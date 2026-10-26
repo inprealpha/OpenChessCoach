@@ -43,4 +43,16 @@ describe('the desktop’s Engine', () => {
     const service = new EngineService(() => createNodeEngine(), VERIFY_ENGINE);
     await expect(service.gradeGame(['e2e4', 'e7e5'], undefined, undefined, AbortSignal.abort())).rejects.toMatchObject({ code: 'cancelled' });
   });
+
+  it('grades a slower mate the Engine sees Good, and keeps the floor when it can’t see the mate', async () => {
+    // Ra8 mates at once; Kf6 still mates in 4 and the Engine sees it, so nothing is given away
+    // (ADR 0002). With the queen, Kg5 still mates in 5, but at verify depth the Engine reports
+    // +10.12, not a mate, so the material floor still applies: the floor only steps aside for a
+    // mate the Engine reports.
+    const service = new EngineService(() => createNodeEngine(), VERIFY_ENGINE);
+    const slower = (await service.grade('7k/8/6K1/8/8/8/8/R7 w - - 0 1', 'g6f6')).move;
+    const unseen = (await service.grade('7k/8/6K1/8/8/8/8/1Q6 w - - 0 1', 'g6g5')).move;
+    expect([slower.grade, slower.playedScore]).toEqual(['Good', { mate: 4 }]);
+    expect([unseen.grade, unseen.playedScore.mate]).toEqual(['Mistake', undefined]);
+  });
 });

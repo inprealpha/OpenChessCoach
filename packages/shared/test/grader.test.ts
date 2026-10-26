@@ -59,6 +59,30 @@ describe('the material floor', () => {
   });
 });
 
+describe('a slower mate', () => {
+  /** An analysis of a position from its lines' first moves and scores, as the Engine reported them. */
+  const analysis = (fen: string, lines: [string, Score][]): Analysis => ({ fen, depth: 10, lines: lines.map(([uci, score]) => ({ pv: [uci], score, depth: 10 })) });
+  // King and rook against king: Ra8 mates at once. The desktop's Stockfish at verify mode's depth
+  // (10, five lines) reported these lines before the move and after it.
+  const rook = analysis('7k/8/6K1/8/8/8/8/R7 w - - 0 1', [['a1a8', { mate: 1 }], ['a1b1', { mate: 2 }], ['a1c1', { mate: 2 }], ['a1a2', { mate: 2 }], ['a1a3', { mate: 2 }]]);
+
+  it('is Good when the move still forces mate: nothing is given away (Lichess never faults a delayed mate)', () => {
+    // 1. Kf6 still mates in 4 and 1. Kg5 in 6; mapped to centipawns they sit 300 and 500 below mate in 1.
+    const kf6 = gradeFromAnalyses(1, 'g6f6', rook, analysis('7k/8/5K2/8/8/8/8/R7 b - - 1 1', [['h8g8', { mate: -4 }]]));
+    const kg5 = gradeFromAnalyses(1, 'g6g5', rook, analysis('7k/8/8/6K1/8/8/8/R7 b - - 1 1', [['h8g7', { mate: -6 }]]));
+    expect([kf6.grade, kf6.winLoss, kg5.grade, kg5.winLoss]).toEqual(['Good', 0, 'Good', 0]);
+    expect(gradeMove({ best: { mate: 2 }, played: { mate: 5 }, isTopMove: false }).grade).toBe('Good');
+  });
+
+  it('keeps the material floor for a move that lets the mate go', () => {
+    // King and queen: Qb8 mates at once; 1. Kg5 leaves White winning (+10.12) but with no mate in sight.
+    const queen = analysis('7k/8/6K1/8/8/8/8/1Q6 w - - 0 1', [['b1b8', { mate: 1 }], ['b1a1', { mate: 2 }], ['b1c1', { mate: 2 }], ['b1h1', { mate: 2 }], ['b1d1', { mate: 2 }]]);
+    const kg5 = gradeFromAnalyses(1, 'g6g5', queen, analysis('7k/8/8/6K1/8/8/8/1Q6 b - - 1 1', [['h8g7', { cp: -1012 }]]));
+    expect([kg5.grade, kg5.winLoss]).toEqual(['Mistake', 0]);
+    expect(gradeMove({ best: { mate: 3 }, played: { cp: 900 }, isTopMove: false }).grade).toBe('Mistake');
+  });
+});
+
 describe('golden games', () => {
   it(`were graded by ${golden.engine}`, () => {
     expect(golden.games).toHaveLength(8);

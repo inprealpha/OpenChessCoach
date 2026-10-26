@@ -1,7 +1,7 @@
 # Board and Engine
 
 An accessible board where every move is graded by Stockfish running in the browser (ADR 0002,
-ADR 0007). Move Grades use the Lichess formula (Best, Good, Inaccuracy, Mistake, Blunder), with one floor: giving up 3 pawns or more against the best move is at least a Mistake, even in a decided game (ADR 0002).
+ADR 0007). Move Grades use the Lichess formula (Best, Good, Inaccuracy, Mistake, Blunder), with one floor: giving up 3 pawns or more against the best move is at least a Mistake, even in a decided game, unless the Engine still sees a forced mate after the move (ADR 0002).
 
 **Reached from:** the small `Board` link under the main menu's three choices (`#/board`).
 

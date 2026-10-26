@@ -681,17 +681,23 @@ test('a Coach move the Engine never suggested is stripped before it reaches the 
   expect(JSON.parse((calls[0] as { stripped: string }).stripped)).not.toEqual([]);
 });
 
-test('when the Engine can’t start, the Player is told instead of left waiting', async ({ page, app }) => {
-  // The Engine's files fail to load, as when a browser refuses the Engine's memory.
-  await page.context().route('**/engine/**', (route) => route.abort());
-  await page.goto(`${app.url}/#pair=${app.code}`);
-  await expect(connection(page)).toHaveText(/Desktop connected/);
-  await page.goto(`${app.url}/#/board`);
-  await play(page, 'e2e4');
-  await expect(page.getByRole('alert')).toHaveText(/The Engine couldn’t start in this browser/);
-  // The board itself keeps working.
-  await play(page, 'e7e5');
-  await expect(page.getByRole('list', { name: 'Moves' }).getByRole('button')).toHaveCount(2);
+test.describe('when the Engine can’t start', () => {
+  // The offline app shell's service worker caches the Engine's files with requests the route below
+  // never sees, and once it controls the page it would serve the Engine whatever the route says.
+  test.use({ serviceWorkers: 'block' });
+
+  test('the Player is told instead of left waiting', async ({ page, app }) => {
+    // The Engine's files fail to load, as when a browser refuses the Engine's memory.
+    await page.context().route('**/engine/**', (route) => route.abort());
+    await page.goto(`${app.url}/#pair=${app.code}`);
+    await expect(connection(page)).toHaveText(/Desktop connected/);
+    await page.goto(`${app.url}/#/board`);
+    await play(page, 'e2e4');
+    await expect(page.getByRole('alert')).toHaveText(/The Engine couldn’t start in this browser/);
+    // The board itself keeps working.
+    await play(page, 'e7e5');
+    await expect(page.getByRole('list', { name: 'Moves' }).getByRole('button')).toHaveCount(2);
+  });
 });
 
 test.describe('setting up a position', () => {

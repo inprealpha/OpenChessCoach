@@ -12,6 +12,9 @@ export const GRADE_THRESHOLDS = { Inaccuracy: 0.1, Mistake: 0.2, Blunder: 0.3 } 
  * The material floor: a move that gives up this many centipawns or more against the best move is
  * at least a Mistake, even when the game is already decided and the winning chance barely moves.
  * Lichess's formula alone would call hanging a piece a queen down Good (ADR 0002, 2026-10-13 note).
+ * A move after which the Engine still reports a forced mate gives nothing away, however much
+ * later the mate comes, so the floor leaves it to the formula, as Lichess does. A mate beyond the
+ * Engine's depth reads as a big centipawn score, and the floor still applies.
  */
 export const MATERIAL_FLOOR_CP = 300;
 
@@ -57,7 +60,8 @@ export function gradeMove(input: GradeInput): GradeResult {
   if (input.isTopMove) return { grade: 'Best', winLoss: 0 };
   if (winLoss >= GRADE_THRESHOLDS.Blunder) return { grade: 'Blunder', winLoss };
   if (winLoss >= GRADE_THRESHOLDS.Mistake) return { grade: 'Mistake', winLoss };
-  if (scoreToCp(input.best) - scoreToCp(input.played) >= MATERIAL_FLOOR_CP) return { grade: 'Mistake', winLoss };
+  const stillMates = input.played.mate !== undefined && input.played.mate > 0;
+  if (!stillMates && scoreToCp(input.best) - scoreToCp(input.played) >= MATERIAL_FLOOR_CP) return { grade: 'Mistake', winLoss };
   if (winLoss >= GRADE_THRESHOLDS.Inaccuracy) return { grade: 'Inaccuracy', winLoss };
   return { grade: 'Good', winLoss };
 }

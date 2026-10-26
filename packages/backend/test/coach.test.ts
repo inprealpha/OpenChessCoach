@@ -3,6 +3,11 @@ import { describe, expect, it } from 'vitest';
 import type { CoachRequest } from '@chess-coach/shared/coach/types';
 import { BRIEF_BUDGET } from '@chess-coach/shared/coach/brief';
 import { candidatesFrom, gradeFromAnalyses } from '@chess-coach/shared/analysis';
+import { playSan } from '@chess-coach/shared/chess';
+import { scoreAfterPly } from '@chess-coach/shared/position-score';
+import { winningChancesFor } from '@chess-coach/shared/winning-chances';
+// The bar's own function on the Board and in Engine Games, so the test compares with the screen.
+import { scoreFromAnalysis } from '../../web/src/lib/position-score.ts';
 import { createNodeEngine } from '../src/engine/node-engine.ts';
 import { NOTE_CAP } from '../src/profile.ts';
 import { REPLY_SCHEMA } from '../src/coach/prompts.ts';
@@ -16,6 +21,15 @@ const START = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 function whyAsk(): CoachRequest {
   return { job: 'why', fen: START, recentMoves: [], moveUci: 'e2e4', question: 'Why e4?' };
 }
+
+/** What the Winning Chances bar on the Board shows in a position, from the Engine at verify mode's settings, which the browser shares. */
+async function barAt(fen: string, side: 'white' | 'black' = 'white'): Promise<string> {
+  barEngine ??= createNodeEngine();
+  const shown = scoreFromAnalysis(fen, await (await barEngine).analyse(fen, { depth: VERIFY_ENGINE.depth, multiPv: VERIFY_ENGINE.multiPv }));
+  if (!shown) throw new Error('the Engine found no line');
+  return winningChancesFor(shown.score, shown.pov, side).text;
+}
+let barEngine: ReturnType<typeof createNodeEngine> | undefined;
 
 /** The desktop Engine's own facts for 1. e4, from Node Stockfish at the verify depth. */
 async function engineFacts() {
@@ -57,6 +71,99 @@ describe('the Coach port', () => {
     expect(brief.profile.goals).toEqual(['Learn the Italian Game']);
     expect(brief).not.toHaveProperty('evaluation');
     expect(app.coach.lastBrief).toEqual(brief);
+  });
+
+  it('quotes the Board’s Winning Chances bar either side of the move: the Engine’s best line in each position', async () => {
+    const app = await instance();
+    const c = await client(app);
+    // A Why Question about 3. Bc4, as the Board sends it: the position, the move and no side.
+    const before = 'r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3';
+    const bc4 = playSan(before, 'Bc4');
+    if (!bc4) throw new Error('bad fixture');
+    await c.request('coach.ask', { job: 'why', fen: before, recentMoves: ['e4', 'e5', 'Nf3', 'Nc6'], moveUci: bc4.uci });
+    const [call] = rows<{ brief: string; raw_reply: string }>(app, 'SELECT brief, raw_reply FROM coach_calls');
+    expect(JSON.parse(call?.brief ?? '{}').winningChances).toEqual({ before: await barAt(before), after: await barAt(bc4.fenAfter) });
+    // The fake Coach repeats them, so journeys show what the real Coach is told.
+    expect(JSON.parse(call?.raw_reply ?? '{}').text).toContain(`After it, ${await barAt(bc4.fenAfter)}.`);
+  });
+
+  it('quotes the bar’s Winning Chances and mate count after a move that was among the Engine’s lines', async () => {
+    const app = await instance();
+    const c = await client(app);
+    // Board positions from the user-driven review (u6): before the fix the brief counted a mate from
+    // the search before the move, one move or more longer than the bar.
+    const cases = [
+      { fen: 'r1bq3r/p1nppkbp/1p3ppn/2pP3P/4PP1N/8/PPP1B1P1/RNBQK2R w KQ - 5 10', san: 'd6', bar: 'White’s winning chances: 72%' },
+      { fen: 'r1b2bR1/p2pk2p/1p3pP1/3QP3/2p1P1nN/8/PPP1B1P1/RNB1K2R w KQ - 1 17', san: 'Qd6+', bar: 'White mates in 1' },
+      { fen: 'r1b2bR1/p2pk2p/1p3pP1/3QP3/2p1P1nN/8/PPP1B1P1/RNB1K2R w KQ - 1 17', san: 'exf6+', bar: 'White mates in 5' },
+      // The Back-rank mate Lesson's third decision, set up on the Board, where the bar shows.
+      { fen: 'r5k1/p4ppp/qp6/8/8/1P1R4/P1B2PPP/3R2K1 w - - 0 3', san: 'Rd8+', bar: 'White mates in 1' },
+    ];
+    for (const { fen, san } of cases) {
+      const played = playSan(fen, san);
+      if (!played) throw new Error(`${san} is not legal`);
+      await c.request('coach.ask', { job: 'why', fen, recentMoves: [], moveUci: played.uci });
+    }
+    const said = rows<{ brief: string }>(app, 'SELECT brief FROM coach_calls ORDER BY id').map((r) => JSON.parse(r.brief).winningChances?.after);
+    const shown = await Promise.all(cases.map(async ({ fen, san }) => barAt(playSan(fen, san)?.fenAfter ?? '')));
+    expect(shown).toEqual(cases.map((x) => x.bar));
+    expect(said).toEqual(shown);
+  });
+
+  it('leaves Winning Chances out where the screen hides the bar: Hints, Lesson turns, and Why Questions in a Lesson or a Puzzle', async () => {
+    const app = await instance();
+    const c = await client(app);
+    const fen = 'r5k1/p4ppp/qp6/8/8/1P1R4/P1B2PPP/3R2K1 w - - 0 3';
+    const rd8 = playSan(fen, 'Rd8+');
+    if (!rd8) throw new Error('bad fixture');
+    const lesson = { lessonId: 'back-rank-mate', opening: 'Back-rank mate', notes: '', popularity: [], finalTurn: false };
+    await c.request('coach.ask', { job: 'hint', fen, recentMoves: [], playerSide: 'white' });
+    await c.request('coach.ask', { job: 'lesson-turn', fen, recentMoves: [], playerSide: 'white', moveUci: rd8.uci, lesson });
+    await c.request('coach.ask', { job: 'why', fen, recentMoves: [], playerSide: 'white', moveUci: rd8.uci, hideWinningChances: true });
+    // The same Why Question on the Board, which shows the bar, still carries them.
+    await c.request('coach.ask', { job: 'why', fen, recentMoves: [], playerSide: 'white', moveUci: rd8.uci });
+    const briefs = rows<{ job: string; brief: string; raw_reply: string }>(app, 'SELECT job, brief, raw_reply FROM coach_calls ORDER BY id');
+    expect(briefs.map((r) => [r.job, JSON.parse(r.brief).winningChances])).toEqual([
+      ['hint', undefined],
+      ['lesson-turn', undefined],
+      ['why', undefined],
+      ['why', { before: 'White mates in 2', after: 'White mates in 1' }],
+    ]);
+    for (const r of briefs.slice(0, 3)) expect(JSON.parse(r.raw_reply).text).not.toMatch(/winning chances|mates in/);
+  });
+
+  it('quotes the Review’s Winning Chances from its graded moves, in each key moment and in a Why Question asked from the Review', async () => {
+    const app = await instance();
+    const c = await client(app);
+    const game = await c.request('games.get', { gameId: 1 });
+    const review = await c.request('review.start', { gameId: 1 });
+    // What the key-moment card and the bar show either side of the move (Review.svelte).
+    const card = (ply: number) => {
+      const [before, after] = [scoreAfterPly(review.moves, ply - 1), scoreAfterPly(review.moves, ply)];
+      if (!before || !after) throw new Error(`no score around ply ${ply}`);
+      return { before: winningChancesFor(before.score, before.pov, game.playerSide).text, after: winningChancesFor(after.score, after.pov, game.playerSide).text };
+    };
+    const briefs = (job: string) => rows<{ brief: string }>(app, 'SELECT brief FROM coach_calls WHERE job = ? ORDER BY id', job).map((r) => JSON.parse(r.brief).winningChances);
+    expect(review.moments.length).toBeGreaterThan(0);
+    expect(briefs('review-moment')).toEqual(review.moments.map((m) => card(m.ply)));
+    // The Player selects each key moment's move, and two other moves the user-driven review (u6)
+    // caught (3. Nf3: 52% against the bar's 53%; 10. a3: 53% against 51%), and asks why, as the
+    // Review sends it.
+    const plies = [...review.moments.map((m) => m.ply), 5, 19];
+    expect([review.moves[4]?.san, review.moves[18]?.san]).toEqual(['Nf3', 'a3']);
+    for (const ply of plies) {
+      const move = review.moves[ply - 1];
+      if (!move) throw new Error(`no graded move at ply ${ply}`);
+      await c.request('coach.ask', {
+        job: 'why',
+        fen: move.fenBefore,
+        recentMoves: review.moves.slice(0, ply - 1).map((x) => x.san),
+        playerSide: game.playerSide,
+        moveUci: move.uci,
+        gameId: game.id,
+      });
+    }
+    expect(briefs('why')).toEqual(plies.map(card));
   });
 
   it('sends each job to the model chosen for it in Settings', async () => {
@@ -117,6 +224,9 @@ describe('the Coach port', () => {
       move: { uci: 'e2e4', san: 'e4', grade: 'Blunder', playedScore: { cp: -900 } },
       candidates: [{ uci: 'h2h4', san: 'h4', score: { cp: 500 }, pv: ['h2h4'] }],
       replies: [{ uci: 'a7a5', san: 'a5', score: { cp: 0 }, pv: ['a7a5'] }],
+      positionBefore: { score: { mate: 2 }, pov: 'white' },
+      positionAfter: { score: { mate: 2 }, pov: 'white' },
+      winningChances: { before: 'White’s winning chances: 99%' },
       allowNote: true,
     } as CoachRequest;
     app.coach.script({ kind: 'reply', reply: { text: 'h4 is best.', moves: ['h2h4'], note: 'Forged note' } });
@@ -130,6 +240,10 @@ describe('the Coach port', () => {
     expect(briefCandidates).toEqual(facts.move.candidates.map((x) => x.uci).slice(0, briefCandidates.length));
     expect(briefReplies).toEqual(facts.replies.map((x) => x.uci).slice(0, briefReplies.length));
     expect(brief?.candidates.map((x) => x.uci)).not.toContain('h2h4');
+    expect(brief?.winningChances).toEqual({
+      before: winningChancesFor(facts.move.candidates[0]?.score ?? { cp: 0 }, 'white').text,
+      after: winningChancesFor(facts.replies[0]?.score ?? { cp: 0 }, 'black', 'white').text,
+    });
     // The guard checks the Coach against the desktop's facts, so the forged move is stripped.
     expect(reply.moves).toEqual([]);
     expect(reply.note).toBeNull();

@@ -198,6 +198,8 @@
         playerSide: game.playerSide,
         moveUci: move.uci,
         opening: game.opening,
+        // The desktop quotes the Winning Chances this Review shows, from its graded moves.
+        gameId: game.id,
         ...(question ? { question } : {}),
       },
       question || (grade ? `Why is ${move.san} graded ${grade}?` : `Why ${move.san}?`),

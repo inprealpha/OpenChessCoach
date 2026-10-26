@@ -98,7 +98,7 @@ export function templateReply(brief: Brief): CoachRawReply {
       text = 'Look at which of your pieces is doing the least, and find the move that brings it into the game while keeping your king safe.';
       return { text, moves: [], arrows: [], highlights: [], note: null };
     case 'live': {
-      text = `${brief.move?.san ?? 'That move'} is graded ${brief.move?.grade ?? 'Mistake'}. The Engine preferred ${best?.san ?? 'another move'}. You can take it back and try again.`;
+      text = `${brief.move?.san ?? 'That move'} is graded ${brief.move?.grade ?? 'Mistake'}.${chances(brief)} The Engine preferred ${best?.san ?? 'another move'}. You can take it back and try again.`;
       if (brief.move) add(brief.move, 'red');
       add(best, 'green');
       break;
@@ -107,7 +107,7 @@ export function templateReply(brief: Brief): CoachRawReply {
       const popular = brief.lesson?.popularity ? ` Players at your level play: ${brief.lesson.popularity}.` : '';
       const grade = brief.move?.grade ?? 'Good';
       const verdict = grade === 'Best' || grade === 'Good' ? 'a sound choice' : 'not the best idea here';
-      text = `What are your options here? You chose ${brief.move?.san ?? 'a move'}, graded ${grade}, which is ${verdict}. The Engine's top choice is ${best?.san ?? 'unclear'}.${popular}`;
+      text = `What are your options here? You chose ${brief.move?.san ?? 'a move'}, graded ${grade}, which is ${verdict}.${chances(brief)} The Engine's top choice is ${best?.san ?? 'unclear'}.${popular}`;
       if (reply) text += ` Your opponent's main option next is ${reply.san}.`;
       text += grade === 'Best' || grade === 'Good' ? ' Let\'s continue the Lesson.' : ' Try another move.';
       add(best, 'green');
@@ -116,7 +116,7 @@ export function templateReply(brief: Brief): CoachRawReply {
       break;
     }
     case 'review-moment': {
-      text = `Here you played ${brief.move?.san ?? 'a move'}, graded ${brief.move?.grade ?? 'Mistake'}. The Engine's better option was ${best?.san ?? 'another move'} (${best?.eval ?? ''}), which the Engine rates higher.`;
+      text = `Here you played ${brief.move?.san ?? 'a move'}, graded ${brief.move?.grade ?? 'Mistake'}.${chances(brief)} The Engine's better option was ${best?.san ?? 'another move'} (${best?.evaluation ?? ''}), which the Engine rates higher.`;
       if (alt) text += ` ${alt.san} was another option worth a look.`;
       if (brief.move) add(brief.move, 'red');
       add(best, 'green');
@@ -126,8 +126,8 @@ export function templateReply(brief: Brief): CoachRawReply {
     case 'why':
     default: {
       text = brief.move
-        ? `${brief.move.san} is graded ${brief.move.grade}. The Engine's top choice was ${best?.san ?? 'another move'} (${best?.eval ?? ''}).`
-        : `The Engine's top choice here is ${best?.san ?? 'unclear'} (${best?.eval ?? ''}).`;
+        ? `${brief.move.san} is graded ${brief.move.grade}.${chances(brief)} The Engine's top choice was ${best?.san ?? 'another move'} (${best?.evaluation ?? ''}).`
+        : `The Engine's top choice here is ${best?.san ?? 'unclear'} (${best?.evaluation ?? ''}).${chances(brief)}`;
       if (alt) text += ` ${alt.san} is graded ${alt.grade} because the Engine's line after it, ${alt.line || alt.san}, gives up some of the advantage.`;
       if (brief.question) text += ' That answers your Why Question.';
       add(best, 'green');
@@ -138,4 +138,11 @@ export function templateReply(brief: Brief): CoachRawReply {
   }
   const note = brief.allowNote ? `Worked on ${brief.lesson?.opening ?? 'a Review'}.` : null;
   return { text, moves, arrows, highlights: [], note };
+}
+
+/** The brief's Winning Chances, word for word, as a key moment shows them. */
+function chances(brief: Brief): string {
+  const c = brief.winningChances;
+  if (!c) return '';
+  return c.after ? ` Before it, ${c.before}. After it, ${c.after}.` : ` ${c.before}.`;
 }

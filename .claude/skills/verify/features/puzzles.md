@@ -35,7 +35,8 @@ by Lesson: an opening's Puzzles by the opening, a Theme's or endgame's by Liches
   again`, and `Puzzles from every Lesson`.
 - Every Puzzle's first try is recorded in the Player Profile ("Puzzles: N solved first time out of
   M"). Trying it again, from the missed list or after `Start these Puzzles again`, adds nothing.
-- No Winning Chances bar: it would give the answer away.
+- No Winning Chances bar: it would give the answer away. The Coach's brief for a Why Question here
+  carries no `winningChances` either (`puzzles.spec.ts`).
 
 ## Drive
 

@@ -44,8 +44,17 @@ for (const id of ['caro-kann', 'pins', 'queen-mate']) {
       await expect(paired.getByRole('region', { name: 'Your choice' }).getByTitle(/^Move Grade: (Best|Good)$/)).toBeVisible();
       await coachIdle(paired);
       expect(await lessonCalls()).toBe(i + 1);
+      if (i === 0) {
+        // A Why Question about the choice: the Coach answers, again with no Winning Chances.
+        await paired.getByRole('button', { name: 'Ask the Coach why' }).click();
+        await coachIdle(paired);
+      }
       await paired.getByRole('button', { name: /^Continue/ }).click();
     }
+    // The Lesson hides the Winning Chances, so none of its Coach briefs carries them.
+    const briefs = (await app.rows<{ job: string; brief: string }>('coach_calls')).map((c) => ({ job: c.job, chances: JSON.parse(c.brief).winningChances }));
+    expect(briefs.filter((b) => b.job === 'why')).toHaveLength(1);
+    expect(briefs.filter((b) => b.chances !== undefined)).toEqual([]);
 
     const done = paired.getByRole('region', { name: 'Lesson complete' });
     await expect(done).toBeVisible();

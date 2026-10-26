@@ -117,6 +117,7 @@ export class EngineService {
       ...(typeof req.question === 'string' ? { question: req.question } : {}),
       ...(req.lesson !== undefined ? { lesson: lessonOf(req.lesson) } : {}),
       ...(typeof req.opening === 'string' ? { opening: req.opening } : {}),
+      ...(req.hideWinningChances === true ? { hideWinningChances: true } : {}),
     };
     if (req.moveUci) {
       const { move, replies } = await this.grade(req.fen, req.moveUci);

@@ -23,6 +23,15 @@ $C db get coach_calls                          # the brief, the raw reply and wh
   rest.
 - `coach_calls` has one row per call with `job: why`, the brief (under 3,500 characters) and the model.
 - In the browser, the scripted non-Engine arrow never appears on the board (`board.spec.ts`).
+- The brief's `winningChances` are the numbers the Winning Chances bar shows either side of the
+  move, and the fake Coach repeats them ("Before it, White’s winning chances: 54%. After it, …").
+  On the Board they are the Engine's best line in each position: 54% and 54% around 3. Bc4
+  (`board.spec.ts`). From a Review the request carries `gameId`, and the desktop scores both
+  positions from the Review's graded moves, as its bar and key moments do: 35% and 19% around
+  12. Bg5 (`imported-game.spec.ts`, `coach.test.ts`). A mate counts as the bar counts it, from the
+  position after the move: "White mates in 1" after 17. Qd6+ (`coach.test.ts`). Where the screen
+  hides the bar, in a Lesson or a Puzzle, the request says so (`hideWinningChances`) and the brief
+  carries none; a Hint never does.
 - A question is at most 300 characters (`MAX_QUESTION_LENGTH`): the input stops there and shows how
   many characters are left from 50 before it (`board.spec.ts`); the desktop refuses a longer one with
   "A question can be at most 300 characters." (`coach.test.ts`). If a longer one is forced past the

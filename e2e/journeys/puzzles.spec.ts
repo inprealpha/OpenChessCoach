@@ -37,6 +37,12 @@ test('solve one Puzzle, then fail a second and retry it', async ({ paired, app }
   // A solved Puzzle no longer asks for the move.
   await expect(region).not.toContainText('Find the best move');
   await expect(region).toContainText(/You found the best move for (White|Black)\./);
+  // Why is it the answer? The Coach is told no Winning Chances, as the Puzzle shows none.
+  await paired.getByRole('button', { name: 'Ask the Coach why' }).click();
+  await coachIdle(paired);
+  const [why] = await app.rows<{ job: string; brief: string }>('coach_calls');
+  expect(why?.job).toBe('why');
+  expect(JSON.parse(why?.brief ?? '{}')).not.toHaveProperty('winningChances');
 
   await paired.getByRole('button', { name: 'Next Puzzle' }).click();
   const second = await current(paired, first.id);

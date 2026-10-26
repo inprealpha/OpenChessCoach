@@ -3,6 +3,7 @@ import type { Candidate } from '../analysis.ts';
 import type { Side } from '../chess.ts';
 import type { Score } from '../engine.ts';
 import type { MoveGrade } from '../grader.ts';
+import type { PositionScore } from '../position-score.ts';
 import type { CoachJob } from '../protocol.ts';
 
 export type Brush = 'green' | 'blue' | 'red' | 'yellow';
@@ -34,6 +35,16 @@ export interface CoachRequest {
   lesson?: CoachAsk['lesson'];
   /** Opening or theme, used to pick the relevant slice of the Player Profile. */
   opening?: string;
+  /**
+   * The game a Review's Why Question is about: the desktop then scores the positions either side of
+   * the move from that Review's graded moves, as the Review shows them.
+   */
+  gameId?: number;
+  /**
+   * The screen hides the Winning Chances bar so it doesn't give the answer away, as a Lesson and a
+   * Puzzle do: the brief then leaves them out as well.
+   */
+  hideWinningChances?: boolean;
 }
 
 /** A Coach request with the desktop Engine's facts added. Every chess fact in it comes from the Engine (ADR 0002). */
@@ -50,6 +61,13 @@ export interface CoachAsk {
   move?: { uci: string; san: string; grade: MoveGrade; playedScore: Score };
   /** The Engine's candidate moves in `fen`, best first. */
   candidates: Candidate[];
+  /**
+   * The scores the screen shows for `fen` and for the position after `move` when they aren't the
+   * Engine's best line there: a Review scores each position with the graded move that led to it
+   *. Only the desktop sets them.
+   */
+  positionBefore?: PositionScore;
+  positionAfter?: PositionScore;
   /** The Engine's candidate replies after `move`, best first. */
   replies?: Candidate[];
   /** The Player's question or typed answer. */
@@ -67,6 +85,8 @@ export interface CoachAsk {
   opening?: string;
   /** For Reviews: the last moment may carry a profile note. */
   allowNote?: boolean;
+  /** The screen hides the Winning Chances bar (a Lesson or a Puzzle), so the brief leaves them out. */
+  hideWinningChances?: boolean;
 }
 
 /** What a Coach implementation returns before the guard. Moves are always data, never only prose. */

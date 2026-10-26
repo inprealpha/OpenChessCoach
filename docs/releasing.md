@@ -53,8 +53,10 @@ The welcome page walks them through it for Windows, macOS and Linux:
    npm version minor -w packages/backend    # or patch, or major
    ```
 
-2. Tag the merge commit with that version, with a `v` in front, and push the tag. The Release
-   workflow stops if the tag and `package.json` disagree. For 0.2.0:
+2. On GitHub, open **Actions → Release → Run workflow**, keep the default branch and run it. It
+   releases the version in `package.json`, creates the `v` tag for it (`v0.2.0`) and stops if that
+   version is already released. Pushing the tag yourself works too, and stops if the tag and
+   `package.json` disagree:
 
    ```bash
    git tag v0.2.0 && git push origin v0.2.0

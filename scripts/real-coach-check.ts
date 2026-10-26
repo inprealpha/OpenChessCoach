@@ -6,7 +6,10 @@
 //   - every piece move named in the text appears in the brief, so it came from the Engine,
 //     the game or the bundled Lesson notes;
 //   - each reply stays within its length budget (with 25% slack; over the budget alone is a warning);
-//   - replies avoid the terms CONTEXT.md says to avoid.
+//   - replies avoid the terms CONTEXT.md says to avoid (a stray one is a warning: the wording is
+//     the model's, and the reply has already streamed to the Player), except the ones that
+//     mean the Coach broke role, such as "As an AI assistant, I can't…", which fail.
+// The posted status counts the warnings, so a pass with warnings never reads as a clean one.
 // Every call runs on the latest Haiku (the `haiku` alias), whatever model the job uses in the app,
 // to keep the check cheap on the owner's subscription.
 //
@@ -29,6 +32,13 @@ export const STATUS_CONTEXT = 'real Coach';
 /** The model every call in the check uses: Claude Code resolves the alias to the latest Haiku. */
 export const CHECK_MODEL = 'haiku';
 const SLACK = 1.25;
+/**
+ * Avoided terms that mean the Coach stepped out of its role: a refusal, or talk about itself as an
+ * AI or about "the user". That is a structural failure, not a wording slip, so these fail the check.
+ */
+export const ROLE_BREAK_TERMS: readonly string[] = ['ai', 'assistant', 'user'];
+/** GitHub's limit on a commit status description. */
+const MAX_DESCRIPTION = 140;
 
 export interface CoachCallRecord {
   job: CoachJob;
@@ -79,7 +89,9 @@ export function checkCall(record: CoachCallRecord, reply: CoachReply, terms: rea
 
   const lower = reply.text.toLowerCase();
   for (const term of terms) {
-    if (new RegExp(`\\b${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}s?\\b`).test(lower)) problems.push(`the text uses "${term}", which CONTEXT.md says to avoid`);
+    if (!new RegExp(`\\b${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}s?\\b`).test(lower)) continue;
+    if (ROLE_BREAK_TERMS.includes(term)) problems.push(`the text uses "${term}", so the Coach broke role`);
+    else warnings.push(`the text uses "${term}", which CONTEXT.md says to avoid`);
   }
   return { job: record.job, words, maxWords: brief.maxWords, problems, warnings };
 }
@@ -170,6 +182,16 @@ export interface Verdict {
   description: string;
 }
 
+/** The run's verdict: any problem fails it, and the status it posts counts the warnings. */
+export function summarize(calls: readonly CallVerdict[]): { ok: boolean; description: string } {
+  const failed = calls.filter((c) => c.problems.length);
+  if (failed.length) return { ok: false, description: `${failed.length} of ${calls.length} Coach calls failed: ${failed[0]?.problems[0] ?? ''}`.slice(0, MAX_DESCRIPTION - 1) };
+  const passed = `${calls.length} Coach ${calls.length === 1 ? 'call' : 'calls'} passed the structural checks`;
+  const warnings = calls.flatMap((c) => c.warnings);
+  if (!warnings.length) return { ok: true, description: passed };
+  return { ok: true, description: `${passed}, ${warnings.length} ${warnings.length === 1 ? 'warning' : 'warnings'}: ${warnings[0]}`.slice(0, MAX_DESCRIPTION - 1) };
+}
+
 async function run(fake: boolean): Promise<Verdict> {
   const root = new URL('../', import.meta.url);
   const { RealCoach } = await import('../packages/backend/src/coach/real.ts');
@@ -205,9 +227,7 @@ async function run(fake: boolean): Promise<Verdict> {
   const jobs = new Set(calls.map((c) => c.job));
   const missing = (Object.keys(MAX_WORDS) as CoachJob[]).filter((j) => !jobs.has(j));
   if (missing.length) calls.push({ job: missing[0] as CoachJob, words: 0, maxWords: 0, problems: [`no Coach call was made for ${missing.join(', ')}`], warnings: [] });
-  const failed = calls.filter((c) => c.problems.length);
-  const ok = failed.length === 0;
-  const description = ok ? `${calls.length} Coach calls passed the structural checks` : `${failed.length} of ${calls.length} Coach calls failed: ${failed[0]?.problems[0] ?? ''}`.slice(0, 139);
+  const { ok, description } = summarize(calls);
   return { ok, sha, calls, description };
 }
 

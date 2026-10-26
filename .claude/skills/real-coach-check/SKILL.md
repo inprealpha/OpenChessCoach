@@ -41,10 +41,14 @@ whatever model each job uses in the app. The owner's rule: tests run on the late
    - every piece move named in the text appears in the brief (the Engine's output, the game or the
      Lesson notes), and a Hint names no move at all;
    - each reply stays within its word budget; up to 25% over is a warning, more fails;
-   - no reply uses a term `CONTEXT.md` says to avoid.
+   - no reply uses a term `CONTEXT.md` says to avoid; one that does is a warning, not a failure
+     (the wording is the model's, and the Player has already read the streamed reply);
+   - no reply breaks the Coach's role: "AI", "assistant" or "user" (as in "As an AI assistant,
+     I can't…") fails.
 
    It prints `{ ok, sha, calls: [{ job, words, maxWords, problems, warnings }], description }` and
-   exits 0 on pass, 1 on fail, 2 when it couldn't run.
+   exits 0 on pass, 1 on fail, 2 when it couldn't run. On a pass with warnings, `description` (the
+   posted status) counts them and quotes the first.
 
 4. Post the verdict on the head commit:
 

@@ -265,8 +265,9 @@
     }
   }
 
-  function whyContext(): { playerSide?: 'white' | 'black'; opening?: string } {
-    return { ...(part ? { playerSide: part.side } : {}), ...(lesson?.kind === 'opening' ? { opening: lesson.name } : {}) };
+  /** A Lesson hides the Winning Chances bar so it doesn't give the answer away, and so does the Coach. */
+  function whyContext(): { playerSide?: 'white' | 'black'; opening?: string; hideWinningChances: true } {
+    return { ...(part ? { playerSide: part.side } : {}), ...(lesson?.kind === 'opening' ? { opening: lesson.name } : {}), hideWinningChances: true };
   }
 
   async function why(question: string): Promise<void> {

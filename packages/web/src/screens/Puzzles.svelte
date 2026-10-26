@@ -223,6 +223,8 @@
         recentMoves: [setup.san],
         playerSide: solver,
         moveUci: answer.uci,
+        // A Puzzle shows no Winning Chances bar, so the Coach quotes none.
+        hideWinningChances: true,
         ...(question ? { question } : {}),
         ...(lesson?.kind === 'opening' ? { opening: lesson.name } : {}),
       },

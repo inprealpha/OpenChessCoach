@@ -41,7 +41,9 @@ openings `italian-game`, `ruy-lopez`, `london-system`, `queens-gambit`, `caro-ka
   king." or "Promote your pawn."); the Engine answers at full strength; `Start again` resets it;
   reaching the goal says "Well played!"; losing the pawn says "Your pawn is gone, so it can no
   longer promote." Under the board, "N moves played" counts the Player's own moves.
-- No Winning Chances bar, in a Lesson or in Play it out: it would give the answer away.
+- No Winning Chances bar, in a Lesson or in Play it out: it would give the answer away. No Coach
+  brief in a Lesson carries `winningChances` either: Lesson turns, Hints and Why Questions
+  (`lesson.spec.ts`).
 - The Wikibooks credit links (`Wikibooks, Chess Opening Theory/…`) on every note.
 
 ## Drive

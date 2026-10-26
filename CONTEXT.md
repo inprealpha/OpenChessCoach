@@ -34,6 +34,10 @@ _Avoid_: External game, online game
 The Engine's verdict on a single move, based on how much it gives away compared with the best move, not on its rank among the Engine's choices.
 _Avoid_: Accuracy, rating, score
 
+**Winning Chances**:
+The Engine's estimate, as a percentage, of how the game is going for a side, from the same evaluation the Move Grades use.
+_Avoid_: Win probability, odds, eval
+
 ### Teaching
 
 **Review**:

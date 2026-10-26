@@ -316,7 +316,7 @@ test('a Review lists key moments with Move Grades, and reopening it makes no Coa
   expect(count).toBeLessThanOrEqual(5);
   for (let i = 0; i < count; i++) await expect(moments.nth(i).getByRole('button', { name: /, (Inaccuracy|Mistake|Blunder)$/ })).toBeVisible();
 
-  const calls = await app.rows<{ job: string }>('coach_calls');
+  const calls = await app.rows<{ job: string; brief: string }>('coach_calls');
   expect(calls.filter((c) => c.job === 'review-moment')).toHaveLength(count);
   const [review] = await app.rows<{ moments: string }>('reviews');
   expect(JSON.parse(review?.moments ?? '[]')).toHaveLength(count);
@@ -326,6 +326,10 @@ test('a Review lists key moments with Move Grades, and reopening it makes no Coa
   // Each moment shows the Player's Winning Chances before and after their move, with the
   // evaluation beside them: 11. Bxf7+ (Mistake) took White from 48% to 35%.
   await expectBxf7Chances(moments.first());
+  // The Coach is told those Winning Chances in the same words, and the fake Coach repeats them.
+  const bxf7 = calls.find((c) => c.job === 'review-moment');
+  expect(JSON.parse(bxf7?.brief ?? '{}').winningChances).toEqual({ before: 'White’s winning chances: 48%', after: 'White’s winning chances: 35%' });
+  await expect(moments.first()).toContainText('Before it, White’s winning chances: 48%. After it, White’s winning chances: 35%.');
 
   // Jump to a moment: the board shows the position before the move.
   await moments.nth(1).getByRole('button').click();
@@ -479,6 +483,10 @@ test('a Review shows one number per position, and an open key moment shows its p
   await expectShown('12. Bg5', '19%');
   // Its "Before" is the position after 11… Rxf7, as the bar and the graph show it there.
   await expect(moment('12. Bg5').getByTestId('chances-before')).toHaveText('Before: White’s winning chances: 35% -1.72');
+  // A Why Question about it quotes those same numbers: the fake Coach repeats its brief's.
+  await paired.getByRole('button', { name: 'Ask the Coach why' }).click();
+  await coachIdle(paired);
+  await expect(paired.getByLabel('Coach conversation')).toContainText('Before it, White’s winning chances: 35%. After it, White’s winning chances: 19%.');
   await move('Move 11… Rxf7, Best').click();
   await expectShown('11… Rxf7', '35%');
 

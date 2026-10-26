@@ -2,7 +2,9 @@
 import type { Candidate } from '../analysis.ts';
 import { playUci, turnOf, type Side } from '../chess.ts';
 import { formatScore, gradeMove, type MoveGrade } from '../grader.ts';
+import { finishedScore, type PositionScore } from '../position-score.ts';
 import type { CoachJob, PlayerLevel, PlayerProfile } from '../protocol.ts';
+import { winningChancesFor } from '../winning-chances.ts';
 import type { CoachAsk } from './types.ts';
 
 /** Hard ceiling on the serialised brief, in characters. */
@@ -28,8 +30,8 @@ const MAX_PROFILE_ITEMS = 3;
 export interface BriefCandidate {
   san: string;
   uci: string;
-  /** Engine evaluation from the side to move, e.g. "+0.45" or "M3". */
-  eval: string;
+  /** Engine evaluation from the side to move, e.g. "+0.45" or "M3". Not "eval": the Coach reads this key. */
+  evaluation: string;
   /** How the Engine grades this candidate compared with its best move. */
   grade: MoveGrade;
   /** The Engine's line after it, in SAN. */
@@ -48,7 +50,9 @@ export interface Brief {
   sideToMove: Side;
   fen: string;
   recentMoves: string;
-  move?: { san: string; uci: string; grade: MoveGrade; evalAfter: string };
+  move?: { san: string; uci: string; grade: MoveGrade; evaluationAfter: string };
+  /** The Player's Winning Chances in `fen` and after the move, worded exactly as the screen shows them. */
+  winningChances?: { before: string; after?: string };
   candidates: BriefCandidate[];
   replies?: BriefCandidate[];
   lesson?: { opening: string; notes: string; popularity: string };
@@ -109,11 +113,13 @@ export function buildBrief({ ask, profile, summary }: BriefInput): Brief {
         san: played.san,
         uci: played.uci,
         grade: ask.move.grade,
-        evalAfter: formatScore(ask.move.playedScore),
+        evaluationAfter: formatScore(ask.move.playedScore),
       };
       if (ask.replies?.length) brief.replies = briefCandidates(played.fenAfter, ask.replies, MAX_REPLIES);
     }
   }
+  const chances = winningChancesOf(ask);
+  if (chances) brief.winningChances = chances;
   if (ask.lesson) {
     brief.lesson = {
       opening: clip(ask.lesson.opening, 80),
@@ -131,6 +137,33 @@ export function buildBrief({ ask, profile, summary }: BriefInput): Brief {
   return fitToBudget(brief);
 }
 
+/**
+ * The Player's Winning Chances before and after the move, scored as the bar on the Player's screen
+ * scores those positions and worded by the same formatter, so the Coach quotes the bar. The
+ * Board, Engine Games and Lessons show the Engine's best line in the position on the board: the
+ * best candidate before the move, the best reply after it. A Review shows its graded moves' scores,
+ * which the desktop passes as `positionBefore` and `positionAfter`. Where the screen hides the bar so
+ * it doesn't give the answer away (a Hint, a Lesson, a Puzzle), the brief leaves them out too.
+ */
+function winningChancesOf(ask: CoachAsk): Brief['winningChances'] {
+  if (ask.job === 'hint' || ask.job === 'lesson-turn' || ask.hideWinningChances) return undefined;
+  const side = ask.playerSide ?? turnOf(ask.fen);
+  const before = ask.positionBefore ?? bestLineScore(ask.fen, ask.candidates);
+  if (!before) return undefined;
+  const played = ask.move ? playUci(ask.fen, ask.move.uci) : null;
+  const after = played ? (ask.positionAfter ?? bestLineScore(played.fenAfter, ask.replies ?? [])) : undefined;
+  return {
+    before: winningChancesFor(before.score, before.pov, side).text,
+    ...(after ? { after: winningChancesFor(after.score, after.pov, side).text } : {}),
+  };
+}
+
+/** A position's score as the Board's bar shows it: the result once the game is over, otherwise the Engine's best line. */
+function bestLineScore(fen: string, lines: readonly Candidate[]): PositionScore | undefined {
+  const best = lines[0];
+  return finishedScore(fen) ?? (best ? { score: best.score, pov: turnOf(fen) } : undefined);
+}
+
 function briefCandidates(fen: string, candidates: readonly Candidate[], max: number): BriefCandidate[] {
   const best = candidates[0];
   const out: BriefCandidate[] = [];
@@ -141,7 +174,7 @@ function briefCandidates(fen: string, candidates: readonly Candidate[], max: num
     out.push({
       san: played.san,
       uci: played.uci,
-      eval: formatScore(c.score),
+      evaluation: formatScore(c.score),
       grade: gradeMove({ best: best.score, played: c.score, isTopMove: c.uci === best.uci }).grade,
       line,
     });

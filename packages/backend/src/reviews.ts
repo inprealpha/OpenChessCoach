@@ -3,6 +3,8 @@
 import type { GradedMove } from '@chess-coach/shared/analysis';
 import { formatScore, type MoveGrade } from '@chess-coach/shared/grader';
 import { pickKeyMoments } from '@chess-coach/shared/key-moments';
+import type { CoachAsk } from '@chess-coach/shared/coach/types';
+import { scoreAfterPly } from '@chess-coach/shared/position-score';
 import type { KeyMoment, Review } from '@chess-coach/shared/protocol';
 import { type Clock, iso } from './clock.ts';
 import { all, one, transaction, type Db } from './db.ts';
@@ -18,6 +20,25 @@ export function getReview(db: Db, gameId: number): Review | null {
     (r) => JSON.parse(r.data) as GradedMove,
   );
   return { gameId, createdAt: row.created_at, moments: JSON.parse(row.moments) as KeyMoment[], moves };
+}
+
+/** The scores a Review shows either side of the move at `ply`, so the Coach quotes them. */
+function reviewScores(graded: readonly GradedMove[], ply: number): Pick<CoachAsk, 'positionBefore' | 'positionAfter'> {
+  const before = scoreAfterPly(graded, ply - 1);
+  const after = scoreAfterPly(graded, ply);
+  return { ...(before ? { positionBefore: before } : {}), ...(after ? { positionAfter: after } : {}) };
+}
+
+/**
+ * A Why Question asked from a Review: the positions either side of the move scored from the
+ * desktop's own graded moves, as the Review's bar and key moments score them (ADR 0007).
+ * Any other ask, or a move this game's Review didn't grade, comes back unchanged.
+ */
+export function withReviewScores(db: Db, gameId: unknown, ask: CoachAsk): CoachAsk {
+  if (typeof gameId !== 'number' || !ask.move) return ask;
+  const graded = getReview(db, gameId)?.moves ?? [];
+  const index = graded.findIndex((m) => m.fenBefore === ask.fen && m.uci === ask.move?.uci);
+  return index < 0 ? ask : { ...ask, ...reviewScores(graded, index + 1) };
 }
 
 export interface ReviewDeps {
@@ -143,6 +164,8 @@ async function makeReview(
         playerSide: game.playerSide,
         move: { uci: m.uci, san: m.san, grade: m.grade, playedScore: m.playedScore },
         candidates: m.candidates,
+        // The Coach quotes the Winning Chances the key moment shows, scored as the screen scores them.
+        ...reviewScores(graded, m.ply),
         replies: graded[m.ply]?.candidates ?? [],
         opening: game.opening,
         allowNote: counts && index === moments.length - 1,

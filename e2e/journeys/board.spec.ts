@@ -617,6 +617,23 @@ test('a Why Question is answered with Engine moves only, and the brief is record
   await expect(arrows.first()).toBeVisible();
 });
 
+test('the Coach quotes the Winning Chances the bar shows either side of the move', async ({ paired, app }) => {
+  await paired.goto(`${app.url}/#/board`);
+  for (const uci of MOVES.slice(0, 5)) await play(paired, uci);
+  await expect(paired.getByRole('button', { name: /Move 3\. Bc4, / })).toBeVisible();
+  // The bar shows the Engine's best line in the position on the board: 54% after 3. Bc4, and 54% before it.
+  const bar = chancesBar(paired);
+  await expect(bar).toHaveAccessibleName('Winning Chances bar: White’s winning chances: 54%');
+  await paired.getByRole('button', { name: 'Previous move' }).click();
+  await expect(bar).toHaveAccessibleName('Winning Chances bar: White’s winning chances: 54%');
+  await paired.getByRole('button', { name: 'Last position' }).click();
+
+  await paired.getByRole('button', { name: 'Ask the Coach why' }).click();
+  await coachIdle(paired);
+  // The fake Coach repeats the brief's Winning Chances word for word, as the real Coach is told to.
+  await expect(paired.getByLabel('Coach conversation')).toContainText('Bc4 is graded Good. Before it, White’s winning chances: 54%. After it, White’s winning chances: 54%.');
+});
+
 test('a Why Question stops at 300 characters, and the Player sees how many are left', async ({ paired, app }) => {
   await paired.goto(`${app.url}/#/board`);
   await play(paired, 'e2e4');

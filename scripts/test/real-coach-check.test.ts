@@ -1,8 +1,10 @@
 // The real-Coach check's structural rules, each proven against a deliberately broken reply.
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import type { Brief } from '@chess-coach/shared/coach/brief';
 import type { CoachRawReply, CoachReply } from '@chess-coach/shared/coach/types';
-import { CHECK_MODEL, checkCall, RecordingCoach } from '../real-coach-check.ts';
+import { avoidedTerms } from '../glossary-lint.ts';
+import { CHECK_MODEL, type CallVerdict, checkCall, RecordingCoach, ROLE_BREAK_TERMS, summarize } from '../real-coach-check.ts';
 import type { CoachCall, CoachPort } from '../../packages/backend/src/coach/port.ts';
 
 const AFTER_E4_D5 = 'rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2';
@@ -59,8 +61,37 @@ describe('the real-Coach check', () => {
     expect(check({ text: words(60) }).problems).toEqual(['60 words, over the 40-word budget by more than 25%']);
   });
 
-  it('fails a term CONTEXT.md says to avoid', () => {
-    expect(check({ text: 'The computer likes exd5.' }).problems).toEqual(['the text uses "computer", which CONTEXT.md says to avoid']);
+  it('warns on a term CONTEXT.md says to avoid, and still fails a move the Engine never suggested beside it', () => {
+    expect(check({ text: 'The computer likes exd5.' })).toMatchObject({ problems: [], warnings: ['the text uses "computer", which CONTEXT.md says to avoid'] });
+    expect(check({ text: 'Your accuracy drops after exd5.', arrows: [{ from: 'a2', to: 'a4', brush: 'green' }] })).toMatchObject({
+      problems: ['the reply shows a2a4, which the Engine never suggested'],
+      warnings: ['the text uses "accuracy", which CONTEXT.md says to avoid'],
+    });
+  });
+
+  it('fails a reply where the Coach breaks role, and still only warns on the other avoided terms in it', () => {
+    const contextTerms = avoidedTerms(readFileSync(new URL('../../CONTEXT.md', import.meta.url), 'utf8'));
+    expect(contextTerms).toEqual(expect.arrayContaining([...ROLE_BREAK_TERMS]));
+    const refusal = 'As an AI assistant, I am not able to judge chess positions. Please ask a human tutor or use a computer.';
+    expect(checkCall({ job: 'why', brief, raw }, { ...good, text: refusal }, contextTerms)).toMatchObject({
+      problems: ['the text uses "assistant", so the Coach broke role', 'the text uses "ai", so the Coach broke role'],
+      warnings: ['the text uses "computer", which CONTEXT.md says to avoid', 'the text uses "tutor", which CONTEXT.md says to avoid'],
+    });
+    expect(checkCall({ job: 'why', brief, raw }, { ...good, text: 'The user should take back with exd5.' }, contextTerms).problems).toEqual(['the text uses "user", so the Coach broke role']);
+  });
+
+  it('passes a run whose calls only have warnings, and counts them in the posted status', () => {
+    const call = (warnings: string[], problems: string[] = []): CallVerdict => ({ job: 'why', words: 30, maxWords: 150, problems, warnings });
+    expect(summarize([call([]), call([])])).toEqual({ ok: true, description: '2 Coach calls passed the structural checks' });
+    expect(summarize([call(['the text uses "score", which CONTEXT.md says to avoid']), call([]), call(['45 words, over the 40-word budget'])])).toEqual({
+      ok: true,
+      description: '3 Coach calls passed the structural checks, 2 warnings: the text uses "score", which CONTEXT.md says to avoid',
+    });
+    expect(summarize([call(['45 words, over the 40-word budget'])]).description).toBe('1 Coach call passed the structural checks, 1 warning: 45 words, over the 40-word budget');
+    const failed = summarize([call(['45 words, over the 40-word budget']), call([], ['the reply is empty'])]);
+    expect(failed).toEqual({ ok: false, description: '1 of 2 Coach calls failed: the reply is empty' });
+    // GitHub refuses a status description over 140 characters.
+    expect(summarize([call([`the text uses "${'x'.repeat(200)}"`])]).description.length).toBeLessThanOrEqual(140);
   });
 
   it('runs every call on the latest Haiku, whatever model the job uses in the app', async () => {

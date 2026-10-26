@@ -39,9 +39,16 @@ describe('the glossary lint', () => {
 });
 
 describe('the Coach\'s instructions', () => {
-  it('tell the Coach to avoid every term CONTEXT.md avoids, which the real-Coach check fails on', () => {
+  it('name only the few avoided terms the Coach reaches for, each with what to say instead', () => {
+    // A long list buries the words that matter; the real-Coach check warns on the rest anyway.
     const neverSay = SYSTEM_PROMPT.match(/Never say: ([^.]+)\./)?.[1] ?? '';
-    const listed = new Set(neverSay.split(/,\s*/).map((t) => t.replace(/\s*\(.*\)$/, '').trim().toLowerCase()));
-    expect(terms.filter((t) => !listed.has(t))).toEqual([]);
+    const entries = neverSay.split(/;\s*/).map((e) => /^(.+?) \(say (.+)\)$/.exec(e.trim().replace(/\s+/g, ' ')));
+    expect(entries.length).toBeGreaterThan(0);
+    expect(entries.length).toBeLessThanOrEqual(8);
+    for (const entry of entries) {
+      expect(entry, 'each entry reads "<term(s)> (say <what instead>)"').not.toBeNull();
+      for (const term of (entry?.[1] ?? '').split(/ or /)) expect(terms, `"${term}" is an avoided term in CONTEXT.md`).toContain(term.toLowerCase());
+    }
+    expect(neverSay).toMatch(/\bscore\b/);
   });
 });

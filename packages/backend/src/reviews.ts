@@ -156,6 +156,9 @@ async function makeReview(
   const counts = game.source !== 'sample';
   const out: KeyMoment[] = [];
   for (const [index, m] of moments.entries()) {
+    // What the opponent threatened before the move: the brief keeps it only when the Engine's best
+    // reply to the move is that threat, so the Coach can say the move left it on.
+    const threat = await engine.threat(m.fenBefore);
     const reply = await coach.ask(
       {
         job: 'review-moment',
@@ -167,6 +170,7 @@ async function makeReview(
         // The Coach quotes the Winning Chances the key moment shows, scored as the screen scores them.
         ...reviewScores(graded, m.ply),
         replies: graded[m.ply]?.candidates ?? [],
+        ...(threat ? { threat } : {}),
         opening: game.opening,
         allowNote: counts && index === moments.length - 1,
       },

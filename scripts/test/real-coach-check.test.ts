@@ -47,6 +47,15 @@ describe('the real-Coach check', () => {
     expect(check({ arrows: [{ from: 'a2', to: 'a4', brush: 'green' }] }).problems).toEqual(['the reply shows a2a4, which the Engine never suggested']);
   });
 
+  it('accepts the threat’s move where the guard does: after a pass, in a question about the position', () => {
+    const position: Partial<Brief> = { move: undefined, replies: undefined, threat: { by: 'black', san: 'dxe4', uci: 'd5e4', line: 'd4 Nf6' } };
+    const shows: Partial<CoachReply> = { text: 'Black threatens dxe4.', moves: ['d5e4'], arrows: [{ from: 'd5', to: 'e4', brush: 'red' }] };
+    expect(check(shows, position).problems).toEqual([]);
+    // After 2. exd5 the pawn is gone, so a reply that still shows dxe4 fails.
+    const exd5: Partial<Brief> = { ...position, move: { san: 'exd5', uci: 'e4d5', grade: 'Best', evaluationAfter: '+0.60' } };
+    expect(check(shows, exd5).problems).toEqual(['the reply shows d5e4, which is not legal here', 'the reply shows d5e4, which is not legal here']);
+  });
+
   it('fails a piece move named in the text that is not in the brief', () => {
     expect(check({ text: 'Bb5+ was the move.' }).problems).toEqual(['the text names Bb5, which is not in the brief']);
   });

@@ -40,13 +40,15 @@ export function nullMoveFen(fen: string): string | undefined {
  * The opponent's threat in a position, or undefined when there is none worth showing: the side to
  * move is in check, the game is over, or the threat costs less than an Inaccuracy. `analyse` is the
  * Engine's analysis at the caller's settings, so a position it already analysed costs nothing again.
+ * After the pass only the best line counts, so `analyse` is asked for one line there: a search for
+ * one line takes a fraction of the time of five.
  */
-export async function findThreat(analyse: (fen: string) => Promise<Analysis>, fen: string): Promise<Threat | undefined> {
+export async function findThreat(analyse: (fen: string, multiPv?: number) => Promise<Analysis>, fen: string): Promise<Threat | undefined> {
   if (!isValidFen(fen) || outcomeOf(fen) || isCheck(fen)) return undefined;
   const swapped = nullMoveFen(fen);
   if (!swapped || outcomeOf(swapped)) return undefined;
   const now = (await analyse(fen)).lines[0];
-  const passed = (await analyse(swapped)).lines[0];
+  const passed = (await analyse(swapped, 1)).lines[0];
   const uci = passed?.pv[0];
   if (!now || !passed || !uci) return undefined;
   const san = uciToSan(swapped, uci);
@@ -57,6 +59,6 @@ export async function findThreat(analyse: (fen: string) => Promise<Analysis>, fe
 }
 
 /** A capture, a check or a promotion, read from the move's SAN. */
-function isForcing(san: string): boolean {
+export function isForcing(san: string): boolean {
   return /[x+#=]/.test(san);
 }

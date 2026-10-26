@@ -10,7 +10,7 @@ import { winningChancesFor } from '@chess-coach/shared/winning-chances';
 import { scoreFromAnalysis } from '../../web/src/lib/position-score.ts';
 import { createNodeEngine } from '../src/engine/node-engine.ts';
 import { NOTE_CAP } from '../src/profile.ts';
-import { REPLY_SCHEMA } from '../src/coach/prompts.ts';
+import { REPLY_SCHEMA, SYSTEM_PROMPT } from '../src/coach/prompts.ts';
 import { VERIFY_ENGINE } from '../src/verify/instance.ts';
 import { toRawReply } from '../src/coach/real.ts';
 import { client, instance, rows } from './helpers.ts';
@@ -227,6 +227,7 @@ describe('the Coach port', () => {
       positionBefore: { score: { mate: 2 }, pov: 'white' },
       positionAfter: { score: { mate: 2 }, pov: 'white' },
       winningChances: { before: 'White’s winning chances: 99%' },
+      threat: { side: 'black', uci: 'e7e5', san: 'e5', pv: ['e7e5'], score: { cp: 900 }, winLoss: 0.5 },
       allowNote: true,
     } as CoachRequest;
     app.coach.script({ kind: 'reply', reply: { text: 'h4 is best.', moves: ['h2h4'], note: 'Forged note' } });
@@ -244,9 +245,122 @@ describe('the Coach port', () => {
       before: winningChancesFor(facts.move.candidates[0]?.score ?? { cp: 0 }, 'white').text,
       after: winningChancesFor(facts.replies[0]?.score ?? { cp: 0 }, 'black', 'white').text,
     });
+    // The start position holds no threat for the desktop's Engine, whatever the client claims.
+    expect(brief).not.toHaveProperty('threat');
     // The guard checks the Coach against the desktop's facts, so the forged move is stripped.
     expect(reply.moves).toEqual([]);
     expect(reply.note).toBeNull();
+  });
+
+  it('tells the Coach the opponent’s threat from the desktop’s Engine, and none in a quiet position or in check', async () => {
+    const app = await instance();
+    const c = await client(app);
+    // 1. e4 d5: Black threatens dxe4.
+    const fen = 'rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 2';
+    const { threat } = await c.request('engine.threat', { fen });
+    expect(threat).toMatchObject({ side: 'black', uci: 'd5e4', san: 'dxe4' });
+    // A Why Question about the position: the threat as the Engine found it after a pass.
+    const position = await c.request('coach.ask', { job: 'why', fen, recentMoves: ['e4', 'd5'], playerSide: 'white' });
+    expect(app.coach.lastBrief?.threat).toEqual({ by: 'black', san: 'dxe4', uci: 'd5e4', line: expect.any(String) });
+    // The fake Coach names it, so journeys show what the real Coach is told.
+    expect(position.text).toContain('Watch out: Black threatens dxe4.');
+    // 2. Nf3 does nothing about it: the Engine's best reply is still dxe4, and the brief says so.
+    const nf3 = await c.request('coach.ask', { job: 'why', fen, recentMoves: ['e4', 'd5'], playerSide: 'white', moveUci: 'g1f3' });
+    expect(app.coach.lastBrief?.replies?.[0]?.uci).toBe('d5e4');
+    expect(app.coach.lastBrief?.threat).toMatchObject({ by: 'black', san: 'dxe4', uci: 'd5e4', ignored: true });
+    expect(nf3.text).toContain('Nf3 leaves Black\'s threat dxe4 on.');
+    expect(nf3.moves).toContain('d5e4');
+
+    // A quiet position: the start position's best "threat" is a free tempo, not a threat.
+    await c.request('coach.ask', whyAsk());
+    expect(app.coach.lastBrief).not.toHaveProperty('threat');
+    // In check there is no threat to speak of: the side to move must answer the check.
+    const check = 'rnbqkbnr/ppppp1pp/8/5p1Q/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 1 2';
+    await c.request('coach.ask', { job: 'why', fen: check, recentMoves: ['e4', 'f5', 'Qh5+'] });
+    expect(app.coach.lastBrief).not.toHaveProperty('threat');
+  });
+
+  it('drops the threat once the move dealt with it, so the Coach neither names it nor shows it', async () => {
+    const app = await instance();
+    const c = await client(app);
+    const fen = 'rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 2';
+    // 2. exd5 takes the pawn that threatened, and 2. Nc3 defends e4: the Engine's best reply is no longer dxe4.
+    for (const moveUci of ['e4d5', 'b1c3']) {
+      const reply = await c.request('coach.ask', { job: 'why', fen, recentMoves: ['e4', 'd5'], playerSide: 'white', moveUci });
+      expect(app.coach.lastBrief?.replies?.[0]?.uci).not.toBe('d5e4');
+      expect(app.coach.lastBrief).not.toHaveProperty('threat');
+      expect(reply.text).not.toMatch(/threat/);
+      expect(reply.moves).not.toContain('d5e4');
+    }
+    // A Coach that names it anyway after exd5, where it isn't legal, has it stripped: no red arrow
+    // from White's own pawn on d5 back to e4.
+    app.coach.script({ kind: 'reply', reply: { text: 'Black threatens dxe4.', moves: ['d5e4'], arrows: [{ uci: 'd5e4', brush: 'red' }] } });
+    const forced = await c.request('coach.ask', { job: 'why', fen, recentMoves: ['e4', 'd5'], playerSide: 'white', moveUci: 'e4d5' });
+    expect(forced).toMatchObject({ moves: [], arrows: [], stripped: 2 });
+
+    // Live Coaching after 1. g4 d5 2. f3: f3 defends g4, and the Engine's best reply is no longer Bxg4.
+    const g4 = 'rnbqkbnr/ppp1pppp/8/3p4/6P1/8/PPPPPP1P/RNBQKBNR w KQkq - 0 2';
+    expect((await c.request('engine.threat', { fen: g4 })).threat).toMatchObject({ san: 'Bxg4' });
+    const live = await c.request('coach.ask', { job: 'live', fen: g4, recentMoves: ['g4', 'd5'], playerSide: 'white', moveUci: 'f2f3' });
+    expect(app.coach.lastBrief?.replies?.[0]?.uci).not.toBe('c8g4');
+    expect(app.coach.lastBrief).not.toHaveProperty('threat');
+    expect(live.text).not.toMatch(/Bxg4|threat/);
+  });
+
+  it('never tells the Coach a threat after a move that ends the game: Rxd8# in the Back-rank mate Lesson', async () => {
+    const app = await instance();
+    const c = await client(app);
+    // Decision 4: Black's rook on d8 threatens Rxd1+, and Rxd8# takes it with mate.
+    const fen = '3r2k1/p4ppp/qp6/8/8/1P6/P1B2PPP/3R2K1 w - - 0 4';
+    expect((await c.request('engine.threat', { fen })).threat).toMatchObject({ san: 'Rxd1+' });
+    const lesson = { lessonId: 'back-rank-mate', opening: 'Back-rank mate', notes: '', popularity: [], finalTurn: false };
+    const reply = await c.request('coach.ask', { job: 'lesson-turn', fen, recentMoves: [], playerSide: 'white', moveUci: 'd1d8', lesson });
+    expect(app.coach.lastBrief?.move?.san).toBe('Rxd8#');
+    expect(app.coach.lastBrief).not.toHaveProperty('threat');
+    expect(reply.text).not.toMatch(/Rxd1|threat/);
+    expect(reply.moves).not.toContain('d8d1');
+  });
+
+  it('names the threat by the side that makes it, when the Player asks about the opponent’s move', async () => {
+    const app = await instance();
+    const c = await client(app);
+    // 1. e4 e5 2. Qh5 Nc6 3. Bc4: White, the Player, threatens Qxf7#, and Black's 3... Nf6 leaves it on.
+    const fen = 'r1bqkbnr/pppp1ppp/2n5/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 3 3';
+    const reply = await c.request('coach.ask', { job: 'why', fen, recentMoves: ['e4', 'e5', 'Qh5', 'Nc6', 'Bc4'], playerSide: 'white', moveUci: 'g8f6' });
+    expect(app.coach.lastBrief).toMatchObject({ playerSide: 'white', threat: { by: 'white', san: 'Qxf7#', ignored: true } });
+    expect(reply.text).toContain('Nf6 leaves White\'s threat Qxf7# on.');
+    // The prompt words the threat by threat.by, never as "the opponent's", and leaves the judgement to the Engine (ADR 0002).
+    const rule = SYSTEM_PROMPT.split('\n- ').find((r) => r.startsWith('When the brief has threat')) ?? '';
+    expect(rule).toContain('threat.by');
+    expect(rule).toContain('threat.ignored');
+    expect(rule).not.toMatch(/opponent|does nothing about/);
+  });
+
+  it('keeps a Coach move that names the threat, and still strips a move the Engine never produced', async () => {
+    const app = await instance();
+    const c = await client(app);
+    const fen = 'rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 2';
+    app.coach.script({
+      kind: 'reply',
+      reply: { text: 'Black threatens dxe4.', moves: ['d5e4', 'h2h3'], arrows: [{ uci: 'd5e4', brush: 'red' }, { uci: 'h2h3', brush: 'blue' }] },
+    });
+    const reply = await c.request('coach.ask', { job: 'why', fen, recentMoves: ['e4', 'd5'] });
+    expect(reply.moves).toEqual(['d5e4']);
+    expect(reply.arrows).toEqual([{ from: 'd5', to: 'e4', brush: 'red' }]);
+    expect(reply.stripped).toBe(2);
+  });
+
+  it('tells the Coach the threat in a key moment of a Review only when the move left it on, as the desktop’s Engine finds it', async () => {
+    const app = await instance();
+    const c = await client(app);
+    await c.request('review.start', { gameId: 1 });
+    const briefs = app.coach.briefs.filter((b) => b.job === 'review-moment');
+    expect(briefs.length).toBeGreaterThan(0);
+    for (const b of briefs) {
+      const { threat } = await c.request('engine.threat', { fen: b.fen });
+      if (threat && b.replies?.[0]?.uci === threat.uci) expect(b.threat).toMatchObject({ by: threat.side, uci: threat.uci, ignored: true });
+      else expect(b).not.toHaveProperty('threat');
+    }
   });
 
   it('grades a move on the desktop’s Engine for clients without one', async () => {

@@ -5,6 +5,7 @@ import type { Score } from '../engine.ts';
 import type { MoveGrade } from '../grader.ts';
 import type { PositionScore } from '../position-score.ts';
 import type { CoachJob } from '../protocol.ts';
+import type { Threat } from '../threat.ts';
 
 export type Brush = 'green' | 'blue' | 'red' | 'yellow';
 
@@ -70,6 +71,8 @@ export interface CoachAsk {
   positionAfter?: PositionScore;
   /** The Engine's candidate replies after `move`, best first. */
   replies?: Candidate[];
+  /** What the opponent threatens in `fen`, when the Engine finds a real threat. Only the desktop sets it. */
+  threat?: Threat;
   /** The Player's question or typed answer. */
   question?: string;
   /** Lesson context: bundled notes and how often players at the Player's level choose each move. */

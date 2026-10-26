@@ -14,13 +14,20 @@ const SCHOLAR_WHITE_TO_MOVE = 'r1bqkbnr/pppp1ppp/2n5/4p2Q/2B1P3/8/PPPP1PPP/RNB1K
 
 const START = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
-/** An Engine that answers each position with one scored line. */
-function scripted(answers: Record<string, { pv: string[]; score: Score }>): { analyse: (fen: string) => Promise<Analysis>; asked: string[] } {
+/** An Engine that answers each position with one scored line, and records how many lines each search asked for. */
+function scripted(answers: Record<string, { pv: string[]; score: Score }>): {
+  analyse: (fen: string, multiPv?: number) => Promise<Analysis>;
+  asked: string[];
+  lines: (number | undefined)[];
+} {
   const asked: string[] = [];
+  const lines: (number | undefined)[] = [];
   return {
     asked,
-    analyse: async (fen) => {
+    lines,
+    analyse: async (fen, multiPv) => {
       asked.push(fen);
+      lines.push(multiPv);
       const a = answers[fen];
       if (!a) throw new Error(`Not scripted: ${fen}`);
       return { fen, depth: 10, lines: [{ ...a, depth: 10 }] };
@@ -36,6 +43,8 @@ describe('finding a threat', () => {
     });
     const threat = await findThreat(engine.analyse, SCHOLAR);
     expect(engine.asked).toEqual([SCHOLAR, SCHOLAR_WHITE_TO_MOVE]);
+    // The position at the caller's settings, then one line after the pass: only the best counts.
+    expect(engine.lines).toEqual([undefined, 1]);
     expect(threat).toMatchObject({ uci: 'h5f7', san: 'Qxf7#', side: 'white', pv: ['h5f7'], score: { mate: 1 } });
     // Letting a mate in one happen costs nearly all of Black’s winning chances.
     expect(threat?.winLoss).toBeGreaterThan(0.85);

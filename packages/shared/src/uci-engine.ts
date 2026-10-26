@@ -141,9 +141,9 @@ export class UciEngine implements Engine {
     });
   }
 
-  /** The opponent's threat, from two searches at these options: the position, and the position after a null move. */
+  /** The opponent's threat, from two searches at these options: the position, and the position after a null move (one line). */
   threat(fen: string, options: AnalyseOptions): Promise<Threat | undefined> {
-    return findThreat((f) => this.analyse(f, options), fen);
+    return findThreat((f, multiPv) => this.analyse(f, multiPv ? { ...options, multiPv } : options), fen);
   }
 
   /** Stops the current search; its result resolves with what was found so far. Queued work is dropped. */

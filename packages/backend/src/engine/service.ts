@@ -53,15 +53,19 @@ export class EngineService {
     return this.engine;
   }
 
-  /** The Engine's top lines in a position, at the configured depth. */
-  async analyse(fen: string): Promise<Analysis> {
+  /**
+   * The Engine's top lines in a position, at the configured depth. Fewer lines than configured are
+   * cached apart, so they are never served as a position's candidates.
+   */
+  async analyse(fen: string, multiPv = this.settings.multiPv): Promise<Analysis> {
     if (!isValidFen(fen)) throw new AppError('bad-request', 'The position is not valid.');
     if (outcomeOf(fen)) return { fen, depth: 0, lines: [] };
-    const hit = this.cache.get(fen);
+    const key = multiPv === this.settings.multiPv ? fen : `${fen}|${multiPv}`;
+    const hit = this.cache.get(key);
     if (hit) return hit;
-    const analysis = this.get().then((e) => e.analyse(fen, { multiPv: this.settings.multiPv, depth: this.settings.depth }));
-    this.cache.set(fen, analysis);
-    analysis.catch(() => this.cache.delete(fen));
+    const analysis = this.get().then((e) => e.analyse(fen, { multiPv, depth: this.settings.depth }));
+    this.cache.set(key, analysis);
+    analysis.catch(() => this.cache.delete(key));
     if (this.cache.size > CACHE_SIZE) this.cache.delete(this.cache.keys().next().value as string);
     return analysis;
   }
@@ -69,11 +73,11 @@ export class EngineService {
   /**
    * The opponent's threat in a position, from the cached analyses at the configured depth: a
    * position the desktop already analysed, as every position of a graded game is, costs only the
-   * search after the null move.
+   * one-line search after the null move.
    */
   async threat(fen: string): Promise<Threat | undefined> {
     if (!isValidFen(fen)) throw new AppError('bad-request', 'The position is not valid.');
-    return findThreat((f) => this.analyse(f), fen);
+    return findThreat((f, multiPv) => this.analyse(f, multiPv), fen);
   }
 
   /** Grades one move and lists the Engine's replies to it. */
@@ -119,17 +123,23 @@ export class EngineService {
       ...(typeof req.opening === 'string' ? { opening: req.opening } : {}),
       ...(req.hideWinningChances === true ? { hideWinningChances: true } : {}),
     };
+    // The opponent's threat in the position: it reuses the analysis of `fen` and costs one
+    // more search, after the null move. After a move, the brief keeps it only when the Engine's
+    // best reply to the move is that threat.
+    const threat = this.threat(req.fen);
     if (req.moveUci) {
-      const { move, replies } = await this.grade(req.fen, req.moveUci);
+      const [{ move, replies }, found] = await Promise.all([this.grade(req.fen, req.moveUci), threat]);
       return {
         ...ask,
         move: { uci: move.uci, san: move.san, grade: move.grade, playedScore: move.playedScore },
         candidates: move.candidates,
         replies,
+        ...(found ? { threat: found } : {}),
       };
     }
-    const candidates = candidatesFrom(await this.analyse(req.fen));
+    const [analysis, found] = await Promise.all([this.analyse(req.fen), threat]);
+    const candidates = candidatesFrom(analysis);
     if (!candidates.length) throw new AppError('bad-request', 'The game is already over in this position.');
-    return { ...ask, candidates };
+    return { ...ask, candidates, ...(found ? { threat: found } : {}) };
   }
 }

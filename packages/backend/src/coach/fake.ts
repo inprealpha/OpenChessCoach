@@ -5,7 +5,7 @@
 import type { Brief, BriefCandidate } from '@chess-coach/shared/coach/brief';
 import type { CoachRawReply } from '@chess-coach/shared/coach/types';
 import type { CoachStatus } from '@chess-coach/shared/protocol';
-import { positionKey } from '@chess-coach/shared/chess';
+import { positionKey, SIDE_NAMES } from '@chess-coach/shared/chess';
 import { CoachLimitError, CoachUnavailableError, type CoachCall, type CoachPort } from './port.ts';
 
 export type ScriptedReply =
@@ -95,7 +95,9 @@ export function templateReply(brief: Brief): CoachRawReply {
   let text: string;
   switch (brief.job) {
     case 'hint':
-      text = 'Look at which of your pieces is doing the least, and find the move that brings it into the game while keeping your king safe.';
+      text = brief.threat
+        ? 'First see what your opponent threatens, and find the move that deals with it while keeping your pieces working.'
+        : 'Look at which of your pieces is doing the least, and find the move that brings it into the game while keeping your king safe.';
       return { text, moves: [], arrows: [], highlights: [], note: null };
     case 'live': {
       text = `${brief.move?.san ?? 'That move'} is graded ${brief.move?.grade ?? 'Mistake'}.${chances(brief)} The Engine preferred ${best?.san ?? 'another move'}. You can take it back and try again.`;
@@ -135,6 +137,15 @@ export function templateReply(brief: Brief): CoachRawReply {
       add(alt, 'blue');
       break;
     }
+  }
+  // The threat, by the side that makes it: in the position, as the board's Threat arrow names
+  // it, or after a move that left it on, as the Engine's best reply.
+  if (brief.threat) {
+    const side = SIDE_NAMES[brief.threat.by];
+    text += brief.move
+      ? ` ${brief.move.san} leaves ${side}'s threat ${brief.threat.san} on.`
+      : ` Watch out: ${side} threatens ${brief.threat.san}.`;
+    if (!moves.includes(brief.threat.uci)) moves.push(brief.threat.uci);
   }
   const note = brief.allowNote ? `Worked on ${brief.lesson?.opening ?? 'a Review'}.` : null;
   return { text, moves, arrows, highlights: [], note };

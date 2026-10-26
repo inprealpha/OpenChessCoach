@@ -53,13 +53,13 @@ export async function bestMove(fen: string, options: PlayOptions): Promise<strin
   return (await engine()).bestMove(fen, options);
 }
 
-/** Analyses a position at the configured depth. Progress updates stream to `onProgress`. */
-export function analyse(fen: string, onProgress?: (a: Analysis) => void): Promise<Analysis> {
-  const key = `${fen}|${api.engine.depth}|${api.engine.multiPv}`;
+/** Analyses a position at the configured depth, with the configured lines unless told fewer. Progress updates stream to `onProgress`. */
+export function analyse(fen: string, onProgress?: (a: Analysis) => void, multiPv = api.engine.multiPv): Promise<Analysis> {
+  const key = `${fen}|${api.engine.depth}|${multiPv}`;
   let hit = cache.get(key);
   if (!hit) {
     if (outcomeOf(fen)) hit = Promise.resolve({ fen, depth: 0, lines: [] });
-    else hit = engine().then((e) => e.analyse(fen, { multiPv: api.engine.multiPv, depth: api.engine.depth }, onProgress));
+    else hit = engine().then((e) => e.analyse(fen, { multiPv, depth: api.engine.depth }, onProgress));
     cache.set(key, hit);
     if (cache.size > 500) cache.delete(cache.keys().next().value as string);
   }
@@ -68,10 +68,11 @@ export function analyse(fen: string, onProgress?: (a: Analysis) => void): Promis
 
 /**
  * The opponent's threat in a position, for the Board and Engine Games: from the same cached
- * analyses as the board's lines, so a position already analysed costs one more search.
+ * analyses as the board's lines, so a position already analysed costs one more search, of one
+ * line, as on the desktop.
  */
 export function threat(fen: string): Promise<Threat | undefined> {
-  return findThreat((f) => analyse(f), fen);
+  return findThreat((f, multiPv) => analyse(f, undefined, multiPv), fen);
 }
 
 /** The opponent's threat for a Review: from the desktop's Engine, which graded the game, unless it can't be reached (ADR 0007). */

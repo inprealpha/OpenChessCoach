@@ -6,8 +6,9 @@ import type { Analysis } from '../src/engine.ts';
 import { assertBriefWithinBudget, BRIEF_BUDGET, BriefTooLargeError, briefSize, buildBrief, profileSlice, type Brief } from '../src/coach/brief.ts';
 import { allowedMoves, guardReply } from '../src/coach/guard.ts';
 import type { CoachAsk, CoachRawReply } from '../src/coach/types.ts';
-import { turnOf } from '../src/chess.ts';
+import { legalMoves, playUci, turnOf } from '../src/chess.ts';
 import { scoreAfterPly } from '../src/position-score.ts';
+import { nullMoveFen, type Threat } from '../src/threat.ts';
 import { winningChancesFor } from '../src/winning-chances.ts';
 // The bar's own function on the Board and in Engine Games, so the brief is compared with the screen.
 import { scoreFromAnalysis } from '../../web/src/lib/position-score.ts';
@@ -22,22 +23,45 @@ const profile = {
 };
 
 /** A Review moment late in a long real game, the largest brief the app builds. */
-function longGameAsk(): CoachAsk {
+function longGameAsk(at = 60): CoachAsk {
   const g = game('fzjtms6a');
-  const m = g.moves[60];
+  const m = g.moves[at];
   if (!m) throw new Error('fixture too short');
   return {
     job: 'review-moment',
     fen: m.fenBefore,
-    recentMoves: g.moves.slice(0, 60).map((x) => x.san),
+    recentMoves: g.moves.slice(0, at).map((x) => x.san),
     playerSide: 'white',
     move: { uci: m.uci, san: m.san, grade: m.grade, playedScore: m.playedScore },
     candidates: m.candidates,
-    replies: g.moves[61]?.candidates ?? [],
+    replies: g.moves[at + 1]?.candidates ?? [],
     question: 'x'.repeat(2000),
     opening: 'Italian Game',
     allowNote: true,
   };
+}
+
+/** A legal line of `plies` moves from `fen`, each the first legal move: only its length matters. */
+function someLine(fen: string, plies: number): string[] {
+  const line: string[] = [];
+  let current = fen;
+  for (let i = 0; i < plies; i++) {
+    const uci = legalMoves(current)[0];
+    const played = uci ? playUci(current, uci) : undefined;
+    if (!uci || !played) break;
+    line.push(uci);
+    current = played.fenAfter;
+  }
+  return line;
+}
+
+/** A threat for the opponent in `fen`: a legal move of theirs after a pass, with a full line. */
+function someThreat(fen: string): Threat {
+  const swapped = nullMoveFen(fen) as string;
+  const pv = someLine(swapped, 8);
+  const first = playUci(swapped, pv[0] as string);
+  if (!first) throw new Error('no legal move for the opponent');
+  return { side: turnOf(swapped), uci: first.uci, san: first.san, pv, score: { cp: 250 }, winLoss: 0.2 };
 }
 
 describe('the Coach brief', () => {
@@ -45,6 +69,90 @@ describe('the Coach brief', () => {
     const brief = buildBrief({ ask: longGameAsk(), profile, summary: 'y'.repeat(5000) });
     expect(briefSize(brief)).toBeLessThanOrEqual(BRIEF_BUDGET);
     expect(() => assertBriefWithinBudget(brief)).not.toThrow();
+  });
+
+  it('stays within its budget with the opponent’s threat added, in the position and after a move', () => {
+    // 25... Re2, where the Engine's best reply is the capture Rxe2: the move leaves that threat on.
+    const ask = longGameAsk(50);
+    const best = ask.replies?.[0] as Candidate;
+    const afterMove = buildBrief({ ask: { ...ask, threat: { ...someThreat(ask.fen), uci: best.uci, pv: best.pv } }, profile, summary: 'y'.repeat(5000) });
+    expect(afterMove.threat).toMatchObject({ uci: best.uci, ignored: true });
+    expect(briefSize(afterMove)).toBeLessThanOrEqual(BRIEF_BUDGET);
+    // The same moment asked about as a position: the threat after a pass, with a full line.
+    const inPosition = buildBrief({ ask: { ...ask, move: undefined, replies: undefined, threat: someThreat(ask.fen) }, profile, summary: 'y'.repeat(5000) });
+    expect(inPosition.threat).toBeDefined();
+    expect(briefSize(inPosition)).toBeLessThanOrEqual(BRIEF_BUDGET);
+  });
+
+  it('carries the opponent’s threat as the Engine found it: who threatens, the move and its line', () => {
+    // 1. e4 d5: Black threatens dxe4.
+    const fen = 'rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 2';
+    const threat: Threat = { side: 'black', uci: 'd5e4', san: 'dxe4', pv: ['d5e4', 'b1c3', 'g8f6'], score: { cp: 120 }, winLoss: 0.15 };
+    const ask: CoachAsk = { job: 'why', fen, recentMoves: ['e4', 'd5'], candidates: [{ uci: 'e4d5', san: 'exd5', score: { cp: 40 }, pv: ['e4d5', 'd8d5'] }], threat };
+    expect(buildBrief({ ask, profile }).threat).toEqual({ by: 'black', san: 'dxe4', uci: 'd5e4', line: 'Nc3 Nf6' });
+    // No threat, no field.
+    expect(buildBrief({ ask: { ...ask, threat: undefined }, profile })).not.toHaveProperty('threat');
+    // A threat that isn't a legal move for the opponent never reaches the Coach.
+    expect(buildBrief({ ask: { ...ask, threat: { ...threat, uci: 'd5d3' } }, profile })).not.toHaveProperty('threat');
+  });
+
+  it('keeps the threat after a move only when the Engine’s best reply to the move is that threat, and says so', () => {
+    // 1. e4 d5: Black threatens dxe4, as the Engine found it after a pass.
+    const fen = 'rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 2';
+    const threat: Threat = { side: 'black', uci: 'd5e4', san: 'dxe4', pv: ['d5e4', 'd2d4', 'g8f6'], score: { cp: 128 }, winLoss: 0.34 };
+    const after = (uci: string, replies: Candidate[]): CoachAsk => ({
+      job: 'why',
+      fen,
+      recentMoves: ['e4', 'd5'],
+      playerSide: 'white',
+      move: { uci, san: '', grade: 'Good', playedScore: { cp: 0 } },
+      candidates: [{ uci: 'e4d5', san: 'exd5', score: { cp: 60 }, pv: ['e4d5', 'd8d5'] }],
+      replies,
+      threat,
+    });
+    const reply = (uci: string, pv: string[] = [uci]): Candidate => ({ uci, san: '', score: { cp: 0 }, pv });
+    // 2. Nf3: the Engine's best reply is still dxe4, so the brief says the move left the threat on,
+    // with the Engine's line after the move.
+    expect(buildBrief({ ask: after('g1f3', [reply('d5e4', ['d5e4', 'f3g5', 'g8f6']), reply('e7e6')]), profile }).threat).toEqual({
+      by: 'black',
+      san: 'dxe4',
+      uci: 'd5e4',
+      line: 'Ng5 Nf6',
+      ignored: true,
+    });
+    // 2. exd5 took the pawn: dxe4 isn't even legal any more.
+    expect(buildBrief({ ask: after('e4d5', [reply('d8d5')]), profile })).not.toHaveProperty('threat');
+    // 2. Nc3 defends e4, and the Engine's best reply is 2... d4, not the threat.
+    expect(buildBrief({ ask: after('b1c3', [reply('d5d4'), reply('d5e4')]), profile })).not.toHaveProperty('threat');
+    // With no replies from the Engine, there is nothing to say the threat still stands.
+    expect(buildBrief({ ask: after('g1f3', []), profile })).not.toHaveProperty('threat');
+    // 1. e4 Nf6 2. e5: the knight's best reply goes to e4, but there is nothing left to take there.
+    const nf6 = 'rnbqkb1r/pppppppp/5n2/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 1 2';
+    const nxe4: Threat = { side: 'black', uci: 'f6e4', san: 'Nxe4', pv: ['f6e4'], score: { cp: 300 }, winLoss: 0.5 };
+    expect(buildBrief({ ask: { ...after('e4e5', [reply('f6e4')]), fen: nf6, candidates: [], threat: nxe4 }, profile })).not.toHaveProperty('threat');
+  });
+
+  it('never carries a threat after a move that ends the game, checkmate or stalemate', () => {
+    const ask = (fen: string, uci: string, threat: Threat): CoachAsk => ({
+      job: 'lesson-turn',
+      fen,
+      recentMoves: [],
+      playerSide: 'white',
+      move: { uci, san: '', grade: 'Best', playedScore: { cp: 0 } },
+      candidates: [],
+      // The Engine has no replies once the game is over; even a forged one can't keep the threat.
+      replies: [{ uci: threat.uci, san: '', score: { cp: 0 }, pv: [threat.uci] }],
+      threat,
+    });
+    // The Back-rank mate Lesson: Black threatens Rxd1+, and Rxd8# takes the rook with mate.
+    const backRank = '3r2k1/p4ppp/qp6/8/8/1P6/P1B2PPP/3R2K1 w - - 0 4';
+    const rxd1: Threat = { side: 'black', uci: 'd8d1', san: 'Rxd1+', pv: ['d8d1'], score: { cp: 900 }, winLoss: 0.9 };
+    expect(buildBrief({ ask: ask(backRank, 'd1d8', rxd1), profile })).not.toHaveProperty('threat');
+    expect(buildBrief({ ask: { ...ask(backRank, 'd1d8', rxd1), replies: [] }, profile })).not.toHaveProperty('threat');
+    // Black's pawn threatens hxg1=Q, and 1. Ne2 leaves Black no legal move: stalemate.
+    const stalemate = '7k/5K2/6Q1/8/8/8/7p/6NB w - - 0 1';
+    const promote: Threat = { side: 'black', uci: 'h2g1q', san: 'hxg1=Q', pv: ['h2g1q'], score: { cp: 0 }, winLoss: 0.2 };
+    expect(buildBrief({ ask: ask(stalemate, 'g1e2', promote), profile })).not.toHaveProperty('threat');
   });
 
   it('the budget check fails on an oversized brief', () => {
@@ -158,6 +266,34 @@ describe('the Coach-move guard', () => {
     expect(out.moves).toEqual([best]);
     expect(out.arrows).toEqual([{ from: best.slice(0, 2), to: best.slice(2, 4), brush: 'green' }]);
     expect(out.stripped).toHaveLength(3);
+  });
+
+  it('allows the opponent’s threat, legal after a pass, and still strips a move that is neither a candidate nor the threat', () => {
+    const fen = 'rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 2';
+    const threat: Threat = { side: 'black', uci: 'd5e4', san: 'dxe4', pv: ['d5e4'], score: { cp: 120 }, winLoss: 0.15 };
+    const withThreat = buildBrief({
+      ask: { job: 'why', fen, recentMoves: [], candidates: [{ uci: 'e4d5', san: 'exd5', score: { cp: 40 }, pv: ['e4d5'] }], threat },
+      profile,
+    });
+    const out = guardReply(withThreat, reply({ moves: ['e4d5', 'd5e4', 'h2h3'], arrows: [{ uci: 'd5e4', brush: 'red' }] }));
+    expect(out.moves).toEqual(['e4d5', 'd5e4']);
+    expect(out.arrows).toEqual([{ from: 'd5', to: 'e4', brush: 'red' }]);
+    expect(out.stripped).toEqual(['move h2h3 is not in the Engine\'s output']);
+    // Without the threat in the brief, the same move is stripped.
+    const without = buildBrief({ ask: { job: 'why', fen, recentMoves: [], candidates: [{ uci: 'e4d5', san: 'exd5', score: { cp: 40 }, pv: ['e4d5'] }] }, profile });
+    expect(guardReply(without, reply({ moves: ['d5e4'] })).moves).toEqual([]);
+  });
+
+  it('allows the threat’s move only where it is legal: after the move, when the brief has one', () => {
+    const fen = 'rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 2';
+    const threat = { by: 'black' as const, san: 'dxe4', uci: 'd5e4', line: '' };
+    const base: Brief = { ...brief, fen, candidates: [], move: undefined, replies: undefined, threat };
+    // 2. Nf3 left the threat on: dxe4 is legal after it.
+    expect(allowedMoves({ ...base, move: { san: 'Nf3', uci: 'g1f3', grade: 'Mistake', evaluationAfter: '-1.10' }, threat: { ...threat, ignored: true } }).has('d5e4')).toBe(true);
+    // 2. exd5 took the pawn: a brief that still carried the threat would not get it past the guard.
+    const exd5: Brief = { ...base, move: { san: 'exd5', uci: 'e4d5', grade: 'Best', evaluationAfter: '+0.60' } };
+    expect(allowedMoves(exd5).has('d5e4')).toBe(false);
+    expect(guardReply(exd5, reply({ moves: ['d5e4'], arrows: [{ uci: 'd5e4', brush: 'red' }] }))).toMatchObject({ moves: [], arrows: [] });
   });
 
   it('strips every move and arrow from a Hint', () => {

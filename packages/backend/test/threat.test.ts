@@ -3,6 +3,8 @@
 // answer, and so does the protocol the Review asks it through.
 import { describe, expect, it } from 'vitest';
 import { INITIAL_FEN, playLine } from '@chess-coach/shared/chess';
+import type { Engine } from '@chess-coach/shared/engine';
+import { nullMoveFen } from '@chess-coach/shared/threat';
 import { createNodeEngine } from '../src/engine/node-engine.ts';
 import { EngineService } from '../src/engine/service.ts';
 import { VERIFY_ENGINE } from '../src/verify/instance.ts';
@@ -48,6 +50,29 @@ describe('the threat query', () => {
     if (expected) expect(threat).toMatchObject(expected);
     else expect(threat).toBeUndefined();
     expect(threat).toEqual(await (await createNodeEngine(1)).threat(fen, options));
+  });
+
+  it('searches one line after the pass on the desktop, cached apart from that position’s own lines', async () => {
+    const real = await createNodeEngine(1);
+    const asked: [string, number][] = [];
+    const engine: Engine = {
+      analyse: (fen, o, onProgress) => {
+        asked.push([fen, o.multiPv]);
+        return real.analyse(fen, o, onProgress);
+      },
+      bestMove: (fen, o) => real.bestMove(fen, o),
+      threat: (fen, o) => real.threat(fen, o),
+      stop: () => real.stop(),
+      dispose: () => real.dispose(),
+    };
+    const service = new EngineService(async () => engine, VERIFY_ENGINE);
+    const passed = nullMoveFen(POSITIONS.scholar) as string;
+    expect(await service.threat(POSITIONS.scholar)).toMatchObject(EXPECTED.scholar);
+    // Only the best line after the pass counts, so only one is searched.
+    expect(asked).toEqual([[POSITIONS.scholar, VERIFY_ENGINE.multiPv], [passed, 1]]);
+    // The position after the pass, analysed for itself, still gets every line.
+    expect((await service.analyse(passed)).lines).toHaveLength(VERIFY_ENGINE.multiPv);
+    expect(asked.at(-1)).toEqual([passed, VERIFY_ENGINE.multiPv]);
   });
 
   it('answers over the protocol, and refuses a position that is not valid', async () => {

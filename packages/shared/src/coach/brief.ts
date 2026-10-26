@@ -4,6 +4,7 @@ import { playUci, turnOf, type Side } from '../chess.ts';
 import { formatScore, gradeMove, type MoveGrade } from '../grader.ts';
 import { finishedScore, type PositionScore } from '../position-score.ts';
 import type { CoachJob, PlayerLevel, PlayerProfile } from '../protocol.ts';
+import { isForcing, nullMoveFen } from '../threat.ts';
 import { winningChancesFor } from '../winning-chances.ts';
 import type { CoachAsk } from './types.ts';
 
@@ -55,6 +56,13 @@ export interface Brief {
   winningChances?: { before: string; after?: string };
   candidates: BriefCandidate[];
   replies?: BriefCandidate[];
+  /**
+   * What `by`, the side not to move in `fen`, would play if it were their move: a forcing move the
+   * Engine found that would cost the side to move at least an Inaccuracy, with the Engine's
+   * line after it. With a move, it is there only when the Engine's best reply to the move is still
+   * that threat (`ignored`), and it is played from the position after the move (see `threatFen`).
+   */
+  threat?: { by: Side; san: string; uci: string; line: string; ignored?: true };
   lesson?: { opening: string; notes: string; popularity: string };
   profile?: { goals: string[]; weaknesses: string[]; notes: string[] };
   question?: string;
@@ -120,6 +128,8 @@ export function buildBrief({ ask, profile, summary }: BriefInput): Brief {
   }
   const chances = winningChancesOf(ask);
   if (chances) brief.winningChances = chances;
+  const threat = threatOf(ask);
+  if (threat) brief.threat = threat;
   if (ask.lesson) {
     brief.lesson = {
       opening: clip(ask.lesson.opening, 80),
@@ -162,6 +172,35 @@ function winningChancesOf(ask: CoachAsk): Brief['winningChances'] {
 function bestLineScore(fen: string, lines: readonly Candidate[]): PositionScore | undefined {
   const best = lines[0];
   return finishedScore(fen) ?? (best ? { score: best.score, pov: turnOf(fen) } : undefined);
+}
+
+/**
+ * Where the brief's threat is played from: the position after the move when there is one, and
+ * otherwise `fen` after a pass. The guard checks the threat's move there.
+ */
+export function threatFen(brief: { fen: string; move?: { uci: string } | undefined }): string | undefined {
+  return brief.move ? playUci(brief.fen, brief.move.uci)?.fenAfter : nullMoveFen(brief.fen);
+}
+
+/**
+ * The opponent's threat as the Engine found it, legal where it would be played. Without a move it
+ * is the threat in `fen`. After a move it stays only when the Engine's best reply to the move is
+ * still that forcing move, with the Engine's line after it, so the brief states as an Engine fact
+ * that the move left the threat on; otherwise the move dealt with it and the Coach isn't told (ADR 0002).
+ */
+function threatOf(ask: CoachAsk): Brief['threat'] {
+  if (!ask.threat) return undefined;
+  const from = threatFen(ask);
+  if (!from) return undefined;
+  if (ask.move) {
+    const best = ask.replies?.[0];
+    const played = best?.uci === ask.threat.uci ? playUci(from, best.uci) : undefined;
+    if (!best || !played || !isForcing(played.san)) return undefined;
+    return { by: turnOf(from), san: played.san, uci: played.uci, line: linesSan(played.fenAfter, best.pv.slice(1, LINE_PLIES)), ignored: true };
+  }
+  const played = playUci(from, ask.threat.uci);
+  if (!played) return undefined;
+  return { by: turnOf(from), san: played.san, uci: played.uci, line: linesSan(played.fenAfter, ask.threat.pv.slice(1, LINE_PLIES)) };
 }
 
 function briefCandidates(fen: string, candidates: readonly Candidate[], max: number): BriefCandidate[] {
@@ -249,6 +288,7 @@ function fitToBudget(brief: Brief): Brief {
     (b) => { if (b.lesson) b.lesson.notes = clip(b.lesson.notes, 300); },
     (b) => { if (b.profile) b.profile.notes = b.profile.notes.slice(-1); },
     (b) => { b.candidates.forEach((c) => (c.line = c.line.split(' ').slice(0, 2).join(' '))); },
+    (b) => { if (b.threat) b.threat.line = b.threat.line.split(' ').slice(0, 2).join(' '); },
     (b) => { if (b.replies) b.replies = b.replies.slice(0, 2); },
     (b) => { b.recentMoves = b.recentMoves.split(' ').slice(-12).join(' '); },
     (b) => { if (b.question) b.question = clip(b.question, 200); },

@@ -2,7 +2,8 @@
 // in, because the real Coach can't run in cloud CI (ADR 0001). It starts a verify-mode instance with
 // the real Coach in place of the fake one, makes one call of every Coach job through the protocol,
 // and checks only structure, so the verdict doesn't flip when the Coach words something differently:
-//   - every move a reply shows is legal and came from the Engine (the move guard, ADR 0002);
+//   - every move a reply shows is legal and came from the Engine (the move guard, ADR 0002), the
+//     briefed threat included, where the guard plays it;
 //   - every piece move named in the text appears in the brief, so it came from the Engine,
 //     the game or the bundled Lesson notes;
 //   - each reply stays within its length budget (with 25% slack; over the budget alone is a warning);
@@ -21,7 +22,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { playSan, playUci } from '@chess-coach/shared/chess';
 import { allowedMoves, guardReply } from '@chess-coach/shared/coach/guard';
-import { MAX_WORDS, type Brief } from '@chess-coach/shared/coach/brief';
+import { MAX_WORDS, threatFen, type Brief } from '@chess-coach/shared/coach/brief';
 import type { CoachRequest, CoachRawReply, CoachReply } from '@chess-coach/shared/coach/types';
 import type { CoachJob } from '@chess-coach/shared/protocol';
 import { CoachClient } from '../packages/backend/src/client.ts';
@@ -69,7 +70,12 @@ export function checkCall(record: CoachCallRecord, reply: CoachReply, terms: rea
 
   const allowed = brief.hideMoves ? new Set<string>() : allowedMoves(brief);
   for (const uci of [...reply.moves, ...reply.arrows.map((a) => `${a.from}${a.to}`)]) {
-    const legal = playUci(brief.fen, uci) ?? (brief.move ? playUci(playUci(brief.fen, brief.move.uci)?.fenAfter ?? brief.fen, uci) : undefined);
+    // Legal in the position, after the move, or, for the briefed threat, where the guard plays it.
+    const threatFrom = uci === brief.threat?.uci ? threatFen(brief) : undefined;
+    const legal =
+      playUci(brief.fen, uci) ??
+      (brief.move ? playUci(playUci(brief.fen, brief.move.uci)?.fenAfter ?? brief.fen, uci) : undefined) ??
+      (threatFrom ? playUci(threatFrom, uci) : undefined);
     if (!legal) problems.push(`the reply shows ${uci}, which is not legal here`);
     else if (!allowed.has(uci) && ![...allowed].some((a) => a.slice(0, 4) === uci)) problems.push(`the reply shows ${uci}, which the Engine never suggested`);
   }
@@ -144,6 +150,9 @@ async function driveEveryJob(client: CoachClient, root: URL): Promise<{ job: Coa
 
   // Hint: the same position before White's move.
   out.push({ job: 'hint', reply: await client.request('coach.ask', { job: 'hint', fen: AFTER_E4_D5, recentMoves: ['e4', 'd5'], playerSide: 'white' }) });
+
+  // A Why Question about that position, with no move: Black's threat dxe4 is legal there only after a pass.
+  out.push({ job: 'why', reply: await client.request('coach.ask', { job: 'why', fen: AFTER_E4_D5, recentMoves: ['e4', 'd5'], playerSide: 'white', question: 'What are the options in this position?' }) });
 
   // Lesson turn: the Italian Game's 3.Bc4, with its bundled notes.
   const lesson = JSON.parse(readFileSync(new URL('data/lessons/italian-game.json', root), 'utf8')) as {

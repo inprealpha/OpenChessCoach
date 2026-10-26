@@ -1,0 +1,74 @@
+# Every PR and every push to the default branch (ADR 0006). The Coach is always the fake one
+# here, so CI costs none of the owner's Claude limits; Coach changes are checked on the desktop.
+name: CI
+
+on:
+  pull_request:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Checks
+    # On a push, only the default branch; every other branch is checked through its PR.
+    if: ${{ github.event_name != 'push' || github.ref_name == github.event.repository.default_branch }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Typecheck (strict TypeScript and Svelte)
+        run: npm run typecheck
+      - name: Lint and glossary lint
+        run: npm run lint
+      - name: CODEOWNERS follows the protected-path list
+        run: npm run check:paths
+      - name: Build
+        run: npm run build
+      - name: Unit, golden, data and protocol tests (ADR checks included)
+        run: npm test
+      - name: The real-Coach check drives every Coach job (with the fake Coach)
+        run: node scripts/real-coach-check.ts --fake
+
+  journeys:
+    name: Player journeys
+    if: ${{ github.event_name != 'push' || github.ref_name == github.event.repository.default_branch }}
+    # Not ubuntu-latest: it is Ubuntu 26.04 now, and Playwright 1.56 can't install Chromium there
+    # ("Playwright does not support chromium on ubuntu26.04-x64"). Back to ubuntu-latest once
+    # @playwright/test is on a release that supports it.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build -w @chess-coach/web
+      - name: Player journeys with the fake Coach
+        run: npm run test:journeys
+        env:
+          CI: 'true'
+      - name: Keep the report and failure traces
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 14
+          if-no-files-found: ignore

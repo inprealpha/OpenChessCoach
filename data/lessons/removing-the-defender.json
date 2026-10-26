@@ -1,0 +1,236 @@
+{
+ "id": "removing-the-defender",
+ "name": "Removing the defender",
+ "kind": "theme",
+ "side": "white",
+ "puzzleTags": [],
+ "puzzleThemes": [
+  "capturingDefender"
+ ],
+ "intro": {
+  "text": "Removing the defender means capturing, chasing away or pinning the piece that guards something else, so that the piece it guarded is left hanging. Your opponent then has an unpleasant choice: take back, or save the piece that has lost its guard.",
+  "credit": {
+   "source": "Wikipedia, Undermining (chess)",
+   "url": "https://en.wikipedia.org/wiki/Undermining_(chess)",
+   "licence": "CC BY-SA 4.0",
+   "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "authors": "Wikipedia contributors (see the page history)"
+  }
+ },
+ "parts": [
+  {
+   "title": "Kramnik against Topalov",
+   "fen": "8/4kp2/1r1p2p1/1p2p1bp/n7/R4P2/PP2B1PP/1K5R w - - 0 1",
+   "side": "white",
+   "text": "Linares 2004: Black's knight on a4 is defended only by the pawn on b5.",
+   "credit": {
+    "source": "Wikipedia, Undermining (chess)",
+    "url": "https://en.wikipedia.org/wiki/Undermining_(chess)",
+    "licence": "CC BY-SA 4.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "authors": "Wikipedia contributors (see the page history)"
+   },
+   "mainLine": [
+    "e2b5",
+    "b6b5",
+    "a3a4"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "8/4kp2/1r1p2p1/1p2p1bp/n7/R4P2/PP2B1PP/1K5R w - - 0 1",
+     "decision": true,
+     "main": "e2b5",
+     "mainSan": "Bxb5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Take the defender. If 1...Rxb5, the knight on a4 is left alone; if 1...Nxb2, 2.Rb3 wins the exchange.",
+      "credit": {
+       "source": "Wikipedia, Undermining (chess)",
+       "url": "https://en.wikipedia.org/wiki/Undermining_(chess)",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikipedia contributors (see the page history)"
+      }
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "8/4kp2/1r1p2p1/1B2p1bp/n7/R4P2/PP4PP/1K5R b - - 0 1",
+     "decision": false,
+     "main": "b6b5",
+     "mainSan": "Rxb5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "8/4kp2/3p2p1/1r2p1bp/n7/R4P2/PP4PP/1K5R w - - 0 2",
+     "decision": true,
+     "main": "a3a4",
+     "mainSan": "Rxa4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The knight falls, and White is a pawn up.",
+      "credit": {
+       "source": "Wikipedia, Undermining (chess)",
+       "url": "https://en.wikipedia.org/wiki/Undermining_(chess)",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikipedia contributors (see the page history)"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "title": "Take the guard",
+   "fen": "rn1qk2r/p1p2pp1/2bpp2p/1Bp5/3PnB2/4PN2/P1Q2PPP/1R3RK1 b kq - 3 14",
+   "side": "white",
+   "text": "A position from a game played on Lichess. Black has just castled. Black's knight on e4 is attacked by your queen. What defends it?",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle ZZMzy",
+    "url": "https://lichess.org/training/ZZMzy",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "e8g8",
+    "b5c6",
+    "b8c6",
+    "c2e4"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "rn1qk2r/p1p2pp1/2bpp2p/1Bp5/3PnB2/4PN2/P1Q2PPP/1R3RK1 b kq - 3 14",
+     "decision": false,
+     "main": "e8g8",
+     "mainSan": "O-O",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "rn1q1rk1/p1p2pp1/2bpp2p/1Bp5/3PnB2/4PN2/P1Q2PPP/1R3RK1 w - - 4 15",
+     "decision": true,
+     "main": "b5c6",
+     "mainSan": "Bxc6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "rn1q1rk1/p1p2pp1/2Bpp2p/2p5/3PnB2/4PN2/P1Q2PPP/1R3RK1 b - - 0 15",
+     "decision": false,
+     "main": "b8c6",
+     "mainSan": "Nxc6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "r2q1rk1/p1p2pp1/2npp2p/2p5/3PnB2/4PN2/P1Q2PPP/1R3RK1 w - - 0 16",
+     "decision": true,
+     "main": "c2e4",
+     "mainSan": "Qxe4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    }
+   ]
+  },
+  {
+   "title": "The rook that guards",
+   "fen": "3r1rk1/6pp/2n2p1n/1p6/4P3/1P4PP/1B1qQPB1/R3R1K1 w - - 0 26",
+   "side": "black",
+   "text": "A position from a game played on Lichess. White has just offered a rook on d1 to your queen. Which white piece is doing two jobs?",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle XX6e7",
+    "url": "https://lichess.org/training/XX6e7",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "a1d1",
+    "d2e2",
+    "e1e2",
+    "d8d1"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "3r1rk1/6pp/2n2p1n/1p6/4P3/1P4PP/1B1qQPB1/R3R1K1 w - - 0 26",
+     "decision": false,
+     "main": "a1d1",
+     "mainSan": "Rad1",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "3r1rk1/6pp/2n2p1n/1p6/4P3/1P4PP/1B1qQPB1/3RR1K1 b - - 1 26",
+     "decision": true,
+     "main": "d2e2",
+     "mainSan": "Qxe2",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "3r1rk1/6pp/2n2p1n/1p6/4P3/1P4PP/1B2qPB1/3RR1K1 w - - 0 27",
+     "decision": false,
+     "main": "e1e2",
+     "mainSan": "Rxe2",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "3r1rk1/6pp/2n2p1n/1p6/4P3/1P4PP/1B2RPB1/3R2K1 b - - 0 27",
+     "decision": true,
+     "main": "d8d1",
+     "mainSan": "Rxd1+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    }
+   ]
+  }
+ ]
+}

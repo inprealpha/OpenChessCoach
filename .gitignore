@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.verify/
+evidence/
+test-results/
+playwright-report/
+*.tsbuildinfo
+.DS_Store
+packages/web/public/engine/
+# Copied in by the package build
+packages/backend/LICENSE
+packages/backend/README.md
+packages/backend/THIRD_PARTY_NOTICES.md

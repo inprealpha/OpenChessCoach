@@ -1,0 +1,344 @@
+{
+  "italian-game": {
+    "intro": "In the Italian Game White puts the bishop on c4, where it controls d5 and eyes f7, the weakest pawn in Black's camp, and gets ready to castle early. After 3...Bc5, the Giuoco Piano or \"quiet game\", White's classical plan is to build a big pawn centre with c3 and d4.",
+    "introUrl": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4",
+    "decisions": [
+      {
+        "ply": 0,
+        "san": "e4",
+        "text": "The opening is a race to develop and control the centre. 1.e4 opens lines for your queen and king's bishop, controls d5 and f5, and keeps a Black pawn off e4 so your knight can later sit safely on f3. 1.d4 is the other main choice and gives slower, more closed games; knight moves to the edge like 1.Na3 do little for the centre.",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory"
+      },
+      {
+        "ply": 2,
+        "san": "Nf3",
+        "text": "Black's e5 pawn is undefended. 2.Nf3 attacks it while developing a piece, also eyes d4 and prepares castling; it is by far the most popular move. 2.f4 (King's Gambit) and 2.d4 attack with pawns instead. 2.Qh5 or 2.Qf3 hope for a quick mate, but if Black stays calm they are not dangerous.",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5"
+      },
+      {
+        "ply": 4,
+        "san": "Bc4",
+        "text": "2...Nc6 defends e5. White usually develops the bishop next, keeping c3 and d4 in reserve. 3.Bc4, the Italian Game, aims it at Black's weak f7 pawn. 3.Bb5 (Spanish) pressures the knight that guards e5, and 3.d4 (Scotch) opens the centre at once. 3.Nxe5?? simply gives away a knight.",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6"
+      },
+      {
+        "ply": 6,
+        "san": "c3",
+        "text": "Black controls d4 three times to your two, so 4.c3 adds a defender and prepares d4. 4.d3 is the quieter Giuoco Pianissimo, 4.d4 at once is a gambit that is not quite sound, and 4.b4 is the Evans Gambit. Avoid 4.Bxf7+?: the Jerome Gambit comes far too early and is objectively bad for White.",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4/3...Bc5"
+      },
+      {
+        "ply": 8,
+        "san": "d4",
+        "text": "4...Nf6 hits e4, and with your pawn on c3 you can no longer defend it with Nc3. The quiet main line is 5.d3, but 5.d4 strikes at once, attacking the bishop and intending 6.e5 after 5...exd4 (the Greco Gambit). 5.b4!? (Bird's Attack) tries to trap the bishop. Later, Qb3 can add pressure on f7.",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4/3...Bc5/4._c3"
+      },
+      {
+        "ply": 10,
+        "san": "cxd4",
+        "text": "After 5...exd4, 6.cxd4 takes back and attacks the bishop on c5, though Black has the check 6...Bb4+. Many players now prefer 6.e5, hitting the f6 knight, when 6...d5 7.Bb5 Ne4 8.cxd4 Bb6 is slightly better for White. 6.b4!? (Dubov Italian) is somewhat dubious but dangerous if Black is unprepared.",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4/3...Bc5"
+      },
+      {
+        "ply": 12,
+        "san": "Bd2",
+        "text": "Block the check with 7.Bd2, the modern main line. Black can trade with 7...Bxd2+ or grab 7...Nxe4, but that does not really win a pawn: 8.Bxb4 Nxb4 9.Bxf7+ Kxf7 10.Qb3+ Kf8 11.Qxb4+ Qe7 12.Qxe7+ Kxe7 wins it back, though the endgame is slightly easier for Black.",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4/3...Bc5"
+      }
+    ]
+  },
+  "london-system": {
+    "intro": "The London System is a set-up you can play against almost anything. The bishop goes to f4 before e3 so it is not shut in behind the pawns; then e3 and c3 support d4, Bd3 and Nd2 watch e4, and the king's knight heads for e5 via f3. It is popular at club level because the plans hardly change whatever Black does.",
+    "introUrl": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._Bf4",
+    "decisions": [
+      {
+        "ply": 0,
+        "san": "d4",
+        "text": "The opening is a race to develop and control the centre. 1.d4 frees your queen's bishop, stops ...e5 and controls c5. Unlike 1.e4, the pawn is already guarded by the queen, so games tend to be slower and more closed, which suits the steady London set-up. 1.e4 is the more popular, sharper choice.",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory"
+      },
+      {
+        "ply": 2,
+        "san": "Bf4",
+        "text": "2.Bf4, the Accelerated London, brings the bishop out before e3 so it will not be stuck behind your pawns, and gives simple plans against most Black set-ups. Keep an eye on b2, which the bishop no longer guards. 2.c4 (Queen's Gambit) is the main line; 2.e4?! (Blackmar-Diemer Gambit) gives up a pawn and is dubious.",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5"
+      },
+      {
+        "ply": 4,
+        "san": "e3",
+        "text": "3.e3 is the usual move order: it supports d4 and prepares Bd3. 3.Nf3 transposes to the regular London, while 3.Nc3 instead of c3 leads to the Rapport-Jobava London. Black's two main plans are ...c5 and ...e6.",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...Nf6/2._Bf4/2...d5"
+      },
+      {
+        "ply": 6,
+        "san": "Nf3",
+        "text": "Black chose the solid ...e6 set-up, usually planning ...Bd6 to castle quickly and offer a trade of your London bishop; in these lines Black's light-squared bishop often struggles to develop. 4.Nf3 continues your plan of sending the knight towards e5. 4.Nd2 is also common; most London move orders are interchangeable.",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._Bf4"
+      },
+      {
+        "ply": 8,
+        "san": "c3",
+        "text": "With ...c5 Black hits d4 and often follows with ...Qb6 to attack b2, which your bishop left undefended. Do not grab the c5 pawn: play 5.c3 instead, so that if Black exchanges on d4 you can recapture and keep two pawns in the centre.",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...Nf6/2._Bf4/2...d5"
+      },
+      {
+        "ply": 10,
+        "san": "Nbd2",
+        "text": "Your pawns on d4 and e3 give a solid centre. The usual plan continues with Nbd2 and Be2, followed later by an e4 break or the calmer h3 and O-O. Black's typical ways to challenge your strong f4 bishop are ...c5 and ...Nh5.",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...Nf6/2._Bf4/2...d5/3._e3/3...e6/4._Nf3"
+      },
+      {
+        "ply": 12,
+        "san": "Bg3",
+        "text": "6...Bd6 offers to trade off your London bishop. The standard answer is to drop it back with 7.Bg3: if Black takes, hxg3 gives you the semi-open h-file for your rook in return.",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._Bf4"
+      }
+    ]
+  },
+  "queens-gambit": {
+    "intro": "The Queen's Gambit offers the c-pawn to win control of the centre. In this line Black accepts with 2...dxc4, but holding the pawn is impractical: Black has given up control of e4, and White develops calmly, regains the pawn and keeps the bigger share of the centre.",
+    "introUrl": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._c4",
+    "decisions": [
+      {
+        "ply": 0,
+        "san": "d4",
+        "text": "The opening is a race to develop and control the centre. 1.d4 frees your queen's bishop, stops ...e5 and controls c5. The pawn is already guarded by the queen, so play is usually slower and more positional than after 1.e4, and White often follows with c4 for more control of the centre. 1.e4 is the more popular, sharper choice.",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory"
+      },
+      {
+        "ply": 2,
+        "san": "c4",
+        "text": "2.c4, the Queen's Gambit, is the main line. It offers the flank c-pawn: if Black takes it, the d-pawn is pulled away from the centre and you can win the pawn back later, so most players decline it. 2.Nf3 and 2.Bf4 (London) are calmer; 2.e4?! (Blackmar-Diemer) cannot keep a pawn on e4 and is dubious.",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5"
+      },
+      {
+        "ply": 4,
+        "san": "e3",
+        "text": "Black has taken the pawn but no longer controls e4. 3.e3 opens the way for your bishop to take back on c4. 3.Nf3 (the classical line) and the ambitious 3.e4 are also good, while 3.Nc3 looks misguided. If Black tries to hold the pawn with ...b5, a4 attacks the pawn chain at its base.",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._c4/2...dxc4"
+      },
+      {
+        "ply": 6,
+        "san": "Bxc4",
+        "text": "Black chose to develop with 3...Nf6, so take the pawn back now with 4.Bxc4, developing your bishop at the same time. Had Black tried 3...b5? to keep the pawn, 4.a4! c6? 5.axb5 cxb5?? 6.Qf3! wins at least a minor piece, because the long diagonal to a8 cannot be defended.",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._c4/2...dxc4/3._e3"
+      },
+      {
+        "ply": 8,
+        "san": "Nf3",
+        "text": "With the pawn regained, 5.Nf3 develops and reaches the classical main line, the same position as 3.Nf3 Nf6 4.e3 e6 5.Bxc4. Black will aim for the breaks ...c5 or ...e5, and the knight helps stop ...e5. 5.Nc3 is also played and is often met by ...a6 and ...c5.",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._c4/2...dxc4"
+      },
+      {
+        "ply": 10,
+        "san": "O-O",
+        "text": "Black strikes at d4 with ...c5. The main move is 6.O-O, getting your king out of the centre. 6.Qe2, the Furman Variation, is the alternative: it supports a later e4 advance and lets you capture on c5 without a queen trade.",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._c4/2...dxc4/3._Nf3/3...Nf6/4._e3/4...e6/5._Bxc4/5...c5"
+      }
+    ]
+  },
+  "caro-kann": {
+    "intro": "The Caro-Kann prepares ...d5 with the c-pawn ready to take back, so Black keeps a share of the centre and makes f7 safer. Unlike the French (1...e6), it does not shut in the light-squared bishop, though the knight loses the c6 square. It has a reputation as a solid, defensive reply to 1.e4.",
+    "introUrl": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...c6",
+    "decisions": [
+      {
+        "ply": 1,
+        "san": "c6",
+        "text": "1...c6, the Caro-Kann, prepares ...d5 so a pawn can recapture there. Compared with 1...e6 (French), your light-squared bishop stays free, but c6 is taken from your knight and a later ...c5 costs a move. 1...e5 and 1...c5 fight for d4 instead, while 1...f5? weakens your kingside.",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4"
+      },
+      {
+        "ply": 3,
+        "san": "d5",
+        "text": "White has put two pawns in the centre. Play 2...d5 as planned: it attacks e4, and if 3.exd5 cxd5 you have swapped your c-pawn for White's central e-pawn. Other moves are rare: 2...d6 transposes to a Pirc, and 2...Nf6!? invites 3.e5!, chasing the knight.",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...c6/2._d4"
+      },
+      {
+        "ply": 5,
+        "san": "dxe4",
+        "text": "White defends e4 with the knight. 3...dxe4 is the main move, denying White the two-pawn centre. 3...Nf6 invites 4.e5 and a closed game; 3...g6 lets White gain kingside space; 3...e6?! combines the drawbacks of the Caro-Kann and the French.",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...c6/2._d4/2...d5/3._Nc3"
+      },
+      {
+        "ply": 7,
+        "san": "Bf5",
+        "text": "4...Bf5, the Classical Variation, develops your bishop and attacks the e4 knight; the bishop will later control the long diagonal from g6 and then h7. 4...Nf6 5.Nxf6+ leaves you with doubled pawns, and 4...Nd7 (Karpov Variation) looks slower because the knight must move again before that bishop can come out.",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...c6/2._d4/2...d5/3._Nc3/3...dxe4/4._Nxe4"
+      },
+      {
+        "ply": 9,
+        "san": "Bg6",
+        "text": "The knight on g3 attacks your bishop. 5...Bg6 is the only sensible retreat and almost always played. Defending it with 5...g6 is very rare and leaves you with a worse pawn structure.",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...c6/2._d4/2...d5/3._Nc3/3...dxe4/4._Nxe4/4...Bf5/5._Ng3"
+      },
+      {
+        "ply": 11,
+        "san": "h6",
+        "text": "6.h4 puts pressure on your bishop, so you need to look after it. 6...h6 is almost universal. 6...h5 and 6...Nd7 have been tried but are probably inferior.",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...c6/2._d4/2...d5/3._Nc3/3...dxe4/4._Nxe4/4...Bf5/5._Ng3/5...Bg6/6._h4"
+      },
+      {
+        "ply": 13,
+        "san": "Nd7",
+        "text": "White's knight would like to jump to e5, where it is usually too strong. 7...Nd7 covers e5 and stops it, and is the normal choice. 7...Nf6 and 7...e6 are other options.",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...c6/2._d4/2...d5/3._Nc3/3...dxe4/4._Nxe4/4...Bf5/5._Ng3/5...Bg6/6._h4/6...h6/7._Nf3"
+      }
+    ]
+  },
+  "queens-gambit-declined": {
+    "intro": "In the Queen's Gambit Declined Black meets 2.c4 with 2...e6, holding the d5 pawn firmly and opening a diagonal for the dark-squared bishop. The cost is that the light-squared bishop on c8 is blocked in, and finding it a good job is Black's long-term task. In the Orthodox line Black develops with ...Nf6, ...Be7, castles and adds ...Nbd7.",
+    "introUrl": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._c4/2...e6",
+    "decisions": [
+      {
+        "ply": 1,
+        "san": "d5",
+        "text": "1...d5 is the classical answer: it controls e4 and c4, so White cannot keep a pawn on e4, stops d4-d5 and frees your queen's bishop. 1...Nf6 is a more flexible choice. 1...e5?! (Englund Gambit) is unsound, and 1...f5 (Dutch) can run into early tricks on the weak e8-h5 diagonal.",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4"
+      },
+      {
+        "ply": 3,
+        "san": "e6",
+        "text": "2.c4 offers a pawn. If White plays cxd5 you want to take back with a pawn and keep control of e4, so 2...e6 (or 2...c6, the Slav) is the usual way to decline. 2...dxc4 is playable but gives up e4. 2...Nf6 loses time after 3.cxd5 Nxd5 4.e4!, and 2...Bf5? (Baltic) is thought worse for Black.",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._c4"
+      },
+      {
+        "ply": 5,
+        "san": "Nf6",
+        "text": "3.Nc3 adds pressure on d5 and supports a future e4. 3...Nf6 develops, guards d5 and stops e4, though it allows the pin 4.Bg5. 3...c6 can be met by the sharp 4.e4!? gambit; 3...c5 (Tarrasch) usually accepts an isolated pawn for active pieces; 3...Be7 rules out Bg5.",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._c4/2...e6/3._Nc3"
+      },
+      {
+        "ply": 7,
+        "san": "Be7",
+        "text": "4.Bg5 pins your knight to the queen. The usual answer is 4...Be7, breaking the pin and getting ready to castle quickly. 4...Nbd7 is a notable alternative that often leads to the Cambridge Springs Defence after 5.e3 c6 6.Nf3 Qa5.",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._c4/2...e6/3._Nc3/3...Nf6"
+      },
+      {
+        "ply": 9,
+        "san": "O-O",
+        "text": "With the bishop already out on g5, White can safely build a pawn chain on dark squares with e3. Castling with 5...O-O is the main move; 5...h6 and 5...Nbd7 are also played and keep the balance.",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._c4/2...e6/3._Nc3/3...Nf6/4._Bg5/4...Be7/5._e3"
+      },
+      {
+        "ply": 11,
+        "san": "Nbd7",
+        "text": "White develops normally with 6.Nf3. You now choose between 6...Nbd7, the Classical Variation, and 6...h6, which asks the bishop to move (7.Bh4) and leads to Lasker's Defence or the Tartakower Variation.",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._c4/2...e6/3._Nc3/3...Nf6/4._Bg5/4...Be7/5._e3/5...O-O/6._Nf3"
+      }
+    ]
+  },
+  "ruy-lopez": {
+    "intro": "In the Ruy Lopez, or Spanish Game, White develops the bishop to b5 to put pressure on the knight that defends e5. White plays for quick development, castling and control of the centre, and would like to build a big pawn centre later with c3 and d4. The usual reply is 3...a6, the Morphy Defence, which asks the bishop to decide at once: take the knight or retreat.",
+    "introUrl": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bb5",
+    "decisions": [
+      {
+        "ply": 0,
+        "san": "e4",
+        "text": "The opening is a race to develop and control the centre. 1.e4 opens lines for your queen and king's bishop, controls d5 and f5, and keeps a Black pawn off e4 so your knight can later sit safely on f3. 1.d4 is the other main choice and gives slower, more closed games; knight moves to the edge like 1.Na3 do little for the centre.",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory"
+      },
+      {
+        "ply": 2,
+        "san": "Nf3",
+        "text": "Black's e5 pawn is undefended. 2.Nf3 attacks it while developing a piece, also eyes d4 and prepares castling; it is by far the most popular move. 2.f4 (King's Gambit) and 2.d4 attack with pawns instead. 2.Qh5 or 2.Qf3 hope for a quick mate, but if Black stays calm they are not dangerous.",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5"
+      },
+      {
+        "ply": 4,
+        "san": "Bb5",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6",
+        "text": "2...Nc6 defends e5 and controls d4. White usually develops the bishop next and keeps c3 and d4 in reserve. 3.Bb5, the Spanish, is the most popular and most studied move: by pressing the knight that guards e5 it threatens that pawn indirectly. 3.Bc4 (Italian) aims at f7 instead, and 3.d4 (Scotch) opens the centre at once."
+      },
+      {
+        "ply": 6,
+        "san": "Ba4",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bb5/3...a6",
+        "text": "3...a6 puts the question to the bishop: take or retreat, but it cannot stay. 4.Bxc6, the Exchange Variation, does not win e5 yet, because after 4...dxc6 5.Nxe5? Qd4! Black forks knight and pawn. 4.Ba4 is the main line: it keeps the bishop and the pressure on the knight. Watch out later for ...b5 and ...c4 trapping a bishop on b3."
+      },
+      {
+        "ply": 8,
+        "san": "O-O",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bb5/3...a6/4._Ba4/4...Nf6",
+        "text": "4...Nf6 develops and attacks e4. 5.O-O is the main line: castle to safety and get ready for Re1, leaving e4 to look after itself. If 5...Nxe4 (the Open Spanish), 6.d4 wins the pawn back. 5.d3 or 5.Nc3 defend e4 directly but get in the way of White's plan of c3 and d4."
+      },
+      {
+        "ply": 10,
+        "san": "Re1",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bb5/3...a6/4._Ba4/4...Nf6/5._O-O/5...Be7",
+        "text": "5...Be7, the Closed Spanish, guards the king along the e-file. Now Black really threatens ...b5 and ...Nxe4, winning the pawn. 6.Re1 defends e4 with a developing move. 6.Qe2 also holds it, but puts the queen on a file likely to open; 6.d3 and 6.Nc3 get in the way of c3 and d4."
+      },
+      {
+        "ply": 12,
+        "san": "Bb3",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bb5/3...a6/4._Ba4/4...Nf6/5._O-O/5...Be7/6._Re1/6...b5",
+        "text": "6...b5 ends the pressure on Black's knight by attacking the bishop. 7.Bb3 is necessary to save it, and from b3 the bishop still looks at f7."
+      },
+      {
+        "ply": 14,
+        "san": "c3",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bb5/3...a6/4._Ba4/4...Nf6/5._O-O/5...Be7/6._Re1/6...b5/7._Bb3/7...d6",
+        "text": "White's plan is to play d4, but 8.d4? at once is a mistake. 8.c3 prepares it, and also gives the bishop on b3 a retreat square on c2. h3 will be useful later, but 8.h3 now allows 8...Na5, swapping off the bishop."
+      }
+    ]
+  },
+  "two-knights-defence": {
+    "intro": "In the Two Knights Defence Black answers the Italian Game's 3.Bc4 with 3...Nf6, developing a piece and pressing on e4. After the sharp 4.Ng5, attacking f7 with knight and bishop, Black gives up a pawn with 4...d5 and plays 5...Na5, the Polerio Defence: White may be a pawn up, but Black's pieces become active and the game is considered equal.",
+    "introUrl": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4/3...Nf6/4._Ng5",
+    "decisions": [
+      {
+        "ply": 1,
+        "san": "e5",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4",
+        "text": "1...e5 takes space in the centre and controls d4, so White cannot easily keep pawns on both d4 and e4. It also stops e4-e5, so your knight can come to f6. 1...c5 (Sicilian) also controls d4; 1...e6 and 1...c6 prepare ...d5, and 1...d5 attacks e4 at once."
+      },
+      {
+        "ply": 3,
+        "san": "Nc6",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3",
+        "text": "2.Nf3 attacks your e5 pawn. 2...Nc6 is the main line: it develops a piece, defends e5 and controls d4. 2...d6 defends with a pawn but falls behind in development, and 2...f6? weakens your king. 2...Nf6 counter-attacks e4 instead."
+      },
+      {
+        "ply": 5,
+        "san": "Nf6",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4",
+        "text": "White's bishop eyes f7, your weakest pawn, but there is no immediate threat. 3...Nf6, the Two Knights, develops and attacks e4; it leads to sharp play. 3...Bc5, the Giuoco Piano, keeps the queen's control of g5 and gives a quieter game. If White defends e4 with 4.Nc3, the fork trick 4...Nxe4 5.Nxe4 d5 wins the piece back."
+      },
+      {
+        "ply": 7,
+        "san": "d5",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4/3...Nf6/4._Ng5",
+        "text": "4.Ng5 attacks f7 with knight and bishop, and you cannot castle yet. You must defend f7: 4...h6?? loses to 5.Nxf7, forking queen and rook, and 4...Nxe4? fails to 5.Bxf7+. 4...d5 is the best defence: it blocks the bishop's diagonal at the cost of a pawn."
+      },
+      {
+        "ply": 9,
+        "san": "Na5",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4/3...Nf6/4._Ng5/4...d5/5._exd5",
+        "text": "5.exd5 wins a pawn. Recapturing with 5...Nxd5?! is common but allows 6.Nxf7, the Fried Liver attack, where your king is hunted into the centre. 5...Na5, the Polerio Defence, is the main line: it attacks the bishop and keeps your knight safe."
+      },
+      {
+        "ply": 11,
+        "san": "c6",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4/3...Nf6/4._Ng5/4...d5/5._exd5",
+        "text": "In the Polerio line White checks with 6.Bb5+ and you block with 6...c6, attacking the d5 pawn and the bishop together. The main line runs 7.dxc6 bxc6 8.Bd3 Nd5 9.Nf3 Bd6 10.O-O."
+      },
+      {
+        "ply": 13,
+        "san": "bxc6",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4/3...Nf6/4._Ng5/4...d5/5._exd5",
+        "text": "7.dxc6 takes the pawn; recapture with 7...bxc6 as in the main line. Your bishop and queen gain open lines and the bishop on b5 is attacked again. White stays a pawn ahead, but your pieces are more active."
+      },
+      {
+        "ply": 15,
+        "san": "Nd5",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4/3...Nf6/4._Ng5/4...d5/5._exd5",
+        "text": "After 8.Bd3 the main line continues 8...Nd5, centralising the knight from f6 to d5 where it is safe and strong. Black is considered equal: the extra pawn is balanced by active pieces."
+      },
+      {
+        "ply": 17,
+        "san": "Bd6",
+        "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4/3...Nf6/4._Ng5/4...d5/5._exd5",
+        "text": "9.Nf3 brings White's knight home. 9...Bd6 develops the bishop and protects e5 so you can castle next; the main line goes 10.O-O. You have given a pawn for quick, active development."
+      }
+    ]
+  }
+}

@@ -1,0 +1,36 @@
+# Paths only the owner may approve (ADR 0006). CODEOWNERS is generated from this file:
+#   node scripts/protected-paths.ts        (rewrite .github/CODEOWNERS)
+#   node scripts/protected-paths.ts --check (CI: fail if they differ)
+# One path per line: a trailing / means everything under that folder.
+
+# Decisions, the glossary and the agent instructions
+docs/adr/
+CONTEXT.md
+CLAUDE.md
+docs/agents/
+
+# Pairing and security
+packages/backend/src/pairing.ts
+packages/backend/src/server.ts
+packages/backend/src/tunnel.ts
+packages/backend/src/network.ts
+packages/backend/src/verify/routes.ts
+
+# Licensing and bundled Lesson data
+LICENSE
+THIRD_PARTY_NOTICES.md
+data/lessons/
+data/lesson-notes.json
+data/lesson-topics.json
+data-prep/
+
+# CI and the checks that judge PRs
+.github/
+scripts/protected-paths.ts
+scripts/glossary-lint.ts
+scripts/glossary-allowlist.json
+scripts/real-coach-check.ts
+
+# The verification skills and feature map
+.claude/skills/verify/
+.claude/skills/real-coach-check/

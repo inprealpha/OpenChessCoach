@@ -1,0 +1,493 @@
+{
+ "id": "rook-endgames",
+ "name": "Rook endgames: Lucena and Philidor",
+ "kind": "endgame",
+ "side": "white",
+ "puzzleTags": [],
+ "puzzleThemes": [
+  "rookEndgame"
+ ],
+ "intro": {
+  "text": "Rook and pawn against rook is the most common endgame of all, and two positions are the key to it. With the Lucena position the side with the pawn wins by building a bridge with the rook to shelter its king. With the Philidor position the defender draws by keeping the rook on the third rank and then checking from behind.",
+  "credit": {
+   "source": "Wikipedia, Lucena position",
+   "url": "https://en.wikipedia.org/wiki/Lucena_position",
+   "licence": "CC BY-SA 4.0",
+   "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "authors": "Wikipedia contributors (see the page history)"
+  }
+ },
+ "parts": [
+  {
+   "title": "Lucena: build a bridge",
+   "fen": "1K1k4/1P6/8/8/8/8/r7/2R5 w - - 0 1",
+   "side": "white",
+   "text": "Your pawn is on the seventh rank but your own king stands in front of it, and Black's rook is ready to check.",
+   "credit": {
+    "source": "Wikipedia, Lucena position",
+    "url": "https://en.wikipedia.org/wiki/Lucena_position",
+    "licence": "CC BY-SA 4.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "authors": "Wikipedia contributors (see the page history)"
+   },
+   "mainLine": [
+    "c1d1",
+    "d8e7",
+    "d1d4",
+    "a2a1",
+    "b8c7",
+    "a1c1",
+    "c7b6",
+    "c1b1",
+    "b6c6",
+    "b1c1",
+    "c6b5",
+    "c1b1",
+    "d4b4"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "1K1k4/1P6/8/8/8/8/r7/2R5 w - - 0 1",
+     "decision": true,
+     "main": "c1d1",
+     "mainSan": "Rd1+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Drive the black king away from the pawn first.",
+      "credit": {
+       "source": "Wikipedia, Lucena position",
+       "url": "https://en.wikipedia.org/wiki/Lucena_position",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikipedia contributors (see the page history)"
+      }
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "1K1k4/1P6/8/8/8/8/r7/3R4 b - - 1 1",
+     "decision": false,
+     "main": "d8e7",
+     "mainSan": "Ke7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "1K6/1P2k3/8/8/8/8/r7/3R4 w - - 2 2",
+     "decision": true,
+     "main": "d1d4",
+     "mainSan": "Rd4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The key move: the rook goes to the fourth rank, ready to block checks later.",
+      "credit": {
+       "source": "Wikipedia, Lucena position",
+       "url": "https://en.wikipedia.org/wiki/Lucena_position",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikipedia contributors (see the page history)"
+      }
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "1K6/1P2k3/8/8/3R4/8/r7/8 b - - 3 2",
+     "decision": false,
+     "main": "a2a1",
+     "mainSan": "Ra1",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "1K6/1P2k3/8/8/3R4/8/8/r7 w - - 4 3",
+     "decision": true,
+     "main": "b8c7",
+     "mainSan": "Kc7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Now the king comes out, and Black starts checking.",
+      "credit": {
+       "source": "Wikipedia, Lucena position",
+       "url": "https://en.wikipedia.org/wiki/Lucena_position",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikipedia contributors (see the page history)"
+      }
+     }
+    },
+    {
+     "ply": 5,
+     "fen": "8/1PK1k3/8/8/3R4/8/8/r7 b - - 5 3",
+     "decision": false,
+     "main": "a1c1",
+     "mainSan": "Rc1+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 6,
+     "fen": "8/1PK1k3/8/8/3R4/8/8/2r5 w - - 6 4",
+     "decision": true,
+     "main": "c7b6",
+     "mainSan": "Kb6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 7,
+     "fen": "8/1P2k3/1K6/8/3R4/8/8/2r5 b - - 7 4",
+     "decision": false,
+     "main": "c1b1",
+     "mainSan": "Rb1+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 8,
+     "fen": "8/1P2k3/1K6/8/3R4/8/8/1r6 w - - 8 5",
+     "decision": true,
+     "main": "b6c6",
+     "mainSan": "Kc6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 9,
+     "fen": "8/1P2k3/2K5/8/3R4/8/8/1r6 b - - 9 5",
+     "decision": false,
+     "main": "b1c1",
+     "mainSan": "Rc1+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 10,
+     "fen": "8/1P2k3/2K5/8/3R4/8/8/2r5 w - - 10 6",
+     "decision": true,
+     "main": "c6b5",
+     "mainSan": "Kb5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 11,
+     "fen": "8/1P2k3/8/1K6/3R4/8/8/2r5 b - - 11 6",
+     "decision": false,
+     "main": "c1b1",
+     "mainSan": "Rb1+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 12,
+     "fen": "8/1P2k3/8/1K6/3R4/8/8/1r6 w - - 12 7",
+     "decision": true,
+     "main": "d4b4",
+     "mainSan": "Rb4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The rook blocks the check: the bridge is built. Black cannot stop the pawn queening.",
+      "credit": {
+       "source": "Wikipedia, Lucena position",
+       "url": "https://en.wikipedia.org/wiki/Lucena_position",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikipedia contributors (see the page history)"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "title": "Philidor: hold the draw",
+   "fen": "8/8/8/8/4pk2/R7/7r/4K3 b - - 0 1",
+   "side": "white",
+   "text": "You defend. Your king is on the pawn's queening square and your rook on the third rank keeps Black's king out.",
+   "credit": {
+    "source": "Wikipedia, Philidor position",
+    "url": "https://en.wikipedia.org/wiki/Philidor_position",
+    "licence": "CC BY-SA 4.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "authors": "Wikipedia contributors (see the page history)"
+   },
+   "mainLine": [
+    "h2b2",
+    "a3c3",
+    "b2a2",
+    "c3b3",
+    "e4e3",
+    "b3b8",
+    "f4f3",
+    "b8f8",
+    "f3e4",
+    "f8e8",
+    "e4f4",
+    "e8f8",
+    "f4e5",
+    "f8e8"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "8/8/8/8/4pk2/R7/7r/4K3 b - - 0 1",
+     "decision": false,
+     "main": "h2b2",
+     "mainSan": "Rb2",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "8/8/8/8/4pk2/R7/1r6/4K3 w - - 1 2",
+     "decision": true,
+     "main": "a3c3",
+     "mainSan": "Rc3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Keep the rook on the third rank, shuffling along it, until the pawn comes forward.",
+      "credit": {
+       "source": "Wikipedia, Philidor position",
+       "url": "https://en.wikipedia.org/wiki/Philidor_position",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikipedia contributors (see the page history)"
+      }
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "8/8/8/8/4pk2/2R5/1r6/4K3 b - - 2 2",
+     "decision": false,
+     "main": "b2a2",
+     "mainSan": "Ra2",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "8/8/8/8/4pk2/2R5/r7/4K3 w - - 3 3",
+     "decision": true,
+     "main": "c3b3",
+     "mainSan": "Rb3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "8/8/8/8/4pk2/1R6/r7/4K3 b - - 4 3",
+     "decision": false,
+     "main": "e4e3",
+     "mainSan": "e3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 5,
+     "fen": "8/8/8/8/5k2/1R2p3/r7/4K3 w - - 0 4",
+     "decision": true,
+     "main": "b3b8",
+     "mainSan": "Rb8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "With the pawn on e3, Black's king can no longer use that square, so your rook is free to go to the far end of the board. 4.Rb4+?? would lose to 4...Kf3.",
+      "credit": {
+       "source": "Wikipedia, Philidor position",
+       "url": "https://en.wikipedia.org/wiki/Philidor_position",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikipedia contributors (see the page history)"
+      }
+     }
+    },
+    {
+     "ply": 6,
+     "fen": "1R6/8/8/8/5k2/4p3/r7/4K3 b - - 1 4",
+     "decision": false,
+     "main": "f4f3",
+     "mainSan": "Kf3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 7,
+     "fen": "1R6/8/8/8/8/4pk2/r7/4K3 w - - 2 5",
+     "decision": true,
+     "main": "b8f8",
+     "mainSan": "Rf8+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Check from behind. The king cannot escape the checks without giving up the pawn.",
+      "credit": {
+       "source": "Wikipedia, Philidor position",
+       "url": "https://en.wikipedia.org/wiki/Philidor_position",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikipedia contributors (see the page history)"
+      }
+     }
+    },
+    {
+     "ply": 8,
+     "fen": "5R2/8/8/8/8/4pk2/r7/4K3 b - - 3 5",
+     "decision": false,
+     "main": "f3e4",
+     "mainSan": "Ke4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 9,
+     "fen": "5R2/8/8/8/4k3/4p3/r7/4K3 w - - 4 6",
+     "decision": true,
+     "main": "f8e8",
+     "mainSan": "Re8+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 10,
+     "fen": "4R3/8/8/8/4k3/4p3/r7/4K3 b - - 5 6",
+     "decision": false,
+     "main": "e4f4",
+     "mainSan": "Kf4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 11,
+     "fen": "4R3/8/8/8/5k2/4p3/r7/4K3 w - - 6 7",
+     "decision": true,
+     "main": "e8f8",
+     "mainSan": "Rf8+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 12,
+     "fen": "5R2/8/8/8/5k2/4p3/r7/4K3 b - - 7 7",
+     "decision": false,
+     "main": "f4e5",
+     "mainSan": "Ke5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 13,
+     "fen": "5R2/8/8/4k3/8/4p3/r7/4K3 w - - 8 8",
+     "decision": true,
+     "main": "f8e8",
+     "mainSan": "Re8+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Black makes no progress: a draw.",
+      "credit": {
+       "source": "Wikipedia, Philidor position",
+       "url": "https://en.wikipedia.org/wiki/Philidor_position",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikipedia contributors (see the page history)"
+      }
+     }
+    }
+   ]
+  }
+ ],
+ "playOut": {
+  "title": "Win the Lucena position",
+  "fen": "1K1k4/1P6/8/8/8/8/r7/2R5 w - - 0 1",
+  "side": "white",
+  "goal": "promote"
+ }
+}

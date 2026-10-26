@@ -1,0 +1,36 @@
+{
+  "name": "ai-chess-coach-workspace",
+  "private": true,
+  "license": "GPL-3.0-or-later",
+  "type": "module",
+  "workspaces": [
+    "packages/shared",
+    "packages/backend",
+    "packages/web"
+  ],
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "start": "node packages/backend/src/cli.ts",
+    "verify": "node packages/backend/src/verify/launch.ts",
+    "coachctl": "node packages/backend/src/coachctl/main.ts",
+    "build": "npm run build -w @chess-coach/web && npm run build -w openchesscoach",
+    "typecheck": "tsc -p packages/shared && tsc -p packages/backend && npm run typecheck -w @chess-coach/web && tsc -p scripts",
+    "lint": "eslint . && node scripts/glossary-lint.ts",
+    "test": "vitest run",
+    "test:journeys": "playwright test",
+    "check:paths": "node scripts/protected-paths.ts --check"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.56.1",
+    "@types/node": "^22.20.5",
+    "eslint": "^10.12.0",
+    "eslint-plugin-svelte": "^3.23.1",
+    "globals": "^17.13.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.71.2",
+    "vitest": "^5.0.4"
+  }
+}

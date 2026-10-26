@@ -1,0 +1,521 @@
+{
+ "id": "rook-mate",
+ "name": "Mate with king and rook",
+ "kind": "endgame",
+ "side": "white",
+ "puzzleTags": [],
+ "puzzleThemes": [],
+ "intro": {
+  "text": "Mating with king and rook takes longer than with a queen, because king and rook must work together. The usual method is to build a box with the rook, protected by your own king, and make it smaller and smaller until the enemy king is pushed into a corner. No checks are needed until the final mate.",
+  "credit": {
+   "source": "Wikibooks, Chess/The Endgame/King and Rook vs. King",
+   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
+   "licence": "CC BY-SA 4.0",
+   "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "authors": "Wikibooks contributors (see the page history)"
+  }
+ },
+ "parts": [
+  {
+   "title": "Build the box",
+   "fen": "8/8/8/8/4k3/8/8/RK6 w - - 0 1",
+   "side": "white",
+   "text": "First improve your king, then use the rook to fence the black king into a box.",
+   "credit": {
+    "source": "Wikibooks, Chess/The Endgame/King and Rook vs. King",
+    "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
+    "licence": "CC BY-SA 4.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "authors": "Wikibooks contributors (see the page history)"
+   },
+   "mainLine": [
+    "b1c2",
+    "e4e5",
+    "c2d3",
+    "e5d5",
+    "a1a4",
+    "d5e5",
+    "a4d4",
+    "e5f5",
+    "d4e4"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "8/8/8/8/4k3/8/8/RK6 w - - 0 1",
+     "decision": true,
+     "main": "b1c2",
+     "mainSan": "Kc2",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Bring the king towards the centre before building the box.",
+      "credit": {
+       "source": "Wikibooks, Chess/The Endgame/King and Rook vs. King",
+       "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikibooks contributors (see the page history)"
+      }
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "8/8/8/8/4k3/8/2K5/R7 b - - 1 1",
+     "decision": false,
+     "main": "e4e5",
+     "mainSan": "Ke5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "8/8/8/4k3/8/8/2K5/R7 w - - 2 2",
+     "decision": true,
+     "main": "c2d3",
+     "mainSan": "Kd3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "8/8/8/4k3/8/3K4/8/R7 b - - 3 2",
+     "decision": false,
+     "main": "e5d5",
+     "mainSan": "Kd5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "8/8/8/3k4/8/3K4/8/R7 w - - 4 3",
+     "decision": true,
+     "main": "a1a4",
+     "mainSan": "Ra4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 5,
+     "fen": "8/8/8/3k4/R7/3K4/8/8 b - - 5 3",
+     "decision": false,
+     "main": "d5e5",
+     "mainSan": "Ke5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 6,
+     "fen": "8/8/8/4k3/R7/3K4/8/8 w - - 6 4",
+     "decision": true,
+     "main": "a4d4",
+     "mainSan": "Rd4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The box is d8-d4-h4: the black king cannot cross the d-file or the fourth rank.",
+      "credit": {
+       "source": "Wikibooks, Chess/The Endgame/King and Rook vs. King",
+       "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikibooks contributors (see the page history)"
+      }
+     }
+    },
+    {
+     "ply": 7,
+     "fen": "8/8/8/4k3/3R4/3K4/8/8 b - - 7 4",
+     "decision": false,
+     "main": "e5f5",
+     "mainSan": "Kf5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 8,
+     "fen": "8/8/8/5k2/3R4/3K4/8/8 w - - 8 5",
+     "decision": true,
+     "main": "d4e4",
+     "mainSan": "Re4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The box shrinks to e8-e4-h4.",
+      "credit": {
+       "source": "Wikibooks, Chess/The Endgame/King and Rook vs. King",
+       "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikibooks contributors (see the page history)"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "title": "Creep closer",
+   "fen": "8/8/8/5k2/4R3/3K4/8/8 b - - 0 1",
+   "side": "white",
+   "text": "The box is e8-e4-h4. Black's king is keeping its distance, so the rook cannot shrink the box straight away.",
+   "credit": {
+    "source": "Wikibooks, Chess/The Endgame/King and Rook vs. King",
+    "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
+    "licence": "CC BY-SA 4.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "authors": "Wikibooks contributors (see the page history)"
+   },
+   "mainLine": [
+    "f5f6",
+    "d3d4",
+    "f6f5",
+    "d4d5",
+    "f5f6",
+    "e4e5"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "8/8/8/5k2/4R3/3K4/8/8 b - - 0 1",
+     "decision": false,
+     "main": "f5f6",
+     "mainSan": "Kf6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "8/8/5k2/8/4R3/3K4/8/8 w - - 1 2",
+     "decision": true,
+     "main": "d3d4",
+     "mainSan": "Kd4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The box can't be made smaller yet, so the king creeps closer.",
+      "credit": {
+       "source": "Wikibooks, Chess/The Endgame/King and Rook vs. King",
+       "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikibooks contributors (see the page history)"
+      }
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "8/8/5k2/8/3KR3/8/8/8 b - - 2 2",
+     "decision": false,
+     "main": "f6f5",
+     "mainSan": "Kf5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "8/8/8/5k2/3KR3/8/8/8 w - - 3 3",
+     "decision": true,
+     "main": "d4d5",
+     "mainSan": "Kd5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "8/8/8/3K1k2/4R3/8/8/8 b - - 4 3",
+     "decision": false,
+     "main": "f5f6",
+     "mainSan": "Kf6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 5,
+     "fen": "8/8/5k2/3K4/4R3/8/8/8 w - - 5 4",
+     "decision": true,
+     "main": "e4e5",
+     "mainSan": "Re5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Back to shrinking the box: the process repeats itself.",
+      "credit": {
+       "source": "Wikibooks, Chess/The Endgame/King and Rook vs. King",
+       "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikibooks contributors (see the page history)"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "title": "Shrink the box to mate",
+   "fen": "8/6k1/4R3/3K4/8/8/8/8 w - - 9 6",
+   "side": "white",
+   "text": "After 8...Kf7 9.Re6 Kg7 the box is down to the last two ranks and files. Keep shrinking it with king and rook together; no checks are needed until the mate.",
+   "credit": {
+    "source": "Wikibooks, Chess/The Endgame/King and Rook vs. King",
+    "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
+    "licence": "CC BY-SA 4.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "authors": "Wikibooks contributors (see the page history)"
+   },
+   "mainLine": [
+    "d5e5",
+    "g7f7",
+    "e5f5",
+    "f7g7",
+    "e6f6",
+    "g7h7",
+    "f6g6",
+    "h7h8",
+    "f5f6",
+    "h8h7",
+    "f6f7",
+    "h7h8",
+    "g6h6"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "8/6k1/4R3/3K4/8/8/8/8 w - - 9 6",
+     "decision": true,
+     "main": "d5e5",
+     "mainSan": "Ke5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The king follows the rook, keeping it protected.",
+      "credit": {
+       "source": "Wikibooks, Chess/The Endgame/King and Rook vs. King",
+       "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikibooks contributors (see the page history)"
+      }
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "8/6k1/4R3/4K3/8/8/8/8 b - - 10 6",
+     "decision": false,
+     "main": "g7f7",
+     "mainSan": "Kf7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "8/5k2/4R3/4K3/8/8/8/8 w - - 11 7",
+     "decision": true,
+     "main": "e5f5",
+     "mainSan": "Kf5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "8/5k2/4R3/5K2/8/8/8/8 b - - 12 7",
+     "decision": false,
+     "main": "f7g7",
+     "mainSan": "Kg7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "8/6k1/4R3/5K2/8/8/8/8 w - - 13 8",
+     "decision": true,
+     "main": "e6f6",
+     "mainSan": "Rf6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 5,
+     "fen": "8/6k1/5R2/5K2/8/8/8/8 b - - 14 8",
+     "decision": false,
+     "main": "g7h7",
+     "mainSan": "Kh7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 6,
+     "fen": "8/7k/5R2/5K2/8/8/8/8 w - - 15 9",
+     "decision": true,
+     "main": "f6g6",
+     "mainSan": "Rg6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 7,
+     "fen": "8/7k/6R1/5K2/8/8/8/8 b - - 16 9",
+     "decision": false,
+     "main": "h7h8",
+     "mainSan": "Kh8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 8,
+     "fen": "7k/8/6R1/5K2/8/8/8/8 w - - 17 10",
+     "decision": true,
+     "main": "f5f6",
+     "mainSan": "Kf6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 9,
+     "fen": "7k/8/5KR1/8/8/8/8/8 b - - 18 10",
+     "decision": false,
+     "main": "h8h7",
+     "mainSan": "Kh7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 10,
+     "fen": "8/7k/5KR1/8/8/8/8/8 w - - 19 11",
+     "decision": true,
+     "main": "f6f7",
+     "mainSan": "Kf7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Black's king can only shuffle between h7 and h8. If it were your move here, you would make a waiting move with the rook along the sixth rank.",
+      "credit": {
+       "source": "Wikibooks, Chess/The Endgame/King and Rook vs. King",
+       "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikibooks contributors (see the page history)"
+      }
+     }
+    },
+    {
+     "ply": 11,
+     "fen": "8/5K1k/6R1/8/8/8/8/8 b - - 20 11",
+     "decision": false,
+     "main": "h7h8",
+     "mainSan": "Kh8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 12,
+     "fen": "7k/5K2/6R1/8/8/8/8/8 w - - 21 12",
+     "decision": true,
+     "main": "g6h6",
+     "mainSan": "Rh6#",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Mate in the corner.",
+      "credit": {
+       "source": "Wikibooks, Chess/The Endgame/King and Rook vs. King",
+       "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikibooks contributors (see the page history)"
+      }
+     }
+    }
+   ]
+  }
+ ],
+ "playOut": {
+  "title": "Mate the lone king yourself",
+  "fen": "8/8/8/8/4k3/8/8/RK6 w - - 0 1",
+  "side": "white",
+  "goal": "mate"
+ }
+}

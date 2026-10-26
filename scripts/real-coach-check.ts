@@ -1,0 +1,237 @@
+// The real-Coach check (ADR 0006). It runs on the owner's desktop, where Claude Code is logged
+// in, because the real Coach can't run in cloud CI (ADR 0001). It starts a verify-mode instance with
+// the real Coach in place of the fake one, makes one call of every Coach job through the protocol,
+// and checks only structure, so the verdict doesn't flip when the Coach words something differently:
+//   - every move a reply shows is legal and came from the Engine (the move guard, ADR 0002);
+//   - every piece move named in the text appears in the brief, so it came from the Engine,
+//     the game or the bundled Lesson notes;
+//   - each reply stays within its length budget (with 25% slack; over the budget alone is a warning);
+//   - replies avoid the terms CONTEXT.md says to avoid.
+// Every call runs on the latest Haiku (the `haiku` alias), whatever model the job uses in the app,
+// to keep the check cheap on the owner's subscription.
+//
+//   node scripts/real-coach-check.ts            run the check and print the verdict as JSON
+//   node scripts/real-coach-check.ts --post     also post it as the "real Coach" status on HEAD
+//   node scripts/real-coach-check.ts --fake     drive the same calls with the fake Coach, to test this script
+import { execFileSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { playSan, playUci } from '@chess-coach/shared/chess';
+import { allowedMoves, guardReply } from '@chess-coach/shared/coach/guard';
+import { MAX_WORDS, type Brief } from '@chess-coach/shared/coach/brief';
+import type { CoachRequest, CoachRawReply, CoachReply } from '@chess-coach/shared/coach/types';
+import type { CoachJob } from '@chess-coach/shared/protocol';
+import { CoachClient } from '../packages/backend/src/client.ts';
+import type { CoachCall, CoachPort } from '../packages/backend/src/coach/port.ts';
+import { avoidedTerms } from './glossary-lint.ts';
+
+export const STATUS_CONTEXT = 'real Coach';
+/** The model every call in the check uses: Claude Code resolves the alias to the latest Haiku. */
+export const CHECK_MODEL = 'haiku';
+const SLACK = 1.25;
+
+export interface CoachCallRecord {
+  job: CoachJob;
+  brief: Brief;
+  raw: CoachRawReply;
+}
+
+export interface CallVerdict {
+  job: CoachJob;
+  words: number;
+  maxWords: number;
+  problems: string[];
+  warnings: string[];
+}
+
+// Piece moves, captures and castling. Pawn pushes such as "e4" read like squares, so they are left out.
+const SAN_IN_TEXT = /(?<![\w-])(O-O-O|O-O|[KQRBN][a-h]?[1-8]?x?[a-h][1-8]|[a-h]x[a-h][1-8](?:=[QRBN])?)(?=[+#!?]*(?![\w-]))/g;
+
+function sansIn(text: string): string[] {
+  return [...text.matchAll(SAN_IN_TEXT)].map((m) => m[1] as string);
+}
+
+/** The structural checks for one Coach call: the brief it got, its raw reply and what the client received. */
+export function checkCall(record: CoachCallRecord, reply: CoachReply, terms: readonly string[]): CallVerdict {
+  const problems: string[] = [];
+  const warnings: string[] = [];
+  const { brief } = record;
+
+  const allowed = brief.hideMoves ? new Set<string>() : allowedMoves(brief);
+  for (const uci of [...reply.moves, ...reply.arrows.map((a) => `${a.from}${a.to}`)]) {
+    const legal = playUci(brief.fen, uci) ?? (brief.move ? playUci(playUci(brief.fen, brief.move.uci)?.fenAfter ?? brief.fen, uci) : undefined);
+    if (!legal) problems.push(`the reply shows ${uci}, which is not legal here`);
+    else if (!allowed.has(uci) && ![...allowed].some((a) => a.slice(0, 4) === uci)) problems.push(`the reply shows ${uci}, which the Engine never suggested`);
+  }
+  const stripped = guardReply(brief, record.raw).stripped;
+  if (stripped.length) warnings.push(`the move guard stripped what the Engine never suggested: ${stripped.join('; ')}`);
+
+  const briefText = JSON.stringify(brief);
+  for (const san of new Set(sansIn(reply.text))) {
+    if (brief.hideMoves) problems.push(`the Hint names the move ${san}`);
+    else if (!briefText.includes(san)) problems.push(`the text names ${san}, which is not in the brief`);
+  }
+
+  const words = reply.text.split(/\s+/).filter(Boolean).length;
+  if (words > brief.maxWords * SLACK) problems.push(`${words} words, over the ${brief.maxWords}-word budget by more than ${Math.round((SLACK - 1) * 100)}%`);
+  else if (words > brief.maxWords) warnings.push(`${words} words, over the ${brief.maxWords}-word budget`);
+  if (!reply.text.trim()) problems.push('the reply is empty');
+
+  const lower = reply.text.toLowerCase();
+  for (const term of terms) {
+    if (new RegExp(`\\b${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}s?\\b`).test(lower)) problems.push(`the text uses "${term}", which CONTEXT.md says to avoid`);
+  }
+  return { job: record.job, words, maxWords: brief.maxWords, problems, warnings };
+}
+
+/** Wraps a Coach, runs every call on one model and keeps every brief and raw reply. */
+export class RecordingCoach implements CoachPort {
+  readonly name: 'real' | 'fake';
+  readonly calls: CoachCallRecord[] = [];
+  private readonly inner: CoachPort;
+  private readonly model: string;
+
+  constructor(inner: CoachPort, model = CHECK_MODEL) {
+    this.inner = inner;
+    this.name = inner.name;
+    this.model = model;
+  }
+
+  status() {
+    return this.inner.status();
+  }
+
+  async ask(call: CoachCall, onText: (delta: string) => void): Promise<CoachRawReply> {
+    const raw = await this.inner.ask({ ...call, model: this.model }, onText);
+    this.calls.push({ job: call.job, brief: call.brief, raw });
+    return raw;
+  }
+}
+
+const ITALIAN_BEFORE_BC4 = 'r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3';
+const AFTER_E4_D5 = 'rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2';
+
+/**
+ * One call of every Coach job, the way the web app makes them: the position and the move only.
+ * The instance's own Engine works out the facts (ADR 0007).
+ */
+async function driveEveryJob(client: CoachClient, root: URL): Promise<{ job: CoachJob; reply: CoachReply }[]> {
+  const out: { job: CoachJob; reply: CoachReply }[] = [];
+  const uciOf = (fen: string, san: string): string => {
+    const played = playSan(fen, san);
+    if (!played) throw new Error(`${san} is not legal in ${fen}`);
+    return played.uci;
+  };
+
+  // Why Question and Live Coaching: 2.Nf3?? after 1.e4 d5, a Blunder.
+  const nf3 = uciOf(AFTER_E4_D5, 'Nf3');
+  for (const job of ['why', 'live'] as const) {
+    const ask: CoachRequest = { job, fen: AFTER_E4_D5, recentMoves: ['e4', 'd5'], playerSide: 'white', moveUci: nf3 };
+    out.push({ job, reply: await client.request('coach.ask', job === 'why' ? { ...ask, question: 'Why is this a mistake?' } : ask) });
+  }
+
+  // Hint: the same position before White's move.
+  out.push({ job: 'hint', reply: await client.request('coach.ask', { job: 'hint', fen: AFTER_E4_D5, recentMoves: ['e4', 'd5'], playerSide: 'white' }) });
+
+  // Lesson turn: the Italian Game's 3.Bc4, with its bundled notes.
+  const lesson = JSON.parse(readFileSync(new URL('data/lessons/italian-game.json', root), 'utf8')) as {
+    id: string;
+    name: string;
+    parts: { nodes: { ply: number; notes?: { text: string }; popular: Record<string, { san: string; percent: number }[]> }[] }[];
+  };
+  const node = lesson.parts[0]?.nodes.find((n) => n.ply === 4);
+  out.push({
+    job: 'lesson-turn',
+    reply: await client.request('coach.ask', {
+      job: 'lesson-turn',
+      fen: ITALIAN_BEFORE_BC4,
+      recentMoves: ['e4', 'e5', 'Nf3', 'Nc6'],
+      playerSide: 'white',
+      moveUci: uciOf(ITALIAN_BEFORE_BC4, 'Bc4'),
+      lesson: { lessonId: lesson.id, opening: lesson.name, notes: node?.notes?.text ?? '', popularity: (node?.popular.casual ?? []).map((p) => ({ san: p.san, percent: p.percent })), finalTurn: false },
+      opening: lesson.name,
+    }),
+  });
+
+  // Review: the seeded Imported Game, graded on the instance. Each key moment is one review-moment call.
+  const [game] = (await client.request('games.list', {})).games;
+  if (!game) throw new Error('The seed has no game to review.');
+  const review = await client.request('review.start', { gameId: game.id });
+  for (const m of review.moments) {
+    out.push({ job: 'review-moment', reply: { text: m.explanation, moves: [], arrows: [], highlights: [], note: null, stripped: 0, model: '' } });
+  }
+  return out;
+}
+
+export interface Verdict {
+  ok: boolean;
+  sha: string;
+  calls: CallVerdict[];
+  description: string;
+}
+
+async function run(fake: boolean): Promise<Verdict> {
+  const root = new URL('../', import.meta.url);
+  const { RealCoach } = await import('../packages/backend/src/coach/real.ts');
+  const { FakeCoach } = await import('../packages/backend/src/coach/fake.ts');
+  const { startVerifyInstance } = await import('../packages/backend/src/verify/instance.ts');
+  const sha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+  const coach = new RecordingCoach(fake ? new FakeCoach({ chunkDelayMs: 0 }) : new RealCoach());
+  const status = await coach.status();
+  if (status.state !== 'ready') throw new Error(`The real Coach is not ready: ${'reason' in status ? status.reason : status.state}. Log in to Claude Code first.`);
+
+  const instance = await startVerifyInstance({ coachPort: coach, seed: 'default' });
+  let received: { job: CoachJob; reply: CoachReply }[];
+  try {
+    const client = await CoachClient.connect(instance.url, instance.token);
+    try {
+      received = await driveEveryJob(client, root);
+    } finally {
+      await client.close();
+    }
+  } finally {
+    await instance.stop();
+  }
+
+  const terms = avoidedTerms(readFileSync(new URL('CONTEXT.md', root), 'utf8'));
+  // Review moments reach the client inside the Review, in the order the Coach was called.
+  const reviewReplies = received.filter((r) => r.job === 'review-moment');
+  const others = received.filter((r) => r.job !== 'review-moment');
+  const calls = coach.calls.map((record) => {
+    const reply = record.job === 'review-moment' ? reviewReplies.shift() : others.shift();
+    if (!reply) return { job: record.job, words: 0, maxWords: MAX_WORDS[record.job], problems: ['no reply reached the client'], warnings: [] };
+    return checkCall(record, reply.reply, terms);
+  });
+  const jobs = new Set(calls.map((c) => c.job));
+  const missing = (Object.keys(MAX_WORDS) as CoachJob[]).filter((j) => !jobs.has(j));
+  if (missing.length) calls.push({ job: missing[0] as CoachJob, words: 0, maxWords: 0, problems: [`no Coach call was made for ${missing.join(', ')}`], warnings: [] });
+  const failed = calls.filter((c) => c.problems.length);
+  const ok = failed.length === 0;
+  const description = ok ? `${calls.length} Coach calls passed the structural checks` : `${failed.length} of ${calls.length} Coach calls failed: ${failed[0]?.problems[0] ?? ''}`.slice(0, 139);
+  return { ok, sha, calls, description };
+}
+
+function post(verdict: Verdict): void {
+  if (execFileSync('git', ['status', '--porcelain'], { encoding: 'utf8' }).trim()) {
+    throw new Error('The working tree has changes, so the verdict would not match the commit. Commit or stash them, then run again.');
+  }
+  execFileSync('gh', ['api', `repos/{owner}/{repo}/statuses/${verdict.sha}`, '-f', `state=${verdict.ok ? 'success' : 'failure'}`, '-f', `context=${STATUS_CONTEXT}`, '-f', `description=${verdict.description}`], { stdio: 'inherit' });
+}
+
+if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+  const { quietSqliteWarning } = await import('../packages/backend/src/runtime.ts');
+  quietSqliteWarning();
+  try {
+    const fake = process.argv.includes('--fake');
+    const verdict = await run(fake);
+    process.stdout.write(`${JSON.stringify(verdict, null, 2)}\n`);
+    if (process.argv.includes('--post')) {
+      if (fake) throw new Error('A run with the fake Coach is never posted as the real-Coach verdict.');
+      post(verdict);
+    }
+    process.exit(verdict.ok ? 0 : 1);
+  } catch (err) {
+    process.stderr.write(`${err instanceof Error ? err.message : String(err)}\n`);
+    process.exit(2);
+  }
+}

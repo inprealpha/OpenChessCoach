@@ -1,0 +1,276 @@
+{
+ "id": "forks",
+ "name": "Forks",
+ "kind": "theme",
+ "side": "black",
+ "puzzleTags": [],
+ "puzzleThemes": [
+  "fork"
+ ],
+ "intro": {
+  "text": "A fork is one piece attacking two enemy pieces at once. Every piece can fork, even a pawn, but knights are famous for it: the forked pieces cannot block a knight's attack or hit back at it, unless one of them is a knight too. A fork that comes with check is the most powerful kind, because the king must move and the other piece is lost. Not every fork wins material, though: check how your opponent could escape before you play it.",
+  "credit": {
+   "source": "Wikibooks, Chess/Tactics",
+   "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
+   "licence": "CC BY-SA 4.0",
+   "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "authors": "Wikibooks contributors (see the page history)"
+  }
+ },
+ "parts": [
+  {
+   "title": "Check first, then the royal fork",
+   "fen": "6k1/5pb1/4p2p/1p1nN3/4q1P1/1P5P/5P2/2BQ1K2 b - - 0 40",
+   "side": "black",
+   "text": "Soppe against Braga, Buenos Aires: you are Black. White's queen and king are both within a knight's jump of c3. Can you force them onto the right squares?",
+   "credit": {
+    "source": "Wikipedia, Fork (chess)",
+    "url": "https://en.wikipedia.org/wiki/Fork_(chess)",
+    "licence": "CC BY-SA 4.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "authors": "Wikipedia contributors (see the page history)"
+   },
+   "mainLine": [
+    "e4h1",
+    "f1e2",
+    "d5c3",
+    "e2d2",
+    "h1d1"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "6k1/5pb1/4p2p/1p1nN3/4q1P1/1P5P/5P2/2BQ1K2 b - - 0 40",
+     "decision": true,
+     "main": "e4h1",
+     "mainSan": "Qh1+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The check leaves White one legal move: 41.Ke2. Now king on e2 and queen on d1 can both be hit from c3.",
+      "credit": {
+       "source": "Wikipedia, Fork (chess)",
+       "url": "https://en.wikipedia.org/wiki/Fork_(chess)",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikipedia contributors (see the page history)"
+      }
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "6k1/5pb1/4p2p/1p1nN3/6P1/1P5P/5P2/2BQ1K1q w - - 1 41",
+     "decision": false,
+     "main": "f1e2",
+     "mainSan": "Ke2",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "6k1/5pb1/4p2p/1p1nN3/6P1/1P5P/4KP2/2BQ3q b - - 2 41",
+     "decision": true,
+     "main": "d5c3",
+     "mainSan": "Nc3+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "A royal fork: the knight checks the king and attacks the queen. The king must move, and the queen falls. In the game White resigned after 40...Qh1+.",
+      "credit": {
+       "source": "Wikipedia, Fork (chess)",
+       "url": "https://en.wikipedia.org/wiki/Fork_(chess)",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikipedia contributors (see the page history)"
+      }
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "6k1/5pb1/4p2p/1p2N3/6P1/1Pn4P/4KP2/2BQ3q w - - 3 42",
+     "decision": false,
+     "main": "e2d2",
+     "mainSan": "Kd2",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "6k1/5pb1/4p2p/1p2N3/6P1/1Pn4P/3K1P2/2BQ3q b - - 4 42",
+     "decision": true,
+     "main": "h1d1",
+     "mainSan": "Qxd1+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    }
+   ]
+  },
+  {
+   "title": "A fork that wins the exchange",
+   "fen": "r5k1/1p1q1pbp/6p1/2Pp4/p3nQ2/P4P2/B2B2PP/2R4K b - - 0 33",
+   "side": "black",
+   "text": "Tissir against Dreev, FIDE World Championship 2004: you are Black, and White's queen has just come to f4. Look for a knight check that leads to a fork.",
+   "credit": {
+    "source": "Wikipedia, Fork (chess)",
+    "url": "https://en.wikipedia.org/wiki/Fork_(chess)",
+    "licence": "CC BY-SA 4.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "authors": "Wikipedia contributors (see the page history)"
+   },
+   "mainLine": [
+    "e4f2",
+    "h1g1",
+    "f2d3"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "r5k1/1p1q1pbp/6p1/2Pp4/p3nQ2/P4P2/B2B2PP/2R4K b - - 0 33",
+     "decision": true,
+     "main": "e4f2",
+     "mainSan": "Nf2+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The knight checks from f2 and the king has to step to g1.",
+      "credit": {
+       "source": "Wikipedia, Fork (chess)",
+       "url": "https://en.wikipedia.org/wiki/Fork_(chess)",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikipedia contributors (see the page history)"
+      }
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "r5k1/1p1q1pbp/6p1/2Pp4/p4Q2/P4P2/B2B1nPP/2R4K w - - 1 34",
+     "decision": false,
+     "main": "h1g1",
+     "mainSan": "Kg1",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "r5k1/1p1q1pbp/6p1/2Pp4/p4Q2/P4P2/B2B1nPP/2R3K1 b - - 2 34",
+     "decision": true,
+     "main": "f2d3",
+     "mainSan": "Nd3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Now the knight attacks the queen on f4 and the rook on c1 at once. After the queen moves, Black takes the rook for a knight. White resigned here.",
+      "credit": {
+       "source": "Wikipedia, Fork (chess)",
+       "url": "https://en.wikipedia.org/wiki/Fork_(chess)",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikipedia contributors (see the page history)"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "title": "The fork trick",
+   "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/2N2N2/PPPP1PPP/R1BQK2R b KQkq - 5 4",
+   "side": "black",
+   "text": "Two Knights Defence after 4.Nc3: you are Black. White has defended e4 with a knight, but a pawn fork lets you take it anyway.",
+   "credit": {
+    "source": "Wikipedia, Fork (chess)",
+    "url": "https://en.wikipedia.org/wiki/Fork_(chess)",
+    "licence": "CC BY-SA 4.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "authors": "Wikipedia contributors (see the page history)"
+   },
+   "mainLine": [
+    "f6e4",
+    "c3e4",
+    "d7d5"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/2N2N2/PPPP1PPP/R1BQK2R b KQkq - 5 4",
+     "decision": true,
+     "main": "f6e4",
+     "mainSan": "Nxe4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "4...Nxe4! seems to give a knight for a pawn, but it relies on the fork that follows.",
+      "credit": {
+       "source": "Wikipedia, Fork (chess)",
+       "url": "https://en.wikipedia.org/wiki/Fork_(chess)",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikipedia contributors (see the page history)"
+      }
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "r1bqkb1r/pppp1ppp/2n5/4p3/2B1n3/2N2N2/PPPP1PPP/R1BQK2R w KQkq - 0 5",
+     "decision": false,
+     "main": "c3e4",
+     "mainSan": "Nxe4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "r1bqkb1r/pppp1ppp/2n5/4p3/2B1N3/5N2/PPPP1PPP/R1BQK2R b KQkq - 0 5",
+     "decision": true,
+     "main": "d7d5",
+     "mainSan": "d5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "After 5.Nxe4 d5 the pawn attacks White's bishop and knight together. Whichever one moves, you win the other back and stand well in the centre.",
+      "credit": {
+       "source": "Wikipedia, Fork (chess)",
+       "url": "https://en.wikipedia.org/wiki/Fork_(chess)",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikipedia contributors (see the page history)"
+      }
+     }
+    }
+   ]
+  }
+ ]
+}

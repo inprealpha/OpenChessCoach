@@ -1,0 +1,84 @@
+# Labels a PR for the reviews it needs (ADR 0006), from lists read off the base branch so
+# a PR can't exempt itself by editing them:
+#   protected-path  touches a path in .github/protected-paths.txt: the owner reviews it before merging
+#   touches-coach   touches a path in .github/coach-paths.txt: the "real Coach" status stays pending
+#                   until a desktop session runs scripts/real-coach-check.ts --post on the head commit
+#   no-evidence     the PR description's Evidence section is empty
+# PRs that don't touch the Coach get a passing "real Coach" status, so it can be a required check.
+# pull_request_target, so a PR from a fork gets its labels and status too: the job runs the base
+# branch's workflow and code with a token that can write them, and never checks out the PR's code.
+# Keep it that way: only the PR's file list and description, read through the API, come from the PR.
+name: PR labels
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review, edited]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  statuses: write
+
+concurrency:
+  group: pr-labels-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  label:
+    name: Label for review
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+      PR: ${{ github.event.pull_request.number }}
+      SHA: ${{ github.event.pull_request.head.sha }}
+      BASE: ${{ github.event.pull_request.base.ref }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Use the path lists from the base branch
+        run: |
+          if git cat-file -e "origin/$BASE:scripts/protected-paths.ts" 2>/dev/null; then
+            git checkout "origin/$BASE" -- scripts/protected-paths.ts .github/protected-paths.txt .github/coach-paths.txt
+          else
+            echo "The base branch has no path lists yet; using the PR's own."
+          fi
+      - name: Find what the PR touches
+        run: |
+          gh api "repos/$REPO/pulls/$PR/files" --paginate --jq '.[] | .filename, (.previous_filename // empty)' | sort -u > changed.txt
+          node scripts/protected-paths.ts --match protected < changed.txt > protected.txt
+          node scripts/protected-paths.ts --match coach < changed.txt > coach.txt
+          echo "Protected paths touched:"; cat protected.txt
+          echo "Coach paths touched:"; cat coach.txt
+      - name: Label
+        run: |
+          gh label create protected-path --repo "$REPO" --color B60205 --description "Touches a protected path: the owner reviews it before merging" 2>/dev/null || true
+          gh label create touches-coach --repo "$REPO" --color 5319E7 --description "Touches the Coach: needs a passing real-Coach check from the desktop" 2>/dev/null || true
+          gh label create no-evidence --repo "$REPO" --color FBCA04 --description "The PR description has no evidence from the running app" 2>/dev/null || true
+          set_label() {
+            if [ "$2" = yes ]; then gh api "repos/$REPO/issues/$PR/labels" -f "labels[]=$1" --silent
+            else gh api -X DELETE "repos/$REPO/issues/$PR/labels/$1" --silent 2>/dev/null || true; fi
+          }
+          set_label protected-path "$([ -s protected.txt ] && echo yes || echo no)"
+          set_label touches-coach "$([ -s coach.txt ] && echo yes || echo no)"
+          gh api "repos/$REPO/pulls/$PR" --jq '.body // ""' > body.md
+          # Evidence is whatever follows the "## Evidence" heading, up to the next heading, minus comments.
+          evidence=$(awk '/^## /{inside=($0 ~ /^## Evidence/); next} inside' body.md | sed -e 's/<!--.*-->//g' | tr -d '[:space:]')
+          set_label no-evidence "$([ -z "$evidence" ] && echo yes || echo no)"
+      - name: Set the real Coach status
+        run: |
+          current=$(gh api "repos/$REPO/commits/$SHA/status" --jq '[.statuses[] | select(.context == "real Coach")][0].state // ""')
+          if [ ! -s coach.txt ]; then
+            gh api "repos/$REPO/statuses/$SHA" -f state=success -f context="real Coach" -f description="Does not touch the Coach"
+          elif [ "$current" = success ] || [ "$current" = failure ]; then
+            echo "The desktop already posted a verdict for $SHA: $current"
+          else
+            gh api "repos/$REPO/statuses/$SHA" -f state=pending -f context="real Coach" \
+              -f description="Touches the Coach: run scripts/real-coach-check.ts --post on the desktop"
+          fi

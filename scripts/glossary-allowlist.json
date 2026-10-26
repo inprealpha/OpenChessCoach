@@ -1,0 +1,12 @@
+[
+  {
+    "term": "ai",
+    "phrase": "claude\\.ai",
+    "reason": "Anthropic's domain, in sign-up links and Claude Code's install commands."
+  },
+  {
+    "term": "rating",
+    "phrase": "your rating|Rating:",
+    "reason": "The Player's Lichess or chess.com rating, a number from another site, not a Move Grade."
+  }
+]

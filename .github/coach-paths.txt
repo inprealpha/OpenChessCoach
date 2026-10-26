@@ -1,0 +1,6 @@
+# Paths that touch the Coach. A PR touching any of them gets the touches-coach label and a
+# pending "real Coach" status until a desktop session verifies it against the real Coach.
+# One path per line: a trailing / means everything under that folder.
+packages/backend/src/coach/
+packages/shared/src/coach/
+packages/backend/src/claude-check.ts

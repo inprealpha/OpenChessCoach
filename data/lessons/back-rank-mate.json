@@ -1,0 +1,387 @@
+{
+ "id": "back-rank-mate",
+ "name": "Back-rank mate",
+ "kind": "theme",
+ "side": "white",
+ "puzzleTags": [],
+ "puzzleThemes": [
+  "backRankMate"
+ ],
+ "intro": {
+  "text": "A back-rank mate is delivered by a rook or queen along the last rank, when the king cannot step forward because its own pawns block the way. The defending rook or queen that guards the back rank can often be lured away, exchanged or simply overloaded. To guard against it, give your king a flight square by moving one of the pawns in front of it.",
+  "credit": {
+   "source": "Wikipedia, Back-rank checkmate",
+   "url": "https://en.wikipedia.org/wiki/Back-rank_checkmate",
+   "licence": "CC BY-SA 4.0",
+   "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "authors": "Wikipedia contributors (see the page history)"
+  }
+ },
+ "parts": [
+  {
+   "title": "The bishop cannot be taken back",
+   "fen": "r1r3k1/p4ppp/1pb5/q7/2Q5/1P1R4/P1B2PPP/3R2K1 w - - 0 1",
+   "side": "white",
+   "text": "Your rooks are doubled on the d-file and Black's king has no flight square. Black's bishop on c6 is defended only by the rook on c8.",
+   "credit": {
+    "source": "Wikipedia, Back-rank checkmate",
+    "url": "https://en.wikipedia.org/wiki/Back-rank_checkmate",
+    "licence": "CC BY-SA 4.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "authors": "Wikipedia contributors (see the page history)"
+   },
+   "mainLine": [
+    "c4c6",
+    "a5a6",
+    "c6a8",
+    "c8a8",
+    "d3d8",
+    "a8d8",
+    "d1d8"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "r1r3k1/p4ppp/1pb5/q7/2Q5/1P1R4/P1B2PPP/3R2K1 w - - 0 1",
+     "decision": true,
+     "main": "c4c6",
+     "mainSan": "Qxc6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Take the bishop. 1...Rxc6 would allow 2.Rd8+ Rxd8 3.Rxd8#, so Black is simply a piece down.",
+      "credit": {
+       "source": "Wikipedia, Back-rank checkmate",
+       "url": "https://en.wikipedia.org/wiki/Back-rank_checkmate",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikipedia contributors (see the page history)"
+      }
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "r1r3k1/p4ppp/1pQ5/q7/8/1P1R4/P1B2PPP/3R2K1 b - - 0 1",
+     "decision": false,
+     "main": "a5a6",
+     "mainSan": "Qa6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "r1r3k1/p4ppp/qpQ5/8/8/1P1R4/P1B2PPP/3R2K1 w - - 1 2",
+     "decision": true,
+     "main": "c6a8",
+     "mainSan": "Qxa8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "After 1...Qa6 the back rank is still weak: 2.Qxa8! takes a rook, and 2...Rxa8 would lose to mate.",
+      "credit": {
+       "source": "Wikipedia, Back-rank checkmate",
+       "url": "https://en.wikipedia.org/wiki/Back-rank_checkmate",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikipedia contributors (see the page history)"
+      }
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "Q1r3k1/p4ppp/qp6/8/8/1P1R4/P1B2PPP/3R2K1 b - - 0 2",
+     "decision": false,
+     "main": "c8a8",
+     "mainSan": "Rxa8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "r5k1/p4ppp/qp6/8/8/1P1R4/P1B2PPP/3R2K1 w - - 0 3",
+     "decision": true,
+     "main": "d3d8",
+     "mainSan": "Rd8+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The rook enters with check. Black can only block with the rook.",
+      "credit": {
+       "source": "Wikipedia, Back-rank checkmate",
+       "url": "https://en.wikipedia.org/wiki/Back-rank_checkmate",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikipedia contributors (see the page history)"
+      }
+     }
+    },
+    {
+     "ply": 5,
+     "fen": "r2R2k1/p4ppp/qp6/8/8/1P6/P1B2PPP/3R2K1 b - - 1 3",
+     "decision": false,
+     "main": "a8d8",
+     "mainSan": "Rxd8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 6,
+     "fen": "3r2k1/p4ppp/qp6/8/8/1P6/P1B2PPP/3R2K1 w - - 0 4",
+     "decision": true,
+     "main": "d1d8",
+     "mainSan": "Rxd8#",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Mate on the back rank: the pawns on f7, g7 and h7 keep their own king in.",
+      "credit": {
+       "source": "Wikipedia, Back-rank checkmate",
+       "url": "https://en.wikipedia.org/wiki/Back-rank_checkmate",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikipedia contributors (see the page history)"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "title": "Capablanca strikes",
+   "fen": "3r2k1/p4ppp/1q6/8/8/2R1P3/P3QPPP/6K1 b - - 0 29",
+   "side": "black",
+   "text": "Bernstein against Capablanca, Moscow 1914: you are Black. White's queen guards the back rank and the rook on c3. Can you overload it?",
+   "credit": {
+    "source": "Wikipedia, Back-rank checkmate",
+    "url": "https://en.wikipedia.org/wiki/Back-rank_checkmate",
+    "licence": "CC BY-SA 4.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "authors": "Wikipedia contributors (see the page history)"
+   },
+   "mainLine": [
+    "b6b2",
+    "e2e1",
+    "b2c3",
+    "e1c3",
+    "d8d1",
+    "c3e1",
+    "d1e1"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "3r2k1/p4ppp/1q6/8/8/2R1P3/P3QPPP/6K1 b - - 0 29",
+     "decision": true,
+     "main": "b6b2",
+     "mainSan": "Qb2",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "29...Qb2! attacks the rook and offers the queen. 30.Qxb2 is impossible because of 30...Rd1#.",
+      "credit": {
+       "source": "Wikipedia, Back-rank checkmate",
+       "url": "https://en.wikipedia.org/wiki/Back-rank_checkmate",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikipedia contributors (see the page history)"
+      }
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "3r2k1/p4ppp/8/8/8/2R1P3/Pq2QPPP/6K1 w - - 1 30",
+     "decision": false,
+     "main": "e2e1",
+     "mainSan": "Qe1",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "3r2k1/p4ppp/8/8/8/2R1P3/Pq3PPP/4Q1K1 b - - 2 30",
+     "decision": true,
+     "main": "b2c3",
+     "mainSan": "Qxc3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "30.Qe1 seems to defend the rook, but the rook is not really protected: take it.",
+      "credit": {
+       "source": "Wikipedia, Back-rank checkmate",
+       "url": "https://en.wikipedia.org/wiki/Back-rank_checkmate",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikipedia contributors (see the page history)"
+      }
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "3r2k1/p4ppp/8/8/8/2q1P3/P4PPP/4Q1K1 w - - 0 31",
+     "decision": false,
+     "main": "e1c3",
+     "mainSan": "Qxc3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "3r2k1/p4ppp/8/8/8/2Q1P3/P4PPP/6K1 b - - 0 31",
+     "decision": true,
+     "main": "d8d1",
+     "mainSan": "Rd1+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "31.Qxc3 left the back rank, so the rook checks there. 32.Qe1 is the only block.",
+      "credit": {
+       "source": "Wikipedia, Back-rank checkmate",
+       "url": "https://en.wikipedia.org/wiki/Back-rank_checkmate",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikipedia contributors (see the page history)"
+      }
+     }
+    },
+    {
+     "ply": 5,
+     "fen": "6k1/p4ppp/8/8/8/2Q1P3/P4PPP/3r2K1 w - - 1 32",
+     "decision": false,
+     "main": "c3e1",
+     "mainSan": "Qe1",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 6,
+     "fen": "6k1/p4ppp/8/8/8/4P3/P4PPP/3rQ1K1 b - - 2 32",
+     "decision": true,
+     "main": "d1e1",
+     "mainSan": "Rxe1#",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Back-rank mate.",
+      "credit": {
+       "source": "Wikipedia, Back-rank checkmate",
+       "url": "https://en.wikipedia.org/wiki/Back-rank_checkmate",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikipedia contributors (see the page history)"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "title": "After the queen is gone",
+   "fen": "5r2/6pp/4N2k/2R3b1/4q3/5P2/PP4PP/6K1 w - - 0 37",
+   "side": "black",
+   "text": "A position from a game played on Lichess. White has just taken your queen on e4. White's king has no flight square: find the mate.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle TtYEa",
+    "url": "https://lichess.org/training/TtYEa",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "f3e4",
+    "g5e3",
+    "g1h1",
+    "f8f1"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "5r2/6pp/4N2k/2R3b1/4q3/5P2/PP4PP/6K1 w - - 0 37",
+     "decision": false,
+     "main": "f3e4",
+     "mainSan": "fxe4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "5r2/6pp/4N2k/2R3b1/4P3/8/PP4PP/6K1 b - - 0 37",
+     "decision": true,
+     "main": "g5e3",
+     "mainSan": "Be3+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "5r2/6pp/4N2k/2R5/4P3/4b3/PP4PP/6K1 w - - 1 38",
+     "decision": false,
+     "main": "g1h1",
+     "mainSan": "Kh1",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "5r2/6pp/4N2k/2R5/4P3/4b3/PP4PP/7K b - - 2 38",
+     "decision": true,
+     "main": "f8f1",
+     "mainSan": "Rf1#",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    }
+   ]
+  }
+ ]
+}

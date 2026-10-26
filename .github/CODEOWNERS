@@ -1,0 +1,24 @@
+# Generated from .github/protected-paths.txt by scripts/protected-paths.ts. Do not edit by hand.
+# GitHub cannot enforce these yet: agents open PRs under the owner's own account.
+/docs/adr/ @inprealpha
+/CONTEXT.md @inprealpha
+/CLAUDE.md @inprealpha
+/docs/agents/ @inprealpha
+/packages/backend/src/pairing.ts @inprealpha
+/packages/backend/src/server.ts @inprealpha
+/packages/backend/src/tunnel.ts @inprealpha
+/packages/backend/src/network.ts @inprealpha
+/packages/backend/src/verify/routes.ts @inprealpha
+/LICENSE @inprealpha
+/THIRD_PARTY_NOTICES.md @inprealpha
+/data/lessons/ @inprealpha
+/data/lesson-notes.json @inprealpha
+/data/lesson-topics.json @inprealpha
+/data-prep/ @inprealpha
+/.github/ @inprealpha
+/scripts/protected-paths.ts @inprealpha
+/scripts/glossary-lint.ts @inprealpha
+/scripts/glossary-allowlist.json @inprealpha
+/scripts/real-coach-check.ts @inprealpha
+/.claude/skills/verify/ @inprealpha
+/.claude/skills/real-coach-check/ @inprealpha

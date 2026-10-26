@@ -1,0 +1,59 @@
+{
+  "name": "openchesscoach",
+  "version": "0.2.0",
+  "description": "An AI chess coach: the Engine judges every move and Claude explains why, on your own Claude subscription.",
+  "license": "GPL-3.0-or-later",
+  "homepage": "https://github.com/inprealpha/OpenChessCoach#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/inprealpha/OpenChessCoach.git",
+    "directory": "packages/backend"
+  },
+  "bugs": {
+    "url": "https://github.com/inprealpha/OpenChessCoach/issues"
+  },
+  "keywords": [
+    "chess",
+    "chess-coach",
+    "stockfish",
+    "claude",
+    "learn-chess",
+    "chess-engine",
+    "pgn",
+    "lichess",
+    "chess.com"
+  ],
+  "type": "module",
+  "bin": {
+    "openchesscoach": "dist/cli.js",
+    "coachctl": "dist/coachctl.js"
+  },
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "build": "node scripts/build.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.3.296",
+    "qrcode": "^1.5.4",
+    "ws": "^8.22.0"
+  },
+  "devDependencies": {
+    "@chess-coach/shared": "*",
+    "@tsconfig/svelte": "^5.0.8",
+    "@types/qrcode": "^1.5.6",
+    "@types/ws": "^8.18.1",
+    "rolldown": "^1.2.13",
+    "stockfish": "^18.0.8"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

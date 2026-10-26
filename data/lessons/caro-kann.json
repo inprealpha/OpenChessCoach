@@ -1,0 +1,1319 @@
+{
+ "id": "caro-kann",
+ "name": "Caro-Kann Defence",
+ "kind": "opening",
+ "side": "black",
+ "eco": "B18",
+ "puzzleTags": [
+  "Caro-Kann_Defense"
+ ],
+ "puzzleThemes": [],
+ "intro": {
+  "text": "The Caro-Kann prepares ...d5 with the c-pawn ready to take back, so Black keeps a share of the centre and makes f7 safer. Unlike the French (1...e6), it does not shut in the light-squared bishop, though the knight loses the c6 square. It has a reputation as a solid, defensive reply to 1.e4.",
+  "credit": {
+   "source": "Wikibooks, Chess Opening Theory/1. e4/1...c6",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...c6",
+   "licence": "CC BY-SA 4.0",
+   "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "authors": "Wikibooks contributors (see the page history)"
+  }
+ },
+ "parts": [
+  {
+   "title": "Caro-Kann Defence",
+   "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+   "side": "black",
+   "credit": {
+    "source": "Wikibooks, Chess Opening Theory/1. e4/1...c6",
+    "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...c6",
+    "licence": "CC BY-SA 4.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "authors": "Wikibooks contributors (see the page history)"
+   },
+   "mainLine": [
+    "e2e4",
+    "c7c6",
+    "d2d4",
+    "d7d5",
+    "b1c3",
+    "d5e4",
+    "c3e4",
+    "c8f5",
+    "e4g3",
+    "f5g6",
+    "h2h4",
+    "h7h6",
+    "g1f3",
+    "b8d7"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+     "decision": false,
+     "main": "e2e4",
+     "mainSan": "e4",
+     "popular": {
+      "beginner": [
+       {
+        "uci": "e2e4",
+        "san": "e4",
+        "percent": 60.9,
+        "games": 87398
+       },
+       {
+        "uci": "d2d4",
+        "san": "d4",
+        "percent": 20.9,
+        "games": 29948
+       },
+       {
+        "uci": "e2e3",
+        "san": "e3",
+        "percent": 5,
+        "games": 7238
+       },
+       {
+        "uci": "g1f3",
+        "san": "Nf3",
+        "percent": 2.9,
+        "games": 4156
+       },
+       {
+        "uci": "c2c4",
+        "san": "c4",
+        "percent": 2,
+        "games": 2915
+       }
+      ],
+      "casual": [
+       {
+        "uci": "e2e4",
+        "san": "e4",
+        "percent": 61.7,
+        "games": 318036
+       },
+       {
+        "uci": "d2d4",
+        "san": "d4",
+        "percent": 25.4,
+        "games": 130955
+       },
+       {
+        "uci": "c2c4",
+        "san": "c4",
+        "percent": 3.1,
+        "games": 15815
+       },
+       {
+        "uci": "g1f3",
+        "san": "Nf3",
+        "percent": 2.3,
+        "games": 11842
+       },
+       {
+        "uci": "e2e3",
+        "san": "e3",
+        "percent": 2,
+        "games": 10471
+       }
+      ],
+      "club": [
+       {
+        "uci": "e2e4",
+        "san": "e4",
+        "percent": 58.7,
+        "games": 81381
+       },
+       {
+        "uci": "d2d4",
+        "san": "d4",
+        "percent": 29.2,
+        "games": 40443
+       },
+       {
+        "uci": "g1f3",
+        "san": "Nf3",
+        "percent": 3.7,
+        "games": 5163
+       },
+       {
+        "uci": "c2c4",
+        "san": "c4",
+        "percent": 3.4,
+        "games": 4742
+       },
+       {
+        "uci": "e2e3",
+        "san": "e3",
+        "percent": 1.1,
+        "games": 1544
+       }
+      ]
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
+     "decision": true,
+     "main": "c7c6",
+     "mainSan": "c6",
+     "popular": {
+      "beginner": [
+       {
+        "uci": "e7e5",
+        "san": "e5",
+        "percent": 56,
+        "games": 53459
+       },
+       {
+        "uci": "e7e6",
+        "san": "e6",
+        "percent": 10,
+        "games": 9547
+       },
+       {
+        "uci": "d7d5",
+        "san": "d5",
+        "percent": 9.7,
+        "games": 9293
+       },
+       {
+        "uci": "c7c5",
+        "san": "c5",
+        "percent": 8.9,
+        "games": 8480
+       },
+       {
+        "uci": "d7d6",
+        "san": "d6",
+        "percent": 3.2,
+        "games": 3015
+       }
+      ],
+      "casual": [
+       {
+        "uci": "e7e5",
+        "san": "e5",
+        "percent": 46.8,
+        "games": 146581
+       },
+       {
+        "uci": "c7c5",
+        "san": "c5",
+        "percent": 18,
+        "games": 56313
+       },
+       {
+        "uci": "e7e6",
+        "san": "e6",
+        "percent": 11.3,
+        "games": 35389
+       },
+       {
+        "uci": "d7d5",
+        "san": "d5",
+        "percent": 6.7,
+        "games": 20854
+       },
+       {
+        "uci": "c7c6",
+        "san": "c6",
+        "percent": 4.1,
+        "games": 12924
+       }
+      ],
+      "club": [
+       {
+        "uci": "e7e5",
+        "san": "e5",
+        "percent": 31.4,
+        "games": 24465
+       },
+       {
+        "uci": "c7c5",
+        "san": "c5",
+        "percent": 28.6,
+        "games": 22268
+       },
+       {
+        "uci": "e7e6",
+        "san": "e6",
+        "percent": 14,
+        "games": 10897
+       },
+       {
+        "uci": "c7c6",
+        "san": "c6",
+        "percent": 7.6,
+        "games": 5914
+       },
+       {
+        "uci": "d7d5",
+        "san": "d5",
+        "percent": 5.6,
+        "games": 4375
+       }
+      ]
+     },
+     "notes": {
+      "text": "1...c6, the Caro-Kann, prepares ...d5 so a pawn can recapture there. Compared with 1...e6 (French), your light-squared bishop stays free, but c6 is taken from your knight and a later ...c5 costs a move. 1...e5 and 1...c5 fight for d4 instead, while 1...f5? weakens your kingside.",
+      "credit": {
+       "source": "Wikibooks, Chess Opening Theory/1. e4",
+       "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikibooks contributors (see the page history)"
+      }
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "rnbqkbnr/pp1ppppp/2p5/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+     "decision": false,
+     "main": "d2d4",
+     "mainSan": "d4",
+     "popular": {
+      "beginner": [
+       {
+        "uci": "d2d4",
+        "san": "d4",
+        "percent": 33.3,
+        "games": 692
+       },
+       {
+        "uci": "g1f3",
+        "san": "Nf3",
+        "percent": 23.8,
+        "games": 494
+       },
+       {
+        "uci": "f1c4",
+        "san": "Bc4",
+        "percent": 12.9,
+        "games": 268
+       },
+       {
+        "uci": "b1c3",
+        "san": "Nc3",
+        "percent": 7.7,
+        "games": 159
+       },
+       {
+        "uci": "d2d3",
+        "san": "d3",
+        "percent": 4.7,
+        "games": 98
+       }
+      ],
+      "casual": [
+       {
+        "uci": "d2d4",
+        "san": "d4",
+        "percent": 41.1,
+        "games": 5362
+       },
+       {
+        "uci": "g1f3",
+        "san": "Nf3",
+        "percent": 27.5,
+        "games": 3585
+       },
+       {
+        "uci": "f1c4",
+        "san": "Bc4",
+        "percent": 10,
+        "games": 1300
+       },
+       {
+        "uci": "f2f4",
+        "san": "f4",
+        "percent": 6.1,
+        "games": 795
+       },
+       {
+        "uci": "b1c3",
+        "san": "Nc3",
+        "percent": 4.3,
+        "games": 555
+       }
+      ],
+      "club": [
+       {
+        "uci": "d2d4",
+        "san": "d4",
+        "percent": 58.7,
+        "games": 3204
+       },
+       {
+        "uci": "g1f3",
+        "san": "Nf3",
+        "percent": 19.4,
+        "games": 1058
+       },
+       {
+        "uci": "b1c3",
+        "san": "Nc3",
+        "percent": 6.2,
+        "games": 337
+       },
+       {
+        "uci": "f2f4",
+        "san": "f4",
+        "percent": 4.9,
+        "games": 265
+       },
+       {
+        "uci": "c2c4",
+        "san": "c4",
+        "percent": 3.2,
+        "games": 175
+       }
+      ]
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "rnbqkbnr/pp1ppppp/2p5/8/3PP3/8/PPP2PPP/RNBQKBNR b KQkq - 0 2",
+     "decision": true,
+     "main": "d7d5",
+     "mainSan": "d5",
+     "popular": {
+      "beginner": [
+       {
+        "uci": "d7d5",
+        "san": "d5",
+        "percent": 71.6,
+        "games": 471
+       },
+       {
+        "uci": "e7e6",
+        "san": "e6",
+        "percent": 8.5,
+        "games": 56
+       },
+       {
+        "uci": "d7d6",
+        "san": "d6",
+        "percent": 4,
+        "games": 26
+       },
+       {
+        "uci": "b7b5",
+        "san": "b5",
+        "percent": 4,
+        "games": 26
+       },
+       {
+        "uci": "e7e5",
+        "san": "e5",
+        "percent": 1.7,
+        "games": 11
+       }
+      ],
+      "casual": [
+       {
+        "uci": "d7d5",
+        "san": "d5",
+        "percent": 87.3,
+        "games": 4787
+       },
+       {
+        "uci": "e7e6",
+        "san": "e6",
+        "percent": 4.6,
+        "games": 252
+       },
+       {
+        "uci": "d7d6",
+        "san": "d6",
+        "percent": 2.6,
+        "games": 144
+       },
+       {
+        "uci": "g7g6",
+        "san": "g6",
+        "percent": 1.5,
+        "games": 83
+       },
+       {
+        "uci": "b7b5",
+        "san": "b5",
+        "percent": 0.9,
+        "games": 50
+       }
+      ],
+      "club": [
+       {
+        "uci": "d7d5",
+        "san": "d5",
+        "percent": 95.4,
+        "games": 2963
+       },
+       {
+        "uci": "d7d6",
+        "san": "d6",
+        "percent": 2.3,
+        "games": 70
+       },
+       {
+        "uci": "g7g6",
+        "san": "g6",
+        "percent": 1.3,
+        "games": 41
+       },
+       {
+        "uci": "e7e6",
+        "san": "e6",
+        "percent": 0.5,
+        "games": 17
+       }
+      ]
+     },
+     "notes": {
+      "text": "White has put two pawns in the centre. Play 2...d5 as planned: it attacks e4, and if 3.exd5 cxd5 you have swapped your c-pawn for White's central e-pawn. Other moves are rare: 2...d6 transposes to a Pirc, and 2...Nf6!? invites 3.e5!, chasing the knight.",
+      "credit": {
+       "source": "Wikibooks, Chess Opening Theory/1. e4/1...c6/2. d4",
+       "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...c6/2._d4",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikibooks contributors (see the page history)"
+      }
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "rnbqkbnr/pp2pppp/2p5/3p4/3PP3/8/PPP2PPP/RNBQKBNR w KQkq - 0 3",
+     "decision": false,
+     "main": "b1c3",
+     "mainSan": "Nc3",
+     "popular": {
+      "beginner": [
+       {
+        "uci": "e4e5",
+        "san": "e5",
+        "percent": 49.8,
+        "games": 290
+       },
+       {
+        "uci": "e4d5",
+        "san": "exd5",
+        "percent": 21.8,
+        "games": 127
+       },
+       {
+        "uci": "b1c3",
+        "san": "Nc3",
+        "percent": 18.7,
+        "games": 109
+       },
+       {
+        "uci": "f2f3",
+        "san": "f3",
+        "percent": 3.8,
+        "games": 22
+       },
+       {
+        "uci": "b1d2",
+        "san": "Nd2",
+        "percent": 1.9,
+        "games": 11
+       }
+      ],
+      "casual": [
+       {
+        "uci": "e4e5",
+        "san": "e5",
+        "percent": 49.5,
+        "games": 2312
+       },
+       {
+        "uci": "e4d5",
+        "san": "exd5",
+        "percent": 26.3,
+        "games": 1228
+       },
+       {
+        "uci": "b1c3",
+        "san": "Nc3",
+        "percent": 18.1,
+        "games": 845
+       },
+       {
+        "uci": "f2f3",
+        "san": "f3",
+        "percent": 2.2,
+        "games": 103
+       },
+       {
+        "uci": "b1d2",
+        "san": "Nd2",
+        "percent": 2,
+        "games": 95
+       }
+      ],
+      "club": [
+       {
+        "uci": "e4e5",
+        "san": "e5",
+        "percent": 34,
+        "games": 1007
+       },
+       {
+        "uci": "e4d5",
+        "san": "exd5",
+        "percent": 27.4,
+        "games": 812
+       },
+       {
+        "uci": "b1c3",
+        "san": "Nc3",
+        "percent": 26,
+        "games": 768
+       },
+       {
+        "uci": "b1d2",
+        "san": "Nd2",
+        "percent": 5.9,
+        "games": 176
+       },
+       {
+        "uci": "f2f3",
+        "san": "f3",
+        "percent": 5.1,
+        "games": 150
+       }
+      ]
+     }
+    },
+    {
+     "ply": 5,
+     "fen": "rnbqkbnr/pp2pppp/2p5/3p4/3PP3/2N5/PPP2PPP/R1BQKBNR b KQkq - 1 3",
+     "decision": true,
+     "main": "d5e4",
+     "mainSan": "dxe4",
+     "popular": {
+      "beginner": [
+       {
+        "uci": "d5e4",
+        "san": "dxe4",
+        "percent": 58.8,
+        "games": 47
+       },
+       {
+        "uci": "g8f6",
+        "san": "Nf6",
+        "percent": 20,
+        "games": 16
+       },
+       {
+        "uci": "e7e6",
+        "san": "e6",
+        "percent": 8.8,
+        "games": 7
+       },
+       {
+        "uci": "f7f6",
+        "san": "f6",
+        "percent": 3.8,
+        "games": 3
+       },
+       {
+        "uci": "a7a6",
+        "san": "a6",
+        "percent": 1.3,
+        "games": 1
+       }
+      ],
+      "casual": [
+       {
+        "uci": "d5e4",
+        "san": "dxe4",
+        "percent": 83.2,
+        "games": 807
+       },
+       {
+        "uci": "e7e6",
+        "san": "e6",
+        "percent": 5.2,
+        "games": 50
+       },
+       {
+        "uci": "g8f6",
+        "san": "Nf6",
+        "percent": 4,
+        "games": 39
+       },
+       {
+        "uci": "a7a6",
+        "san": "a6",
+        "percent": 3,
+        "games": 29
+       },
+       {
+        "uci": "g7g6",
+        "san": "g6",
+        "percent": 1.3,
+        "games": 13
+       }
+      ],
+      "club": [
+       {
+        "uci": "d5e4",
+        "san": "dxe4",
+        "percent": 84.1,
+        "games": 565
+       },
+       {
+        "uci": "e7e6",
+        "san": "e6",
+        "percent": 6,
+        "games": 40
+       },
+       {
+        "uci": "a7a6",
+        "san": "a6",
+        "percent": 3.7,
+        "games": 25
+       },
+       {
+        "uci": "g7g6",
+        "san": "g6",
+        "percent": 2.8,
+        "games": 19
+       },
+       {
+        "uci": "g8f6",
+        "san": "Nf6",
+        "percent": 1.9,
+        "games": 13
+       }
+      ]
+     },
+     "notes": {
+      "text": "White defends e4 with the knight. 3...dxe4 is the main move, denying White the two-pawn centre. 3...Nf6 invites 4.e5 and a closed game; 3...g6 lets White gain kingside space; 3...e6?! combines the drawbacks of the Caro-Kann and the French.",
+      "credit": {
+       "source": "Wikibooks, Chess Opening Theory/1. e4/1...c6/2. d4/2...d5/3. Nc3",
+       "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...c6/2._d4/2...d5/3._Nc3",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikibooks contributors (see the page history)"
+      }
+     }
+    },
+    {
+     "ply": 6,
+     "fen": "rnbqkbnr/pp2pppp/2p5/8/3Pp3/2N5/PPP2PPP/R1BQKBNR w KQkq - 0 4",
+     "decision": false,
+     "main": "c3e4",
+     "mainSan": "Nxe4",
+     "popular": {
+      "beginner": [
+       {
+        "uci": "c3e4",
+        "san": "Nxe4",
+        "percent": 98.8,
+        "games": 79
+       },
+       {
+        "uci": "f2f3",
+        "san": "f3",
+        "percent": 1.3,
+        "games": 1
+       }
+      ],
+      "casual": [
+       {
+        "uci": "c3e4",
+        "san": "Nxe4",
+        "percent": 95,
+        "games": 652
+       },
+       {
+        "uci": "f2f3",
+        "san": "f3",
+        "percent": 2.3,
+        "games": 16
+       },
+       {
+        "uci": "f1c4",
+        "san": "Bc4",
+        "percent": 2,
+        "games": 14
+       }
+      ],
+      "club": [
+       {
+        "uci": "c3e4",
+        "san": "Nxe4",
+        "percent": 89.9,
+        "games": 586
+       },
+       {
+        "uci": "f2f3",
+        "san": "f3",
+        "percent": 8.1,
+        "games": 53
+       },
+       {
+        "uci": "f1c4",
+        "san": "Bc4",
+        "percent": 2,
+        "games": 13
+       }
+      ]
+     }
+    },
+    {
+     "ply": 7,
+     "fen": "rnbqkbnr/pp2pppp/2p5/8/3PN3/8/PPP2PPP/R1BQKBNR b KQkq - 0 4",
+     "decision": true,
+     "main": "c8f5",
+     "mainSan": "Bf5",
+     "popular": {
+      "beginner": [
+       {
+        "uci": "c8f5",
+        "san": "Bf5",
+        "percent": 63.6,
+        "games": 28
+       },
+       {
+        "uci": "g8f6",
+        "san": "Nf6",
+        "percent": 13.6,
+        "games": 6
+       },
+       {
+        "uci": "b8d7",
+        "san": "Nd7",
+        "percent": 13.6,
+        "games": 6
+       },
+       {
+        "uci": "e7e6",
+        "san": "e6",
+        "percent": 4.5,
+        "games": 2
+       },
+       {
+        "uci": "c8d7",
+        "san": "Bd7",
+        "percent": 2.3,
+        "games": 1
+       }
+      ],
+      "casual": [
+       {
+        "uci": "c8f5",
+        "san": "Bf5",
+        "percent": 64.1,
+        "games": 485
+       },
+       {
+        "uci": "g8f6",
+        "san": "Nf6",
+        "percent": 21.5,
+        "games": 163
+       },
+       {
+        "uci": "b8d7",
+        "san": "Nd7",
+        "percent": 10.4,
+        "games": 79
+       },
+       {
+        "uci": "e7e6",
+        "san": "e6",
+        "percent": 2.2,
+        "games": 17
+       },
+       {
+        "uci": "e7e5",
+        "san": "e5",
+        "percent": 0.9,
+        "games": 7
+       }
+      ],
+      "club": [
+       {
+        "uci": "c8f5",
+        "san": "Bf5",
+        "percent": 45.3,
+        "games": 234
+       },
+       {
+        "uci": "g8f6",
+        "san": "Nf6",
+        "percent": 31.2,
+        "games": 161
+       },
+       {
+        "uci": "b8d7",
+        "san": "Nd7",
+        "percent": 22.3,
+        "games": 115
+       }
+      ]
+     },
+     "notes": {
+      "text": "4...Bf5, the Classical Variation, develops your bishop and attacks the e4 knight; the bishop will later control the long diagonal from g6 and then h7. 4...Nf6 5.Nxf6+ leaves you with doubled pawns, and 4...Nd7 (Karpov Variation) looks slower because the knight must move again before that bishop can come out.",
+      "credit": {
+       "source": "Wikibooks, Chess Opening Theory/1. e4/1...c6/2. d4/2...d5/3. Nc3/3...dxe4/4. Nxe4",
+       "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...c6/2._d4/2...d5/3._Nc3/3...dxe4/4._Nxe4",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikibooks contributors (see the page history)"
+      }
+     }
+    },
+    {
+     "ply": 8,
+     "fen": "rn1qkbnr/pp2pppp/2p5/5b2/3PN3/8/PPP2PPP/R1BQKBNR w KQkq - 1 5",
+     "decision": false,
+     "main": "e4g3",
+     "mainSan": "Ng3",
+     "popular": {
+      "beginner": [
+       {
+        "uci": "f1d3",
+        "san": "Bd3",
+        "percent": 28.3,
+        "games": 17
+       },
+       {
+        "uci": "e4g3",
+        "san": "Ng3",
+        "percent": 25,
+        "games": 15
+       },
+       {
+        "uci": "f2f3",
+        "san": "f3",
+        "percent": 23.3,
+        "games": 14
+       },
+       {
+        "uci": "e4c5",
+        "san": "Nc5",
+        "percent": 8.3,
+        "games": 5
+       },
+       {
+        "uci": "d1d3",
+        "san": "Qd3",
+        "percent": 5,
+        "games": 3
+       }
+      ],
+      "casual": [
+       {
+        "uci": "e4g3",
+        "san": "Ng3",
+        "percent": 75.1,
+        "games": 295
+       },
+       {
+        "uci": "f1d3",
+        "san": "Bd3",
+        "percent": 8.9,
+        "games": 35
+       },
+       {
+        "uci": "e4c3",
+        "san": "Nc3",
+        "percent": 4.6,
+        "games": 18
+       },
+       {
+        "uci": "f2f3",
+        "san": "f3",
+        "percent": 4.1,
+        "games": 16
+       },
+       {
+        "uci": "e4c5",
+        "san": "Nc5",
+        "percent": 3.3,
+        "games": 13
+       }
+      ],
+      "club": [
+       {
+        "uci": "e4g3",
+        "san": "Ng3",
+        "percent": 93.9,
+        "games": 275
+       },
+       {
+        "uci": "e4c3",
+        "san": "Nc3",
+        "percent": 2.4,
+        "games": 7
+       },
+       {
+        "uci": "f1d3",
+        "san": "Bd3",
+        "percent": 1.4,
+        "games": 4
+       },
+       {
+        "uci": "f2f3",
+        "san": "f3",
+        "percent": 1.4,
+        "games": 4
+       },
+       {
+        "uci": "e4c5",
+        "san": "Nc5",
+        "percent": 1,
+        "games": 3
+       }
+      ]
+     }
+    },
+    {
+     "ply": 9,
+     "fen": "rn1qkbnr/pp2pppp/2p5/5b2/3P4/6N1/PPP2PPP/R1BQKBNR b KQkq - 2 5",
+     "decision": true,
+     "main": "f5g6",
+     "mainSan": "Bg6",
+     "popular": {
+      "beginner": [],
+      "casual": [
+       {
+        "uci": "f5g6",
+        "san": "Bg6",
+        "percent": 97.3,
+        "games": 355
+       },
+       {
+        "uci": "g8f6",
+        "san": "Nf6",
+        "percent": 0.8,
+        "games": 3
+       },
+       {
+        "uci": "e7e6",
+        "san": "e6",
+        "percent": 0.8,
+        "games": 3
+       }
+      ],
+      "club": [
+       {
+        "uci": "f5g6",
+        "san": "Bg6",
+        "percent": 99,
+        "games": 204
+       }
+      ]
+     },
+     "notes": {
+      "text": "The knight on g3 attacks your bishop. 5...Bg6 is the only sensible retreat and almost always played. Defending it with 5...g6 is very rare and leaves you with a worse pawn structure.",
+      "credit": {
+       "source": "Wikibooks, Chess Opening Theory/1. e4/1...c6/2. d4/2...d5/3. Nc3/3...dxe4/4. Nxe4/4...Bf5/5. Ng3",
+       "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...c6/2._d4/2...d5/3._Nc3/3...dxe4/4._Nxe4/4...Bf5/5._Ng3",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikibooks contributors (see the page history)"
+      }
+     }
+    },
+    {
+     "ply": 10,
+     "fen": "rn1qkbnr/pp2pppp/2p3b1/8/3P4/6N1/PPP2PPP/R1BQKBNR w KQkq - 3 6",
+     "decision": false,
+     "main": "h2h4",
+     "mainSan": "h4",
+     "popular": {
+      "beginner": [],
+      "casual": [
+       {
+        "uci": "g1f3",
+        "san": "Nf3",
+        "percent": 53.7,
+        "games": 152
+       },
+       {
+        "uci": "h2h4",
+        "san": "h4",
+        "percent": 35.3,
+        "games": 100
+       },
+       {
+        "uci": "f1d3",
+        "san": "Bd3",
+        "percent": 3.2,
+        "games": 9
+       },
+       {
+        "uci": "c2c3",
+        "san": "c3",
+        "percent": 1.4,
+        "games": 4
+       },
+       {
+        "uci": "f1c4",
+        "san": "Bc4",
+        "percent": 1.4,
+        "games": 4
+       }
+      ],
+      "club": [
+       {
+        "uci": "g1f3",
+        "san": "Nf3",
+        "percent": 48.5,
+        "games": 133
+       },
+       {
+        "uci": "h2h4",
+        "san": "h4",
+        "percent": 37.2,
+        "games": 102
+       },
+       {
+        "uci": "f2f4",
+        "san": "f4",
+        "percent": 3.6,
+        "games": 10
+       },
+       {
+        "uci": "c2c3",
+        "san": "c3",
+        "percent": 2.9,
+        "games": 8
+       },
+       {
+        "uci": "g1e2",
+        "san": "N1e2",
+        "percent": 2.6,
+        "games": 7
+       }
+      ]
+     }
+    },
+    {
+     "ply": 11,
+     "fen": "rn1qkbnr/pp2pppp/2p3b1/8/3P3P/6N1/PPP2PP1/R1BQKBNR b KQkq - 0 6",
+     "decision": true,
+     "main": "h7h6",
+     "mainSan": "h6",
+     "popular": {
+      "beginner": [],
+      "casual": [
+       {
+        "uci": "h7h6",
+        "san": "h6",
+        "percent": 86.6,
+        "games": 110
+       },
+       {
+        "uci": "h7h5",
+        "san": "h5",
+        "percent": 8.7,
+        "games": 11
+       },
+       {
+        "uci": "e7e6",
+        "san": "e6",
+        "percent": 2.4,
+        "games": 3
+       },
+       {
+        "uci": "g8f6",
+        "san": "Nf6",
+        "percent": 2.4,
+        "games": 3
+       }
+      ],
+      "club": [
+       {
+        "uci": "h7h6",
+        "san": "h6",
+        "percent": 92.3,
+        "games": 72
+       },
+       {
+        "uci": "e7e6",
+        "san": "e6",
+        "percent": 3.8,
+        "games": 3
+       },
+       {
+        "uci": "g8f6",
+        "san": "Nf6",
+        "percent": 2.6,
+        "games": 2
+       },
+       {
+        "uci": "f7f6",
+        "san": "f6",
+        "percent": 1.3,
+        "games": 1
+       }
+      ]
+     },
+     "notes": {
+      "text": "6.h4 puts pressure on your bishop, so you need to look after it. 6...h6 is almost universal. 6...h5 and 6...Nd7 have been tried but are probably inferior.",
+      "credit": {
+       "source": "Wikibooks, Chess Opening Theory/1. e4/1...c6/2. d4/2...d5/3. Nc3/3...dxe4/4. Nxe4/4...Bf5/5. Ng3/5...Bg6/6. h4",
+       "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...c6/2._d4/2...d5/3._Nc3/3...dxe4/4._Nxe4/4...Bf5/5._Ng3/5...Bg6/6._h4",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikibooks contributors (see the page history)"
+      }
+     }
+    },
+    {
+     "ply": 12,
+     "fen": "rn1qkbnr/pp2ppp1/2p3bp/8/3P3P/6N1/PPP2PP1/R1BQKBNR w KQkq - 0 7",
+     "decision": false,
+     "main": "g1f3",
+     "mainSan": "Nf3",
+     "popular": {
+      "beginner": [],
+      "casual": [
+       {
+        "uci": "g1f3",
+        "san": "Nf3",
+        "percent": 44.3,
+        "games": 39
+       },
+       {
+        "uci": "h4h5",
+        "san": "h5",
+        "percent": 37.5,
+        "games": 33
+       },
+       {
+        "uci": "f1d3",
+        "san": "Bd3",
+        "percent": 12.5,
+        "games": 11
+       },
+       {
+        "uci": "g1h3",
+        "san": "Nh3",
+        "percent": 1.1,
+        "games": 1
+       },
+       {
+        "uci": "f1e2",
+        "san": "Be2",
+        "percent": 1.1,
+        "games": 1
+       }
+      ],
+      "club": [
+       {
+        "uci": "g1f3",
+        "san": "Nf3",
+        "percent": 47.8,
+        "games": 43
+       },
+       {
+        "uci": "h4h5",
+        "san": "h5",
+        "percent": 44.4,
+        "games": 40
+       },
+       {
+        "uci": "g1e2",
+        "san": "N1e2",
+        "percent": 2.2,
+        "games": 2
+       },
+       {
+        "uci": "f1d3",
+        "san": "Bd3",
+        "percent": 2.2,
+        "games": 2
+       },
+       {
+        "uci": "g1h3",
+        "san": "Nh3",
+        "percent": 2.2,
+        "games": 2
+       }
+      ]
+     }
+    },
+    {
+     "ply": 13,
+     "fen": "rn1qkbnr/pp2ppp1/2p3bp/8/3P3P/5NN1/PPP2PP1/R1BQKB1R b KQkq - 1 7",
+     "decision": true,
+     "main": "b8d7",
+     "mainSan": "Nd7",
+     "popular": {
+      "beginner": [],
+      "casual": [
+       {
+        "uci": "b8d7",
+        "san": "Nd7",
+        "percent": 39.6,
+        "games": 19
+       },
+       {
+        "uci": "e7e6",
+        "san": "e6",
+        "percent": 33.3,
+        "games": 16
+       },
+       {
+        "uci": "g8f6",
+        "san": "Nf6",
+        "percent": 25,
+        "games": 12
+       },
+       {
+        "uci": "f7f6",
+        "san": "f6",
+        "percent": 2.1,
+        "games": 1
+       }
+      ],
+      "club": [
+       {
+        "uci": "b8d7",
+        "san": "Nd7",
+        "percent": 69.4,
+        "games": 25
+       },
+       {
+        "uci": "e7e6",
+        "san": "e6",
+        "percent": 25,
+        "games": 9
+       },
+       {
+        "uci": "g8f6",
+        "san": "Nf6",
+        "percent": 2.8,
+        "games": 1
+       },
+       {
+        "uci": "d8c7",
+        "san": "Qc7",
+        "percent": 2.8,
+        "games": 1
+       }
+      ]
+     },
+     "notes": {
+      "text": "White's knight would like to jump to e5, where it is usually too strong. 7...Nd7 covers e5 and stops it, and is the normal choice. 7...Nf6 and 7...e6 are other options.",
+      "credit": {
+       "source": "Wikibooks, Chess Opening Theory/1. e4/1...c6/2. d4/2...d5/3. Nc3/3...dxe4/4. Nxe4/4...Bf5/5. Ng3/5...Bg6/6. h4/6...h6/7. Nf3",
+       "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...c6/2._d4/2...d5/3._Nc3/3...dxe4/4._Nxe4/4...Bf5/5._Ng3/5...Bg6/6._h4/6...h6/7._Nf3",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikibooks contributors (see the page history)"
+      }
+     }
+    }
+   ]
+  }
+ ],
+ "statsSource": "Lichess games database (CC0): lichess_db_standard_rated_2013-01.pgn, lichess_db_standard_rated_2014-07.pgn.zst, 1,169,772 rated games"
+}

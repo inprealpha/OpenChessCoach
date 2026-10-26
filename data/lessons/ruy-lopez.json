@@ -1,0 +1,780 @@
+{
+ "id": "ruy-lopez",
+ "name": "Ruy Lopez",
+ "kind": "opening",
+ "side": "white",
+ "eco": "C88",
+ "puzzleTags": [
+  "Ruy_Lopez"
+ ],
+ "puzzleThemes": [],
+ "intro": {
+  "text": "In the Ruy Lopez, or Spanish Game, White develops the bishop to b5 to put pressure on the knight that defends e5. White plays for quick development, castling and control of the centre, and would like to build a big pawn centre later with c3 and d4. The usual reply is 3...a6, the Morphy Defence, which asks the bishop to decide at once: take the knight or retreat.",
+  "credit": {
+   "source": "Wikibooks, Chess Opening Theory/1. e4/1...e5/2. Nf3/2...Nc6/3. Bb5",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bb5",
+   "licence": "CC BY-SA 4.0",
+   "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "authors": "Wikibooks contributors (see the page history)"
+  }
+ },
+ "parts": [
+  {
+   "title": "Ruy Lopez",
+   "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+   "side": "white",
+   "credit": {
+    "source": "Wikibooks, Chess Opening Theory/1. e4/1...e5/2. Nf3/2...Nc6/3. Bb5",
+    "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bb5",
+    "licence": "CC BY-SA 4.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "authors": "Wikibooks contributors (see the page history)"
+   },
+   "mainLine": [
+    "e2e4",
+    "e7e5",
+    "g1f3",
+    "b8c6",
+    "f1b5",
+    "a7a6",
+    "b5a4",
+    "g8f6",
+    "e1g1",
+    "f8e7",
+    "f1e1",
+    "b7b5",
+    "a4b3",
+    "d7d6",
+    "c2c3"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+     "decision": true,
+     "main": "e2e4",
+     "mainSan": "e4",
+     "popular": {
+      "beginner": [
+       {
+        "uci": "e2e4",
+        "san": "e4",
+        "percent": 60.9,
+        "games": 87398
+       },
+       {
+        "uci": "d2d4",
+        "san": "d4",
+        "percent": 20.9,
+        "games": 29948
+       },
+       {
+        "uci": "e2e3",
+        "san": "e3",
+        "percent": 5,
+        "games": 7238
+       },
+       {
+        "uci": "g1f3",
+        "san": "Nf3",
+        "percent": 2.9,
+        "games": 4156
+       },
+       {
+        "uci": "c2c4",
+        "san": "c4",
+        "percent": 2,
+        "games": 2915
+       }
+      ],
+      "casual": [
+       {
+        "uci": "e2e4",
+        "san": "e4",
+        "percent": 61.7,
+        "games": 318036
+       },
+       {
+        "uci": "d2d4",
+        "san": "d4",
+        "percent": 25.4,
+        "games": 130955
+       },
+       {
+        "uci": "c2c4",
+        "san": "c4",
+        "percent": 3.1,
+        "games": 15815
+       },
+       {
+        "uci": "g1f3",
+        "san": "Nf3",
+        "percent": 2.3,
+        "games": 11842
+       },
+       {
+        "uci": "e2e3",
+        "san": "e3",
+        "percent": 2,
+        "games": 10471
+       }
+      ],
+      "club": [
+       {
+        "uci": "e2e4",
+        "san": "e4",
+        "percent": 58.7,
+        "games": 81381
+       },
+       {
+        "uci": "d2d4",
+        "san": "d4",
+        "percent": 29.2,
+        "games": 40443
+       },
+       {
+        "uci": "g1f3",
+        "san": "Nf3",
+        "percent": 3.7,
+        "games": 5163
+       },
+       {
+        "uci": "c2c4",
+        "san": "c4",
+        "percent": 3.4,
+        "games": 4742
+       },
+       {
+        "uci": "e2e3",
+        "san": "e3",
+        "percent": 1.1,
+        "games": 1544
+       }
+      ]
+     },
+     "notes": {
+      "text": "The opening is a race to develop and control the centre. 1.e4 opens lines for your queen and king's bishop, controls d5 and f5, and keeps a Black pawn off e4 so your knight can later sit safely on f3. 1.d4 is the other main choice and gives slower, more closed games; knight moves to the edge like 1.Na3 do little for the centre.",
+      "credit": {
+       "source": "Wikibooks, Chess Opening Theory",
+       "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikibooks contributors (see the page history)"
+      }
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
+     "decision": false,
+     "main": "e7e5",
+     "mainSan": "e5",
+     "popular": {
+      "beginner": [
+       {
+        "uci": "e7e5",
+        "san": "e5",
+        "percent": 56,
+        "games": 53459
+       },
+       {
+        "uci": "e7e6",
+        "san": "e6",
+        "percent": 10,
+        "games": 9547
+       },
+       {
+        "uci": "d7d5",
+        "san": "d5",
+        "percent": 9.7,
+        "games": 9293
+       },
+       {
+        "uci": "c7c5",
+        "san": "c5",
+        "percent": 8.9,
+        "games": 8480
+       },
+       {
+        "uci": "d7d6",
+        "san": "d6",
+        "percent": 3.2,
+        "games": 3015
+       }
+      ],
+      "casual": [
+       {
+        "uci": "e7e5",
+        "san": "e5",
+        "percent": 46.8,
+        "games": 146581
+       },
+       {
+        "uci": "c7c5",
+        "san": "c5",
+        "percent": 18,
+        "games": 56313
+       },
+       {
+        "uci": "e7e6",
+        "san": "e6",
+        "percent": 11.3,
+        "games": 35389
+       },
+       {
+        "uci": "d7d5",
+        "san": "d5",
+        "percent": 6.7,
+        "games": 20854
+       },
+       {
+        "uci": "c7c6",
+        "san": "c6",
+        "percent": 4.1,
+        "games": 12924
+       }
+      ],
+      "club": [
+       {
+        "uci": "e7e5",
+        "san": "e5",
+        "percent": 31.4,
+        "games": 24465
+       },
+       {
+        "uci": "c7c5",
+        "san": "c5",
+        "percent": 28.6,
+        "games": 22268
+       },
+       {
+        "uci": "e7e6",
+        "san": "e6",
+        "percent": 14,
+        "games": 10897
+       },
+       {
+        "uci": "c7c6",
+        "san": "c6",
+        "percent": 7.6,
+        "games": 5914
+       },
+       {
+        "uci": "d7d5",
+        "san": "d5",
+        "percent": 5.6,
+        "games": 4375
+       }
+      ]
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+     "decision": true,
+     "main": "g1f3",
+     "mainSan": "Nf3",
+     "popular": {
+      "beginner": [
+       {
+        "uci": "g1f3",
+        "san": "Nf3",
+        "percent": 52.1,
+        "games": 24513
+       },
+       {
+        "uci": "f1c4",
+        "san": "Bc4",
+        "percent": 11,
+        "games": 5160
+       },
+       {
+        "uci": "d2d4",
+        "san": "d4",
+        "percent": 8.3,
+        "games": 3892
+       },
+       {
+        "uci": "d1h5",
+        "san": "Qh5",
+        "percent": 8,
+        "games": 3749
+       },
+       {
+        "uci": "d2d3",
+        "san": "d3",
+        "percent": 5.4,
+        "games": 2538
+       }
+      ],
+      "casual": [
+       {
+        "uci": "g1f3",
+        "san": "Nf3",
+        "percent": 58.4,
+        "games": 86371
+       },
+       {
+        "uci": "f1c4",
+        "san": "Bc4",
+        "percent": 13.8,
+        "games": 20442
+       },
+       {
+        "uci": "f2f4",
+        "san": "f4",
+        "percent": 9.3,
+        "games": 13797
+       },
+       {
+        "uci": "d2d4",
+        "san": "d4",
+        "percent": 5.4,
+        "games": 7935
+       },
+       {
+        "uci": "d1h5",
+        "san": "Qh5",
+        "percent": 3.4,
+        "games": 5079
+       }
+      ],
+      "club": [
+       {
+        "uci": "g1f3",
+        "san": "Nf3",
+        "percent": 65.6,
+        "games": 18961
+       },
+       {
+        "uci": "f2f4",
+        "san": "f4",
+        "percent": 12.6,
+        "games": 3630
+       },
+       {
+        "uci": "f1c4",
+        "san": "Bc4",
+        "percent": 8.3,
+        "games": 2410
+       },
+       {
+        "uci": "d2d4",
+        "san": "d4",
+        "percent": 5.8,
+        "games": 1675
+       },
+       {
+        "uci": "b1c3",
+        "san": "Nc3",
+        "percent": 3.3,
+        "games": 965
+       }
+      ]
+     },
+     "notes": {
+      "text": "Black's e5 pawn is undefended. 2.Nf3 attacks it while developing a piece, also eyes d4 and prepares castling; it is by far the most popular move. 2.f4 (King's Gambit) and 2.d4 attack with pawns instead. 2.Qh5 or 2.Qf3 hope for a quick mate, but if Black stays calm they are not dangerous.",
+      "credit": {
+       "source": "Wikibooks, Chess Opening Theory/1. e4/1...e5",
+       "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikibooks contributors (see the page history)"
+      }
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2",
+     "decision": false,
+     "main": "b8c6",
+     "mainSan": "Nc6",
+     "popular": {
+      "beginner": [
+       {
+        "uci": "b8c6",
+        "san": "Nc6",
+        "percent": 44.6,
+        "games": 13110
+       },
+       {
+        "uci": "d7d6",
+        "san": "d6",
+        "percent": 28,
+        "games": 8241
+       },
+       {
+        "uci": "g8f6",
+        "san": "Nf6",
+        "percent": 9.2,
+        "games": 2696
+       },
+       {
+        "uci": "f7f6",
+        "san": "f6",
+        "percent": 4.1,
+        "games": 1200
+       },
+       {
+        "uci": "d8f6",
+        "san": "Qf6",
+        "percent": 4,
+        "games": 1171
+       }
+      ],
+      "casual": [
+       {
+        "uci": "b8c6",
+        "san": "Nc6",
+        "percent": 55.8,
+        "games": 47366
+       },
+       {
+        "uci": "d7d6",
+        "san": "d6",
+        "percent": 26.8,
+        "games": 22733
+       },
+       {
+        "uci": "g8f6",
+        "san": "Nf6",
+        "percent": 7.7,
+        "games": 6516
+       },
+       {
+        "uci": "d8f6",
+        "san": "Qf6",
+        "percent": 3,
+        "games": 2547
+       },
+       {
+        "uci": "f8c5",
+        "san": "Bc5",
+        "percent": 1.8,
+        "games": 1561
+       }
+      ],
+      "club": [
+       {
+        "uci": "b8c6",
+        "san": "Nc6",
+        "percent": 73.4,
+        "games": 11278
+       },
+       {
+        "uci": "d7d6",
+        "san": "d6",
+        "percent": 14.6,
+        "games": 2237
+       },
+       {
+        "uci": "g8f6",
+        "san": "Nf6",
+        "percent": 6.7,
+        "games": 1029
+       },
+       {
+        "uci": "f7f5",
+        "san": "f5",
+        "percent": 2.4,
+        "games": 372
+       },
+       {
+        "uci": "d7d5",
+        "san": "d5",
+        "percent": 1.3,
+        "games": 196
+       }
+      ]
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3",
+     "decision": true,
+     "main": "f1b5",
+     "mainSan": "Bb5",
+     "popular": {
+      "beginner": [
+       {
+        "uci": "f1c4",
+        "san": "Bc4",
+        "percent": 29.3,
+        "games": 3456
+       },
+       {
+        "uci": "f1b5",
+        "san": "Bb5",
+        "percent": 26.3,
+        "games": 3093
+       },
+       {
+        "uci": "d2d4",
+        "san": "d4",
+        "percent": 17.8,
+        "games": 2094
+       },
+       {
+        "uci": "b1c3",
+        "san": "Nc3",
+        "percent": 14.6,
+        "games": 1724
+       },
+       {
+        "uci": "c2c3",
+        "san": "c3",
+        "percent": 3.7,
+        "games": 440
+       }
+      ],
+      "casual": [
+       {
+        "uci": "f1c4",
+        "san": "Bc4",
+        "percent": 37,
+        "games": 17671
+       },
+       {
+        "uci": "f1b5",
+        "san": "Bb5",
+        "percent": 27.4,
+        "games": 13082
+       },
+       {
+        "uci": "d2d4",
+        "san": "d4",
+        "percent": 17,
+        "games": 8117
+       },
+       {
+        "uci": "b1c3",
+        "san": "Nc3",
+        "percent": 8.8,
+        "games": 4218
+       },
+       {
+        "uci": "c2c3",
+        "san": "c3",
+        "percent": 4,
+        "games": 1907
+       }
+      ],
+      "club": [
+       {
+        "uci": "f1b5",
+        "san": "Bb5",
+        "percent": 37,
+        "games": 4512
+       },
+       {
+        "uci": "f1c4",
+        "san": "Bc4",
+        "percent": 33,
+        "games": 4025
+       },
+       {
+        "uci": "d2d4",
+        "san": "d4",
+        "percent": 19.7,
+        "games": 2398
+       },
+       {
+        "uci": "b1c3",
+        "san": "Nc3",
+        "percent": 6.1,
+        "games": 750
+       },
+       {
+        "uci": "c2c3",
+        "san": "c3",
+        "percent": 2.6,
+        "games": 314
+       }
+      ]
+     },
+     "notes": {
+      "text": "2...Nc6 defends e5 and controls d4. White usually develops the bishop next and keeps c3 and d4 in reserve. 3.Bb5, the Spanish, is the most popular and most studied move: by pressing the knight that guards e5 it threatens that pawn indirectly. 3.Bc4 (Italian) aims at f7 instead, and 3.d4 (Scotch) opens the centre at once.",
+      "credit": {
+       "source": "Wikibooks, Chess Opening Theory/1. e4/1...e5/2. Nf3/2...Nc6",
+       "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikibooks contributors (see the page history)"
+      }
+     }
+    },
+    {
+     "ply": 5,
+     "fen": "r1bqkbnr/pppp1ppp/2n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3",
+     "decision": false,
+     "main": "a7a6",
+     "mainSan": "a6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 6,
+     "fen": "r1bqkbnr/1ppp1ppp/p1n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 4",
+     "decision": true,
+     "main": "b5a4",
+     "mainSan": "Ba4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "3...a6 puts the question to the bishop: take or retreat, but it cannot stay. 4.Bxc6, the Exchange Variation, does not win e5 yet, because after 4...dxc6 5.Nxe5? Qd4! Black forks knight and pawn. 4.Ba4 is the main line: it keeps the bishop and the pressure on the knight. Watch out later for ...b5 and ...c4 trapping a bishop on b3.",
+      "credit": {
+       "source": "Wikibooks, Chess Opening Theory/1. e4/1...e5/2. Nf3/2...Nc6/3. Bb5/3...a6",
+       "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bb5/3...a6",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikibooks contributors (see the page history)"
+      }
+     }
+    },
+    {
+     "ply": 7,
+     "fen": "r1bqkbnr/1ppp1ppp/p1n5/4p3/B3P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 1 4",
+     "decision": false,
+     "main": "g8f6",
+     "mainSan": "Nf6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 8,
+     "fen": "r1bqkb1r/1ppp1ppp/p1n2n2/4p3/B3P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 2 5",
+     "decision": true,
+     "main": "e1g1",
+     "mainSan": "O-O",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "4...Nf6 develops and attacks e4. 5.O-O is the main line: castle to safety and get ready for Re1, leaving e4 to look after itself. If 5...Nxe4 (the Open Spanish), 6.d4 wins the pawn back. 5.d3 or 5.Nc3 defend e4 directly but get in the way of White's plan of c3 and d4.",
+      "credit": {
+       "source": "Wikibooks, Chess Opening Theory/1. e4/1...e5/2. Nf3/2...Nc6/3. Bb5/3...a6/4. Ba4/4...Nf6",
+       "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bb5/3...a6/4._Ba4/4...Nf6",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikibooks contributors (see the page history)"
+      }
+     }
+    },
+    {
+     "ply": 9,
+     "fen": "r1bqkb1r/1ppp1ppp/p1n2n2/4p3/B3P3/5N2/PPPP1PPP/RNBQ1RK1 b kq - 3 5",
+     "decision": false,
+     "main": "f8e7",
+     "mainSan": "Be7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 10,
+     "fen": "r1bqk2r/1pppbppp/p1n2n2/4p3/B3P3/5N2/PPPP1PPP/RNBQ1RK1 w kq - 4 6",
+     "decision": true,
+     "main": "f1e1",
+     "mainSan": "Re1",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "5...Be7, the Closed Spanish, guards the king along the e-file. Now Black really threatens ...b5 and ...Nxe4, winning the pawn. 6.Re1 defends e4 with a developing move. 6.Qe2 also holds it, but puts the queen on a file likely to open; 6.d3 and 6.Nc3 get in the way of c3 and d4.",
+      "credit": {
+       "source": "Wikibooks, Chess Opening Theory/1. e4/1...e5/2. Nf3/2...Nc6/3. Bb5/3...a6/4. Ba4/4...Nf6/5. O-O/5...Be7",
+       "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bb5/3...a6/4._Ba4/4...Nf6/5._O-O/5...Be7",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikibooks contributors (see the page history)"
+      }
+     }
+    },
+    {
+     "ply": 11,
+     "fen": "r1bqk2r/1pppbppp/p1n2n2/4p3/B3P3/5N2/PPPP1PPP/RNBQR1K1 b kq - 5 6",
+     "decision": false,
+     "main": "b7b5",
+     "mainSan": "b5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 12,
+     "fen": "r1bqk2r/2ppbppp/p1n2n2/1p2p3/B3P3/5N2/PPPP1PPP/RNBQR1K1 w kq - 0 7",
+     "decision": true,
+     "main": "a4b3",
+     "mainSan": "Bb3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "6...b5 ends the pressure on Black's knight by attacking the bishop. 7.Bb3 is necessary to save it, and from b3 the bishop still looks at f7.",
+      "credit": {
+       "source": "Wikibooks, Chess Opening Theory/1. e4/1...e5/2. Nf3/2...Nc6/3. Bb5/3...a6/4. Ba4/4...Nf6/5. O-O/5...Be7/6. Re1/6...b5",
+       "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bb5/3...a6/4._Ba4/4...Nf6/5._O-O/5...Be7/6._Re1/6...b5",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikibooks contributors (see the page history)"
+      }
+     }
+    },
+    {
+     "ply": 13,
+     "fen": "r1bqk2r/2ppbppp/p1n2n2/1p2p3/4P3/1B3N2/PPPP1PPP/RNBQR1K1 b kq - 1 7",
+     "decision": false,
+     "main": "d7d6",
+     "mainSan": "d6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 14,
+     "fen": "r1bqk2r/2p1bppp/p1np1n2/1p2p3/4P3/1B3N2/PPPP1PPP/RNBQR1K1 w kq - 0 8",
+     "decision": true,
+     "main": "c2c3",
+     "mainSan": "c3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "White's plan is to play d4, but 8.d4? at once is a mistake. 8.c3 prepares it, and also gives the bishop on b3 a retreat square on c2. h3 will be useful later, but 8.h3 now allows 8...Na5, swapping off the bishop.",
+      "credit": {
+       "source": "Wikibooks, Chess Opening Theory/1. e4/1...e5/2. Nf3/2...Nc6/3. Bb5/3...a6/4. Ba4/4...Nf6/5. O-O/5...Be7/6. Re1/6...b5/7. Bb3/7...d6",
+       "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bb5/3...a6/4._Ba4/4...Nf6/5._O-O/5...Be7/6._Re1/6...b5/7._Bb3/7...d6",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikibooks contributors (see the page history)"
+      }
+     }
+    }
+   ]
+  }
+ ],
+ "statsSource": "Lichess games database (CC0): lichess_db_standard_rated_2013-01.pgn, lichess_db_standard_rated_2014-07.pgn.zst, 1,169,772 rated games"
+}

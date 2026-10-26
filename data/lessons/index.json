@@ -1,0 +1,132 @@
+[
+ {
+  "id": "italian-game",
+  "name": "Italian Game",
+  "kind": "opening",
+  "side": "white",
+  "eco": "C54",
+  "decisions": 7
+ },
+ {
+  "id": "ruy-lopez",
+  "name": "Ruy Lopez",
+  "kind": "opening",
+  "side": "white",
+  "eco": "C88",
+  "decisions": 8
+ },
+ {
+  "id": "london-system",
+  "name": "London System",
+  "kind": "opening",
+  "side": "white",
+  "eco": "D00",
+  "decisions": 7
+ },
+ {
+  "id": "queens-gambit",
+  "name": "Queen's Gambit",
+  "kind": "opening",
+  "side": "white",
+  "eco": "D20",
+  "decisions": 6
+ },
+ {
+  "id": "caro-kann",
+  "name": "Caro-Kann Defence",
+  "kind": "opening",
+  "side": "black",
+  "eco": "B18",
+  "decisions": 7
+ },
+ {
+  "id": "two-knights-defence",
+  "name": "Two Knights Defence",
+  "kind": "opening",
+  "side": "black",
+  "eco": "C58",
+  "decisions": 9
+ },
+ {
+  "id": "queens-gambit-declined",
+  "name": "Queen's Gambit Declined",
+  "kind": "opening",
+  "side": "black",
+  "eco": "D63",
+  "decisions": 6
+ },
+ {
+  "id": "forks",
+  "name": "Forks",
+  "kind": "theme",
+  "side": "black",
+  "decisions": 7
+ },
+ {
+  "id": "pins",
+  "name": "Pins",
+  "kind": "theme",
+  "side": "white",
+  "decisions": 5
+ },
+ {
+  "id": "skewers",
+  "name": "Skewers",
+  "kind": "theme",
+  "side": "white",
+  "decisions": 6
+ },
+ {
+  "id": "discovered-attacks",
+  "name": "Discovered attacks",
+  "kind": "theme",
+  "side": "white",
+  "decisions": 6
+ },
+ {
+  "id": "back-rank-mate",
+  "name": "Back-rank mate",
+  "kind": "theme",
+  "side": "white",
+  "decisions": 10
+ },
+ {
+  "id": "removing-the-defender",
+  "name": "Removing the defender",
+  "kind": "theme",
+  "side": "white",
+  "decisions": 6
+ },
+ {
+  "id": "queen-mate",
+  "name": "Mate with king and queen",
+  "kind": "endgame",
+  "side": "white",
+  "decisions": 10,
+  "playOut": true
+ },
+ {
+  "id": "rook-mate",
+  "name": "Mate with king and rook",
+  "kind": "endgame",
+  "side": "white",
+  "decisions": 15,
+  "playOut": true
+ },
+ {
+  "id": "king-and-pawn",
+  "name": "King and pawn endgames",
+  "kind": "endgame",
+  "side": "white",
+  "decisions": 17,
+  "playOut": true
+ },
+ {
+  "id": "rook-endgames",
+  "name": "Rook endgames: Lucena and Philidor",
+  "kind": "endgame",
+  "side": "white",
+  "decisions": 14,
+  "playOut": true
+ }
+]

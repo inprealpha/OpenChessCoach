@@ -1,0 +1,236 @@
+{
+ "id": "skewers",
+ "name": "Skewers",
+ "kind": "theme",
+ "side": "white",
+ "puzzleTags": [],
+ "puzzleThemes": [
+  "skewer"
+ ],
+ "intro": {
+  "text": "A skewer is a pin turned around. In a pin the less valuable piece stands in front of the more valuable one; in a skewer the more valuable piece is attacked first, and when it moves away the piece behind it is lost. Skewers through the king are the strongest, because the king must move.",
+  "credit": {
+   "source": "Wikibooks, Chess/Tactics",
+   "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
+   "licence": "CC BY-SA 4.0",
+   "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "authors": "Wikibooks contributors (see the page history)"
+  }
+ },
+ "parts": [
+  {
+   "title": "King in front of the queen",
+   "fen": "3q4/pppk1ppp/8/8/8/8/PPP2PPP/R4RK1 w - - 0 1",
+   "side": "white",
+   "text": "Black's king has stepped onto d7, right in front of the queen on d8. How do you punish it?",
+   "credit": {
+    "source": "Wikibooks, Chess/Tactics",
+    "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
+    "licence": "CC BY-SA 4.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "authors": "Wikibooks contributors (see the page history)"
+   },
+   "mainLine": [
+    "a1d1",
+    "d7c8",
+    "d1d8"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "3q4/pppk1ppp/8/8/8/8/PPP2PPP/R4RK1 w - - 0 1",
+     "decision": true,
+     "main": "a1d1",
+     "mainSan": "Rad1+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Either rook to d1 skewers king and queen. Black cannot block the check, so the king must move.",
+      "credit": {
+       "source": "Wikibooks, Chess/Tactics",
+       "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikibooks contributors (see the page history)"
+      }
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "3q4/pppk1ppp/8/8/8/8/PPP2PPP/3R1RK1 b - - 1 1",
+     "decision": false,
+     "main": "d7c8",
+     "mainSan": "Kc8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "2kq4/ppp2ppp/8/8/8/8/PPP2PPP/3R1RK1 w - - 2 2",
+     "decision": true,
+     "main": "d1d8",
+     "mainSan": "Rxd8+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The king has moved out of the way and the queen behind it is lost.",
+      "credit": {
+       "source": "Wikibooks, Chess/Tactics",
+       "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
+       "licence": "CC BY-SA 4.0",
+       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "authors": "Wikibooks contributors (see the page history)"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "title": "A queen skewer",
+   "fen": "8/1p5p/p2Q2p1/4n3/8/P1Pk3P/6PK/4qN2 b - - 4 35",
+   "side": "white",
+   "text": "A position from a game played on Lichess. Black's king has just taken on c3. Find the check that wins Black's queen.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle Q9GCn",
+    "url": "https://lichess.org/training/Q9GCn",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "d3c3",
+    "d6b4",
+    "c3d3",
+    "b4e1"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "8/1p5p/p2Q2p1/4n3/8/P1Pk3P/6PK/4qN2 b - - 4 35",
+     "decision": false,
+     "main": "d3c3",
+     "mainSan": "Kxc3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "8/1p5p/p2Q2p1/4n3/8/P1k4P/6PK/4qN2 w - - 0 36",
+     "decision": true,
+     "main": "d6b4",
+     "mainSan": "Qb4+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "8/1p5p/p5p1/4n3/1Q6/P1k4P/6PK/4qN2 b - - 1 36",
+     "decision": false,
+     "main": "c3d3",
+     "mainSan": "Kd3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "8/1p5p/p5p1/4n3/1Q6/P2k3P/6PK/4qN2 w - - 2 37",
+     "decision": true,
+     "main": "b4e1",
+     "mainSan": "Qxe1",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    }
+   ]
+  },
+  {
+   "title": "A rook skewer",
+   "fen": "8/5p2/1b2p1k1/1P4p1/N5P1/6r1/8/1R2K3 w - - 2 48",
+   "side": "black",
+   "text": "A position from a game played on Lichess. White has just taken your bishop. Find the rook check that wins material back.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle AOHMD",
+    "url": "https://lichess.org/training/AOHMD",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "a4b6",
+    "g3g1",
+    "e1d2",
+    "g1b1"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "8/5p2/1b2p1k1/1P4p1/N5P1/6r1/8/1R2K3 w - - 2 48",
+     "decision": false,
+     "main": "a4b6",
+     "mainSan": "Nxb6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "8/5p2/1N2p1k1/1P4p1/6P1/6r1/8/1R2K3 b - - 0 48",
+     "decision": true,
+     "main": "g3g1",
+     "mainSan": "Rg1+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "8/5p2/1N2p1k1/1P4p1/6P1/8/8/1R2K1r1 w - - 1 49",
+     "decision": false,
+     "main": "e1d2",
+     "mainSan": "Kd2",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "8/5p2/1N2p1k1/1P4p1/6P1/8/3K4/1R4r1 b - - 2 49",
+     "decision": true,
+     "main": "g1b1",
+     "mainSan": "Rxb1",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    }
+   ]
+  }
+ ]
+}

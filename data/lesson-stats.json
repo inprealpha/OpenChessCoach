@@ -1,0 +1,4761 @@
+{
+ "source": "lichess_db_standard_rated_2013-01.pgn, lichess_db_standard_rated_2014-07.pgn.zst",
+ "games": 1169772,
+ "positions": {
+  "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -": {
+   "beginner": {
+    "total": 143541,
+    "moves": [
+     {
+      "uci": "e2e4",
+      "games": 87398
+     },
+     {
+      "uci": "d2d4",
+      "games": 29948
+     },
+     {
+      "uci": "e2e3",
+      "games": 7238
+     },
+     {
+      "uci": "g1f3",
+      "games": 4156
+     },
+     {
+      "uci": "c2c4",
+      "games": 2915
+     },
+     {
+      "uci": "g2g3",
+      "games": 2421
+     },
+     {
+      "uci": "b1c3",
+      "games": 1794
+     },
+     {
+      "uci": "d2d3",
+      "games": 1468
+     }
+    ]
+   },
+   "casual": {
+    "total": 515801,
+    "moves": [
+     {
+      "uci": "e2e4",
+      "games": 318036
+     },
+     {
+      "uci": "d2d4",
+      "games": 130955
+     },
+     {
+      "uci": "c2c4",
+      "games": 15815
+     },
+     {
+      "uci": "g1f3",
+      "games": 11842
+     },
+     {
+      "uci": "e2e3",
+      "games": 10471
+     },
+     {
+      "uci": "g2g3",
+      "games": 7507
+     },
+     {
+      "uci": "f2f4",
+      "games": 5435
+     },
+     {
+      "uci": "b2b3",
+      "games": 5130
+     }
+    ]
+   },
+   "club": {
+    "total": 138610,
+    "moves": [
+     {
+      "uci": "e2e4",
+      "games": 81381
+     },
+     {
+      "uci": "d2d4",
+      "games": 40443
+     },
+     {
+      "uci": "g1f3",
+      "games": 5163
+     },
+     {
+      "uci": "c2c4",
+      "games": 4742
+     },
+     {
+      "uci": "e2e3",
+      "games": 1544
+     },
+     {
+      "uci": "f2f4",
+      "games": 1124
+     },
+     {
+      "uci": "g2g3",
+      "games": 1072
+     },
+     {
+      "uci": "b2b3",
+      "games": 696
+     }
+    ]
+   }
+  },
+  "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq -": {
+   "beginner": {
+    "total": 95488,
+    "moves": [
+     {
+      "uci": "e7e5",
+      "games": 53459
+     },
+     {
+      "uci": "e7e6",
+      "games": 9547
+     },
+     {
+      "uci": "d7d5",
+      "games": 9293
+     },
+     {
+      "uci": "c7c5",
+      "games": 8480
+     },
+     {
+      "uci": "d7d6",
+      "games": 3015
+     },
+     {
+      "uci": "b8c6",
+      "games": 2628
+     },
+     {
+      "uci": "b7b6",
+      "games": 1989
+     },
+     {
+      "uci": "g7g6",
+      "games": 1838
+     }
+    ]
+   },
+   "casual": {
+    "total": 313355,
+    "moves": [
+     {
+      "uci": "e7e5",
+      "games": 146581
+     },
+     {
+      "uci": "c7c5",
+      "games": 56313
+     },
+     {
+      "uci": "e7e6",
+      "games": 35389
+     },
+     {
+      "uci": "d7d5",
+      "games": 20854
+     },
+     {
+      "uci": "c7c6",
+      "games": 12924
+     },
+     {
+      "uci": "g7g6",
+      "games": 8956
+     },
+     {
+      "uci": "d7d6",
+      "games": 8917
+     },
+     {
+      "uci": "b7b6",
+      "games": 8305
+     }
+    ]
+   },
+   "club": {
+    "total": 77949,
+    "moves": [
+     {
+      "uci": "e7e5",
+      "games": 24465
+     },
+     {
+      "uci": "c7c5",
+      "games": 22268
+     },
+     {
+      "uci": "e7e6",
+      "games": 10897
+     },
+     {
+      "uci": "c7c6",
+      "games": 5914
+     },
+     {
+      "uci": "d7d5",
+      "games": 4375
+     },
+     {
+      "uci": "d7d6",
+      "games": 3289
+     },
+     {
+      "uci": "g8f6",
+      "games": 2233
+     },
+     {
+      "uci": "g7g6",
+      "games": 1727
+     }
+    ]
+   }
+  },
+  "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq -": {
+   "beginner": {
+    "total": 34487,
+    "moves": [
+     {
+      "uci": "d7d5",
+      "games": 19281
+     },
+     {
+      "uci": "e7e6",
+      "games": 5107
+     },
+     {
+      "uci": "g8f6",
+      "games": 2831
+     },
+     {
+      "uci": "d7d6",
+      "games": 1479
+     },
+     {
+      "uci": "g7g6",
+      "games": 937
+     },
+     {
+      "uci": "e7e5",
+      "games": 828
+     },
+     {
+      "uci": "b8c6",
+      "games": 787
+     },
+     {
+      "uci": "c7c5",
+      "games": 741
+     }
+    ]
+   },
+   "casual": {
+    "total": 128639,
+    "moves": [
+     {
+      "uci": "d7d5",
+      "games": 62610
+     },
+     {
+      "uci": "g8f6",
+      "games": 21621
+     },
+     {
+      "uci": "e7e6",
+      "games": 16493
+     },
+     {
+      "uci": "g7g6",
+      "games": 5889
+     },
+     {
+      "uci": "c7c5",
+      "games": 4024
+     },
+     {
+      "uci": "d7d6",
+      "games": 3766
+     },
+     {
+      "uci": "b7b6",
+      "games": 3448
+     },
+     {
+      "uci": "c7c6",
+      "games": 3134
+     }
+    ]
+   },
+   "club": {
+    "total": 38206,
+    "moves": [
+     {
+      "uci": "d7d5",
+      "games": 13964
+     },
+     {
+      "uci": "g8f6",
+      "games": 11701
+     },
+     {
+      "uci": "e7e6",
+      "games": 4254
+     },
+     {
+      "uci": "c7c5",
+      "games": 1473
+     },
+     {
+      "uci": "c7c6",
+      "games": 1309
+     },
+     {
+      "uci": "g7g6",
+      "games": 1276
+     },
+     {
+      "uci": "f7f5",
+      "games": 1274
+     },
+     {
+      "uci": "d7d6",
+      "games": 1258
+     }
+    ]
+   }
+  },
+  "rnbqkbnr/ppp1pppp/8/3p4/3P4/8/PPP1PPPP/RNBQKBNR w KQkq -": {
+   "beginner": {
+    "total": 16398,
+    "moves": [
+     {
+      "uci": "c2c4",
+      "games": 4200
+     },
+     {
+      "uci": "e2e3",
+      "games": 4057
+     },
+     {
+      "uci": "b1c3",
+      "games": 2116
+     },
+     {
+      "uci": "g1f3",
+      "games": 1966
+     },
+     {
+      "uci": "c1f4",
+      "games": 1193
+     },
+     {
+      "uci": "f2f4",
+      "games": 485
+     },
+     {
+      "uci": "c2c3",
+      "games": 462
+     },
+     {
+      "uci": "f2f3",
+      "games": 368
+     }
+    ]
+   },
+   "casual": {
+    "total": 62833,
+    "moves": [
+     {
+      "uci": "c2c4",
+      "games": 26913
+     },
+     {
+      "uci": "g1f3",
+      "games": 9770
+     },
+     {
+      "uci": "e2e3",
+      "games": 8455
+     },
+     {
+      "uci": "b1c3",
+      "games": 4886
+     },
+     {
+      "uci": "c1f4",
+      "games": 4380
+     },
+     {
+      "uci": "c1g5",
+      "games": 1892
+     },
+     {
+      "uci": "h2h3",
+      "games": 1460
+     },
+     {
+      "uci": "f2f4",
+      "games": 1082
+     }
+    ]
+   },
+   "club": {
+    "total": 16390,
+    "moves": [
+     {
+      "uci": "c2c4",
+      "games": 9506
+     },
+     {
+      "uci": "g1f3",
+      "games": 3231
+     },
+     {
+      "uci": "e2e3",
+      "games": 1709
+     },
+     {
+      "uci": "c1f4",
+      "games": 435
+     },
+     {
+      "uci": "c1g5",
+      "games": 399
+     },
+     {
+      "uci": "f2f4",
+      "games": 358
+     },
+     {
+      "uci": "b1c3",
+      "games": 252
+     },
+     {
+      "uci": "g2g3",
+      "games": 210
+     }
+    ]
+   }
+  },
+  "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq -": {
+   "beginner": {
+    "total": 47034,
+    "moves": [
+     {
+      "uci": "g1f3",
+      "games": 24513
+     },
+     {
+      "uci": "f1c4",
+      "games": 5160
+     },
+     {
+      "uci": "d2d4",
+      "games": 3892
+     },
+     {
+      "uci": "d1h5",
+      "games": 3749
+     },
+     {
+      "uci": "d2d3",
+      "games": 2538
+     },
+     {
+      "uci": "b1c3",
+      "games": 1711
+     },
+     {
+      "uci": "d1f3",
+      "games": 1467
+     },
+     {
+      "uci": "f2f4",
+      "games": 1335
+     }
+    ]
+   },
+   "casual": {
+    "total": 147873,
+    "moves": [
+     {
+      "uci": "g1f3",
+      "games": 86371
+     },
+     {
+      "uci": "f1c4",
+      "games": 20442
+     },
+     {
+      "uci": "f2f4",
+      "games": 13797
+     },
+     {
+      "uci": "d2d4",
+      "games": 7935
+     },
+     {
+      "uci": "d1h5",
+      "games": 5079
+     },
+     {
+      "uci": "d2d3",
+      "games": 4318
+     },
+     {
+      "uci": "b1c3",
+      "games": 3771
+     },
+     {
+      "uci": "d1f3",
+      "games": 1778
+     }
+    ]
+   },
+   "club": {
+    "total": 28910,
+    "moves": [
+     {
+      "uci": "g1f3",
+      "games": 18961
+     },
+     {
+      "uci": "f2f4",
+      "games": 3630
+     },
+     {
+      "uci": "f1c4",
+      "games": 2410
+     },
+     {
+      "uci": "d2d4",
+      "games": 1675
+     },
+     {
+      "uci": "b1c3",
+      "games": 965
+     },
+     {
+      "uci": "d2d3",
+      "games": 624
+     },
+     {
+      "uci": "d1f3",
+      "games": 151
+     }
+    ]
+   }
+  },
+  "rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq -": {
+   "beginner": {
+    "total": 29400,
+    "moves": [
+     {
+      "uci": "b8c6",
+      "games": 13110
+     },
+     {
+      "uci": "d7d6",
+      "games": 8241
+     },
+     {
+      "uci": "g8f6",
+      "games": 2696
+     },
+     {
+      "uci": "f7f6",
+      "games": 1200
+     },
+     {
+      "uci": "d8f6",
+      "games": 1171
+     },
+     {
+      "uci": "d7d5",
+      "games": 804
+     },
+     {
+      "uci": "f8c5",
+      "games": 717
+     },
+     {
+      "uci": "f8d6",
+      "games": 459
+     }
+    ]
+   },
+   "casual": {
+    "total": 84810,
+    "moves": [
+     {
+      "uci": "b8c6",
+      "games": 47366
+     },
+     {
+      "uci": "d7d6",
+      "games": 22733
+     },
+     {
+      "uci": "g8f6",
+      "games": 6516
+     },
+     {
+      "uci": "d8f6",
+      "games": 2547
+     },
+     {
+      "uci": "f8c5",
+      "games": 1561
+     },
+     {
+      "uci": "d7d5",
+      "games": 1279
+     },
+     {
+      "uci": "f7f5",
+      "games": 788
+     },
+     {
+      "uci": "f7f6",
+      "games": 759
+     }
+    ]
+   },
+   "club": {
+    "total": 15366,
+    "moves": [
+     {
+      "uci": "b8c6",
+      "games": 11278
+     },
+     {
+      "uci": "d7d6",
+      "games": 2237
+     },
+     {
+      "uci": "g8f6",
+      "games": 1029
+     },
+     {
+      "uci": "f7f5",
+      "games": 372
+     },
+     {
+      "uci": "d7d5",
+      "games": 196
+     },
+     {
+      "uci": "d8f6",
+      "games": 79
+     }
+    ]
+   }
+  },
+  "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq -": {
+   "beginner": {
+    "total": 11780,
+    "moves": [
+     {
+      "uci": "f1c4",
+      "games": 3456
+     },
+     {
+      "uci": "f1b5",
+      "games": 3093
+     },
+     {
+      "uci": "d2d4",
+      "games": 2094
+     },
+     {
+      "uci": "b1c3",
+      "games": 1724
+     },
+     {
+      "uci": "c2c3",
+      "games": 440
+     },
+     {
+      "uci": "d2d3",
+      "games": 371
+     },
+     {
+      "uci": "a2a3",
+      "games": 171
+     },
+     {
+      "uci": "g2g3",
+      "games": 91
+     }
+    ]
+   },
+   "casual": {
+    "total": 47724,
+    "moves": [
+     {
+      "uci": "f1c4",
+      "games": 17671
+     },
+     {
+      "uci": "f1b5",
+      "games": 13082
+     },
+     {
+      "uci": "d2d4",
+      "games": 8117
+     },
+     {
+      "uci": "b1c3",
+      "games": 4218
+     },
+     {
+      "uci": "c2c3",
+      "games": 1907
+     },
+     {
+      "uci": "d2d3",
+      "games": 613
+     },
+     {
+      "uci": "a2a3",
+      "games": 515
+     },
+     {
+      "uci": "f1e2",
+      "games": 410
+     }
+    ]
+   },
+   "club": {
+    "total": 12200,
+    "moves": [
+     {
+      "uci": "f1b5",
+      "games": 4512
+     },
+     {
+      "uci": "f1c4",
+      "games": 4025
+     },
+     {
+      "uci": "d2d4",
+      "games": 2398
+     },
+     {
+      "uci": "b1c3",
+      "games": 750
+     },
+     {
+      "uci": "c2c3",
+      "games": 314
+     },
+     {
+      "uci": "f1e2",
+      "games": 86
+     }
+    ]
+   }
+  },
+  "r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R b KQkq -": {
+   "beginner": {
+    "total": 4373,
+    "moves": [
+     {
+      "uci": "g8f6",
+      "games": 1456
+     },
+     {
+      "uci": "h7h6",
+      "games": 911
+     },
+     {
+      "uci": "f8c5",
+      "games": 743
+     },
+     {
+      "uci": "d7d6",
+      "games": 366
+     },
+     {
+      "uci": "c6d4",
+      "games": 207
+     },
+     {
+      "uci": "a7a6",
+      "games": 103
+     },
+     {
+      "uci": "f7f6",
+      "games": 99
+     },
+     {
+      "uci": "f8e7",
+      "games": 90
+     }
+    ]
+   },
+   "casual": {
+    "total": 17066,
+    "moves": [
+     {
+      "uci": "g8f6",
+      "games": 4944
+     },
+     {
+      "uci": "f8c5",
+      "games": 4731
+     },
+     {
+      "uci": "h7h6",
+      "games": 3837
+     },
+     {
+      "uci": "d7d6",
+      "games": 1050
+     },
+     {
+      "uci": "c6d4",
+      "games": 827
+     },
+     {
+      "uci": "f8e7",
+      "games": 728
+     },
+     {
+      "uci": "a7a6",
+      "games": 167
+     },
+     {
+      "uci": "f7f5",
+      "games": 142
+     }
+    ]
+   },
+   "club": {
+    "total": 3696,
+    "moves": [
+     {
+      "uci": "f8c5",
+      "games": 1476
+     },
+     {
+      "uci": "g8f6",
+      "games": 1249
+     },
+     {
+      "uci": "f8e7",
+      "games": 288
+     },
+     {
+      "uci": "h7h6",
+      "games": 282
+     },
+     {
+      "uci": "c6d4",
+      "games": 191
+     },
+     {
+      "uci": "d7d6",
+      "games": 146
+     },
+     {
+      "uci": "f7f5",
+      "games": 24
+     }
+    ]
+   }
+  },
+  "r1bqk1nr/pppp1ppp/2n5/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq -": {
+   "beginner": {
+    "total": 743,
+    "moves": [
+     {
+      "uci": "d2d3",
+      "games": 229
+     },
+     {
+      "uci": "e1g1",
+      "games": 154
+     },
+     {
+      "uci": "c2c3",
+      "games": 106
+     },
+     {
+      "uci": "b1c3",
+      "games": 83
+     },
+     {
+      "uci": "b2b4",
+      "games": 58
+     },
+     {
+      "uci": "f3g5",
+      "games": 44
+     },
+     {
+      "uci": "d2d4",
+      "games": 23
+     },
+     {
+      "uci": "a2a3",
+      "games": 19
+     }
+    ]
+   },
+   "casual": {
+    "total": 4787,
+    "moves": [
+     {
+      "uci": "c2c3",
+      "games": 1176
+     },
+     {
+      "uci": "d2d3",
+      "games": 1158
+     },
+     {
+      "uci": "e1g1",
+      "games": 1058
+     },
+     {
+      "uci": "b1c3",
+      "games": 685
+     },
+     {
+      "uci": "b2b4",
+      "games": 328
+     },
+     {
+      "uci": "d2d4",
+      "games": 121
+     },
+     {
+      "uci": "a2a3",
+      "games": 103
+     },
+     {
+      "uci": "f3g5",
+      "games": 60
+     }
+    ]
+   },
+   "club": {
+    "total": 1412,
+    "moves": [
+     {
+      "uci": "c2c3",
+      "games": 513
+     },
+     {
+      "uci": "e1g1",
+      "games": 358
+     },
+     {
+      "uci": "b1c3",
+      "games": 196
+     },
+     {
+      "uci": "b2b4",
+      "games": 160
+     },
+     {
+      "uci": "d2d3",
+      "games": 119
+     },
+     {
+      "uci": "d2d4",
+      "games": 35
+     },
+     {
+      "uci": "a2a3",
+      "games": 14
+     }
+    ]
+   }
+  },
+  "rnbqkbnr/ppp1pppp/8/3p4/2PP4/8/PP2PPPP/RNBQKBNR b KQkq -": {
+   "beginner": {
+    "total": 6175,
+    "moves": [
+     {
+      "uci": "d5c4",
+      "games": 2518
+     },
+     {
+      "uci": "e7e6",
+      "games": 1181
+     },
+     {
+      "uci": "g8f6",
+      "games": 910
+     },
+     {
+      "uci": "c7c6",
+      "games": 764
+     },
+     {
+      "uci": "c7c5",
+      "games": 183
+     },
+     {
+      "uci": "e7e5",
+      "games": 169
+     },
+     {
+      "uci": "b8c6",
+      "games": 147
+     },
+     {
+      "uci": "c8f5",
+      "games": 110
+     }
+    ]
+   },
+   "casual": {
+    "total": 27249,
+    "moves": [
+     {
+      "uci": "d5c4",
+      "games": 7650
+     },
+     {
+      "uci": "e7e6",
+      "games": 6797
+     },
+     {
+      "uci": "c7c6",
+      "games": 6277
+     },
+     {
+      "uci": "g8f6",
+      "games": 3303
+     },
+     {
+      "uci": "e7e5",
+      "games": 749
+     },
+     {
+      "uci": "c8f5",
+      "games": 730
+     },
+     {
+      "uci": "c7c5",
+      "games": 701
+     },
+     {
+      "uci": "b8c6",
+      "games": 484
+     }
+    ]
+   },
+   "club": {
+    "total": 7098,
+    "moves": [
+     {
+      "uci": "e7e6",
+      "games": 2693
+     },
+     {
+      "uci": "c7c6",
+      "games": 2381
+     },
+     {
+      "uci": "d5c4",
+      "games": 847
+     },
+     {
+      "uci": "g8f6",
+      "games": 542
+     },
+     {
+      "uci": "e7e5",
+      "games": 270
+     },
+     {
+      "uci": "b8c6",
+      "games": 136
+     },
+     {
+      "uci": "c7c5",
+      "games": 103
+     },
+     {
+      "uci": "c8f5",
+      "games": 89
+     }
+    ]
+   }
+  },
+  "rnbqkbnr/ppp1pppp/8/8/2pP4/8/PP2PPPP/RNBQKBNR w KQkq -": {
+   "beginner": {
+    "total": 1636,
+    "moves": [
+     {
+      "uci": "b1c3",
+      "games": 571
+     },
+     {
+      "uci": "e2e3",
+      "games": 482
+     },
+     {
+      "uci": "e2e4",
+      "games": 298
+     },
+     {
+      "uci": "g1f3",
+      "games": 149
+     },
+     {
+      "uci": "d1a4",
+      "games": 90
+     },
+     {
+      "uci": "c1f4",
+      "games": 15
+     },
+     {
+      "uci": "d4d5",
+      "games": 12
+     }
+    ]
+   },
+   "casual": {
+    "total": 7647,
+    "moves": [
+     {
+      "uci": "b1c3",
+      "games": 3016
+     },
+     {
+      "uci": "e2e3",
+      "games": 2256
+     },
+     {
+      "uci": "e2e4",
+      "games": 1361
+     },
+     {
+      "uci": "g1f3",
+      "games": 546
+     },
+     {
+      "uci": "d1a4",
+      "games": 330
+     },
+     {
+      "uci": "a2a4",
+      "games": 46
+     },
+     {
+      "uci": "d4d5",
+      "games": 44
+     }
+    ]
+   },
+   "club": {
+    "total": 1722,
+    "moves": [
+     {
+      "uci": "b1c3",
+      "games": 706
+     },
+     {
+      "uci": "e2e3",
+      "games": 445
+     },
+     {
+      "uci": "e2e4",
+      "games": 279
+     },
+     {
+      "uci": "g1f3",
+      "games": 224
+     },
+     {
+      "uci": "d1a4",
+      "games": 55
+     }
+    ]
+   }
+  },
+  "rnbqkbnr/pp1ppppp/2p5/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq -": {
+   "beginner": {
+    "total": 2076,
+    "moves": [
+     {
+      "uci": "d2d4",
+      "games": 692
+     },
+     {
+      "uci": "g1f3",
+      "games": 494
+     },
+     {
+      "uci": "f1c4",
+      "games": 268
+     },
+     {
+      "uci": "b1c3",
+      "games": 159
+     },
+     {
+      "uci": "d2d3",
+      "games": 98
+     },
+     {
+      "uci": "e4e5",
+      "games": 94
+     },
+     {
+      "uci": "d1f3",
+      "games": 53
+     },
+     {
+      "uci": "d1h5",
+      "games": 44
+     }
+    ]
+   },
+   "casual": {
+    "total": 13042,
+    "moves": [
+     {
+      "uci": "d2d4",
+      "games": 5362
+     },
+     {
+      "uci": "g1f3",
+      "games": 3585
+     },
+     {
+      "uci": "f1c4",
+      "games": 1300
+     },
+     {
+      "uci": "f2f4",
+      "games": 795
+     },
+     {
+      "uci": "b1c3",
+      "games": 555
+     },
+     {
+      "uci": "d2d3",
+      "games": 352
+     },
+     {
+      "uci": "c2c4",
+      "games": 318
+     },
+     {
+      "uci": "e4e5",
+      "games": 185
+     }
+    ]
+   },
+   "club": {
+    "total": 5455,
+    "moves": [
+     {
+      "uci": "d2d4",
+      "games": 3204
+     },
+     {
+      "uci": "g1f3",
+      "games": 1058
+     },
+     {
+      "uci": "b1c3",
+      "games": 337
+     },
+     {
+      "uci": "f2f4",
+      "games": 265
+     },
+     {
+      "uci": "c2c4",
+      "games": 175
+     },
+     {
+      "uci": "d2d3",
+      "games": 166
+     },
+     {
+      "uci": "f1c4",
+      "games": 138
+     },
+     {
+      "uci": "g2g3",
+      "games": 28
+     }
+    ]
+   }
+  },
+  "rnbqkbnr/ppp2ppp/4p3/3p4/2PP4/8/PP2PPPP/RNBQKBNR w KQkq -": {
+   "beginner": {
+    "total": 838,
+    "moves": [
+     {
+      "uci": "b1c3",
+      "games": 334
+     },
+     {
+      "uci": "e2e3",
+      "games": 148
+     },
+     {
+      "uci": "g1f3",
+      "games": 109
+     },
+     {
+      "uci": "c4d5",
+      "games": 83
+     },
+     {
+      "uci": "a2a3",
+      "games": 75
+     },
+     {
+      "uci": "c4c5",
+      "games": 41
+     },
+     {
+      "uci": "c1f4",
+      "games": 22
+     },
+     {
+      "uci": "g1h3",
+      "games": 5
+     }
+    ]
+   },
+   "casual": {
+    "total": 6733,
+    "moves": [
+     {
+      "uci": "b1c3",
+      "games": 3838
+     },
+     {
+      "uci": "g1f3",
+      "games": 894
+     },
+     {
+      "uci": "e2e3",
+      "games": 775
+     },
+     {
+      "uci": "c4d5",
+      "games": 504
+     },
+     {
+      "uci": "a2a3",
+      "games": 423
+     },
+     {
+      "uci": "c4c5",
+      "games": 170
+     },
+     {
+      "uci": "c1f4",
+      "games": 71
+     }
+    ]
+   },
+   "club": {
+    "total": 3090,
+    "moves": [
+     {
+      "uci": "b1c3",
+      "games": 2179
+     },
+     {
+      "uci": "g1f3",
+      "games": 455
+     },
+     {
+      "uci": "e2e3",
+      "games": 174
+     },
+     {
+      "uci": "c4d5",
+      "games": 139
+     },
+     {
+      "uci": "a2a3",
+      "games": 92
+     },
+     {
+      "uci": "c1f4",
+      "games": 20
+     },
+     {
+      "uci": "g2g3",
+      "games": 17
+     }
+    ]
+   }
+  },
+  "rnbqkbnr/ppp1pppp/8/8/2pP4/4P3/PP3PPP/RNBQKBNR b KQkq -": {
+   "beginner": {
+    "total": 768,
+    "moves": [
+     {
+      "uci": "b7b5",
+      "games": 229
+     },
+     {
+      "uci": "g8f6",
+      "games": 100
+     },
+     {
+      "uci": "e7e6",
+      "games": 99
+     },
+     {
+      "uci": "c8e6",
+      "games": 96
+     },
+     {
+      "uci": "b8c6",
+      "games": 57
+     },
+     {
+      "uci": "c8f5",
+      "games": 41
+     },
+     {
+      "uci": "e7e5",
+      "games": 32
+     },
+     {
+      "uci": "d8d5",
+      "games": 30
+     }
+    ]
+   },
+   "casual": {
+    "total": 2219,
+    "moves": [
+     {
+      "uci": "b7b5",
+      "games": 629
+     },
+     {
+      "uci": "e7e6",
+      "games": 421
+     },
+     {
+      "uci": "g8f6",
+      "games": 360
+     },
+     {
+      "uci": "c8e6",
+      "games": 178
+     },
+     {
+      "uci": "e7e5",
+      "games": 153
+     },
+     {
+      "uci": "c8f5",
+      "games": 143
+     },
+     {
+      "uci": "b8c6",
+      "games": 68
+     },
+     {
+      "uci": "c7c6",
+      "games": 52
+     }
+    ]
+   },
+   "club": {
+    "total": 193,
+    "moves": [
+     {
+      "uci": "e7e6",
+      "games": 46
+     },
+     {
+      "uci": "e7e5",
+      "games": 37
+     },
+     {
+      "uci": "g8f6",
+      "games": 33
+     },
+     {
+      "uci": "b7b5",
+      "games": 27
+     },
+     {
+      "uci": "c8e6",
+      "games": 13
+     },
+     {
+      "uci": "c8f5",
+      "games": 11
+     },
+     {
+      "uci": "c7c6",
+      "games": 7
+     },
+     {
+      "uci": "b8c6",
+      "games": 6
+     }
+    ]
+   }
+  },
+  "rnbqkbnr/pp1ppppp/2p5/8/3PP3/8/PPP2PPP/RNBQKBNR b KQkq -": {
+   "beginner": {
+    "total": 658,
+    "moves": [
+     {
+      "uci": "d7d5",
+      "games": 471
+     },
+     {
+      "uci": "e7e6",
+      "games": 56
+     },
+     {
+      "uci": "d7d6",
+      "games": 26
+     },
+     {
+      "uci": "b7b5",
+      "games": 26
+     },
+     {
+      "uci": "e7e5",
+      "games": 11
+     },
+     {
+      "uci": "f7f6",
+      "games": 11
+     },
+     {
+      "uci": "g8f6",
+      "games": 10
+     },
+     {
+      "uci": "d8c7",
+      "games": 9
+     }
+    ]
+   },
+   "casual": {
+    "total": 5482,
+    "moves": [
+     {
+      "uci": "d7d5",
+      "games": 4787
+     },
+     {
+      "uci": "e7e6",
+      "games": 252
+     },
+     {
+      "uci": "d7d6",
+      "games": 144
+     },
+     {
+      "uci": "g7g6",
+      "games": 83
+     },
+     {
+      "uci": "b7b5",
+      "games": 50
+     },
+     {
+      "uci": "b7b6",
+      "games": 34
+     },
+     {
+      "uci": "e7e5",
+      "games": 33
+     }
+    ]
+   },
+   "club": {
+    "total": 3106,
+    "moves": [
+     {
+      "uci": "d7d5",
+      "games": 2963
+     },
+     {
+      "uci": "d7d6",
+      "games": 70
+     },
+     {
+      "uci": "g7g6",
+      "games": 41
+     },
+     {
+      "uci": "e7e6",
+      "games": 17
+     }
+    ]
+   }
+  },
+  "rnbqkbnr/pp2pppp/2p5/3p4/3PP3/8/PPP2PPP/RNBQKBNR w KQkq -": {
+   "beginner": {
+    "total": 582,
+    "moves": [
+     {
+      "uci": "e4e5",
+      "games": 290
+     },
+     {
+      "uci": "e4d5",
+      "games": 127
+     },
+     {
+      "uci": "b1c3",
+      "games": 109
+     },
+     {
+      "uci": "f2f3",
+      "games": 22
+     },
+     {
+      "uci": "b1d2",
+      "games": 11
+     },
+     {
+      "uci": "f1d3",
+      "games": 5
+     },
+     {
+      "uci": "c2c3",
+      "games": 4
+     },
+     {
+      "uci": "c2c4",
+      "games": 4
+     }
+    ]
+   },
+   "casual": {
+    "total": 4667,
+    "moves": [
+     {
+      "uci": "e4e5",
+      "games": 2312
+     },
+     {
+      "uci": "e4d5",
+      "games": 1228
+     },
+     {
+      "uci": "b1c3",
+      "games": 845
+     },
+     {
+      "uci": "f2f3",
+      "games": 103
+     },
+     {
+      "uci": "b1d2",
+      "games": 95
+     },
+     {
+      "uci": "f1d3",
+      "games": 43
+     },
+     {
+      "uci": "c2c4",
+      "games": 25
+     }
+    ]
+   },
+   "club": {
+    "total": 2959,
+    "moves": [
+     {
+      "uci": "e4e5",
+      "games": 1007
+     },
+     {
+      "uci": "e4d5",
+      "games": 812
+     },
+     {
+      "uci": "b1c3",
+      "games": 768
+     },
+     {
+      "uci": "b1d2",
+      "games": 176
+     },
+     {
+      "uci": "f2f3",
+      "games": 150
+     },
+     {
+      "uci": "f1d3",
+      "games": 22
+     },
+     {
+      "uci": "c2c4",
+      "games": 17
+     }
+    ]
+   }
+  },
+  "rnbqkbnr/ppp1pppp/8/3p4/3P1B2/8/PPP1PPPP/RN1QKBNR b KQkq -": {
+   "beginner": {
+    "total": 1405,
+    "moves": [
+     {
+      "uci": "b8c6",
+      "games": 447
+     },
+     {
+      "uci": "e7e6",
+      "games": 299
+     },
+     {
+      "uci": "g8f6",
+      "games": 237
+     },
+     {
+      "uci": "c8f5",
+      "games": 117
+     },
+     {
+      "uci": "c7c6",
+      "games": 57
+     },
+     {
+      "uci": "f7f6",
+      "games": 54
+     },
+     {
+      "uci": "h7h6",
+      "games": 34
+     },
+     {
+      "uci": "c7c5",
+      "games": 32
+     }
+    ]
+   },
+   "casual": {
+    "total": 3923,
+    "moves": [
+     {
+      "uci": "b8c6",
+      "games": 999
+     },
+     {
+      "uci": "g8f6",
+      "games": 901
+     },
+     {
+      "uci": "e7e6",
+      "games": 868
+     },
+     {
+      "uci": "c8f5",
+      "games": 465
+     },
+     {
+      "uci": "c7c6",
+      "games": 194
+     },
+     {
+      "uci": "c7c5",
+      "games": 128
+     },
+     {
+      "uci": "g7g6",
+      "games": 77
+     },
+     {
+      "uci": "f7f6",
+      "games": 64
+     }
+    ]
+   },
+   "club": {
+    "total": 667,
+    "moves": [
+     {
+      "uci": "g8f6",
+      "games": 204
+     },
+     {
+      "uci": "e7e6",
+      "games": 176
+     },
+     {
+      "uci": "c7c6",
+      "games": 75
+     },
+     {
+      "uci": "b8c6",
+      "games": 72
+     },
+     {
+      "uci": "c8f5",
+      "games": 68
+     },
+     {
+      "uci": "c7c5",
+      "games": 24
+     },
+     {
+      "uci": "g7g6",
+      "games": 20
+     },
+     {
+      "uci": "b8d7",
+      "games": 7
+     }
+    ]
+   }
+  },
+  "r1bqk1nr/pppp1ppp/2n5/2b1p3/2B1P3/2P2N2/PP1P1PPP/RNBQK2R b KQkq -": {
+   "beginner": {
+    "total": 145,
+    "moves": [
+     {
+      "uci": "g8f6",
+      "games": 79
+     },
+     {
+      "uci": "d7d6",
+      "games": 29
+     },
+     {
+      "uci": "a7a6",
+      "games": 12
+     },
+     {
+      "uci": "h7h6",
+      "games": 11
+     },
+     {
+      "uci": "d8f6",
+      "games": 5
+     },
+     {
+      "uci": "g8h6",
+      "games": 2
+     },
+     {
+      "uci": "c6a5",
+      "games": 2
+     },
+     {
+      "uci": "d7d5",
+      "games": 1
+     }
+    ]
+   },
+   "casual": {
+    "total": 1191,
+    "moves": [
+     {
+      "uci": "g8f6",
+      "games": 627
+     },
+     {
+      "uci": "d7d6",
+      "games": 356
+     },
+     {
+      "uci": "h7h6",
+      "games": 87
+     },
+     {
+      "uci": "a7a6",
+      "games": 40
+     },
+     {
+      "uci": "d8f6",
+      "games": 27
+     },
+     {
+      "uci": "g8e7",
+      "games": 13
+     },
+     {
+      "uci": "a7a5",
+      "games": 11
+     },
+     {
+      "uci": "c5b6",
+      "games": 6
+     }
+    ]
+   },
+   "club": {
+    "total": 459,
+    "moves": [
+     {
+      "uci": "g8f6",
+      "games": 308
+     },
+     {
+      "uci": "d7d6",
+      "games": 93
+     },
+     {
+      "uci": "h7h6",
+      "games": 13
+     },
+     {
+      "uci": "d8e7",
+      "games": 11
+     },
+     {
+      "uci": "d8f6",
+      "games": 9
+     },
+     {
+      "uci": "a7a6",
+      "games": 8
+     },
+     {
+      "uci": "f7f5",
+      "games": 5
+     },
+     {
+      "uci": "g8e7",
+      "games": 5
+     }
+    ]
+   }
+  },
+  "r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/2P2N2/PP1P1PPP/RNBQK2R w KQkq -": {
+   "beginner": {
+    "total": 60,
+    "moves": [
+     {
+      "uci": "d2d4",
+      "games": 31
+     },
+     {
+      "uci": "d2d3",
+      "games": 18
+     },
+     {
+      "uci": "f3g5",
+      "games": 4
+     },
+     {
+      "uci": "d1b3",
+      "games": 2
+     },
+     {
+      "uci": "e1g1",
+      "games": 2
+     },
+     {
+      "uci": "c4f7",
+      "games": 1
+     },
+     {
+      "uci": "b2b4",
+      "games": 1
+     },
+     {
+      "uci": "d1e2",
+      "games": 1
+     }
+    ]
+   },
+   "casual": {
+    "total": 622,
+    "moves": [
+     {
+      "uci": "d2d4",
+      "games": 333
+     },
+     {
+      "uci": "d2d3",
+      "games": 154
+     },
+     {
+      "uci": "e1g1",
+      "games": 45
+     },
+     {
+      "uci": "b2b4",
+      "games": 27
+     },
+     {
+      "uci": "d1e2",
+      "games": 20
+     },
+     {
+      "uci": "f3g5",
+      "games": 17
+     },
+     {
+      "uci": "d1b3",
+      "games": 9
+     },
+     {
+      "uci": "d1c2",
+      "games": 6
+     }
+    ]
+   },
+   "club": {
+    "total": 332,
+    "moves": [
+     {
+      "uci": "d2d4",
+      "games": 168
+     },
+     {
+      "uci": "d2d3",
+      "games": 119
+     },
+     {
+      "uci": "e1g1",
+      "games": 19
+     },
+     {
+      "uci": "b2b4",
+      "games": 12
+     },
+     {
+      "uci": "d1e2",
+      "games": 8
+     },
+     {
+      "uci": "f3g5",
+      "games": 2
+     },
+     {
+      "uci": "d1c2",
+      "games": 2
+     }
+    ]
+   }
+  },
+  "rnbqkbnr/ppp2ppp/4p3/3p4/2PP4/2N5/PP2PPPP/R1BQKBNR b KQkq -": {
+   "beginner": {
+    "total": 563,
+    "moves": [
+     {
+      "uci": "g8f6",
+      "games": 210
+     },
+     {
+      "uci": "d5c4",
+      "games": 84
+     },
+     {
+      "uci": "f8b4",
+      "games": 82
+     },
+     {
+      "uci": "c7c6",
+      "games": 64
+     },
+     {
+      "uci": "b8c6",
+      "games": 39
+     },
+     {
+      "uci": "c7c5",
+      "games": 33
+     },
+     {
+      "uci": "b7b6",
+      "games": 8
+     },
+     {
+      "uci": "f8e7",
+      "games": 7
+     }
+    ]
+   },
+   "casual": {
+    "total": 3983,
+    "moves": [
+     {
+      "uci": "g8f6",
+      "games": 2225
+     },
+     {
+      "uci": "c7c6",
+      "games": 455
+     },
+     {
+      "uci": "f8b4",
+      "games": 435
+     },
+     {
+      "uci": "c7c5",
+      "games": 288
+     },
+     {
+      "uci": "d5c4",
+      "games": 200
+     },
+     {
+      "uci": "f8e7",
+      "games": 81
+     },
+     {
+      "uci": "f7f5",
+      "games": 71
+     },
+     {
+      "uci": "b8c6",
+      "games": 64
+     }
+    ]
+   },
+   "club": {
+    "total": 1800,
+    "moves": [
+     {
+      "uci": "g8f6",
+      "games": 1206
+     },
+     {
+      "uci": "c7c6",
+      "games": 284
+     },
+     {
+      "uci": "c7c5",
+      "games": 90
+     },
+     {
+      "uci": "f7f5",
+      "games": 66
+     },
+     {
+      "uci": "f8b4",
+      "games": 53
+     },
+     {
+      "uci": "f8e7",
+      "games": 35
+     },
+     {
+      "uci": "d5c4",
+      "games": 22
+     },
+     {
+      "uci": "a7a6",
+      "games": 15
+     }
+    ]
+   }
+  },
+  "rnbqkb1r/ppp2ppp/4pn2/3p4/2PP4/2N5/PP2PPPP/R1BQKBNR w KQkq -": {
+   "beginner": {
+    "total": 170,
+    "moves": [
+     {
+      "uci": "g1f3",
+      "games": 46
+     },
+     {
+      "uci": "c1g5",
+      "games": 40
+     },
+     {
+      "uci": "e2e3",
+      "games": 35
+     },
+     {
+      "uci": "c4d5",
+      "games": 19
+     },
+     {
+      "uci": "a2a3",
+      "games": 8
+     },
+     {
+      "uci": "c1f4",
+      "games": 7
+     },
+     {
+      "uci": "c4c5",
+      "games": 6
+     },
+     {
+      "uci": "g2g3",
+      "games": 3
+     }
+    ]
+   },
+   "casual": {
+    "total": 2134,
+    "moves": [
+     {
+      "uci": "c1g5",
+      "games": 851
+     },
+     {
+      "uci": "g1f3",
+      "games": 554
+     },
+     {
+      "uci": "e2e3",
+      "games": 298
+     },
+     {
+      "uci": "c4d5",
+      "games": 186
+     },
+     {
+      "uci": "c1f4",
+      "games": 108
+     },
+     {
+      "uci": "a2a3",
+      "games": 54
+     },
+     {
+      "uci": "f2f3",
+      "games": 34
+     },
+     {
+      "uci": "d1c2",
+      "games": 14
+     }
+    ]
+   },
+   "club": {
+    "total": 1335,
+    "moves": [
+     {
+      "uci": "c1g5",
+      "games": 523
+     },
+     {
+      "uci": "g1f3",
+      "games": 403
+     },
+     {
+      "uci": "c4d5",
+      "games": 169
+     },
+     {
+      "uci": "e2e3",
+      "games": 127
+     },
+     {
+      "uci": "c1f4",
+      "games": 45
+     },
+     {
+      "uci": "f2f3",
+      "games": 34
+     },
+     {
+      "uci": "a2a3",
+      "games": 19
+     }
+    ]
+   }
+  },
+  "rnbqkb1r/ppp2ppp/4pn2/3p2B1/2PP4/2N5/PP2PPPP/R2QKBNR b KQkq -": {
+   "beginner": {
+    "total": 58,
+    "moves": [
+     {
+      "uci": "f8e7",
+      "games": 25
+     },
+     {
+      "uci": "h7h6",
+      "games": 12
+     },
+     {
+      "uci": "f8b4",
+      "games": 8
+     },
+     {
+      "uci": "b8d7",
+      "games": 6
+     },
+     {
+      "uci": "d5c4",
+      "games": 3
+     },
+     {
+      "uci": "c7c5",
+      "games": 1
+     },
+     {
+      "uci": "b8c6",
+      "games": 1
+     },
+     {
+      "uci": "f8d6",
+      "games": 1
+     }
+    ]
+   },
+   "casual": {
+    "total": 881,
+    "moves": [
+     {
+      "uci": "f8e7",
+      "games": 545
+     },
+     {
+      "uci": "f8b4",
+      "games": 88
+     },
+     {
+      "uci": "b8d7",
+      "games": 80
+     },
+     {
+      "uci": "d5c4",
+      "games": 46
+     },
+     {
+      "uci": "h7h6",
+      "games": 43
+     },
+     {
+      "uci": "c7c6",
+      "games": 40
+     },
+     {
+      "uci": "c7c5",
+      "games": 27
+     }
+    ]
+   },
+   "club": {
+    "total": 474,
+    "moves": [
+     {
+      "uci": "f8e7",
+      "games": 277
+     },
+     {
+      "uci": "b8d7",
+      "games": 76
+     },
+     {
+      "uci": "c7c6",
+      "games": 64
+     },
+     {
+      "uci": "f8b4",
+      "games": 28
+     },
+     {
+      "uci": "d5c4",
+      "games": 20
+     },
+     {
+      "uci": "h7h6",
+      "games": 6
+     }
+    ]
+   }
+  },
+  "rnbqkb1r/ppp1pppp/5n2/3p4/3P1B2/8/PPP1PPPP/RN1QKBNR w KQkq -": {
+   "beginner": {
+    "total": 225,
+    "moves": [
+     {
+      "uci": "e2e3",
+      "games": 79
+     },
+     {
+      "uci": "b1c3",
+      "games": 74
+     },
+     {
+      "uci": "g1f3",
+      "games": 28
+     },
+     {
+      "uci": "h2h3",
+      "games": 15
+     },
+     {
+      "uci": "f2f3",
+      "games": 12
+     },
+     {
+      "uci": "d1d3",
+      "games": 6
+     },
+     {
+      "uci": "g2g3",
+      "games": 4
+     },
+     {
+      "uci": "f4e5",
+      "games": 3
+     }
+    ]
+   },
+   "casual": {
+    "total": 993,
+    "moves": [
+     {
+      "uci": "e2e3",
+      "games": 463
+     },
+     {
+      "uci": "b1c3",
+      "games": 212
+     },
+     {
+      "uci": "g1f3",
+      "games": 171
+     },
+     {
+      "uci": "h2h3",
+      "games": 79
+     },
+     {
+      "uci": "c2c4",
+      "games": 18
+     },
+     {
+      "uci": "a2a3",
+      "games": 12
+     },
+     {
+      "uci": "b1d2",
+      "games": 8
+     },
+     {
+      "uci": "d1d3",
+      "games": 6
+     }
+    ]
+   },
+   "club": {
+    "total": 123,
+    "moves": [
+     {
+      "uci": "e2e3",
+      "games": 78
+     },
+     {
+      "uci": "g1f3",
+      "games": 29
+     },
+     {
+      "uci": "h2h3",
+      "games": 10
+     },
+     {
+      "uci": "b1c3",
+      "games": 3
+     },
+     {
+      "uci": "c2c3",
+      "games": 2
+     },
+     {
+      "uci": "c2c4",
+      "games": 1
+     }
+    ]
+   }
+  },
+  "rnbqk2r/ppp1bppp/4pn2/3p2B1/2PP4/2N5/PP2PPPP/R2QKBNR w KQkq -": {
+   "beginner": {
+    "total": 24,
+    "moves": [
+     {
+      "uci": "g1f3",
+      "games": 7
+     },
+     {
+      "uci": "g5f6",
+      "games": 7
+     },
+     {
+      "uci": "e2e3",
+      "games": 6
+     },
+     {
+      "uci": "c4c5",
+      "games": 2
+     },
+     {
+      "uci": "e2e4",
+      "games": 1
+     },
+     {
+      "uci": "c4d5",
+      "games": 1
+     }
+    ]
+   },
+   "casual": {
+    "total": 511,
+    "moves": [
+     {
+      "uci": "e2e3",
+      "games": 213
+     },
+     {
+      "uci": "g1f3",
+      "games": 158
+     },
+     {
+      "uci": "g5f6",
+      "games": 50
+     },
+     {
+      "uci": "c4c5",
+      "games": 40
+     },
+     {
+      "uci": "c4d5",
+      "games": 32
+     },
+     {
+      "uci": "f2f3",
+      "games": 7
+     },
+     {
+      "uci": "a1c1",
+      "games": 4
+     }
+    ]
+   },
+   "club": {
+    "total": 312,
+    "moves": [
+     {
+      "uci": "e2e3",
+      "games": 214
+     },
+     {
+      "uci": "g1f3",
+      "games": 39
+     },
+     {
+      "uci": "c4d5",
+      "games": 36
+     },
+     {
+      "uci": "g5f6",
+      "games": 17
+     },
+     {
+      "uci": "a1c1",
+      "games": 2
+     }
+    ]
+   }
+  },
+  "rnbqkbnr/pp2pppp/2p5/3p4/3PP3/2N5/PPP2PPP/R1BQKBNR b KQkq -": {
+   "beginner": {
+    "total": 80,
+    "moves": [
+     {
+      "uci": "d5e4",
+      "games": 47
+     },
+     {
+      "uci": "g8f6",
+      "games": 16
+     },
+     {
+      "uci": "e7e6",
+      "games": 7
+     },
+     {
+      "uci": "f7f6",
+      "games": 3
+     },
+     {
+      "uci": "a7a6",
+      "games": 1
+     },
+     {
+      "uci": "b8a6",
+      "games": 1
+     },
+     {
+      "uci": "b8d7",
+      "games": 1
+     },
+     {
+      "uci": "g7g6",
+      "games": 1
+     }
+    ]
+   },
+   "casual": {
+    "total": 970,
+    "moves": [
+     {
+      "uci": "d5e4",
+      "games": 807
+     },
+     {
+      "uci": "e7e6",
+      "games": 50
+     },
+     {
+      "uci": "g8f6",
+      "games": 39
+     },
+     {
+      "uci": "a7a6",
+      "games": 29
+     },
+     {
+      "uci": "g7g6",
+      "games": 13
+     },
+     {
+      "uci": "h7h6",
+      "games": 9
+     }
+    ]
+   },
+   "club": {
+    "total": 672,
+    "moves": [
+     {
+      "uci": "d5e4",
+      "games": 565
+     },
+     {
+      "uci": "e7e6",
+      "games": 40
+     },
+     {
+      "uci": "a7a6",
+      "games": 25
+     },
+     {
+      "uci": "g7g6",
+      "games": 19
+     },
+     {
+      "uci": "g8f6",
+      "games": 13
+     },
+     {
+      "uci": "b7b5",
+      "games": 5
+     },
+     {
+      "uci": "d8a5",
+      "games": 4
+     }
+    ]
+   }
+  },
+  "rnbqkbnr/pp2pppp/2p5/8/3Pp3/2N5/PPP2PPP/R1BQKBNR w KQkq -": {
+   "beginner": {
+    "total": 80,
+    "moves": [
+     {
+      "uci": "c3e4",
+      "games": 79
+     },
+     {
+      "uci": "f2f3",
+      "games": 1
+     }
+    ]
+   },
+   "casual": {
+    "total": 686,
+    "moves": [
+     {
+      "uci": "c3e4",
+      "games": 652
+     },
+     {
+      "uci": "f2f3",
+      "games": 16
+     },
+     {
+      "uci": "f1c4",
+      "games": 14
+     }
+    ]
+   },
+   "club": {
+    "total": 652,
+    "moves": [
+     {
+      "uci": "c3e4",
+      "games": 586
+     },
+     {
+      "uci": "f2f3",
+      "games": 53
+     },
+     {
+      "uci": "f1c4",
+      "games": 13
+     }
+    ]
+   }
+  },
+  "rnbqk2r/ppp1bppp/4pn2/3p2B1/2PP4/2N1P3/PP3PPP/R2QKBNR b KQkq -": {
+   "beginner": {
+    "total": 9,
+    "moves": [
+     {
+      "uci": "h7h6",
+      "games": 4
+     },
+     {
+      "uci": "e8g8",
+      "games": 2
+     },
+     {
+      "uci": "b8c6",
+      "games": 1
+     },
+     {
+      "uci": "c7c6",
+      "games": 1
+     },
+     {
+      "uci": "b7b6",
+      "games": 1
+     }
+    ]
+   },
+   "casual": {
+    "total": 259,
+    "moves": [
+     {
+      "uci": "e8g8",
+      "games": 114
+     },
+     {
+      "uci": "h7h6",
+      "games": 44
+     },
+     {
+      "uci": "c7c6",
+      "games": 26
+     },
+     {
+      "uci": "b8d7",
+      "games": 25
+     },
+     {
+      "uci": "b7b6",
+      "games": 16
+     },
+     {
+      "uci": "a7a6",
+      "games": 11
+     },
+     {
+      "uci": "b8c6",
+      "games": 10
+     },
+     {
+      "uci": "c7c5",
+      "games": 7
+     }
+    ]
+   },
+   "club": {
+    "total": 165,
+    "moves": [
+     {
+      "uci": "e8g8",
+      "games": 93
+     },
+     {
+      "uci": "c7c6",
+      "games": 23
+     },
+     {
+      "uci": "h7h6",
+      "games": 19
+     },
+     {
+      "uci": "a7a6",
+      "games": 12
+     },
+     {
+      "uci": "b8d7",
+      "games": 9
+     },
+     {
+      "uci": "b7b6",
+      "games": 5
+     },
+     {
+      "uci": "d5c4",
+      "games": 1
+     },
+     {
+      "uci": "c7c5",
+      "games": 1
+     }
+    ]
+   }
+  },
+  "rnbqkbnr/pp2pppp/2p5/8/3PN3/8/PPP2PPP/R1BQKBNR b KQkq -": {
+   "beginner": {
+    "total": 44,
+    "moves": [
+     {
+      "uci": "c8f5",
+      "games": 28
+     },
+     {
+      "uci": "g8f6",
+      "games": 6
+     },
+     {
+      "uci": "b8d7",
+      "games": 6
+     },
+     {
+      "uci": "e7e6",
+      "games": 2
+     },
+     {
+      "uci": "c8d7",
+      "games": 1
+     },
+     {
+      "uci": "d8d5",
+      "games": 1
+     }
+    ]
+   },
+   "casual": {
+    "total": 757,
+    "moves": [
+     {
+      "uci": "c8f5",
+      "games": 485
+     },
+     {
+      "uci": "g8f6",
+      "games": 163
+     },
+     {
+      "uci": "b8d7",
+      "games": 79
+     },
+     {
+      "uci": "e7e6",
+      "games": 17
+     },
+     {
+      "uci": "e7e5",
+      "games": 7
+     }
+    ]
+   },
+   "club": {
+    "total": 516,
+    "moves": [
+     {
+      "uci": "c8f5",
+      "games": 234
+     },
+     {
+      "uci": "g8f6",
+      "games": 161
+     },
+     {
+      "uci": "b8d7",
+      "games": 115
+     }
+    ]
+   }
+  },
+  "rn1qkbnr/pp2pppp/2p5/5b2/3PN3/8/PPP2PPP/R1BQKBNR w KQkq -": {
+   "beginner": {
+    "total": 60,
+    "moves": [
+     {
+      "uci": "f1d3",
+      "games": 17
+     },
+     {
+      "uci": "e4g3",
+      "games": 15
+     },
+     {
+      "uci": "f2f3",
+      "games": 14
+     },
+     {
+      "uci": "e4c5",
+      "games": 5
+     },
+     {
+      "uci": "d1d3",
+      "games": 3
+     },
+     {
+      "uci": "e4c3",
+      "games": 2
+     },
+     {
+      "uci": "d1f3",
+      "games": 2
+     },
+     {
+      "uci": "g1f3",
+      "games": 2
+     }
+    ]
+   },
+   "casual": {
+    "total": 393,
+    "moves": [
+     {
+      "uci": "e4g3",
+      "games": 295
+     },
+     {
+      "uci": "f1d3",
+      "games": 35
+     },
+     {
+      "uci": "e4c3",
+      "games": 18
+     },
+     {
+      "uci": "f2f3",
+      "games": 16
+     },
+     {
+      "uci": "e4c5",
+      "games": 13
+     },
+     {
+      "uci": "d1d3",
+      "games": 7
+     },
+     {
+      "uci": "d1f3",
+      "games": 4
+     },
+     {
+      "uci": "e4g5",
+      "games": 2
+     }
+    ]
+   },
+   "club": {
+    "total": 293,
+    "moves": [
+     {
+      "uci": "e4g3",
+      "games": 275
+     },
+     {
+      "uci": "e4c3",
+      "games": 7
+     },
+     {
+      "uci": "f1d3",
+      "games": 4
+     },
+     {
+      "uci": "f2f3",
+      "games": 4
+     },
+     {
+      "uci": "e4c5",
+      "games": 3
+     }
+    ]
+   }
+  },
+  "rn1qkbnr/pp2pppp/2p5/5b2/3P4/6N1/PPP2PPP/R1BQKBNR b KQkq -": {
+   "beginner": {
+    "total": 14,
+    "moves": [
+     {
+      "uci": "f5g6",
+      "games": 12
+     },
+     {
+      "uci": "e7e6",
+      "games": 2
+     }
+    ]
+   },
+   "casual": {
+    "total": 365,
+    "moves": [
+     {
+      "uci": "f5g6",
+      "games": 355
+     },
+     {
+      "uci": "g8f6",
+      "games": 3
+     },
+     {
+      "uci": "e7e6",
+      "games": 3
+     }
+    ]
+   },
+   "club": {
+    "total": 206,
+    "moves": [
+     {
+      "uci": "f5g6",
+      "games": 204
+     }
+    ]
+   }
+  },
+  "rn1qkbnr/pp2pppp/2p3b1/8/3P4/6N1/PPP2PPP/R1BQKBNR w KQkq -": {
+   "beginner": {
+    "total": 14,
+    "moves": [
+     {
+      "uci": "g1f3",
+      "games": 7
+     },
+     {
+      "uci": "h2h4",
+      "games": 5
+     },
+     {
+      "uci": "c1e3",
+      "games": 1
+     },
+     {
+      "uci": "f1c4",
+      "games": 1
+     }
+    ]
+   },
+   "casual": {
+    "total": 283,
+    "moves": [
+     {
+      "uci": "g1f3",
+      "games": 152
+     },
+     {
+      "uci": "h2h4",
+      "games": 100
+     },
+     {
+      "uci": "f1d3",
+      "games": 9
+     },
+     {
+      "uci": "c2c3",
+      "games": 4
+     },
+     {
+      "uci": "f1c4",
+      "games": 4
+     },
+     {
+      "uci": "f2f4",
+      "games": 3
+     },
+     {
+      "uci": "g1h3",
+      "games": 3
+     },
+     {
+      "uci": "g1e2",
+      "games": 2
+     }
+    ]
+   },
+   "club": {
+    "total": 274,
+    "moves": [
+     {
+      "uci": "g1f3",
+      "games": 133
+     },
+     {
+      "uci": "h2h4",
+      "games": 102
+     },
+     {
+      "uci": "f2f4",
+      "games": 10
+     },
+     {
+      "uci": "c2c3",
+      "games": 8
+     },
+     {
+      "uci": "g1e2",
+      "games": 7
+     },
+     {
+      "uci": "f1c4",
+      "games": 5
+     },
+     {
+      "uci": "g1h3",
+      "games": 5
+     },
+     {
+      "uci": "f1d3",
+      "games": 3
+     }
+    ]
+   }
+  },
+  "rn1qkbnr/pp2pppp/2p3b1/8/3P3P/6N1/PPP2PP1/R1BQKBNR b KQkq -": {
+   "beginner": {
+    "total": 2,
+    "moves": [
+     {
+      "uci": "h7h6",
+      "games": 2
+     }
+    ]
+   },
+   "casual": {
+    "total": 127,
+    "moves": [
+     {
+      "uci": "h7h6",
+      "games": 110
+     },
+     {
+      "uci": "h7h5",
+      "games": 11
+     },
+     {
+      "uci": "e7e6",
+      "games": 3
+     },
+     {
+      "uci": "g8f6",
+      "games": 3
+     }
+    ]
+   },
+   "club": {
+    "total": 78,
+    "moves": [
+     {
+      "uci": "h7h6",
+      "games": 72
+     },
+     {
+      "uci": "e7e6",
+      "games": 3
+     },
+     {
+      "uci": "g8f6",
+      "games": 2
+     },
+     {
+      "uci": "f7f6",
+      "games": 1
+     }
+    ]
+   }
+  },
+  "rn1qkbnr/pp2ppp1/2p3bp/8/3P3P/6N1/PPP2PP1/R1BQKBNR w KQkq -": {
+   "beginner": {
+    "total": 5,
+    "moves": [
+     {
+      "uci": "g1f3",
+      "games": 3
+     },
+     {
+      "uci": "h4h5",
+      "games": 2
+     }
+    ]
+   },
+   "casual": {
+    "total": 88,
+    "moves": [
+     {
+      "uci": "g1f3",
+      "games": 39
+     },
+     {
+      "uci": "h4h5",
+      "games": 33
+     },
+     {
+      "uci": "f1d3",
+      "games": 11
+     },
+     {
+      "uci": "g1h3",
+      "games": 1
+     },
+     {
+      "uci": "f1e2",
+      "games": 1
+     },
+     {
+      "uci": "f1c4",
+      "games": 1
+     },
+     {
+      "uci": "c1e3",
+      "games": 1
+     },
+     {
+      "uci": "g1e2",
+      "games": 1
+     }
+    ]
+   },
+   "club": {
+    "total": 90,
+    "moves": [
+     {
+      "uci": "g1f3",
+      "games": 43
+     },
+     {
+      "uci": "h4h5",
+      "games": 40
+     },
+     {
+      "uci": "g1e2",
+      "games": 2
+     },
+     {
+      "uci": "f1d3",
+      "games": 2
+     },
+     {
+      "uci": "g1h3",
+      "games": 2
+     },
+     {
+      "uci": "f2f4",
+      "games": 1
+     }
+    ]
+   }
+  },
+  "r1bqk2r/pppp1ppp/2n2n2/2b1p3/2BPP3/2P2N2/PP3PPP/RNBQK2R b KQkq -": {
+   "beginner": {
+    "total": 46,
+    "moves": [
+     {
+      "uci": "e5d4",
+      "games": 39
+     },
+     {
+      "uci": "d7d5",
+      "games": 3
+     },
+     {
+      "uci": "c5d6",
+      "games": 2
+     },
+     {
+      "uci": "c5b6",
+      "games": 1
+     },
+     {
+      "uci": "f6e4",
+      "games": 1
+     }
+    ]
+   },
+   "casual": {
+    "total": 333,
+    "moves": [
+     {
+      "uci": "e5d4",
+      "games": 321
+     },
+     {
+      "uci": "c5b6",
+      "games": 7
+     },
+     {
+      "uci": "f6e4",
+      "games": 2
+     }
+    ]
+   },
+   "club": {
+    "total": 153,
+    "moves": [
+     {
+      "uci": "e5d4",
+      "games": 151
+     },
+     {
+      "uci": "c5b6",
+      "games": 2
+     }
+    ]
+   }
+  },
+  "r1bqk2r/pppp1ppp/2n2n2/2b5/2BpP3/2P2N2/PP3PPP/RNBQK2R w KQkq -": {
+   "beginner": {
+    "total": 28,
+    "moves": [
+     {
+      "uci": "c3d4",
+      "games": 20
+     },
+     {
+      "uci": "e4e5",
+      "games": 8
+     }
+    ]
+   },
+   "casual": {
+    "total": 320,
+    "moves": [
+     {
+      "uci": "c3d4",
+      "games": 269
+     },
+     {
+      "uci": "e4e5",
+      "games": 48
+     },
+     {
+      "uci": "f3d4",
+      "games": 2
+     }
+    ]
+   },
+   "club": {
+    "total": 163,
+    "moves": [
+     {
+      "uci": "c3d4",
+      "games": 129
+     },
+     {
+      "uci": "e4e5",
+      "games": 26
+     },
+     {
+      "uci": "e1g1",
+      "games": 8
+     }
+    ]
+   }
+  },
+  "r1bqk2r/pppp1ppp/2n2n2/2b5/2BPP3/5N2/PP3PPP/RNBQK2R b KQkq -": {
+   "beginner": {
+    "total": 26,
+    "moves": [
+     {
+      "uci": "c5b4",
+      "games": 18
+     },
+     {
+      "uci": "c5b6",
+      "games": 7
+     },
+     {
+      "uci": "c6b4",
+      "games": 1
+     }
+    ]
+   },
+   "casual": {
+    "total": 267,
+    "moves": [
+     {
+      "uci": "c5b4",
+      "games": 212
+     },
+     {
+      "uci": "c5b6",
+      "games": 46
+     },
+     {
+      "uci": "c5e7",
+      "games": 3
+     },
+     {
+      "uci": "c6d4",
+      "games": 2
+     },
+     {
+      "uci": "d7d5",
+      "games": 2
+     }
+    ]
+   },
+   "club": {
+    "total": 124,
+    "moves": [
+     {
+      "uci": "c5b4",
+      "games": 122
+     },
+     {
+      "uci": "c5b6",
+      "games": 1
+     },
+     {
+      "uci": "c5e7",
+      "games": 1
+     }
+    ]
+   }
+  },
+  "r1bqk2r/pppp1ppp/2n2n2/8/1bBPP3/5N2/PP3PPP/RNBQK2R w KQkq -": {
+   "beginner": {
+    "total": 17,
+    "moves": [
+     {
+      "uci": "c1d2",
+      "games": 9
+     },
+     {
+      "uci": "b1c3",
+      "games": 8
+     }
+    ]
+   },
+   "casual": {
+    "total": 216,
+    "moves": [
+     {
+      "uci": "b1c3",
+      "games": 134
+     },
+     {
+      "uci": "c1d2",
+      "games": 78
+     },
+     {
+      "uci": "b1d2",
+      "games": 3
+     }
+    ]
+   },
+   "club": {
+    "total": 119,
+    "moves": [
+     {
+      "uci": "b1c3",
+      "games": 61
+     },
+     {
+      "uci": "c1d2",
+      "games": 57
+     },
+     {
+      "uci": "b1d2",
+      "games": 1
+     }
+    ]
+   }
+  },
+  "rnbq1rk1/ppp1bppp/4pn2/3p2B1/2PP4/2N1P3/PP3PPP/R2QKBNR w KQ -": {
+   "beginner": {
+    "total": 2,
+    "moves": [
+     {
+      "uci": "f1d3",
+      "games": 1
+     },
+     {
+      "uci": "f1e2",
+      "games": 1
+     }
+    ]
+   },
+   "casual": {
+    "total": 95,
+    "moves": [
+     {
+      "uci": "g1f3",
+      "games": 68
+     },
+     {
+      "uci": "f1d3",
+      "games": 15
+     },
+     {
+      "uci": "a1c1",
+      "games": 4
+     },
+     {
+      "uci": "g5f6",
+      "games": 3
+     },
+     {
+      "uci": "f2f4",
+      "games": 2
+     },
+     {
+      "uci": "c4d5",
+      "games": 2
+     },
+     {
+      "uci": "c4c5",
+      "games": 1
+     }
+    ]
+   },
+   "club": {
+    "total": 112,
+    "moves": [
+     {
+      "uci": "g1f3",
+      "games": 88
+     },
+     {
+      "uci": "a1c1",
+      "games": 11
+     },
+     {
+      "uci": "f1d3",
+      "games": 5
+     },
+     {
+      "uci": "h2h4",
+      "games": 4
+     },
+     {
+      "uci": "d1c2",
+      "games": 2
+     },
+     {
+      "uci": "c4d5",
+      "games": 1
+     },
+     {
+      "uci": "g5f6",
+      "games": 1
+     }
+    ]
+   }
+  },
+  "rnbq1rk1/ppp1bppp/4pn2/3p2B1/2PP4/2N1PN2/PP3PPP/R2QKB1R b KQ -": {
+   "beginner": {
+    "total": 2,
+    "moves": [
+     {
+      "uci": "c7c5",
+      "games": 1
+     },
+     {
+      "uci": "h7h6",
+      "games": 1
+     }
+    ]
+   },
+   "casual": {
+    "total": 87,
+    "moves": [
+     {
+      "uci": "h7h6",
+      "games": 32
+     },
+     {
+      "uci": "b8d7",
+      "games": 14
+     },
+     {
+      "uci": "c7c6",
+      "games": 10
+     },
+     {
+      "uci": "c7c5",
+      "games": 9
+     },
+     {
+      "uci": "b7b6",
+      "games": 8
+     },
+     {
+      "uci": "f6e4",
+      "games": 5
+     },
+     {
+      "uci": "d5c4",
+      "games": 3
+     },
+     {
+      "uci": "a7a6",
+      "games": 3
+     }
+    ]
+   },
+   "club": {
+    "total": 67,
+    "moves": [
+     {
+      "uci": "b8d7",
+      "games": 21
+     },
+     {
+      "uci": "h7h6",
+      "games": 14
+     },
+     {
+      "uci": "b7b6",
+      "games": 14
+     },
+     {
+      "uci": "c7c6",
+      "games": 10
+     },
+     {
+      "uci": "f6e4",
+      "games": 3
+     },
+     {
+      "uci": "d5c4",
+      "games": 1
+     },
+     {
+      "uci": "b8c6",
+      "games": 1
+     },
+     {
+      "uci": "f8e8",
+      "games": 1
+     }
+    ]
+   }
+  },
+  "r1bq1rk1/pppnbppp/4pn2/3p2B1/2PP4/2N1PN2/PP3PPP/R2QKB1R w KQ -": {
+   "beginner": {
+    "total": 0,
+    "moves": []
+   },
+   "casual": {
+    "total": 12,
+    "moves": [
+     {
+      "uci": "c4d5",
+      "games": 4
+     },
+     {
+      "uci": "a1c1",
+      "games": 3
+     },
+     {
+      "uci": "f1d3",
+      "games": 3
+     },
+     {
+      "uci": "c4c5",
+      "games": 2
+     }
+    ]
+   },
+   "club": {
+    "total": 23,
+    "moves": [
+     {
+      "uci": "f1d3",
+      "games": 14
+     },
+     {
+      "uci": "a1c1",
+      "games": 4
+     },
+     {
+      "uci": "d1c2",
+      "games": 3
+     },
+     {
+      "uci": "c4d5",
+      "games": 2
+     }
+    ]
+   }
+  },
+  "rnbqkb1r/ppp1pppp/5n2/8/2pP4/4P3/PP3PPP/RNBQKBNR w KQkq -": {
+   "beginner": {
+    "total": 67,
+    "moves": [
+     {
+      "uci": "f1c4",
+      "games": 54
+     },
+     {
+      "uci": "b1c3",
+      "games": 9
+     },
+     {
+      "uci": "g1f3",
+      "games": 3
+     },
+     {
+      "uci": "b1a3",
+      "games": 1
+     }
+    ]
+   },
+   "casual": {
+    "total": 342,
+    "moves": [
+     {
+      "uci": "f1c4",
+      "games": 304
+     },
+     {
+      "uci": "b1c3",
+      "games": 22
+     },
+     {
+      "uci": "g1f3",
+      "games": 10
+     },
+     {
+      "uci": "h2h3",
+      "games": 5
+     }
+    ]
+   },
+   "club": {
+    "total": 83,
+    "moves": [
+     {
+      "uci": "f1c4",
+      "games": 82
+     },
+     {
+      "uci": "g1f3",
+      "games": 1
+     }
+    ]
+   }
+  },
+  "rnbqkb1r/ppp1pppp/5n2/8/2BP4/4P3/PP3PPP/RNBQK1NR b KQkq -": {
+   "beginner": {
+    "total": 83,
+    "moves": [
+     {
+      "uci": "e7e6",
+      "games": 29
+     },
+     {
+      "uci": "b8c6",
+      "games": 17
+     },
+     {
+      "uci": "c8g4",
+      "games": 11
+     },
+     {
+      "uci": "f6e4",
+      "games": 6
+     },
+     {
+      "uci": "c8f5",
+      "games": 4
+     },
+     {
+      "uci": "c8e6",
+      "games": 4
+     },
+     {
+      "uci": "g7g6",
+      "games": 3
+     },
+     {
+      "uci": "e7e5",
+      "games": 3
+     }
+    ]
+   },
+   "casual": {
+    "total": 324,
+    "moves": [
+     {
+      "uci": "e7e6",
+      "games": 180
+     },
+     {
+      "uci": "c8f5",
+      "games": 33
+     },
+     {
+      "uci": "b8c6",
+      "games": 32
+     },
+     {
+      "uci": "c8g4",
+      "games": 24
+     },
+     {
+      "uci": "g7g6",
+      "games": 21
+     },
+     {
+      "uci": "a7a6",
+      "games": 8
+     },
+     {
+      "uci": "c8e6",
+      "games": 5
+     },
+     {
+      "uci": "c7c6",
+      "games": 5
+     }
+    ]
+   },
+   "club": {
+    "total": 32,
+    "moves": [
+     {
+      "uci": "e7e6",
+      "games": 15
+     },
+     {
+      "uci": "c8f5",
+      "games": 5
+     },
+     {
+      "uci": "b8c6",
+      "games": 5
+     },
+     {
+      "uci": "g7g6",
+      "games": 2
+     },
+     {
+      "uci": "c7c6",
+      "games": 2
+     },
+     {
+      "uci": "c8g4",
+      "games": 1
+     },
+     {
+      "uci": "b8d7",
+      "games": 1
+     },
+     {
+      "uci": "c7c5",
+      "games": 1
+     }
+    ]
+   }
+  },
+  "rnbqkb1r/ppp2ppp/4pn2/8/2BP4/4P3/PP3PPP/RNBQK1NR w KQkq -": {
+   "beginner": {
+    "total": 22,
+    "moves": [
+     {
+      "uci": "g1f3",
+      "games": 11
+     },
+     {
+      "uci": "b1c3",
+      "games": 9
+     },
+     {
+      "uci": "d4d5",
+      "games": 1
+     },
+     {
+      "uci": "a2a3",
+      "games": 1
+     }
+    ]
+   },
+   "casual": {
+    "total": 156,
+    "moves": [
+     {
+      "uci": "g1f3",
+      "games": 71
+     },
+     {
+      "uci": "b1c3",
+      "games": 47
+     },
+     {
+      "uci": "a2a3",
+      "games": 22
+     },
+     {
+      "uci": "g1e2",
+      "games": 8
+     },
+     {
+      "uci": "c1d2",
+      "games": 3
+     },
+     {
+      "uci": "h2h3",
+      "games": 2
+     },
+     {
+      "uci": "b2b3",
+      "games": 1
+     },
+     {
+      "uci": "d1b3",
+      "games": 1
+     }
+    ]
+   },
+   "club": {
+    "total": 46,
+    "moves": [
+     {
+      "uci": "g1f3",
+      "games": 33
+     },
+     {
+      "uci": "b1c3",
+      "games": 10
+     },
+     {
+      "uci": "a2a3",
+      "games": 3
+     }
+    ]
+   }
+  },
+  "rnbqkb1r/ppp2ppp/4pn2/8/2BP4/4PN2/PP3PPP/RNBQK2R b KQkq -": {
+   "beginner": {
+    "total": 16,
+    "moves": [
+     {
+      "uci": "f8b4",
+      "games": 7
+     },
+     {
+      "uci": "h7h6",
+      "games": 3
+     },
+     {
+      "uci": "f8e7",
+      "games": 3
+     },
+     {
+      "uci": "f6e4",
+      "games": 1
+     },
+     {
+      "uci": "b8c6",
+      "games": 1
+     },
+     {
+      "uci": "f8d6",
+      "games": 1
+     }
+    ]
+   },
+   "casual": {
+    "total": 91,
+    "moves": [
+     {
+      "uci": "f8b4",
+      "games": 28
+     },
+     {
+      "uci": "f8e7",
+      "games": 18
+     },
+     {
+      "uci": "b8c6",
+      "games": 11
+     },
+     {
+      "uci": "f8d6",
+      "games": 9
+     },
+     {
+      "uci": "a7a6",
+      "games": 7
+     },
+     {
+      "uci": "c7c5",
+      "games": 5
+     },
+     {
+      "uci": "h7h6",
+      "games": 4
+     },
+     {
+      "uci": "b8d7",
+      "games": 2
+     }
+    ]
+   },
+   "club": {
+    "total": 8,
+    "moves": [
+     {
+      "uci": "a7a6",
+      "games": 3
+     },
+     {
+      "uci": "c7c5",
+      "games": 2
+     },
+     {
+      "uci": "b8c6",
+      "games": 1
+     },
+     {
+      "uci": "f8b4",
+      "games": 1
+     },
+     {
+      "uci": "f8e7",
+      "games": 1
+     }
+    ]
+   }
+  },
+  "rnbqkb1r/ppp1pppp/5n2/3p4/3P1B2/4P3/PPP2PPP/RN1QKBNR b KQkq -": {
+   "beginner": {
+    "total": 80,
+    "moves": [
+     {
+      "uci": "b8c6",
+      "games": 21
+     },
+     {
+      "uci": "e7e6",
+      "games": 18
+     },
+     {
+      "uci": "c8f5",
+      "games": 11
+     },
+     {
+      "uci": "a7a6",
+      "games": 7
+     },
+     {
+      "uci": "g7g6",
+      "games": 6
+     },
+     {
+      "uci": "f6e4",
+      "games": 5
+     },
+     {
+      "uci": "c8g4",
+      "games": 4
+     },
+     {
+      "uci": "b7b6",
+      "games": 1
+     }
+    ]
+   },
+   "casual": {
+    "total": 425,
+    "moves": [
+     {
+      "uci": "e7e6",
+      "games": 133
+     },
+     {
+      "uci": "c8f5",
+      "games": 76
+     },
+     {
+      "uci": "b8c6",
+      "games": 74
+     },
+     {
+      "uci": "g7g6",
+      "games": 38
+     },
+     {
+      "uci": "a7a6",
+      "games": 28
+     },
+     {
+      "uci": "c8g4",
+      "games": 18
+     },
+     {
+      "uci": "c7c5",
+      "games": 16
+     },
+     {
+      "uci": "c7c6",
+      "games": 14
+     }
+    ]
+   },
+   "club": {
+    "total": 114,
+    "moves": [
+     {
+      "uci": "e7e6",
+      "games": 48
+     },
+     {
+      "uci": "c8f5",
+      "games": 27
+     },
+     {
+      "uci": "c7c6",
+      "games": 8
+     },
+     {
+      "uci": "b8c6",
+      "games": 6
+     },
+     {
+      "uci": "a7a6",
+      "games": 6
+     },
+     {
+      "uci": "g7g6",
+      "games": 6
+     },
+     {
+      "uci": "b8d7",
+      "games": 4
+     },
+     {
+      "uci": "c7c5",
+      "games": 3
+     }
+    ]
+   }
+  },
+  "r1bqk2r/pppp1ppp/2n2n2/8/1bBPP3/5N2/PP1B1PPP/RN1QK2R b KQkq -": {
+   "beginner": {
+    "total": 9,
+    "moves": [
+     {
+      "uci": "b4d2",
+      "games": 6
+     },
+     {
+      "uci": "f6e4",
+      "games": 3
+     }
+    ]
+   },
+   "casual": {
+    "total": 81,
+    "moves": [
+     {
+      "uci": "b4d2",
+      "games": 45
+     },
+     {
+      "uci": "f6e4",
+      "games": 21
+     },
+     {
+      "uci": "e8g8",
+      "games": 8
+     },
+     {
+      "uci": "b4e7",
+      "games": 2
+     },
+     {
+      "uci": "d8e7",
+      "games": 2
+     },
+     {
+      "uci": "d7d6",
+      "games": 2
+     },
+     {
+      "uci": "d7d5",
+      "games": 1
+     }
+    ]
+   },
+   "club": {
+    "total": 54,
+    "moves": [
+     {
+      "uci": "b4d2",
+      "games": 41
+     },
+     {
+      "uci": "f6e4",
+      "games": 11
+     },
+     {
+      "uci": "d7d5",
+      "games": 1
+     },
+     {
+      "uci": "d7d6",
+      "games": 1
+     }
+    ]
+   }
+  },
+  "rnbqkb1r/ppp2ppp/4pn2/3p4/3P1B2/4P3/PPP2PPP/RN1QKBNR w KQkq -": {
+   "beginner": {
+    "total": 23,
+    "moves": [
+     {
+      "uci": "c2c4",
+      "games": 6
+     },
+     {
+      "uci": "c2c3",
+      "games": 3
+     },
+     {
+      "uci": "f1d3",
+      "games": 3
+     },
+     {
+      "uci": "g1f3",
+      "games": 2
+     },
+     {
+      "uci": "h2h3",
+      "games": 2
+     },
+     {
+      "uci": "f1b5",
+      "games": 2
+     },
+     {
+      "uci": "g1h3",
+      "games": 1
+     },
+     {
+      "uci": "f4e5",
+      "games": 1
+     }
+    ]
+   },
+   "casual": {
+    "total": 145,
+    "moves": [
+     {
+      "uci": "f1d3",
+      "games": 28
+     },
+     {
+      "uci": "g1f3",
+      "games": 27
+     },
+     {
+      "uci": "c2c4",
+      "games": 25
+     },
+     {
+      "uci": "a2a3",
+      "games": 24
+     },
+     {
+      "uci": "h2h3",
+      "games": 11
+     },
+     {
+      "uci": "c2c3",
+      "games": 8
+     },
+     {
+      "uci": "b1d2",
+      "games": 8
+     },
+     {
+      "uci": "b1c3",
+      "games": 6
+     }
+    ]
+   },
+   "club": {
+    "total": 31,
+    "moves": [
+     {
+      "uci": "g1f3",
+      "games": 11
+     },
+     {
+      "uci": "c2c3",
+      "games": 5
+     },
+     {
+      "uci": "a2a3",
+      "games": 4
+     },
+     {
+      "uci": "f1d3",
+      "games": 4
+     },
+     {
+      "uci": "b1d2",
+      "games": 4
+     },
+     {
+      "uci": "c2c4",
+      "games": 1
+     },
+     {
+      "uci": "h2h3",
+      "games": 1
+     },
+     {
+      "uci": "f1e2",
+      "games": 1
+     }
+    ]
+   }
+  },
+  "rnbqkb1r/ppp2ppp/4pn2/3p4/3P1B2/4PN2/PPP2PPP/RN1QKB1R b KQkq -": {
+   "beginner": {
+    "total": 2,
+    "moves": [
+     {
+      "uci": "f8d6",
+      "games": 1
+     },
+     {
+      "uci": "b8d7",
+      "games": 1
+     }
+    ]
+   },
+   "casual": {
+    "total": 25,
+    "moves": [
+     {
+      "uci": "c7c5",
+      "games": 8
+     },
+     {
+      "uci": "f8d6",
+      "games": 6
+     },
+     {
+      "uci": "b8c6",
+      "games": 4
+     },
+     {
+      "uci": "h7h6",
+      "games": 2
+     },
+     {
+      "uci": "c7c6",
+      "games": 1
+     },
+     {
+      "uci": "f8e7",
+      "games": 1
+     },
+     {
+      "uci": "a7a6",
+      "games": 1
+     },
+     {
+      "uci": "f8b4",
+      "games": 1
+     }
+    ]
+   },
+   "club": {
+    "total": 13,
+    "moves": [
+     {
+      "uci": "f8d6",
+      "games": 4
+     },
+     {
+      "uci": "c7c5",
+      "games": 4
+     },
+     {
+      "uci": "f8e7",
+      "games": 2
+     },
+     {
+      "uci": "b8c6",
+      "games": 1
+     },
+     {
+      "uci": "f6h5",
+      "games": 1
+     },
+     {
+      "uci": "b7b6",
+      "games": 1
+     }
+    ]
+   }
+  },
+  "rn1qkbnr/pp2ppp1/2p3bp/8/3P3P/5NN1/PPP2PP1/R1BQKB1R b KQkq -": {
+   "beginner": {
+    "total": 1,
+    "moves": [
+     {
+      "uci": "b8d7",
+      "games": 1
+     }
+    ]
+   },
+   "casual": {
+    "total": 48,
+    "moves": [
+     {
+      "uci": "b8d7",
+      "games": 19
+     },
+     {
+      "uci": "e7e6",
+      "games": 16
+     },
+     {
+      "uci": "g8f6",
+      "games": 12
+     },
+     {
+      "uci": "f7f6",
+      "games": 1
+     }
+    ]
+   },
+   "club": {
+    "total": 36,
+    "moves": [
+     {
+      "uci": "b8d7",
+      "games": 25
+     },
+     {
+      "uci": "e7e6",
+      "games": 9
+     },
+     {
+      "uci": "g8f6",
+      "games": 1
+     },
+     {
+      "uci": "d8c7",
+      "games": 1
+     }
+    ]
+   }
+  },
+  "r2qkbnr/pp1nppp1/2p3bp/8/3P3P/5NN1/PPP2PP1/R1BQKB1R w KQkq -": {
+   "beginner": {
+    "total": 2,
+    "moves": [
+     {
+      "uci": "h4h5",
+      "games": 1
+     },
+     {
+      "uci": "c1e3",
+      "games": 1
+     }
+    ]
+   },
+   "casual": {
+    "total": 16,
+    "moves": [
+     {
+      "uci": "h4h5",
+      "games": 10
+     },
+     {
+      "uci": "f1d3",
+      "games": 6
+     }
+    ]
+   },
+   "club": {
+    "total": 27,
+    "moves": [
+     {
+      "uci": "h4h5",
+      "games": 21
+     },
+     {
+      "uci": "f1d3",
+      "games": 3
+     },
+     {
+      "uci": "c1f4",
+      "games": 1
+     },
+     {
+      "uci": "f1c4",
+      "games": 1
+     },
+     {
+      "uci": "c2c3",
+      "games": 1
+     }
+    ]
+   }
+  },
+  "rnbqkb1r/pp3ppp/4pn2/2p5/2BP4/4PN2/PP3PPP/RNBQK2R w KQkq -": {
+   "beginner": {
+    "total": 0,
+    "moves": []
+   },
+   "casual": {
+    "total": 4,
+    "moves": [
+     {
+      "uci": "e1g1",
+      "games": 3
+     },
+     {
+      "uci": "b1c3",
+      "games": 1
+     }
+    ]
+   },
+   "club": {
+    "total": 3,
+    "moves": [
+     {
+      "uci": "e1g1",
+      "games": 3
+     }
+    ]
+   }
+  },
+  "rnbqkb1r/pp3ppp/4pn2/2p5/2BP4/4PN2/PP3PPP/RNBQ1RK1 b kq -": {
+   "beginner": {
+    "total": 0,
+    "moves": []
+   },
+   "casual": {
+    "total": 4,
+    "moves": [
+     {
+      "uci": "c5d4",
+      "games": 2
+     },
+     {
+      "uci": "b8c6",
+      "games": 2
+     }
+    ]
+   },
+   "club": {
+    "total": 2,
+    "moves": [
+     {
+      "uci": "f8e7",
+      "games": 1
+     },
+     {
+      "uci": "a7a6",
+      "games": 1
+     }
+    ]
+   }
+  },
+  "rnbqkb1r/pp3ppp/4pn2/2pp4/3P1B2/4PN2/PPP2PPP/RN1QKB1R w KQkq -": {
+   "beginner": {
+    "total": 0,
+    "moves": []
+   },
+   "casual": {
+    "total": 8,
+    "moves": [
+     {
+      "uci": "c2c3",
+      "games": 5
+     },
+     {
+      "uci": "f4e5",
+      "games": 1
+     },
+     {
+      "uci": "f4b8",
+      "games": 1
+     },
+     {
+      "uci": "b1c3",
+      "games": 1
+     }
+    ]
+   },
+   "club": {
+    "total": 4,
+    "moves": [
+     {
+      "uci": "c2c3",
+      "games": 3
+     },
+     {
+      "uci": "d4c5",
+      "games": 1
+     }
+    ]
+   }
+  },
+  "rnbqkb1r/pp3ppp/4pn2/2pp4/3P1B2/2P1PN2/PP3PPP/RN1QKB1R b KQkq -": {
+   "beginner": {
+    "total": 0,
+    "moves": []
+   },
+   "casual": {
+    "total": 5,
+    "moves": [
+     {
+      "uci": "b8c6",
+      "games": 2
+     },
+     {
+      "uci": "c5d4",
+      "games": 2
+     },
+     {
+      "uci": "c8d7",
+      "games": 1
+     }
+    ]
+   },
+   "club": {
+    "total": 3,
+    "moves": [
+     {
+      "uci": "b8c6",
+      "games": 3
+     }
+    ]
+   }
+  },
+  "r1bqkb1r/pp3ppp/2n1pn2/2pp4/3P1B2/2P1PN2/PP3PPP/RN1QKB1R w KQkq -": {
+   "beginner": {
+    "total": 0,
+    "moves": []
+   },
+   "casual": {
+    "total": 3,
+    "moves": [
+     {
+      "uci": "f1d3",
+      "games": 2
+     },
+     {
+      "uci": "b1d2",
+      "games": 1
+     }
+    ]
+   },
+   "club": {
+    "total": 2,
+    "moves": [
+     {
+      "uci": "f1d3",
+      "games": 1
+     },
+     {
+      "uci": "b1d2",
+      "games": 1
+     }
+    ]
+   }
+  },
+  "r1bqkb1r/pp3ppp/2n1pn2/2pp4/3P1B2/2P1PN2/PP1N1PPP/R2QKB1R b KQkq -": {
+   "beginner": {
+    "total": 0,
+    "moves": []
+   },
+   "casual": {
+    "total": 1,
+    "moves": [
+     {
+      "uci": "c5d4",
+      "games": 1
+     }
+    ]
+   },
+   "club": {
+    "total": 1,
+    "moves": [
+     {
+      "uci": "f8d6",
+      "games": 1
+     }
+    ]
+   }
+  },
+  "rnbqkb1r/1p3ppp/p3pn2/2p5/2BP4/4PN2/PP3PPP/RNBQ1RK1 w kq -": {
+   "beginner": {
+    "total": 0,
+    "moves": []
+   },
+   "casual": {
+    "total": 1,
+    "moves": [
+     {
+      "uci": "b1c3",
+      "games": 1
+     }
+    ]
+   },
+   "club": {
+    "total": 0,
+    "moves": []
+   }
+  },
+  "r1bqk2r/pp3ppp/2nbpn2/2pp4/3P1B2/2P1PN2/PP1N1PPP/R2QKB1R w KQkq -": {
+   "beginner": {
+    "total": 0,
+    "moves": []
+   },
+   "casual": {
+    "total": 0,
+    "moves": []
+   },
+   "club": {
+    "total": 1,
+    "moves": [
+     {
+      "uci": "d4c5",
+      "games": 1
+     }
+    ]
+   }
+  }
+ }
+}

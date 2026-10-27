@@ -48,7 +48,8 @@ describe('reading an Engine line', () => {
   it('names what each move takes, en passant and promotions included', () => {
     const fen = 'k7/4P3/8/3pP3/8/8/8/K7 w - d6 0 1';
     const [ep, promo] = readLine(fen, ['e5d6', 'a8b8', 'e7e8q']).filter((p) => p.side === 'white');
-    expect(ep).toMatchObject({ san: 'exd6', captured: 'pawn' });
+    // The pawn taken en passant stood on d5, not on d6 where the taker lands.
+    expect(ep).toMatchObject({ san: 'exd6', captured: 'pawn', capturedAt: 'd5' });
     expect(promo).toMatchObject({ san: 'e8=Q+', promotion: 'queen' });
   });
 

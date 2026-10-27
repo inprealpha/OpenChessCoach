@@ -236,6 +236,19 @@ describe('the Coach brief', () => {
     expect(brief.recentMoves).toBe('1. e4 e5 2. Bc4 Nc6 3. Nf3 Bc5');
   });
 
+  it('names no moves in a Hint’s facts, and trims the facts last to keep a brief in budget', () => {
+    // Puzzle Hzxlt: Bxf7+ mates in 2; a Hint may say so, but not with the moves.
+    const fen = 'r2qkb1r/ppp2pp1/2np1n1p/4p3/2B1P3/1QP2b1P/PP1P1PP1/RNB1R1K1 w kq - 0 9';
+    const pv = ['c4f7', 'e8e7', 'b3e6'];
+    const ask: CoachAsk = { job: 'hint', fen, recentMoves: [], playerSide: 'white', candidates: [{ uci: 'c4f7', san: 'Bxf7+', score: { mate: 2 }, pv }] };
+    const hint = buildBrief({ ask, profile });
+    expect(hint.candidates[0]?.result).toBe('White mates in 2');
+    expect(buildBrief({ ask: { ...ask, job: 'why' }, profile }).candidates[0]?.result).toContain('(Bxf7+');
+    // A brief made too big by a long question and summary still fits once facts are trimmed.
+    const big = buildBrief({ ask: { ...longGameAsk(), question: 'x'.repeat(2000) }, profile, summary: 'y'.repeat(5000) });
+    expect(briefSize(big)).toBeLessThanOrEqual(BRIEF_BUDGET);
+  });
+
   it('keeps Live Coaching and Hint briefs short: facts only on the move, the best move and the best reply', () => {
     const g = game('i425hmuv');
     const m = g.moves[20] as (typeof g.moves)[number]; // 11. Bxf7+

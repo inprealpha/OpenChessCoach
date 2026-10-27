@@ -30,7 +30,7 @@ const MAX_SUMMARY = 600;
 const MAX_NOTES = 700;
 const MAX_PROFILE_ITEMS = 3;
 /** Jobs that must stay short: their briefs explain only the move, the Engine's best move and its best reply. */
-export const CHEAP_JOBS: readonly CoachJob[] = ['live', 'hint'];
+const CHEAP_JOBS: readonly CoachJob[] = ['live', 'hint'];
 
 export interface BriefCandidate {
   san: string;
@@ -111,7 +111,7 @@ export function buildBrief({ ask, profile, summary }: BriefInput): Brief {
   const cheap = CHEAP_JOBS.includes(ask.job);
   // The move's own candidate line can differ from the line after the move: the move's facts come from the latter.
   const candidates = briefCandidates(ask.fen, ask.candidates, MAX_CANDIDATES, (c, i) =>
-    c.uci === ask.move?.uci || (cheap && i > 0) ? {} : explained(ask.fen, c.uci, c.pv.slice(1), c.score),
+    c.uci === ask.move?.uci || (cheap && i > 0) ? {} : explained(ask.fen, c.uci, c.pv.slice(1), c.score, hideMoves),
   );
   const brief: Brief = {
     job: ask.job,
@@ -134,7 +134,7 @@ export function buildBrief({ ask, profile, summary }: BriefInput): Brief {
         uci: played.uci,
         grade: ask.move.grade,
         evaluationAfter: formatScore(ask.move.playedScore),
-        ...explained(ask.fen, played.uci, ask.replies?.[0]?.pv ?? [], ask.move.playedScore),
+        ...explained(ask.fen, played.uci, ask.replies?.[0]?.pv ?? [], ask.move.playedScore, hideMoves),
       };
       // The replies say what they do; what the line leads to is the move's result.
       if (ask.replies?.length) {
@@ -246,14 +246,14 @@ type Facts = Pick<BriefCandidate, 'does' | 'result'>;
 /**
  * The explainability layer's facts for a move from `fen` (see explain.ts): what it does, and, given
  * the Engine's `score` of it for its side, what the forcing moves of the line after it (`line`,
- * starting with the reply) lead to.
+ * starting with the reply) lead to. With `hideMoves` (a Hint) the result names no moves.
  */
-function explained(fen: string, uci: string, line: readonly string[], score?: Score): Facts {
+function explained(fen: string, uci: string, line: readonly string[], score?: Score, hideMoves = false): Facts {
   const out: Facts = {};
   const does = moveFacts(fen, uci, line);
   if (does.length) out.does = does.map(describeFact).join('; ');
   const result = score && lineOutcome(turnOf(fen), readLine(fen, [uci, ...line]), score);
-  if (result && worthSaying(result, fen, score)) out.result = describeOutcome(result);
+  if (result && worthSaying(result, fen, score)) out.result = describeOutcome(result, !hideMoves);
   return out;
 }
 
@@ -322,6 +322,7 @@ function fitToBudget(brief: Brief): Brief {
   const steps: ((b: Brief) => void)[] = [
     // The facts about the weaker alternatives go first: the best moves and the move matter most.
     (b) => { b.candidates.slice(2).forEach((c) => delete c.does); b.replies?.slice(1).forEach((r) => delete r.does); },
+    (b) => { b.candidates.slice(1).forEach((c) => { delete c.does; delete c.result; }); },
     (b) => { if (b.summary) b.summary = clip(b.summary, 250); },
     (b) => { if (b.lesson) b.lesson.notes = clip(b.lesson.notes, 300); },
     (b) => { if (b.profile) b.profile.notes = b.profile.notes.slice(-1); },
@@ -332,6 +333,9 @@ function fitToBudget(brief: Brief): Brief {
     (b) => { if (b.question) b.question = clip(b.question, 200); },
     (b) => { delete b.profile; },
     (b) => { delete b.summary; },
+    // Last, the facts on the key moves themselves.
+    (b) => { b.replies?.forEach((r) => delete r.does); b.candidates.forEach((c) => { delete c.does; delete c.result; }); },
+    (b) => { if (b.move) { delete b.move.does; delete b.move.result; } },
   ];
   for (const step of steps) {
     if (briefSize(brief) <= BRIEF_BUDGET) break;

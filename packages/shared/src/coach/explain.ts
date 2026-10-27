@@ -12,7 +12,7 @@ import type { Role } from 'chessops/types';
 import { makeSquare, parseSquare } from 'chessops/util';
 import { isCheck, legalMoves, otherSide, playUci, positionFromFen, SIDE_NAMES, type Side } from '../chess.ts';
 import type { Score } from '../engine.ts';
-import { nullMoveFen } from '../threat.ts';
+import { isForcing, nullMoveFen } from '../threat.ts';
 
 type Position = ReturnType<typeof positionFromFen>;
 
@@ -47,6 +47,8 @@ export interface LinePly {
   from: string;
   to: string;
   captured?: Role;
+  /** Where the taken piece stood: `to`, except en passant. */
+  capturedAt?: string;
   promotion?: Role;
   fenAfter: string;
 }
@@ -75,7 +77,7 @@ export function readLine(fen: string, ucis: readonly string[]): LinePly[] {
       role: mover.role,
       from: makeSquare(from),
       to: makeSquare(to),
-      ...(captured ? { captured } : {}),
+      ...(captured ? { captured, capturedAt: makeSquare(enPassant ? (from & ~7) | (to & 7) : to) } : {}),
       ...(promotion ? { promotion } : {}),
       fenAfter: played.fenAfter,
     });
@@ -84,19 +86,23 @@ export function readLine(fen: string, ucis: readonly string[]): LinePly[] {
   return out;
 }
 
-const forcing = (p: LinePly) => Boolean(p.captured || p.promotion || /[+#]$/.test(p.san));
+const forcing = (p: LinePly) => isForcing(p.san);
 
 /**
  * The plies of a line whose material counts: its first move and the forcing sequence right after
  * it (captures, promotions, checks and answers to a check), up to the first quiet move. Further on,
- * the Engine's line is a guess at best play. A line that ends while taking, with a piece that can
- * be taken back, ends in the middle of an exchange, so that whole exchange is left out.
+ * the Engine's line is a guess at best play. A count that stops in the middle of an exchange leaves
+ * that whole exchange out.
  */
 function counted(plies: readonly LinePly[]): readonly LinePly[] {
   let end = Math.min(1, plies.length);
   while (end < Math.min(plies.length, COUNTED_PLIES) && (forcing(plies[end] as LinePly) || /[+#]$/.test(plies[end - 1]?.san ?? ''))) end++;
+  // Stopped while taking, with the taker taken back next (the count's limit cut the exchange) or
+  // able to be (the line ends there): the exchange is not over, so it is left out.
   const last = plies[end - 1];
-  if (end === plies.length && last?.captured && loosePieces(last.fenAfter).some((l) => l.piece.square === last.to)) {
+  const next = plies[end];
+  const unfinished = last?.captured && (next ? next.capturedAt === last.to : loosePieces(last.fenAfter).some((l) => l.piece.square === last.to));
+  if (unfinished) {
     while (end > 0 && plies[end - 1]?.captured) end--;
   }
   return plies.slice(0, end);
@@ -191,9 +197,10 @@ function materialBalance(fen: string, side: Side): number {
 }
 
 /** "White wins a knight", "Black gives up a rook for a knight", "White mates in 2 (…)". */
-export function describeOutcome(o: LineOutcome): string {
-  // The moves it happens over, so a loss a few moves on isn't read as the move's own.
-  const over = o.line.length > 1 ? ` (${o.line.join(' ')})` : '';
+export function describeOutcome(o: LineOutcome, withMoves = true): string {
+  // The moves it happens over, so a loss a few moves on isn't read as the move's own; left out where
+  // no move may be named (a Hint).
+  const over = withMoves && o.line.length > 1 ? ` (${o.line.join(' ')})` : '';
   if (o.mate) {
     const { by, boxedBy = [], giver, guardedBy = [] } = o.mate;
     // A mate in one is one event, the move itself or the very next one, never a capture and then a mate.
@@ -263,7 +270,7 @@ function capture(pos: Position, from: number, to: number) {
 /** Whether `line` takes the piece standing on `square` at its start, there, within `limit` plies, before it moves. */
 function takenThere(line: readonly LinePly[], square: string, limit: number): boolean {
   for (const p of line.slice(0, limit)) {
-    if (p.to === square && p.captured) return true;
+    if (p.capturedAt === square) return true;
     if (p.from === square) return false;
   }
   return false;
@@ -275,9 +282,9 @@ function takesOn(line: readonly LinePly[], square: string, limit: number): strin
   const out: string[] = [];
   for (const p of line.slice(0, limit)) {
     if (p.from === at) {
-      if (p.captured) out.push(p.to);
+      if (p.capturedAt) out.push(p.capturedAt);
       at = p.to;
-    } else if (p.to === at) break;
+    } else if (p.capturedAt === at) break;
   }
   return out;
 }
@@ -317,7 +324,14 @@ export function moveFacts(fen: string, uci: string, line: readonly string[]): Mo
   const after = move.fenAfter;
   const rest = readLine(after, line);
   const taken = (square: string) => takenThere(rest, square, CONFIRM_PLIES);
-  return [...ownFacts(fen, move), ...attackFacts(fen, move, rest, taken), ...exposureFacts(fen, move, rest, taken)];
+  const loose = { before: loosePieces(fen), after: loosePieces(after) };
+  return [...ownFacts(fen, move), ...attackFacts(fen, move, rest, loose, taken), ...exposureFacts(fen, move, rest, loose, taken)];
+}
+
+/** The pieces that can be taken before the move and after it. */
+interface Loose {
+  before: LoosePiece[];
+  after: LoosePiece[];
 }
 
 /** What the move itself is: the only move, a capture, castling, a promotion, a check, development, a king walk. */
@@ -342,12 +356,11 @@ function ownFacts(fen: string, move: LinePly): MoveFact[] {
 }
 
 /** What the move attacks: a double attack or a skewer the moved piece goes on to win, or pieces it uncovered an attack on. */
-function attackFacts(fen: string, move: LinePly, rest: readonly LinePly[], taken: (square: string) => boolean): MoveFact[] {
+function attackFacts(fen: string, move: LinePly, rest: readonly LinePly[], { before, after }: Loose, taken: (square: string) => boolean): MoveFact[] {
   const board = positionFromFen(fen).board;
-  const before = loosePieces(fen);
   // Pieces that can be taken now and couldn't before, unless by the same piece that already attacked
   // them: then the move only took away a defender, and that is not an attack it made.
-  const attacked = loosePieces(move.fenAfter).filter((l) => {
+  const attacked = after.filter((l) => {
     if (l.piece.side === move.side || before.some((b) => b.piece.square === l.piece.square && b.piece.role === l.piece.role)) return false;
     if (l.attacker.square === move.to) return true;
     const from = parseSquare(l.attacker.square) as number;
@@ -371,11 +384,11 @@ function attackFacts(fen: string, move: LinePly, rest: readonly LinePly[], taken
 }
 
 /** What the move exposes: its own pieces left to be taken, a square it stops guarding, and a pin that saves it. */
-function exposureFacts(fen: string, move: LinePly, rest: readonly LinePly[], taken: (square: string) => boolean): MoveFact[] {
+function exposureFacts(fen: string, move: LinePly, rest: readonly LinePly[], loose: Loose, taken: (square: string) => boolean): MoveFact[] {
   const after = move.fenAfter;
-  const before = loosePieces(fen);
+  const before = loose.before;
   const facts: MoveFact[] = [];
-  for (const l of loosePieces(after).filter((x) => x.piece.side === move.side && taken(x.piece.square))) {
+  for (const l of loose.after.filter((x) => x.piece.side === move.side && taken(x.piece.square))) {
     const moved = l.piece.square === move.to;
     // Taking a piece worth as much or more is a trade, even when the taker can be taken back.
     if (moved && move.captured && VALUE[move.captured] >= VALUE[move.role]) continue;
@@ -466,9 +479,10 @@ function pinnedAttackers(move: LinePly): { piece: PieceAt; by: PieceAt }[] {
   const king = pos.board.kingOf(pos.turn);
   const out: { piece: PieceAt; by: PieceAt }[] = [];
   if (king === undefined) return out;
+  const { blockers } = pos.ctx();
   for (const from of pos.kingAttackers(to, pos.turn, pos.board.occupied)) {
     const piece = pos.board.get(from);
-    if (!piece || piece.role === 'king' || !pos.ctx().blockers.has(from) || pos.isLegal({ from, to })) continue;
+    if (!piece || piece.role === 'king' || !blockers.has(from) || pos.isLegal({ from, to })) continue;
     // The pinner: a piece of the mover's that would attack the king were the pinned piece gone.
     for (const s of pos.kingAttackers(king, move.side, pos.board.occupied.without(from))) {
       const p = pos.board.get(s);

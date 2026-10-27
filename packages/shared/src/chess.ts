@@ -91,6 +91,26 @@ export function playSan(fen: string, san: string): PlayedMove | undefined {
   return playUci(fen, makeUci(move));
 }
 
+// Moves in SAN as people write them: castling (with O's or zeros), piece moves, pawn captures and pawn pushes.
+const SAN_IN_TEXT = /(?<![\w-])(O-O-O|O-O|0-0-0|0-0|[KQRBN][a-h]?[1-8]?x?[a-h][1-8]|[a-h]x[a-h][1-8](?:=?[QRBN])?|[a-h][1-8](?:=?[QRBN])?)(?=[+#!?]*(?![\w-]))/g;
+// The words that make a bare square a move: "Why not d4?", "Why d4?", "play d4", "What about d4?", or nothing at all.
+const PUSH_CUE = /(?:^|\b(?:not|why|play|played|playing|push|pushed|pushing|about))\s*$/i;
+
+/**
+ * The moves `text` names in SAN, in order, castling written with O's. A pawn push such as "e5"
+ * reads like a square ("my knight on e5"), so it counts only with `pushes`, and only when the
+ * words just before it make it a move.
+ */
+export function sansIn(text: string, { pushes = false } = {}): string[] {
+  const out: string[] = [];
+  for (const m of text.matchAll(SAN_IN_TEXT)) {
+    const san = (m[1] as string).replaceAll('0', 'O');
+    if (/^[a-h][1-8]/.test(san) && !(pushes && PUSH_CUE.test(text.slice(0, m.index)))) continue;
+    out.push(san);
+  }
+  return out;
+}
+
 export function isLegalUci(fen: string, uci: string): boolean {
   return playUci(fen, uci) !== undefined;
 }

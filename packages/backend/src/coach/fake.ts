@@ -140,7 +140,8 @@ export function templateReply(brief: Brief): CoachRawReply {
       if (brief.question) text += ' That answers your Why Question.';
       add(best, 'green');
       if (brief.move && brief.move.uci !== best?.uci) add(brief.move, 'red');
-      add(asked ?? alt, 'blue');
+      // An asked move that is the Engine's best is already drawn in green, and the other option is drawn in its place.
+      add(asked && asked.uci !== best?.uci ? asked : alt, 'blue');
       break;
     }
   }

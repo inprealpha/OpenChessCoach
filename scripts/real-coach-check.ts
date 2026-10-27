@@ -20,7 +20,7 @@
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { playSan, playUci } from '@chess-coach/shared/chess';
+import { playSan, playUci, sansIn } from '@chess-coach/shared/chess';
 import { allowedMoves, guardReply } from '@chess-coach/shared/coach/guard';
 import { MAX_WORDS, threatFen, type Brief } from '@chess-coach/shared/coach/brief';
 import type { CoachRequest, CoachRawReply, CoachReply } from '@chess-coach/shared/coach/types';
@@ -53,13 +53,6 @@ export interface CallVerdict {
   maxWords: number;
   problems: string[];
   warnings: string[];
-}
-
-// Piece moves, captures and castling. Pawn pushes such as "e4" read like squares, so they are left out.
-const SAN_IN_TEXT = /(?<![\w-])(O-O-O|O-O|[KQRBN][a-h]?[1-8]?x?[a-h][1-8]|[a-h]x[a-h][1-8](?:=[QRBN])?)(?=[+#!?]*(?![\w-]))/g;
-
-function sansIn(text: string): string[] {
-  return [...text.matchAll(SAN_IN_TEXT)].map((m) => m[1] as string);
 }
 
 /** The structural checks for one Coach call: the brief it got, its raw reply and what the client received. */

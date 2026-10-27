@@ -353,8 +353,35 @@ describe('the Coach port', () => {
     for (const question of ['Why not Qxf7?', 'Why is e5 weak?', 'Why O-O?', 'Why not take the pawn on e5?']) {
       expect(await briefFor(question)).toEqual(plain);
     }
+    // A square named for a piece is not a pawn push, though d3 is legal; "Why not d3?" is one.
+    expect(await briefFor('Why can’t my bishop go to d3?')).toEqual(plain);
+    expect((await briefFor('Why not d3?')).candidates.filter((x) => x.asked).map((x) => x.uci)).toEqual(['d2d3']);
+    // Asked about the Engine's best move, the fake Coach draws it in green and the next option in blue.
+    const [top, next] = plain.candidates;
+    const reply = await c.request('coach.ask', { ...ask, moveUci: undefined, question: `Why not ${top?.san}?` });
+    expect(reply.arrows).toEqual(expect.arrayContaining([
+      { from: top?.uci.slice(0, 2), to: top?.uci.slice(2, 4), brush: 'green' },
+      { from: next?.uci.slice(0, 2), to: next?.uci.slice(2, 4), brush: 'blue' },
+    ]));
     // Only a Why Question pays for the extra search: a Lesson turn's typed reasoning names no move for the Engine.
     expect((await briefFor('I played it because Nxe5 loses a piece', 'lesson-turn')).candidates.some((x) => x.asked || x.uci === 'f3e5')).toBe(false);
+  });
+
+  it('leaves out a named move either side could mean, unless the move asked about is the Player’s own', async () => {
+    const app = await instance();
+    const c = await client(app);
+    // 1. e4 e5 2. Nf3 Nc6 3. Bc4, asked about Black's 3... Bc5: Black's knight could go to d4 instead, and White's can go there next.
+    const fen = 'r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3';
+    const askedFor = async (question: string, playerSide?: 'white' | 'black') => {
+      await c.request('coach.ask', { job: 'why', fen, recentMoves: [], moveUci: 'f8c5', question, ...(playerSide ? { playerSide } : {}) });
+      return app.coach.lastBrief?.candidates.filter((x) => x.asked).map((x) => x.san);
+    };
+    // White's Player, or one the Board doesn't name, may mean White's Nd4 next: it is left out.
+    expect(await askedFor('Why not Nd4?', 'white')).toEqual([]);
+    expect(await askedFor('Why not Nd4?')).toEqual([]);
+    // Black's Player asks about their own other option; only Black can play Nf6.
+    expect(await askedFor('Why not Nd4?', 'black')).toEqual(['Nd4']);
+    expect(await askedFor('Why not Nf6?', 'white')).toEqual(['Nf6']);
   });
 
   it('drops the threat once the move dealt with it, so the Coach neither names it nor shows it', async () => {

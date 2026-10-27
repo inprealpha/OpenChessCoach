@@ -327,11 +327,12 @@ describe('the Coach port', () => {
     expect(reply.moves).toContain('f3e5');
     expect(reply.arrows).toContainEqual({ from: 'f3', to: 'e5', brush: 'blue' });
     expect(reply.stripped).toBe(0);
-    // The Coach can show the Engine's reply to it as well, and only where the line plays it.
+    // The Coach can name the Engine's reply to it as well, but draws only the move itself.
     const lineMove = graded.replies[0]?.uci as string;
-    app.coach.script({ kind: 'reply', reply: { text: 'Nxe5 runs into a strong reply.', moves: ['f3e5', lineMove], arrows: [{ uci: lineMove, brush: 'red' }] } });
-    const shown = await c.request('coach.ask', { ...ask, question: 'Why not Nxe5?' });
-    expect(shown).toMatchObject({ moves: ['f3e5', lineMove], arrows: [{ from: lineMove.slice(0, 2), to: lineMove.slice(2, 4), brush: 'red' }], stripped: 0 });
+    app.coach.script({ kind: 'reply', reply: { text: 'Nxe5 runs into a strong reply.', moves: ['f3e5', lineMove], arrows: [{ uci: 'f3e5', brush: 'blue' }, { uci: lineMove, brush: 'red' }] } });
+    const shown = await c.request('coach.ask', { ...ask, question: '   Why not Nxe5?   ' });
+    expect(shown).toMatchObject({ moves: ['f3e5', lineMove], arrows: [{ from: 'f3', to: 'e5', brush: 'blue' }], stripped: 1 });
+    expect(app.coach.lastBrief?.question).toBe('Why not Nxe5?');
     // Asked about the position, with the move named among others in a sentence.
     await c.request('coach.ask', { ...ask, moveUci: undefined, question: 'I wanted to play Nxe5!? here, why is it bad?' });
     expect(app.coach.lastBrief?.candidates.find((x) => x.asked)).toEqual(expect.objectContaining(asked));

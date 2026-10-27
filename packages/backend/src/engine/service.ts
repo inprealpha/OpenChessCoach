@@ -129,6 +129,8 @@ export class EngineService {
    * sends besides the position and the moves played is ignored (ADR 0007).
    */
   async factsFor(req: CoachRequest): Promise<CoachAsk> {
+    // Trimmed, as the handler measures it, so a question padded with spaces costs no more to read.
+    const question = typeof req.question === 'string' ? req.question.trim() : '';
     const ask: CoachAsk = {
       job: req.job,
       fen: req.fen,
@@ -136,7 +138,7 @@ export class EngineService {
       candidates: [],
       ...(req.threadId ? { threadId: req.threadId } : {}),
       ...(req.playerSide === 'white' || req.playerSide === 'black' ? { playerSide: req.playerSide } : {}),
-      ...(typeof req.question === 'string' ? { question: req.question } : {}),
+      ...(question ? { question } : {}),
       ...(req.lesson !== undefined ? { lesson: lessonOf(req.lesson) } : {}),
       ...(typeof req.opening === 'string' ? { opening: req.opening } : {}),
       ...(req.hideWinningChances === true ? { hideWinningChances: true } : {}),

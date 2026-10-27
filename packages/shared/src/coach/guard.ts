@@ -32,25 +32,35 @@ export function allowedMoves(brief: Brief): Set<string> {
       for (const r of brief.replies ?? []) if (playUci(played.fenAfter, r.uci)) allowed.add(r.uci);
     }
   }
-  // A move the Player asked about, and the Engine's line after it, each legal where the line plays it.
+  return allowed;
+}
+
+/**
+ * The moves of the Engine's line after a move the Player asked about, each legal where the line
+ * plays it. The Coach may name them, but never draw them: the board shows the position before the
+ * line, where they aren't played.
+ */
+export function askedLineMoves(brief: Brief): Set<string> {
+  const out = new Set<string>();
   for (const c of brief.candidates.filter((x) => x.asked)) {
     let played = playUci(brief.fen, c.uci);
     for (const san of c.line.split(' ').filter(Boolean)) {
       played = played && playSan(played.fenAfter, san);
       if (!played) break;
-      allowed.add(played.uci);
+      out.add(played.uci);
     }
   }
-  return allowed;
+  return out;
 }
 
 export function guardReply(brief: Brief, raw: CoachRawReply): GuardResult {
   const allowed = brief.hideMoves ? new Set<string>() : allowedMoves(brief);
+  const named = brief.hideMoves ? new Set<string>() : askedLineMoves(brief);
   const stripped: string[] = [];
 
   const moves: string[] = [];
   for (const uci of raw.moves) {
-    if (allowed.has(uci)) {
+    if (allowed.has(uci) || named.has(uci)) {
       if (!moves.includes(uci)) moves.push(uci);
     } else stripped.push(`move ${uci} is not in the Engine's output`);
   }

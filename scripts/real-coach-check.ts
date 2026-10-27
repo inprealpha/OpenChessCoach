@@ -21,7 +21,7 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { playSan, playUci, sansIn } from '@chess-coach/shared/chess';
-import { allowedMoves, guardReply } from '@chess-coach/shared/coach/guard';
+import { allowedMoves, askedLineMoves, guardReply } from '@chess-coach/shared/coach/guard';
 import { MAX_WORDS, threatFen, type Brief } from '@chess-coach/shared/coach/brief';
 import type { CoachRequest, CoachRawReply, CoachReply } from '@chess-coach/shared/coach/types';
 import type { CoachJob } from '@chess-coach/shared/protocol';
@@ -62,17 +62,17 @@ export function checkCall(record: CoachCallRecord, reply: CoachReply, terms: rea
   const { brief } = record;
 
   const allowed = brief.hideMoves ? new Set<string>() : allowedMoves(brief);
-  for (const uci of [...reply.moves, ...reply.arrows.map((a) => `${a.from}${a.to}`)]) {
-    // The guard allows a move only where it is legal, as for an asked move's line deep in it.
-    if (allowed.has(uci)) continue;
-    // Otherwise legal in the position, after the move, or, for the briefed threat, where the guard plays it.
+  // An asked move's line may be named, never drawn: the guard checks each move where the line plays it.
+  const named = brief.hideMoves ? new Set<string>() : askedLineMoves(brief);
+  for (const uci of [...reply.moves.filter((m) => !named.has(m)), ...reply.arrows.map((a) => `${a.from}${a.to}`)]) {
+    // Legal in the position, after the move, or, for the briefed threat, where the guard plays it.
     const threatFrom = uci === brief.threat?.uci ? threatFen(brief) : undefined;
     const legal =
       playUci(brief.fen, uci) ??
       (brief.move ? playUci(playUci(brief.fen, brief.move.uci)?.fenAfter ?? brief.fen, uci) : undefined) ??
       (threatFrom ? playUci(threatFrom, uci) : undefined);
     if (!legal) problems.push(`the reply shows ${uci}, which is not legal here`);
-    else if (![...allowed].some((a) => a.slice(0, 4) === uci)) problems.push(`the reply shows ${uci}, which the Engine never suggested`);
+    else if (!allowed.has(uci) && ![...allowed].some((a) => a.slice(0, 4) === uci)) problems.push(`the reply shows ${uci}, which the Engine never suggested`);
   }
   const stripped = guardReply(brief, record.raw).stripped;
   if (stripped.length) warnings.push(`the move guard stripped what the Engine never suggested: ${stripped.join('; ')}`);

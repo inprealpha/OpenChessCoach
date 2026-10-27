@@ -45,6 +45,8 @@ export interface BriefCandidate {
   does?: string;
   /** What the forcing moves right after it lead to, for the side that plays it: material or a mate. */
   result?: string;
+  /** The Player's question names this move. When the Engine didn't list it, it comes after the candidates. */
+  asked?: true;
 }
 
 /**
@@ -113,6 +115,13 @@ export function buildBrief({ ask, profile, summary }: BriefInput): Brief {
   const candidates = briefCandidates(ask.fen, ask.candidates, MAX_CANDIDATES, (c, i) =>
     c.uci === ask.move?.uci || (cheap && i > 0) ? {} : explained(ask.fen, c.uci, c.pv.slice(1), c.score, hideMoves),
   );
+  // The moves the Player's question names: marked among the candidates, or added after them,
+  // graded against the Engine's best move as the candidates are.
+  const asked = ask.asked ?? [];
+  for (const c of candidates) if (asked.some((a) => a.uci === c.uci)) c.asked = true;
+  const others = asked.filter((a) => !candidates.some((c) => c.uci === a.uci));
+  const extra = briefCandidates(ask.fen, others, others.length, (a) => explained(ask.fen, a.uci, a.pv.slice(1), a.score, hideMoves), ask.candidates[0]);
+  candidates.push(...extra.map((c) => ({ ...c, asked: true as const })));
   const brief: Brief = {
     job: ask.job,
     level: profile.level,
@@ -221,9 +230,14 @@ function threatOf(ask: CoachAsk): Brief['threat'] {
   return { by: turnOf(from), san: played.san, uci: played.uci, line: linesSan(played.fenAfter, ask.threat.pv.slice(1, LINE_PLIES)) };
 }
 
-/** The Engine's candidates in `fen`, each with the facts `explain` gives for it. */
-function briefCandidates(fen: string, candidates: readonly Candidate[], max: number, explain: (c: Candidate, index: number) => Facts): BriefCandidate[] {
-  const best = candidates[0];
+/** The Engine's candidates in `fen`, each graded against `best` and with the facts `explain` gives for it. */
+function briefCandidates(
+  fen: string,
+  candidates: readonly Candidate[],
+  max: number,
+  explain: (c: Candidate, index: number) => Facts,
+  best: Candidate | undefined = candidates[0],
+): BriefCandidate[] {
   const out: BriefCandidate[] = [];
   for (const [i, c] of candidates.slice(0, max).entries()) {
     const played = playUci(fen, c.uci);
@@ -320,13 +334,13 @@ function clip(text: string, max: number): string {
 /** Trims the least important parts until the brief fits. */
 function fitToBudget(brief: Brief): Brief {
   const steps: ((b: Brief) => void)[] = [
-    // The facts about the weaker alternatives go first: the best moves and the move matter most.
-    (b) => { b.candidates.slice(2).forEach((c) => delete c.does); b.replies?.slice(1).forEach((r) => delete r.does); },
-    (b) => { b.candidates.slice(1).forEach((c) => { delete c.does; delete c.result; }); },
+    // The facts about the weaker alternatives go first: the best moves, the move and the moves the Player asked about matter most.
+    (b) => { b.candidates.slice(2).forEach((c) => { if (!c.asked) delete c.does; }); b.replies?.slice(1).forEach((r) => delete r.does); },
+    (b) => { b.candidates.slice(1).forEach((c) => { if (!c.asked) { delete c.does; delete c.result; } }); },
     (b) => { if (b.summary) b.summary = clip(b.summary, 250); },
     (b) => { if (b.lesson) b.lesson.notes = clip(b.lesson.notes, 300); },
     (b) => { if (b.profile) b.profile.notes = b.profile.notes.slice(-1); },
-    (b) => { b.candidates.forEach((c) => (c.line = c.line.split(' ').slice(0, 2).join(' '))); },
+    (b) => { b.candidates.forEach((c) => { if (!c.asked) c.line = c.line.split(' ').slice(0, 2).join(' '); }); },
     (b) => { if (b.threat) b.threat.line = b.threat.line.split(' ').slice(0, 2).join(' '); },
     (b) => { if (b.replies) b.replies = b.replies.slice(0, 2); },
     (b) => { b.recentMoves = b.recentMoves.split(' ').slice(-12).join(' '); },

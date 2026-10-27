@@ -1,6 +1,6 @@
 // The Coach move guard (ADR 0002): before a Coach reply reaches any client, every move and
 // arrow is checked against the Engine's candidates in that call's brief. Anything else is stripped.
-import { playUci } from '../chess.ts';
+import { playSan, playUci } from '../chess.ts';
 import { threatFen, type Brief } from './brief.ts';
 import type { Arrow, CoachRawReply } from './types.ts';
 
@@ -35,13 +35,32 @@ export function allowedMoves(brief: Brief): Set<string> {
   return allowed;
 }
 
+/**
+ * The moves of the Engine's line after a move the Player asked about, each legal where the line
+ * plays it. The Coach may name them, but never draw them: the board shows the position before the
+ * line, where they aren't played.
+ */
+export function askedLineMoves(brief: Brief): Set<string> {
+  const out = new Set<string>();
+  for (const c of brief.candidates.filter((x) => x.asked)) {
+    let played = playUci(brief.fen, c.uci);
+    for (const san of c.line.split(' ').filter(Boolean)) {
+      played = played && playSan(played.fenAfter, san);
+      if (!played) break;
+      out.add(played.uci);
+    }
+  }
+  return out;
+}
+
 export function guardReply(brief: Brief, raw: CoachRawReply): GuardResult {
   const allowed = brief.hideMoves ? new Set<string>() : allowedMoves(brief);
+  const named = brief.hideMoves ? new Set<string>() : askedLineMoves(brief);
   const stripped: string[] = [];
 
   const moves: string[] = [];
   for (const uci of raw.moves) {
-    if (allowed.has(uci)) {
+    if (allowed.has(uci) || named.has(uci)) {
       if (!moves.includes(uci)) moves.push(uci);
     } else stripped.push(`move ${uci} is not in the Engine's output`);
   }

@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import type { Candidate } from '../src/analysis.ts';
 import type { Analysis } from '../src/engine.ts';
 import { assertBriefWithinBudget, BRIEF_BUDGET, BriefTooLargeError, briefSize, buildBrief, profileSlice, type Brief } from '../src/coach/brief.ts';
-import { allowedMoves, guardReply } from '../src/coach/guard.ts';
+import { allowedMoves, askedLineMoves, guardReply } from '../src/coach/guard.ts';
 import type { CoachAsk, CoachRawReply } from '../src/coach/types.ts';
 import { legalMoves, playUci, turnOf } from '../src/chess.ts';
 import { scoreAfterPly } from '../src/position-score.ts';
@@ -82,6 +82,33 @@ describe('the Coach brief', () => {
     const inPosition = buildBrief({ ask: { ...ask, move: undefined, replies: undefined, threat: someThreat(ask.fen) }, profile, summary: 'y'.repeat(5000) });
     expect(inPosition.threat).toBeDefined();
     expect(briefSize(inPosition)).toBeLessThanOrEqual(BRIEF_BUDGET);
+  });
+
+  it('stays within its budget with two moves the Player asked about, keeping their facts and lines whole', () => {
+    // 25. Qxe6+ and 25. Qxb7, which the Engine doesn't list.
+    const ask = longGameAsk(48);
+    const best = ask.replies?.[0] as Candidate;
+    // Two captures the Engine didn't list, each with a full line, as the desktop grades them.
+    const asked = legalMoves(ask.fen)
+      .filter((uci) => uci !== ask.move?.uci && !ask.candidates.some((c) => c.uci === uci))
+      .map((uci) => playUci(ask.fen, uci) as NonNullable<ReturnType<typeof playUci>>)
+      .filter((played) => played.san.includes('x'))
+      .slice(0, 2)
+      .map((played) => ({ uci: played.uci, san: played.san, score: { cp: -300 }, pv: [played.uci, ...someLine(played.fenAfter, 8)] }));
+    expect(asked).toHaveLength(2);
+    const question = `Why not ${asked.map((a) => a.san).join(' or ')}? ${'x'.repeat(300)}`;
+    const why = { ...ask, job: 'why' as const, question, asked, threat: { ...someThreat(ask.fen), uci: best.uci, pv: best.pv } };
+    const brief = buildBrief({ ask: why, profile, summary: 'y'.repeat(5000) });
+    expect(briefSize(brief)).toBeLessThanOrEqual(BRIEF_BUDGET);
+    const shown = brief.candidates.filter((c) => c.asked);
+    expect(shown.map((c) => c.uci)).toEqual(asked.map((a) => a.uci));
+    for (const c of shown) {
+      expect(c.does).toMatch(/^takes /);
+      expect(c.line.split(' ')).toHaveLength(4);
+    }
+    // Without them the brief is the same, so asking costs the other moves nothing.
+    const without = buildBrief({ ask: { ...why, asked: undefined }, profile, summary: 'y'.repeat(5000) });
+    expect(brief.candidates.slice(0, without.candidates.length)).toEqual(without.candidates);
   });
 
   it('carries the opponent’s threat as the Engine found it: who threatens, the move and its line', () => {
@@ -327,6 +354,25 @@ describe('the Coach-move guard', () => {
     const exd5: Brief = { ...base, move: { san: 'exd5', uci: 'e4d5', grade: 'Best', evaluationAfter: '+0.60' } };
     expect(allowedMoves(exd5).has('d5e4')).toBe(false);
     expect(guardReply(exd5, reply({ moves: ['d5e4'], arrows: [{ uci: 'd5e4', brush: 'red' }] }))).toMatchObject({ moves: [], arrows: [] });
+  });
+
+  it('lets the Coach name the Engine’s line after a move the Player asked about, each move where the line plays it, but draw only the move', () => {
+    // 1. e4 e5 2. Nf3 Nc6 3. Bc4 Nd4, and the Player asks about 4. Nxe5: 4… Qg5 5. Bxf7+ Kd8 6. Ng4.
+    const fen = 'r1bqkbnr/pppp1ppp/8/4p3/2BnP3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4';
+    const nxe5 = { uci: 'f3e5', san: 'Nxe5', score: { cp: -50 }, pv: ['f3e5', 'd8g5', 'c4f7', 'e8d8', 'e5g4'] };
+    const why = (asked?: Candidate[]) =>
+      buildBrief({ ask: { job: 'why', fen, recentMoves: [], candidates: [{ uci: 'e1g1', san: 'O-O', score: { cp: 30 }, pv: ['e1g1'] }], asked }, profile });
+    const lineMoves = ['d8g5', 'c4f7', 'e8d8', 'e5g4'];
+    expect([...askedLineMoves(why([nxe5]))]).toEqual(lineMoves);
+    const arrows = ['f3e5', ...lineMoves].map((uci) => ({ uci, brush: 'blue' as const }));
+    const out = guardReply(why([nxe5]), reply({ moves: ['f3e5', ...lineMoves, 'd8h4'], arrows }));
+    expect(out.moves).toEqual(['f3e5', ...lineMoves]);
+    // The board shows the position before the line: Bxf7+ would read as a move to play now, and Kd8 isn't legal there.
+    expect(out.arrows).toEqual([{ from: 'f3', to: 'e5', brush: 'blue' }]);
+    // 4… Qh4 is legal after 4. Nxe5 but not in the Engine's line.
+    expect(out.stripped).toEqual(["move d8h4 is not in the Engine's output", ...lineMoves.map((uci) => `arrow ${uci} is not in the Engine's output`)]);
+    // Without the question, the same line gets nothing past the guard.
+    expect(guardReply(why(), reply({ moves: lineMoves })).moves).toEqual([]);
   });
 
   it('strips every move and arrow from a Hint', () => {

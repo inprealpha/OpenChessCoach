@@ -130,11 +130,18 @@ export function templateReply(brief: Brief): CoachRawReply {
       text = brief.move
         ? `${brief.move.san} is graded ${brief.move.grade}.${chances(brief)} The Engine's top choice was ${best?.san ?? 'another move'} (${best?.evaluation ?? ''}).`
         : `The Engine's top choice here is ${best?.san ?? 'unclear'} (${best?.evaluation ?? ''}).${chances(brief)}`;
-      if (alt) text += ` ${alt.san} is graded ${alt.grade} because the Engine's line after it, ${alt.line || alt.san}, gives up some of the advantage.`;
+      // A move the Player's question names takes the place of the other option, with the facts the brief gives for it.
+      const asked = brief.candidates.find((c) => c.asked);
+      if (asked) {
+        text += ` You asked about ${asked.san}: it is graded ${asked.grade}.`;
+        if (asked.does) text += ` It ${asked.does}.`;
+        if (asked.result) text += ` In the Engine's line, ${asked.result}.`;
+      } else if (alt) text += ` ${alt.san} is graded ${alt.grade} because the Engine's line after it, ${alt.line || alt.san}, gives up some of the advantage.`;
       if (brief.question) text += ' That answers your Why Question.';
       add(best, 'green');
       if (brief.move && brief.move.uci !== best?.uci) add(brief.move, 'red');
-      add(alt, 'blue');
+      // An asked move that is the Engine's best is already drawn in green, and the other option is drawn in its place.
+      add(asked && asked.uci !== best?.uci ? asked : alt, 'blue');
       break;
     }
   }

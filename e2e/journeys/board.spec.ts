@@ -617,6 +617,23 @@ test('a Why Question is answered with Engine moves only, and the brief is record
   await expect(arrows.first()).toBeVisible();
 });
 
+test('a Why Question about a move the Engine didn’t list gets that move graded, explained and drawn', async ({ paired, app }) => {
+  await paired.goto(`${app.url}/#/board`);
+  // 1. e4 e5 2. Nf3 Nc6 3. Bc4 Nd4 4. O-O, and the Player asks about 4. Nxe5, which isn't among the Engine's lines.
+  for (const uci of ['e2e4', 'e7e5', 'g1f3', 'b8c6', 'f1c4', 'c6d4', 'e1g1']) await play(paired, uci);
+  await expect(paired.getByRole('button', { name: /Move 4\. O-O, / })).toBeVisible();
+  await paired.getByLabel('Your Why Question').fill('Why not Nxe5?');
+  await paired.getByRole('button', { name: 'Ask the Coach why' }).click();
+  await coachIdle(paired);
+  // The fake Coach answers about it from the brief's facts, and the guard lets its arrow through.
+  await expect(paired.getByLabel('Coach conversation')).toContainText("You asked about Nxe5: it is graded Inaccuracy. It takes Black's pawn on e5");
+  await expect(paired.getByRole('img', { name: 'Arrow f3 to e5 (blue)' })).toBeVisible();
+  const [call] = await app.rows<{ brief: string; stripped: string }>('coach_calls');
+  const brief = JSON.parse(call?.brief ?? '{}') as { candidates: { san: string; asked?: true }[] };
+  expect(brief.candidates.filter((c) => c.asked)).toEqual([expect.objectContaining({ san: 'Nxe5', uci: 'f3e5', grade: 'Inaccuracy' })]);
+  expect(JSON.parse(call?.stripped ?? '[]')).toEqual([]);
+});
+
 test('the Coach quotes the Winning Chances the bar shows either side of the move', async ({ paired, app }) => {
   await paired.goto(`${app.url}/#/board`);
   for (const uci of MOVES.slice(0, 5)) await play(paired, uci);

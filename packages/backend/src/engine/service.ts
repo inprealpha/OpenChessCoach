@@ -2,7 +2,7 @@
 // every Engine fact in a Coach brief, so the Coach move guard checks the Coach against facts the
 // backend produced, never facts a client sent. Each position is analysed once.
 import { candidatesFrom, gradeFromAnalyses, gradeGame, type Candidate, type GradedMove } from '@chess-coach/shared/analysis';
-import { INITIAL_FEN, isValidFen, outcomeOf, playLine } from '@chess-coach/shared/chess';
+import { INITIAL_FEN, isValidFen, outcomeOf, playLine, playSan, playUci, sansIn, turnOf, type Side } from '@chess-coach/shared/chess';
 import type { CoachAsk, CoachRequest } from '@chess-coach/shared/coach/types';
 import type { Analysis, Engine } from '@chess-coach/shared/engine';
 import { findThreat, type Threat } from '@chess-coach/shared/threat';
@@ -14,6 +14,24 @@ export interface EngineSettings {
 }
 
 const CACHE_SIZE = 2000;
+/** How many moves a Why Question may name for the brief, each costing one search when it isn't a candidate. */
+const MAX_ASKED = 2;
+
+/**
+ * The moves a question names that are legal in `fen`, besides `moveUci`, at most MAX_ASKED, in UCI.
+ * Unless `moveUci` is the Player's own, a move that could also be played right after it is left
+ * out: "Why not Nd4?" could then mean either side's move, and a wrong guess explains the wrong one.
+ */
+function namedMoves(fen: string, question: string, moveUci: string | undefined, playerSide: Side | undefined): string[] {
+  const next = moveUci && turnOf(fen) !== playerSide ? playUci(fen, moveUci)?.fenAfter : undefined;
+  const out: string[] = [];
+  for (const san of sansIn(question, { pushes: true })) {
+    const uci = playSan(fen, san)?.uci;
+    if (uci && uci !== moveUci && !out.includes(uci) && !(next && playSan(next, san))) out.push(uci);
+    if (out.length === MAX_ASKED) break;
+  }
+  return out;
+}
 
 /** A client's Lesson context, checked field by field so a malformed one is refused rather than breaking the brief. */
 function lessonOf(value: unknown): NonNullable<CoachAsk['lesson']> {
@@ -111,6 +129,8 @@ export class EngineService {
    * sends besides the position and the moves played is ignored (ADR 0007).
    */
   async factsFor(req: CoachRequest): Promise<CoachAsk> {
+    // Trimmed, as the handler measures it, so a question padded with spaces costs no more to read.
+    const question = typeof req.question === 'string' ? req.question.trim() : '';
     const ask: CoachAsk = {
       job: req.job,
       fen: req.fen,
@@ -118,7 +138,7 @@ export class EngineService {
       candidates: [],
       ...(req.threadId ? { threadId: req.threadId } : {}),
       ...(req.playerSide === 'white' || req.playerSide === 'black' ? { playerSide: req.playerSide } : {}),
-      ...(typeof req.question === 'string' ? { question: req.question } : {}),
+      ...(question ? { question } : {}),
       ...(req.lesson !== undefined ? { lesson: lessonOf(req.lesson) } : {}),
       ...(typeof req.opening === 'string' ? { opening: req.opening } : {}),
       ...(req.hideWinningChances === true ? { hideWinningChances: true } : {}),
@@ -129,10 +149,12 @@ export class EngineService {
     const threat = this.threat(req.fen);
     if (req.moveUci) {
       const [{ move, replies }, found] = await Promise.all([this.grade(req.fen, req.moveUci), threat]);
+      const asked = await this.askedIn(ask, move.candidates, move.uci);
       return {
         ...ask,
         move: { uci: move.uci, san: move.san, grade: move.grade, playedScore: move.playedScore },
         candidates: move.candidates,
+        ...(asked.length ? { asked } : {}),
         replies,
         ...(found ? { threat: found } : {}),
       };
@@ -140,6 +162,24 @@ export class EngineService {
     const [analysis, found] = await Promise.all([this.analyse(req.fen), threat]);
     const candidates = candidatesFrom(analysis);
     if (!candidates.length) throw new AppError('bad-request', 'The game is already over in this position.');
-    return { ...ask, candidates, ...(found ? { threat: found } : {}) };
+    const asked = await this.askedIn(ask, candidates);
+    return { ...ask, candidates, ...(asked.length ? { asked } : {}), ...(found ? { threat: found } : {}) };
+  }
+
+  /**
+   * The moves a Why Question names in its position (see `namedMoves`): a candidate as it is, and any
+   * other graded as `grade` grades a move, at the cost of one search after it: the search its Move
+   * Grade uses if it is played, so the two always agree. Other jobs pay for none.
+   */
+  private async askedIn(ask: CoachAsk, candidates: readonly Candidate[], moveUci?: string): Promise<Candidate[]> {
+    if (ask.job !== 'why' || ask.question === undefined) return [];
+    return Promise.all(
+      namedMoves(ask.fen, ask.question, moveUci, ask.playerSide).map(async (uci) => {
+        const candidate = candidates.find((c) => c.uci === uci);
+        if (candidate) return candidate;
+        const { move, replies } = await this.grade(ask.fen, uci);
+        return { uci: move.uci, san: move.san, score: move.playedScore, pv: [move.uci, ...(replies[0]?.pv ?? [])] };
+      }),
+    );
   }
 }

@@ -1,7 +1,7 @@
 // How a game ends: the final position decides checkmate, stalemate, insufficient material and the
 // fifty-move rule; a threefold repetition needs the whole line, so it is judged from the moves.
 import { describe, expect, it } from 'vitest';
-import { INITIAL_FEN, outcomeOf, outcomeOfLine, playLine } from '../src/chess.ts';
+import { INITIAL_FEN, outcomeOf, outcomeOfLine, playLine, sansIn } from '../src/chess.ts';
 
 /** Both sides' king's knights out and back: each round trip returns to the start position. */
 const SHUFFLE = ['g1f3', 'g8f6', 'f3g1', 'f6g8'];
@@ -55,5 +55,20 @@ describe('outcomeOf', () => {
     expect(outcomeOf('8/8/4k3/8/8/4K3/4R3/8 w - - 100 80')).toEqual({ winner: undefined, reason: 'draw' });
     expect(outcomeOf('8/8/4k3/8/8/4K3/4N3/8 w - - 0 80')).toEqual({ winner: undefined, reason: 'insufficient' });
     expect(outcomeOf('8/8/4k3/8/8/4K3/4R3/8 w - - 99 80')).toBeUndefined();
+  });
+});
+
+describe('sansIn', () => {
+  it('finds piece moves, captures and castling, and a pawn push only where the words make it a move', () => {
+    expect(sansIn('Why not Nxe5, or 0-0 and then exd5?')).toEqual(['Nxe5', 'O-O', 'exd5']);
+    expect(sansIn('Why not d4?')).toEqual([]);
+    for (const text of ['Why not d4?', 'Why d4?', 'I wanted to play d4!?', 'What about d4', 'd4?']) {
+      expect(sansIn(text, { pushes: true })).toEqual(['d4']);
+    }
+    // A square named for a piece, or as a square, is not a pawn push.
+    for (const text of ['Why can’t my knight go to d4?', 'Is the pawn on d4 weak?', 'Why is d4 weak?', 'Who controls d4?']) {
+      expect(sansIn(text, { pushes: true })).toEqual([]);
+    }
+    expect(sansIn('Why not Bb5 instead of putting it on c4?', { pushes: true })).toEqual(['Bb5']);
   });
 });

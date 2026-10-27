@@ -15,6 +15,8 @@ $C ask-why --fen "rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2" 
 $C coach script --reply '{"text":"Try this.","moves":["a2a4"],"arrows":[{"uci":"a2a4","brush":"green"}]}'
 $C ask-why --fen "<same fen>" --move Nf3      # the scripted move is stripped: "stripped": 2
 $C db get coach_calls                          # the brief, the raw reply and what was stripped
+# A question naming a move the Engine didn't list: 4. Nxe5 after 1. e4 e5 2. Nf3 Nc6 3. Bc4 Nd4
+$C ask-why --fen "r1bqkbnr/pppp1ppp/8/4p3/2BnP3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4" --move O-O --question "Why not Nxe5?"
 ```
 
 ## Proof
@@ -32,6 +34,13 @@ $C db get coach_calls                          # the brief, the raw reply and wh
   position after the move: "White mates in 1" after 17. Qd6+ (`coach.test.ts`). Where the screen
   hides the bar, in a Lesson or a Puzzle, the request says so (`hideWinningChances`) and the brief
   carries none; a Hint never does.
+- A move the question names in SAN ("Why not Nxe5?"), legal in the position and not the move
+  itself, is in the brief with `asked: true`: marked among the candidates when the Engine listed it,
+  and otherwise graded on the desktop's Engine (one more search each, at most two moves, Why
+  Questions only) and added after them with its Move Grade, line, `does` and `result`. The guard
+  lets the Coach show it, and name the moves of its line (each where the line plays it) but not draw them, and the fake Coach says "You asked about Nxe5: it is graded Inaccuracy. It
+  takes Black's pawn on e5…" with a blue arrow f3 to e5 (`board.spec.ts`). A move that isn't legal,
+  or one named only in words, changes nothing (`coach.test.ts`).
 - A question is at most 300 characters (`MAX_QUESTION_LENGTH`): the input stops there and shows how
   many characters are left from 50 before it (`board.spec.ts`); the desktop refuses a longer one with
   "A question can be at most 300 characters." (`coach.test.ts`). If a longer one is forced past the

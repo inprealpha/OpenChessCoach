@@ -20,8 +20,8 @@
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { playSan, playUci } from '@chess-coach/shared/chess';
-import { allowedMoves, guardReply } from '@chess-coach/shared/coach/guard';
+import { playSan, playUci, sansIn } from '@chess-coach/shared/chess';
+import { allowedMoves, askedLineMoves, guardReply } from '@chess-coach/shared/coach/guard';
 import { MAX_WORDS, threatFen, type Brief } from '@chess-coach/shared/coach/brief';
 import type { CoachRequest, CoachRawReply, CoachReply } from '@chess-coach/shared/coach/types';
 import type { CoachJob } from '@chess-coach/shared/protocol';
@@ -55,13 +55,6 @@ export interface CallVerdict {
   warnings: string[];
 }
 
-// Piece moves, captures and castling. Pawn pushes such as "e4" read like squares, so they are left out.
-const SAN_IN_TEXT = /(?<![\w-])(O-O-O|O-O|[KQRBN][a-h]?[1-8]?x?[a-h][1-8]|[a-h]x[a-h][1-8](?:=[QRBN])?)(?=[+#!?]*(?![\w-]))/g;
-
-function sansIn(text: string): string[] {
-  return [...text.matchAll(SAN_IN_TEXT)].map((m) => m[1] as string);
-}
-
 /** The structural checks for one Coach call: the brief it got, its raw reply and what the client received. */
 export function checkCall(record: CoachCallRecord, reply: CoachReply, terms: readonly string[]): CallVerdict {
   const problems: string[] = [];
@@ -69,7 +62,9 @@ export function checkCall(record: CoachCallRecord, reply: CoachReply, terms: rea
   const { brief } = record;
 
   const allowed = brief.hideMoves ? new Set<string>() : allowedMoves(brief);
-  for (const uci of [...reply.moves, ...reply.arrows.map((a) => `${a.from}${a.to}`)]) {
+  // An asked move's line may be named, never drawn: the guard checks each move where the line plays it.
+  const named = brief.hideMoves ? new Set<string>() : askedLineMoves(brief);
+  for (const uci of [...reply.moves.filter((m) => !named.has(m)), ...reply.arrows.map((a) => `${a.from}${a.to}`)]) {
     // Legal in the position, after the move, or, for the briefed threat, where the guard plays it.
     const threatFrom = uci === brief.threat?.uci ? threatFen(brief) : undefined;
     const legal =
@@ -128,6 +123,7 @@ export class RecordingCoach implements CoachPort {
 
 const ITALIAN_BEFORE_BC4 = 'r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3';
 const AFTER_E4_D5 = 'rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2';
+const ITALIAN_AFTER_ND4 = 'r1bqkbnr/pppp1ppp/8/4p3/2BnP3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4';
 
 /**
  * One call of every Coach job, the way the web app makes them: the position and the move only.
@@ -153,6 +149,19 @@ async function driveEveryJob(client: CoachClient, root: URL): Promise<{ job: Coa
 
   // A Why Question about that position, with no move: Black's threat dxe4 is legal there only after a pass.
   out.push({ job: 'why', reply: await client.request('coach.ask', { job: 'why', fen: AFTER_E4_D5, recentMoves: ['e4', 'd5'], playerSide: 'white', question: 'What are the options in this position?' }) });
+
+  // A Why Question about a move the Engine doesn't list: 4.Nxe5 instead of 4.O-O after 3...Nd4.
+  out.push({
+    job: 'why',
+    reply: await client.request('coach.ask', {
+      job: 'why',
+      fen: ITALIAN_AFTER_ND4,
+      recentMoves: ['e4', 'e5', 'Nf3', 'Nc6', 'Bc4', 'Nd4'],
+      playerSide: 'white',
+      moveUci: uciOf(ITALIAN_AFTER_ND4, 'O-O'),
+      question: 'Why not Nxe5?',
+    }),
+  });
 
   // Lesson turn: the Italian Game's 3.Bc4, with its bundled notes.
   const lesson = JSON.parse(readFileSync(new URL('data/lessons/italian-game.json', root), 'utf8')) as {

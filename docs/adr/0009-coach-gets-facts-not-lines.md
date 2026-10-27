@@ -11,6 +11,7 @@ A wrong fact is worse than none, because the Coach repeats it with confidence. E
 ## Consequences
 
 - The layer adds no Engine searches: it reads the lines the brief already has, in a few milliseconds. Live Coaching and Hints, which must stay short, get facts only on the move, the Engine's best move and its best reply.
+- A Why Question that names a move the Engine didn't list ("Why not Nxe5?") is the one place the desktop searches for the layer: it grades that move, at most two of them, so the brief has its line and facts beside the candidates, marked `asked`.
 - Each fact is typed and names its pieces and squares, so it can later be drawn on the board as well as said.
 - Facts are tested on real positions: the Lichess puzzles' own solutions and the golden games (`packages/shared/test/explain.test.ts`), including a check that quiet, sound moves in real games get no tactical claim at all, and every failure the adversarial reviews found.
 - The layer was tuned on a fixed set of 20 positions, the Coach's answers judged claim by claim against the Engine, and checked once on 5 positions held out from the tuning. A threat search after each key move and a list of pieces that can be taken were tried and dropped: they were never the main reason and needed the most rules to keep true.

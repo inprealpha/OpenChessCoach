@@ -84,6 +84,33 @@ describe('the Coach brief', () => {
     expect(briefSize(inPosition)).toBeLessThanOrEqual(BRIEF_BUDGET);
   });
 
+  it('stays within its budget with two moves the Player asked about, keeping their facts and lines whole', () => {
+    // 25. Qxe6+ and 25. Qxb7, which the Engine doesn't list.
+    const ask = longGameAsk(48);
+    const best = ask.replies?.[0] as Candidate;
+    // Two captures the Engine didn't list, each with a full line, as the desktop grades them.
+    const asked = legalMoves(ask.fen)
+      .filter((uci) => uci !== ask.move?.uci && !ask.candidates.some((c) => c.uci === uci))
+      .map((uci) => playUci(ask.fen, uci) as NonNullable<ReturnType<typeof playUci>>)
+      .filter((played) => played.san.includes('x'))
+      .slice(0, 2)
+      .map((played) => ({ uci: played.uci, san: played.san, score: { cp: -300 }, pv: [played.uci, ...someLine(played.fenAfter, 8)] }));
+    expect(asked).toHaveLength(2);
+    const question = `Why not ${asked.map((a) => a.san).join(' or ')}? ${'x'.repeat(300)}`;
+    const why = { ...ask, job: 'why' as const, question, asked, threat: { ...someThreat(ask.fen), uci: best.uci, pv: best.pv } };
+    const brief = buildBrief({ ask: why, profile, summary: 'y'.repeat(5000) });
+    expect(briefSize(brief)).toBeLessThanOrEqual(BRIEF_BUDGET);
+    const shown = brief.candidates.filter((c) => c.asked);
+    expect(shown.map((c) => c.uci)).toEqual(asked.map((a) => a.uci));
+    for (const c of shown) {
+      expect(c.does).toMatch(/^takes /);
+      expect(c.line.split(' ')).toHaveLength(4);
+    }
+    // Without them the brief is the same, so asking costs the other moves nothing.
+    const without = buildBrief({ ask: { ...why, asked: undefined }, profile, summary: 'y'.repeat(5000) });
+    expect(brief.candidates.slice(0, without.candidates.length)).toEqual(without.candidates);
+  });
+
   it('carries the opponent’s threat as the Engine found it: who threatens, the move and its line', () => {
     // 1. e4 d5: Black threatens dxe4.
     const fen = 'rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 2';

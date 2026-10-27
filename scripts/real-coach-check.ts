@@ -128,6 +128,7 @@ export class RecordingCoach implements CoachPort {
 
 const ITALIAN_BEFORE_BC4 = 'r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3';
 const AFTER_E4_D5 = 'rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2';
+const ITALIAN_AFTER_ND4 = 'r1bqkbnr/pppp1ppp/8/4p3/2BnP3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4';
 
 /**
  * One call of every Coach job, the way the web app makes them: the position and the move only.
@@ -153,6 +154,19 @@ async function driveEveryJob(client: CoachClient, root: URL): Promise<{ job: Coa
 
   // A Why Question about that position, with no move: Black's threat dxe4 is legal there only after a pass.
   out.push({ job: 'why', reply: await client.request('coach.ask', { job: 'why', fen: AFTER_E4_D5, recentMoves: ['e4', 'd5'], playerSide: 'white', question: 'What are the options in this position?' }) });
+
+  // A Why Question about a move the Engine doesn't list: 4.Nxe5 instead of 4.O-O after 3...Nd4.
+  out.push({
+    job: 'why',
+    reply: await client.request('coach.ask', {
+      job: 'why',
+      fen: ITALIAN_AFTER_ND4,
+      recentMoves: ['e4', 'e5', 'Nf3', 'Nc6', 'Bc4', 'Nd4'],
+      playerSide: 'white',
+      moveUci: uciOf(ITALIAN_AFTER_ND4, 'O-O'),
+      question: 'Why not Nxe5?',
+    }),
+  });
 
   // Lesson turn: the Italian Game's 3.Bc4, with its bundled notes.
   const lesson = JSON.parse(readFileSync(new URL('data/lessons/italian-game.json', root), 'utf8')) as {

@@ -4,6 +4,7 @@ import type { CoachRequest } from '@chess-coach/shared/coach/types';
 import { BRIEF_BUDGET } from '@chess-coach/shared/coach/brief';
 import { candidatesFrom, gradeFromAnalyses } from '@chess-coach/shared/analysis';
 import { playSan } from '@chess-coach/shared/chess';
+import { formatScore } from '@chess-coach/shared/grader';
 import { scoreAfterPly } from '@chess-coach/shared/position-score';
 import { winningChancesFor } from '@chess-coach/shared/winning-chances';
 // The bar's own function on the Board and in Engine Games, so the test compares with the screen.
@@ -228,6 +229,7 @@ describe('the Coach port', () => {
       positionAfter: { score: { mate: 2 }, pov: 'white' },
       winningChances: { before: 'White’s winning chances: 99%' },
       threat: { side: 'black', uci: 'e7e5', san: 'e5', pv: ['e7e5'], score: { cp: 900 }, winLoss: 0.5 },
+      asked: [{ uci: 'h2h4', san: 'h4', score: { cp: 500 }, pv: ['h2h4'] }],
       allowNote: true,
     } as CoachRequest;
     app.coach.script({ kind: 'reply', reply: { text: 'h4 is best.', moves: ['h2h4'], note: 'Forged note' } });
@@ -296,6 +298,63 @@ describe('the Coach port', () => {
     expect(live?.move?.does).toContain("takes Black's pawn on e5");
     expect(live?.candidates.slice(1).every((x) => !x.does && !x.result)).toBe(true);
     expect(live?.replies?.slice(1).every((x) => !x.does)).toBe(true);
+  });
+
+  it('grades and explains a move the Player’s Why Question names when the Engine didn’t list it, and lets the Coach show it', async () => {
+    const app = await instance();
+    const c = await client(app);
+    // 1. e4 e5 2. Nf3 Nc6 3. Bc4 Nd4: the Player castled and asks about 4. Nxe5, which the Engine doesn't list.
+    const fen = 'r1bqkbnr/pppp1ppp/8/4p3/2BnP3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4';
+    const ask = { job: 'why' as const, fen, recentMoves: ['e4', 'e5', 'Nf3', 'Nc6', 'Bc4', 'Nd4'], playerSide: 'white' as const, moveUci: 'e1g1' };
+    const graded = await c.request('engine.grade', { fen, uci: 'f3e5' });
+    const asked = {
+      san: 'Nxe5',
+      uci: 'f3e5',
+      evaluation: formatScore(graded.move.playedScore),
+      grade: graded.move.grade,
+      line: expect.stringMatching(new RegExp(`^${graded.replies[0]?.san.replace('+', '\\+')} `)),
+      does: expect.stringContaining("takes Black's pawn on e5"),
+      asked: true,
+    };
+    const reply = await c.request('coach.ask', { ...ask, question: 'Why not Nxe5?' });
+    const brief = app.coach.lastBrief;
+    expect(brief?.move?.san).toBe('O-O');
+    expect(brief?.candidates).toHaveLength(6);
+    expect(brief?.candidates.slice(0, 5).every((x) => x.uci !== 'f3e5' && !x.asked)).toBe(true);
+    expect(brief?.candidates[5]).toEqual(expect.objectContaining(asked));
+    // The guard lets the Coach show it: the move now comes from the Engine.
+    expect(reply.text).toContain(`You asked about Nxe5: it is graded ${graded.move.grade}. It takes Black's pawn on e5`);
+    expect(reply.moves).toContain('f3e5');
+    expect(reply.arrows).toContainEqual({ from: 'f3', to: 'e5', brush: 'blue' });
+    expect(reply.stripped).toBe(0);
+    // Asked about the position, with the move named among others in a sentence.
+    await c.request('coach.ask', { ...ask, moveUci: undefined, question: 'I wanted to play Nxe5!? here, why is it bad?' });
+    expect(app.coach.lastBrief?.candidates.find((x) => x.asked)).toEqual(expect.objectContaining(asked));
+  });
+
+  it('marks a named move the Engine already listed, and changes nothing for a move that isn’t legal or isn’t named', async () => {
+    const app = await instance();
+    const c = await client(app);
+    const fen = 'r1bqkbnr/pppp1ppp/8/4p3/2BnP3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4';
+    const ask = { job: 'why' as const, fen, recentMoves: [], playerSide: 'white' as const, moveUci: 'e1g1' };
+    const briefFor = async (question: string, job: 'why' | 'lesson-turn' = 'why') => {
+      const lesson = { lessonId: 'italian-game', opening: 'Italian Game', notes: '', popularity: [], finalTurn: false };
+      await c.request('coach.ask', { ...ask, job, question, ...(job === 'lesson-turn' ? { lesson } : {}) });
+      if (!app.coach.lastBrief) throw new Error('no Coach call');
+      const { question: _q, ...brief } = app.coach.lastBrief;
+      return brief;
+    };
+    const plain = await briefFor('Why?');
+    // c3 is one of the Engine's candidates: it is marked, and the brief gains no candidate.
+    const c3 = await briefFor('Why not c3?');
+    expect(c3.candidates.map((x) => x.uci)).toEqual(plain.candidates.map((x) => x.uci));
+    expect(c3.candidates.filter((x) => x.asked).map((x) => x.san)).toEqual(['c3']);
+    // A queen move that isn't legal, a pawn push onto a pawn, the move itself and a move in words.
+    for (const question of ['Why not Qxf7?', 'Why is e5 weak?', 'Why O-O?', 'Why not take the pawn on e5?']) {
+      expect(await briefFor(question)).toEqual(plain);
+    }
+    // Only a Why Question pays for the extra search: a Lesson turn's typed reasoning names no move for the Engine.
+    expect((await briefFor('I played it because Nxe5 loses a piece', 'lesson-turn')).candidates.some((x) => x.asked || x.uci === 'f3e5')).toBe(false);
   });
 
   it('drops the threat once the move dealt with it, so the Coach neither names it nor shows it', async () => {

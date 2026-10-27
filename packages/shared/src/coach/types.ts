@@ -63,6 +63,12 @@ export interface CoachAsk {
   /** The Engine's candidate moves in `fen`, best first. */
   candidates: Candidate[];
   /**
+   * The moves in `fen` a Why Question names, besides the move: a candidate as it is, and any other
+   * graded by the desktop's Engine as it grades a move, with its score for the side that plays it
+   * and the Engine's line after it. Only the desktop sets them.
+   */
+  asked?: Candidate[];
+  /**
    * The scores the screen shows for `fen` and for the position after `move` when they aren't the
    * Engine's best line there: a Review scores each position with the graded move that led to it
    *. Only the desktop sets them.

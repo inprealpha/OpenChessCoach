@@ -1,11 +1,13 @@
 // Builds the compact, fresh brief every Coach call starts from (ADR 0004).
 import type { Candidate } from '../analysis.ts';
 import { playUci, turnOf, type Side } from '../chess.ts';
+import type { Score } from '../engine.ts';
 import { formatScore, gradeMove, type MoveGrade } from '../grader.ts';
 import { finishedScore, type PositionScore } from '../position-score.ts';
 import type { CoachJob, PlayerLevel, PlayerProfile } from '../protocol.ts';
 import { isForcing, nullMoveFen } from '../threat.ts';
 import { winningChancesFor } from '../winning-chances.ts';
+import { describeFact, describeOutcome, lineOutcome, moveFacts, readLine, worthSaying } from './explain.ts';
 import type { CoachAsk } from './types.ts';
 
 /** Hard ceiling on the serialised brief, in characters. */
@@ -27,6 +29,8 @@ const MAX_QUESTION = 400;
 const MAX_SUMMARY = 600;
 const MAX_NOTES = 700;
 const MAX_PROFILE_ITEMS = 3;
+/** Jobs that must stay short: their briefs explain only the move, the Engine's best move and its best reply. */
+const CHEAP_JOBS: readonly CoachJob[] = ['live', 'hint'];
 
 export interface BriefCandidate {
   san: string;
@@ -37,6 +41,10 @@ export interface BriefCandidate {
   grade: MoveGrade;
   /** The Engine's line after it, in SAN. */
   line: string;
+  /** What the move does on the board, read off the board and the Engine's line (see explain.ts). */
+  does?: string;
+  /** What the forcing moves right after it lead to, for the side that plays it: material or a mate. */
+  result?: string;
 }
 
 /**
@@ -51,7 +59,7 @@ export interface Brief {
   sideToMove: Side;
   fen: string;
   recentMoves: string;
-  move?: { san: string; uci: string; grade: MoveGrade; evaluationAfter: string };
+  move?: { san: string; uci: string; grade: MoveGrade; evaluationAfter: string; does?: string; result?: string };
   /** The Player's Winning Chances in `fen` and after the move, worded exactly as the screen shows them. */
   winningChances?: { before: string; after?: string };
   candidates: BriefCandidate[];
@@ -100,7 +108,11 @@ export interface BriefInput {
 
 export function buildBrief({ ask, profile, summary }: BriefInput): Brief {
   const hideMoves = ask.job === 'hint';
-  const candidates = briefCandidates(ask.fen, ask.candidates, MAX_CANDIDATES);
+  const cheap = CHEAP_JOBS.includes(ask.job);
+  // The move's own candidate line can differ from the line after the move: the move's facts come from the latter.
+  const candidates = briefCandidates(ask.fen, ask.candidates, MAX_CANDIDATES, (c, i) =>
+    c.uci === ask.move?.uci || (cheap && i > 0) ? {} : explained(ask.fen, c.uci, c.pv.slice(1), c.score, hideMoves),
+  );
   const brief: Brief = {
     job: ask.job,
     level: profile.level,
@@ -122,8 +134,14 @@ export function buildBrief({ ask, profile, summary }: BriefInput): Brief {
         uci: played.uci,
         grade: ask.move.grade,
         evaluationAfter: formatScore(ask.move.playedScore),
+        ...explained(ask.fen, played.uci, ask.replies?.[0]?.pv ?? [], ask.move.playedScore, hideMoves),
       };
-      if (ask.replies?.length) brief.replies = briefCandidates(played.fenAfter, ask.replies, MAX_REPLIES);
+      // The replies say what they do; what the line leads to is the move's result.
+      if (ask.replies?.length) {
+        brief.replies = briefCandidates(played.fenAfter, ask.replies, MAX_REPLIES, (r, i) =>
+          cheap && i > 0 ? {} : explained(played.fenAfter, r.uci, r.pv.slice(1)),
+        );
+      }
     }
   }
   const chances = winningChancesOf(ask);
@@ -203,10 +221,11 @@ function threatOf(ask: CoachAsk): Brief['threat'] {
   return { by: turnOf(from), san: played.san, uci: played.uci, line: linesSan(played.fenAfter, ask.threat.pv.slice(1, LINE_PLIES)) };
 }
 
-function briefCandidates(fen: string, candidates: readonly Candidate[], max: number): BriefCandidate[] {
+/** The Engine's candidates in `fen`, each with the facts `explain` gives for it. */
+function briefCandidates(fen: string, candidates: readonly Candidate[], max: number, explain: (c: Candidate, index: number) => Facts): BriefCandidate[] {
   const best = candidates[0];
   const out: BriefCandidate[] = [];
-  for (const c of candidates.slice(0, max)) {
+  for (const [i, c] of candidates.slice(0, max).entries()) {
     const played = playUci(fen, c.uci);
     if (!played || !best) continue;
     const line = linesSan(played.fenAfter, c.pv.slice(1, LINE_PLIES));
@@ -216,8 +235,25 @@ function briefCandidates(fen: string, candidates: readonly Candidate[], max: num
       evaluation: formatScore(c.score),
       grade: gradeMove({ best: best.score, played: c.score, isTopMove: c.uci === best.uci }).grade,
       line,
+      ...explain(c, i),
     });
   }
+  return out;
+}
+
+type Facts = Pick<BriefCandidate, 'does' | 'result'>;
+
+/**
+ * The explainability layer's facts for a move from `fen` (see explain.ts): what it does, and, given
+ * the Engine's `score` of it for its side, what the forcing moves of the line after it (`line`,
+ * starting with the reply) lead to. With `hideMoves` (a Hint) the result names no moves.
+ */
+function explained(fen: string, uci: string, line: readonly string[], score?: Score, hideMoves = false): Facts {
+  const out: Facts = {};
+  const does = moveFacts(fen, uci, line);
+  if (does.length) out.does = does.map(describeFact).join('; ');
+  const result = score && lineOutcome(turnOf(fen), readLine(fen, [uci, ...line]), score);
+  if (result && worthSaying(result, fen, score)) out.result = describeOutcome(result, !hideMoves);
   return out;
 }
 
@@ -284,6 +320,9 @@ function clip(text: string, max: number): string {
 /** Trims the least important parts until the brief fits. */
 function fitToBudget(brief: Brief): Brief {
   const steps: ((b: Brief) => void)[] = [
+    // The facts about the weaker alternatives go first: the best moves and the move matter most.
+    (b) => { b.candidates.slice(2).forEach((c) => delete c.does); b.replies?.slice(1).forEach((r) => delete r.does); },
+    (b) => { b.candidates.slice(1).forEach((c) => { delete c.does; delete c.result; }); },
     (b) => { if (b.summary) b.summary = clip(b.summary, 250); },
     (b) => { if (b.lesson) b.lesson.notes = clip(b.lesson.notes, 300); },
     (b) => { if (b.profile) b.profile.notes = b.profile.notes.slice(-1); },
@@ -294,6 +333,9 @@ function fitToBudget(brief: Brief): Brief {
     (b) => { if (b.question) b.question = clip(b.question, 200); },
     (b) => { delete b.profile; },
     (b) => { delete b.summary; },
+    // Last, the facts on the key moves themselves.
+    (b) => { b.replies?.forEach((r) => delete r.does); b.candidates.forEach((c) => { delete c.does; delete c.result; }); },
+    (b) => { if (b.move) { delete b.move.does; delete b.move.result; } },
   ];
   for (const step of steps) {
     if (briefSize(brief) <= BRIEF_BUDGET) break;

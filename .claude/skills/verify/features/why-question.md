@@ -38,7 +38,7 @@ $C ask-why --fen "r1bqkbnr/pppp1ppp/8/4p3/2BnP3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 
   itself, is in the brief with `asked: true`: marked among the candidates when the Engine listed it,
   and otherwise graded on the desktop's Engine (one more search each, at most two moves, Why
   Questions only) and added after them with its Move Grade, line, `does` and `result`. The guard
-  lets the Coach show it, and the fake Coach says "You asked about Nxe5: it is graded Inaccuracy. It
+  lets the Coach show it and the moves of its line, each where the line plays it, and the fake Coach says "You asked about Nxe5: it is graded Inaccuracy. It
   takes Black's pawn on e5…" with a blue arrow f3 to e5 (`board.spec.ts`). A move that isn't legal,
   or one named only in words, changes nothing (`coach.test.ts`).
 - A question is at most 300 characters (`MAX_QUESTION_LENGTH`): the input stops there and shows how

@@ -356,6 +356,22 @@ describe('the Coach-move guard', () => {
     expect(guardReply(exd5, reply({ moves: ['d5e4'], arrows: [{ uci: 'd5e4', brush: 'red' }] }))).toMatchObject({ moves: [], arrows: [] });
   });
 
+  it('allows a move the Player asked about and the Engine’s line after it, each where the line plays it', () => {
+    // 1. e4 e5 2. Nf3 Nc6 3. Bc4 Nd4, and the Player asks about 4. Nxe5: 4… Qg5 5. Bxf7+ Kd8 6. Ng4.
+    const fen = 'r1bqkbnr/pppp1ppp/8/4p3/2BnP3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4';
+    const nxe5 = { uci: 'f3e5', san: 'Nxe5', score: { cp: -50 }, pv: ['f3e5', 'd8g5', 'c4f7', 'e8d8', 'e5g4'] };
+    const why = (asked?: Candidate[]) =>
+      buildBrief({ ask: { job: 'why', fen, recentMoves: [], candidates: [{ uci: 'e1g1', san: 'O-O', score: { cp: 30 }, pv: ['e1g1'] }], asked }, profile });
+    const lineMoves = ['d8g5', 'c4f7', 'e8d8', 'e5g4'];
+    const out = guardReply(why([nxe5]), reply({ moves: ['f3e5', ...lineMoves, 'd8h4'], arrows: lineMoves.map((uci) => ({ uci, brush: 'blue' as const })) }));
+    expect(out.moves).toEqual(['f3e5', ...lineMoves]);
+    expect(out.arrows.map((a) => `${a.from}${a.to}`)).toEqual(lineMoves);
+    // 4… Qh4 is legal after 4. Nxe5 but not in the Engine's line.
+    expect(out.stripped).toEqual(["move d8h4 is not in the Engine's output"]);
+    // Without the question, the same line gets nothing past the guard.
+    expect(guardReply(why(), reply({ moves: lineMoves })).moves).toEqual([]);
+  });
+
   it('strips every move and arrow from a Hint', () => {
     const hint = buildBrief({ ask: { ...ask, job: 'hint' }, profile });
     const best = hint.candidates[0]?.uci as string;

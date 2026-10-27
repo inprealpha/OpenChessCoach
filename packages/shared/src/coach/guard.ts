@@ -1,6 +1,6 @@
 // The Coach move guard (ADR 0002): before a Coach reply reaches any client, every move and
 // arrow is checked against the Engine's candidates in that call's brief. Anything else is stripped.
-import { playUci } from '../chess.ts';
+import { playSan, playUci } from '../chess.ts';
 import { threatFen, type Brief } from './brief.ts';
 import type { Arrow, CoachRawReply } from './types.ts';
 
@@ -30,6 +30,15 @@ export function allowedMoves(brief: Brief): Set<string> {
     if (played) {
       allowed.add(played.uci);
       for (const r of brief.replies ?? []) if (playUci(played.fenAfter, r.uci)) allowed.add(r.uci);
+    }
+  }
+  // A move the Player asked about, and the Engine's line after it, each legal where the line plays it.
+  for (const c of brief.candidates.filter((x) => x.asked)) {
+    let played = playUci(brief.fen, c.uci);
+    for (const san of c.line.split(' ').filter(Boolean)) {
+      played = played && playSan(played.fenAfter, san);
+      if (!played) break;
+      allowed.add(played.uci);
     }
   }
   return allowed;

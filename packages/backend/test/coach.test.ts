@@ -280,6 +280,24 @@ describe('the Coach port', () => {
     expect(app.coach.lastBrief).not.toHaveProperty('threat');
   });
 
+  it('tells the Coach what the key moves do, and in Live Coaching only those', async () => {
+    const app = await instance();
+    const c = await client(app);
+    // 1. e4 e5 2. Nf3 Nc6 3. Bc4 Nd4 4. Nxe5: Black's best reply Qg5 attacks the knight and the g2 pawn at once.
+    const fen = 'r1bqkbnr/pppp1ppp/8/4p3/2BnP3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4';
+    const ask = { fen, recentMoves: ['e4', 'e5', 'Nf3', 'Nc6', 'Bc4', 'Nd4'], playerSide: 'white' as const, moveUci: 'f3e5' };
+    await c.request('coach.ask', { job: 'why', ...ask });
+    const why = app.coach.lastBrief;
+    expect(why?.move?.does).toContain("takes Black's pawn on e5");
+    expect(why?.candidates.slice(1).some((x) => x.does)).toBe(true);
+    // Live Coaching must stay short: facts only on the move, the best move and the best reply.
+    await c.request('coach.ask', { job: 'live', ...ask });
+    const live = app.coach.lastBrief;
+    expect(live?.move?.does).toContain("takes Black's pawn on e5");
+    expect(live?.candidates.slice(1).every((x) => !x.does && !x.result)).toBe(true);
+    expect(live?.replies?.slice(1).every((x) => !x.does)).toBe(true);
+  });
+
   it('drops the threat once the move dealt with it, so the Coach neither names it nor shows it', async () => {
     const app = await instance();
     const c = await client(app);

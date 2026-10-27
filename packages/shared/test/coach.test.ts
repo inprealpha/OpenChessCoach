@@ -235,6 +235,26 @@ describe('the Coach brief', () => {
     const brief = buildBrief({ ask: { job: 'why', fen: m.fenBefore, recentMoves: g.moves.slice(0, 6).map((x) => x.san), candidates: m.candidates }, profile });
     expect(brief.recentMoves).toBe('1. e4 e5 2. Bc4 Nc6 3. Nf3 Bc5');
   });
+
+  it('keeps Live Coaching and Hint briefs short: facts only on the move, the best move and the best reply', () => {
+    const g = game('i425hmuv');
+    const m = g.moves[20] as (typeof g.moves)[number]; // 11. Bxf7+
+    const ask: CoachAsk = {
+      job: 'live',
+      fen: m.fenBefore,
+      recentMoves: [],
+      playerSide: 'white',
+      move: { uci: m.uci, san: m.san, grade: m.grade, playedScore: m.playedScore },
+      candidates: m.candidates,
+      replies: g.moves[21]?.candidates ?? [],
+    };
+    for (const job of ['live', 'hint'] as const) {
+      const brief = buildBrief({ ask: { ...ask, job }, profile });
+      expect(brief.candidates.slice(1).every((c) => !c.does && !c.result), job).toBe(true);
+      expect(brief.replies?.slice(1).every((r) => !r.does), job).toBe(true);
+    }
+    expect(buildBrief({ ask, profile }).move?.does).toContain("takes Black's pawn on f7");
+  });
 });
 
 describe('the Coach-move guard', () => {

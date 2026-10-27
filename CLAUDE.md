@@ -21,6 +21,7 @@ A rule that only lives in a document gets broken. When agents repeat a mistake, 
 | Nobody without the pairing code reaches the backend, on the LAN or through the tunnel (ADR 0001) | `packages/backend/test/pairing.test.ts`, `e2e/journeys/pairing.spec.ts`, `coachctl doctor` (pairing-guard) |
 | The Engine judges, the Coach explains: Coach moves not in the Engine's output are stripped (ADR 0002) | `packages/shared/test/coach.test.ts`, `packages/backend/test/coach.test.ts`, `scripts/real-coach-check.ts` |
 | Move Grades follow the Lichess formula on real positions (ADR 0002) | `packages/shared/test/grader.test.ts` (golden tests) |
+| Every fact in a Coach brief is true on the board and confirmed by an Engine line; quiet moves get no tactical claims (ADR 0009) | `packages/shared/test/explain.test.ts` (golden tests on Lichess puzzles and real games) |
 | The Engine runs in the browser for play and on the desktop for everything the Coach touches (ADR 0007) | Architecture: the backend's `EngineService` computes every Coach fact; `e2e/journeys/offline.spec.ts` still plays with the desktop down |
 | The backend ignores Engine facts a client sends (ADR 0007) | `packages/backend/test/coach.test.ts` (forged-facts test) |
 | Coach briefs stay within their size budget, replies within their length (ADR 0004) | `packages/shared/test/coach.test.ts`, `scripts/real-coach-check.ts` |

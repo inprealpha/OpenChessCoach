@@ -50,6 +50,11 @@ export function connection(page: Page): Locator {
   return page.getByRole('status', { name: 'Connection' });
 }
 
+/** First run on a desktop asks for the phone first: put it off, which the main menu asks again about in a few days. */
+export async function phoneLater(page: Page): Promise<void> {
+  await page.getByRole('region', { name: 'Play on your phone' }).getByRole('button', { name: 'I’ll do it later' }).click();
+}
+
 export function board(page: Page, name?: string): Locator {
   return name ? page.getByRole('group', { name }) : page.locator('.board[role="group"]');
 }

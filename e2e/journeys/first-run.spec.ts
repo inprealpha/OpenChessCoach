@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { CoachClient } from '../../packages/backend/src/client.ts';
 import { recordedFetch } from '../../packages/backend/src/verify/recorded-sites.ts';
 import { MOVE_GRADES } from '../../packages/shared/src/grader.ts';
-import { connection, expect, storedOnDevice, test } from '../fixtures/app.ts';
+import { connection, expect, phoneLater, storedOnDevice, test } from '../fixtures/app.ts';
 
 /** Each Move Grade's symbol, as the board draws it. */
 const SYMBOL = { Best: '★', Good: '✓', Inaccuracy: '?!', Mistake: '?', Blunder: '??' };
@@ -18,6 +18,8 @@ test.describe('a fresh install', () => {
     await page.goto(`${app.url}/#pair=${app.code}`);
     await expect(connection(page)).toHaveText(/Desktop connected/);
     await expect(page.getByRole('heading', { name: 'Welcome to your chess Coach' })).toBeVisible();
+    // First the phone (phone.spec.ts), then the Player.
+    await phoneLater(page);
     // The suggestion counts the opening Lessons the app has, not a number written by hand.
     await expect(page.getByText(`the Opening Lessons teach ${OPENINGS} beginner openings`)).toBeVisible();
     await page.getByRole('radio', { name: /Club/ }).check();
@@ -44,6 +46,7 @@ test.describe('a fresh install', () => {
     test(`an unknown username is shown beside the Username box, which takes the focus, and onboards nothing (${viewport.width}px)`, async ({ page, app }) => {
       await page.setViewportSize(viewport);
       await page.goto(`${app.url}/#pair=${app.code}`);
+      await phoneLater(page);
       await page.getByRole('radio', { name: /Beginner/ }).check();
       await page.getByLabel('Site').selectOption('lichess');
       await page.getByLabel('Username').fill('NoSuchPlayer');
@@ -68,6 +71,7 @@ test.describe('a fresh install', () => {
 
   test('a new Player Profile keeps its empty parts short', async ({ page, app }) => {
     await page.goto(`${app.url}/#pair=${app.code}`);
+    await phoneLater(page);
     await page.getByRole('button', { name: 'Skip to the main menu' }).click();
     // Skip saves the Player Profile, then opens the menu: wait for it, or that late step would
     // take the page back to the menu from the Profile.

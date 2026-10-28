@@ -1,10 +1,13 @@
 // The known state every verify-mode run starts from. `empty` is a fresh install, so the
-// first-run screen shows; `default` is a Player who finished first run and imported one game;
-// `many-games` is `default` with 60 newer games, more than one page of the game list.
+// first-run screen shows; `default` is a Player who finished first run, paired a phone and
+// imported one game; `many-games` is `default` with 60 newer games, more than one page of the game
+// list; `no-phone` is `default` without the phone, an install from before first run asked for one,
+// so the main menu asks the Player to pair one.
 import { SAMPLE_GAME_PGN } from '@chess-coach/shared/sample-game';
 import { type FakeClock } from '../clock.ts';
 import type { Db } from '../db.ts';
 import { importPgn } from '../games.ts';
+import { Pairing } from '../pairing.ts';
 import { updateProfile } from '../profile.ts';
 
 export { SEEDS, type Seed } from './runs.ts';
@@ -37,6 +40,11 @@ export function seed(db: Db, clock: FakeClock, which: Seed): void {
   if (which === 'empty') return;
   updateProfile(db, { level: 'casual', goals: ['Learn a solid opening as White', 'Blunder less'], onboarded: true });
   importPgn(db, clock, SEED_GAME_PGN, 'white');
+  // Nobody holds this phone's token: it only marks a phone as paired.
+  if (which !== 'no-phone') {
+    const pairing = new Pairing(db, clock);
+    pairing.pair(pairing.code, 'iPhone or iPad browser');
+  }
   if (which === 'many-games') {
     manyGamesPgns().forEach((pgn, i) => importPgn(db, clock, pgn, i % 2 ? 'black' : 'white'));
   }

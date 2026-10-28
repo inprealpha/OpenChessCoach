@@ -15,7 +15,8 @@ depth, a fresh data folder with seeded data and a free port. Prints JSON once a 
 
 Options:
   --seed <name>       ${SEEDS.join(' or ')} (default: default). "empty" shows the first-run screen;
-                      "many-games" adds 60 games, more than one page of the game list.
+                      "many-games" adds 60 games, more than one page of the game list;
+                      "no-phone" has no phone paired, so the main menu asks for one.
   --port <n>          Port to use (default: a free one, never the owner's 8737)
   --state-dir <path>  Where run files go (default: .verify)
   --help              Show this help

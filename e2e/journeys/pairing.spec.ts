@@ -13,7 +13,7 @@ test('an unpaired visit is refused and shows the pairing screen', async ({ page,
   // The backend refuses a socket without a valid token before upgrading it.
   await expect(CoachClient.connect(app.url, 'not-a-token')).rejects.toBeInstanceOf(ProtocolError);
   const devices = await app.rows('devices');
-  expect(devices).toHaveLength(1); // only the readiness handshake's device
+  expect(devices).toHaveLength(2); // only the seed's phone and the readiness handshake's device
 });
 
 test('a wrong code is refused with a clear error', async ({ page, app }) => {
@@ -21,7 +21,7 @@ test('a wrong code is refused with a clear error', async ({ page, app }) => {
   await page.getByLabel('Pairing code').fill('WRONGCODE123');
   await page.getByRole('button', { name: 'Pair this device' }).click();
   await expect(page.getByRole('alert')).toHaveText(/wrong or has been reset/);
-  expect(await app.rows('devices')).toHaveLength(1);
+  expect(await app.rows('devices')).toHaveLength(2);
 });
 
 test('the QR link pairs the browser and it stays paired after a reload', async ({ page, app }) => {
@@ -31,7 +31,7 @@ test('the QR link pairs the browser and it stays paired after a reload', async (
   await page.reload();
   await expect(connection(page)).toHaveText(/Desktop connected/);
   const devices = await app.rows<{ name: string; revoked_at: string | null }>('devices');
-  expect(devices).toHaveLength(2);
+  expect(devices).toHaveLength(3);
   expect(devices.every((d) => d.revoked_at === null)).toBe(true);
 });
 

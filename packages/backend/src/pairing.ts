@@ -58,6 +58,11 @@ export class Pairing {
     return row;
   }
 
+  /** Gives a device the name it now goes by, such as an iPad that paired as a Mac before the app told them apart. */
+  rename(deviceId: string, deviceName: string): void {
+    this.db.prepare('UPDATE devices SET name = ? WHERE id = ?').run(deviceName.slice(0, 80) || 'Device', deviceId);
+  }
+
   /** Revokes every token and makes a new pairing code. Returns a fresh token for the device that asked, if any. */
   reset(keepDeviceName?: string): { token: string | undefined } {
     this.db.prepare('UPDATE devices SET revoked_at = ? WHERE revoked_at IS NULL').run(iso(this.clock));

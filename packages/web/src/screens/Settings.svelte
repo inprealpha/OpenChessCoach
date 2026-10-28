@@ -11,6 +11,7 @@
     type SettingsPatch,
   } from '@chess-coach/shared/protocol';
   import { api, ApiError } from '../lib/api.svelte.ts';
+  import { pairingCode } from '../lib/pairing-code.ts';
 
   /** A card on this screen, where the outcome of a change made in it is shown. */
   type Card = 'pairing' | 'tunnel' | 'live' | 'quality';
@@ -22,8 +23,7 @@
   let outcome = $state<{ card: Card; text: string; failed: boolean } | null>(null);
   let confirmReset = $state(false);
 
-  /** The pairing code, from the pairing link, in groups of four for reading out and typing (the Pair screen ignores the spaces). */
-  const code = $derived(pairing ? (/#pair=(.+)$/.exec(pairing.pairUrl)?.[1] ?? '').replace(/(.{4})(?!$)/g, '$1 ') : '');
+  const code = $derived(pairing ? pairingCode(pairing.pairUrl) : '');
   const canCopy = typeof navigator !== 'undefined' && Boolean(navigator.clipboard);
 
   const JOB_NAMES: Record<CoachJob, string> = {

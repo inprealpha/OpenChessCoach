@@ -12,7 +12,197 @@
  "puzzleTags": [],
  "puzzleThemes": [],
  "intro": {
-  "text": ""
+  "text": "Each piece has a value in points: a pawn is worth 1, a knight or a bishop 3, a rook 5 and a queen 9. The king is never traded, so it has no points. Add up both sides to see who is ahead, and before any capture, count what you give and what you get back. A trade is good when you get more points than you give."
  },
- "parts": []
+ "parts": [
+  {
+   "title": "Take the free piece",
+   "fen": "r4rk1/p5pp/2pbb3/3p1pq1/5PP1/4Q2P/PPP1NP1K/R4R2 w - - 0 19",
+   "side": "white",
+   "keyIdea": "A piece with no defender is free: take it and you gain its full value.",
+   "text": "A Lichess Puzzle. You are White, and Black is 2 points ahead: two bishops against your knight, for one pawn. After 18...f5, which black pieces does nothing defend?",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle B43hL",
+    "url": "https://lichess.org/training/B43hL",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "e3e6",
+    "f8f7",
+    "e6d6"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "r4rk1/p5pp/2pbb3/3p1pq1/5PP1/4Q2P/PPP1NP1K/R4R2 w - - 0 19",
+     "decision": true,
+     "main": "e3e6",
+     "mainSan": "Qxe6+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The pawn on f7 used to guard the bishop on e6, but after 18...f5 nothing does. Your queen takes it for free, and with check, so Black has to answer the check first."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "r4rk1/p5pp/2pbQ3/3p1pq1/5PP1/7P/PPP1NP1K/R4R2 b - - 0 19",
+     "decision": false,
+     "main": "f8f7",
+     "mainSan": "Rf7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "r5k1/p4rpp/2pbQ3/3p1pq1/5PP1/7P/PPP1NP1K/R4R2 w - - 1 20",
+     "decision": true,
+     "main": "e6d6",
+     "mainSan": "Qxd6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The bishop on d6 has no defender either, so take it too. You have won two bishops, 6 points, for nothing: you were 2 points behind and are now 4 ahead."
+     }
+    }
+   ]
+  },
+  {
+   "title": "A rook for a knight",
+   "fen": "r3qr2/pp4pk/4bbNp/3p3Q/5P2/8/PP4PP/R3R1K1 w - - 1 24",
+   "side": "white",
+   "keyIdea": "Count both sides of a trade: giving a knight (3) for a rook (5) gains 2 points, even though your piece is taken back.",
+   "text": "A Lichess Puzzle. You are White and 3 points behind, and after 23...Kh7 your knight on g6 is attacked by the king and the queen. Look at what the knight can take, and count.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle VWMyb",
+    "url": "https://lichess.org/training/VWMyb",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "g6f8",
+    "e8f8",
+    "e1e6"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "r3qr2/pp4pk/4bbNp/3p3Q/5P2/8/PP4PP/R3R1K1 w - - 1 24",
+     "decision": true,
+     "main": "g6f8",
+     "mainSan": "Nxf8+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The knight takes the rook on f8 with check. After 24...Qxf8 your knight is gone, but count the trade: you gave 3 points and won 5."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "r3qN2/pp4pk/4bb1p/3p3Q/5P2/8/PP4PP/R3R1K1 b - - 0 24",
+     "decision": false,
+     "main": "e8f8",
+     "mainSan": "Qxf8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "r4q2/pp4pk/4bb1p/3p3Q/5P2/8/PP4PP/R3R1K1 w - - 0 25",
+     "decision": true,
+     "main": "e1e6",
+     "mainSan": "Rxe6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The queen has left e8, and nothing guards the bishop on e6 any more. Your rook takes it for free: you started 3 points behind and are now 2 ahead."
+     }
+    }
+   ]
+  },
+  {
+   "title": "A check that loses a bishop",
+   "fen": "r1b1k2r/ppppqppp/2n2n2/2b1p3/2P1P3/3P1NP1/PP3PBP/RNBQK2R b KQkq - 0 6",
+   "side": "black",
+   "keyIdea": "Before you capture, count what comes back: a bishop for a pawn loses 2 points, even when the capture is a check.",
+   "text": "From a game played on Lichess. You are Black, the material is level, and both 6...Bxf2+ and 6...Nxe4 take a pawn. Count what White takes back after each one, then choose a better move.",
+   "credit": {
+    "source": "Lichess games database, game 2MDaV4cl",
+    "url": "https://lichess.org/2MDaV4cl#11",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "e8g8",
+    "b1c3",
+    "d7d6"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "r1b1k2r/ppppqppp/2n2n2/2b1p3/2P1P3/3P1NP1/PP3PBP/RNBQK2R b KQkq - 0 6",
+     "decision": true,
+     "main": "e8g8",
+     "mainSan": "O-O",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "After 6...Bxf2+ 7.Kxf2 you would have given a bishop (3) for a pawn (1), and after 6...Nxe4 7.dxe4 a knight for a pawn: 2 points lost either way. Castling keeps all your pieces and gets your king to safety."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "r1b2rk1/ppppqppp/2n2n2/2b1p3/2P1P3/3P1NP1/PP3PBP/RNBQK2R w KQ - 1 7",
+     "decision": false,
+     "main": "b1c3",
+     "mainSan": "Nc3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "r1b2rk1/ppppqppp/2n2n2/2b1p3/2P1P3/2NP1NP1/PP3PBP/R1BQK2R b KQ - 2 7",
+     "decision": true,
+     "main": "d7d6",
+     "mainSan": "d6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Both captures are still bad trades, so count before you take. 7...d6 guards the pawn on e5 and opens the way for your bishop on c8."
+     }
+    }
+   ]
+  }
+ ]
 }

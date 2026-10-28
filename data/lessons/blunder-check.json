@@ -12,7 +12,226 @@
  "puzzleTags": [],
  "puzzleThemes": [],
  "intro": {
-  "text": ""
+  "text": "One careless move can throw away a whole game. A blunder check is a habit for the moment before you play: picture your move on the board, then look at every capture, check and attack your opponent would have after it. If one of them costs you material or lets your opponent mate, choose a different move."
  },
- "parts": []
+ "parts": [
+  {
+   "title": "Which piece takes back?",
+   "fen": "r2qk2r/1pp3pp/3ppn2/p1b1p3/3nP3/P1NPBN2/1PP2PPP/R2Q1RK1 w kq - 3 10",
+   "side": "white",
+   "keyIdea": "Before you capture, check what the opponent's recapture attacks: a pawn that takes back can hit two pieces at once.",
+   "text": "From a game played on Lichess. You are White, and you can take Black's knight on d4 with your knight or with your bishop. For each capture, picture Black taking back and ask what that piece would attack.",
+   "credit": {
+    "source": "Lichess games database, game l9oTgq0h",
+    "url": "https://lichess.org/l9oTgq0h#18",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "e3d4",
+    "c5d4",
+    "f3d4",
+    "e5d4",
+    "c3e2"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "r2qk2r/1pp3pp/3ppn2/p1b1p3/3nP3/P1NPBN2/1PP2PPP/R2Q1RK1 w kq - 3 10",
+     "decision": true,
+     "main": "e3d4",
+     "mainSan": "Bxd4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "10.Nxd4 looks natural, but after 10...exd4 the pawn attacks your knight on c3 and your bishop on e3 together, and one of them is lost. Taking with the bishop means there is no bishop left on e3 for that pawn to attack."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "r2qk2r/1pp3pp/3ppn2/p1b1p3/3BP3/P1NP1N2/1PP2PPP/R2Q1RK1 b kq - 0 10",
+     "decision": false,
+     "main": "c5d4",
+     "mainSan": "Bxd4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "r2qk2r/1pp3pp/3ppn2/p3p3/3bP3/P1NP1N2/1PP2PPP/R2Q1RK1 w kq - 0 11",
+     "decision": true,
+     "main": "f3d4",
+     "mainSan": "Nxd4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Run the check again: after 11.Nxd4 exd4 the pawn attacks only your knight on c3, and the knight can simply move away."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "r2qk2r/1pp3pp/3ppn2/p3p3/3NP3/P1NP4/1PP2PPP/R2Q1RK1 b kq - 0 11",
+     "decision": false,
+     "main": "e5d4",
+     "mainSan": "exd4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "r2qk2r/1pp3pp/3ppn2/p7/3pP3/P1NP4/1PP2PPP/R2Q1RK1 w kq - 0 12",
+     "decision": true,
+     "main": "c3e2",
+     "mainSan": "Ne2",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The pawn on d4 attacks your knight, so move it to a safe square. On e2 no black piece attacks it, and your queen guards it."
+     }
+    }
+   ]
+  },
+  {
+   "title": "A free rook and a back-rank mate",
+   "fen": "3q3k/5rpp/p7/P3pp2/1P6/5P2/Q5PP/2r2RK1 w - - 0 30",
+   "side": "white",
+   "keyIdea": "A free piece is only free if your king is still safe afterwards: look at every enemy check before you grab it.",
+   "text": "From a game played on Lichess. You are White and a rook down, and you can take a black rook with 30.Qxf7 or with 30.Rxc1. Before you take one, look at every check Black would have afterwards.",
+   "credit": {
+    "source": "Lichess games database, game cjDG0xIn",
+    "url": "https://lichess.org/cjDG0xIn#58",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "f1c1",
+    "f7f8",
+    "a2c4"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "3q3k/5rpp/p7/P3pp2/1P6/5P2/Q5PP/2r2RK1 w - - 0 30",
+     "decision": true,
+     "main": "f1c1",
+     "mainSan": "Rxc1",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "30.Qxf7 wins a rook but loses the game: 30...Qd4+ leaves your king only h1, and 31...Rxf1 is mate. 30.Rxc1 removes the rook that attacks your rook on f1 along your back rank, and the material is level again."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "3q3k/5rpp/p7/P3pp2/1P6/5P2/Q5PP/2R3K1 b - - 0 30",
+     "decision": false,
+     "main": "f7f8",
+     "mainSan": "Rf8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "3q1r1k/6pp/p7/P3pp2/1P6/5P2/Q5PP/2R3K1 w - - 1 31",
+     "decision": true,
+     "main": "a2c4",
+     "mainSan": "Qc4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Black has saved the rook on f7. Blunder-check again before you move: 31.Qc4 brings your queen back towards the middle, where it guards f1 next to your king and attacks the pawn on a6."
+     }
+    }
+   ]
+  },
+  {
+   "title": "A free bishop and a knight check",
+   "fen": "2kr1b1r/ppp1pppp/2q5/1N1n4/5B2/8/PPP1QPPP/R4RK1 b - - 5 13",
+   "side": "black",
+   "keyIdea": "Before you take, look at your opponent's checks: one check can attack your king and your queen together.",
+   "text": "From a game played on Lichess. You are Black, and your knight on d5 can take White's bishop on f4, which nothing defends. Before you take it, look for White's checks.",
+   "credit": {
+    "source": "Lichess games database, game gcuPg8Dd",
+    "url": "https://lichess.org/gcuPg8Dd#25",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "c6e8",
+    "f4g3",
+    "a7a6"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "2kr1b1r/ppp1pppp/2q5/1N1n4/5B2/8/PPP1QPPP/R4RK1 b - - 5 13",
+     "decision": true,
+     "main": "c6e8",
+     "mainSan": "Qe8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "13...Nxf4 wins a bishop, but 14.Nxa7+ is a check that also attacks your queen on c6, and after your king moves, the knight takes the queen. That knight check is possible right now too, so move the queen off c6 first. On e8 it is safe, and your knight still attacks the bishop."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "2krqb1r/ppp1pppp/8/1N1n4/5B2/8/PPP1QPPP/R4RK1 w - - 6 14",
+     "decision": false,
+     "main": "f4g3",
+     "mainSan": "Bg3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "2krqb1r/ppp1pppp/8/1N1n4/8/6B1/PPP1QPPP/R4RK1 b - - 7 14",
+     "decision": true,
+     "main": "a7a6",
+     "mainSan": "a6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "White has saved the bishop. Now your pawn and your queen both attack the knight on b5, the piece that made the check possible."
+     }
+    }
+   ]
+  }
+ ]
 }

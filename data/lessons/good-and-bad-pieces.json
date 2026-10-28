@@ -12,7 +12,197 @@
  "puzzleTags": [],
  "puzzleThemes": [],
  "intro": {
-  "text": ""
+  "text": "A bishop only ever moves on squares of one colour. It is a good bishop when its own pawns stand on the other colour, so its diagonals are free, and a bad bishop when its own pawns stand on its colour and block it. If you have a bad bishop, try to trade it for your opponent's good one. Two bishops together are strong when the position is open, while a knight is often better than a bishop when the pawns are locked and the knight has a square no pawn can attack."
  },
- "parts": []
+ "parts": [
+  {
+   "title": "Swap your bad bishop",
+   "fen": "r1bq1rk1/1p1nb1pp/p1p1p3/2Pp1pB1/PP1Pn2P/2NBPN2/5PP1/R2Q1RK1 w - - 3 14",
+   "side": "white",
+   "keyIdea": "If your bishop is blocked by your own pawns, trade it for your opponent's good bishop.",
+   "text": "From a game played on Lichess. You are White, and Black's knight on e4 and bishop on e7 both attack your bishop on g5. Before you move it, look at which colour of squares your pawns stand on.",
+   "credit": {
+    "source": "Lichess games database, game 5j5bnrhJ",
+    "url": "https://lichess.org/5j5bnrhJ#26",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "g5e7"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "r1bq1rk1/1p1nb1pp/p1p1p3/2Pp1pB1/PP1Pn2P/2NBPN2/5PP1/R2Q1RK1 w - - 3 14",
+     "decision": true,
+     "main": "g5e7",
+     "mainSan": "Bxe7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Six of your pawns stand on dark squares (b4, c5, d4, e3, f2 and h4), so your dark-squared bishop is the bad one. Black's pawns stand mostly on light squares, so the bishop on e7 is Black's good one. Trade them: you keep your good bishop on d3, and Black is left with the bishop on c8, hemmed in by Black's own pawns."
+     }
+    }
+   ]
+  },
+  {
+   "title": "The two bishops in an open position",
+   "fen": "3r1rk1/p4ppp/1p2p3/3n1n2/3P4/5B1P/P1PB1PP1/1R1R2K1 w - - 4 20",
+   "side": "white",
+   "keyIdea": "Two bishops want open lines: take central squares away from the knights and open up the position.",
+   "text": "From a game played on Lichess. You are White, with two bishops against Black's two knights, and the centre is almost empty. Black's knight stands on d5, a strong central square.",
+   "credit": {
+    "source": "Lichess games database, game TcXKuEam",
+    "url": "https://lichess.org/TcXKuEam#38",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "c2c4",
+    "d5e7",
+    "d2b4",
+    "d8d7",
+    "d4d5"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "3r1rk1/p4ppp/1p2p3/3n1n2/3P4/5B1P/P1PB1PP1/1R1R2K1 w - - 4 20",
+     "decision": true,
+     "main": "c2c4",
+     "mainSan": "c4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Knights need safe squares near the centre. The pawn chases the knight away from d5, and it cannot come back there while your pawn stands on c4."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "3r1rk1/p4ppp/1p2p3/3n1n2/2PP4/5B1P/P2B1PP1/1R1R2K1 b - - 0 20",
+     "decision": false,
+     "main": "d5e7",
+     "mainSan": "Nde7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "3r1rk1/p3nppp/1p2p3/5n2/2PP4/5B1P/P2B1PP1/1R1R2K1 w - - 1 21",
+     "decision": true,
+     "main": "d2b4",
+     "mainSan": "Bb4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Now a bishop takes a long diagonal: from b4 it attacks the knight on e7, with the rook on f8 standing behind it."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "3r1rk1/p3nppp/1p2p3/5n2/1BPP4/5B1P/P4PP1/1R1R2K1 b - - 2 21",
+     "decision": false,
+     "main": "d8d7",
+     "mainSan": "Rd7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "5rk1/p2rnppp/1p2p3/5n2/1BPP4/5B1P/P4PP1/1R1R2K1 w - - 3 22",
+     "decision": true,
+     "main": "d4d5",
+     "mainSan": "d5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Open the centre. The pawn attacks e6, and the fewer pawns there are in the middle, the further your bishops can reach across the board."
+     }
+    }
+   ]
+  },
+  {
+   "title": "A good knight against a bad bishop",
+   "fen": "r1bqk2r/5p2/p3p1p1/1p1pPn1p/2p2P1P/2P2NQ1/PPB2PP1/R3K2R w KQkq - 4 16",
+   "side": "white",
+   "keyIdea": "In a locked position, trade your bishop for a knight if it leaves your opponent a bad bishop and your knight a safe square.",
+   "text": "From a game played on Lichess. You are White, and Black's knight on f5 is attacking your queen. Look at Black's pawns: what colour are the squares they stand on?",
+   "credit": {
+    "source": "Lichess games database, game Lj8gk80W",
+    "url": "https://lichess.org/Lj8gk80W#30",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "c2f5",
+    "e6f5",
+    "f3d4"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "r1bqk2r/5p2/p3p1p1/1p1pPn1p/2p2P1P/2P2NQ1/PPB2PP1/R3K2R w KQkq - 4 16",
+     "decision": true,
+     "main": "c2f5",
+     "mainSan": "Bxf5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "All eight of Black's pawns stand on light squares, so Black's bishop on c8 is a very bad bishop. Instead of moving your queen, take the knight with your bishop: Black keeps the bad bishop, and you keep your knight."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "r1bqk2r/5p2/p3p1p1/1p1pPB1p/2p2P1P/2P2NQ1/PP3PP1/R3K2R b KQkq - 0 16",
+     "decision": false,
+     "main": "e6f5",
+     "mainSan": "exf5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "r1bqk2r/5p2/p5p1/1p1pPp1p/2p2P1P/2P2NQ1/PP3PP1/R3K2R w KQkq - 0 17",
+     "decision": true,
+     "main": "f3d4",
+     "mainSan": "Nd4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The knight goes to d4, a square no black pawn can ever attack: Black's c-pawn has already gone past it, and there is no e-pawn left. From d4 it hits the pawns on b5 and f5. Castling first was also a good move."
+     }
+    }
+   ]
+  }
+ ]
 }

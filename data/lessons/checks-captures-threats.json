@@ -12,7 +12,197 @@
  "puzzleTags": [],
  "puzzleThemes": [],
  "intro": {
-  "text": ""
+  "text": "Checks, captures and threats are forcing moves: your opponent has to answer them. Before each move, list every check, capture and threat you have, and the ones your opponent has too. Then follow each forcing move one reply ahead. This is how you find the moves that win material, and the ones that only seem to."
  },
- "parts": []
+ "parts": [
+  {
+   "title": "A check that wins a rook",
+   "fen": "1r6/p7/4b2Q/q3kp1p/4p3/8/PPP3PP/5R1K w - - 3 31",
+   "side": "white",
+   "keyIdea": "List every check: a check can force the king off a line and leave the piece behind it unguarded.",
+   "text": "A Lichess Puzzle. You are White and 2 points behind. Black's king stands in the open on e5: list all your checks and follow each one a move ahead.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle EGGQS",
+    "url": "https://lichess.org/training/EGGQS",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "h6f4",
+    "e5f6",
+    "f4b8"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "1r6/p7/4b2Q/q3kp1p/4p3/8/PPP3PP/5R1K w - - 3 31",
+     "decision": true,
+     "main": "h6f4",
+     "mainSan": "Qf4+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Of your checks, 31.Qf4+ is the one that wins. The king cannot take the queen, because your rook on f1 guards f4, and once the king steps off the diagonal your queen sees the rook on b8. 31.Qxe6+ would only lose the queen to 31...Kxe6."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "1r6/p7/4b3/q3kp1p/4pQ2/8/PPP3PP/5R1K b - - 4 31",
+     "decision": false,
+     "main": "e5f6",
+     "mainSan": "Kf6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "1r6/p7/4bk2/q4p1p/4pQ2/8/PPP3PP/5R1K w - - 5 32",
+     "decision": true,
+     "main": "f4b8",
+     "mainSan": "Qxb8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Take the rook. You were 2 points behind, and now you are 3 ahead."
+     }
+    }
+   ]
+  },
+  {
+   "title": "Capture the defender",
+   "fen": "5r1r/4knQp/1b2pp2/7B/2P5/3P2P1/7P/7K w - - 3 39",
+   "side": "white",
+   "keyIdea": "List the captures and ask what each piece guards: taking a defender can leave the piece it protected free.",
+   "text": "A Lichess Puzzle. You are White and 3 points behind; your queen attacks the rook on h8, but the knight on f7 and the rook on f8 both guard it. Each of your checks gives away the queen, so look at your other captures.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle vlCI2",
+    "url": "https://lichess.org/training/vlCI2",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "h5f7",
+    "f8f7",
+    "g7h8"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "5r1r/4knQp/1b2pp2/7B/2P5/3P2P1/7P/7K w - - 3 39",
+     "decision": true,
+     "main": "h5f7",
+     "mainSan": "Bxf7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "39.Qxh8 would give your queen for a rook. 39.Bxf7 instead takes one of the two guards of the rook on h8, and if the rook on f8 takes back, the other guard has gone too."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "5r1r/4kBQp/1b2pp2/8/2P5/3P2P1/7P/7K b - - 0 39",
+     "decision": false,
+     "main": "f8f7",
+     "mainSan": "Rxf7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "7r/4krQp/1b2pp2/8/2P5/3P2P1/7P/7K w - - 0 40",
+     "decision": true,
+     "main": "g7h8",
+     "mainSan": "Qxh8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Nothing guards the rook on h8 now, so take it. You gave your bishop for a knight and a rook: you were 3 points behind and are now 2 ahead."
+     }
+    }
+   ]
+  },
+  {
+   "title": "A pawn makes two threats",
+   "fen": "2r2rk1/1pqb1p1p/2n1p1p1/3pP3/5P1P/2NBQ3/PP4PK/R4R2 b - - 1 19",
+   "side": "black",
+   "keyIdea": "A quiet move that attacks two pieces at once can win as surely as a check or a capture.",
+   "text": "A Lichess Puzzle. You are Black, and the material is level. You have no checks, and both of your captures lose material, so look at the moves that make a threat.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle 1WT0R",
+    "url": "https://lichess.org/training/1WT0R",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "d5d4",
+    "e3g3",
+    "d4c3"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "2r2rk1/1pqb1p1p/2n1p1p1/3pP3/5P1P/2NBQ3/PP4PK/R4R2 b - - 1 19",
+     "decision": true,
+     "main": "d5d4",
+     "mainSan": "d4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "19...d4 attacks the queen on e3 and the knight on c3 at once. The queen has to move, and then your pawn takes the knight."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "2r2rk1/1pqb1p1p/2n1p1p1/4P3/3p1P1P/2NBQ3/PP4PK/R4R2 w - - 0 20",
+     "decision": false,
+     "main": "e3g3",
+     "mainSan": "Qg3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "2r2rk1/1pqb1p1p/2n1p1p1/4P3/3p1P1P/2NB2Q1/PP4PK/R4R2 b - - 1 20",
+     "decision": true,
+     "main": "d4c3",
+     "mainSan": "dxc3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Take the knight. Even if White takes your pawn back, you have won a knight for a pawn, 3 points for 1."
+     }
+    }
+   ]
+  }
+ ]
 }

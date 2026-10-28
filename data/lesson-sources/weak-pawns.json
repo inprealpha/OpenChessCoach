@@ -4,11 +4,95 @@
  "kind": "thinking",
  "track": "thinking",
  "level": "intermediate",
- "side": "white",
+ "side": "black",
  "goal": "You can recognise isolated, doubled and backward pawns, attack them in your opponent's position, and avoid them in yours.",
  "priorKnowledge": [
   "simple-plans"
  ],
- "intro": "",
- "parts": []
+ "intro": "A pawn that no other pawn can protect is weak: only pieces can guard it, and a piece busy guarding a pawn is not doing much else. Three kinds come up all the time. An isolated pawn has no friendly pawns on the files beside it, doubled pawns stand one behind the other on the same file, and a backward pawn has been left behind by its neighbours and cannot move forward safely. Attack these pawns when your opponent has them, and think twice before a capture or a pawn move gives you one.",
+ "parts": [
+  {
+   "title": "Block the isolated pawn",
+   "fen": "r2q1rk1/pp1b1ppp/1n2pb2/8/3P1P2/2N2N2/PP2Q1PP/R1B2RK1 b - - 8 15",
+   "side": "black",
+   "keyIdea": "Put a knight on the square in front of an isolated pawn, where no pawn can chase it, then attack the pawn.",
+   "text": "From a game played on Lichess. You are Black. White's pawn on d4 is isolated: there are no white pawns on the c- or e-file to protect it. The square in front of it, d5, is just as important as the pawn itself.",
+   "url": "https://lichess.org/ddqm9ytb#29",
+   "line": "Bc6 Be3 Nd5 Rad1 Qb6",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Bc6",
+     "text": "Put the bishop on the long diagonal. From c6 it guards d5, and it also looks at the knight on f3, one of the pieces that defend d4."
+    },
+    {
+     "ply": 2,
+     "san": "Nd5",
+     "text": "The knight settles on d5, right in front of the isolated pawn. White has no c- or e-pawn, so no pawn can ever drive it away, and the d-pawn can no longer move forward."
+    },
+    {
+     "ply": 4,
+     "san": "Qb6",
+     "text": "Now aim another piece at the pawn. Your queen and your bishop on f6 both attack d4, so White's pieces have to stay back and guard it."
+    }
+   ]
+  },
+  {
+   "title": "Attack the doubled pawns",
+   "fen": "r1b2rk1/p2p1ppp/1pn1pn2/2q5/2P5/P1P1PN2/3BBPPP/R2Q1RK1 b - - 1 11",
+   "side": "black",
+   "keyIdea": "Doubled pawns cannot guard each other: attack the front one with more pieces than can defend it.",
+   "text": "From a game played on Lichess. You are Black. White has two pawns on the c-file, on c3 and c4, and no b- or d-pawn beside them. Your queen already attacks c4. Can you add another attacker?",
+   "url": "https://lichess.org/QIsLHCi6#21",
+   "line": "Ba6 a4 Bxc4 Bc1 Bxe2 Qxe2",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Ba6",
+     "text": "Doubled pawns cannot protect each other, and here no other white pawn can protect c4 either. Your bishop joins the queen in attacking it, and only White's bishop on e2 defends it."
+    },
+    {
+     "ply": 2,
+     "san": "Bxc4",
+     "text": "Two attackers against one defender, so take the pawn. If White takes your bishop, your queen takes back and you are still a pawn up."
+    },
+    {
+     "ply": 4,
+     "san": "Bxe2",
+     "text": "Trade bishops. You are a pawn ahead, and White's last c-pawn, on c3, has no pawns beside it: it is isolated and the next weak pawn to aim at."
+    }
+   ]
+  },
+  {
+   "title": "Pile up on the backward pawn",
+   "fen": "r1bq1rk1/3nbppp/p1p1pn2/3p4/1PNP4/P2BPN2/1B3PPP/R2Q1RK1 w - - 0 12",
+   "side": "white",
+   "keyIdea": "A backward pawn on a file without your pawns is a fixed weakness: pile up on it with knights and rooks.",
+   "text": "From a game played on Lichess. You are White. Look at Black's pawn on c6. The b-pawn that could protect it is gone, the d-pawn has moved past it, and your pawns on b4 and d4 guard c5, so it cannot move forward safely.",
+   "url": "https://lichess.org/nEbgPaCw#22",
+   "line": "Na5 Qc7 Rc1 Bb7 Qe2 Rfc8 Rc2",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Na5",
+     "text": "Your knight attacks c6 from a5, and right now nothing defends the pawn. Black has to spend a move guarding it."
+    },
+    {
+     "ply": 2,
+     "san": "Rc1",
+     "text": "You have no pawn on the c-file, so a rook on c1 looks straight up at c6. That is a second attacker, and Black has to find a second defender."
+    },
+    {
+     "ply": 4,
+     "san": "Qe2",
+     "text": "Your queen on d1 stood in the way of the rook on f1. On e2 it clears the path, so that both rooks can come to the c-file."
+    },
+    {
+     "ply": 6,
+     "san": "Rc2",
+     "text": "Make room for the other rook: Rfc1 comes next. The pawn on c6 cannot run and no pawn can help it, so Black's pieces stay tied to its defence."
+    }
+   ]
+  }
+ ]
 }

@@ -14,6 +14,95 @@
   "mating-patterns",
   "open-files"
  ],
- "intro": "",
- "parts": []
+ "intro": "An attack on the king works when you bring more pieces to it than your opponent can bring to defend it. Pawn pushes and sacrifices can tear open the lines in front of the king, so your pieces can get in. And a king that is still in the centre when the lines open is in the most danger of all.",
+ "parts": [
+  {
+   "title": "One more attacker than defenders",
+   "fen": "3rr1k1/ppq1np1p/2p1p1pQ/4P3/2BR4/P6P/1P3PP1/4R1K1 w - - 5 23",
+   "side": "white",
+   "keyIdea": "Count the attackers and defenders of a square next to the king, then bring one more attacker than there are defenders.",
+   "text": "A Lichess Puzzle. You are White, and Black's knight has just gone back to e7. Your queen on h6 attacks the pawn on h7: who defends it, and what can you add?",
+   "url": "https://lichess.org/training/wKouZ",
+   "line": "Rh4 Nd5 Qxh7+",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Rh4",
+     "text": "The pawn on h7 is attacked once, by your queen, and defended once, by the king. The rook swings along the fourth rank to h4, behind the queen. Now h7 is attacked twice, and the king can no longer take back there."
+    },
+    {
+     "ply": 2,
+     "san": "Qxh7+",
+     "text": "Two attackers against one defender: the pawn falls with check, and the king has to run to f8, the only square left."
+    }
+   ]
+  },
+  {
+   "title": "Open lines with pawns",
+   "fen": "r2q1rk1/1p2b1pp/p2p1p2/3npPPQ/4P2P/1P1P4/1P6/R1B2RK1 w - - 0 18",
+   "side": "white",
+   "keyIdea": "Push your pawns at the enemy king, then break its pawn cover, even with a sacrifice, so your pieces can get at it.",
+   "text": "A Lichess Puzzle. You are White. Black has just taken your knight on d5, but your queen and your pawns are already close to Black's king.",
+   "url": "https://lichess.org/training/YEHZC",
+   "line": "g6 h6 Bxh6 gxh6 Qxh6 Rf7 gxf7+",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "g6",
+     "text": "Do not take back on d5. The g-pawn hits h7 and threatens Qxh7 mate: the king could not escape to f7, because your pawn on g6 guards it."
+    },
+    {
+     "ply": 2,
+     "san": "Bxh6",
+     "text": "Black blocked with h6. Now break the wall: the bishop takes the pawn on h6 to tear away the king's cover."
+    },
+    {
+     "ply": 4,
+     "san": "Qxh6",
+     "text": "Take back with the queen. Black's g-pawn and h-pawn are gone, and Qh7 mate is threatened again."
+    },
+    {
+     "ply": 6,
+     "san": "gxf7+",
+     "text": "Black put a rook on f7 to guard h7. Take it with check: you win the rook, and the attack goes on."
+    }
+   ]
+  },
+  {
+   "title": "Punish the king in the centre",
+   "fen": "rn2kb1r/p3qppp/2p2n2/1p2p1B1/2B1P3/1QN5/PPP2PPP/R3K2R w KQkq - 0 10",
+   "side": "white",
+   "keyIdea": "When the enemy king is stuck in the centre, open lines towards it, even at the cost of material, and bring every piece.",
+   "text": "Paul Morphy's famous Opera Game, played in Paris in 1858: you are White, playing Morphy's moves. Black's king is still on e8, most of Black's pieces are at home, and Black has just played 9...b5 to chase your bishop.",
+   "url": "https://en.wikipedia.org/wiki/Opera_Game",
+   "line": "Nxb5 cxb5 Bxb5+ Nbd7 O-O-O Rd8 Rxd7 Rxd7 Rd1",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Nxb5",
+     "text": "Do not retreat the bishop. Give up the knight for pawns to tear open the lines to Black's king: after 10...cxb5 your bishop takes on b5 with check."
+    },
+    {
+     "ply": 2,
+     "san": "Bxb5+",
+     "text": "Check, and you have two pawns for the knight. Black's king is still in the centre, and a knight that blocks on d7 will be pinned to it."
+    },
+    {
+     "ply": 4,
+     "san": "O-O-O",
+     "text": "Castle long: your king is safe, and your rook lands at once on the open d-file, where it attacks the pinned knight on d7."
+    },
+    {
+     "ply": 6,
+     "san": "Rxd7",
+     "text": "Black defended d7 with a rook. Take the knight anyway: after 13...Rxd7 the black rook on d7 is pinned too, and your other rook is ready to join."
+    },
+    {
+     "ply": 8,
+     "san": "Rd1",
+     "text": "Every white piece is now in the attack, while Black's rook on h8 and bishop on f8 have still not moved. In the game, after 14...Qe6, Morphy finished with 15.Bxd7+ Nxd7 16.Qb8+! Nxb8 17.Rd8 mate."
+    }
+   ]
+  }
+ ]
 }

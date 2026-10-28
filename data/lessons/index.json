@@ -8,7 +8,7 @@
   "side": "white",
   "goal": "You can see which pieces each side attacks, take a piece that is left undefended, and save an attacked piece by moving it, guarding it, blocking or taking the attacker.",
   "priorKnowledge": [],
-  "decisions": 0
+  "decisions": 5
  },
  {
   "id": "check",
@@ -16,12 +16,12 @@
   "kind": "theme",
   "track": "themes",
   "level": "beginner",
-  "side": "white",
+  "side": "black",
   "goal": "You can tell when a king is in check and find every way out: move the king, block the check, or take the checking piece.",
   "priorKnowledge": [
    "attack-and-defend"
   ],
-  "decisions": 0
+  "decisions": 7
  },
  {
   "id": "mate-in-one",
@@ -34,7 +34,7 @@
   "priorKnowledge": [
    "check"
   ],
-  "decisions": 0
+  "decisions": 5
  },
  {
   "id": "piece-values",
@@ -47,7 +47,7 @@
   "priorKnowledge": [
    "attack-and-defend"
   ],
-  "decisions": 0
+  "decisions": 6
  },
  {
   "id": "opening-principles",
@@ -58,7 +58,7 @@
   "side": "white",
   "goal": "In the first moves of any game, you can claim the centre with pawns, bring out knights and bishops, castle early, and avoid moving one piece again and again.",
   "priorKnowledge": [],
-  "decisions": 0
+  "decisions": 11
  },
  {
   "id": "queen-mate",
@@ -85,7 +85,7 @@
   "priorKnowledge": [
    "piece-values"
   ],
-  "decisions": 0
+  "decisions": 6
  },
  {
   "id": "double-attack",
@@ -99,7 +99,7 @@
    "attack-and-defend",
    "piece-values"
   ],
-  "decisions": 0
+  "decisions": 6
  },
  {
   "id": "forks",
@@ -107,12 +107,12 @@
   "kind": "theme",
   "track": "themes",
   "level": "beginner",
-  "side": "black",
+  "side": "white",
   "goal": "You can spot a fork by a knight, a pawn or another piece, and use a check to win the piece the fork also attacks.",
   "priorKnowledge": [
    "double-attack"
   ],
-  "decisions": 7
+  "decisions": 10
  },
  {
   "id": "scholars-mate-defence",
@@ -127,7 +127,7 @@
    "opening-principles",
    "threats"
   ],
-  "decisions": 0
+  "decisions": 8
  },
  {
   "id": "two-rook-mate",
@@ -140,7 +140,8 @@
   "priorKnowledge": [
    "queen-mate"
   ],
-  "decisions": 0
+  "decisions": 12,
+  "playOut": true
  },
  {
   "id": "pins",
@@ -153,7 +154,7 @@
   "priorKnowledge": [
    "piece-values"
   ],
-  "decisions": 5
+  "decisions": 6
  },
  {
   "id": "blunder-check",
@@ -166,7 +167,7 @@
   "priorKnowledge": [
    "threats"
   ],
-  "decisions": 0
+  "decisions": 7
  },
  {
   "id": "italian-game",
@@ -180,7 +181,7 @@
   "priorKnowledge": [
    "opening-principles"
   ],
-  "decisions": 7
+  "decisions": 10
  },
  {
   "id": "rook-mate",
@@ -193,7 +194,7 @@
   "priorKnowledge": [
    "two-rook-mate"
   ],
-  "decisions": 15,
+  "decisions": 11,
   "playOut": true
  },
  {
@@ -231,7 +232,7 @@
   "side": "white",
   "goal": "You can promote a pawn, tell with the square of the pawn whether a king can catch it, and capture en passant.",
   "priorKnowledge": [],
-  "decisions": 0
+  "decisions": 11
  },
  {
   "id": "checks-captures-threats",
@@ -244,7 +245,7 @@
   "priorKnowledge": [
    "blunder-check"
   ],
-  "decisions": 0
+  "decisions": 6
  },
  {
   "id": "london-system",
@@ -253,7 +254,7 @@
   "track": "openings",
   "level": "beginner",
   "side": "white",
-  "eco": "D00",
+  "eco": "D02",
   "goal": "As White, you can set up the London System against almost any reply: d4, Bf4, e3, Nf3, c3 and Nbd2.",
   "priorKnowledge": [
    "opening-principles"
@@ -284,7 +285,7 @@
   "priorKnowledge": [
    "queen-mate"
   ],
-  "decisions": 0
+  "decisions": 6
  },
  {
   "id": "two-knights-defence",
@@ -324,7 +325,7 @@
   "priorKnowledge": [
    "discovered-attacks"
   ],
-  "decisions": 0
+  "decisions": 6
  },
  {
   "id": "active-king",
@@ -337,7 +338,7 @@
   "priorKnowledge": [
    "pawn-promotion"
   ],
-  "decisions": 0
+  "decisions": 10
  },
  {
   "id": "queens-gambit",
@@ -346,7 +347,7 @@
   "track": "openings",
   "level": "beginner",
   "side": "white",
-  "eco": "D20",
+  "eco": "D27",
   "goal": "As White, you can offer the c-pawn with the Queen's Gambit, and win it back while you develop when Black takes it.",
   "priorKnowledge": [
    "opening-principles"
@@ -364,7 +365,7 @@
   "priorKnowledge": [
    "opening-principles"
   ],
-  "decisions": 0
+  "decisions": 6
  },
  {
   "id": "mate-in-two",
@@ -378,7 +379,7 @@
    "mate-in-one",
    "checks-captures-threats"
   ],
-  "decisions": 0
+  "decisions": 6
  },
  {
   "id": "caro-kann",
@@ -387,7 +388,7 @@
   "track": "openings",
   "level": "beginner",
   "side": "black",
-  "eco": "B18",
+  "eco": "B19",
   "goal": "As Black against 1.e4, you can play the Caro-Kann: support d5 with c6, develop the light-squared bishop early, and keep a solid position.",
   "priorKnowledge": [
    "opening-principles"
@@ -401,26 +402,12 @@
   "track": "openings",
   "level": "beginner",
   "side": "black",
-  "eco": "D63",
+  "eco": "D60",
   "goal": "As Black against the Queen's Gambit, you can hold the centre with e6, develop, castle, and know which pieces still need to come out.",
   "priorKnowledge": [
    "queens-gambit"
   ],
   "decisions": 6
- },
- {
-  "id": "king-and-pawn",
-  "name": "King and pawn endgames",
-  "kind": "endgame",
-  "track": "endgames",
-  "level": "intermediate",
-  "side": "white",
-  "goal": "You can tell whether king and pawn win against a lone king, using the opposition and the key squares in front of the pawn.",
-  "priorKnowledge": [
-   "active-king"
-  ],
-  "decisions": 17,
-  "playOut": true
  },
  {
   "id": "candidate-moves",
@@ -433,7 +420,21 @@
   "priorKnowledge": [
    "checks-captures-threats"
   ],
-  "decisions": 0
+  "decisions": 8
+ },
+ {
+  "id": "king-and-pawn",
+  "name": "King and pawn endgames",
+  "kind": "endgame",
+  "track": "endgames",
+  "level": "intermediate",
+  "side": "white",
+  "goal": "You can tell whether king and pawn win against a lone king, using the opposition and the key squares in front of the pawn.",
+  "priorKnowledge": [
+   "active-king"
+  ],
+  "decisions": 12,
+  "playOut": true
  },
  {
   "id": "pinned-pieces",
@@ -446,7 +447,7 @@
   "priorKnowledge": [
    "pins"
   ],
-  "decisions": 0
+  "decisions": 6
  },
  {
   "id": "deflection",
@@ -459,7 +460,7 @@
   "priorKnowledge": [
    "removing-the-defender"
   ],
-  "decisions": 0
+  "decisions": 6
  },
  {
   "id": "ruy-lopez",
@@ -486,7 +487,7 @@
   "priorKnowledge": [
    "deflection"
   ],
-  "decisions": 0
+  "decisions": 8
  },
  {
   "id": "zugzwang",
@@ -494,12 +495,12 @@
   "kind": "endgame",
   "track": "endgames",
   "level": "intermediate",
-  "side": "white",
+  "side": "black",
   "goal": "You can win a position where the opponent would be fine if they could pass, by making the move that leaves them only bad moves.",
   "priorKnowledge": [
    "king-and-pawn"
   ],
-  "decisions": 0
+  "decisions": 8
  },
  {
   "id": "simple-plans",
@@ -513,7 +514,7 @@
    "candidate-moves",
    "centre-and-activity"
   ],
-  "decisions": 0
+  "decisions": 10
  },
  {
   "id": "mating-patterns",
@@ -527,7 +528,7 @@
    "mate-in-two",
    "back-rank-mate"
   ],
-  "decisions": 0
+  "decisions": 11
  },
  {
   "id": "scotch-game",
@@ -541,7 +542,7 @@
   "priorKnowledge": [
    "italian-game"
   ],
-  "decisions": 0
+  "decisions": 8
  },
  {
   "id": "passed-pawns",
@@ -554,7 +555,7 @@
   "priorKnowledge": [
    "king-and-pawn"
   ],
-  "decisions": 0
+  "decisions": 12
  },
  {
   "id": "weak-pawns",
@@ -562,12 +563,12 @@
   "kind": "thinking",
   "track": "thinking",
   "level": "intermediate",
-  "side": "white",
+  "side": "black",
   "goal": "You can recognise isolated, doubled and backward pawns, attack them in your opponent's position, and avoid them in yours.",
   "priorKnowledge": [
    "simple-plans"
   ],
-  "decisions": 0
+  "decisions": 10
  },
  {
   "id": "zwischenzug",
@@ -580,7 +581,7 @@
   "priorKnowledge": [
    "candidate-moves"
   ],
-  "decisions": 0
+  "decisions": 6
  },
  {
   "id": "opening-traps",
@@ -594,7 +595,7 @@
    "scholars-mate-defence",
    "italian-game"
   ],
-  "decisions": 0
+  "decisions": 12
  },
  {
   "id": "trapped-pieces",
@@ -607,7 +608,7 @@
   "priorKnowledge": [
    "blunder-check"
   ],
-  "decisions": 0
+  "decisions": 8
  },
  {
   "id": "pawn-races",
@@ -620,7 +621,7 @@
   "priorKnowledge": [
    "passed-pawns"
   ],
-  "decisions": 0
+  "decisions": 12
  },
  {
   "id": "pawn-structure",
@@ -628,12 +629,12 @@
   "kind": "thinking",
   "track": "thinking",
   "level": "intermediate",
-  "side": "white",
+  "side": "black",
   "goal": "You can read a pawn chain, attack it at its base with a pawn break, and tell open positions from closed ones.",
   "priorKnowledge": [
    "weak-pawns"
   ],
-  "decisions": 0
+  "decisions": 9
  },
  {
   "id": "clearance-and-interference",
@@ -647,7 +648,7 @@
    "discovered-attacks",
    "deflection"
   ],
-  "decisions": 0
+  "decisions": 8
  },
  {
   "id": "sicilian-defence",
@@ -656,12 +657,12 @@
   "track": "openings",
   "level": "intermediate",
   "side": "black",
-  "eco": "B90",
+  "eco": "B92",
   "goal": "As Black against 1.e4, you can play the Sicilian Defence: trade the c-pawn for White's d-pawn and fight back on the queenside.",
   "priorKnowledge": [
    "opening-principles"
   ],
-  "decisions": 0
+  "decisions": 8
  },
  {
   "id": "rook-endgame-basics",
@@ -675,7 +676,7 @@
    "rook-mate",
    "passed-pawns"
   ],
-  "decisions": 0
+  "decisions": 11
  },
  {
   "id": "weak-squares",
@@ -688,7 +689,7 @@
   "priorKnowledge": [
    "pawn-structure"
   ],
-  "decisions": 0
+  "decisions": 7
  },
  {
   "id": "quiet-moves",
@@ -701,7 +702,7 @@
   "priorKnowledge": [
    "mating-patterns"
   ],
-  "decisions": 0
+  "decisions": 7
  },
  {
   "id": "french-defence",
@@ -710,12 +711,12 @@
   "track": "openings",
   "level": "intermediate",
   "side": "black",
-  "eco": "C11",
-  "goal": "As Black against 1.e4, you can play the French Defence and know the plan against White's pawn chain: attack its base with c5 and f6.",
+  "eco": "C06",
+  "goal": "As Black against 1.e4, you can play the French Defence and know the plan against White's pawn chain: attack its base with c5 and its front with f6.",
   "priorKnowledge": [
    "pawn-structure"
   ],
-  "decisions": 0
+  "decisions": 10
  },
  {
   "id": "rook-endgames",
@@ -728,7 +729,7 @@
   "priorKnowledge": [
    "rook-endgame-basics"
   ],
-  "decisions": 14,
+  "decisions": 12,
   "playOut": true
  },
  {
@@ -742,7 +743,7 @@
   "priorKnowledge": [
    "weak-squares"
   ],
-  "decisions": 0
+  "decisions": 10
  },
  {
   "id": "perpetual-check",
@@ -756,7 +757,7 @@
    "checks-captures-threats",
    "draws"
   ],
-  "decisions": 0
+  "decisions": 10
  },
  {
   "id": "gambits",
@@ -764,12 +765,12 @@
   "kind": "thinking",
   "track": "openings",
   "level": "intermediate",
-  "side": "white",
+  "side": "black",
   "goal": "You can judge when a pawn offered in the opening is worth taking, and when to give one back to finish developing.",
   "priorKnowledge": [
    "opening-traps"
   ],
-  "decisions": 0
+  "decisions": 11
  },
  {
   "id": "good-and-bad-pieces",
@@ -782,7 +783,7 @@
   "priorKnowledge": [
    "pawn-structure"
   ],
-  "decisions": 0
+  "decisions": 6
  },
  {
   "id": "minor-piece-endgames",
@@ -795,7 +796,7 @@
   "priorKnowledge": [
    "good-and-bad-pieces"
   ],
-  "decisions": 0
+  "decisions": 12
  },
  {
   "id": "combinations",
@@ -809,7 +810,7 @@
    "decoy",
    "clearance-and-interference"
   ],
-  "decisions": 0
+  "decisions": 10
  },
  {
   "id": "when-to-trade",
@@ -823,7 +824,7 @@
    "piece-values",
    "good-and-bad-pieces"
   ],
-  "decisions": 0
+  "decisions": 10
  },
  {
   "id": "attacking-the-king",
@@ -837,7 +838,7 @@
    "mating-patterns",
    "open-files"
   ],
-  "decisions": 0
+  "decisions": 11
  },
  {
   "id": "defending",
@@ -850,6 +851,6 @@
   "priorKnowledge": [
    "attacking-the-king"
   ],
-  "decisions": 0
+  "decisions": 11
  }
 ]

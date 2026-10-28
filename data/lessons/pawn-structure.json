@@ -8,11 +8,288 @@
  "priorKnowledge": [
   "weak-pawns"
  ],
- "side": "white",
+ "side": "black",
  "puzzleTags": [],
  "puzzleThemes": [],
  "intro": {
-  "text": ""
+  "text": "Pawns standing on a diagonal, each one protecting the pawn in front, form a chain. The pawn at the back of the chain, its base, has no pawn to protect it, so that is where to strike, with a pawn move called a pawn break. When the pawns in the centre block each other, the position is closed: pieces cannot get through, and the play moves to the sides of the board. When the centre is open, pieces move freely, and the side whose pieces are ready to use the open lines gains."
  },
- "parts": []
+ "parts": [
+  {
+   "title": "Strike at the base",
+   "fen": "2r1qrnk/2p3pp/p3p3/1p1pP3/3P4/P5NP/3Q1PP1/R3R1K1 b - - 0 22",
+   "side": "black",
+   "keyIdea": "Attack a pawn chain at its base, the back pawn that holds up the others.",
+   "text": "From a game played on Lichess. You are Black. In the centre the pawns block each other: White's d4 and e5 against your d5 and e6. White's two pawns form a chain. Which of them holds the chain together, and how can a pawn of yours attack it?",
+   "credit": {
+    "source": "Lichess games database, game gYcE03ml",
+    "url": "https://lichess.org/gYcE03ml#43",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "c7c5",
+    "d4c5",
+    "c8c5",
+    "d2a5",
+    "e8c6"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "2r1qrnk/2p3pp/p3p3/1p1pP3/3P4/P5NP/3Q1PP1/R3R1K1 b - - 0 22",
+     "decision": true,
+     "main": "c7c5",
+     "mainSan": "c5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The pawn on d4 is the base of White's chain: it protects e5, and no pawn protects it. Strike at it with c5. If the d4 pawn disappears, e5 loses its support."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "2r1qrnk/6pp/p3p3/1pppP3/3P4/P5NP/3Q1PP1/R3R1K1 w - - 0 23",
+     "decision": false,
+     "main": "d4c5",
+     "mainSan": "dxc5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "2r1qrnk/6pp/p3p3/1pPpP3/8/P5NP/3Q1PP1/R3R1K1 b - - 0 23",
+     "decision": true,
+     "main": "c8c5",
+     "mainSan": "Rxc5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Take back with the rook. The c-file is now open and your rook already stands on it, while White's pawn on e5 has no pawn left to protect it."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "4qrnk/6pp/p3p3/1prpP3/8/P5NP/3Q1PP1/R3R1K1 w - - 0 24",
+     "decision": false,
+     "main": "d2a5",
+     "mainSan": "Qa5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "4qrnk/6pp/p3p3/QprpP3/8/P5NP/5PP1/R3R1K1 b - - 1 24",
+     "decision": true,
+     "main": "e8c6",
+     "mainSan": "Qc6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "White's queen attacked your pawn on a6. Your queen guards it from c6 and lines up behind your rook on the open c-file."
+     }
+    }
+   ]
+  },
+  {
+   "title": "A closed centre: play on the wing",
+   "fen": "r1bqnrk1/ppp1npbp/3p2p1/3Pp3/2P1P3/2NN4/PP2BPPP/R1BQ1RK1 b - - 4 10",
+   "side": "black",
+   "keyIdea": "In a closed centre, attack with pawns on the side your chain points to, starting at the base of the enemy chain.",
+   "text": "From a game played on Lichess, in the King's Indian Defence. You are Black. The centre is closed: White's pawns on d5 and e4 and yours on d6 and e5 block each other, so no piece can get through. Your pawns point towards the kingside, where White's king lives. Which pawn break fits?",
+   "credit": {
+    "source": "Lichess games database, game rsX9p4Rx",
+    "url": "https://lichess.org/rsX9p4Rx#19",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "f7f5",
+    "f2f3",
+    "f5f4",
+    "a2a4",
+    "g6g5"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "r1bqnrk1/ppp1npbp/3p2p1/3Pp3/2P1P3/2NN4/PP2BPPP/R1BQ1RK1 b - - 4 10",
+     "decision": true,
+     "main": "f7f5",
+     "mainSan": "f5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "White's chain runs e4 to d5, and e4 is its base. Your f-pawn attacks it. Nothing can happen in the locked centre, so this break is where your play begins."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "r1bqnrk1/ppp1n1bp/3p2p1/3Ppp2/2P1P3/2NN4/PP2BPPP/R1BQ1RK1 w - - 0 11",
+     "decision": false,
+     "main": "f2f3",
+     "mainSan": "f3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "r1bqnrk1/ppp1n1bp/3p2p1/3Ppp2/2P1P3/2NN1P2/PP2B1PP/R1BQ1RK1 b - - 0 11",
+     "decision": true,
+     "main": "f5f4",
+     "mainSan": "f4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "White propped up e4 with f3. Push past it: f4 grabs space on the kingside, and now f3 is the base of White's chain."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "r1bqnrk1/ppp1n1bp/3p2p1/3Pp3/2P1Pp2/2NN1P2/PP2B1PP/R1BQ1RK1 w - - 0 12",
+     "decision": false,
+     "main": "a2a4",
+     "mainSan": "a4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "r1bqnrk1/ppp1n1bp/3p2p1/3Pp3/P1P1Pp2/2NN1P2/1P2B1PP/R1BQ1RK1 b - - 0 12",
+     "decision": true,
+     "main": "g6g5",
+     "mainSan": "g5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Next comes g4, to attack f3, the new base. White's play is on the queenside, yours is towards White's king, and the centre stays shut in between."
+     }
+    }
+   ]
+  },
+  {
+   "title": "Open the centre when it suits you",
+   "fen": "rnbq1rk1/5pbp/p2ppnp1/2p5/2PPPP2/3BB2P/P3N1P1/RN1Q1RK1 w - - 0 12",
+   "side": "white",
+   "keyIdea": "Open the centre with a pawn break when your pieces can use the open lines and some enemy pieces are still at home.",
+   "text": "From a game played on Lichess. You are White, with four pawns side by side in the centre. The centre is not locked yet, and Black's rook on a8, knight on b8 and bishop on c8 have not moved. Should you keep the position closed, or open it?",
+   "credit": {
+    "source": "Lichess games database, game bomlf4to",
+    "url": "https://lichess.org/bomlf4to#22",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "e4e5",
+    "f6d7",
+    "d3e4",
+    "a8a7",
+    "e5d6"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "rnbq1rk1/5pbp/p2ppnp1/2p5/2PPPP2/3BB2P/P3N1P1/RN1Q1RK1 w - - 0 12",
+     "decision": true,
+     "main": "e4e5",
+     "mainSan": "e5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Open it. The pawn hits the knight on f6 and the pawn on d6, the base of Black's chain from d6 to c5. It also clears e4 for your bishop on d3."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "rnbq1rk1/5pbp/p2ppnp1/2p1P3/2PP1P2/3BB2P/P3N1P1/RN1Q1RK1 b - - 0 12",
+     "decision": false,
+     "main": "f6d7",
+     "mainSan": "Nfd7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "rnbq1rk1/3n1pbp/p2pp1p1/2p1P3/2PP1P2/3BB2P/P3N1P1/RN1Q1RK1 w - - 1 13",
+     "decision": true,
+     "main": "d3e4",
+     "mainSan": "Be4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The bishop comes to e4 and attacks the rook on a8 along the long diagonal. Black has to spend a move saving the rook instead of bringing out the knight on b8 and the bishop on c8."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "rnbq1rk1/3n1pbp/p2pp1p1/2p1P3/2PPBP2/4B2P/P3N1P1/RN1Q1RK1 b - - 2 13",
+     "decision": false,
+     "main": "a8a7",
+     "mainSan": "Ra7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "1nbq1rk1/r2n1pbp/p2pp1p1/2p1P3/2PPBP2/4B2P/P3N1P1/RN1Q1RK1 w - - 3 14",
+     "decision": true,
+     "main": "e5d6",
+     "mainSan": "exd6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Take the pawn on d6. Black's chain is broken and the centre is no longer blocked, while Black's knight on b8 and bishop on c8 are still waiting to come out."
+     }
+    }
+   ]
+  }
+ ]
 }

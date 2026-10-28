@@ -9,6 +9,90 @@
  "priorKnowledge": [
   "weak-squares"
  ],
- "intro": "",
- "parts": []
+ "intro": "An open file is a column of the board with no pawns on it. A rook on an open file can travel all the way into the opponent's position, so the first rook to get there owns it, and two rooks on the same file are stronger still. The best place to arrive is the seventh rank, the opponent's second row: a rook there attacks pawns that are hard to defend and keeps the enemy king shut in on its back rank.",
+ "parts": [
+  {
+   "title": "Take the open file first",
+   "fen": "3r1rk1/p4pp1/1p1N2bp/3qP3/3P1Q2/P7/6PP/R3R1K1 w - - 1 25",
+   "side": "white",
+   "keyIdea": "Put a rook on the open file before your opponent does, then double your rooks on it.",
+   "text": "From a game played on Lichess. You are White, and both sides still have their rooks. Look for a file with no pawns on it, and ask which rook can get there first.",
+   "url": "https://lichess.org/pLJUyEy7#48",
+   "line": "Rac1 Rd7 Rc3 Rfd8 Rec1",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Rac1",
+     "text": "The c-file has no pawns on it, so a rook on c1 looks all the way up to c8. Your rook on a1 was doing nothing; now it owns the file before Black's rook on d8 can get to c8."
+    },
+    {
+     "ply": 2,
+     "san": "Rc3",
+     "text": "Make room for the other rook. From c3 the rook still holds the file, and your rook on e1 can now come to c1 behind it."
+    },
+    {
+     "ply": 4,
+     "san": "Rec1",
+     "text": "Two rooks on one open file back each other up. They are ready to go into Black's position as soon as a square on the c-file is safe to land on."
+    }
+   ]
+  },
+  {
+   "title": "From the open file to the seventh rank",
+   "fen": "r4rk1/pb2bppp/2p1p3/4p3/2B1N3/8/PPP2PPP/3R1RK1 w - - 4 15",
+   "side": "white",
+   "keyIdea": "Use the open file to reach the seventh rank, where enemy pawns and pieces are attacked from the side.",
+   "text": "A Lichess Puzzle. You are White, and your rook on d1 already stands on the open d-file. Black has just played 14...Bb7. Where can the rook do the most damage?",
+   "url": "https://lichess.org/training/BLcB3",
+   "line": "Rd7 Rfe8 Rxb7 Kf8 Rc7",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Rd7",
+     "text": "The rook runs up the open file to d7, on Black's second rank. From there it attacks both black bishops, on b7 and e7, and neither of them is defended. Black cannot save both."
+    },
+    {
+     "ply": 2,
+     "san": "Rxb7",
+     "text": "Black guarded the bishop on e7 with the rook, so take the other one. You have won a piece, and your rook is still on the seventh rank."
+    },
+    {
+     "ply": 4,
+     "san": "Rc7",
+     "text": "Stay on the seventh: from c7 the rook attacks the pawns on c6 and a7. Bringing your bishop into play first was also a good move."
+    }
+   ]
+  },
+  {
+   "title": "Two rooks on the seventh",
+   "fen": "r4k2/pR3ppp/1p6/8/2p5/2P4P/P2r1PP1/4R1K1 w - - 1 25",
+   "side": "white",
+   "keyIdea": "Two rooks on the seventh rank trap the king on its back rank and sweep up the pawns there.",
+   "text": "A Lichess Puzzle. You are White, and your rook on b7 is already on the seventh rank. Black has just played 24...Rd2. What can your second rook do?",
+   "url": "https://lichess.org/training/dBVAV",
+   "line": "Ree7 f5 Rf7+ Kg8 Rxg7+ Kh8 Rxh7+",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Ree7",
+     "text": "The second rook joins the first on the seventh rank. Now the pawn on f7 is attacked, Black's king is stuck on the back rank, and Black's rook on d2 is far away from its king."
+    },
+    {
+     "ply": 2,
+     "san": "Rf7+",
+     "text": "Black moved the f-pawn away, so check from f7. The king can only go to e8 or g8."
+    },
+    {
+     "ply": 4,
+     "san": "Rxg7+",
+     "text": "Take the g-pawn with check. Your two rooks guard each other along the seventh rank."
+    },
+    {
+     "ply": 6,
+     "san": "Rxh7+",
+     "text": "And the h-pawn, again with check. In a few moves the two rooks have won two pawns, and the king still cannot leave the back rank."
+    }
+   ]
+  }
+ ]
 }

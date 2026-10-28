@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import type { Options, query } from '@anthropic-ai/claude-agent-sdk';
 import type { CoachRequest } from '@chess-coach/shared/coach/types';
 import { BRIEF_BUDGET, type Brief } from '@chess-coach/shared/coach/brief';
+import { MAX_GOAL, MAX_KEY_IDEA } from '@chess-coach/shared/content/lessons';
 import { candidatesFrom, gradeFromAnalyses } from '@chess-coach/shared/analysis';
 import { playSan } from '@chess-coach/shared/chess';
 import { formatScore } from '@chess-coach/shared/grader';
@@ -551,5 +552,51 @@ describe('the Coach port', () => {
     }
     expect(rows(app, 'SELECT * FROM coach_calls')).toHaveLength(0);
     await expect(c.request('coach.ask', ask)).resolves.toMatchObject({ stripped: expect.any(Number) });
+  });
+
+  it('carries a Lesson’s focus from the request into the brief of a Lesson turn, a Hint and a Why Question', async () => {
+    const app = await instance();
+    const c = await client(app);
+    const lessonFocus = {
+      name: 'Italian Game',
+      goal: 'Play the first moves of the Italian Game and say what each one is for.',
+      keyIdea: 'Take the centre with a pawn and bring the pieces out behind it.',
+    };
+    const focus = { lesson: 'Italian Game', goal: lessonFocus.goal, keyIdea: lessonFocus.keyIdea };
+    const lesson = { lessonId: 'italian-game', opening: 'Italian Game', notes: '', popularity: [], finalTurn: false };
+    const turn = await c.request('coach.ask', { ...whyAsk(), job: 'lesson-turn', question: undefined, lesson, lessonFocus });
+    expect(app.coach.lastBrief?.focus).toEqual(focus);
+    // The fake Coach names the key idea, so Player journeys see the focus reached the Coach.
+    expect(turn.text).toContain(`Key idea: ${lessonFocus.keyIdea}`);
+    await c.request('coach.ask', { job: 'hint', fen: START, recentMoves: [], playerSide: 'white', lessonFocus });
+    expect(app.coach.lastBrief?.focus).toEqual(focus);
+    await c.request('coach.ask', { ...whyAsk(), hideWinningChances: true, lessonFocus });
+    expect(app.coach.lastBrief?.focus).toEqual(focus);
+    // Outside a Lesson there is none.
+    await c.request('coach.ask', whyAsk());
+    expect(app.coach.lastBrief).not.toHaveProperty('focus');
+    // It is the client's text, not an Engine fact: clipped to the Lesson limits, and nothing else it carries is kept.
+    const long = { name: 'n'.repeat(5000), goal: 'g'.repeat(5000), keyIdea: 'k'.repeat(5000), candidates: [{ uci: 'h2h4', san: 'h4', score: { cp: 500 }, pv: ['h2h4'] }] };
+    await c.request('coach.ask', { ...whyAsk(), lessonFocus: long as never });
+    expect(app.coach.lastBrief?.focus).toEqual({ lesson: `${'n'.repeat(79)}…`, goal: `${'g'.repeat(MAX_GOAL - 1)}…`, keyIdea: `${'k'.repeat(MAX_KEY_IDEA - 1)}…` });
+    expect(app.coach.lastBrief?.candidates.map((x) => x.uci)).not.toContain('h2h4');
+    const [call] = rows<{ brief: string }>(app, 'SELECT brief FROM coach_calls ORDER BY id DESC LIMIT 1');
+    expect(call?.brief.length).toBeLessThanOrEqual(BRIEF_BUDGET);
+    // The prompt keeps the Coach on the key idea, and the Engine's facts still decide what is true (ADR 0002, ADR 0009).
+    const rule = SYSTEM_PROMPT.split('\n- ').find((r) => r.startsWith('When the brief has focus')) ?? '';
+    expect(rule).toContain('focus.keyIdea');
+    expect(rule).toMatch(/the Engine's facts\s+still decide what is true/);
+  });
+
+  it('refuses a malformed Lesson focus before calling the Coach', async () => {
+    const app = await instance();
+    const c = await client(app);
+    const lessonFocus = { name: 'Italian Game', goal: 'Play the first moves of the Italian Game.', keyIdea: 'Aim the bishop at f7.' };
+    const { keyIdea: _missing, ...noKeyIdea } = lessonFocus;
+    for (const bad of [noKeyIdea, { ...lessonFocus, goal: 3 }, { ...lessonFocus, keyIdea: ['Aim the bishop at f7.'] }, 'Italian Game', null]) {
+      await expect(c.request('coach.ask', { ...whyAsk(), lessonFocus: bad as never })).rejects.toMatchObject({ code: 'bad-request' });
+    }
+    expect(rows(app, 'SELECT * FROM coach_calls')).toHaveLength(0);
+    await expect(c.request('coach.ask', { ...whyAsk(), lessonFocus })).resolves.toMatchObject({ stripped: expect.any(Number) });
   });
 });

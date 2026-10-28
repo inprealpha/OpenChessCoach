@@ -147,6 +147,9 @@ export function templateReply(brief: Brief): CoachRawReply {
       const verdict = grade === 'Best' || grade === 'Good' ? 'a sound choice' : 'not the best idea here';
       text = `What are your options here? You chose ${brief.move?.san ?? 'a move'}, graded ${grade}, which is ${verdict}.${chances(brief)} The Engine's top choice is ${best?.san ?? 'unclear'}.${popular}`;
       if (reply) text += ` Your opponent's main option next is ${reply.san}.`;
+      // The Lesson's key idea, so journeys see the focus reached the Coach (ADR 0011).
+      const idea = brief.focus?.keyIdea;
+      if (idea) text += ` Key idea: ${idea}${/[.!?…]$/.test(idea) ? '' : '.'}`;
       text += grade === 'Best' || grade === 'Good' ? ' Let\'s continue the Lesson.' : ' Try another move.';
       add(best, 'green');
       if (brief.move && brief.move.uci !== best?.uci) add(brief.move, grade === 'Best' || grade === 'Good' ? 'blue' : 'red');

@@ -33,9 +33,10 @@ function namedMoves(fen: string, question: string, moveUci: string | undefined, 
   return out;
 }
 
+const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null;
+
 /** A client's Lesson context, checked field by field so a malformed one is refused rather than breaking the brief. */
 function lessonOf(value: unknown): NonNullable<CoachAsk['lesson']> {
-  const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null;
   const isEntry = (p: unknown) => isRecord(p) && typeof p.san === 'string' && typeof p.percent === 'number' && Number.isFinite(p.percent);
   if (
     !isRecord(value) ||
@@ -50,6 +51,17 @@ function lessonOf(value: unknown): NonNullable<CoachAsk['lesson']> {
   }
   const popularity = (value.popularity as { san: string; percent: number }[]).map(({ san, percent }) => ({ san, percent }));
   return { lessonId: value.lessonId, opening: value.opening, notes: value.notes, popularity, finalTurn: value.finalTurn };
+}
+
+/**
+ * A client's Lesson focus (ADR 0011): three strings, copied alone, which the brief clips. It is
+ * Lesson text from the client, never an Engine fact.
+ */
+function lessonFocusOf(value: unknown): NonNullable<CoachAsk['lessonFocus']> {
+  if (!isRecord(value) || typeof value.name !== 'string' || typeof value.goal !== 'string' || typeof value.keyIdea !== 'string') {
+    throw new AppError('bad-request', 'The Lesson focus is not valid.');
+  }
+  return { name: value.name, goal: value.goal, keyIdea: value.keyIdea };
 }
 
 export class EngineService {
@@ -141,6 +153,7 @@ export class EngineService {
       ...(req.playerSide === 'white' || req.playerSide === 'black' ? { playerSide: req.playerSide } : {}),
       ...(question ? { question } : {}),
       ...(req.lesson !== undefined ? { lesson: lessonOf(req.lesson) } : {}),
+      ...(req.lessonFocus !== undefined ? { lessonFocus: lessonFocusOf(req.lessonFocus) } : {}),
       ...(typeof req.opening === 'string' ? { opening: req.opening } : {}),
       ...(req.hideWinningChances === true ? { hideWinningChances: true } : {}),
     };

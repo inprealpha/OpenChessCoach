@@ -26,6 +26,7 @@ import { allowedMoves, answeredMoves, askedLineMoves, guardReply } from '@chess-
 import { answerMoves, type EngineAnswer, type EngineQuestion } from '@chess-coach/shared/coach/engine-tool';
 import { MAX_WORDS, threatFen, type Brief } from '@chess-coach/shared/coach/brief';
 import type { CoachRequest, CoachRawReply, CoachReply } from '@chess-coach/shared/coach/types';
+import type { LessonData, LessonPart } from '@chess-coach/shared/content/lessons';
 import type { CoachJob } from '@chess-coach/shared/protocol';
 import { CoachClient } from '../packages/backend/src/client.ts';
 import type { CoachCall, CoachEngine, CoachPort } from '../packages/backend/src/coach/port.ts';
@@ -188,12 +189,11 @@ async function driveEveryJob(client: CoachClient, root: URL): Promise<{ job: Coa
     }),
   });
 
-  // Lesson turn: the Italian Game's 3.Bc4, with its bundled notes.
-  const lesson = JSON.parse(readFileSync(new URL('data/lessons/italian-game.json', root), 'utf8')) as {
-    id: string;
-    name: string;
-    parts: { nodes: { ply: number; notes?: { text: string }; popular: Record<string, { san: string; percent: number }[]> }[] }[];
-  };
+  // Lesson turns, each with its Lesson's learning goal and the part's key idea, as every Coach call
+  // in a Lesson carries them (ADR 0011). First the Italian Game's 3.Bc4, with its bundled notes.
+  const readLesson = (id: string) => JSON.parse(readFileSync(new URL(`data/lessons/${id}.json`, root), 'utf8')) as LessonData;
+  const focusOf = (lesson: LessonData, part: LessonPart | undefined) => ({ name: lesson.name, goal: lesson.goal, keyIdea: part?.keyIdea ?? '' });
+  const lesson = readLesson('italian-game');
   const node = lesson.parts[0]?.nodes.find((n) => n.ply === 4);
   out.push({
     job: 'lesson-turn',
@@ -204,7 +204,27 @@ async function driveEveryJob(client: CoachClient, root: URL): Promise<{ job: Coa
       playerSide: 'white',
       moveUci: uciOf(ITALIAN_BEFORE_BC4, 'Bc4'),
       lesson: { lessonId: lesson.id, opening: lesson.name, notes: node?.notes?.text ?? '', popularity: (node?.popular.casual ?? []).map((p) => ({ san: p.san, percent: p.percent })), finalTurn: false },
+      lessonFocus: focusOf(lesson, lesson.parts[0]),
       opening: lesson.name,
+    }),
+  });
+
+  // Then a Theme: the Forks Lesson's first decision, a check that sets up a fork, where the Coach
+  // has to explain the key idea from the Engine's facts.
+  const forks = readLesson('forks');
+  const part = forks.parts[0];
+  const first = part?.nodes.find((n) => n.decision);
+  if (!part || !first) throw new Error('The Forks Lesson has no decision.');
+  out.push({
+    job: 'lesson-turn',
+    reply: await client.request('coach.ask', {
+      job: 'lesson-turn',
+      fen: first.fen,
+      recentMoves: [],
+      playerSide: part.side,
+      moveUci: first.main,
+      lesson: { lessonId: forks.id, opening: forks.name, notes: first.notes?.text ?? '', popularity: [], finalTurn: false },
+      lessonFocus: focusOf(forks, part),
     }),
   });
 

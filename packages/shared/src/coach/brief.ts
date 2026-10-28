@@ -1,6 +1,7 @@
 // Builds the compact, fresh brief every Coach call starts from (ADR 0004).
 import type { Candidate } from '../analysis.ts';
 import { playUci, turnOf, type Side } from '../chess.ts';
+import { MAX_GOAL, MAX_KEY_IDEA } from '../content/lessons.ts';
 import type { Score } from '../engine.ts';
 import { formatScore, gradeMove, type MoveGrade } from '../grader.ts';
 import { finishedScore, type PositionScore } from '../position-score.ts';
@@ -74,6 +75,11 @@ export interface Brief {
    */
   threat?: { by: Side; san: string; uci: string; line: string; ignored?: true };
   lesson?: { opening: string; notes: string; popularity: string };
+  /**
+   * During a Lesson, on every Coach call: the Lesson, its learning goal and the current part's key
+   * idea, so the Coach stays on the Lesson's point (ADR 0011). The Lesson's aim, never an Engine fact.
+   */
+  focus?: { lesson: string; goal: string; keyIdea: string };
   profile?: { goals: string[]; weaknesses: string[]; notes: string[] };
   question?: string;
   summary?: string;
@@ -163,9 +169,14 @@ export function buildBrief({ ask, profile, summary }: BriefInput): Brief {
       notes: clip(ask.lesson.notes, MAX_NOTES),
       popularity: ask.lesson.popularity
         .slice(0, 5)
-        .map((p) => `${p.san} ${Math.round(p.percent)}%`)
+        // A move in SAN is at most 7 characters (exd8=Q+); a longer name from the client is clipped.
+        .map((p) => `${clip(p.san, 8)} ${Math.round(p.percent)}%`)
         .join(', '),
     };
+  }
+  const focus = ask.lessonFocus;
+  if (focus && (focus.goal.trim() || focus.keyIdea.trim())) {
+    brief.focus = { lesson: clip(focus.name.trim(), 80), goal: clip(focus.goal.trim(), MAX_GOAL), keyIdea: clip(focus.keyIdea.trim(), MAX_KEY_IDEA) };
   }
   const slice = profileSlice(profile, ask.opening ?? ask.lesson?.opening);
   if (slice) brief.profile = slice;
@@ -331,7 +342,10 @@ function clip(text: string, max: number): string {
   return text.length <= max ? text : `${text.slice(0, max - 1)}…`;
 }
 
-/** Trims the least important parts until the brief fits. */
+/**
+ * Trims the least important parts until the brief fits. A Lesson's focus is never trimmed: it is what
+ * keeps the Coach on the Lesson's point, and the worst case fits with it whole (see the tests).
+ */
 function fitToBudget(brief: Brief): Brief {
   const steps: ((b: Brief) => void)[] = [
     // The facts about the weaker alternatives go first: the best moves, the move and the moves the Player asked about matter most.

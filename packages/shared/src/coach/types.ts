@@ -34,6 +34,8 @@ export interface CoachRequest {
   question?: string;
   /** Lesson context: bundled notes and how often players at the Player's level choose each move. */
   lesson?: CoachAsk['lesson'];
+  /** Sent with every Coach call during a Lesson (ADR 0011). */
+  lessonFocus?: CoachAsk['lessonFocus'];
   /** Opening or theme, used to pick the relevant slice of the Player Profile. */
   opening?: string;
   /**
@@ -90,6 +92,11 @@ export interface CoachAsk {
     popularity: { san: string; percent: number }[];
     finalTurn: boolean;
   };
+  /**
+   * During a Lesson, on every Coach call (a Lesson turn, a Hint, a Why Question): the Lesson's
+   * learning goal and the current part's key idea, so the Coach stays on the Lesson's point (ADR 0011).
+   */
+  lessonFocus?: { name: string; goal: string; keyIdea: string };
   /** Opening or theme, used to pick the relevant slice of the Player Profile. */
   opening?: string;
   /** For Reviews: the last moment may carry a profile note. */

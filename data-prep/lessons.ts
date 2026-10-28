@@ -7,7 +7,7 @@
 // - data/lesson-sources/<id>.json, one per Lesson (the `Source` type below). Positions and lines
 //   come from Lichess's open data (CC0) or from Wikibooks and Wikipedia pages (CC BY-SA 4.0). Text
 //   is written for OpenChessCoach; a text kept from Wikibooks or Wikipedia names its page in
-//   `introUrl`, `textUrl` or a note's `url`, and is credited (ADR 0005, ADR 0011).
+//   `introUrl`, `textUrl` or a note's `url`, and is credited (ADR 0005, ADR 0012).
 // - data/lesson-stats.json (from lesson-stats.ts): move popularity for the opening Lessons.
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { INITIAL_FEN, playSan, playUci, positionKey, turnOf } from '@chess-coach/shared/chess';

@@ -1,6 +1,6 @@
 # Learn course outline
 
-This is the plan for the Learn section (ADR 0011): 64 Lessons in four tracks, from a complete beginner to the end of intermediate level. Advanced level is future work, listed at the end.
+This is the plan for the Learn section (ADR 0012): 64 Lessons in four tracks, from a complete beginner to the end of intermediate level. Advanced level is future work, listed at the end.
 
 - **Beginner** is for a Player who knows how the pieces move, up to a rating of about 1200. Its first Lessons also suit a Player who is still learning the moves: they start with capturing and with check.
 - **Intermediate** goes from about 1200 to about 1800.
@@ -13,7 +13,7 @@ Every Lesson has a learning goal (what the Player can do afterwards) and its pri
 
 The course order mixes the four tracks, so a Player never does two Lessons of the same kind in a row for long, and each Lesson comes after the ones it builds on. `data-prep/course.ts` holds this order. The Learn screen shows the Lessons by track and level, in the same order.
 
-Positions come from Lichess's open data (the puzzle database, the games database and the chess-openings list) or from famous games as Wikipedia or Wikibooks give them. Every explanation is written fresh. The books in the owner's private folder decided the topics and their order only (ADR 0011).
+Positions come from Lichess's open data (the puzzle database, the games database and the chess-openings list) or from famous games as Wikipedia or Wikibooks give them. Every explanation is written fresh. The books in the owner's private folder decided the topics and their order only (ADR 0012).
 
 "Rewritten" Lessons existed before this course: their text is rewritten in the new style, and any part kept from Wikibooks or Wikipedia keeps its credit. "New" Lessons are written for this course. "Puzzles" names the Lichess puzzle themes, or for openings the opening, that the Lesson's practice Puzzles come from.
 

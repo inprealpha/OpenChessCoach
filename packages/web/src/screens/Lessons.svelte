@@ -1,5 +1,5 @@
 <script lang="ts">
-  // The Lessons (ADR 0011): the suggested next Lesson first, then the four tracks, each by level in
+  // The Lessons (ADR 0012): the suggested next Lesson first, then the four tracks, each by level in
   // the suggested order, with each Lesson's progress from the Player Profile. Nothing is locked: the
   // suggestion only says where to go next. With about sixty Lessons, links at the top jump to a track.
   import { SIDE_NAMES } from '@chess-coach/shared/chess';

@@ -1,4 +1,4 @@
-// The ADR 0005, 0008 and 0011 data checks: every Lesson line legal, every position and kept text
+// The ADR 0005, 0008 and 0012 data checks: every Lesson line legal, every position and kept text
 // credited, every Lesson with its goal, prior knowledge and key ideas, every Puzzle legal and
 // belonging to its Lesson. Each check is proven to fail on a broken copy of real data.
 import { readFileSync } from 'node:fs';

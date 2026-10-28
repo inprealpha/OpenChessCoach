@@ -190,7 +190,7 @@ async function driveEveryJob(client: CoachClient, root: URL): Promise<{ job: Coa
   });
 
   // Lesson turns, each with its Lesson's learning goal and the part's key idea, as every Coach call
-  // in a Lesson carries them (ADR 0011). First the Italian Game's 3.Bc4, with its bundled notes.
+  // in a Lesson carries them (ADR 0012). First the Italian Game's 3.Bc4, with its bundled notes.
   const readLesson = (id: string) => JSON.parse(readFileSync(new URL(`data/lessons/${id}.json`, root), 'utf8')) as LessonData;
   const focusOf = (lesson: LessonData, part: LessonPart | undefined) => ({ name: lesson.name, goal: lesson.goal, keyIdea: part?.keyIdea ?? '' });
   const lesson = readLesson('italian-game');

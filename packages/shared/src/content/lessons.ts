@@ -1,4 +1,4 @@
-// Bundled Lesson data (ADR 0005, ADR 0008, ADR 0011). Every position and line comes from open data:
+// Bundled Lesson data (ADR 0005, ADR 0008, ADR 0012). Every position and line comes from open data:
 // Lichess's chess-openings, puzzle and games databases (CC0), or Wikibooks and Wikipedia pages
 // (CC BY-SA 4.0). Explanations are written for OpenChessCoach; a text kept from Wikibooks or
 // Wikipedia carries its credit. Opening Lessons add move popularity by rating band from the Lichess
@@ -13,7 +13,7 @@ export const WIKIBOOKS_LICENCE_URL = 'https://creativecommons.org/licenses/by-sa
 export const LICHESS_LICENCE = 'CC0 1.0';
 export const LICHESS_LICENCE_URL = 'https://creativecommons.org/publicdomain/zero/1.0/';
 
-/** The four tracks of the course (ADR 0011), in the order the Learn screen shows them. */
+/** The four tracks of the course (ADR 0012), in the order the Learn screen shows them. */
 export const TRACKS = ['themes', 'endgames', 'openings', 'thinking'] as const;
 export type Track = (typeof TRACKS)[number];
 
@@ -68,7 +68,7 @@ export interface LessonPart {
   text?: string;
   /** Present when `text` is kept from Wikibooks or Wikipedia. */
   textCredit?: Credit;
-  /** What this position teaches, in one line (ADR 0011). Shown once the part is played, never before. */
+  /** What this position teaches, in one line (ADR 0012). Shown once the part is played, never before. */
   keyIdea: string;
   /** Where the position and the line come from. */
   credit: Credit;
@@ -97,10 +97,10 @@ export interface LessonData {
   id: string;
   name: string;
   kind: LessonKind;
-  /** Where the Lesson sits in the course (ADR 0011). */
+  /** Where the Lesson sits in the course (ADR 0012). */
   track: Track;
   level: CourseLevel;
-  /** What the Player can do afterwards, in one or two plain sentences (ADR 0011). */
+  /** What the Player can do afterwards, in one or two plain sentences (ADR 0012). */
   goal: string;
   /** Ids of the Lessons a Player should know first. Nothing is locked: this only orders the suggestions. */
   priorKnowledge: string[];
@@ -173,7 +173,7 @@ const KIND_TRACKS: Record<LessonKind, readonly Track[]> = {
 };
 
 /**
- * The ADR 0005, 0008 and 0011 check: every line legal, every position credited, every kept text
+ * The ADR 0005, 0008 and 0012 check: every line legal, every position credited, every kept text
  * credited, and the goal, prior knowledge and key ideas in place. Pass `ids` (every Lesson id) to
  * check that the prior knowledge names real Lessons. Returns the problems found.
  */
@@ -298,7 +298,7 @@ export function checkPositionCredit(credit: Credit | undefined): boolean {
   );
 }
 
-/** A text the Lessons adapted from Wikibooks or Wikipedia before ADR 0011 (`data/open-texts.json`). */
+/** A text the Lessons adapted from Wikibooks or Wikipedia before ADR 0012 (`data/open-texts.json`). */
 export interface OpenText {
   url: string;
   text: string;
@@ -320,7 +320,7 @@ function wordRuns(text: string): Set<string> {
 }
 
 /**
- * The ADR 0011 credit check: a Lesson text without a credit must not keep wording from the earlier
+ * The ADR 0012 credit check: a Lesson text without a credit must not keep wording from the earlier
  * Wikibooks and Wikipedia texts. Returns a problem for each uncredited text that shares a run of
  * words with one of them.
  */

@@ -1,4 +1,4 @@
-// Which Lesson the app suggests next (ADR 0011): nothing is locked, the suggestion only orders what
+// Which Lesson the app suggests next (ADR 0012): nothing is locked, the suggestion only orders what
 // to do first. Each rule of suggestNext, on a small made-up catalogue in course order.
 import { describe, expect, it } from 'vitest';
 import { suggestNext, type CatalogueItem } from '../src/content/course.ts';

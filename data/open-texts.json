@@ -1,5 +1,5 @@
 {
- "about": "Every text the Lessons adapted from Wikibooks and Wikipedia (CC BY-SA 4.0) before ADR 0011, each with its page. The Lesson data check (keptOpenText in packages/shared/src/content/lessons.ts) uses it to make sure a Lesson text that keeps one of them carries its credit.",
+ "about": "Every text the Lessons adapted from Wikibooks and Wikipedia (CC BY-SA 4.0) before ADR 0012, each with its page. The Lesson data check (keptOpenText in packages/shared/src/content/lessons.ts) uses it to make sure a Lesson text that keeps one of them carries its credit.",
  "licence": "CC BY-SA 4.0, https://creativecommons.org/licenses/by-sa/4.0/; authors: Wikibooks and Wikipedia contributors (see each page's history)",
  "texts": [
   {

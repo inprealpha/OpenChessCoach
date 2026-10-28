@@ -54,7 +54,7 @@ function lessonOf(value: unknown): NonNullable<CoachAsk['lesson']> {
 }
 
 /**
- * A client's Lesson focus (ADR 0011): three strings, copied alone, which the brief clips. It is
+ * A client's Lesson focus (ADR 0012): three strings, copied alone, which the brief clips. It is
  * Lesson text from the client, never an Engine fact.
  */
 function lessonFocusOf(value: unknown): NonNullable<CoachAsk['lessonFocus']> {

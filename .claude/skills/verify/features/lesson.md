@@ -1,7 +1,7 @@
 # Lesson
 
 A course from first moves to the end of intermediate level in four tracks: Themes, Endgames,
-Openings and How to think during a game, each at Beginner and Intermediate level (ADR 0011). Every
+Openings and How to think during a game, each at Beginner and Intermediate level (ADR 0012). Every
 position comes from open data (ADR 0005, ADR 0008): Lichess's puzzles, games and chess-openings
 (CC0), or a Wikibooks or Wikipedia page. Text is written for OpenChessCoach; a text kept from
 Wikibooks or Wikipedia carries its CC BY-SA credit on screen. Openings add Lichess statistics for

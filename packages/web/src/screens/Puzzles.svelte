@@ -58,7 +58,7 @@
       .map((l) => ({ id: l.id, name: l.name, track: l.track, ...progressOn(all.filter((p) => p.lessonId === l.id).map((p) => p.id)) }))
       .filter((s) => s.count > 0),
   );
-  /** The sets by the Lessons' tracks, as the Lessons screen shows them (ADR 0011); a track with no Puzzles is left out. */
+  /** The sets by the Lessons' tracks, as the Lessons screen shows them (ADR 0012); a track with no Puzzles is left out. */
   const groups = $derived(TRACKS.map((track) => ({ track, label: TRACK_NAMES[track].name, sets: sets.filter((s) => s.track === track) })).filter((g) => g.sets.length));
 
   /**

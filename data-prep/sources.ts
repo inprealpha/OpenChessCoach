@@ -1,5 +1,5 @@
 // Reads the Lesson sources, data/lesson-sources/<id>.json: one file per Lesson, so Lessons can be
-// written and checked one at a time (ADR 0011).
+// written and checked one at a time (ADR 0012).
 import { readdirSync, readFileSync } from 'node:fs';
 import type { Side } from '@chess-coach/shared/chess';
 import type { CourseLevel, LessonKind, PlayOut, Track } from '@chess-coach/shared/content/lessons';

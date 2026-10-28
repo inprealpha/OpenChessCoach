@@ -1,4 +1,4 @@
-// Tools for writing a Lesson source (data/lesson-sources/<id>.json, ADR 0011): find positions in the
+// Tools for writing a Lesson source (data/lesson-sources/<id>.json, ADR 0012): find positions in the
 // CC0 Lichess puzzle database, ask the Engine about a position, and check a line before it goes into
 // a source. `node data-prep/engine-check.ts <id>` is still the check that counts.
 //

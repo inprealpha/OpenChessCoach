@@ -1,4 +1,4 @@
-// The course across the four tracks (ADR 0011): the catalogue entry of each Lesson, and which
+// The course across the four tracks (ADR 0012): the catalogue entry of each Lesson, and which
 // Lesson the app suggests next. Nothing is locked; the suggestion only orders what to do first.
 import type { Side } from '../chess.ts';
 import type { LessonProgress, PlayerLevel } from '../protocol.ts';

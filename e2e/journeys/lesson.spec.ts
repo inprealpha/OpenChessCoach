@@ -2,7 +2,7 @@
 // Engine moves first), a Theme and an endgame (several parts, then a play-out). One Coach call per
 // decision, every main-line move graded Best or Good, progress survives a reload, and the catalogue
 // shows progress from the database. The catalogue's four tracks and its suggested next Lesson
-// (ADR 0011), which finishing a Lesson moves on; the intro's goal and the Lessons it builds on; the
+// (ADR 0012), which finishing a Lesson moves on; the intro's goal and the Lessons it builds on; the
 // Lesson's goal and key idea sent with every Coach call. Every other Lesson's data is checked
 // without a browser: content.test.ts (legal, credited, goals and key ideas) and lesson-engine.test.ts
 // (every move Best or Good). Goals and key ideas are read from the data, never written here.
@@ -54,7 +54,7 @@ for (const id of ['caro-kann', 'pins', 'queen-mate']) {
 
     await paired.goto(`${app.url}/#/lesson/${id}`);
     await expect(paired.getByRole('heading', { name: lesson.name })).toBeVisible();
-    // A text kept from Wikibooks or Wikipedia keeps its credit; one written for OpenChessCoach has none (ADR 0011).
+    // A text kept from Wikibooks or Wikipedia keeps its credit; one written for OpenChessCoach has none (ADR 0012).
     const about = paired.getByRole('region', { name: 'About this Lesson' });
     if (lesson.intro.credit) await expect(about.getByRole('link', { name: lesson.intro.credit.source })).toBeVisible();
     else await expect(about).not.toContainText('Text adapted from');
@@ -288,7 +288,7 @@ test('on a phone, a Theme Lesson keeps the Move Grade and Continue under the boa
   await expect(paired.getByRole('button', { name: /^Continue/ })).toBeInViewport();
   await expect(paired.getByRole('group', { name: boardName })).toBeInViewport({ ratio: 0.9 });
   // The position keeps its credit, now further down, and so does a text kept from Wikibooks or
-  // Wikipedia (ADR 0005, ADR 0011: CC BY-SA text is credited).
+  // Wikipedia (ADR 0005, ADR 0012: CC BY-SA text is credited).
   const position = paired.getByRole('region', { name: 'Position' });
   await expect(position.getByRole('link', { name: part.credit.source }).first()).toBeVisible();
   await expect(position.getByRole('link', { name: part.credit.licence }).first()).toBeVisible();
@@ -429,7 +429,7 @@ test('every Coach call in a Lesson carries the Lesson’s goal and the part’s 
   await paired.getByRole('button', { name: 'Ask the Coach why' }).click();
   await coachIdle(paired);
 
-  // The page sends it with a Hint, a Lesson turn and a Why Question alike (ADR 0011).
+  // The page sends it with a Hint, a Lesson turn and a Why Question alike (ADR 0012).
   const focus = { name: lesson.name, goal: lesson.goal, keyIdea: part.keyIdea };
   expect(sent.map((f) => f.job)).toEqual(['hint', 'lesson-turn', 'why']);
   expect(sent.map((f) => f.lessonFocus)).toEqual([focus, focus, focus]);

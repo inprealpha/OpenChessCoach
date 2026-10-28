@@ -1,4 +1,4 @@
-// The course order (ADR 0011): every Lesson id, in the order the app suggests them. The Learn
+// The course order (ADR 0012): every Lesson id, in the order the app suggests them. The Learn
 // screen groups them by track and level and keeps this order inside each group. The plan behind it,
 // with each Lesson's learning goal and prior knowledge, is docs/course-outline.md.
 export const COURSE: string[] = [

@@ -4,7 +4,7 @@ import type { LessonData } from '@chess-coach/shared/content/lessons';
 import type { PuzzleFile } from '@chess-coach/shared/content/puzzles';
 import catalogue from '../../../../data/lessons/index.json';
 
-/** Every Lesson, in the course's suggested order (ADR 0011). */
+/** Every Lesson, in the course's suggested order (ADR 0012). */
 export const lessonCatalogue = catalogue as CatalogueItem[];
 
 const lessonFiles = import.meta.glob<{ default: LessonData }>(['../../../../data/lessons/*.json', '!../../../../data/lessons/index.json']);

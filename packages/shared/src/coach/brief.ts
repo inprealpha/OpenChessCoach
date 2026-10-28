@@ -77,7 +77,7 @@ export interface Brief {
   lesson?: { opening: string; notes: string; popularity: string };
   /**
    * During a Lesson, on every Coach call: the Lesson, its learning goal and the current part's key
-   * idea, so the Coach stays on the Lesson's point (ADR 0011). The Lesson's aim, never an Engine fact.
+   * idea, so the Coach stays on the Lesson's point (ADR 0012). The Lesson's aim, never an Engine fact.
    */
   focus?: { lesson: string; goal: string; keyIdea: string };
   profile?: { goals: string[]; weaknesses: string[]; notes: string[] };

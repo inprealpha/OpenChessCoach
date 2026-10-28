@@ -1,6 +1,6 @@
 <script lang="ts">
   // A Lesson: an opening, or worked examples of a Theme, an endgame or a way of thinking, in one or
-  // more parts. The intro says what the Player will learn and which Lessons it builds on (ADR 0011).
+  // more parts. The intro says what the Player will learn and which Lessons it builds on (ADR 0012).
   // At each of the Player's decisions the Coach asks "what are your options here?", the Engine grades
   // the chosen move, the app shows how often players at the Player's level choose each move (openings
   // only), and the Coach explains. One Coach call per decision. Every Coach call carries the Lesson's
@@ -111,7 +111,7 @@
     if (n === decisionList.length) return 'Your first tries';
     return n === 1 ? 'Your first try at the one decision you played this time' : `Your first tries at the ${n} decisions you played this time`;
   });
-  /** The Lesson the app suggests next, counting this one as complete (ADR 0011). */
+  /** The Lesson the app suggests next, counting this one as complete (ADR 0012). */
   const nextLesson = $derived.by(() => {
     if (!lesson) return undefined;
     const { id } = lesson;
@@ -119,7 +119,7 @@
     return suggestNext(lessonCatalogue, [...progress.list.filter((p) => p.lessonId !== id), done], profile.profile?.level ?? 'beginner')?.lesson;
   });
 
-  /** The Lesson's goal and the part's key idea, sent with every Coach call during the Lesson (ADR 0011). */
+  /** The Lesson's goal and the part's key idea, sent with every Coach call during the Lesson (ADR 0012). */
   function lessonFocus(p: LessonPart | undefined = part): Pick<CoachRequest, 'lessonFocus'> {
     if (!lesson || !p) return {};
     return { lessonFocus: { name: lesson.name, goal: lesson.goal ?? '', keyIdea: p.keyIdea ?? '' } };

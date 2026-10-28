@@ -20,7 +20,7 @@ const brief: Brief = {
   allowNote: false,
   hideMoves: false,
 };
-const engine: CoachEngine = { maxQuestions: 3, maxCalls: 5, ask: async () => ({ text: '{}', refused: false }) };
+const engine: CoachEngine = { maxQuestions: 3, maxCalls: 5, exhausted: false, ask: async () => ({ text: '{}', refused: false }) };
 const result = {
   type: 'result',
   subtype: 'success',
@@ -125,4 +125,56 @@ describe('the real Coach', () => {
     expect(shown).toBe('Nxe5 leaves f2 open.');
     expect(reply.text).toBe('Nxe5 leaves f2 open.');
   });
+
+  it('streams the answer as soon as the turn moves on to it, not only once it ends', async () => {
+    const delta = (text: string) => ({ type: 'stream_event', parent_tool_use_id: null, event: { type: 'content_block_delta', index: 0, delta: { type: 'text_delta', text } } });
+    const opens = (name: string) => ({ type: 'stream_event', parent_tool_use_id: null, event: { type: 'content_block_start', index: 1, content_block: { type: 'tool_use', id: 't', name, input: {} } } });
+    let shown = '';
+    let shownBeforeTurnEnded = '';
+    const model = (() =>
+      (async function* () {
+        yield delta('Let me check Qxf2+. ');
+        yield opens(ENGINE_TOOL_NAME);
+        yield { type: 'assistant', parent_tool_use_id: null, message: { content: [{ type: 'tool_use', id: 't1', name: ENGINE_TOOL_NAME, input: {} }] } };
+        yield delta('Nxe5 leaves f2 open.');
+        // The turn's next block is its structured answer: the text before it is the answer, not thinking aloud.
+        yield opens('StructuredOutput');
+        shownBeforeTurnEnded = shown;
+        yield { type: 'assistant', parent_tool_use_id: null, message: { content: [{ type: 'text', text: 'Nxe5 leaves f2 open.' }, { type: 'tool_use', id: 't2', name: 'StructuredOutput', input: {} }] } };
+        yield { ...result, structured_output: undefined };
+      })()) as unknown as typeof query;
+    const reply = await new RealCoach({ query: model }).ask({ job: 'why', model: 'haiku', brief, engine }, (d) => (shown += d));
+    expect(shownBeforeTurnEnded).toBe('Nxe5 leaves f2 open.');
+    expect(shown).toBe('Nxe5 leaves f2 open.');
+    expect(reply.text).toBe('Nxe5 leaves f2 open.');
+  });
+
+  it('streams every turn once no question is left to ask', async () => {
+    const delta = (text: string) => ({ type: 'stream_event', parent_tool_use_id: null, event: { type: 'content_block_delta', index: 0, delta: { type: 'text_delta', text } } });
+    const used = { ...engine, exhausted: true };
+    let shown = '';
+    let shownMidTurn = '';
+    const model = (() =>
+      (async function* () {
+        yield { type: 'assistant', parent_tool_use_id: null, message: { content: [{ type: 'tool_use', id: 't1', name: ENGINE_TOOL_NAME, input: {} }] } };
+        yield delta('Nxe5 ');
+        shownMidTurn = shown;
+        yield delta('leaves f2 open.');
+        yield { type: 'assistant', parent_tool_use_id: null, message: { content: [{ type: 'text', text: 'Nxe5 leaves f2 open.' }] } };
+        yield { ...result, structured_output: undefined };
+      })()) as unknown as typeof query;
+    await new RealCoach({ query: model }).ask({ job: 'why', model: 'haiku', brief, engine: used }, (d) => (shown += d));
+    expect(shownMidTurn).toBe('Nxe5 ');
+  });
+
+  it('asks the Engine at least once on a first question, and only if needed on a follow-up', async () => {
+    const seen: Options[] = [];
+    const coach = new RealCoach({ query: fakeQuery(seen) });
+    await coach.ask({ job: 'why', model: 'haiku', brief, engine }, () => {});
+    await coach.ask({ job: 'why', model: 'haiku', brief: { ...brief, summary: 'Player asked: Why Nf3? Coach said: it drops e4.' }, engine }, () => {});
+    expect(seen[0]?.systemPrompt).toContain('ask the Engine at least once');
+    expect(seen[1]?.systemPrompt).not.toContain('at least once');
+    expect(seen[1]?.systemPrompt).toContain('This is a follow-up');
+  });
 });
+

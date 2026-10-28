@@ -82,3 +82,8 @@ $C db get coach_questions                      # each question, the Engine's ans
 - A move the Coach made up, or one it only played in its own question's line, is still stripped. A
   client can neither turn the tool on for one request nor send Engine answers (`think-deeper.test.ts`).
 
+- While the Coach asks the Engine, the Coach panel shows "The Coach is checking with the Engine
+  (question 1)…" (a `coach.delta` with `status`), until the answer's text streams (`think-deeper.test.ts`).
+- With Why Questions or Reviews on Haiku (the Thrifty preset, or a custom model), the Think deeper
+  card warns that on Haiku it makes answers fuller but can add mistakes; Balanced and Best show no
+  warning (`first-run.spec.ts`).

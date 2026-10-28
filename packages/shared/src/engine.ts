@@ -28,6 +28,15 @@ export interface AnalyseOptions {
   nodes?: number;
   /** Time limit in milliseconds. */
   movetime?: number;
+  /** Cancels the search: dropped if it hasn't started, stopped if it has. Either way it rejects with an EngineCancelled. */
+  signal?: AbortSignal;
+}
+
+/** A search cancelled through its signal: nobody wants its result, so it has none. */
+export class EngineCancelled extends Error {
+  constructor() {
+    super('The Engine search was cancelled.');
+  }
 }
 
 export interface PlayOptions {

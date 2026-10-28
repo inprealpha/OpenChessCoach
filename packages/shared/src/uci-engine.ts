@@ -1,6 +1,6 @@
 // Drives any Stockfish build over the UCI protocol: the WebAssembly Worker in the browser and the
 // same builds under Node on the backend (ADR 0007), so both grade a position the same way.
-import { AnalysisCollector, type AnalyseOptions, type Analysis, type Engine, type PlayOptions } from './engine.ts';
+import { AnalysisCollector, EngineCancelled, type AnalyseOptions, type Analysis, type Engine, type PlayOptions } from './engine.ts';
 import { findThreat, type Threat } from './threat.ts';
 
 interface Job {
@@ -93,15 +93,21 @@ export class UciEngine implements Engine {
 
   async analyse(fen: string, options: AnalyseOptions, onProgress?: (partial: Analysis) => void): Promise<Analysis> {
     await this.ready;
-    return new Promise((resolve) => {
+    const { signal } = options;
+    if (signal?.aborted) throw new EngineCancelled();
+    return new Promise((resolve, reject) => {
       const collector = new AnalysisCollector(fen);
-      this.enqueue({
+      let running = false;
+      const job: Job = {
         run: () => {
+          running = true;
           this.listener = (line) => {
             if (collector.push(line) && onProgress) onProgress(collector.snapshot());
             if (line.startsWith('bestmove')) {
               this.listener = undefined;
-              resolve(collector.snapshot());
+              signal?.removeEventListener('abort', onAbort);
+              if (signal?.aborted) reject(new EngineCancelled());
+              else resolve(collector.snapshot());
               this.done();
             }
           };
@@ -111,7 +117,19 @@ export class UciEngine implements Engine {
           this.send(goCommand(options));
         },
         cancel: () => resolve(collector.snapshot()),
-      });
+      };
+      // Not started: leave the queue. Running: stop it, and its bestmove rejects it.
+      const onAbort = () => {
+        if (running) {
+          this.send('stop');
+          return;
+        }
+        const at = this.queue.indexOf(job);
+        if (at >= 0) this.queue.splice(at, 1);
+        reject(new EngineCancelled());
+      };
+      signal?.addEventListener('abort', onAbort, { once: true });
+      this.enqueue(job);
     });
   }
 

@@ -9,7 +9,7 @@ import { z } from 'zod';
 import type { CoachStatus } from '@chess-coach/shared/protocol';
 import { tmpdir } from 'node:os';
 import { checkClaude, isWindowsShim } from '../claude-check.ts';
-import { CoachLimitError, CoachUnavailableError, type CoachCall, type CoachEngine, type CoachPort } from './port.ts';
+import { CoachDeadlineError, CoachLimitError, CoachUnavailableError, type CoachCall, type CoachEngine, type CoachPort } from './port.ts';
 import { engineToolPrompt, REPLY_SCHEMA, SYSTEM_PROMPT, userPrompt } from './prompts.ts';
 
 /** Turns without the Engine: the answer, and a retry of its structured output. */
@@ -77,17 +77,18 @@ export class RealCoach implements CoachPort {
     const engine = call.engine;
     const started = Date.now();
     let late = false;
+    const deadlineMs = call.deadlineMs ?? this.deadlineMs;
     const deadline = engine
       ? setTimeout(() => {
           late = true;
           abort.abort();
-        }, this.deadlineMs)
+        }, deadlineMs)
       : undefined;
     const stream = this.query({
       prompt: userPrompt(call.brief),
       options: {
         model: call.model,
-        systemPrompt: engine ? SYSTEM_PROMPT + engineToolPrompt(engine.maxQuestions) : SYSTEM_PROMPT,
+        systemPrompt: engine ? SYSTEM_PROMPT + engineToolPrompt(engine.maxQuestions, call.brief.summary !== undefined) : SYSTEM_PROMPT,
         // No built-in tools, and no MCP servers but the Engine's: the Engine tool is the only one allowed to run.
         tools: [],
         allowedTools: engine ? [ENGINE_TOOL_NAME] : [],
@@ -114,10 +115,13 @@ export class RealCoach implements CoachPort {
       },
     });
     let text = '';
-    // With the Engine tool, a turn's text is held until the turn ends: text the Coach writes before
-    // asking the Engine is thinking aloud, which the Player never sees and the reply never keeps.
+    // With the Engine tool, a turn's text is held until the turn shows what it is: text the Coach
+    // writes before asking the Engine is thinking aloud, which the Player never sees and the reply
+    // never keeps. Once the turn moves on to its answer, or no question is left to ask, it streams.
     let held = '';
+    let live = !engine;
     const show = (delta: string) => {
+      if (!delta) return;
       text += delta;
       onText(delta);
     };
@@ -127,12 +131,23 @@ export class RealCoach implements CoachPort {
       for await (const message of stream) {
         const delta = textDelta(message);
         if (delta) {
-          if (engine) held += delta;
-          else show(delta);
+          if (live) show(delta);
+          else held += delta;
+        }
+        const opened = toolStarted(message);
+        if (engine && opened) {
+          // Asking the Engine: what came before is thinking aloud. Anything else is the answer.
+          if (opened === ENGINE_TOOL_NAME) live = false;
+          else {
+            show(held);
+            live = true;
+          }
+          held = '';
         }
         if (engine && message.type === 'assistant' && !message.parent_tool_use_id) {
           if (!asksEngine(message)) show(held);
           held = '';
+          live = engine.exhausted;
         }
         if (message.type === 'rate_limit_event' && message.rate_limit_info.status === 'rejected') {
           const resets = message.rate_limit_info.resetsAt;
@@ -162,24 +177,26 @@ export class RealCoach implements CoachPort {
         }
       }
     } catch (err) {
-      if (late) throw tooLate(this.deadlineMs);
+      if (late) throw new CoachDeadlineError(deadlineMs);
       throw err;
     } finally {
       clearTimeout(deadline);
     }
-    if (late) throw tooLate(this.deadlineMs);
+    if (late) throw new CoachDeadlineError(deadlineMs);
     return { ...toRawReply(text, structured), ...(usage ? { usage } : {}) };
   }
-}
-
-/** What the Player reads when a call with the Engine tool reaches its deadline. */
-function tooLate(ms: number): Error {
-  return new Error(`thinking deeper took longer than ${Math.round(ms / 1000)} seconds, so it stopped. Ask again, or turn Think deeper off in Settings.`);
 }
 
 /** Whether a turn of the Coach's ends by asking the Engine. */
 function asksEngine(message: Extract<SDKMessage, { type: 'assistant' }>): boolean {
   return message.message.content.some((block) => block.type === 'tool_use' && block.name === ENGINE_TOOL_NAME);
+}
+
+/** The name of a tool the Coach's turn starts calling, as it streams. */
+function toolStarted(message: SDKMessage): string | undefined {
+  if (message.type !== 'stream_event' || message.parent_tool_use_id) return undefined;
+  const event = message.event;
+  return event.type === 'content_block_start' && event.content_block.type === 'tool_use' ? event.content_block.name : undefined;
 }
 
 function textDelta(message: SDKMessage): string | undefined {

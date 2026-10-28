@@ -165,7 +165,7 @@ async function answer(positions: EvalPosition[], model: string, only: readonly s
       const started = Date.now();
       const row: EvalAnswer = { id: p.id, mode, model: models[p.job] ?? model, brief: coach.brief(ask), questions: [], ms: 0 };
       try {
-        row.reply = await coach.ask(ask, () => {}, undefined, engine);
+        row.reply = await coach.ask(ask, () => {}, { engine });
       } catch (err) {
         row.error = err instanceof Error ? err.message : String(err);
       }

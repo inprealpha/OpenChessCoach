@@ -64,7 +64,13 @@ How to answer:
  * Added to the instructions when the Coach may ask the Engine (Think deeper, ADR 0010). The
  * answers are Engine facts like the brief's, so every rule above holds for them too.
  */
-export function engineToolPrompt(maxQuestions: number): string {
+export function engineToolPrompt(maxQuestions: number, followUp = false): string {
+  // A follow-up may be answered by what the thread already covered: asking is then the Coach's call.
+  const ask = followUp
+    ? `This is a follow-up (the brief has a summary): ask the Engine only if the brief and the summary
+  don't already answer the new question, at most ${maxQuestions} times. When you ask, choose your questions first. Good questions:`
+    : `Before you answer, ask the Engine at least once, and at most ${maxQuestions} times, to look
+  further than the brief's short lines. Choose your questions first. Good questions:`;
   return `
 
 Think deeper is on: the Player wants a deeper explanation than the brief alone gives, and has
@@ -74,8 +80,7 @@ optionally "move", one SAN move in the position after the line. It answers like 
 Engine's best moves there, each with its Move Grade, line, "does" and "result"; for "move", its
 Move Grade against the Engine's best move there, its line and facts, and the Engine's replies to it;
 and for a line, "lastMove": what the line's last move does, as "move" says it for the brief's move.
-- Before you answer, ask the Engine at least once, and at most ${maxQuestions} times, to look
-  further than the brief's short lines. Choose your questions first. Good questions:
+- ${ask}
   after a mistake, the position at the end of the Engine's best reply line, to see what it wins;
   for the Engine's best move, the position after its line, to see why it holds;
   for a move the Player asked about, the Engine's answer to it a move or two further on;

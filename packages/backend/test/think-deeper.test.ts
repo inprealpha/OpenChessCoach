@@ -7,7 +7,7 @@ import { playSan } from '@chess-coach/shared/chess';
 import { MAX_ENGINE_QUESTIONS, type EngineAnswer } from '@chess-coach/shared/coach/engine-tool';
 import type { CoachRequest } from '@chess-coach/shared/coach/types';
 import { EngineTool } from '../src/coach/engine-tool.ts';
-import { QUESTION_CLEANUP } from '../src/coach/service.ts';
+import { checkingText, QUESTION_CLEANUP } from '../src/coach/service.ts';
 import type { EngineService } from '../src/engine/service.ts';
 import { AppError } from '../src/errors.ts';
 import { REVIEW_ENGINE_BUDGET_MS } from '../src/reviews.ts';
@@ -176,23 +176,67 @@ describe('Think deeper', () => {
     expect(tool.calls).toEqual([expect.objectContaining({ question: { line: ['exd5'] }, refused: expect.stringContaining('couldn’t start') })]);
   });
 
-  it(`stops asking the Engine in a Review once its key moments have taken ${REVIEW_ENGINE_BUDGET_MS / 1000} seconds`, async () => {
+  it(`gives each key moment of a Review the time left of its ${REVIEW_ENGINE_BUDGET_MS / 1000} seconds, and none once they are spent`, async () => {
     const app = await instance();
     const c = await client(app);
     await c.request('settings.update', { thinkDeeper: true });
-    // Each key moment takes half the budget on the fake clock.
+    // Each key moment takes 100 seconds on the fake clock.
     const ask = app.coach.ask.bind(app.coach);
     app.coach.ask = async (call, onText) => {
       const reply = await ask(call, onText);
-      app.clock.advance(REVIEW_ENGINE_BUDGET_MS / 2);
+      app.clock.advance(100_000);
       return reply;
     };
     const review = await c.request('review.start', { gameId: 1 });
     const moments = rows<CallRow>(app, "SELECT id, job FROM coach_calls WHERE job = 'review-moment' ORDER BY id");
     expect(review.moments.length).toBeGreaterThan(2);
-    // The first two moments ask; the rest answer from the brief alone, still each with an explanation.
+    // The first at most the Coach's own 90 seconds, the second the 80 left; the rest answer from the brief alone.
+    expect(app.coach.deadlines).toEqual([90_000, 80_000]);
     expect(moments.map((m) => engineCalls(app, m).length)).toEqual(moments.map((_, i) => (i < 2 ? 1 : 0)));
     for (const m of review.moments) expect(m.explanation).not.toBe('');
+  });
+
+  it('answers a key moment again from the brief alone when its questions run out of time', async () => {
+    const app = await instance();
+    const c = await client(app);
+    await c.request('settings.update', { thinkDeeper: true });
+    app.coach.script({ kind: 'deadline' });
+    const review = await c.request('review.start', { gameId: 1 });
+    for (const m of review.moments) expect(m.explanation).not.toBe('');
+    // One more call than moments: the first moment's, stopped, then its answer without the Engine.
+    expect(rows<CallRow>(app, "SELECT id, job FROM coach_calls WHERE job = 'review-moment'")).toHaveLength(review.moments.length + 1);
+  });
+
+  it('tells the Player while the Coach asks the Engine, and stops the searches once the Coach is done', async () => {
+    const app = await instance();
+    const c = await client(app);
+    await c.request('settings.update', { thinkDeeper: true });
+    const signals: AbortSignal[] = [];
+    const analyse = app.app.context.desktopEngine.analyse.bind(app.app.context.desktopEngine);
+    app.app.context.desktopEngine.analyse = (fen, multiPv, signal) => {
+      if (signal) signals.push(signal);
+      return analyse(fen, multiPv, signal);
+    };
+    const statuses: string[] = [];
+    app.coach.script({ kind: 'reply', reply: {}, questions: [{ line: ['exd5'] }, { move: 'Nc3' }] });
+    await c.request('coach.ask', why, (_text, _part, status) => {
+      if (status) statuses.push(status);
+    });
+    expect(statuses).toEqual([checkingText(1), checkingText(2)]);
+    // Every search the tool started was given the call's signal, which ended with the call.
+    expect(signals.length).toBeGreaterThan(0);
+    expect(signals.every((sig) => sig.aborted)).toBe(true);
+  });
+
+  it('logs the call and its Engine questions when the Coach runs into the usage limit', async () => {
+    const app = await instance();
+    const c = await client(app);
+    await c.request('settings.update', { thinkDeeper: true });
+    app.coach.script({ kind: 'limit', questions: [{ line: ['exd5'] }] });
+    await expect(c.request('coach.ask', why)).rejects.toMatchObject({ code: 'coach-limit' });
+    const call = lastCall(app);
+    expect(call?.job).toBe('why');
+    expect(engineCalls(app, call)).toEqual([expect.objectContaining({ question: { line: ['exd5'] }, answer: expect.objectContaining({ after: 'exd5' }) })]);
   });
 
   it('clears the questions of trimmed Coach calls by an index, not a scan of both tables', async () => {

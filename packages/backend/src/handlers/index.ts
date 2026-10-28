@@ -44,8 +44,8 @@ export interface RequestContext {
    * `signal` aborts: once closing, the app has told the Player the request failed.
    */
   connected: () => boolean;
-  /** Streams a chunk of Coach text for this request. */
-  delta: (text: string, part?: number) => void;
+  /** Streams a chunk of Coach text for this request, or with `status` what the Coach is doing meanwhile. */
+  delta: (text: string, part?: number, status?: string) => void;
   /** Reports how far the desktop has got with this request; a total of 0 means it isn't known yet. */
   progress: (done: number, total: number) => void;
   /** Replaces this connection's token, after a pairing reset. */

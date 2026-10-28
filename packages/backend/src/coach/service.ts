@@ -12,7 +12,25 @@ import { addCoachNote, getProfile } from '../profile.ts';
 import type { EngineService } from '../engine/service.ts';
 import { getSettings } from '../settings.ts';
 import { EngineTool, type EngineCall } from './engine-tool.ts';
-import { CoachLimitError, CoachUnavailableError, type CoachPort } from './port.ts';
+import { CoachDeadlineError, CoachLimitError, CoachUnavailableError, type CoachPort } from './port.ts';
+
+/** How the Coach panel says the Coach is asking the Engine, numbered so the Player sees it move on. */
+export function checkingText(n: number): string {
+  return `The Coach is checking with the Engine (question ${n})…`;
+}
+
+/** What a Coach call may use besides its ask. */
+export interface AskOptions {
+  signal?: AbortSignal;
+  /** The desktop's Engine, which the Coach may ask with Think deeper on (ADR 0010). */
+  engine?: EngineService;
+  /** Hears what the Coach is doing while no text streams, such as asking the Engine. */
+  onStatus?: (status: string) => void;
+  /** With the Engine, a shorter deadline than the Coach's own, when a Review has less time left. */
+  deadlineMs?: number;
+  /** With the Engine, answer once more from the brief alone when the deadline stops the call. */
+  retryWithoutEngine?: boolean;
+}
 
 const MAX_THREADS = 200;
 const MAX_LOGGED_CALLS = 500;
@@ -56,31 +74,55 @@ export class CoachService {
 
   /**
    * Asks the Coach. Every Engine fact in `ask` comes from the desktop's Engine (ADR 0007). With
-   * Think deeper on, a Why Question or a Review moment may also ask `engine` while it answers (ADR 0010).
+   * Think deeper on, a Why Question or a Review moment may also ask `options.engine` while it answers (ADR 0010).
    */
-  async ask(ask: CoachAsk, onText: (delta: string) => void, signal?: AbortSignal, engine?: EngineService): Promise<CoachReply> {
+  async ask(ask: CoachAsk, onText: (delta: string) => void, options: AskOptions = {}): Promise<CoachReply> {
     await this.assertAvailable();
 
     const brief = this.brief(ask);
     const settings = getSettings(this.db);
     const model = settings.models[ask.job];
-    const tool = engine && settings.thinkDeeper && ENGINE_TOOL_JOBS.includes(ask.job) ? new EngineTool(engine, brief.fen) : undefined;
+    const { engine, signal } = options;
+    // The tool's Engine searches end with the call: when the client cancels, and once the Coach is done or stopped.
+    const stop = new AbortController();
+    const cancel = () => stop.abort();
+    signal?.addEventListener('abort', cancel, { once: true });
+    const tool =
+      engine && settings.thinkDeeper && ENGINE_TOOL_JOBS.includes(ask.job)
+        ? new EngineTool(engine, brief.fen, { signal: stop.signal, onQuestion: (n) => options.onStatus?.(checkingText(n)) })
+        : undefined;
     let raw;
     try {
-      raw = await this.coach.ask({ job: ask.job, model, brief, ...(signal ? { signal } : {}), ...(tool ? { engine: tool } : {}) }, onText);
+      raw = await this.coach.ask(
+        {
+          job: ask.job,
+          model,
+          brief,
+          ...(signal ? { signal } : {}),
+          ...(tool ? { engine: tool, ...(options.deadlineMs !== undefined ? { deadlineMs: options.deadlineMs } : {}) } : {}),
+        },
+        onText,
+      );
     } catch (err) {
       if (err instanceof CoachLimitError) {
+        this.log(ask.job, model, brief, null, [], tool?.calls);
         this.limitUntil = err.resetsAt ?? new Date(this.clock.now().getTime() + 15 * 60_000);
         const next = await this.status();
         this.onStatus(next);
         throw new AppError('coach-limit', next.reason ?? err.message);
       }
       if (err instanceof CoachUnavailableError) {
+        this.log(ask.job, model, brief, null, [], tool?.calls);
         this.onStatus({ state: 'unavailable', reason: err.message });
         throw new AppError('coach-unavailable', err.message);
       }
       this.log(ask.job, model, brief, null, [], tool?.calls);
+      // Out of time with the Engine: once, the Coach answers from the brief alone instead.
+      if (err instanceof CoachDeadlineError && options.retryWithoutEngine) return this.ask(ask, onText, { ...options, engine: undefined });
       throw new AppError('coach-error', `The Coach couldn't answer: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      stop.abort();
+      signal?.removeEventListener('abort', cancel);
     }
     if (!raw.text.trim()) {
       this.log(ask.job, model, brief, raw, [], tool?.calls);

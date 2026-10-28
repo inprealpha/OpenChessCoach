@@ -34,16 +34,30 @@ export class EngineTool implements CoachEngine {
   readonly moves: EngineMove[] = [];
   private readonly engine: EngineService;
   private readonly fen: string;
+  private readonly signal: AbortSignal | undefined;
+  private readonly onQuestion: ((n: number) => void) | undefined;
   private answered = 0;
 
-  constructor(engine: EngineService, fen: string) {
+  /**
+   * `signal` ends the call: questions after it are refused, and searches it started are stopped or
+   * dropped, so the shared Engine never works for an answer nobody reads. `onQuestion` hears each
+   * question the Engine starts on, numbered from 1, so the Player can be told.
+   */
+  constructor(engine: EngineService, fen: string, options: { signal?: AbortSignal; onQuestion?: (n: number) => void } = {}) {
     this.engine = engine;
     this.fen = fen;
+    this.signal = options.signal;
+    this.onQuestion = options.onQuestion;
   }
 
   /** How many questions the Engine answered. */
   get questions(): number {
     return this.answered;
+  }
+
+  /** Whether every further question would be refused. */
+  get exhausted(): boolean {
+    return this.answered >= this.maxQuestions || this.calls.length >= this.maxCalls;
   }
 
   async ask(question: EngineQuestion): Promise<{ text: string; refused: boolean }> {
@@ -52,8 +66,9 @@ export class EngineTool implements CoachEngine {
       this.calls.push({ question, refused: reason, ms: Date.now() - started });
       return { text: reason, refused: true };
     };
+    if (this.signal?.aborted) return refuse('The answer was stopped, so the Engine answers no more questions.');
     // Counted before the search, so questions asked at once can't slip past the cap together.
-    if (this.answered >= this.maxQuestions || this.calls.length >= this.maxCalls) {
+    if (this.exhausted) {
       return refuse(`You have asked the Engine all the questions one answer may ask. Answer now from the brief and the Engine's answers so far.`);
     }
     let placed;
@@ -65,11 +80,12 @@ export class EngineTool implements CoachEngine {
     }
     this.answered++;
     const left = this.maxQuestions - this.answered;
+    this.onQuestion?.(this.answered);
     let analysis, asked;
     try {
       [analysis, asked] = await Promise.all([
-        this.engine.analyse(placed.fen),
-        placed.move ? this.engine.gradeAsked(placed.fen, placed.move.uci) : undefined,
+        this.engine.analyse(placed.fen, undefined, this.signal),
+        placed.move ? this.engine.gradeAsked(placed.fen, placed.move.uci, this.signal) : undefined,
       ]);
     } catch (err) {
       // The Coach answers from what it has; a question the Engine couldn't answer isn't spent.

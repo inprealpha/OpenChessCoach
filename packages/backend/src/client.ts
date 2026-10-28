@@ -25,7 +25,7 @@ export class ProtocolError extends Error {
 interface Pending {
   resolve: (data: unknown) => void;
   reject: (err: Error) => void;
-  onDelta?: (text: string, part?: number) => void;
+  onDelta?: (text: string, part?: number, status?: string) => void;
   onProgress?: (done: number, total: number) => void;
 }
 
@@ -83,7 +83,7 @@ export class CoachClient {
   request<K extends RequestType>(
     type: K,
     body: RequestBody<K>,
-    onDelta?: (text: string, part?: number) => void,
+    onDelta?: (text: string, part?: number, status?: string) => void,
     onProgress?: (done: number, total: number) => void,
   ): Promise<ResponseBody<K>> {
     const id = String(this.nextId++);
@@ -121,7 +121,7 @@ export class CoachClient {
     const p = this.pending.get(msg.id);
     if (!p) return;
     if (msg.type === 'coach.delta') {
-      p.onDelta?.(msg.text, msg.part);
+      p.onDelta?.(msg.text, msg.part, msg.status);
       return;
     }
     if (msg.type === 'progress') {

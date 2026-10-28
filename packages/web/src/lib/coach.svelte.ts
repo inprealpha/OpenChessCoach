@@ -13,6 +13,8 @@ export interface Entry {
   note?: string | null;
   /** How many questions the Coach asked the Engine for this reply, with Think deeper on. */
   engineQuestions?: number;
+  /** While it streams: what the Coach is doing meanwhile, such as asking the Engine. */
+  status?: string;
 }
 
 let nextEntry = 1;
@@ -65,9 +67,12 @@ export class CoachThread {
     this.failed = false;
     this.calls++;
     try {
-      const reply = await api.request('coach.ask', { ...ask, threadId: this.threadId }, (text) => {
+      const reply = await api.request('coach.ask', { ...ask, threadId: this.threadId }, (text, _part, status) => {
         const current = this.entries[index];
-        if (current) this.entries[index] = { ...current, text: current.text + text };
+        if (!current) return;
+        // The answer's text replaces any status; a status shows only while no text has come.
+        if (status !== undefined) this.entries[index] = { ...current, status };
+        if (text) this.entries[index] = { ...current, text: current.text + text, status: '' };
       });
       this.entries[index] = { ...entry, text: reply.text, streaming: false, note: reply.note, engineQuestions: reply.engineQuestions };
       this.arrows = reply.arrows;

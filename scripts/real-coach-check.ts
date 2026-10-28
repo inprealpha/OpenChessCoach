@@ -135,6 +135,9 @@ function recordAnswers(engine: CoachEngine, answers: EngineAnswer[]): CoachEngin
   return {
     maxQuestions: engine.maxQuestions,
     maxCalls: engine.maxCalls,
+    get exhausted() {
+      return engine.exhausted;
+    },
     async ask(question: EngineQuestion) {
       const out = await engine.ask(question);
       if (!out.refused) answers.push(JSON.parse(out.text) as EngineAnswer);

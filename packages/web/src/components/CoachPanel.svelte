@@ -61,6 +61,7 @@
         {#if entry.from === 'player'}<span class="who">You:</span>{/if}
         {entry.text}{#if entry.streaming}<span class="cursor" aria-hidden="true">▍</span>{/if}
       </p>
+      {#if entry.streaming && entry.status && !entry.text}<p class="note" role="status">{entry.status}</p>{/if}
       {#if entry.engineQuestions}
         <p class="note">Checked with the Engine: {entry.engineQuestions} {entry.engineQuestions === 1 ? 'question' : 'questions'}</p>
       {/if}

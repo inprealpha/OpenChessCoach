@@ -75,13 +75,14 @@ export class EngineService {
    * The Engine's top lines in a position, at the configured depth. Fewer lines than configured are
    * cached apart, so they are never served as a position's candidates.
    */
-  async analyse(fen: string, multiPv = this.settings.multiPv): Promise<Analysis> {
+  async analyse(fen: string, multiPv = this.settings.multiPv, signal?: AbortSignal): Promise<Analysis> {
     if (!isValidFen(fen)) throw new AppError('bad-request', 'The position is not valid.');
     if (outcomeOf(fen)) return { fen, depth: 0, lines: [] };
     const key = multiPv === this.settings.multiPv ? fen : `${fen}|${multiPv}`;
     const hit = this.cache.get(key);
     if (hit) return hit;
-    const analysis = this.get().then((e) => e.analyse(fen, { multiPv, depth: this.settings.depth }));
+    // A cancelled search rejects, and the catch below takes it out of the cache.
+    const analysis = this.get().then((e) => e.analyse(fen, { multiPv, depth: this.settings.depth, ...(signal ? { signal } : {}) }));
     this.cache.set(key, analysis);
     analysis.catch(() => this.cache.delete(key));
     if (this.cache.size > CACHE_SIZE) this.cache.delete(this.cache.keys().next().value as string);
@@ -99,11 +100,11 @@ export class EngineService {
   }
 
   /** Grades one move and lists the Engine's replies to it. */
-  async grade(fen: string, uci: string, ply = 1): Promise<{ move: GradedMove; replies: Candidate[] }> {
+  async grade(fen: string, uci: string, ply = 1, signal?: AbortSignal): Promise<{ move: GradedMove; replies: Candidate[] }> {
     if (!isValidFen(fen)) throw new AppError('bad-request', 'The position is not valid.');
     const played = playLine(fen, [uci])[0];
     if (!played) throw new AppError('bad-request', `${uci} is not a legal move in this position.`);
-    const [before, after] = await Promise.all([this.analyse(fen), this.analyse(played.fenAfter)]);
+    const [before, after] = await Promise.all([this.analyse(fen, undefined, signal), this.analyse(played.fenAfter, undefined, signal)]);
     if (!before.lines.length) throw new AppError('bad-request', 'The game is already over in this position.');
     return { move: gradeFromAnalyses(ply, played.uci, before, after), replies: candidatesFrom(after) };
   }
@@ -185,8 +186,8 @@ export class EngineService {
    * A move the Coach asks about, as a candidate: scored by the search after it, the search its Move
    * Grade uses if it is played, with the Engine's line there, and the Engine's replies to it.
    */
-  async gradeAsked(fen: string, uci: string): Promise<{ move: Candidate; replies: Candidate[] }> {
-    const { move, replies } = await this.grade(fen, uci);
+  async gradeAsked(fen: string, uci: string, signal?: AbortSignal): Promise<{ move: Candidate; replies: Candidate[] }> {
+    const { move, replies } = await this.grade(fen, uci, 1, signal);
     return { move: { uci: move.uci, san: move.san, score: move.playedScore, pv: [move.uci, ...(replies[0]?.pv ?? [])] }, replies };
   }
 }

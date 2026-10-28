@@ -9,6 +9,7 @@ import type { KeyMoment, Review } from '@chess-coach/shared/protocol';
 import { type Clock, iso } from './clock.ts';
 import { all, one, transaction, type Db } from './db.ts';
 import { getGame } from './games.ts';
+import { THINK_DEEPER_DEADLINE_MS } from './coach/real.ts';
 import { addGradeCounts, removeGradeCounts } from './profile.ts';
 import type { CoachService } from './coach/service.ts';
 import type { EngineService } from './engine/service.ts';
@@ -167,6 +168,7 @@ async function makeReview(
     // What the opponent threatened before the move: the brief keeps it only when the Engine's best
     // reply to the move is that threat, so the Coach can say the move left it on.
     const threat = await engine.threat(m.fenBefore);
+    const left = REVIEW_ENGINE_BUDGET_MS - (clock.now().getTime() - started);
     const reply = await coach.ask(
       {
         job: 'review-moment',
@@ -183,8 +185,9 @@ async function makeReview(
         allowNote: counts && index === moments.length - 1,
       },
       (text) => delta(text, index),
-      signal,
-      clock.now().getTime() - started < REVIEW_ENGINE_BUDGET_MS ? engine : undefined,
+      // Each moment's questions get the time the Review has left, at most the Coach's own deadline,
+      // and a moment that runs out answers again from the brief alone rather than failing.
+      left > 0 ? { ...(signal ? { signal } : {}), engine, deadlineMs: Math.min(THINK_DEEPER_DEADLINE_MS, left), retryWithoutEngine: true } : signal ? { signal } : {},
     );
     out.push({
       ply: m.ply,

@@ -154,7 +154,7 @@ describe('the real-Coach check', () => {
         return raw;
       },
     };
-    const engine = { maxQuestions: 3, maxCalls: 5, ask: async (q: { line?: string[] }) => (q.line ? { text: 'Ke7 is not legal', refused: true } : { text: JSON.stringify(answer), refused: false }) };
+    const engine = { maxQuestions: 3, maxCalls: 5, exhausted: false, ask: async (q: { line?: string[] }) => (q.line ? { text: 'Ke7 is not legal', refused: true } : { text: JSON.stringify(answer), refused: false }) };
     const coach = new RecordingCoach(inner);
     await coach.ask({ job: 'why', model: 'sonnet', brief, engine }, () => {});
     await coach.ask({ job: 'why', model: 'sonnet', brief }, () => {});

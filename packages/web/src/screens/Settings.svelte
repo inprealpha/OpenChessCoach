@@ -50,6 +50,14 @@
     },
   };
 
+  /**
+   * Whether a Coach job that can ask the Engine runs on Haiku: there Think deeper makes answers fuller
+   * but added false claims in the off/on comparison (ADR 0010), so the card says so.
+   */
+  const haikuThinksDeeper = $derived(
+    settings !== null && (['why', 'review-moment'] as const).some((job) => settings?.models[job].toLowerCase().includes('haiku')),
+  );
+
   const MODEL_NAMES: Record<string, string> = {
     haiku: 'Fastest, latest Haiku',
     sonnet: 'Balanced, latest Sonnet',
@@ -242,6 +250,13 @@
         answers, up to three questions each time. Answers take longer and use more of your Claude limits than usual. Hints, Live
         Coaching and Lessons stay as they are.
       </p>
+      {#if haikuThinksDeeper}
+        <p class="small warning" data-testid="think-deeper-haiku">
+          Your Coach uses Haiku for Why Questions or Reviews.
+          On Haiku, Think deeper makes answers fuller but can add mistakes.
+          A stronger Coach quality, Balanced or Best, gets the most from it.
+        </p>
+      {/if}
       {@render said('deeper')}
     </section>
   {:else}
@@ -272,4 +287,5 @@
   .cost { display: block; }
   .advanced { margin-top: 0.8rem; }
   .advanced summary { cursor: pointer; font-weight: 600; }
+  .warning { margin: 0.5rem 0 0; padding: 0.4rem 0.6rem; border-left: 3px solid #b26a00; background: color-mix(in srgb, #b26a00 10%, transparent); }
 </style>

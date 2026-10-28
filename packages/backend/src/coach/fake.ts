@@ -8,13 +8,16 @@ import type { EngineAnswer, EngineQuestion } from '@chess-coach/shared/coach/eng
 import type { CoachRawReply } from '@chess-coach/shared/coach/types';
 import type { CoachStatus } from '@chess-coach/shared/protocol';
 import { positionKey, SIDE_NAMES } from '@chess-coach/shared/chess';
-import { CoachLimitError, CoachUnavailableError, type CoachCall, type CoachPort } from './port.ts';
+import { CoachDeadlineError, CoachLimitError, CoachUnavailableError, type CoachCall, type CoachPort } from './port.ts';
 
 export type ScriptedReply =
   /** With Think deeper on, `questions` are what the fake Coach asks the Engine before it answers. */
   | { kind: 'reply'; reply: Partial<CoachRawReply>; questions?: EngineQuestion[] }
-  | { kind: 'limit' }
-  | { kind: 'unavailable' };
+  /** The Coach fails, after asking the Engine `questions` first with Think deeper on. */
+  | { kind: 'limit'; questions?: EngineQuestion[] }
+  | { kind: 'unavailable'; questions?: EngineQuestion[] }
+  /** With the Engine, the call runs into its deadline. */
+  | { kind: 'deadline' };
 
 export interface FakeCoachOptions {
   /** Recorded replies keyed by `recordingKey(brief)`. */
@@ -35,6 +38,8 @@ export class FakeCoach implements CoachPort {
   /** Every brief received, in order, and the model each call asked for. */
   readonly briefs: Brief[] = [];
   readonly models: string[] = [];
+  /** The deadline each call with the Engine was given, if any. */
+  readonly deadlines: (number | undefined)[] = [];
 
   get lastBrief(): Brief | undefined {
     return this.briefs.at(-1);
@@ -61,7 +66,12 @@ export class FakeCoach implements CoachPort {
   async ask(call: CoachCall, onText: (delta: string) => void): Promise<CoachRawReply> {
     this.briefs.push(call.brief);
     this.models.push(call.model);
+    if (call.engine) this.deadlines.push(call.deadlineMs);
     const scripted = this.scripted.shift();
+    if (call.engine && scripted && scripted.kind !== 'reply' && scripted.kind !== 'deadline') {
+      for (const q of scripted.questions ?? []) await call.engine.ask(q);
+    }
+    if (scripted?.kind === 'deadline' && call.engine) throw new CoachDeadlineError(call.deadlineMs ?? 90_000);
     // No reset time: the backend then assumes one from its own (possibly fake) clock.
     if (scripted?.kind === 'limit') throw new CoachLimitError('Your Claude usage limit has been reached.');
     if (scripted?.kind === 'unavailable') throw new CoachUnavailableError('Claude Code is not logged in on the desktop.');

@@ -1,6 +1,6 @@
 <script lang="ts">
   // Pairing (QR code, pairing code and reset), the away-from-home tunnel, Live Coaching, the Coach quality
-  // and, under Advanced, the model per Coach job.
+  // and, under Advanced, the model per Coach job, and Think deeper.
   import {
     COACH_JOBS,
     COACH_QUALITIES,
@@ -14,7 +14,7 @@
   import { pairingCode } from '../lib/pairing-code.ts';
 
   /** A card on this screen, where the outcome of a change made in it is shown. */
-  type Card = 'pairing' | 'tunnel' | 'live' | 'quality';
+  type Card = 'pairing' | 'tunnel' | 'live' | 'quality' | 'deeper';
 
   let settings = $state<Settings | null>(null);
   let pairing = $state<PairingInfo | null>(null);
@@ -49,6 +49,14 @@
       cost: 'Opus for Reviews, Why Questions and Lessons; Haiku for Hints and Live Coaching, which must stay quick. Uses your Claude limits fastest.',
     },
   };
+
+  /**
+   * Whether a Coach job that can ask the Engine runs on Haiku: there Think deeper makes answers fuller
+   * but added false claims in the off/on comparison (ADR 0010), so the card says so.
+   */
+  const haikuThinksDeeper = $derived(
+    settings !== null && (['why', 'review-moment'] as const).some((job) => settings?.models[job].toLowerCase().includes('haiku')),
+  );
 
   const MODEL_NAMES: Record<string, string> = {
     haiku: 'Fastest, latest Haiku',
@@ -226,6 +234,31 @@
         {/each}
       </details>
     </fieldset>
+
+    <section class="card" aria-label="Think deeper">
+      <h2>Think deeper</h2>
+      <label class="check">
+        <input
+          type="checkbox"
+          checked={settings.thinkDeeper}
+          onchange={(e) => update('deeper', { thinkDeeper: (e.currentTarget as HTMLInputElement).checked })}
+        />
+        Let the Coach check its explanations with the Engine
+      </label>
+      <p class="muted small">
+        For deeper study. In Why Questions and Reviews, the Coach can ask the Engine about other moves and where they lead before it
+        answers, up to three questions each time. Answers take longer and use more of your Claude limits than usual. Hints, Live
+        Coaching and Lessons stay as they are.
+      </p>
+      {#if haikuThinksDeeper}
+        <p class="small warning" data-testid="think-deeper-haiku">
+          Your Coach uses Haiku for Why Questions or Reviews.
+          On Haiku, Think deeper makes answers fuller but can add mistakes.
+          A stronger Coach quality, Balanced or Best, gets the most from it.
+        </p>
+      {/if}
+      {@render said('deeper')}
+    </section>
   {:else}
     <p class="muted">Loading…</p>
   {/if}
@@ -267,4 +300,5 @@
   .cost { display: block; }
   .advanced { margin-top: 0.8rem; }
   .advanced summary { cursor: pointer; font-weight: 600; }
+  .warning { margin: 0.5rem 0 0; padding: 0.4rem 0.6rem; border-left: 3px solid #b26a00; background: color-mix(in srgb, #b26a00 10%, transparent); }
 </style>

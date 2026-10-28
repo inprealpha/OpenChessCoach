@@ -345,6 +345,16 @@ async function askWhy(flags: Flags): Promise<Result> {
   return { ok: true, ...(m ? { move: m.san } : {}), reply };
 }
 
+// ---------- settings ----------
+
+async function settings(flags: Flags): Promise<Result> {
+  const t = target(flags);
+  const deeper = str(flags, 'think-deeper');
+  if (deeper !== undefined && deeper !== 'on' && deeper !== 'off') throw new CtlError('--think-deeper is on or off.', 'Pass --think-deeper on or --think-deeper off.');
+  const out = await withClient(t, (c) => (deeper ? c.request('settings.update', { thinkDeeper: deeper === 'on' }) : c.request('settings.get', {})));
+  return { ok: true, settings: out };
+}
+
 // ---------- db get ----------
 
 async function db(flags: Flags, positional: string[]): Promise<Result> {
@@ -551,11 +561,19 @@ Asks the Coach a Why Question about a move (or the position when --move is left 
 ${TARGET_HELP}`,
     run: askWhy,
   },
+  settings: {
+    help: `Usage: coachctl settings [--think-deeper on|off]
+
+Prints the settings, after turning Think deeper on or off when asked (ADR 0010).
+${TARGET_HELP}`,
+    run: settings,
+  },
   db: {
     help: `Usage: coachctl db get <table> [--where column=value]
 
 Reads a table back (verify mode only). Tables: meta, devices, settings, profile, coach_notes,
-grade_counts, games, graded_moves, reviews, lesson_progress, puzzle_attempts, coach_calls.
+grade_counts, games, graded_moves, reviews, lesson_progress, puzzle_attempts, coach_calls,
+coach_questions.
 ${TARGET_HELP}`,
     run: db,
   },

@@ -147,6 +147,19 @@ const MIGRATIONS: string[] = [
     PRIMARY KEY (source, source_id)
   );
   `,
+  // With Think deeper on, each question the Coach asked the Engine in a Coach call, and the
+  // Engine's answer or why it was refused (ADR 0010).
+  `
+  CREATE TABLE IF NOT EXISTS coach_questions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    call_id INTEGER NOT NULL,
+    question TEXT NOT NULL,
+    answer TEXT,
+    refused TEXT,
+    ms INTEGER NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS coach_questions_call ON coach_questions (call_id);
+  `,
 ];
 
 /** Tables `coachctl db get` may read. */
@@ -166,6 +179,7 @@ export const READABLE_TABLES = [
   'lesson_progress',
   'puzzle_attempts',
   'coach_calls',
+  'coach_questions',
 ] as const;
 
 export type Db = DatabaseSync;

@@ -228,7 +228,8 @@ function attachSocket(context: AppContext, ws: WebSocket, device: Device): void 
       device,
       signal: abort.signal,
       connected: () => ws.readyState === ws.OPEN,
-      delta: (text, part) => send({ v: PROTOCOL_VERSION, id, type: 'coach.delta', text, ...(part !== undefined ? { part } : {}) }),
+      delta: (text, part, status) =>
+        send({ v: PROTOCOL_VERSION, id, type: 'coach.delta', text, ...(part !== undefined ? { part } : {}), ...(status !== undefined ? { status } : {}) }),
       progress: (done, total) => send({ v: PROTOCOL_VERSION, id, type: 'progress', done, total }),
       setToken: (token) => tokens.set(ws, token),
     };

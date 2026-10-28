@@ -326,6 +326,19 @@ test.describe('Settings: Coach quality', () => {
     await expect.poll(() => savedModels(app)).toEqual(BEST);
   });
 
+  test('Think deeper warns that on Haiku it can add mistakes: shown for Thrifty, not for Balanced or Best', async ({ paired, app }) => {
+    await paired.goto(`${app.url}/#/settings`);
+    const quality = paired.getByRole('group', { name: 'Coach quality' });
+    const warning = paired.getByRole('region', { name: 'Think deeper' }).getByTestId('think-deeper-haiku');
+    // Balanced, the default, runs Why Questions and Reviews on Sonnet.
+    await expect(quality.getByRole('radio', { name: /^Balanced/ })).toBeChecked();
+    await expect(warning).toHaveCount(0);
+    await quality.getByRole('radio', { name: /^Thrifty/ }).check();
+    await expect(warning).toContainText('On Haiku, Think deeper makes answers fuller but can add mistakes.');
+    await quality.getByRole('radio', { name: /^Best/ }).check();
+    await expect(warning).toHaveCount(0);
+  });
+
   test('an install whose models match no preset shows Custom and keeps them', async ({ paired, app }) => {
     const mine = { 'review-moment': 'opus', why: 'sonnet', 'lesson-turn': 'haiku', hint: 'sonnet', live: 'claude-haiku-4-5' };
     app.app.db.prepare("INSERT INTO settings (key, value) VALUES ('models', ?)").run(JSON.stringify(mine));

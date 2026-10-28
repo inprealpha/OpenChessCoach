@@ -9,6 +9,7 @@ import type { KeyMoment, Review } from '@chess-coach/shared/protocol';
 import { type Clock, iso } from './clock.ts';
 import { all, one, transaction, type Db } from './db.ts';
 import { getGame } from './games.ts';
+import { THINK_DEEPER_DEADLINE_MS } from './coach/real.ts';
 import { addGradeCounts, removeGradeCounts } from './profile.ts';
 import type { CoachService } from './coach/service.ts';
 import type { EngineService } from './engine/service.ts';
@@ -23,7 +24,7 @@ export function getReview(db: Db, gameId: number): Review | null {
 }
 
 /** The scores a Review shows either side of the move at `ply`, so the Coach quotes them. */
-function reviewScores(graded: readonly GradedMove[], ply: number): Pick<CoachAsk, 'positionBefore' | 'positionAfter'> {
+export function reviewScores(graded: readonly GradedMove[], ply: number): Pick<CoachAsk, 'positionBefore' | 'positionAfter'> {
   const before = scoreAfterPly(graded, ply - 1);
   const after = scoreAfterPly(graded, ply);
   return { ...(before ? { positionBefore: before } : {}), ...(after ? { positionAfter: after } : {}) };
@@ -40,6 +41,13 @@ export function withReviewScores(db: Db, gameId: unknown, ask: CoachAsk): CoachA
   const index = graded.findIndex((m) => m.fenBefore === ask.fen && m.uci === ask.move?.uci);
   return index < 0 ? ask : { ...ask, ...reviewScores(graded, index + 1) };
 }
+
+/**
+ * How long a Review's key moments may spend asking the Engine, with Think deeper on (ADR 0010). Once
+ * they have taken this long, the remaining moments answer from the brief alone, so a Review never
+ * waits on the Engine tool for every moment of a long game.
+ */
+export const REVIEW_ENGINE_BUDGET_MS = 180_000;
 
 export interface ReviewDeps {
   db: Db;
@@ -155,10 +163,12 @@ async function makeReview(
   // The sample game isn't the Player's: its Review never feeds the Player Profile.
   const counts = game.source !== 'sample';
   const out: KeyMoment[] = [];
+  const started = clock.now().getTime();
   for (const [index, m] of moments.entries()) {
     // What the opponent threatened before the move: the brief keeps it only when the Engine's best
     // reply to the move is that threat, so the Coach can say the move left it on.
     const threat = await engine.threat(m.fenBefore);
+    const left = REVIEW_ENGINE_BUDGET_MS - (clock.now().getTime() - started);
     const reply = await coach.ask(
       {
         job: 'review-moment',
@@ -175,7 +185,9 @@ async function makeReview(
         allowNote: counts && index === moments.length - 1,
       },
       (text) => delta(text, index),
-      signal,
+      // Each moment's questions get the time the Review has left, at most the Coach's own deadline,
+      // and a moment that runs out answers again from the brief alone rather than failing.
+      left > 0 ? { ...(signal ? { signal } : {}), engine, deadlineMs: Math.min(THINK_DEEPER_DEADLINE_MS, left), retryWithoutEngine: true } : signal ? { signal } : {},
     );
     out.push({
       ply: m.ply,

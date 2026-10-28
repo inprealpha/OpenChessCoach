@@ -57,3 +57,33 @@ $C ask-why --fen "r1bqkbnr/pppp1ppp/8/4p3/2BnP3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 
 - `$C coach script --limit` makes the next call fail as if the Claude limit were used up.
 - Changing Coach code needs the real-Coach check from the desktop as well: see
   `.claude/skills/real-coach-check/SKILL.md`.
+
+## Think deeper
+
+Settings → `Think deeper` → `Let the Coach check its explanations with the Engine` (off by
+default; the note under it says answers take longer and use more of the Player's Claude limits).
+With it on, a Why Question's Coach call gets one tool: questions to the desktop's Engine about the
+position after a line of moves from the brief's position, and optionally one move there, at most 3
+per answer (ADR 0010). Hints, Live Coaching and Lesson turns never get it.
+
+```bash
+$C settings --think-deeper on                 # or in the browser: Settings, tick Think deeper
+$C ask-why --fen "rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2" --move Nf3
+$C db get coach_questions                      # each question, the Engine's answer or why it was refused
+```
+
+- The fake Coach asks one question, what the Engine plays after its best move, and adds "I checked
+  with the Engine: after exd5, its best move is …" with that move in `moves`: the guard keeps it
+  although the brief doesn't have it. The Coach panel adds "Checked with the Engine: 1 question"
+  (`board.spec.ts`).
+- `coach_questions` has one row per question, with its `call_id` in `coach_calls`. A question past
+  the third is refused ("Answer now from the brief…"), and the Coach still answers; a question with
+  an illegal move is refused with the reason and doesn't count (`think-deeper.test.ts`).
+- A move the Coach made up, or one it only played in its own question's line, is still stripped. A
+  client can neither turn the tool on for one request nor send Engine answers (`think-deeper.test.ts`).
+
+- While the Coach asks the Engine, the Coach panel shows "The Coach is checking with the Engine
+  (question 1)…" (a `coach.delta` with `status`), until the answer's text streams (`think-deeper.test.ts`).
+- With Why Questions or Reviews on Haiku (the Thrifty preset, or a custom model), the Think deeper
+  card warns that on Haiku it makes answers fuller but can add mistakes; Balanced and Best show no
+  warning (`first-run.spec.ts`).

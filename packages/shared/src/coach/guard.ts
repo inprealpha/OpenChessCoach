@@ -1,7 +1,9 @@
 // The Coach move guard (ADR 0002): before a Coach reply reaches any client, every move and
-// arrow is checked against the Engine's candidates in that call's brief. Anything else is stripped.
-import { playSan, playUci } from '../chess.ts';
+// arrow is checked against the Engine's candidates in that call's brief, and the answers the
+// desktop's Engine gave the Coach's questions in that call (ADR 0010). Anything else is stripped.
+import { playSan, playUci, positionKey } from '../chess.ts';
 import { threatFen, type Brief } from './brief.ts';
+import type { EngineMove } from './engine-tool.ts';
 import type { Arrow, CoachRawReply } from './types.ts';
 
 const SQUARE = /^[a-h][1-8]$/;
@@ -53,9 +55,35 @@ export function askedLineMoves(brief: Brief): Set<string> {
   return out;
 }
 
-export function guardReply(brief: Brief, raw: CoachRawReply): GuardResult {
+/**
+ * The moves the Engine's answers to the Coach's questions gave it, split as the brief's are: those
+ * played on the board the Player sees (the brief's position, or after the move) may be drawn, and
+ * the rest, deeper in a line, only named. Only the backend's own tool fills `answered`, never a
+ * client (ADR 0007), and a line the Coach asked about is its question, not an answer: its moves
+ * aren't in it.
+ */
+export function answeredMoves(brief: Brief, answered: readonly EngineMove[]): { drawn: Set<string>; named: Set<string> } {
+  const shown = new Set([positionKey(brief.fen)]);
+  const afterMove = brief.move && playUci(brief.fen, brief.move.uci);
+  if (afterMove) shown.add(positionKey(afterMove.fenAfter));
+  const drawn = new Set<string>();
+  const named = new Set<string>();
+  for (const { fen, uci } of answered) {
+    const played = playUci(fen, uci);
+    if (!played) continue;
+    (shown.has(positionKey(fen)) ? drawn : named).add(played.uci);
+  }
+  return { drawn, named };
+}
+
+export function guardReply(brief: Brief, raw: CoachRawReply, answered: readonly EngineMove[] = []): GuardResult {
   const allowed = brief.hideMoves ? new Set<string>() : allowedMoves(brief);
   const named = brief.hideMoves ? new Set<string>() : askedLineMoves(brief);
+  if (!brief.hideMoves) {
+    const fromAnswers = answeredMoves(brief, answered);
+    for (const uci of fromAnswers.drawn) allowed.add(uci);
+    for (const uci of fromAnswers.named) named.add(uci);
+  }
   const stripped: string[] = [];
 
   const moves: string[] = [];

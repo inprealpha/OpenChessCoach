@@ -1,5 +1,6 @@
 // An Engine that can't start fails loudly instead of leaving its callers waiting.
 import { describe, expect, it } from 'vitest';
+import { EngineCancelled } from '../src/engine.ts';
 import { EngineStartError, UciEngine, type UciTransport } from '../src/uci-engine.ts';
 
 function transport(answer: boolean): UciTransport & { fail(message: string): void } {
@@ -71,5 +72,48 @@ describe('playing a move', () => {
     await engine.bestMove(AFTER_E4, { skill: 20, depth: 4 });
     await engine.bestMove(START, { skill: 20, depth: 4, history: { startFen: START, moves: [] } });
     expect(positions).toEqual([`position fen ${AFTER_E4}`, `position fen ${START}`]);
+  });
+});
+
+describe('cancelling a search', () => {
+  /** An Engine that answers a search only when told to, and records every command it is sent. */
+  function manual(): { engine: UciEngine; sent: string[]; finish: () => void } {
+    const sent: string[] = [];
+    let onLine: (line: string) => void = () => undefined;
+    const engine = new UciEngine(
+      {
+        send: (cmd) => {
+          sent.push(cmd);
+          if (cmd === 'uci') queueMicrotask(() => onLine('uciok'));
+          if (cmd === 'isready') queueMicrotask(() => onLine('readyok'));
+          if (cmd === 'stop') queueMicrotask(() => onLine('bestmove e2e4'));
+        },
+        listen: (handler) => (onLine = handler),
+        close: () => undefined,
+      },
+      { threads: 1, deterministic: true },
+    );
+    return { engine, sent, finish: () => onLine('bestmove e2e4') };
+  }
+  const START = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+  const AFTER_E4 = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1';
+
+  it('drops a search that hasn’t started, and stops the one that has, so nobody waits on them', async () => {
+    const { engine, sent, finish } = manual();
+    await engine.whenReady();
+    const stop = new AbortController();
+    const running = engine.analyse(START, { multiPv: 1, depth: 10, signal: stop.signal });
+    const queued = engine.analyse(AFTER_E4, { multiPv: 1, depth: 10, signal: stop.signal });
+    const other = engine.analyse(START, { multiPv: 1, depth: 9 });
+    await new Promise((r) => setTimeout(r, 0));
+    stop.abort();
+    await expect(running).rejects.toBeInstanceOf(EngineCancelled);
+    await expect(queued).rejects.toBeInstanceOf(EngineCancelled);
+    expect(sent).toContain('stop');
+    // The queued search never reached the Engine; the next one, with no signal, still runs.
+    expect(sent).not.toContain(`position fen ${AFTER_E4}`);
+    await new Promise((r) => setTimeout(r, 0));
+    finish();
+    await expect(other).resolves.toMatchObject({ fen: START });
   });
 });

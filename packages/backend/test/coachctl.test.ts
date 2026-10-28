@@ -57,10 +57,13 @@ describe('coachctl', () => {
     expect(games.json).toMatchObject({ ok: true, count: 1 });
     const devices = await ctl('db', 'get', 'devices', '--where', 'name=coachctl', ...target);
     expect(devices.json.count).toBe(1);
+    expect((await ctl('settings', ...target)).json).toMatchObject({ ok: true, settings: { thinkDeeper: false } });
+    expect((await ctl('settings', '--think-deeper', 'on', ...target)).json).toMatchObject({ ok: true, settings: { thinkDeeper: true } });
+    expect((await ctl('settings', '--think-deeper', 'maybe', ...target)).json).toMatchObject({ ok: false, fix: 'Pass --think-deeper on or --think-deeper off.' });
   });
 
   it('every command has --help, and errors name the fix', async () => {
-    for (const cmd of ['doctor', 'pair', 'play', 'import-pgn', 'review', 'ask-why', 'db', 'screenshot', 'snapshot', 'coach', 'clock', 'cleanup']) {
+    for (const cmd of ['doctor', 'pair', 'play', 'import-pgn', 'review', 'ask-why', 'settings', 'db', 'screenshot', 'snapshot', 'coach', 'clock', 'cleanup']) {
       const out = await new Promise<string>((resolve) => execFile(process.execPath, [MAIN, cmd, '--help'], (_e, stdout) => resolve(stdout)));
       expect(out, cmd).toMatch(/^Usage: coachctl /);
     }

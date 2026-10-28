@@ -126,6 +126,11 @@ export interface Settings {
   quality: CoachQuality | 'custom';
   liveCoachingDefault: boolean;
   tunnelEnabled: boolean;
+  /**
+   * Think deeper: in Why Questions and Reviews the Coach may ask the desktop's Engine about other
+   * positions and moves while it answers (ADR 0010). Slower and costlier, so off by default.
+   */
+  thinkDeeper: boolean;
 }
 
 /**
@@ -315,7 +320,8 @@ export type ServerMessage =
   | { v: number; id: string; type: 'result'; ok: true; data: unknown }
   | { v: number; id: string; type: 'error'; ok: false; code: ErrorCode; message: string }
   /** A chunk of Coach text for request `id`. `part` separates the moments of a Review. */
-  | { v: number; id: string; type: 'coach.delta'; text: string; part?: number }
+  /** `status`, with Think deeper on: what the Coach is doing while no text streams, such as asking the Engine (ADR 0010). */
+  | { v: number; id: string; type: 'coach.delta'; text: string; part?: number; status?: string }
   /**
    * How far the desktop has got with request `id`, for example grading a game for a Review or
    * fetching games by username. A total of 0 means the total isn't known yet.

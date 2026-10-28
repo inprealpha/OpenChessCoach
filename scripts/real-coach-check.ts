@@ -3,9 +3,10 @@
 // the real Coach in place of the fake one, makes one call of every Coach job through the protocol,
 // and checks only structure, so the verdict doesn't flip when the Coach words something differently:
 //   - every move a reply shows is legal and came from the Engine (the move guard, ADR 0002), the
-//     briefed threat included, where the guard plays it;
-//   - every piece move named in the text appears in the brief, so it came from the Engine,
-//     the game or the bundled Lesson notes;
+//     briefed threat included, where the guard plays it, and with Think deeper on the Engine's
+//     answers to the Coach's questions (ADR 0010);
+//   - every piece move named in the text appears in the brief or those answers, so it came from
+//     the Engine, the game or the bundled Lesson notes;
 //   - each reply stays within its length budget (with 25% slack; over the budget alone is a warning);
 //   - replies avoid the terms CONTEXT.md says to avoid (a stray one is a warning: the wording is
 //     the model's, and the reply has already streamed to the Player), except the ones that
@@ -21,12 +22,13 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { playSan, playUci, sansIn } from '@chess-coach/shared/chess';
-import { allowedMoves, askedLineMoves, guardReply } from '@chess-coach/shared/coach/guard';
+import { allowedMoves, answeredMoves, askedLineMoves, guardReply } from '@chess-coach/shared/coach/guard';
+import { answerMoves, type EngineAnswer, type EngineQuestion } from '@chess-coach/shared/coach/engine-tool';
 import { MAX_WORDS, threatFen, type Brief } from '@chess-coach/shared/coach/brief';
 import type { CoachRequest, CoachRawReply, CoachReply } from '@chess-coach/shared/coach/types';
 import type { CoachJob } from '@chess-coach/shared/protocol';
 import { CoachClient } from '../packages/backend/src/client.ts';
-import type { CoachCall, CoachPort } from '../packages/backend/src/coach/port.ts';
+import type { CoachCall, CoachEngine, CoachPort } from '../packages/backend/src/coach/port.ts';
 import { avoidedTerms } from './glossary-lint.ts';
 
 export const STATUS_CONTEXT = 'real Coach';
@@ -45,6 +47,8 @@ export interface CoachCallRecord {
   job: CoachJob;
   brief: Brief;
   raw: CoachRawReply;
+  /** With Think deeper on, the Engine's answers to the Coach's questions in the call. */
+  answers?: EngineAnswer[];
 }
 
 export interface CallVerdict {
@@ -60,10 +64,13 @@ export function checkCall(record: CoachCallRecord, reply: CoachReply, terms: rea
   const problems: string[] = [];
   const warnings: string[] = [];
   const { brief } = record;
+  const answers = record.answers ?? [];
+  const fromAnswers = answeredMoves(brief, answers.flatMap(answerMoves));
 
-  const allowed = brief.hideMoves ? new Set<string>() : allowedMoves(brief);
+  const allowed = brief.hideMoves ? new Set<string>() : new Set([...allowedMoves(brief), ...fromAnswers.drawn]);
   // An asked move's line may be named, never drawn: the guard checks each move where the line plays it.
-  const named = brief.hideMoves ? new Set<string>() : askedLineMoves(brief);
+  // So may a move deeper in a line in the Engine's answers.
+  const named = brief.hideMoves ? new Set<string>() : new Set([...askedLineMoves(brief), ...fromAnswers.named]);
   for (const uci of [...reply.moves.filter((m) => !named.has(m)), ...reply.arrows.map((a) => `${a.from}${a.to}`)]) {
     // Legal in the position, after the move, or, for the briefed threat, where the guard plays it.
     const threatFrom = uci === brief.threat?.uci ? threatFen(brief) : undefined;
@@ -74,10 +81,10 @@ export function checkCall(record: CoachCallRecord, reply: CoachReply, terms: rea
     if (!legal) problems.push(`the reply shows ${uci}, which is not legal here`);
     else if (!allowed.has(uci) && ![...allowed].some((a) => a.slice(0, 4) === uci)) problems.push(`the reply shows ${uci}, which the Engine never suggested`);
   }
-  const stripped = guardReply(brief, record.raw).stripped;
+  const stripped = guardReply(brief, record.raw, answers.flatMap(answerMoves)).stripped;
   if (stripped.length) warnings.push(`the move guard stripped what the Engine never suggested: ${stripped.join('; ')}`);
 
-  const briefText = JSON.stringify(brief);
+  const briefText = JSON.stringify([brief, ...answers]);
   for (const san of new Set(sansIn(reply.text))) {
     if (brief.hideMoves) problems.push(`the Hint names the move ${san}`);
     else if (!briefText.includes(san)) problems.push(`the text names ${san}, which is not in the brief`);
@@ -115,10 +122,28 @@ export class RecordingCoach implements CoachPort {
   }
 
   async ask(call: CoachCall, onText: (delta: string) => void): Promise<CoachRawReply> {
-    const raw = await this.inner.ask({ ...call, model: this.model }, onText);
-    this.calls.push({ job: call.job, brief: call.brief, raw });
+    const answers: EngineAnswer[] = [];
+    const engine = call.engine && recordAnswers(call.engine, answers);
+    const raw = await this.inner.ask({ ...call, model: this.model, ...(engine ? { engine } : {}) }, onText);
+    this.calls.push({ job: call.job, brief: call.brief, raw, ...(call.engine ? { answers } : {}) });
     return raw;
   }
+}
+
+/** The Engine tool, keeping each answer it gives. */
+function recordAnswers(engine: CoachEngine, answers: EngineAnswer[]): CoachEngine {
+  return {
+    maxQuestions: engine.maxQuestions,
+    maxCalls: engine.maxCalls,
+    get exhausted() {
+      return engine.exhausted;
+    },
+    async ask(question: EngineQuestion) {
+      const out = await engine.ask(question);
+      if (!out.refused) answers.push(JSON.parse(out.text) as EngineAnswer);
+      return out;
+    },
+  };
 }
 
 const ITALIAN_BEFORE_BC4 = 'r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3';
@@ -188,8 +213,23 @@ async function driveEveryJob(client: CoachClient, root: URL): Promise<{ job: Coa
   if (!game) throw new Error('The seed has no game to review.');
   const review = await client.request('review.start', { gameId: game.id });
   for (const m of review.moments) {
-    out.push({ job: 'review-moment', reply: { text: m.explanation, moves: [], arrows: [], highlights: [], note: null, stripped: 0, model: '' } });
+    out.push({ job: 'review-moment', reply: { text: m.explanation, moves: [], arrows: [], highlights: [], note: null, stripped: 0, model: '', engineQuestions: 0 } });
   }
+
+  // Think deeper (ADR 0010): a Why Question the brief alone doesn't settle, so the Coach may ask the Engine.
+  await client.request('settings.update', { thinkDeeper: true });
+  out.push({
+    job: 'why',
+    reply: await client.request('coach.ask', {
+      job: 'why',
+      fen: AFTER_E4_D5,
+      recentMoves: ['e4', 'd5'],
+      playerSide: 'white',
+      moveUci: nf3,
+      question: 'After dxe4, can I win the pawn back?',
+    }),
+  });
+  await client.request('settings.update', { thinkDeeper: false });
   return out;
 }
 

@@ -5,12 +5,75 @@
  "track": "openings",
  "level": "intermediate",
  "side": "black",
- "eco": "C11",
- "puzzleTags": [],
- "goal": "As Black against 1.e4, you can play the French Defence and know the plan against White's pawn chain: attack its base with c5 and f6.",
+ "eco": "C06",
+ "puzzleTags": [
+  "French_Defense"
+ ],
+ "goal": "As Black against 1.e4, you can play the French Defence and know the plan against White's pawn chain: attack its base with c5 and its front with f6.",
  "priorKnowledge": [
   "pawn-structure"
  ],
- "intro": "",
- "parts": []
+ "intro": "In the French Defence, 1...e6 and 2...d5, Black lets White build a big centre and then attacks it. White often pushes a pawn to e5, making a chain of pawns on d4 and e5 that takes space on the kingside. Black's plan is the same in almost every line: hit the base of the chain with ...c5, then its front with ...f6, until White's centre gives way and your pieces get room. The price is the light-squared bishop on c8, which stays shut in behind the e6 pawn for a while.",
+ "parts": [
+  {
+   "title": "The Tarrasch Variation",
+   "fen": "start",
+   "side": "black",
+   "keyIdea": "Against a pawn chain, attack its base first (...c5), then its front (...f6), and bring the pieces to the squares that open up.",
+   "url": "https://github.com/lichess-org/chess-openings",
+   "line": "e4 e6 d4 d5 Nd2 Nf6 e5 Nfd7 Bd3 c5 c3 Nc6 Ne2 cxd4 cxd4 f6 exf6 Nxf6 Nf3 Bd6",
+   "notes": [
+    {
+     "ply": 1,
+     "san": "e6",
+     "text": "1...e6 gets ready for ...d5, with the e6 pawn ready to take back if White ever captures on d5. Your centre stays solid. The cost is that the c8-bishop is shut in behind the e6 pawn for now."
+    },
+    {
+     "ply": 3,
+     "san": "d5",
+     "text": "2...d5 challenges the e4 pawn at once. White must defend it (3.Nc3 or 3.Nd2), push past with 3.e5 (the Advance Variation), or trade with 3.exd5."
+    },
+    {
+     "ply": 5,
+     "san": "Nf6",
+     "text": "3.Nd2 is the Tarrasch Variation. 3...Nf6 attacks e4 again, and White usually answers 4.e5, gaining space with a threat to the knight. That gives you the pawn chain this whole opening is about. 3...c5 at once is the other main move."
+    },
+    {
+     "ply": 7,
+     "san": "Nfd7",
+     "text": "4...Nfd7: the knight steps back, but on d7 it supports both pawn breaks, ...c5 and ...f6. White's pawns on d4 and e5 now form a chain: d4 is its base, e5 its front. Your plan is to attack both."
+    },
+    {
+     "ply": 9,
+     "san": "c5",
+     "text": "5...c5 hits the base of the chain. If the d4 pawn is traded off or falls, the e5 pawn loses its support. White props d4 up with 6.c3."
+    },
+    {
+     "ply": 11,
+     "san": "Nc6",
+     "text": "6...Nc6 adds a second attacker on d4: the c5 pawn and the knight both hit it. White has to keep defending d4, with the c3 pawn now and with knights later, which keeps White busy instead of attacking you."
+    },
+    {
+     "ply": 13,
+     "san": "cxd4",
+     "text": "White's 7.Ne2 brings another defender towards d4. 7...cxd4 8.cxd4 opens the c-file, and now no pawn can protect d4; White must guard it with pieces."
+    },
+    {
+     "ply": 15,
+     "san": "f6",
+     "text": "8...f6 is the second break: now hit the front of the chain. The e5 pawn is attacked by the f6 pawn and both knights, and defended only by the d4 pawn. If White trades with 9.exf6, your pieces get free squares on f6 and d6; if not, ...fxe5 breaks up White's centre."
+    },
+    {
+     "ply": 17,
+     "san": "Nxf6",
+     "text": "9...Nxf6 takes back with the knight, which returns to its best square and covers e4 and d5. The chain is gone. Your e6 pawn can no longer be protected by another pawn, so keep an eye on it, but your pieces have room, and the f-file has no Black pawn on it, ready for a rook once you castle."
+    },
+    {
+     "ply": 19,
+     "san": "Bd6",
+     "text": "10...Bd6 develops the bishop on a strong diagonal towards h2 and helps control e5, so White's pieces cannot settle there. Next you castle, then use moves like ...Bd7, ...Qc7 or ...Qb6, and later ...e5 to free your position."
+    }
+   ]
+  }
+ ]
 }

@@ -11,7 +11,7 @@ import { INITIAL_FEN, playSan, playUci, positionKey } from '@chess-coach/shared/
 import type { PlayerLevel } from '@chess-coach/shared/protocol';
 import { readSources } from './sources.ts';
 
-const MAX_PLIES = 18;
+const MAX_PLIES = 24;
 const files = process.argv.slice(2);
 if (!files.length) {
   console.error('Usage: node data-prep/lesson-stats.ts <dump.pgn | dump.pgn.zst> [more dumps...]');

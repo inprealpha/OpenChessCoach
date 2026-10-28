@@ -6,12 +6,66 @@
  "level": "beginner",
  "side": "black",
  "eco": "C20",
- "puzzleTags": [],
+ "puzzleTags": [
+  "Kings_Pawn_Game_Wayward_Queen_Attack",
+  "Kings_Pawn_Game_Napoleon_Attack"
+ ],
  "goal": "As Black, you can stop Scholar's Mate and other early queen attacks, and gain time by developing while you attack the queen.",
  "priorKnowledge": [
   "opening-principles",
   "threats"
  ],
- "intro": "",
- "parts": []
+ "intro": "Some players go for a quick win with an early queen move such as 2.Qh5: the queen and a bishop on c4 both aim at f7, and if nothing stops them, Qxf7 is checkmate. That is Scholar's Mate. The defence is simple once you know it: keep f7 covered, then bring out your pieces with moves that attack the queen, so White keeps losing time moving it.",
+ "parts": [
+  {
+   "title": "Meeting 2.Qh5",
+   "fen": "start",
+   "side": "black",
+   "keyIdea": "Cover f7 first, then develop with moves that attack the queen, so each queen move costs White time.",
+   "url": "https://github.com/lichess-org/chess-openings",
+   "line": "e4 e5 Qh5 Nc6 Bc4 g6 Qf3 Nf6 Ne2 Bg7 d3 d6 Nbc3 Bg4 Qg3 O-O",
+   "notes": [
+    {
+     "ply": 1,
+     "san": "e5",
+     "text": "Meet 1.e4 with 1...e5: you claim your share of the centre, and your queen and the bishop on f8 can now come out."
+    },
+    {
+     "ply": 3,
+     "san": "Nc6",
+     "text": "2.Qh5 attacks your e5 pawn and also looks at f7. Defend e5 with 2...Nc6, which brings a knight out at the same time. Do not chase the queen with 2...g6 yet: 3.Qxe5+ wins the pawn with check and then takes your rook on h8."
+    },
+    {
+     "ply": 5,
+     "san": "g6",
+     "text": "3.Bc4 lines up queen and bishop against f7, which only your king defends, so White threatens Qxf7 checkmate. 3...g6 blocks the queen's path to f7 and attacks the queen. Watch out: the natural 3...Nf6?? loses at once to 4.Qxf7#."
+    },
+    {
+     "ply": 7,
+     "san": "Nf6",
+     "text": "4.Qf3 threatens mate on f7 again, this time along the f-file. 4...Nf6 blocks that file and develops your knight to its best square. Attacking the queen with 4...Nd4? would forget f7: 5.Qxf7 is mate."
+    },
+    {
+     "ply": 9,
+     "san": "Bg7",
+     "text": "f7 is safe, so now develop. 5...Bg7 puts the bishop on the square your g6 pawn made for it, and with the knight and bishop gone from g8 and f8, you are ready to castle."
+    },
+    {
+     "ply": 11,
+     "san": "d6",
+     "text": "6...d6 makes e5 stronger and opens a path for your bishop on c8. From there it can come to g4 and attack the queen on f3. Castling at once is also good."
+    },
+    {
+     "ply": 13,
+     "san": "Bg4",
+     "text": "7...Bg4 brings out your last bishop with an attack on the queen. The bishop is safe, because your knight on f6 guards it, so White has to move the queen yet again."
+    },
+    {
+     "ply": 15,
+     "san": "O-O",
+     "text": "After 8.Qg3, castle: your king goes to g8 behind its pawns, and your rook comes to f8. You have four pieces out and a safe king, while White's queen has moved three times. That is what an early queen attack usually costs."
+    }
+   ]
+  }
+ ]
 }

@@ -13,7 +13,376 @@
  "puzzleTags": [],
  "puzzleThemes": [],
  "intro": {
-  "text": ""
+  "text": "An opening trap is a position where a natural-looking move loses at once. Most traps catch a player who grabs material, or develops a piece, without asking what the opponent can do next. In this Lesson you spring two famous traps and step around two others. The habit to take away: before each move, ask what your opponent's last move threatens, and what your own move leaves undefended."
  },
- "parts": []
+ "parts": [
+  {
+   "title": "Legal's mate: a pin that does not hold",
+   "fen": "rn1qkbnr/ppp2pp1/3p3p/4p3/2B1P1b1/2N2N2/PPPP1PPP/R1BQK2R w KQkq - 0 5",
+   "side": "white",
+   "keyIdea": "A piece pinned to the queen may still move when losing the queen leads to mate, or when the pinning piece is left hanging.",
+   "text": "From a game played on Lichess, in the Philidor Defence. You are White. Black's bishop on g4 pins your f3 knight to your queen, and Black has just spent a move on ...h6 instead of developing. Is your knight really stuck?",
+   "credit": {
+    "source": "Lichess games database, game 8h05em0y",
+    "url": "https://lichess.org/8h05em0y#8",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "f3e5",
+    "g4d1",
+    "c4f7",
+    "e8e7",
+    "c3d5"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "rn1qkbnr/ppp2pp1/3p3p/4p3/2B1P1b1/2N2N2/PPPP1PPP/R1BQK2R w KQkq - 0 5",
+     "decision": true,
+     "main": "f3e5",
+     "mainSan": "Nxe5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "5.Nxe5! takes a pawn and leaves your queen to be taken. If Black recaptures with 5...dxe5, your queen now sees the bishop on g4, and 6.Qxg4 leaves you a pawn up. If Black grabs your queen, a mate follows."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "rn1qkbnr/ppp2pp1/3p3p/4N3/2B1P1b1/2N5/PPPP1PPP/R1BQK2R b KQkq - 0 5",
+     "decision": false,
+     "main": "g4d1",
+     "mainSan": "Bxd1",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "rn1qkbnr/ppp2pp1/3p3p/4N3/2B1P3/2N5/PPPP1PPP/R1BbK2R w KQkq - 0 6",
+     "decision": true,
+     "main": "c4f7",
+     "mainSan": "Bxf7+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Black took the queen with 5...Bxd1, the losing choice. 6.Bxf7+ leaves the king one legal move, to e7: the knight on e5 protects your bishop, and it also covers d7."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "rn1qkbnr/ppp2Bp1/3p3p/4N3/4P3/2N5/PPPP1PPP/R1BbK2R b KQkq - 0 6",
+     "decision": false,
+     "main": "e8e7",
+     "mainSan": "Ke7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "rn1q1bnr/ppp1kBp1/3p3p/4N3/4P3/2N5/PPPP1PPP/R1BbK2R w KQ - 1 7",
+     "decision": true,
+     "main": "c3d5",
+     "mainSan": "Nd5#",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "7.Nd5# is Legal's mate. The d5 knight gives check and covers f6, the bishop on f7 covers e6 and e8, the e5 knight covers d7 and guards the bishop, and Black's own queen, pawn and bishop block d8, d6 and f8. Three minor pieces beat a whole extra queen."
+     }
+    }
+   ]
+  },
+  {
+   "title": "Legal's mate in reverse, on f2",
+   "fen": "r1bqk2r/ppp2ppp/2p2n2/2b5/4P3/3P4/PPP2PPP/RNBQKB1R w KQkq - 1 6",
+   "side": "white",
+   "keyIdea": "Before you pin a piece to the queen, check whether your opponent could ignore the pin and mate you on f2.",
+   "text": "From a game played on Lichess, in the Stafford Gambit. You are White and a pawn up, but Black's bishop on c5 already aims at f2, the weak square next to your king. In the game White pinned the f6 knight with 6.Bg5 and was mated three moves later. Find a safer developing move.",
+   "credit": {
+    "source": "Lichess games database, game NBYvGOmt",
+    "url": "https://lichess.org/NBYvGOmt#10",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "f1e2",
+    "f6g4",
+    "e2g4",
+    "d8h4",
+    "g2g3"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "r1bqk2r/ppp2ppp/2p2n2/2b5/4P3/3P4/PPP2PPP/RNBQKB1R w KQkq - 1 6",
+     "decision": true,
+     "main": "f1e2",
+     "mainSan": "Be2",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "6.Be2 develops, gets you ready to castle and covers g4, a square Black's pieces want for an attack on f2. The tempting 6.Bg5?? loses to Legal's mate turned around: 6...Nxe4! 7.Bxd8 Bxf2+ 8.Ke2 Bg4#, and other replies to 6...Nxe4 lose a lot of material."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "r1bqk2r/ppp2ppp/2p2n2/2b5/4P3/3P4/PPP1BPPP/RNBQK2R b KQkq - 2 6",
+     "decision": false,
+     "main": "f6g4",
+     "mainSan": "Ng4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "r1bqk2r/ppp2ppp/2p5/2b5/4P1n1/3P4/PPP1BPPP/RNBQK2R w KQkq - 3 7",
+     "decision": true,
+     "main": "e2g4",
+     "mainSan": "Bxg4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Black's knight jumped to g4 anyway, aiming at f2 together with the bishop. 7.Bxg4 removes it. Black wins the piece back with 7...Qh4, which attacks your bishop and f2 at the same time."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "r1bqk2r/ppp2ppp/2p5/2b5/4P1B1/3P4/PPP2PPP/RNBQK2R b KQkq - 0 7",
+     "decision": false,
+     "main": "d8h4",
+     "mainSan": "Qh4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "r1b1k2r/ppp2ppp/2p5/2b5/4P1Bq/3P4/PPP2PPP/RNBQK2R w KQkq - 1 8",
+     "decision": true,
+     "main": "g2g3",
+     "mainSan": "g3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "8.g3 attacks the queen and blocks its path to f2. After 8...Qxg4 9.Qxg4 Bxg4 the queens come off, f2 is safe, and you are still a pawn up."
+     }
+    }
+   ]
+  },
+  {
+   "title": "The Englund trap",
+   "fen": "r1b1kbnr/pppp1ppp/2n5/4P3/8/2B2N2/PqP1PPPP/RN1QKB1R b KQkq - 1 6",
+   "side": "black",
+   "keyIdea": "A piece standing between an enemy bishop and its own king is pinned: it cannot capture, so the piece it attacks is safe.",
+   "text": "From a game played on Lichess, in the Englund Gambit: 1.d4 e5 2.dxe5 Nc6 3.Nf3 Qe7 4.Bf4 Qb4+ 5.Bd2 Qxb2. You are Black. Your queen's raid on b2 was risky, and after 6.Nc3 White would be better. But White has played 6.Bc3, attacking your queen. Before you retreat, look at White's king.",
+   "credit": {
+    "source": "Lichess games database, game 8u1sptl1",
+    "url": "https://lichess.org/8u1sptl1#11",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "f8b4",
+    "d1d2",
+    "b4c3",
+    "d2c3",
+    "b2c1"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "r1b1kbnr/pppp1ppp/2n5/4P3/8/2B2N2/PqP1PPPP/RN1QKB1R b KQkq - 1 6",
+     "decision": true,
+     "main": "f8b4",
+     "mainSan": "Bb4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "6...Bb4! pins the bishop on c3 to White's king, so it cannot take your queen. Now your queen attacks both the c3 bishop and the a1 rook, and White loses material whatever happens next."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "r1b1k1nr/pppp1ppp/2n5/4P3/1b6/2B2N2/PqP1PPPP/RN1QKB1R w KQkq - 2 7",
+     "decision": false,
+     "main": "d1d2",
+     "mainSan": "Qd2",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "r1b1k1nr/pppp1ppp/2n5/4P3/1b6/2B2N2/PqPQPPPP/RN2KB1R b KQkq - 3 7",
+     "decision": true,
+     "main": "b4c3",
+     "mainSan": "Bxc3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "White defended the bishop with 7.Qd2. Take it anyway with 7...Bxc3. If White recaptures with the knight, 8...Qxa1+ wins the rook with check."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "r1b1k1nr/pppp1ppp/2n5/4P3/8/2b2N2/PqPQPPPP/RN2KB1R w KQkq - 0 8",
+     "decision": false,
+     "main": "d2c3",
+     "mainSan": "Qxc3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "r1b1k1nr/pppp1ppp/2n5/4P3/8/2Q2N2/PqP1PPPP/RN2KB1R b KQkq - 0 8",
+     "decision": true,
+     "main": "b2c1",
+     "mainSan": "Qc1#",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "White recaptured with 8.Qxc3, and 8...Qc1# is mate. The queen checks along the first rank; your queen also covers d1 and d2, White's own pawns and bishop block e2, f2 and f1, and the c2 pawn stops White's queen from coming back to c1."
+     }
+    }
+   ]
+  },
+  {
+   "title": "Mind the pin on the e-file",
+   "fen": "r1bqkbnr/pp1npppp/2p5/8/3PN3/8/PPP1QPPP/R1B1KBNR b KQkq - 2 5",
+   "side": "black",
+   "keyIdea": "When a pawn in front of your king is pinned, it cannot take a checking piece: keep a square free for the king.",
+   "text": "From a game played on Lichess, in the Caro-Kann Defence. You are Black. White has just played the odd-looking 5.Qe2, lining the queen up with your king behind the knight on e4. In the game Black developed the most natural way and was mated on the next move. Find a safe developing move.",
+   "credit": {
+    "source": "Lichess games database, game 1vreozsr",
+    "url": "https://lichess.org/1vreozsr#9",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "d7f6",
+    "g1f3",
+    "f6e4",
+    "e2e4",
+    "g8f6"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "r1bqkbnr/pp1npppp/2p5/8/3PN3/8/PPP1QPPP/R1B1KBNR b KQkq - 2 5",
+     "decision": true,
+     "main": "d7f6",
+     "mainSan": "Ndf6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "5...Ndf6 develops the d7 knight and challenges the e4 knight, and d7 stays free for your king. The natural 5...Ngf6?? loses to 6.Nd6#, a smothered mate: the e7 pawn cannot take the knight because the queen on e2 pins it to your king, and your own pieces fill every square around the king. 5...Qc7, which covers d6, is also safe."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "r1bqkbnr/pp2pppp/2p2n2/8/3PN3/8/PPP1QPPP/R1B1KBNR w KQkq - 3 6",
+     "decision": false,
+     "main": "g1f3",
+     "mainSan": "Nf3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "r1bqkbnr/pp2pppp/2p2n2/8/3PN3/5N2/PPP1QPPP/R1B1KB1R b KQkq - 4 6",
+     "decision": true,
+     "main": "f6e4",
+     "mainSan": "Nxe4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "After 6.Nf3, trade knights with 6...Nxe4. White's queen has to take back, and it stands in the open where your pieces can attack it."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "r1bqkbnr/pp2pppp/2p5/8/3Pn3/5N2/PPP1QPPP/R1B1KB1R w KQkq - 0 7",
+     "decision": false,
+     "main": "e2e4",
+     "mainSan": "Qxe4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "r1bqkbnr/pp2pppp/2p5/8/3PQ3/5N2/PPP2PPP/R1B1KB1R b KQkq - 0 7",
+     "decision": true,
+     "main": "g8f6",
+     "mainSan": "Nf6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "7...Nf6 develops with a threat to the queen on e4, so White must spend another move on it. You have side-stepped the trap and kept a sound position."
+     }
+    }
+   ]
+  }
+ ]
 }

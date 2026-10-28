@@ -118,5 +118,5 @@ decision (`data/lessons/<id>.json` lists them as `parts[].mainLine`) → `Contin
   `It builds on` check needs a Lesson in the index with prior knowledge.
 - The seed's Player is casual: `suggestNext` skips the beginner Lessons for them while intermediate
   ones exist. Change the level in the Player Profile to see a beginner's suggestion.
-- Popularity for the Ruy Lopez and Two Knights Defence stops after move 3: the bundled games
-  statistics do not have enough games deeper in those lines. The table is hidden there.
+- Popularity comes from about 5 million Lichess games (2013 to 2015). Deep in a line, where fewer than
+  20 games at the Player's level reached the position, it is missing and the table is hidden.

@@ -5,7 +5,7 @@
  "track": "openings",
  "level": "beginner",
  "side": "black",
- "eco": "D63",
+ "eco": "D60",
  "puzzleTags": [
   "Queens_Gambit_Declined"
  ],
@@ -13,52 +13,46 @@
  "priorKnowledge": [
   "queens-gambit"
  ],
- "intro": "In the Queen's Gambit Declined Black meets 2.c4 with 2...e6, holding the d5 pawn firmly and opening a diagonal for the dark-squared bishop. The cost is that the light-squared bishop on c8 is blocked in, and finding it a good job is Black's long-term task. In the Orthodox line Black develops with ...Nf6, ...Be7, castles and adds ...Nbd7.",
- "introUrl": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._c4/2...e6",
+ "intro": "In the Queen's Gambit Declined, Black answers 2.c4 with 2...e6. The e-pawn backs up the pawn on d5, so Black keeps a pawn in the centre and the bishop on f8 can come out. The cost is the other bishop: the pawn on e6 shuts in the bishop on c8. You develop the kingside, castle, and then look for a way to free that bishop.",
  "parts": [
   {
-   "title": "Queen's Gambit Declined",
+   "title": "Hold d5, develop, castle",
    "fen": "start",
    "side": "black",
-   "keyIdea": "",
-   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._c4/2...e6",
+   "keyIdea": "Hold d5 with pawns, develop the kingside and castle; the bishop on c8 is the piece that still needs a plan.",
+   "text": "You are Black, and White opens with 1.d4. The line is the Orthodox Defence as Lichess's list of openings names it. At each move, ask what it does for your centre, your pieces and your king.",
+   "url": "https://github.com/lichess-org/chess-openings",
    "line": "d4 d5 c4 e6 Nc3 Nf6 Bg5 Be7 e3 O-O Nf3 Nbd7",
    "notes": [
     {
      "ply": 1,
      "san": "d5",
-     "text": "1...d5 is the classical answer: it controls e4 and c4, so White cannot keep a pawn on e4, stops d4-d5 and frees your queen's bishop. 1...Nf6 is a more flexible choice. 1...e5?! (Englund Gambit) is unsound, and 1...f5 (Dutch) can run into early tricks on the weak e8-h5 diagonal.",
-     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4"
+     "text": "1...d5 meets White's centre pawn with one of your own. It also makes e4 hard for White to play, because your pawn on d5 attacks that square."
     },
     {
      "ply": 3,
      "san": "e6",
-     "text": "2.c4 offers a pawn. If White plays cxd5 you want to take back with a pawn and keep control of e4, so 2...e6 (or 2...c6, the Slav) is the usual way to decline. 2...dxc4 is playable but gives up e4. 2...Nf6 loses time after 3.cxd5 Nxd5 4.e4!, and 2...Bf5? (Baltic) is thought worse for Black.",
-     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._c4"
+     "text": "2.c4 attacks your d5 pawn. 2...e6 guards it with a pawn, so if White takes on d5 you take back with the e-pawn and still have a pawn in the centre. It also opens a path for the bishop on f8, but the bishop on c8 is now shut in behind e6."
     },
     {
      "ply": 5,
      "san": "Nf6",
-     "text": "3.Nc3 adds pressure on d5 and supports a future e4. 3...Nf6 develops, guards d5 and stops e4, though it allows the pin 4.Bg5. 3...c6 can be met by the sharp 4.e4!? gambit; 3...c5 (Tarrasch) usually accepts an isolated pawn for active pieces; 3...Be7 rules out Bg5.",
-     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._c4/2...e6/3._Nc3"
+     "text": "3.Nc3 adds a second attacker on d5. 3...Nf6 brings out a knight that guards d5 once more and stops White from playing e4."
     },
     {
      "ply": 7,
      "san": "Be7",
-     "text": "4.Bg5 pins your knight to the queen. The usual answer is 4...Be7, breaking the pin and getting ready to castle quickly. 4...Nbd7 is a notable alternative that often leads to the Cambridge Springs Defence after 5.e3 c6 6.Nf3 Qa5.",
-     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._c4/2...e6/3._Nc3/3...Nf6"
+     "text": "4.Bg5 pins your knight: if the knight moved away, the bishop could take your queen. 4...Be7 steps in between, so the pin is gone, and it gets your king one step closer to castling."
     },
     {
      "ply": 9,
      "san": "O-O",
-     "text": "With the bishop already out on g5, White can safely build a pawn chain on dark squares with e3. Castling with 5...O-O is the main move; 5...h6 and 5...Nbd7 are also played and keep the balance.",
-     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._c4/2...e6/3._Nc3/3...Nf6/4._Bg5/4...Be7/5._e3"
+     "text": "5.e3 opens the way for White's other bishop. Castle now with 5...O-O, so your king is safe before the centre opens. 5...h6, asking the bishop on g5 to decide, is just as good."
     },
     {
      "ply": 11,
      "san": "Nbd7",
-     "text": "White develops normally with 6.Nf3. You now choose between 6...Nbd7, the Classical Variation, and 6...h6, which asks the bishop to move (7.Bh4) and leads to Lasker's Defence or the Tartakower Variation.",
-     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._c4/2...e6/3._Nc3/3...Nf6/4._Bg5/4...Be7/5._e3/5...O-O/6._Nf3"
+     "text": "6...Nbd7 develops your last knight. It goes to d7, not c6, so your c-pawn stays free to move to c6 or c5. Of your minor pieces, only the bishop on c8 is still at home: one plan is ...c6, ...dxc4 and ...Nd5 to trade some pieces, then ...e5 to open its diagonal; another is ...b6 and ...Bb7."
     }
    ]
   }

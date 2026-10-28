@@ -10,6 +10,7 @@ This is a one-off measurement. It does not change the app. Both runs were made o
 
 - **Part 1, quick moves.** This is the part that matters for the layer. It used 408 moves that the human made in 1 to 3 seconds, bullet games included. Half of them were moves the Engine grades as fine and half were Inaccuracies or worse. Each model was asked twice, with two different prompts: 2,448 calls.
 - **Part 2, every kind of move.** This was the first run. It used 708 positions with no limit on thinking time and no bullet games: 2,124 calls.
+- **Part 3, running Maia inside the app.** A prototype that converts Maia2 to run from Node, checks its moves against the original, and sketches the background download.
 
 Both parts also compare against Maia2, a free model built only to predict human moves. It was added after Abir approved downloading it.
 
@@ -30,7 +31,7 @@ Both parts also compare against Maia2, a free model built only to predict human 
 
 **My opinion.** The layer is worth building, but Maia2 should do the guessing, not Claude.
 
-Maia2 catches the tempting mistake more often than Opus: 68% against 54% in its top three. It never proposes an illegal move, and it costs nothing per move. On this desktop's CPU it took well under a tenth of a second per position. Opus takes about 8 seconds and 1.5 cents. That speed means Maia2 could run on every move during play, not only on demand.
+Maia2 catches the tempting mistake more often than Opus: 68% against 54% in its top three. Ranked over the legal moves, it can't propose an illegal move, and it costs nothing per move. Converted to run in Node, it takes 12 to 30 milliseconds per position on this desktop (Part 3). Opus takes about 8 seconds and 1.5 cents. That speed means Maia2 could run on every move during play, not only on demand.
 
 Claude would then do what it is good at: explaining.
 
@@ -42,13 +43,7 @@ This is the split the app already has: the Engine judges and the Coach explains 
 
 If Maia2 can't ship, Opus is the best of the Claude models for guessing. It caught 54% of the quick mistakes, against 46% for Sonnet and 42% for Haiku.
 
-Shipping Maia2 is the open question:
-
-- **Licence:** its code is MIT-licensed, but the package doesn't state a licence for the trained weights, so we'd need to check.
-- **Size:** the weights file is 280 MB.
-- **Runtime:** it runs on PyTorch in Python, while the app runs on Node and in the browser. It would need converting to a format the app can run, such as ONNX, and probably shrinking.
-
-That is a separate piece of work, and I'd prototype it before deciding.
+Part 3 shows that Maia2 can run inside the app. Converted to ONNX, it is a 47 MB file that gives the same moves as the original in Node. It runs on onnxruntime's WebAssembly build, which adds one 12 MB file to the app. It can be downloaded in the background, with Opus guessing until the download is ready. Maia-3, its newer successor, is still untested here, because installing it needs Abir's approval. It also brings AGPL-licensed code.
 
 Whatever proposes the moves, three rules still apply:
 
@@ -287,6 +282,105 @@ The pattern in these examples: Opus usually picks the natural move a club player
 
 The models are not just copying the Engine. Opus's first guess is the Engine's first choice about a third of the time, about as often as the humans themselves play it.
 
+## Part 3: running Maia inside the app (prototype)
+
+Abir decided that the licence is not a blocker: Maia2's repository and README release it under MIT, which works with this project's GPL-3.0-or-later. He also decided how the model gets to the Player: it is downloaded in the background after the app is installed. Until the download finishes, or if it fails, Opus does the guessing instead.
+
+Nothing in the app changed. The prototype is two scripts:
+
+- `data-prep/maia2-onnx-export.py` converts the model to ONNX, a standard file format for neural networks that many runtimes can load. It also records Python's top three for every position, to check against.
+- `data-prep/maia2-node.ts` runs the converted model from Node. It encodes the board in TypeScript on the repo's chessops helpers, then compares its moves with Python's.
+
+### Maia-3: not measured yet
+
+The Maia2 README now recommends Maia-3 for new projects (github.com/CSSLab/maia3, models on Hugging Face under UofTCSSLab). I could not measure it. Installing it means running the authors' code from GitHub, and Claude Code's safety check blocked that without approval given directly in this session. What I could read without running anything:
+
+| | Maia3-5M | Maia3-23M | Maia3-79M | Maia2 (blitz) |
+| --- | --- | --- | --- | --- |
+| Download (PyTorch file) | 21 MB | 92 MB | 316 MB | 280 MB (93 MB as ONNX) |
+| Code licence | AGPL-3.0 | AGPL-3.0 | AGPL-3.0 | MIT |
+| Weights licence on the model card | none stated | none stated | none stated | none stated |
+| Input | the last 8 positions, both ratings, and the time spent thinking | same | same | the current position and both ratings |
+| Pinned file with a checksum | yes (Hugging Face revision + SHA-256) | yes | yes | no (Google Drive link) |
+
+Maia-3 loads plain weight files, not pickles, so loading it can't run code. Its input encoding is about 60 lines of Python, small enough to rewrite in TypeScript. It also takes the time the player spends thinking as an input. Maia-3's own UCI wrapper always passes zero for it, but for this layer we could pass "2 seconds" and ask directly for the instinctive move. That could make Maia-3 better than Maia2 at exactly this job, but that is untested.
+
+Using Maia-3 would mean taking on an AGPL dependency, or at least AGPL-licensed code during conversion. That choice is Abir's.
+
+### A bug in the Maia2 package
+
+Maia2's own one-position function, `inference_each`, has a bug. It mixes the position's index into its list of legal moves, so its top three sometimes includes "a1h8" (or "a8h1" for Black), which is not a legal move. This happened in 22 of the 816 quick-move guesses and 35 of the 1,416 Part 2 guesses.
+
+`data-prep/human-moves-maia.py` now ranks the legal moves by the model's scores itself, and every Maia2 guess was redone. None of the hit rates in Parts 1 and 2 changed: the fake move was never the human's move, and it mostly filled third place. Ranked this way, Maia2 can't propose an illegal move.
+
+### Does the converted model give the same moves?
+
+All 408 quick-move positions, compared with Python's top three from the same weights:
+
+| Model file | Size | Same first move | Same top three, any order | Hit rate: all / quick mistakes |
+| --- | --- | --- | --- | --- |
+| float32 | 93 MB | 407 of 408 | 408 of 408 | 49% / 78%, 35% / 68% |
+| **float16 weights, float32 inputs** | **47 MB** | **408 of 408** | **408 of 408** | 49% / 78%, 36% / 68% |
+| int8 (matrix layers only) | 41 MB | 390 of 408 | 364 of 408 | 48% / 79%, 34% / 69% |
+
+The one float32 difference is a near-tie between two moves. The int8 file ranks differently in about 1 position in 10, but it scores the same against the human moves.
+
+Two other attempts failed:
+
+- A pure float16 file failed under Node 26. onnxruntime's native binding still expects a `Uint16Array` where Node 26 now hands it a `Float16Array`.
+- Int8 on the convolution layers failed too, because onnxruntime's CPU build has no int8 convolution (`ConvInteger`).
+
+### Speed, load time and memory on this desktop
+
+Measured on this desktop's 12-core CPU with the float16-weights file, one position at a time:
+
+| Runtime | Install size | Load time | Per position, 1 thread | Per position, 4 threads | Memory (whole process) |
+| --- | --- | --- | --- | --- | --- |
+| onnxruntime-node (native) | 246 MB package (builds for every platform; 19–65 MB each) | ~0.1 s | 8.2 ms | 4.0 ms | ~355 MB |
+| onnxruntime-web (WebAssembly, run in Node) | one 12 MB `.wasm` file plus ~1 MB of JavaScript, the same on every platform | ~0.2–0.25 s | 29.6 ms | 8.6–12.5 ms (two runs) | ~600 MB |
+
+Python with PyTorch takes about 7 ms per position. Opus takes about 8 seconds.
+
+I recommend onnxruntime-web. Even at 12 to 30 ms it is hundreds of times faster than Opus, which is more than fast enough to run on every move. It is one small file for every platform, so `npx openchesscoach` doesn't grow by 246 MB, and there's no native module that can fail to install.
+
+If its memory use matters (about 600 MB, against 355 MB for the native runtime), the int8 file brings it down to about 340 MB, at the cost of the small ranking differences above.
+
+### Download design
+
+The pieces:
+
+- **What is downloaded:** the converted float16-weights ONNX file (47 MB) and Maia2's move list (15 KB).
+- **Where from:**
+  - Not the authors' Google Drive link: it can't be pinned to a version, has no checksum and is rate-limited.
+  - The MIT licence allows redistribution, so we host the converted file ourselves, as a release asset on `inprealpha/OpenChessCoach` (a `maia2-v1` release), with the MIT notice in `THIRD_PARTY_NOTICES.md`.
+  - The app's source pins the exact URL, the size in bytes and the SHA-256. A Hugging Face repository owned by Abir would work the same way.
+- **Where it is stored:** in the app's data folder (`defaultDataDir()`, which already holds the SQLite file, ADR 0003), under `models/maia2-blitz-f16w-<first 8 characters of the SHA-256>.onnx`. A new model version gets a new name, and the old file is deleted only after the new one passes its check.
+- **When:**
+  - The download starts in the background a short while after the backend starts, never during `npm install`, because `npx` gives no reliable install step.
+  - It runs one at a time, with a lock file in the models folder, so two running copies of the app don't download twice.
+- **Resume:**
+  - The file is written to `<name>.part`.
+  - After an interruption, the next try sends an HTTP `Range` request from the `.part` file's current size. If the server ignores the range, the download starts again from zero.
+- **Check:**
+  - When the size matches, the app computes the SHA-256.
+  - If it matches, the app renames `.part` to the final name in one step, so a half-written file is never loaded.
+  - If it doesn't match, the app deletes the file and counts a failed attempt.
+- **Retry:**
+  - After a failure, wait 1 minute, then 5, then 30.
+  - After three failures in one run, stop until the next start.
+  - The app never retries in a tight loop and never blocks start-up.
+  - `coachctl doctor` reports the state: not downloaded, downloading at some percentage, ready, or failed with the reason.
+- **Switching from Opus to the local model:**
+  - The backend gets a small port, like `CoachPort`, with one job: "the moves a player would reach for here".
+  - It has two implementations. The local one runs Maia2 through onnxruntime-web. The fallback asks Opus with the instinct prompt from Part 1.
+  - Each request checks whether the verified model file exists. If it does, the local model is loaded on first use and kept in memory.
+  - So the switch happens on the next request after the download finishes, with no restart.
+  - If loading or running the local model throws, that request falls back to Opus, the error is logged, and the local model stays switched off until the next start.
+  - Either way, the Engine grades every proposed move before the Coach talks about it, as today.
+- **Verify mode and tests:** verify mode must stay deterministic (ADR 0006). It should use a fixed fake source of moves, or the local model from a fixture path, never the network or Opus.
+
+This is a sketch, not a decision. It changes the brief, the guard and the Coach's instructions, so building it waits until the Think Deeper PR merges.
+
 ## Cost and speed
 
 All calls ran on the owner's Claude Code login. Costs are what the same tokens would cost at API prices, as the Agent SDK reports them. On a subscription, they count against the usage limit instead.
@@ -363,7 +457,7 @@ Maia2 ran on this desktop's CPU. Both parts together, 1,116 positions guessed tw
 
 ## What's still open
 
-- **Shipping Maia2.** This needs three checks: the licence of its trained weights (the code is MIT), a smaller model than the 280 MB file, and a way to run it from Node or the browser, for example by converting it to ONNX. A prototype would answer all three.
+- **Maia-3.** It needs to run on the same 408 quick moves: the 5M and 23M models, with the thinking time set to zero and to the real 1 to 3 seconds. That needs approval to install its code (see Part 3).
 - **Telling the model the rating.** This run hid the rating on purpose. The next test is the same prompt with a line like "the player is rated about 1100". It would show whether Opus or Haiku can shift its guesses toward a level, which Maia does by design.
 - **Lower effort for Haiku.** At medium effort, Haiku spends about 1,160 output tokens and 8.6 seconds per call. Low effort might be as accurate and faster.
 - **Grading the models' guesses.** Part 1 checks whether a model's list held the human's mistake. It does not yet check how often a model's list holds a bad move at all, which is what the Coach would warn about. That needs the Engine to grade every guessed move, about 3,700 searches.
@@ -390,5 +484,15 @@ node data-prep/human-moves.ts guess ~/human-moves/run --models=haiku,sonnet,opus
 node data-prep/human-moves.ts engine ~/human-moves/run
 node data-prep/human-moves.ts report ~/human-moves/run
 ```
+
+Part 3's prototype, from the Maia2 venv and a folder with onnxruntime installed (both outside the repo):
+
+```bash
+.venv/bin/python -I data-prep/maia2-onnx-export.py ~/human-moves/quick <weights dir> ~/human-moves/onnx
+npm install --prefix ~/human-moves/ort onnxruntime-node@1.23.0 onnxruntime-web@1.23.0
+node data-prep/maia2-node.ts ~/human-moves/quick ~/human-moves/onnx --ort=$HOME/human-moves/ort --runtime=web --threads=4
+```
+
+The float16-weights and int8 files are made from the float32 export with `onnxconverter-common` (`float16.convert_float_to_float16(model, keep_io_types=True)`) and `onnxruntime.quantization.quantize_dynamic` (with `op_types_to_quantize=['MatMul', 'Gemm']`).
 
 Every step can be resumed. Re-running `guess` makes only the calls that are missing, for example after a usage limit stops it.

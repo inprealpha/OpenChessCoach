@@ -6,13 +6,15 @@
 // Not part of npm test: the guess step calls real models on the owner's Claude Code login.
 //
 // Usage, with <dir> a working folder outside git (downloaded data is untrusted, keep it apart):
-//   node data-prep/human-moves.ts sample <games.pgn> <dir> [--per-band=50] [--seed=1]
-//   node data-prep/human-moves.ts guess <dir> [--models=haiku,sonnet,opus] [--effort=medium] [--concurrency=24]
+//   node data-prep/human-moves.ts sample <games.pgn> <dir> [--per-band=50] [--seed=1] [--quick]
+//   node data-prep/human-moves.ts guess <dir> [--models=haiku,sonnet,opus] [--prompts=likely,instinct] [--effort=medium] [--concurrency=24]
 //   node data-prep/human-moves.ts engine <dir>
 //   <dir>/../maia/.venv/bin/python -I data-prep/human-moves-maia.py <dir>
 //   node data-prep/human-moves.ts report <dir>
 // Games: the first part of a monthly file from https://database.lichess.org (CC0), for example
 //   curl -r 0-120000000 <url>.pgn.zst | zstd -dc > games.pgn
+// --quick samples only moves made in 1 to 3 seconds, bullet included, half of them Engine-graded
+// mistakes: the move that came to mind, and whether the model sees a tempting mistake coming.
 // Every step is resumable: guesses are appended to <dir>/guesses.jsonl and finished ones are skipped.
 import { query } from '@anthropic-ai/claude-agent-sdk';
 import { appendFileSync, createReadStream, existsSync, readFileSync, writeFileSync } from 'node:fs';
@@ -23,6 +25,8 @@ import { parsePgnGames } from '@chess-coach/shared/pgn';
 import { isCheck, legalMoves, piecesOf, playSan, playUci, sanLine, turnOf, uciToSan } from '@chess-coach/shared/chess';
 import { checkClaude, isWindowsShim } from '../packages/backend/src/claude-check.ts';
 import { createNodeEngine } from '../packages/backend/src/engine/node-engine.ts';
+import type { Engine } from '@chess-coach/shared/engine';
+import { gradeMove, negateScore, type MoveGrade } from '@chess-coach/shared/grader';
 
 export const BANDS = [
   { id: 'u1200', label: 'under 1200', min: 0, max: 1200 },
@@ -49,7 +53,15 @@ export interface Sample {
   /** The move the human played, in UCI and SAN. */
   played: { uci: string; san: string };
   legalCount: number;
+  /** Seconds the human spent on the move, from the game's clocks (whole seconds). */
+  seconds?: number;
+  /** Quick mode: the played move's Move Grade, and whether it was fine (Best or Good) or a mistake. */
+  group?: Group;
+  grade?: MoveGrade;
+  winLoss?: number;
 }
+
+type Group = 'any' | 'fine' | 'mistake';
 
 interface Guess {
   id: string;
@@ -102,11 +114,18 @@ function clockSeconds(text: string): number {
 
 async function sample(pgnPath: string, dir: string): Promise<void> {
   const perBand = Number(flag('per-band', '50'));
-  const perPhase = Math.ceil(perBand / PHASES.length);
+  // Quick mode: only moves made in 1 to 3 seconds, the move that came to mind, bullet games
+  // included; half of each band's positions are ones where that move was an Inaccuracy or worse.
+  const quick = args.includes('--quick');
+  const groups: Group[] = quick ? ['fine', 'mistake'] : ['any'];
+  const perCell = Math.ceil(perBand / PHASES.length / groups.length);
   const random = rng(Number(flag('seed', '1')));
   const quota = new Map<string, number>();
   const samples: Sample[] = [];
-  const full = () => BANDS.every((b) => PHASES.every((p) => (quota.get(`${b.id}/${p}`) ?? 0) >= perPhase));
+  const cells = BANDS.flatMap((b) => PHASES.flatMap((p) => groups.map((g) => `${b.id}/${p}/${g}`)));
+  const full = () => cells.every((c) => (quota.get(c) ?? 0) >= perCell);
+  const sf = quick ? await createNodeEngine(4) : undefined;
+  let graded = 0;
 
   let headers: Record<string, string> = {};
   let movetext: string[] = [];
@@ -114,7 +133,7 @@ async function sample(pgnPath: string, dir: string): Promise<void> {
   for await (const line of lines) {
     if (line.startsWith('[')) {
       if (movetext.length) {
-        consider(headers, movetext.join(' '));
+        await consider(headers, movetext.join(' '));
         headers = {};
         movetext = [];
         if (full()) break;
@@ -125,10 +144,11 @@ async function sample(pgnPath: string, dir: string): Promise<void> {
   }
   lines.close();
 
-  function consider(h: Record<string, string>, text: string): void {
-    // Rated blitz, rapid and classical games that ended normally or on time; no bullet, where moves are reflexes.
-    const [base, inc] = (h.TimeControl ?? '-').split('+').map(Number);
-    if (!h.Event?.startsWith('Rated') || !base || base + 40 * (inc ?? 0) < 180) return;
+  async function consider(h: Record<string, string>, text: string): Promise<void> {
+    // Rated games that ended normally or on time. The default leaves out bullet, where moves are
+    // reflexes; quick mode wants exactly those reflexes, so it keeps bullet (1 minute and up).
+    const [base, inc = 0] = (h.TimeControl ?? '-').split('+').map(Number);
+    if (!h.Event?.startsWith('Rated') || !base || base + 40 * inc < (quick ? 60 : 180)) return;
     if (h.Termination !== 'Normal' && h.Termination !== 'Time forfeit') return;
     const white = Number(h.WhiteElo);
     const black = Number(h.BlackElo);
@@ -138,26 +158,44 @@ async function sample(pgnPath: string, dir: string): Promise<void> {
     if (random() > 0.25) return;
     const clocks = [...text.matchAll(/\[%clk (\d+:\d+:\d+)\]/g)].map((m) => clockSeconds(m[1]!));
     const game = parsePgnGames(`[Event "x"]\n\n${text.replace(/\{[^}]*\}/g, '')}`)[0];
-    if (!game || game.moves.length < 16) return;
+    if (!game || game.moves.length < 16 || (quick && clocks.length < game.moves.length)) return;
+    // The mover's clock before the move, and the seconds the move took (clocks are whole seconds).
+    const before = (ply: number) => (ply >= 2 ? clocks[ply - 2]! : base);
+    const spentOn = (ply: number) => before(ply) - clocks[ply]! + inc;
     // One position per game, after move 3, never the last move (often a resignation-time blunder).
-    const ply = 6 + Math.floor(random() * (game.moves.length - 7));
-    const line = [...(sanLineFrom(game.startFen, game.moves.slice(0, ply + 1)) ?? [])];
-    if (line.length !== ply + 1) return;
+    // The default wants a move thought about: at least 30 seconds left. Quick mode wants a move made
+    // in 1 to 3 seconds with at least 10 seconds left, so not a time scramble; a move that took
+    // no time at all is mostly a premove, chosen before the opponent's move was on the board.
+    let ply: number;
+    if (quick) {
+      const plies = Array.from({ length: game.moves.length - 7 }, (_, i) => i + 6).filter((p) => before(p) >= 10 && spentOn(p) >= 1 && spentOn(p) <= 3);
+      if (!plies.length) return;
+      ply = plies[Math.floor(random() * plies.length)]!;
+    } else {
+      ply = 6 + Math.floor(random() * (game.moves.length - 7));
+      if (before(ply) === undefined || before(ply) < 30) return;
+    }
     let fen = game.startFen;
     for (const uci of game.moves.slice(0, ply)) fen = playUci(fen, uci)!.fenAfter;
-    // The mover had at least 30 seconds left, so the move was thought about, not a time scramble.
-    const ownClock = ply >= 2 ? clocks[ply - 2] : base;
-    if (ownClock === undefined || ownClock < 30) return;
     const legal = legalMoves(fen);
     if (legal.length < 2) return;
     const phase = phaseOf(fen, ply);
-    const key = `${band}/${phase}`;
-    if ((quota.get(key) ?? 0) >= perPhase) return;
+    const played = playUci(fen, game.moves[ply]!)!;
+    let group: Group = 'any';
+    let grade: { grade: MoveGrade; winLoss: number } | undefined;
+    if (sf) {
+      if (groups.every((g) => (quota.get(`${band}/${phase}/${g}`) ?? 0) >= perCell)) return;
+      grade = await gradePlayed(sf, fen, played.uci, played.fenAfter);
+      if (!grade) return;
+      graded++;
+      group = grade.grade === 'Best' || grade.grade === 'Good' ? 'fine' : 'mistake';
+    }
+    const key = `${band}/${phase}/${group}`;
+    if ((quota.get(key) ?? 0) >= perCell) return;
     quota.set(key, (quota.get(key) ?? 0) + 1);
     const mover = turnOf(fen) === 'white' ? white : black;
-    const played = playUci(fen, game.moves[ply]!)!;
     samples.push({
-      id: `${band}-${phase}-${quota.get(key)}`,
+      id: quick ? `${band}-${phase}-${group}-${quota.get(key)}` : `${band}-${phase}-${quota.get(key)}`,
       band,
       phase,
       elo: mover,
@@ -168,12 +206,29 @@ async function sample(pgnPath: string, dir: string): Promise<void> {
       recent: recentMoves(game.startFen, game.moves.slice(0, ply)),
       played: { uci: played.uci, san: played.san },
       legalCount: legal.length,
+      seconds: spentOn(ply),
+      ...(grade ? { group, grade: grade.grade, winLoss: Math.round(grade.winLoss * 1000) / 1000 } : {}),
     });
   }
 
   writeFileSync(join(dir, 'samples.json'), `${JSON.stringify(samples, null, 1)}\n`);
-  for (const b of BANDS) console.error(`${b.label}: ${PHASES.map((p) => `${p} ${quota.get(`${b.id}/${p}`) ?? 0}`).join(', ')}`);
+  for (const b of BANDS) {
+    console.error(`${b.label}: ${PHASES.flatMap((p) => groups.map((g) => `${p}${quick ? ` ${g}` : ''} ${quota.get(`${b.id}/${p}/${g}`) ?? 0}`)).join(', ')}`);
+  }
+  if (quick) console.error(`${graded} moves graded by the Engine`);
   console.error(`${samples.length} positions written to ${join(dir, 'samples.json')}`);
+  process.exit(0);
+}
+
+/**
+ * The played move's Move Grade, the way the app grades it (ADR 0002), from a quicker search than
+ * the desktop's (depth 12). Undefined when the move ends the game, which needs no grade here.
+ */
+async function gradePlayed(sf: Engine, fen: string, uci: string, fenAfter: string): Promise<{ grade: MoveGrade; winLoss: number } | undefined> {
+  const best = (await sf.analyse(fen, { multiPv: 1, depth: 12 })).lines[0];
+  const after = (await sf.analyse(fenAfter, { multiPv: 1, depth: 12 })).lines[0];
+  if (!best || !after) return undefined;
+  return gradeMove({ best: best.score, played: negateScore(after.score), isTopMove: best.pv[0] === uci });
 }
 
 function sanLineFrom(startFen: string, ucis: readonly string[]): string[] | undefined {
@@ -200,21 +255,38 @@ function recentMoves(startFen: string, ucis: readonly string[]): string {
   return parts.join(' ');
 }
 
-// The guessing prompt. It says the players are human and nothing about their level.
+// The guessing prompts. Both say the players are human and nothing about their level.
+//   likely:   the move this person will actually play.
+//   instinct: the move that jumps out first, at a glance, without calculating (for quick moves).
 const SYSTEM_PROMPT = 'You predict the moves human chess players make in online games. Answer only with the JSON asked for.';
-export function guessPrompt(s: Sample): string {
+export const PROMPTS = ['likely', 'instinct'] as const;
+export type PromptId = (typeof PROMPTS)[number];
+export function guessPrompt(s: Sample, prompt: PromptId = 'likely'): string {
   const side = turnOf(s.fen) === 'white' ? 'White' : 'Black';
+  const ask =
+    prompt === 'likely'
+      ? [
+          `Which three moves is the human playing ${side} most likely to play here? Rank them, most likely first.`,
+          'Predict what this person will actually play, not necessarily the best move. Give each move in SAN, like Nf3, exd5 or O-O.',
+        ]
+      : [
+          `The human playing ${side} moved here within a few seconds, on instinct, without calculating.`,
+          'Which three moves would jump out at them first, the ones a player reaches for at a glance? Rank them, most likely first.',
+          'Predict the instinctive move, not necessarily the best move. Give each move in SAN, like Nf3, exd5 or O-O.',
+        ];
   return [
     'This position comes from a rated online game between two human players.',
     `FEN: ${s.fen}`,
     `${side} to move.`,
-    s.recent ? `The last moves were: ${s.recent}` : '',
+    ...(s.recent ? [`The last moves were: ${s.recent}`] : []),
     '',
-    `Which three moves is the human playing ${side} most likely to play here? Rank them, most likely first.`,
-    'Predict what this person will actually play, not necessarily the best move. Give each move in SAN, like Nf3, exd5 or O-O.',
-  ]
-    .filter((l, i) => l || i === 4)
-    .join('\n');
+    ...ask,
+  ].join('\n');
+}
+
+/** The name a model's guesses go under: the model alone for the "likely" prompt, else "opus-instinct". */
+function sourceName(model: string, prompt: PromptId): string {
+  return prompt === 'likely' ? model : `${model}-${prompt}`;
 }
 const GUESS_SCHEMA = {
   type: 'object',
@@ -229,10 +301,10 @@ export function readMove(fen: string, text: string): string | undefined {
   return playSan(fen, clean)?.uci ?? playUci(fen, text.trim().toLowerCase())?.uci;
 }
 
-async function askModel(model: string, effort: string, s: Sample, claudePath: string | undefined): Promise<Guess> {
+async function askModel(model: string, prompt: PromptId, effort: string, s: Sample, claudePath: string | undefined): Promise<Guess> {
   const started = Date.now();
   const stream = query({
-    prompt: guessPrompt(s),
+    prompt: guessPrompt(s, prompt),
     options: {
       model,
       effort: effort as 'low' | 'medium' | 'high',
@@ -251,7 +323,7 @@ async function askModel(model: string, effort: string, s: Sample, claudePath: st
       ...(claudePath && !isWindowsShim(claudePath) ? { pathToClaudeCodeExecutable: claudePath } : {}),
     },
   });
-  const guess: Guess = { id: s.id, source: model, raw: [], moves: [], illegal: [] };
+  const guess: Guess = { id: s.id, source: sourceName(model, prompt), raw: [], moves: [], illegal: [] };
   for await (const message of stream) {
     if (message.type === 'rate_limit_event' && message.rate_limit_info.status === 'rejected') throw new Error('rate limit');
     if (message.type === 'assistant' && message.error === 'rate_limit') throw new Error('rate limit');
@@ -299,21 +371,25 @@ async function guess(dir: string): Promise<void> {
   const concurrency = Number(flag('concurrency', '24'));
   const claude = await checkClaude();
   if (!claude.ok) throw new Error(claude.message);
+  const prompts = flag('prompts', 'likely').split(',') as PromptId[];
+  if (prompts.some((p) => !PROMPTS.includes(p))) throw new Error(`--prompts takes ${PROMPTS.join(', ')}`);
   const samples = readSamples(dir);
   const done = new Set(readGuesses(dir).filter((g) => !g.error).map((g) => `${g.source}/${g.id}`));
-  // Interleave models so a stop part-way leaves every model with a similar spread of positions.
-  const jobs = samples.flatMap((s) => models.map((m) => ({ s, m }))).filter(({ s, m }) => !done.has(`${m}/${s.id}`));
+  // Interleave models and prompts so a stop part-way leaves each with a similar spread of positions.
+  const jobs = samples
+    .flatMap((s) => prompts.flatMap((p) => models.map((m) => ({ s, m, p }))))
+    .filter(({ s, m, p }) => !done.has(`${sourceName(m, p)}/${s.id}`));
   console.error(`${jobs.length} calls to make (${done.size} already done), ${concurrency} at a time`);
   let finished = 0;
   let limited = false;
-  await pool(jobs, concurrency, async ({ s, m }) => {
+  await pool(jobs, concurrency, async ({ s, m, p }) => {
     if (limited) return;
     let g: Guess;
     try {
-      g = await askModel(m, effort, s, claude.path);
+      g = await askModel(m, p, effort, s, claude.path);
     } catch (err) {
       if (String(err).includes('rate limit')) limited = true;
-      g = { id: s.id, source: m, raw: [], moves: [], illegal: [], error: String(err) };
+      g = { id: s.id, source: sourceName(m, p), raw: [], moves: [], illegal: [], error: String(err) };
     }
     appendFileSync(join(dir, 'guesses.jsonl'), `${JSON.stringify(g)}\n`);
     finished++;
@@ -448,22 +524,40 @@ function report(dir: string): void {
   const out: string[] = [];
   const hit = (g: Guess, k: number) => g.moves.slice(0, k).includes(byId.get(g.id)!.played.uci);
 
-  out.push('## Hit rates per band (top-1 / top-3)\n');
-  out.push(`| Source | ${BANDS.map((b) => b.label).join(' | ')} | All |`);
-  out.push(`| --- | ${BANDS.map(() => '---').join(' | ')} | --- |`);
-  const rows = [...sources, 'random'];
-  for (const source of rows) {
-    const cells = [...BANDS.map((b) => b.id), 'all'].map((band) => {
-      const ss = samples.filter((s) => band === 'all' || s.band === band);
-      if (source === 'random') {
-        const t1 = ss.reduce((a, s) => a + 1 / s.legalCount, 0);
-        const t3 = ss.reduce((a, s) => a + Math.min(3, s.legalCount) / s.legalCount, 0);
-        return `${pct(t1, ss.length)} / ${pct(t3, ss.length)}`;
-      }
-      const gs = guesses.filter((g) => g.source === source && ss.some((s) => s.id === g.id));
-      return `${pct(gs.filter((g) => hit(g, 1)).length, gs.length)} / ${pct(gs.filter((g) => hit(g, 3)).length, gs.length)} (n=${gs.length})`;
-    });
-    out.push(`| ${source} | ${cells.join(' | ')} |`);
+  const speeds = samples.reduce<Record<string, number>>((acc, s) => {
+    const [base, inc = 0] = s.timeControl.split('+').map(Number);
+    const total = base! + 40 * inc;
+    const speed = total < 180 ? 'bullet' : total < 480 ? 'blitz' : total < 1500 ? 'rapid' : 'classical';
+    acc[speed] = (acc[speed] ?? 0) + 1;
+    return acc;
+  }, {});
+  out.push(`${samples.length} positions: ${Object.entries(speeds).map(([k, n]) => `${n} ${k}`).join(', ')}.\n`);
+
+  const bandTable = (title: string, pool: Sample[]) => {
+    const inPool = new Set(pool.map((s) => s.id));
+    out.push(`## ${title} (top-1 / top-3)\n`);
+    out.push(`| Source | ${BANDS.map((b) => b.label).join(' | ')} | All |`);
+    out.push(`| --- | ${BANDS.map(() => '---').join(' | ')} | --- |`);
+    for (const source of [...sources, 'random']) {
+      const cells = [...BANDS.map((b) => b.id), 'all'].map((band) => {
+        const ss = pool.filter((s) => band === 'all' || s.band === band);
+        if (source === 'random') {
+          const t1 = ss.reduce((a, s) => a + 1 / s.legalCount, 0);
+          const t3 = ss.reduce((a, s) => a + Math.min(3, s.legalCount) / s.legalCount, 0);
+          return `${pct(t1, ss.length)} / ${pct(t3, ss.length)}`;
+        }
+        const gs = guesses.filter((g) => g.source === source && inPool.has(g.id) && ss.some((s) => s.id === g.id));
+        return `${pct(gs.filter((g) => hit(g, 1)).length, gs.length)} / ${pct(gs.filter((g) => hit(g, 3)).length, gs.length)} (n=${gs.length})`;
+      });
+      out.push(`| ${source} | ${cells.join(' | ')} |`);
+    }
+    out.push('');
+  };
+  bandTable('Hit rates per band', samples);
+  const grouped = samples.some((s) => s.group);
+  if (grouped) {
+    bandTable('Quick moves that were fine (Best or Good)', samples.filter((s) => s.group === 'fine'));
+    bandTable('Quick moves that were mistakes (Inaccuracy or worse): did the source see the tempting move coming?', samples.filter((s) => s.group === 'mistake'));
   }
 
   out.push('\n## Hit rates per game phase, all bands (top-1 / top-3)\n');
@@ -506,17 +600,22 @@ function report(dir: string): void {
     out.push(`| ${a} | ${cells.join(' | ')} |`);
   }
 
-  out.push("\n## What a model's three guesses add to the Engine's top five (the human's move is in the list)\n");
-  out.push(`| List | ${BANDS.map((b) => b.label).join(' | ')} | All |`);
-  out.push(`| --- | ${BANDS.map(() => '---').join(' | ')} | --- |`);
-  for (const source of [undefined, ...sources.filter((s) => s !== 'stockfish' && s !== 'obvious')]) {
-    const cells = [...BANDS.map((b) => b.id), 'all'].map((band) => {
-      const ss = samples.filter((s) => (band === 'all' || s.band === band) && latest.get(`stockfish/${s.id}`) && (!source || latest.get(`${source}/${s.id}`)));
-      const covered = ss.filter((s) => [...latest.get(`stockfish/${s.id}`)!.moves.slice(0, 5), ...(source ? latest.get(`${source}/${s.id}`)!.moves : [])].includes(s.played.uci));
-      return `${pct(covered.length, ss.length)} (n=${ss.length})`;
-    });
-    out.push(`| ${source ? `Engine top 5 + ${source}'s 3` : 'Engine top 5 alone'} | ${cells.join(' | ')} |`);
-  }
+  const models = sources.filter((s) => s !== 'stockfish' && s !== 'obvious');
+  const coverage = (title: string, pool: Sample[]) => {
+    out.push(`\n## ${title}\n`);
+    out.push(`| List | ${BANDS.map((b) => b.label).join(' | ')} | All |`);
+    out.push(`| --- | ${BANDS.map(() => '---').join(' | ')} | --- |`);
+    for (const source of [undefined, ...models]) {
+      const cells = [...BANDS.map((b) => b.id), 'all'].map((band) => {
+        const ss = pool.filter((s) => (band === 'all' || s.band === band) && latest.get(`stockfish/${s.id}`) && (!source || latest.get(`${source}/${s.id}`)));
+        const covered = ss.filter((s) => [...latest.get(`stockfish/${s.id}`)!.moves.slice(0, 5), ...(source ? latest.get(`${source}/${s.id}`)!.moves : [])].includes(s.played.uci));
+        return `${pct(covered.length, ss.length)} (n=${ss.length})`;
+      });
+      out.push(`| ${source ? `Engine top 5 + ${source}'s 3` : 'Engine top 5 alone'} | ${cells.join(' | ')} |`);
+    }
+  };
+  coverage("What a model's three guesses add to the Engine's top five (the human's move is in the list)", samples);
+  if (grouped) coverage("The same, for the quick mistakes only", samples.filter((s) => s.group === 'mistake'));
 
   out.push('\n## How often a model plays the engine move (top-1 equals Stockfish top-1)\n');
   for (const source of sources.filter((s) => s !== 'stockfish')) {
@@ -538,8 +637,13 @@ function report(dir: string): void {
   out.push('\n## Paired comparisons (positions where only the first hit / only the second hit, exact two-sided p)\n');
   out.push('| Comparison | Top-1 | Top-3 |');
   out.push('| --- | --- | --- |');
-  const models = sources.filter((s) => s !== 'stockfish' && s !== 'obvious');
-  const pairs = models.flatMap((m, i) => [...models.slice(i + 1).map((n) => [m, n]), ['stockfish', m], ['obvious', m]]);
+  // Models against each other on the same prompt, each model's two prompts, and each against the baselines.
+  const promptOf = (m: string) => m.split('-')[1] ?? 'likely';
+  const pairs = [
+    ...models.flatMap((m, i) => models.slice(i + 1).filter((n) => promptOf(n) === promptOf(m)).map((n) => [m, n])),
+    ...models.filter((m) => !m.includes('-')).flatMap((m) => models.filter((n) => n.startsWith(`${m}-`)).map((n) => [n, m])),
+    ...models.flatMap((m) => [['stockfish', m], ['obvious', m]]),
+  ].filter(([a, b]) => sources.includes(a!) && sources.includes(b!));
   for (const [a, b] of pairs as [string, string][]) {
     const cells = [1, 3].map((k) => {
       const ss = both(a, b);
@@ -565,24 +669,33 @@ function report(dir: string): void {
     out.push(`| ${source} | ${cells.join(' | ')} |`);
   }
 
-  if (models.length >= 2) {
-    const ss = samples.filter((s) => models.every((m) => latest.get(`${m}/${s.id}`)));
-    const firsts = ss.map((s) => models.map((m) => latest.get(`${m}/${s.id}`)!.moves[0]));
+  // The disagreement figures and examples use one prompt: "instinct" when it was run, else "likely".
+  const shown = models.some((m) => m.includes('-')) ? models.filter((m) => m.includes('-')) : models;
+  if (shown.length >= 2) {
+    const ss = samples.filter((s) => shown.every((m) => latest.get(`${m}/${s.id}`)));
+    const firsts = ss.map((s) => shown.map((m) => latest.get(`${m}/${s.id}`)!.moves[0]));
     const same = firsts.filter((f) => f[0] && f.every((m) => m === f[0])).length;
     const distinct = firsts.filter((f) => new Set(f).size === f.length).length;
-    const anyTop3 = ss.filter((s) => models.some((m) => hit(latest.get(`${m}/${s.id}`)!, 3))).length;
-    out.push(`\nAll of ${models.join(', ')} gave the same first move in ${same} of ${ss.length} positions (${pct(same, ss.length)}); all different first moves in ${distinct} (${pct(distinct, ss.length)}). At least one model's top 3 held the human's move in ${anyTop3} (${pct(anyTop3, ss.length)}).`);
+    const anyTop3 = ss.filter((s) => shown.some((m) => hit(latest.get(`${m}/${s.id}`)!, 3))).length;
+    out.push(`\nAll of ${shown.join(', ')} gave the same first move in ${same} of ${ss.length} positions (${pct(same, ss.length)}); all different first moves in ${distinct} (${pct(distinct, ss.length)}). At least one model's top 3 held the human's move in ${anyTop3} (${pct(anyTop3, ss.length)}).`);
     const outside = samples.filter((s) => latest.get(`stockfish/${s.id}`) && !latest.get(`stockfish/${s.id}`)!.moves.slice(0, 5).includes(s.played.uci));
-    const caught = models.map((m) => `${m} ${outside.filter((s) => latest.get(`${m}/${s.id}`) && hit(latest.get(`${m}/${s.id}`)!, 3)).length}`);
+    const caught = shown.map((m) => `${m} ${outside.filter((s) => latest.get(`${m}/${s.id}`) && hit(latest.get(`${m}/${s.id}`)!, 3)).length}`);
     out.push(`\nThe human's move was outside the Engine's top 5 in ${outside.length} positions; a model's top 3 held it in: ${caught.join(', ')}.`);
 
-    out.push('\n## Examples where every model gave a different first move\n');
-    out.push(`| Position | Played | ${[...models, 'stockfish'].join(' | ')} |`);
-    out.push(`| --- | --- | ${[...models, 'stockfish'].map(() => '---').join(' | ')} |`);
     const sans = (s: Sample, g: Guess) => g.moves.slice(0, 3).map((m) => uciToSan(s.fen, m)).join(', ') + (g.illegal.length ? ` (+${g.illegal.length} illegal)` : '');
-    for (const s of ss.filter((_, i) => new Set(firsts[i]).size === models.length).slice(0, 10)) {
-      const cells = [...models, 'stockfish'].map((m) => sans(s, latest.get(`${m}/${s.id}`)!));
-      out.push(`| ${s.id} (${s.elo}), after ${s.recent} | ${s.played.san} | ${cells.join(' | ')} |`);
+    const examples = (title: string, picked: Sample[]) => {
+      out.push(`\n## ${title}\n`);
+      out.push(`| Position | Played | ${[...shown, 'stockfish'].join(' | ')} |`);
+      out.push(`| --- | --- | ${[...shown, 'stockfish'].map(() => '---').join(' | ')} |`);
+      for (const s of picked.slice(0, 10)) {
+        const cells = [...shown, 'stockfish'].map((m) => sans(s, latest.get(`${m}/${s.id}`)!));
+        out.push(`| ${s.id} (${s.elo}), after ${s.recent} | ${s.played.san}${s.grade ? ` (${s.grade})` : ''} | ${cells.join(' | ')} |`);
+      }
+    };
+    examples('Examples where every model gave a different first move', ss.filter((_, i) => new Set(firsts[i]).size === shown.length));
+    if (grouped) {
+      examples('Quick mistakes a model saw coming (in its top 3)', ss.filter((s) => s.group === 'mistake' && shown.some((m) => hit(latest.get(`${m}/${s.id}`)!, 3))));
+      examples('Quick mistakes no model saw coming', ss.filter((s) => s.group === 'mistake' && !shown.some((m) => hit(latest.get(`${m}/${s.id}`)!, 3))));
     }
   }
 

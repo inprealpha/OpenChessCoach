@@ -16,6 +16,7 @@ Commands:
   import-pgn        Import a PGN as an Imported Game
   review            Grade a game and start (or reopen) its Review
   ask-why           Ask the Coach a Why Question about a move
+  settings          Print the settings; turn Think deeper on or off
   db get <table>    Read a table back (verify mode)
   screenshot        Save a screenshot of a screen of the web app
   snapshot          Save an accessibility snapshot of a screen of the web app

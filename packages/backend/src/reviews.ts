@@ -23,7 +23,7 @@ export function getReview(db: Db, gameId: number): Review | null {
 }
 
 /** The scores a Review shows either side of the move at `ply`, so the Coach quotes them. */
-function reviewScores(graded: readonly GradedMove[], ply: number): Pick<CoachAsk, 'positionBefore' | 'positionAfter'> {
+export function reviewScores(graded: readonly GradedMove[], ply: number): Pick<CoachAsk, 'positionBefore' | 'positionAfter'> {
   const before = scoreAfterPly(graded, ply - 1);
   const after = scoreAfterPly(graded, ply);
   return { ...(before ? { positionBefore: before } : {}), ...(after ? { positionAfter: after } : {}) };

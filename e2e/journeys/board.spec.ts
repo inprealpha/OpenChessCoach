@@ -634,6 +634,23 @@ test('a Why Question about a move the Engine didn’t list gets that move graded
   expect(JSON.parse(call?.stripped ?? '[]')).toEqual([]);
 });
 
+test('a Why Question names a tempting move that fails, graded by the Engine (ADR 0011)', async ({ paired, app }) => {
+  await paired.goto(`${app.url}/#/board`);
+  // 1. e4 e5 2. Nf3 Nc6 3. Bc4 Nd4 4. O-O: before 4. O-O, White could grab the knight on d4.
+  for (const uci of ['e2e4', 'e7e5', 'g1f3', 'b8c6', 'f1c4', 'c6d4', 'e1g1']) await play(paired, uci);
+  await expect(paired.getByRole('button', { name: /Move 4\. O-O, / })).toBeVisible();
+  await paired.getByLabel('Your Why Question').fill('Why castle here?');
+  await paired.getByRole('button', { name: 'Ask the Coach why' }).click();
+  await coachIdle(paired);
+  // Verify mode's fake tempting moves are the captures and checks; the fake Coach names the first that fails.
+  await expect(paired.getByLabel('Coach conversation')).toContainText(/Many players would reach for \S+ here, but it is graded (Inaccuracy|Mistake|Blunder)\./);
+  const [call] = await app.rows<{ brief: string }>('coach_calls');
+  const brief = JSON.parse(call?.brief ?? '{}') as { candidates: { tempting?: true }[]; tempting?: { san: string; grade: string }[] };
+  expect([...brief.candidates.filter((c) => c.tempting), ...(brief.tempting ?? [])].length).toBeGreaterThan(0);
+  const [logged] = await app.rows<{ source: string; moves: string }>('coach_tempting');
+  expect(logged?.source).toBe('fake');
+});
+
 test('with Think deeper on in Settings, the Coach asks the Engine while it answers a Why Question', async ({ paired, app }) => {
   await paired.goto(`${app.url}/#/settings`);
   const deeper = paired.getByRole('region', { name: 'Think deeper' });

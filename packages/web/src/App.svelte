@@ -2,6 +2,8 @@
   import { api } from './lib/api.svelte.ts';
   import { lessonCatalogue } from './lib/content.ts';
   import { pageTitle } from './lib/page-title.svelte.ts';
+  import { phone } from './lib/phone.svelte.ts';
+  import { onPhoneOrTablet } from './lib/this-device.ts';
   import { profile } from './lib/profile.svelte.ts';
   import { router } from './lib/router.svelte.ts';
   import Pair from './screens/Pair.svelte';
@@ -27,6 +29,14 @@
       void profile.load();
       void syncOfflineGames();
     } else if (api.state === 'offline' && !profile.loaded) void profile.load();
+  });
+
+  // A desktop browser asks the Player to pair their phone; a pairing reset unpairs it and makes a new
+  // QR code. When a device pairs, the event says whether it was the phone (lib/phone.svelte.ts).
+  $effect(() => {
+    void api.reconnects;
+    void api.pairingResets;
+    if (api.state === 'online' && !onPhoneOrTablet) void phone.load();
   });
 
   const route = $derived(router.route);

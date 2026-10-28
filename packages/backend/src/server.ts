@@ -15,6 +15,7 @@ import { AppError } from './errors.ts';
 import { handlers, type AppContext, type RequestContext } from './handlers/index.ts';
 import { lanAddress, pairUrl } from './network.ts';
 import { Pairing, PairingRefused, type Device } from './pairing.ts';
+import { phoneStatus } from './phone.ts';
 import { serveStatic } from './static.ts';
 import { CoachService } from './coach/service.ts';
 import { createNodeEngine, desktopThreads } from './engine/node-engine.ts';
@@ -267,9 +268,12 @@ async function handleHttp(context: AppContext, options: AppOptions, req: Incomin
   }
   if (url.pathname === '/api/pair' && req.method === 'POST') {
     const body = (await readJson(req)) as { code?: unknown; deviceName?: unknown };
+    const name = String(body.deviceName ?? 'Device');
     try {
-      const result = context.pairing.pair(String(body.code ?? ''), String(body.deviceName ?? 'Device'));
-      context.log(`Paired a new device (${String(body.deviceName ?? 'Device')}).`);
+      const result = context.pairing.pair(String(body.code ?? ''), name);
+      context.log(`Paired a new device (${name}).`);
+      // A screen showing the QR code, such as first run's phone step, says when the phone has paired.
+      context.broadcast({ kind: 'device-paired', phone: phoneStatus(context.db, context.clock) });
       json(res, 200, result);
     } catch (err) {
       if (err instanceof PairingRefused) json(res, 401, { error: err.message });

@@ -20,7 +20,8 @@ Code, logged in: see [What you need](#what-you-need).
 - **Ask the Coach why** a move is good or bad, beside any board.
 - **See the verdicts at a glance**: Winning Chances as a percentage and a bar, Move Grade symbols on
   the board, and a Threat arrow for what your opponent wants next.
-- **Play on your phone** too: scan the QR code the desktop prints.
+- **Play on your phone**: the first time the app opens on your desktop, it shows a QR code to scan
+  with your phone.
 
 ## What you need
 
@@ -39,8 +40,11 @@ npx openchesscoach@latest
 In Windows PowerShell, type `npx.cmd` instead of `npx`. `@latest` picks up the newest release
 each time you start the app.
 
-The desktop checks Claude Code, starts the app and opens your browser already paired. It also
-prints a QR code: scan it with your phone on the same Wi-Fi to open the app there, already paired.
+The desktop checks Claude Code, starts the app and opens your browser already paired. The first
+thing the browser shows is a QR code: scan it with your phone on the same Wi-Fi to open the app
+there, already paired, and carry on setting up on the phone. The desktop prints the same QR code.
+Until a phone is paired, the main menu on the desktop asks again every few days, unless you choose
+**Don't ask again**.
 
 Browsers keep an offline copy of the app only on an `https://` address or on the desktop itself.
 There you can add the app to your home screen (or install it, on the desktop) to use it like an

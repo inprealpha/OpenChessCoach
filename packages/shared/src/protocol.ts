@@ -173,6 +173,15 @@ export interface PairingInfo {
   tunnel: TunnelState;
   tunnelPairUrl: string | null;
   tunnelQrSvg: string | null;
+  phone: PhoneStatus;
+}
+
+/** Whether the Player has a phone or tablet paired, and whether a desktop browser should ask them to pair one. */
+export interface PhoneStatus {
+  /** A phone or tablet is paired and not revoked. */
+  paired: boolean;
+  /** No phone is paired, and the Player hasn't said "later" (or that time has passed) or "don't ask again". */
+  remind: boolean;
 }
 
 /** The Engine's strength levels in an Engine Game, by `EngineGameRecord.strength`. */
@@ -196,13 +205,16 @@ export interface EngineGameRecord {
 // ---------- Requests ----------
 
 export interface RequestMap {
+  /** `deviceName`, from the web app, renames this device: the name it paired under may predate today's naming. */
   hello: {
-    req: { client: string };
+    req: { client: string; deviceName?: string };
     res: { protocol: number; version: string; verify: boolean; deviceId: string; coach: CoachStatus; temptingMoves: TemptingMovesStatus };
   };
   'pairing.info': { req: Record<string, never>; res: PairingInfo };
   /** Revokes every device token and the pairing code. The caller gets a fresh token so it stays paired. */
   'pairing.reset': { req: Record<string, never>; res: { token: string } };
+  /** The Player put off pairing a phone: ask again in a few days, or with `never`, not again. */
+  'pairing.remindLater': { req: { never?: boolean }; res: PhoneStatus };
 
   'profile.get': { req: Record<string, never>; res: PlayerProfile };
   'profile.update': {
@@ -314,7 +326,9 @@ export type ServerMessage =
 export type ServerEvent =
   | { kind: 'coach-status'; status: CoachStatus }
   | { kind: 'tunnel'; tunnel: TunnelState }
-  | { kind: 'pairing-reset' };
+  | { kind: 'pairing-reset' }
+  /** A device paired: whether a phone is now paired, so a screen showing the QR code says so without fetching it again. */
+  | { kind: 'device-paired'; phone: PhoneStatus };
 
 export function isClientMessage(value: unknown): value is { v: number; id: string; type: string } {
   if (typeof value !== 'object' || value === null) return false;

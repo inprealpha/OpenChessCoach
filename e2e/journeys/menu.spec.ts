@@ -4,7 +4,7 @@
 // with no games yet, and the Engine Game in progress to continue.
 import { type Page } from '@playwright/test';
 import { startVerifyInstance } from '../../packages/backend/src/verify/instance.ts';
-import { connection, expect, play, resign, test } from '../fixtures/app.ts';
+import { connection, expect, phoneLater, play, resign, test } from '../fixtures/app.ts';
 
 const menu = (page: Page) => page.getByRole('navigation', { name: 'Main menu' });
 const choice = (page: Page, name: string) => menu(page).getByRole('listitem').filter({ has: page.getByRole('heading', { name, exact: true }) });
@@ -14,6 +14,7 @@ test.describe('a Player with no games', () => {
 
   test('sees the import prompt and the three big choices, and nothing else competes with them', async ({ page, app }) => {
     await page.goto(`${app.url}/#pair=${app.code}`);
+    await phoneLater(page);
     await page.getByRole('button', { name: 'Skip to the main menu' }).click();
     await expect(menu(page)).toBeVisible();
 
@@ -33,6 +34,7 @@ test.describe('a Player with no games', () => {
 
   test('can try a sample Review before importing anything, and trying again opens the same game', async ({ page, app, browser }) => {
     await page.goto(`${app.url}/#pair=${app.code}`);
+    await phoneLater(page);
     await page.getByRole('button', { name: 'Skip to the main menu' }).click();
     // A second device on the menu too, so the sample is tried twice.
     const other = await browser.newPage();
@@ -73,6 +75,7 @@ test.describe('a Player with no games', () => {
     const app = await startVerifyInstance({ seed: 'empty' });
     try {
       await page.goto(`${app.url}/#pair=${app.code}`);
+      await phoneLater(page);
       await page.getByRole('button', { name: 'Skip to the main menu' }).click();
       // Skip saves the Player Profile, then opens the menu: wait for it, or that late step would
       // take the page back to the menu from the game list.
@@ -92,6 +95,7 @@ test.describe('a Player with no games', () => {
 
   test('the first-run screen’s suggested start opens the Lessons', async ({ page, app }) => {
     await page.goto(`${app.url}/#pair=${app.code}`);
+    await phoneLater(page);
     await page.getByRole('button', { name: 'Start with the Opening Lessons' }).click();
     await expect(page.getByRole('heading', { name: 'Lessons', exact: true })).toBeVisible();
     await expect(page).toHaveURL(/#\/lessons$/);

@@ -1,9 +1,11 @@
 <script lang="ts">
   // The main menu: three big choices, a prompt to import games while the Player has none
   // (with a sample Review to try first), an Engine Game in progress to continue, and the Board as a
-  // small link. Settings and the Player Profile are icons in the header.
+  // small link. Settings and the Player Profile are icons in the header. On a desktop without a
+  // phone paired, it asks the Player to pair one (PhoneReminder).
   import { SIDE_NAMES } from '@chess-coach/shared/chess';
   import type { GameSummary } from '@chess-coach/shared/protocol';
+  import PhoneReminder from '../components/PhoneReminder.svelte';
   import { ApiError, api } from '../lib/api.svelte.ts';
   import { gameInProgress, type GameInProgress } from '../lib/game-in-progress.ts';
   import { keptGames } from '../lib/kept-games.ts';
@@ -125,6 +127,7 @@
 
     <p class="board-link muted small"><a href="#/board">Board</a>: play out any position and see the Engine’s candidate moves.</p>
   </nav>
+  <PhoneReminder />
 </section>
 
 <style>

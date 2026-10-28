@@ -3,7 +3,7 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
-export const SEEDS = ['empty', 'default', 'many-games'] as const;
+export const SEEDS = ['empty', 'default', 'many-games', 'no-phone'] as const;
 export type Seed = (typeof SEEDS)[number];
 
 export interface RunFile {

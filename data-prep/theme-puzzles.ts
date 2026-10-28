@@ -24,8 +24,15 @@ if (!file) {
 const read = <T>(path: string): T => JSON.parse(readFileSync(new URL(path, import.meta.url), 'utf8')) as T;
 const index = read<{ id: string }[]>('../data/lessons/index.json');
 const lessons = index.map((l) => read<LessonData>(`../data/lessons/${l.id}.json`)).filter((l) => l.puzzleThemes.length);
-// The rarer theme decides first, so a fork that is also a skewer counts towards Skewers.
-const RARITY = ['capturingDefender', 'skewer', 'backRankMate', 'pawnEndgame', 'rookEndgame', 'pin', 'discoveredAttack', 'fork'];
+// The rarer theme decides first, so a fork that is also a skewer counts towards Skewers. The order is
+// each theme's count among the database's popular puzzles rated 600 to 2000, rarest first.
+const RARITY = [
+  'bodenMate', 'doubleBishopMate', 'enPassant', 'dovetailMate', 'arabianMate', 'anastasiaMate', 'hookMate', 'interference',
+  'smotheredMate', 'doubleCheck', 'knightEndgame', 'zugzwang', 'capturingDefender', 'clearance', 'bishopEndgame', 'intermezzo',
+  'trappedPiece', 'discoveredCheck', 'backRankMate', 'quietMove', 'promotion', 'skewer', 'pawnEndgame', 'exposedKing',
+  'hangingPiece', 'defensiveMove', 'attraction', 'deflection', 'rookEndgame', 'discoveredAttack', 'advancedPawn', 'pin',
+  'sacrifice', 'kingsideAttack', 'mateIn1', 'mateIn2', 'fork',
+];
 const order = [...lessons].sort((a, b) => themeRank(a) - themeRank(b));
 function themeRank(l: LessonData): number {
   return Math.min(...l.puzzleThemes.map((t) => (RARITY.includes(t) ? RARITY.indexOf(t) : RARITY.length)));

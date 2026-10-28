@@ -9,6 +9,111 @@
  "priorKnowledge": [
   "passed-pawns"
  ],
- "intro": "",
- "parts": []
+ "intro": "Sometimes neither side has a passed pawn yet, and you make one by giving up a pawn or two to break through the enemy pawns. Once both sides have passed pawns, the endgame turns into a race. Count the moves each pawn needs to queen, remember who moves first, and look at what the new queen can do: a queen that arrives with check, or that guards the other pawn's queening square, usually decides the race.",
+ "parts": [
+  {
+   "title": "Three against three",
+   "fen": "8/ppp5/8/PPP5/6p1/6Pp/5k1K/8 w - - 1 53",
+   "side": "white",
+   "keyIdea": "Three pawns against three: sacrifice the middle pawn, then the next one, and one of your pawns gets a free road.",
+   "text": "From a game played on Lichess. Your three queenside pawns face Black's three, and both kings are far away on the kingside, where Black is threatening to win. You need a passed pawn fast, and you can make one by giving up pawns.",
+   "url": "https://lichess.org/training/cQLaQ",
+   "line": "b6 axb6 c6 bxc6 a6",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "b6",
+     "text": "The middle pawn goes first, as a sacrifice. If Black takes with the c-pawn instead, 54.a6 works the same way, and if Black does not take at all, you take on a7 or c7 and queen."
+    },
+    {
+     "ply": 2,
+     "san": "c6",
+     "text": "Now the c-pawn offers itself. Whichever pawn Black takes with, one of yours is left with a free road to the last rank."
+    },
+    {
+     "ply": 4,
+     "san": "a6",
+     "text": "The a-pawn is through. Black's pawns on b6, c6 and c7 cannot touch it, and Black's king is far away, so it queens in two more moves."
+    }
+   ]
+  },
+  {
+   "title": "Give one to free another",
+   "fen": "8/8/5p1p/p4P1P/P1ppk1P1/8/2P1K3/8 w - - 2 41",
+   "side": "white",
+   "keyIdea": "A pawn sacrifice can pull an enemy pawn out of the way and leave your neighbouring pawn with a free path.",
+   "text": "From a game played on Lichess. Black's king is active on e4 and Black's queenside pawns look dangerous. On the kingside your three pawns face two, and one pawn sacrifice is enough to free one of them.",
+   "url": "https://lichess.org/training/ztkmq",
+   "line": "g5 hxg5 h6 c3 h7",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "g5",
+     "text": "The g-pawn offers itself. If 41...hxg5, your h-pawn is free; if 41...fxg5, your f-pawn is free."
+    },
+    {
+     "ply": 2,
+     "san": "h6",
+     "text": "Push the free pawn at once. Black's king on e4 is too far away to catch it."
+    },
+    {
+     "ply": 4,
+     "san": "h7",
+     "text": "Black is trying to stir up trouble on the queenside with 42...c3, but your pawn is one step from queening and gets there first."
+    }
+   ]
+  },
+  {
+   "title": "Count the moves",
+   "fen": "2k5/8/2P5/3KP3/7p/8/8/8 b - - 0 57",
+   "side": "black",
+   "keyIdea": "In a race, count the moves each pawn needs to queen; the side that queens first, ideally with check, usually wins.",
+   "text": "From a game played on Lichess. You are Black, and it is a race: your h-pawn against White's e-pawn. Count how many moves each pawn needs to queen, and remember that you move first.",
+   "url": "https://lichess.org/training/qXXr8",
+   "line": "h3 e6 h2 e7 h1=Q+",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "h3",
+     "text": "Your pawn needs three moves to queen (h3, h2, h1), and White's e-pawn needs three as well (e6, e7, e8). You move first, so you queen first."
+    },
+    {
+     "ply": 2,
+     "san": "h2",
+     "text": "Keep counting: you need one more move, White needs two."
+    },
+    {
+     "ply": 4,
+     "san": "h1=Q+",
+     "text": "Your new queen gives check along the long diagonal to d5. White has to deal with the check first, and your queen will be in time to stop the e-pawn."
+    }
+   ]
+  },
+  {
+   "title": "Stop the check first",
+   "fen": "8/7P/8/1k6/8/p7/3p4/1K6 w - - 0 59",
+   "side": "white",
+   "keyIdea": "Before you queen, look at the reply: if the other pawn would queen with check, deal with it first.",
+   "text": "From a game played on Lichess. Your h-pawn can queen right now, but Black's d-pawn is one step from queening too. Before you promote, look at what Black would do next.",
+   "url": "https://lichess.org/training/KdSE3",
+   "line": "Kc2 d1=Q+ Kxd1 a2 h8=Q",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Kc2",
+     "text": "After 59.h8=Q, Black answers 59...d1=Q+ with check and has enough checks to draw. On c2 your king attacks the d-pawn and guards d1, so if it queens, you take the new queen."
+    },
+    {
+     "ply": 2,
+     "san": "Kxd1",
+     "text": "Black queened anyway, and your king took the new queen. Only Black's a-pawn is left."
+    },
+    {
+     "ply": 4,
+     "san": "h8=Q",
+     "text": "Now you queen. Your new queen on h8 watches a1 along the long diagonal, so Black's a-pawn cannot queen."
+    }
+   ]
+  }
+ ]
 }

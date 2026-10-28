@@ -12,7 +12,313 @@
  "puzzleTags": [],
  "puzzleThemes": [],
  "intro": {
-  "text": ""
+  "text": "In the middlegame your king hides behind its pawns, but once the queens are traded it is safe to bring it out, and it becomes a strong piece. An active king can walk up the board to win pawns the enemy king cannot defend, and it can walk beside your own pawn to lead it to promotion. In endgames with only kings and pawns left, the side whose king gets there first usually wins."
  },
- "parts": []
+ "parts": [
+  {
+   "title": "March to the other side",
+   "fen": "3k4/pp6/2p1p2p/2P1P3/1P6/P4K2/8/8 w - - 1 34",
+   "side": "white",
+   "keyIdea": "Take your king to the side of the board where the enemy king is not, and win the pawns it cannot protect.",
+   "text": "A Lichess Puzzle: only kings and pawns are left. Black's king is over on the queenside, near its own pawns, while Black's h-pawn on the other side of the board has nothing to defend it. Where should your king go?",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle rjCME",
+    "url": "https://lichess.org/training/rjCME",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "f3g4",
+    "d8e7",
+    "g4h5",
+    "e7f7",
+    "h5h6"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "3k4/pp6/2p1p2p/2P1P3/1P6/P4K2/8/8 w - - 1 34",
+     "decision": true,
+     "main": "f3g4",
+     "mainSan": "Kg4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Your king sets off for the h6 pawn. It needs three moves to take it, and Black's king needs three moves to reach g7 and guard it, but you move first."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "3k4/pp6/2p1p2p/2P1P3/1P4K1/P7/8/8 b - - 2 34",
+     "decision": false,
+     "main": "d8e7",
+     "mainSan": "Ke7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "8/pp2k3/2p1p2p/2P1P3/1P4K1/P7/8/8 w - - 3 35",
+     "decision": true,
+     "main": "g4h5",
+     "mainSan": "Kh5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "One more step. Black's king is hurrying over, but it is one move too slow."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "8/pp2k3/2p1p2p/2P1P2K/1P6/P7/8/8 b - - 4 35",
+     "decision": false,
+     "main": "e7f7",
+     "mainSan": "Kf7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "8/pp3k2/2p1p2p/2P1P2K/1P6/P7/8/8 w - - 5 36",
+     "decision": true,
+     "main": "h5h6",
+     "mainSan": "Kxh6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The pawn falls, and material is level again. Your king is now active on the kingside, while Black's king has left its queenside pawns behind, and the Engine sees White winning."
+     }
+    }
+   ]
+  },
+  {
+   "title": "Walk in through the gap",
+   "fen": "8/8/p1k2p1p/P1p1p1p1/2P3P1/3KPP1P/8/8 w - - 1 37",
+   "side": "white",
+   "keyIdea": "Walk your king into the enemy camp through squares no enemy pawn can attack, and hit the pawns from behind.",
+   "text": "A Lichess Puzzle: only kings and pawns are left, and the pawns on the queenside are locked together. Black's kingside pawns have moved forward, leaving squares behind them that no black pawn can ever guard. Find a path for your king into Black's position.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle GVdTW",
+    "url": "https://lichess.org/training/GVdTW",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "d3e4",
+    "c6d6",
+    "e4f5",
+    "d6e7",
+    "f5g6"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "8/8/p1k2p1p/P1p1p1p1/2P3P1/3KPP1P/8/8 w - - 1 37",
+     "decision": true,
+     "main": "d3e4",
+     "mainSan": "Ke4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Your king steps towards the kingside, where Black's pawns are. Black's king, on c6, is further away from them than yours."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "8/8/p1k2p1p/P1p1p1p1/2P1K1P1/4PP1P/8/8 b - - 2 37",
+     "decision": false,
+     "main": "c6d6",
+     "mainSan": "Kd6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "8/8/p2k1p1p/P1p1p1p1/2P1K1P1/4PP1P/8/8 w - - 3 38",
+     "decision": true,
+     "main": "e4f5",
+     "mainSan": "Kf5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "No black pawn can ever attack f5, so your king is safe there, right in front of Black's pawns. Black's king has to come back to guard the f6 pawn."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "8/8/p2k1p1p/P1p1pKp1/2P3P1/4PP1P/8/8 b - - 4 38",
+     "decision": false,
+     "main": "d6e7",
+     "mainSan": "Ke7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "8/4k3/p4p1p/P1p1pKp1/2P3P1/4PP1P/8/8 w - - 5 39",
+     "decision": true,
+     "main": "f5g6",
+     "mainSan": "Kg6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Your king slips round to g6, behind Black's pawns, and attacks the pawn on h6. Black's king cannot defend it: every square next to h6 that is free is also next to your king."
+     }
+    }
+   ]
+  },
+  {
+   "title": "Lead your pawn home",
+   "fen": "5k2/8/7K/1p4P1/8/8/8/8 w - - 5 54",
+   "side": "white",
+   "keyIdea": "Put your king beside your pawn's path to promotion, so the enemy king cannot get in front of the pawn.",
+   "text": "A Lichess Puzzle: your g-pawn wants to reach g8, but Black's king on f8 is close by, and Black's b-pawn is ready to run as well. Your king can help your pawn.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle ZgxgO",
+    "url": "https://lichess.org/training/ZgxgO",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "h6h7",
+    "f8e7",
+    "g5g6",
+    "b5b4",
+    "g6g7",
+    "b4b3",
+    "g7g8q"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "5k2/8/7K/1p4P1/8/8/8/8 w - - 5 54",
+     "decision": true,
+     "main": "h6h7",
+     "mainSan": "Kh7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Your king takes g7 and g8 away from Black's king, so nothing can stop the g-pawn now. If you pushed g6 at once, Black's king would step to g8, right in front of the pawn, and the pawn would be stuck."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "5k2/7K/8/1p4P1/8/8/8/8 b - - 6 54",
+     "decision": false,
+     "main": "f8e7",
+     "mainSan": "Ke7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "8/4k2K/8/1p4P1/8/8/8/8 w - - 7 55",
+     "decision": true,
+     "main": "g5g6",
+     "mainSan": "g6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Now the pawn walks forward, and your king guards every square in front of it."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "8/4k2K/6P1/1p6/8/8/8/8 b - - 0 55",
+     "decision": false,
+     "main": "b5b4",
+     "mainSan": "b4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "8/4k2K/6P1/8/1p6/8/8/8 w - - 0 56",
+     "decision": true,
+     "main": "g6g7",
+     "mainSan": "g7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Black's b-pawn is racing too, but yours is well ahead: after this move it needs one more step, and Black's pawn on b4 still needs three."
+     }
+    },
+    {
+     "ply": 5,
+     "fen": "8/4k1PK/8/8/1p6/8/8/8 b - - 0 56",
+     "decision": false,
+     "main": "b4b3",
+     "mainSan": "b3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 6,
+     "fen": "8/4k1PK/8/8/8/1p6/8/8 w - - 0 57",
+     "decision": true,
+     "main": "g7g8q",
+     "mainSan": "g8=Q",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Promotion. With a queen against Black's lone pawn, you are winning."
+     }
+    }
+   ]
+  }
+ ]
 }

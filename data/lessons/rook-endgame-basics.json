@@ -13,7 +13,342 @@
  "puzzleTags": [],
  "puzzleThemes": [],
  "intro": {
-  "text": ""
+  "text": "Endgames with a rook on each side come up more often than any other kind, so a few good habits here will save and win many games. Keep your rook active, attacking pawns instead of standing guard over them. Put it behind a passed pawn, where it pushes the pawn home. And use it as a fence that keeps the enemy king away from your pawn."
  },
- "parts": []
+ "parts": [
+  {
+   "title": "An active rook hunts pawns",
+   "fen": "8/2k2p1p/1R4p1/8/5P2/6PK/r6P/8 w - - 4 45",
+   "side": "white",
+   "keyIdea": "A rook that attacks enemy pawns does more than one that guards your own. Go for pawns the enemy king is too far away to protect.",
+   "text": "From a game played on Lichess. You are White, and the pawns are level. Black's rook is already busy attacking your pawn on h2, which your king guards. Find a job just as useful for your own rook.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle FLpoL",
+    "url": "https://lichess.org/training/FLpoL",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "b6f6",
+    "c7d7",
+    "f6f7",
+    "d7e8",
+    "f7h7"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "8/2k2p1p/1R4p1/8/5P2/6PK/r6P/8 w - - 4 45",
+     "decision": true,
+     "main": "b6f6",
+     "mainSan": "Rf6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The rook slides along the sixth rank to f6 and attacks the pawn on f7. Nothing defends that pawn, and Black's king on c7 is too far away to reach it in time."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "8/2k2p1p/5Rp1/8/5P2/6PK/r6P/8 b - - 5 45",
+     "decision": false,
+     "main": "c7d7",
+     "mainSan": "Kd7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "8/3k1p1p/5Rp1/8/5P2/6PK/r6P/8 w - - 6 46",
+     "decision": true,
+     "main": "f6f7",
+     "mainSan": "Rxf7+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Take the pawn with check, so Black has no time to hit back. From f7 the rook now also looks along the seventh rank at the pawn on h7."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "8/3k1R1p/6p1/8/5P2/6PK/r6P/8 b - - 0 46",
+     "decision": false,
+     "main": "d7e8",
+     "mainSan": "Ke8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "4k3/5R1p/6p1/8/5P2/6PK/r6P/8 w - - 1 47",
+     "decision": true,
+     "main": "f7h7",
+     "mainSan": "Rxh7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "A second pawn falls. You are two pawns up, and your rook stays active on the seventh rank."
+     }
+    }
+   ]
+  },
+  {
+   "title": "The rook behind the passed pawn",
+   "fen": "7k/6rp/8/2R5/2P5/1p1P3P/5PP1/6K1 b - - 0 34",
+   "side": "black",
+   "keyIdea": "A rook behind a passed pawn gets stronger with every step the pawn takes, and still guards the queening square at the end.",
+   "text": "From a game played on Lichess. You are Black. White has just taken a pawn on c5, so you are three pawns down, but your passed pawn on b3 is only two steps from queening. Where does your rook help that pawn most?",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle hc9LK",
+    "url": "https://lichess.org/training/hc9LK",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "g7b7",
+    "c5c8",
+    "h8g7",
+    "c8e8",
+    "b3b2",
+    "e8e1",
+    "b2b1q",
+    "e1b1",
+    "b7b1"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "7k/6rp/8/2R5/2P5/1p1P3P/5PP1/6K1 b - - 0 34",
+     "decision": true,
+     "main": "g7b7",
+     "mainSan": "Rb7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The rook goes behind the pawn, on the same file. Every time the pawn moves forward, the rook's reach down the b-file grows with it, and the pawn now threatens to run all the way to b1."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "7k/1r5p/8/2R5/2P5/1p1P3P/5PP1/6K1 w - - 1 35",
+     "decision": false,
+     "main": "c5c8",
+     "mainSan": "Rc8+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "2R4k/1r5p/8/8/2P5/1p1P3P/5PP1/6K1 b - - 2 35",
+     "decision": true,
+     "main": "h8g7",
+     "mainSan": "Kg7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The only legal move: the king steps out of the check. Your rook stays where it belongs, behind the pawn."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "2R5/1r4kp/8/8/2P5/1p1P3P/5PP1/6K1 w - - 3 36",
+     "decision": false,
+     "main": "c8e8",
+     "mainSan": "Re8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "4R3/1r4kp/8/8/2P5/1p1P3P/5PP1/6K1 b - - 4 36",
+     "decision": true,
+     "main": "b3b2",
+     "mainSan": "b2",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The pawn moves on with the rook right behind it. It is one step from queening, and White's rook can only stop it by giving itself up."
+     }
+    },
+    {
+     "ply": 5,
+     "fen": "4R3/1r4kp/8/8/2P5/3P3P/1p3PP1/6K1 w - - 0 37",
+     "decision": false,
+     "main": "e8e1",
+     "mainSan": "Re1",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 6,
+     "fen": "8/1r4kp/8/8/2P5/3P3P/1p3PP1/4R1K1 b - - 1 37",
+     "decision": true,
+     "main": "b2b1q",
+     "mainSan": "b1=Q",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Promote. If White takes the new queen, your rook on b7 takes back, because nothing stands between it and b1 any more."
+     }
+    },
+    {
+     "ply": 7,
+     "fen": "8/1r4kp/8/8/2P5/3P3P/5PP1/1q2R1K1 w - - 0 38",
+     "decision": false,
+     "main": "e1b1",
+     "mainSan": "Rxb1",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 8,
+     "fen": "8/1r4kp/8/8/2P5/3P3P/5PP1/1R4K1 b - - 0 38",
+     "decision": true,
+     "main": "b7b1",
+     "mainSan": "Rxb1+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Your rook has won White's rook. You have a rook and a pawn against five pawns, and the Engine judges this clearly winning for you."
+     }
+    }
+   ]
+  },
+  {
+   "title": "Cut the king off",
+   "fen": "7R/p4p2/r4k1P/4pp2/8/6P1/5P2/6K1 w - - 1 38",
+   "side": "white",
+   "keyIdea": "Put your rook on the file between the enemy king and your passed pawn, so the king cannot come back to stop it.",
+   "text": "From a game played on Lichess. You are White, a pawn down. Your rook stands in front of your h-pawn, and Black's king on f6 is close enough to catch the pawn if you push it straight away.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle 1B76x",
+    "url": "https://lichess.org/training/1B76x",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "h8g8",
+    "a6a1",
+    "g1g2",
+    "f5f4",
+    "h6h7"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "7R/p4p2/r4k1P/4pp2/8/6P1/5P2/6K1 w - - 1 38",
+     "decision": true,
+     "main": "h8g8",
+     "mainSan": "Rg8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "One step sideways does two jobs. The rook leaves h8 free for the pawn, and from g8 it controls the g-file, so Black's king cannot cross to g7 or g6 to reach the pawn. Pushing 38.h7 at once would let the king catch the pawn with 38...Kg7."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "6R1/p4p2/r4k1P/4pp2/8/6P1/5P2/6K1 b - - 2 38",
+     "decision": false,
+     "main": "a6a1",
+     "mainSan": "Ra1+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "6R1/p4p2/5k1P/4pp2/8/6P1/5P2/r5K1 w - - 3 39",
+     "decision": true,
+     "main": "g1g2",
+     "mainSan": "Kg2",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Step out of the check. Black's checks do not change anything: the king is still shut out on the other side of the g-file."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "6R1/p4p2/5k1P/4pp2/8/6P1/5PK1/r7 b - - 4 39",
+     "decision": false,
+     "main": "f5f4",
+     "mainSan": "f4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "6R1/p4p2/5k1P/4p3/5p2/6P1/5PK1/r7 w - - 0 40",
+     "decision": true,
+     "main": "h6h7",
+     "mainSan": "h7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The pawn marches on. Next comes h8, and Black has no way to stop it without giving up the rook."
+     }
+    }
+   ]
+  }
+ ]
 }

@@ -14,29 +14,15 @@
   "rookEndgame"
  ],
  "intro": {
-  "text": "Rook and pawn against rook is the most common endgame of all, and two positions are the key to it. With the Lucena position the side with the pawn wins by building a bridge with the rook to shelter its king. With the Philidor position the defender draws by keeping the rook on the third rank and then checking from behind.",
-  "credit": {
-   "source": "Wikipedia, Lucena position",
-   "url": "https://en.wikipedia.org/wiki/Lucena_position",
-   "licence": "CC BY-SA 4.0",
-   "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-   "authors": "Wikipedia contributors (see the page history)"
-  }
+  "text": "With a rook each and one extra pawn, the result often depends on whether you know two famous positions. The Lucena position is a win: the side with the pawn uses its rook as a bridge that shields its king from checks. The Philidor position is a draw: the defending rook guards its own third rank, and once the pawn advances, it drops back and gives check after check from behind."
  },
  "parts": [
   {
    "title": "Lucena: build a bridge",
    "fen": "1K1k4/1P6/8/8/8/8/r7/2R5 w - - 0 1",
    "side": "white",
-   "keyIdea": "",
-   "text": "Your pawn is on the seventh rank but your own king stands in front of it, and Black's rook is ready to check.",
-   "textCredit": {
-    "source": "Wikipedia, Lucena position",
-    "url": "https://en.wikipedia.org/wiki/Lucena_position",
-    "licence": "CC BY-SA 4.0",
-    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-    "authors": "Wikipedia contributors (see the page history)"
-   },
+   "keyIdea": "Push the enemy king one more file away, lift your rook to the fourth rank, then walk your king out and block a check with the rook.",
+   "text": "The Lucena position. You are White: your pawn is on b7, but your own king blocks its way on b8, and Black's rook on a2 is ready to check the king as soon as it steps out. Your rook on c1 keeps Black's king off the c-file.",
    "credit": {
     "source": "Wikipedia, Lucena position",
     "url": "https://en.wikipedia.org/wiki/Lucena_position",
@@ -72,14 +58,7 @@
       "club": []
      },
      "notes": {
-      "text": "Drive the black king away from the pawn first.",
-      "credit": {
-       "source": "Wikipedia, Lucena position",
-       "url": "https://en.wikipedia.org/wiki/Lucena_position",
-       "licence": "CC BY-SA 4.0",
-       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-       "authors": "Wikipedia contributors (see the page history)"
-      }
+      "text": "Check first, to push Black's king one file further away. With the king on e7, your rook on the d-file keeps it out of d7 and d8, so it cannot come back to help."
      }
     },
     {
@@ -106,14 +85,7 @@
       "club": []
      },
      "notes": {
-      "text": "The key move: the rook goes to the fourth rank, ready to block checks later.",
-      "credit": {
-       "source": "Wikipedia, Lucena position",
-       "url": "https://en.wikipedia.org/wiki/Lucena_position",
-       "licence": "CC BY-SA 4.0",
-       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-       "authors": "Wikipedia contributors (see the page history)"
-      }
+      "text": "This is the move to remember. The rook goes up to the fourth rank, where it seems to do nothing. In a few moves it will step across to b4 and block a check: that is the bridge."
      }
     },
     {
@@ -140,14 +112,7 @@
       "club": []
      },
      "notes": {
-      "text": "Now the king comes out, and Black starts checking.",
-      "credit": {
-       "source": "Wikipedia, Lucena position",
-       "url": "https://en.wikipedia.org/wiki/Lucena_position",
-       "licence": "CC BY-SA 4.0",
-       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-       "authors": "Wikipedia contributors (see the page history)"
-      }
+      "text": "Now the king leaves b8, so the pawn's path is open. Black's rook will start checking your king from the c-file and the b-file."
      }
     },
     {
@@ -172,6 +137,9 @@
       "beginner": [],
       "casual": [],
       "club": []
+     },
+     "notes": {
+      "text": "Step away from the check, staying next to the pawn on b7 so it stays protected."
      }
     },
     {
@@ -196,6 +164,9 @@
       "beginner": [],
       "casual": [],
       "club": []
+     },
+     "notes": {
+      "text": "Out of the check again, still beside the pawn. Each step brings your king nearer to the fourth rank, where your rook waits."
      }
     },
     {
@@ -220,6 +191,9 @@
       "beginner": [],
       "casual": [],
       "club": []
+     },
+     "notes": {
+      "text": "Now the king stands just above the fourth rank. If Black checks on the b-file again, your rook is ready to block on b4."
      }
     },
     {
@@ -246,31 +220,17 @@
       "club": []
      },
      "notes": {
-      "text": "The rook blocks the check: the bridge is built. Black cannot stop the pawn queening.",
-      "credit": {
-       "source": "Wikipedia, Lucena position",
-       "url": "https://en.wikipedia.org/wiki/Lucena_position",
-       "licence": "CC BY-SA 4.0",
-       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-       "authors": "Wikipedia contributors (see the page history)"
-      }
+      "text": "The rook blocks the check, and the bridge is built. Black has no more useful checks, and nothing can stop the pawn from queening."
      }
     }
    ]
   },
   {
-   "title": "Philidor: hold the draw",
+   "title": "Philidor: hold the third rank",
    "fen": "8/8/8/8/4pk2/R7/7r/4K3 b - - 0 1",
    "side": "white",
-   "keyIdea": "",
-   "text": "You defend. Your king is on the pawn's queening square and your rook on the third rank keeps Black's king out.",
-   "textCredit": {
-    "source": "Wikipedia, Philidor position",
-    "url": "https://en.wikipedia.org/wiki/Philidor_position",
-    "licence": "CC BY-SA 4.0",
-    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-    "authors": "Wikipedia contributors (see the page history)"
-   },
+   "keyIdea": "Keep your rook on your third rank until the pawn steps onto it, then go to the far end of the board and check from behind.",
+   "text": "The Philidor position. You are White and a pawn down. Your king already stands on e1, the square where the pawn wants to queen, and your rook on a3 guards the whole third rank, so Black's king cannot advance. Black moves first.",
    "credit": {
     "source": "Wikipedia, Philidor position",
     "url": "https://en.wikipedia.org/wiki/Philidor_position",
@@ -288,10 +248,6 @@
     "f4f3",
     "b8f8",
     "f3e4",
-    "f8e8",
-    "e4f4",
-    "e8f8",
-    "f4e5",
     "f8e8"
    ],
    "nodes": [
@@ -319,14 +275,7 @@
       "club": []
      },
      "notes": {
-      "text": "Keep the rook on the third rank, shuffling along it, until the pawn comes forward.",
-      "credit": {
-       "source": "Wikipedia, Philidor position",
-       "url": "https://en.wikipedia.org/wiki/Philidor_position",
-       "licence": "CC BY-SA 4.0",
-       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-       "authors": "Wikipedia contributors (see the page history)"
-      }
+      "text": "Just wait along the third rank. As long as your rook holds that rank, Black's king cannot step onto it to help the pawn forward."
      }
     },
     {
@@ -351,6 +300,9 @@
       "beginner": [],
       "casual": [],
       "club": []
+     },
+     "notes": {
+      "text": "Keep waiting on the third rank. Black's king cannot get past it, so Black tries pushing the pawn instead, as happens next."
      }
     },
     {
@@ -377,14 +329,7 @@
       "club": []
      },
      "notes": {
-      "text": "With the pawn on e3, Black's king can no longer use that square, so your rook is free to go to the far end of the board. 4.Rb4+?? would lose to 4...Kf3.",
-      "credit": {
-       "source": "Wikipedia, Philidor position",
-       "url": "https://en.wikipedia.org/wiki/Philidor_position",
-       "licence": "CC BY-SA 4.0",
-       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-       "authors": "Wikipedia contributors (see the page history)"
-      }
+      "text": "Now the pawn on e3 blocks your rook's view along the third rank, so that job is over. Send the rook to the far end of the board. From there it can check Black's king from behind, and the king has no shelter: it cannot hide on e2, next to your king."
      }
     },
     {
@@ -411,14 +356,7 @@
       "club": []
      },
      "notes": {
-      "text": "Check from behind. The king cannot escape the checks without giving up the pawn.",
-      "credit": {
-       "source": "Wikipedia, Philidor position",
-       "url": "https://en.wikipedia.org/wiki/Philidor_position",
-       "licence": "CC BY-SA 4.0",
-       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-       "authors": "Wikipedia contributors (see the page history)"
-      }
+      "text": "Check at once. Black's king on f3 and rook on a2 now threaten your king on the back rank, and every other move here loses."
      }
     },
     {
@@ -443,64 +381,9 @@
       "beginner": [],
       "casual": [],
       "club": []
-     }
-    },
-    {
-     "ply": 10,
-     "fen": "4R3/8/8/8/4k3/4p3/r7/4K3 b - - 5 6",
-     "decision": false,
-     "main": "e4f4",
-     "mainSan": "Kf4",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 11,
-     "fen": "4R3/8/8/8/5k2/4p3/r7/4K3 w - - 6 7",
-     "decision": true,
-     "main": "e8f8",
-     "mainSan": "Rf8+",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 12,
-     "fen": "5R2/8/8/8/5k2/4p3/r7/4K3 b - - 7 7",
-     "decision": false,
-     "main": "f4e5",
-     "mainSan": "Ke5",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 13,
-     "fen": "5R2/8/8/4k3/8/4p3/r7/4K3 w - - 8 8",
-     "decision": true,
-     "main": "f8e8",
-     "mainSan": "Re8+",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
      },
      "notes": {
-      "text": "Black makes no progress: a draw.",
-      "credit": {
-       "source": "Wikipedia, Philidor position",
-       "url": "https://en.wikipedia.org/wiki/Philidor_position",
-       "licence": "CC BY-SA 4.0",
-       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-       "authors": "Wikipedia contributors (see the page history)"
-      }
+      "text": "Keep checking from behind. Black's king has nowhere to hide near its pawn, and the Engine judges the position a draw."
      }
     }
    ]

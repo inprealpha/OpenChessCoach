@@ -12,7 +12,376 @@
  "puzzleTags": [],
  "puzzleThemes": [],
  "intro": {
-  "text": ""
+  "text": "Sometimes neither side has a passed pawn yet, and you make one by giving up a pawn or two to break through the enemy pawns. Once both sides have passed pawns, the endgame turns into a race. Count the moves each pawn needs to queen, remember who moves first, and look at what the new queen can do: a queen that arrives with check, or that guards the other pawn's queening square, usually decides the race."
  },
- "parts": []
+ "parts": [
+  {
+   "title": "Three against three",
+   "fen": "8/ppp5/8/PPP5/6p1/6Pp/5k1K/8 w - - 1 53",
+   "side": "white",
+   "keyIdea": "Three pawns against three: sacrifice the middle pawn, then the next one, and one of your pawns gets a free road.",
+   "text": "From a game played on Lichess. Your three queenside pawns face Black's three, and both kings are far away on the kingside, where Black is threatening to win. You need a passed pawn fast, and you can make one by giving up pawns.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle cQLaQ",
+    "url": "https://lichess.org/training/cQLaQ",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "b5b6",
+    "a7b6",
+    "c5c6",
+    "b7c6",
+    "a5a6"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "8/ppp5/8/PPP5/6p1/6Pp/5k1K/8 w - - 1 53",
+     "decision": true,
+     "main": "b5b6",
+     "mainSan": "b6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The middle pawn goes first, as a sacrifice. If Black takes with the c-pawn instead, 54.a6 works the same way, and if Black does not take at all, you take on a7 or c7 and queen."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "8/ppp5/1P6/P1P5/6p1/6Pp/5k1K/8 b - - 0 53",
+     "decision": false,
+     "main": "a7b6",
+     "mainSan": "axb6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "8/1pp5/1p6/P1P5/6p1/6Pp/5k1K/8 w - - 0 54",
+     "decision": true,
+     "main": "c5c6",
+     "mainSan": "c6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Now the c-pawn offers itself. Whichever pawn Black takes with, one of yours is left with a free road to the last rank."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "8/1pp5/1pP5/P7/6p1/6Pp/5k1K/8 b - - 0 54",
+     "decision": false,
+     "main": "b7c6",
+     "mainSan": "bxc6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "8/2p5/1pp5/P7/6p1/6Pp/5k1K/8 w - - 0 55",
+     "decision": true,
+     "main": "a5a6",
+     "mainSan": "a6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The a-pawn is through. Black's pawns on b6, c6 and c7 cannot touch it, and Black's king is far away, so it queens in two more moves."
+     }
+    }
+   ]
+  },
+  {
+   "title": "Give one to free another",
+   "fen": "8/8/5p1p/p4P1P/P1ppk1P1/8/2P1K3/8 w - - 2 41",
+   "side": "white",
+   "keyIdea": "A pawn sacrifice can pull an enemy pawn out of the way and leave your neighbouring pawn with a free path.",
+   "text": "From a game played on Lichess. Black's king is active on e4 and Black's queenside pawns look dangerous. On the kingside your three pawns face two, and one pawn sacrifice is enough to free one of them.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle ztkmq",
+    "url": "https://lichess.org/training/ztkmq",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "g4g5",
+    "h6g5",
+    "h5h6",
+    "c4c3",
+    "h6h7"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "8/8/5p1p/p4P1P/P1ppk1P1/8/2P1K3/8 w - - 2 41",
+     "decision": true,
+     "main": "g4g5",
+     "mainSan": "g5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The g-pawn offers itself. If 41...hxg5, your h-pawn is free; if 41...fxg5, your f-pawn is free."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "8/8/5p1p/p4PPP/P1ppk3/8/2P1K3/8 b - - 0 41",
+     "decision": false,
+     "main": "h6g5",
+     "mainSan": "hxg5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "8/8/5p2/p4PpP/P1ppk3/8/2P1K3/8 w - - 0 42",
+     "decision": true,
+     "main": "h5h6",
+     "mainSan": "h6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Push the free pawn at once. Black's king on e4 is too far away to catch it."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "8/8/5p1P/p4Pp1/P1ppk3/8/2P1K3/8 b - - 0 42",
+     "decision": false,
+     "main": "c4c3",
+     "mainSan": "c3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "8/8/5p1P/p4Pp1/P2pk3/2p5/2P1K3/8 w - - 0 43",
+     "decision": true,
+     "main": "h6h7",
+     "mainSan": "h7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Black is trying to stir up trouble on the queenside with 42...c3, but your pawn is one step from queening and gets there first."
+     }
+    }
+   ]
+  },
+  {
+   "title": "Count the moves",
+   "fen": "2k5/8/2P5/3KP3/7p/8/8/8 b - - 0 57",
+   "side": "black",
+   "keyIdea": "In a race, count the moves each pawn needs to queen; the side that queens first, ideally with check, usually wins.",
+   "text": "From a game played on Lichess. You are Black, and it is a race: your h-pawn against White's e-pawn. Count how many moves each pawn needs to queen, and remember that you move first.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle qXXr8",
+    "url": "https://lichess.org/training/qXXr8",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "h4h3",
+    "e5e6",
+    "h3h2",
+    "e6e7",
+    "h2h1q"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "2k5/8/2P5/3KP3/7p/8/8/8 b - - 0 57",
+     "decision": true,
+     "main": "h4h3",
+     "mainSan": "h3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Your pawn needs three moves to queen (h3, h2, h1), and White's e-pawn needs three as well (e6, e7, e8). You move first, so you queen first."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "2k5/8/2P5/3KP3/8/7p/8/8 w - - 0 58",
+     "decision": false,
+     "main": "e5e6",
+     "mainSan": "e6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "2k5/8/2P1P3/3K4/8/7p/8/8 b - - 0 58",
+     "decision": true,
+     "main": "h3h2",
+     "mainSan": "h2",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Keep counting: you need one more move, White needs two."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "2k5/8/2P1P3/3K4/8/8/7p/8 w - - 0 59",
+     "decision": false,
+     "main": "e6e7",
+     "mainSan": "e7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "2k5/4P3/2P5/3K4/8/8/7p/8 b - - 0 59",
+     "decision": true,
+     "main": "h2h1q",
+     "mainSan": "h1=Q+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Your new queen gives check along the long diagonal to d5. White has to deal with the check first, and your queen will be in time to stop the e-pawn."
+     }
+    }
+   ]
+  },
+  {
+   "title": "Stop the check first",
+   "fen": "8/7P/8/1k6/8/p7/3p4/1K6 w - - 0 59",
+   "side": "white",
+   "keyIdea": "Before you queen, look at the reply: if the other pawn would queen with check, deal with it first.",
+   "text": "From a game played on Lichess. Your h-pawn can queen right now, but Black's d-pawn is one step from queening too. Before you promote, look at what Black would do next.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle KdSE3",
+    "url": "https://lichess.org/training/KdSE3",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "b1c2",
+    "d2d1q",
+    "c2d1",
+    "a3a2",
+    "h7h8q"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "8/7P/8/1k6/8/p7/3p4/1K6 w - - 0 59",
+     "decision": true,
+     "main": "b1c2",
+     "mainSan": "Kc2",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "After 59.h8=Q, Black answers 59...d1=Q+ with check and has enough checks to draw. On c2 your king attacks the d-pawn and guards d1, so if it queens, you take the new queen."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "8/7P/8/1k6/8/p7/2Kp4/8 b - - 1 59",
+     "decision": false,
+     "main": "d2d1q",
+     "mainSan": "d1=Q+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "8/7P/8/1k6/8/p7/2K5/3q4 w - - 0 60",
+     "decision": true,
+     "main": "c2d1",
+     "mainSan": "Kxd1",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Black queened anyway, and your king took the new queen. Only Black's a-pawn is left."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "8/7P/8/1k6/8/p7/8/3K4 b - - 0 60",
+     "decision": false,
+     "main": "a3a2",
+     "mainSan": "a2",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "8/7P/8/1k6/8/8/p7/3K4 w - - 0 61",
+     "decision": true,
+     "main": "h7h8q",
+     "mainSan": "h8=Q",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Now you queen. Your new queen on h8 watches a1 along the long diagonal, so Black's a-pawn cannot queen."
+     }
+    }
+   ]
+  }
+ ]
 }

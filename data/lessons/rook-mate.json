@@ -12,29 +12,15 @@
  "puzzleTags": [],
  "puzzleThemes": [],
  "intro": {
-  "text": "Mating with king and rook takes longer than with a queen, because king and rook must work together. The usual method is to build a box with the rook, protected by your own king, and make it smaller and smaller until the enemy king is pushed into a corner. No checks are needed until the final mate.",
-  "credit": {
-   "source": "Wikibooks, Chess/The Endgame/King and Rook vs. King",
-   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
-   "licence": "CC BY-SA 4.0",
-   "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-   "authors": "Wikibooks contributors (see the page history)"
-  }
+  "text": "One rook cannot mate on its own, so your king has to join in. The rook draws a fence around the lone king, your king walks up to guard the rook, and together they move the fence closer until the enemy king is stuck on the edge of the board. It takes longer than with a queen, and near the end you sometimes need a waiting move: a quiet rook move that keeps the fence in place and simply hands the turn to your opponent."
  },
  "parts": [
   {
    "title": "Build the box",
    "fen": "8/8/8/8/4k3/8/8/RK6 w - - 0 1",
    "side": "white",
-   "keyIdea": "",
-   "text": "First improve your king, then use the rook to fence the black king into a box.",
-   "textCredit": {
-    "source": "Wikibooks, Chess/The Endgame/King and Rook vs. King",
-    "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
-    "licence": "CC BY-SA 4.0",
-    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-    "authors": "Wikibooks contributors (see the page history)"
-   },
+   "keyIdea": "The rook fences the king into a box, and your king guards the rook so the box can shrink safely.",
+   "text": "A worked example from Wikibooks. Your king and rook start in the corner, and Black's king stands in the middle of the board. Before the rook can do anything useful, your pieces need to work together.",
    "credit": {
     "source": "Wikibooks, Chess/The Endgame/King and Rook vs. King",
     "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
@@ -66,14 +52,7 @@
       "club": []
      },
      "notes": {
-      "text": "Bring the king towards the centre before building the box.",
-      "credit": {
-       "source": "Wikibooks, Chess/The Endgame/King and Rook vs. King",
-       "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
-       "licence": "CC BY-SA 4.0",
-       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-       "authors": "Wikibooks contributors (see the page history)"
-      }
+      "text": "The king heads for the centre. The rook will need its help later, both to stay safe and to give mate."
      }
     },
     {
@@ -98,6 +77,9 @@
       "beginner": [],
       "casual": [],
       "club": []
+     },
+     "notes": {
+      "text": "Closer again. From d3 the king guards c4, d4 and e4, squares the rook will want to use soon."
      }
     },
     {
@@ -122,6 +104,9 @@
       "beginner": [],
       "casual": [],
       "club": []
+     },
+     "notes": {
+      "text": "The rook takes the whole fourth rank, so Black's king on d5 cannot come down the board. The rook is far from the king on a4, so it is safe there."
      }
     },
     {
@@ -148,14 +133,7 @@
       "club": []
      },
      "notes": {
-      "text": "The box is d8-d4-h4: the black king cannot cross the d-file or the fourth rank.",
-      "credit": {
-       "source": "Wikibooks, Chess/The Endgame/King and Rook vs. King",
-       "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
-       "licence": "CC BY-SA 4.0",
-       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-       "authors": "Wikibooks contributors (see the page history)"
-      }
+      "text": "Black's king stepped to e5, and the rook slides to d4, right next to it. Your king on d3 guards the rook, so it cannot be taken. Now the king is shut into a box: right of the d-file and above the fourth rank."
      }
     },
     {
@@ -182,154 +160,17 @@
       "club": []
      },
      "notes": {
-      "text": "The box shrinks to e8-e4-h4.",
-      "credit": {
-       "source": "Wikibooks, Chess/The Endgame/King and Rook vs. King",
-       "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
-       "licence": "CC BY-SA 4.0",
-       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-       "authors": "Wikibooks contributors (see the page history)"
-      }
+      "text": "The king went to f5, so the rook steps to e4, still guarded by your king. The box is smaller: the f-, g- and h-files, above the fourth rank."
      }
     }
    ]
   },
   {
-   "title": "Creep closer",
-   "fen": "8/8/8/5k2/4R3/3K4/8/8 b - - 0 1",
-   "side": "white",
-   "keyIdea": "",
-   "text": "The box is e8-e4-h4. Black's king is keeping its distance, so the rook cannot shrink the box straight away.",
-   "textCredit": {
-    "source": "Wikibooks, Chess/The Endgame/King and Rook vs. King",
-    "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
-    "licence": "CC BY-SA 4.0",
-    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-    "authors": "Wikibooks contributors (see the page history)"
-   },
-   "credit": {
-    "source": "Wikibooks, Chess/The Endgame/King and Rook vs. King",
-    "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
-    "licence": "CC BY-SA 4.0",
-    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-    "authors": "Wikibooks contributors (see the page history)"
-   },
-   "mainLine": [
-    "f5f6",
-    "d3d4",
-    "f6f5",
-    "d4d5",
-    "f5f6",
-    "e4e5"
-   ],
-   "nodes": [
-    {
-     "ply": 0,
-     "fen": "8/8/8/5k2/4R3/3K4/8/8 b - - 0 1",
-     "decision": false,
-     "main": "f5f6",
-     "mainSan": "Kf6",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 1,
-     "fen": "8/8/5k2/8/4R3/3K4/8/8 w - - 1 2",
-     "decision": true,
-     "main": "d3d4",
-     "mainSan": "Kd4",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     },
-     "notes": {
-      "text": "The box can't be made smaller yet, so the king creeps closer.",
-      "credit": {
-       "source": "Wikibooks, Chess/The Endgame/King and Rook vs. King",
-       "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
-       "licence": "CC BY-SA 4.0",
-       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-       "authors": "Wikibooks contributors (see the page history)"
-      }
-     }
-    },
-    {
-     "ply": 2,
-     "fen": "8/8/5k2/8/3KR3/8/8/8 b - - 2 2",
-     "decision": false,
-     "main": "f6f5",
-     "mainSan": "Kf5",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 3,
-     "fen": "8/8/8/5k2/3KR3/8/8/8 w - - 3 3",
-     "decision": true,
-     "main": "d4d5",
-     "mainSan": "Kd5",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 4,
-     "fen": "8/8/8/3K1k2/4R3/8/8/8 b - - 4 3",
-     "decision": false,
-     "main": "f5f6",
-     "mainSan": "Kf6",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 5,
-     "fen": "8/8/5k2/3K4/4R3/8/8/8 w - - 5 4",
-     "decision": true,
-     "main": "e4e5",
-     "mainSan": "Re5",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     },
-     "notes": {
-      "text": "Back to shrinking the box: the process repeats itself.",
-      "credit": {
-       "source": "Wikibooks, Chess/The Endgame/King and Rook vs. King",
-       "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
-       "licence": "CC BY-SA 4.0",
-       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-       "authors": "Wikibooks contributors (see the page history)"
-      }
-     }
-    }
-   ]
-  },
-  {
-   "title": "Shrink the box to mate",
+   "title": "Creep closer, then shrink",
    "fen": "8/6k1/4R3/3K4/8/8/8/8 w - - 9 6",
    "side": "white",
-   "keyIdea": "",
-   "text": "After 8...Kf7 9.Re6 Kg7 the box is down to the last two ranks and files. Keep shrinking it with king and rook together; no checks are needed until the mate.",
-   "textCredit": {
-    "source": "Wikibooks, Chess/The Endgame/King and Rook vs. King",
-    "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
-    "licence": "CC BY-SA 4.0",
-    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-    "authors": "Wikibooks contributors (see the page history)"
-   },
+   "keyIdea": "When the rook cannot shrink the box safely, bring your king closer to it first, then shrink.",
+   "text": "The same example a few moves later. The rook on e6 has Black's king boxed into the top two ranks, on the f-, g- and h-files. The rook would like to go to f6, but Black's king on g7 would simply take it there.",
    "credit": {
     "source": "Wikibooks, Chess/The Endgame/King and Rook vs. King",
     "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
@@ -344,13 +185,7 @@
     "f7g7",
     "e6f6",
     "g7h7",
-    "f6g6",
-    "h7h8",
-    "f5f6",
-    "h8h7",
-    "f6f7",
-    "h7h8",
-    "g6h6"
+    "f6g6"
    ],
    "nodes": [
     {
@@ -365,14 +200,7 @@
       "club": []
      },
      "notes": {
-      "text": "The king follows the rook, keeping it protected.",
-      "credit": {
-       "source": "Wikibooks, Chess/The Endgame/King and Rook vs. King",
-       "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
-       "licence": "CC BY-SA 4.0",
-       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-       "authors": "Wikibooks contributors (see the page history)"
-      }
+      "text": "The king walks towards the rook. From e5 it guards e6, so the rook stays safe when Black's king comes to f7 to attack it."
      }
     },
     {
@@ -397,6 +225,9 @@
       "beginner": [],
       "casual": [],
       "club": []
+     },
+     "notes": {
+      "text": "Black's king did attack the rook from f7, but your king defends it. Now your king steps to f5, where it guards both e6 and f6."
      }
     },
     {
@@ -421,6 +252,9 @@
       "beginner": [],
       "casual": [],
       "club": []
+     },
+     "notes": {
+      "text": "With your king on f5 guarding it, the rook can move up to f6. The box shrinks to the g- and h-files on the top two ranks."
      }
     },
     {
@@ -445,72 +279,53 @@
       "beginner": [],
       "casual": [],
       "club": []
+     },
+     "notes": {
+      "text": "Black's king went to h7, next to g6, but your king on f5 guards the rook again. The box is now just h7 and h8: the king is stuck on the edge, and the mate is close. It still has h8 to go to, so this is not stalemate."
      }
-    },
+    }
+   ]
+  },
+  {
+   "title": "The waiting move",
+   "fen": "4k3/8/5K2/3R4/8/8/8/8 w - - 11 90",
+   "side": "white",
+   "keyIdea": "When the lone king has one square left, a quiet rook move can hand over the turn and force it onto that square.",
+   "text": "From a game played on Lichess: Black's king is on the edge, on e8, and your rook on d5 keeps it off the d-file. There is no mate this move. Look at where Black's king could go if it were Black's turn.",
+   "credit": {
+    "source": "Lichess games database, game w08d26qi",
+    "url": "https://lichess.org/w08d26qi#178",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "d5d6",
+    "e8f8",
+    "d6d8"
+   ],
+   "nodes": [
     {
-     "ply": 7,
-     "fen": "8/7k/6R1/5K2/8/8/8/8 b - - 16 9",
-     "decision": false,
-     "main": "h7h8",
-     "mainSan": "Kh8",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 8,
-     "fen": "7k/8/6R1/5K2/8/8/8/8 w - - 17 10",
+     "ply": 0,
+     "fen": "4k3/8/5K2/3R4/8/8/8/8 w - - 11 90",
      "decision": true,
-     "main": "f5f6",
-     "mainSan": "Kf6",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 9,
-     "fen": "7k/8/5KR1/8/8/8/8/8 b - - 18 10",
-     "decision": false,
-     "main": "h8h7",
-     "mainSan": "Kh7",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 10,
-     "fen": "8/7k/5KR1/8/8/8/8/8 w - - 19 11",
-     "decision": true,
-     "main": "f6f7",
-     "mainSan": "Kf7",
+     "main": "d5d6",
+     "mainSan": "Rd6",
      "popular": {
       "beginner": [],
       "casual": [],
       "club": []
      },
      "notes": {
-      "text": "Black's king can only shuffle between h7 and h8. If it were your move here, you would make a waiting move with the rook along the sixth rank.",
-      "credit": {
-       "source": "Wikibooks, Chess/The Endgame/King and Rook vs. King",
-       "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
-       "licence": "CC BY-SA 4.0",
-       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-       "authors": "Wikibooks contributors (see the page history)"
-      }
+      "text": "A waiting move. The rook stays on the d-file, so the box does not change, but now Black has to move, and the only square left is f8, facing your king on f6. Any rook move along the d-file that stays out of the king's reach would do the same job."
      }
     },
     {
-     "ply": 11,
-     "fen": "8/5K1k/6R1/8/8/8/8/8 b - - 20 11",
+     "ply": 1,
+     "fen": "4k3/8/3R1K2/8/8/8/8/8 b - - 12 90",
      "decision": false,
-     "main": "h7h8",
-     "mainSan": "Kh8",
+     "main": "e8f8",
+     "mainSan": "Kf8",
      "popular": {
       "beginner": [],
       "casual": [],
@@ -518,25 +333,18 @@
      }
     },
     {
-     "ply": 12,
-     "fen": "7k/5K2/6R1/8/8/8/8/8 w - - 21 12",
+     "ply": 2,
+     "fen": "5k2/8/3R1K2/8/8/8/8/8 w - - 13 91",
      "decision": true,
-     "main": "g6h6",
-     "mainSan": "Rh6#",
+     "main": "d6d8",
+     "mainSan": "Rd8#",
      "popular": {
       "beginner": [],
       "casual": [],
       "club": []
      },
      "notes": {
-      "text": "Mate in the corner.",
-      "credit": {
-       "source": "Wikibooks, Chess/The Endgame/King and Rook vs. King",
-       "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
-       "licence": "CC BY-SA 4.0",
-       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-       "authors": "Wikibooks contributors (see the page history)"
-      }
+      "text": "Mate. The rook checks along the eighth rank, and your king on f6 guards e7, f7 and g7, so Black's king has nowhere to go."
      }
     }
    ]

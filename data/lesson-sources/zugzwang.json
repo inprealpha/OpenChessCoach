@@ -4,7 +4,7 @@
  "kind": "endgame",
  "track": "endgames",
  "level": "intermediate",
- "side": "white",
+ "side": "black",
  "puzzleThemes": [
   "zugzwang"
  ],
@@ -12,6 +12,80 @@
  "priorKnowledge": [
   "king-and-pawn"
  ],
- "intro": "",
- "parts": []
+ "intro": "Zugzwang is a German word for a position where having to move hurts: every move makes things worse, but a player is not allowed to pass. It happens most in endgames with only kings and pawns, where a king is guarding something important and every step it takes gives that up. You win these positions by making the move that hands the turn to your opponent, often by taking the opposition or with a quiet pawn move.",
+ "parts": [
+  {
+   "title": "Take the opposition",
+   "fen": "8/4k1p1/7p/5P1P/5K2/8/8/8 b - - 4 52",
+   "side": "black",
+   "keyIdea": "Taking the opposition can leave the other king with no good square: wherever it steps, it gives something up.",
+   "text": "From a game played on Lichess. You are Black. White's king on f4 is guarding both its pawns, on f5 and h5, and if it ever has to step away, one of them will fall.",
+   "url": "https://lichess.org/training/gXycb",
+   "line": "Kf6 Kg4 Ke5 Kg3 Kxf5",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Kf6",
+     "text": "Your king faces White's king with one square between them, f6 against f4. Both White pawns are now blocked, so White has to move the king, and only one square, g4, still guards both pawns."
+    },
+    {
+     "ply": 2,
+     "san": "Ke5",
+     "text": "Now attack the f5 pawn from the other side. White has to move again: no square the king can reach still guards f5, and 54.f6 just gives the pawn away."
+    },
+    {
+     "ply": 4,
+     "san": "Kxf5",
+     "text": "The pawn falls, and your king is close to the h5 pawn as well. With two pawns against one and the more active king, you are winning."
+    }
+   ]
+  },
+  {
+   "title": "A waiting move",
+   "fen": "8/8/2pk4/p5p1/2KP2P1/8/P7/8 w - - 0 35",
+   "side": "white",
+   "keyIdea": "When you want the other side to be the one who moves, a spare pawn move hands them the turn.",
+   "text": "From a game played on Lichess. Your king would love to get to c5 or d5, but Black's king on d6 guards both squares. Count the spare pawn moves each side has left.",
+   "url": "https://lichess.org/training/SUhwA",
+   "line": "a4 Ke6 Kc5 Kd7 Kb6",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "a4",
+     "text": "A waiting move: your king stays put and Black must move. Black's a- and g-pawns are blocked and 35...c5 just loses a pawn, so Black's king has to step back. 35.a3 would not work, because Black answers 35...a4 and it is White who runs out of useful moves."
+    },
+    {
+     "ply": 2,
+     "san": "Kc5",
+     "text": "Black's king stepped back, so yours walks in. On c5 it attacks the c6 pawn and is heading for b6 and the a5 pawn."
+    },
+    {
+     "ply": 4,
+     "san": "Kb6",
+     "text": "Black's king came back to guard c6, so go after a5 instead. Black cannot defend both pawns, and you win one with a winning endgame."
+    }
+   ]
+  },
+  {
+   "title": "Zugzwang that mates",
+   "fen": "8/8/pp6/3k4/KP6/P7/8/8 b - - 1 61",
+   "side": "black",
+   "keyIdea": "Take away the last free squares, and the opponent may be forced to play a move that loses at once.",
+   "text": "From a game played on Lichess. You are Black. White's king on a4 is hemmed in by your pawns on a6 and b6. Look at which moves White would still have after your next move.",
+   "url": "https://lichess.org/training/hqTzE",
+   "line": "Kc4 b5 axb5#",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Kc4",
+     "text": "Your king takes b3 away from White's king, and your pawns already cover a5 and b5, so the king cannot move at all. The a-pawn is stuck behind its own king, which leaves White only one legal move: b4-b5."
+    },
+    {
+     "ply": 2,
+     "san": "axb5#",
+     "text": "The pawn takes on b5 with check, and White's king has nowhere to go. It is mate, and it only happened because White had to move."
+    }
+   ]
+  }
+ ]
 }

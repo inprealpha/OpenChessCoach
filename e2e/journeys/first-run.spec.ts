@@ -2,14 +2,16 @@
 import { readFileSync } from 'node:fs';
 import { CoachClient } from '../../packages/backend/src/client.ts';
 import { recordedFetch } from '../../packages/backend/src/verify/recorded-sites.ts';
+import { suggestNext, type CatalogueItem } from '../../packages/shared/src/content/course.ts';
 import { MOVE_GRADES } from '../../packages/shared/src/grader.ts';
 import { connection, expect, phoneLater, storedOnDevice, test } from '../fixtures/app.ts';
 
 /** Each Move Grade's symbol, as the board draws it. */
 const SYMBOL = { Best: '★', Good: '✓', Inaccuracy: '?!', Mistake: '?', Blunder: '??' };
 
-const lessonIndex = JSON.parse(readFileSync(new URL('../../data/lessons/index.json', import.meta.url), 'utf8')) as { kind: string }[];
-const OPENINGS = lessonIndex.filter((l) => l.kind === 'opening').length;
+const lessonIndex = JSON.parse(readFileSync(new URL('../../data/lessons/index.json', import.meta.url), 'utf8')) as CatalogueItem[];
+/** The first Lesson the app suggests to a new Player at this level. */
+const firstLesson = (level: 'beginner' | 'casual' | 'club') => suggestNext(lessonIndex, [], level)?.lesson.name;
 
 test.describe('a fresh install', () => {
   test.use({ seed: 'empty' });
@@ -20,13 +22,14 @@ test.describe('a fresh install', () => {
     await expect(page.getByRole('heading', { name: 'Welcome to your chess Coach' })).toBeVisible();
     // First the phone (phone.spec.ts), then the Player.
     await phoneLater(page);
-    // The suggestion counts the opening Lessons the app has, not a number written by hand.
-    await expect(page.getByText(`the Opening Lessons teach ${OPENINGS} beginner openings`)).toBeVisible();
+    // Where to begin names the first Lesson for the level chosen, from the Lessons the app has.
+    await expect(page.getByText(`At your level, the first Lesson is ${firstLesson('beginner')}.`)).toBeVisible();
     await page.getByRole('radio', { name: /Club/ }).check();
+    await expect(page.getByText(`At your level, the first Lesson is ${firstLesson('club')}.`)).toBeVisible();
     await page.getByLabel('Site').selectOption('lichess');
     await page.getByLabel('Username').fill('CoachVerify');
     await page.getByLabel('Goal 1').fill('Learn the Caro-Kann');
-    await page.getByRole('button', { name: 'Start with the Opening Lessons' }).click();
+    await page.getByRole('button', { name: 'Start with the Lessons' }).click();
     // The suggested start opens the Lessons themselves, not the Learn screen above them.
     await expect(page.getByRole('heading', { name: 'Lessons', exact: true })).toBeVisible();
 

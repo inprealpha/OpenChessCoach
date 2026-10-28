@@ -84,7 +84,7 @@ How to start a game, then openings for White and for Black. Each opening Lesson 
 | 10 | Scotch Game (`scotch-game`) | Intermediate | As White, you can open the centre at once with the Scotch Game, and develop quickly when Black takes on d4. | Italian Game | New | Scotch Game |
 | 11 | Opening traps (`opening-traps`) | Intermediate | You can spot the common opening traps on f2 and f7 and in other openings, and avoid falling into them. | Stopping the early queen attack, Italian Game | New | none |
 | 12 | Sicilian Defence (`sicilian-defence`) | Intermediate | As Black against 1.e4, you can play the Sicilian Defence: trade the c-pawn for White's d-pawn and fight back on the queenside. | Opening principles | New | Sicilian Defence |
-| 13 | French Defence (`french-defence`) | Intermediate | As Black against 1.e4, you can play the French Defence and know the plan against White's pawn chain: attack its base with c5 and f6. | Pawn chains and breaks | New | French Defence |
+| 13 | French Defence (`french-defence`) | Intermediate | As Black against 1.e4, you can play the French Defence and know the plan against White's pawn chain: attack its base with c5 and its front with f6. | Pawn chains and breaks | New | French Defence |
 | 14 | Gambits (`gambits`) | Intermediate | You can judge when a pawn offered in the opening is worth taking, and when to give one back to finish developing. | Opening traps | New | none |
 
 ## Track 4: How to think during a game
@@ -144,8 +144,8 @@ The order the app suggests the Lessons in, beginner Lessons first:
 29. Mate in two
 30. Caro-Kann Defence
 31. Queen's Gambit Declined
-32. King and pawn endgames
-33. Candidate moves and thinking ahead
+32. Candidate moves and thinking ahead
+33. King and pawn endgames
 34. Using a pin
 35. Deflection
 36. Ruy Lopez

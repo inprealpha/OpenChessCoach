@@ -96,7 +96,7 @@ test.describe('a Player with no games', () => {
   test('the first-run screen’s suggested start opens the Lessons', async ({ page, app }) => {
     await page.goto(`${app.url}/#pair=${app.code}`);
     await phoneLater(page);
-    await page.getByRole('button', { name: 'Start with the Opening Lessons' }).click();
+    await page.getByRole('button', { name: 'Start with the Lessons' }).click();
     await expect(page.getByRole('heading', { name: 'Lessons', exact: true })).toBeVisible();
     await expect(page).toHaveURL(/#\/lessons$/);
   });

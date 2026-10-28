@@ -1,12 +1,26 @@
 <script lang="ts">
-  // A Lesson: an opening, or worked examples of a Theme or an endgame, in one or more parts. At each
-  // of the Player's decisions the Coach asks "what are your options here?", the Engine grades the
-  // chosen move, the app shows how often players at the Player's level choose each move (openings
-  // only), and the Coach explains. One Coach call per decision.
+  // A Lesson: an opening, or worked examples of a Theme, an endgame or a way of thinking, in one or
+  // more parts. The intro says what the Player will learn and which Lessons it builds on (ADR 0011).
+  // At each of the Player's decisions the Coach asks "what are your options here?", the Engine grades
+  // the chosen move, the app shows how often players at the Player's level choose each move (openings
+  // only), and the Coach explains. One Coach call per decision. Every Coach call carries the Lesson's
+  // goal and the part's key idea; the Player sees a key idea only once its part is played.
   import { candidatesFrom, type GradedMove } from '@chess-coach/shared/analysis';
   import { playUci, SIDE_NAMES } from '@chess-coach/shared/chess';
+  import type { CoachRequest } from '@chess-coach/shared/coach/types';
+  import { LEVEL_NAMES, suggestNext, TRACK_NAMES } from '@chess-coach/shared/content/course';
   import type { Analysis } from '@chess-coach/shared/engine';
-  import { bandFor, BANDS, decisions, type Decision, type LessonData, type LessonNode } from '@chess-coach/shared/content/lessons';
+  import {
+    bandFor,
+    BANDS,
+    decisions,
+    type Credit,
+    type Decision,
+    type LessonData,
+    type LessonKind,
+    type LessonNode,
+    type LessonPart,
+  } from '@chess-coach/shared/content/lessons';
   import { MOVE_GRADES, type MoveGrade } from '@chess-coach/shared/grader';
   import Board from '../components/Board.svelte';
   import CoachPanel from '../components/CoachPanel.svelte';
@@ -17,6 +31,7 @@
   import { analyseForCoach, gradeForCoach } from '../lib/engine/engine.svelte.ts';
   import { Line } from '../lib/game.svelte.ts';
   import { gradeCount, gradeMark } from '../lib/grades.ts';
+  import { lessonProgress, lessonStatus } from '../lib/lesson-progress.svelte.ts';
   import { profile } from '../lib/profile.svelte.ts';
   import { store } from '../lib/storage.ts';
 
@@ -41,6 +56,7 @@
   let firstGrades = $state<Record<number, MoveGrade>>({});
   const line = new Line();
   const coach = new CoachThread();
+  const progress = lessonProgress();
 
   /** An example for the thinking box that fits the Theme or endgame being taught, within its two lines on a 375px phone. */
   const THINKING: Record<string, string> = {
@@ -53,6 +69,13 @@
     'king-and-pawn': 'I want my king in front of the pawn…',
     'rook-endgames': 'I want my rook active, behind the passed pawn…',
   };
+  /** The example for a Lesson without its own, by kind. */
+  const KIND_THINKING: Record<LessonKind, string> = {
+    opening: 'I want to control the centre…',
+    theme: 'I want to win material by…',
+    endgame: 'I want to cut off the enemy king…',
+    thinking: 'I want to check what they threaten…',
+  };
 
   const band = $derived(bandFor(profile.profile?.level ?? 'beginner', profile.profile?.rating ?? null));
   const decisionList = $derived<Decision[]>(lesson ? decisions(lesson) : []);
@@ -63,9 +86,18 @@
   /** Popularity at the Player's band, when the games database has enough games for this position. */
   const popular = $derived(node ? node.popular[band] : []);
   const poorChoice = $derived(result !== null && ['Inaccuracy', 'Mistake', 'Blunder'].includes(result.grade));
-  const thinkingExample = $derived(
-    lesson ? (THINKING[lesson.id] ?? (isOpening ? 'I want to control the centre…' : lesson.kind === 'theme' ? 'I want to win material by…' : 'I want to cut off the enemy king…')) : '',
+  const thinkingExample = $derived(lesson ? (THINKING[lesson.id] ?? KIND_THINKING[lesson.kind] ?? KIND_THINKING.theme) : '');
+  /** The Lessons this one builds on, with how far the Player got in each. Nothing is locked: they are links, not a gate. */
+  const builtOn = $derived(
+    (lesson?.priorKnowledge ?? []).flatMap((id) => {
+      const l = lessonCatalogue.find((x) => x.id === id);
+      return l ? [{ ...l, status: lessonStatus(progress.list, l.id, l.decisions) }] : [];
+    }),
   );
+  /** Whether the decision on screen is the last of its part, so the part's key idea can show once it is played well. */
+  const lastOfPart = $derived(current !== undefined && decisionList[step + 1]?.partIndex !== current.partIndex);
+  /** The key ideas of every part, for the summary at the end. */
+  const keyIdeas = $derived((lesson?.parts ?? []).map((p) => p.keyIdea?.trim()).filter(Boolean));
   /** "5 Best, 1 Good, 2 Mistakes": the Player's first tries, in Move Grade order. */
   const tally = $derived(
     MOVE_GRADES.map((g) => [g, Object.values(firstGrades).filter((x) => x === g).length] as const)
@@ -79,13 +111,19 @@
     if (n === decisionList.length) return 'Your first tries';
     return n === 1 ? 'Your first try at the one decision you played this time' : `Your first tries at the ${n} decisions you played this time`;
   });
-  /** The next Lesson in the same section of the catalogue (openings for the same side, Themes, endgames). */
+  /** The Lesson the app suggests next, counting this one as complete (ADR 0011). */
   const nextLesson = $derived.by(() => {
     if (!lesson) return undefined;
-    const { id, kind, side } = lesson;
-    const section = lessonCatalogue.filter((l) => l.kind === kind && (kind !== 'opening' || l.side === side));
-    return section[section.findIndex((l) => l.id === id) + 1];
+    const { id } = lesson;
+    const done = { lessonId: id, step: decisionList.length, completed: true, updatedAt: new Date().toISOString() };
+    return suggestNext(lessonCatalogue, [...progress.list.filter((p) => p.lessonId !== id), done], profile.profile?.level ?? 'beginner')?.lesson;
   });
+
+  /** The Lesson's goal and the part's key idea, sent with every Coach call during the Lesson (ADR 0011). */
+  function lessonFocus(p: LessonPart | undefined = part): Pick<CoachRequest, 'lessonFocus'> {
+    if (!lesson || !p) return {};
+    return { lessonFocus: { name: lesson.name, goal: lesson.goal ?? '', keyIdea: p.keyIdea ?? '' } };
+  }
 
   $effect(() => {
     void load(lessonId);
@@ -192,6 +230,7 @@
           popularity,
           finalTurn: step === decisionList.length - 1,
         },
+        ...lessonFocus(current?.part),
         ...(lesson.kind === 'opening' ? { opening: lesson.name } : {}),
       },
       typed.trim() ? `${played.san}: ${typed.trim()}` : played.san,
@@ -241,7 +280,9 @@
     hintLevel++;
     try {
       if (hintLevel === 1) {
-        if (api.coachReady) await coach.ask({ job: 'hint', fen: node.fen, recentMoves: line.sansUntilCursor(), ...(part ? { playerSide: part.side } : {}) }, 'Hint, please.');
+        if (api.coachReady) {
+          await coach.ask({ job: 'hint', fen: node.fen, recentMoves: line.sansUntilCursor(), ...(part ? { playerSide: part.side } : {}), ...lessonFocus() }, 'Hint, please.');
+        }
         else coach.say('Hints need the Coach, which is unavailable. Press Hint again to see the Engine’s move.');
         return;
       }
@@ -265,9 +306,17 @@
     }
   }
 
-  /** A Lesson hides the Winning Chances bar so it doesn't give the answer away, and so does the Coach. */
-  function whyContext(): { playerSide?: 'white' | 'black'; opening?: string; hideWinningChances: true } {
-    return { ...(part ? { playerSide: part.side } : {}), ...(lesson?.kind === 'opening' ? { opening: lesson.name } : {}), hideWinningChances: true };
+  /**
+   * A Lesson hides the Winning Chances bar so it doesn't give the answer away, and so does the Coach.
+   * Like every Coach call in a Lesson, a Why Question carries the Lesson's goal and the part's key idea.
+   */
+  function whyContext(): Pick<CoachRequest, 'playerSide' | 'opening' | 'hideWinningChances' | 'lessonFocus'> {
+    return {
+      ...(part ? { playerSide: part.side } : {}),
+      ...(lesson?.kind === 'opening' ? { opening: lesson.name } : {}),
+      hideWinningChances: true,
+      ...lessonFocus(),
+    };
   }
 
   async function why(question: string): Promise<void> {
@@ -303,14 +352,39 @@
   {:else if !lesson}
     <p class="muted">Loading the Lesson…</p>
   {:else}
+    {#snippet credited(c: Credit)}<a href={c.url} target="_blank" rel="noreferrer">{c.source}</a>, {c.authors},
+      <a href={c.licenceUrl} target="_blank" rel="noreferrer">{c.licence}</a>{/snippet}
     <h1>{lesson.name}</h1>
     {#if phase === 'intro'}
-      <div class="card intro">
+      {@const firstPart = lesson.parts[0]}
+      <section class="card intro" aria-label="About this Lesson">
+        <p class="muted small track">{TRACK_NAMES[lesson.track]?.name ?? ''} · {LEVEL_NAMES[lesson.level] ?? ''}</p>
+        {#if lesson.goal?.trim()}
+          <div class="goal">
+            <h2>What you will learn</h2>
+            <p>{lesson.goal}</p>
+          </div>
+        {/if}
+        {#if builtOn.length}
+          <div class="built-on">
+            <h2 id="built-on-heading">It builds on</h2>
+            <ul aria-labelledby="built-on-heading">
+              {#each builtOn as l (l.id)}
+                <li><a href={`#/lesson/${l.id}`}>{l.name}</a> <span class="muted small" class:complete={l.status === 'Complete'}>· {l.status}</span></li>
+              {/each}
+            </ul>
+            {#if builtOn.some((l) => l.status !== 'Complete')}
+              <p class="muted small">You can start this Lesson now, or do those first.</p>
+            {/if}
+          </div>
+        {/if}
         <p>{lesson.intro.text}</p>
-        <p class="credit small">
-          Adapted from <a href={lesson.intro.credit.url} target="_blank" rel="noreferrer">{lesson.intro.credit.source}</a>, {lesson.intro.credit.authors},
-          <a href={lesson.intro.credit.licenceUrl} target="_blank" rel="noreferrer">{lesson.intro.credit.licence}</a>.
-        </p>
+        {#if lesson.intro.credit}
+          <p class="credit small">Text adapted from {@render credited(lesson.intro.credit)}.</p>
+        {/if}
+        {#if isOpening && firstPart && firstPart.credit.url !== lesson.intro.credit?.url}
+          <p class="credit small">Moves from {@render credited(firstPart.credit)}.</p>
+        {/if}
         {#if isOpening}
           <p>You play {SIDE_NAMES[lesson.side]}. There are {decisionList.length} decisions.</p>
         {:else}
@@ -322,7 +396,7 @@
         {:else}
           <button type="button" onclick={() => start(0)}>Start the Lesson</button>
         {/if}
-      </div>
+      </section>
     {:else if part}
       <div class="board-layout">
         <div>
@@ -347,9 +421,12 @@
               <h2>{lesson.parts.length > 1 ? `${(current?.partIndex ?? 0) + 1} of ${lesson.parts.length}: ` : ''}{part.title}</h2>
               {#if part.text}<p>{part.text}</p>{/if}
               <p class="credit small">
-                {part.credit.licence === 'CC0 1.0' ? 'Position from' : 'Adapted from'}
-                <a href={part.credit.url} target="_blank" rel="noreferrer">{part.credit.source}</a>, {part.credit.authors},
-                <a href={part.credit.licenceUrl} target="_blank" rel="noreferrer">{part.credit.licence}</a>.
+                {#if part.textCredit && part.textCredit.url === part.credit.url}
+                  Position and text adapted from {@render credited(part.credit)}.
+                {:else}
+                  Position from {@render credited(part.credit)}.
+                  {#if part.textCredit}Text adapted from {@render credited(part.textCredit)}.{/if}
+                {/if}
               </p>
             </section>
           {/if}
@@ -385,6 +462,10 @@
                   <button type="button" onclick={next} disabled={coach.busy || advancing}>Continue</button>
                 {/if}
               </div>
+              <!-- After Continue, so on a phone the summing-up line never pushes the button off the screen. -->
+              {#if lastOfPart && !poorChoice && part.keyIdea?.trim()}
+                <p class="key-idea"><strong>Key idea:</strong> {part.keyIdea}</p>
+              {/if}
             </section>
           {/if}
           {#if phase === 'done'}
@@ -392,6 +473,12 @@
               <p><strong>Lesson complete.</strong> It is marked complete in your Player Profile.</p>
               {#if tally}
                 <p>{tallyLead}: {tally}.</p>
+              {/if}
+              {#if keyIdeas.length}
+                <h2 id="learned-heading">What you learned</h2>
+                <ul class="learned" aria-labelledby="learned-heading">
+                  {#each keyIdeas as idea, i (i)}<li>{idea}</li>{/each}
+                </ul>
               {/if}
               {#if nextLesson}
                 <p><a href={`#/lesson/${nextLesson.id}`}>Next Lesson: {nextLesson.name}</a></p>
@@ -413,10 +500,9 @@
               {/if}
             {/snippet}
           </CoachPanel>
-          {#if node?.notes}
+          {#if node?.notes?.credit || (lesson.statsSource && popular.length)}
             <p class="credit small">
-              Lesson notes adapted from <a href={node.notes.credit.url} target="_blank" rel="noreferrer">{node.notes.credit.source}</a>,
-              {node.notes.credit.authors}, <a href={node.notes.credit.licenceUrl} target="_blank" rel="noreferrer">{node.notes.credit.licence}</a>.
+              {#if node?.notes?.credit}Lesson notes adapted from {@render credited(node.notes.credit)}.{/if}
               {#if lesson.statsSource && popular.length}Popularity: {lesson.statsSource}.{/if}
             </p>
           {/if}
@@ -427,7 +513,17 @@
 </section>
 
 <style>
-  .intro { max-width: 42rem; display: flex; flex-direction: column; gap: 0.5rem; align-items: flex-start; }
+  .intro { max-width: 42rem; display: flex; flex-direction: column; gap: 0.6rem; align-items: flex-start; }
+  .intro p { margin: 0; }
+  .intro h2 { margin: 0 0 0.2rem; }
+  .intro .goal { border-left: 3px solid var(--accent); padding-left: 0.7rem; }
+  .built-on ul { margin: 0; padding-left: 1.2rem; }
+  .built-on li { margin: 0.15rem 0; }
+  .built-on .complete { color: var(--accent); font-weight: 600; }
+  .built-on p { margin-top: 0.2rem; }
+  .key-idea { margin: 0.6rem 0 0; }
+  .learned { margin: 0 0 0.6rem; padding-left: 1.2rem; }
+  .learned li { margin: 0.2rem 0; }
   .credit { color: var(--muted); }
   .small { font-size: 0.8rem; }
   .center { text-align: center; }

@@ -11,9 +11,10 @@ in the top right of every screen.
 ## Sub-features
 
 - Welcome screen ("Welcome to your chess Coach"): on a desktop with no phone paired, first the
-  phone (`phone.md`), then ("Step 2 of 2") level, optional site username, Goals. The
-  suggestion counts the opening Lessons in the catalogue ("teach 7 beginner openings").
-- `Start with the Opening Lessons` (opens the Lessons, `#/lessons`) or `Skip to the main menu`.
+  phone (`phone.md`), then ("Step 2 of 2") level, optional site username, Goals. "Where to
+  begin" names the first Lesson the app suggests for the level picked ("At your level, the first
+  Lesson is Italian Game."), from `suggestNext` in `packages/shared/src/content/course.ts`.
+- `Start with the Lessons` (opens the Lessons, `#/lessons`) or `Skip to the main menu`.
 - An unknown username (or a site that is limiting requests) shows its error inside the group `Your
   online account (optional)`, under the `Username` box, which takes the focus with
   `aria-invalid="true"`; the error says the Player can set Site to None instead. Onboarding waits.
@@ -46,7 +47,7 @@ in the top right of every screen.
 ## Drive
 
 Browser on an `empty` run: open `pairUrl`, `I’ll do it later` on the phone step, pick a level, type `CoachVerify` (Lichess), add a Goal,
-`Start with the Opening Lessons`. Then `$C db get profile`.
+`Start with the Lessons`. Then `$C db get profile`.
 
 Coach quality, on a `default` run: `#/settings`, check `Best`, then `$C db get settings`; open
 `Advanced`, change `Model for Hints`, and `Custom` is checked.

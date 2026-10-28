@@ -1,5 +1,6 @@
 // The real Coach: Claude through the Claude Agent SDK, on the owner's own Claude Code login
-// (ADR 0001). It has no tools, no file access, no MCP servers and no settings from disk.
+// (ADR 0001). It has no tools, no file access, no MCP servers (the claude.ai account's connectors
+// included) and no settings from disk.
 import { query, type SDKMessage } from '@anthropic-ai/claude-agent-sdk';
 import type { CoachRawReply } from '@chess-coach/shared/coach/types';
 import type { CoachStatus } from '@chess-coach/shared/protocol';
@@ -11,14 +12,18 @@ import { REPLY_SCHEMA, SYSTEM_PROMPT, userPrompt } from './prompts.ts';
 export interface RealCoachOptions {
   /** Path to the `claude` executable the owner logged in with. */
   claudePath?: string;
+  /** The Agent SDK's `query`; tests pass their own to see the options the Coach sends. */
+  query?: typeof query;
 }
 
 export class RealCoach implements CoachPort {
   readonly name = 'real' as const;
   private readonly claudePath: string | undefined;
+  private readonly query: typeof query;
 
   constructor(options: RealCoachOptions = {}) {
     this.claudePath = options.claudePath;
+    this.query = options.query ?? query;
   }
 
   async status(): Promise<CoachStatus> {
@@ -29,7 +34,7 @@ export class RealCoach implements CoachPort {
   async ask(call: CoachCall, onText: (delta: string) => void): Promise<CoachRawReply> {
     const abort = new AbortController();
     call.signal?.addEventListener('abort', () => abort.abort());
-    const stream = query({
+    const stream = this.query({
       prompt: userPrompt(call.brief),
       options: {
         model: call.model,
@@ -42,6 +47,8 @@ export class RealCoach implements CoachPort {
         includePartialMessages: true,
         maxTurns: 3,
         cwd: tmpdir(),
+        // mcpServers: {} doesn't stop the claude.ai account's connectors, which add ~88,000 tokens to a call.
+        env: { ...process.env, ENABLE_CLAUDEAI_MCP_SERVERS: 'false' },
         abortController: abort,
         outputFormat: { type: 'json_schema', schema: REPLY_SCHEMA as unknown as Record<string, unknown> },
         // npm's claude.cmd can't be launched directly, so the SDK's own build runs on the same login.

@@ -24,7 +24,7 @@ Maia-3's code is AGPL-3.0, and its weights have no licence of their own; the mod
 
 ## Consequences
 
-- New runtime dependency: onnxruntime-web (MIT), about 13 MB. The model needs about 425 MB of memory while loaded.
+- New runtime dependency: onnxruntime-web (MIT), about 14 MB in the npm package (its Node build and one `.wasm` file, copied into `dist/ort/` by the build). The model needs a few hundred MB of memory once loaded.
 - `THIRD_PARTY_NOTICES.md` lists the Maia-3 weights (AGPL-3.0) and onnxruntime-web (MIT).
 - A position set up by hand has no history. Maia-3 then sees only that position and guesses less well.
 - The Coach presents a guess as a move many players would reach for, never as a prediction of what this Player will do. Even Maia-3 misses about a third of the tempting mistakes.

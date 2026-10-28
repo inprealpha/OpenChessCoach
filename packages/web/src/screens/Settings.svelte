@@ -230,6 +230,19 @@
     <p class="muted">Loading…</p>
   {/if}
   {#if message}<p class="error" role="alert">{message}</p>{/if}
+  <!-- Shown even when the desktop can't be reached: the AGPL asks that everyone using the app over
+       a network, on the Wi-Fi or through the tunnel, is offered its source (ADR 0011). -->
+  <section class="card" aria-label="About">
+    <h2>About OpenChessCoach</h2>
+    <p class="small">
+      OpenChessCoach is free software: you can read, change and share its source code under the GNU GPL, version 3 or later.
+      Maia-3, the model that suggests the moves a player would reach for, is shared under the GNU AGPL, version 3.
+    </p>
+    <p class="small">
+      <a href="https://github.com/inprealpha/OpenChessCoach" target="_blank" rel="noreferrer">Source code</a> ·
+      <a href="https://github.com/inprealpha/OpenChessCoach/blob/main/THIRD_PARTY_NOTICES.md" target="_blank" rel="noreferrer">Third-party notices</a>
+    </p>
+  </section>
 </section>
 
 <style>

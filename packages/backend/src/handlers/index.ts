@@ -5,6 +5,7 @@ import type { Pairing, Device } from '../pairing.ts';
 import type { CoachService } from '../coach/service.ts';
 import type { EngineService } from '../engine/service.ts';
 import type { EngineConfig } from '../server.ts';
+import type { TemptingMovesService } from '../tempting-moves/service.ts';
 import type { TunnelManager } from '../tunnel.ts';
 import { coachHandlers } from './coach.ts';
 import { engineHandlers } from './engine.ts';
@@ -32,6 +33,8 @@ export interface AppContext {
   revalidate: () => void;
   /** Aborted when the app closes, for work that outlives its request, such as a Review. */
   stopping: AbortSignal;
+  /** The moves a Player would reach for: Maia-3, Opus until it is downloaded, or the fake (ADR 0011). */
+  temptingMoves: TemptingMovesService;
   log: (line: string) => void;
 }
 

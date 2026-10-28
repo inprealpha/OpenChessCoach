@@ -11,6 +11,7 @@ export const systemHandlers: HandlerMap<'hello' | 'pairing.info' | 'pairing.rese
     verify: app.verify,
     deviceId: device.id,
     coach: await app.coach.status(),
+    temptingMoves: app.temptingMoves.status(),
   }),
 
   'pairing.info': async (_req, { app }) => {

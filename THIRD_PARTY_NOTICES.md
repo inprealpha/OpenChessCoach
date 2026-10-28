@@ -14,9 +14,45 @@ It includes or is built from the following work.
 | [qrcode](https://github.com/soldair/node-qrcode) | Pairing QR codes | MIT |
 | [Claude Agent SDK](https://github.com/anthropics/claude-agent-sdk-typescript) | The Coach, through your own Claude Code login | Anthropic's terms (see the package) |
 | [cloudflared](https://github.com/cloudflare/cloudflared) | Away-from-home access; downloaded on first use, not bundled | Apache-2.0 |
+| [ONNX Runtime Web](https://github.com/microsoft/onnxruntime) 1.30.0 (`onnxruntime-web` with `onnxruntime-common`), `dist/ort/` | Runs the Maia-3 model on the desktop | MIT, Copyright (c) Microsoft Corporation |
 
 The Stockfish source code is available at <https://github.com/official-stockfish/Stockfish>, and
 the WebAssembly build's at <https://github.com/nmrugg/stockfish.js>.
+
+## Maia-3
+
+The moves a Player would reach for come from **Maia-3** (5M model) by the Computational Social
+Science Lab, University of Toronto: <https://github.com/CSSLab/maia3>, weights at
+<https://huggingface.co/UofTCSSLab/Maia3-5M> (revision `b6559de2398d7140b985f28fd2c19fb5e47ddabe`),
+from the paper "Chessformer: A Unified Architecture for Chess Modeling" (Monroe, Eilender, Chalmers,
+Tang and Anderson, ICLR 2026). Maia-3's code is licensed under the GNU Affero General Public License,
+version 3 (AGPL-3.0), and its weights carry no other licence, so OpenChessCoach treats them as
+AGPL-3.0 too (ADR 0011). The app downloads them after install, converted to ONNX by
+`data-prep/maia3-onnx-export.py`; it does not include Maia-3's code. The source of OpenChessCoach, as
+the AGPL asks, is at <https://github.com/inprealpha/OpenChessCoach>, and the app's Settings link to it.
+
+## ONNX Runtime
+
+The `onnxruntime-web` and `onnxruntime-common` packages carry this notice:
+
+> MIT License
+>
+> Copyright (c) Microsoft Corporation
+>
+> Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+> associated documentation files (the "Software"), to deal in the Software without restriction,
+> including without limitation the rights to use, copy, modify, merge, publish, distribute,
+> sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+> furnished to do so, subject to the following conditions:
+>
+> The above copyright notice and this permission notice shall be included in all copies or
+> substantial portions of the Software.
+>
+> THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+> NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+> NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+> DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
+> OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ## Chess pieces
 

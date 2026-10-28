@@ -145,6 +145,17 @@ export interface CoachStatus {
   reason?: string;
 }
 
+/**
+ * Where the desktop gets the moves a Player would reach for (ADR 0011): Maia-3 once its model is
+ * downloaded, Opus until then, a fixed fake in verify mode. `model` is the model download's state.
+ */
+export interface TemptingMovesStatus {
+  source: 'maia' | 'opus' | 'fake';
+  model: 'off' | 'missing' | 'downloading' | 'ready' | 'failed';
+  /** Plain-language detail, such as how far a download has got or why it failed. */
+  detail: string;
+}
+
 export interface TunnelState {
   enabled: boolean;
   status: 'off' | 'starting' | 'running' | 'error';
@@ -185,7 +196,10 @@ export interface EngineGameRecord {
 // ---------- Requests ----------
 
 export interface RequestMap {
-  hello: { req: { client: string }; res: { protocol: number; version: string; verify: boolean; deviceId: string; coach: CoachStatus } };
+  hello: {
+    req: { client: string };
+    res: { protocol: number; version: string; verify: boolean; deviceId: string; coach: CoachStatus; temptingMoves: TemptingMovesStatus };
+  };
   'pairing.info': { req: Record<string, never>; res: PairingInfo };
   /** Revokes every device token and the pairing code. The caller gets a fresh token so it stays paired. */
   'pairing.reset': { req: Record<string, never>; res: { token: string } };

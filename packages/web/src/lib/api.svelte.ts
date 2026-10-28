@@ -11,6 +11,7 @@ import {
   type TunnelState,
 } from '@chess-coach/shared/protocol';
 import { loadToken, saveToken, store } from './storage.ts';
+import { thisDeviceName } from './this-device.ts';
 
 export type ConnectionState = 'starting' | 'online' | 'offline' | 'unpaired';
 
@@ -53,6 +54,8 @@ class Api {
   pairError = $state<string | null>(null);
   /** Increments every time the connection comes back, so screens can resync. */
   reconnects = $state(0);
+  /** Increments every time a device pairs or pairing is reset, so a screen showing the QR code can check for the phone. */
+  pairingChanges = $state(0);
 
   private token: string | null = null;
   private ws: WebSocket | null = null;
@@ -102,7 +105,7 @@ class Api {
       const res = await fetch('/api/pair', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ code, deviceName: deviceName() }),
+        body: JSON.stringify({ code, deviceName: thisDeviceName }),
       });
       const body = (await res.json()) as { token?: string; error?: string };
       if (!res.ok || !body.token) {
@@ -175,7 +178,7 @@ class Api {
       this.state = 'online';
       this.watch(ws);
       try {
-        const hello = await this.request('hello', { client: 'web' });
+        const hello = await this.request('hello', { client: 'web', deviceName: thisDeviceName });
         this.verify = hello.verify;
         this.coach = hello.coach;
         this.reconnects++;
@@ -268,6 +271,7 @@ class Api {
       const e = msg.event;
       if (e.kind === 'coach-status') this.coach = e.status;
       if (e.kind === 'tunnel') this.tunnel = e.tunnel;
+      if (e.kind === 'device-paired' || e.kind === 'pairing-reset') this.pairingChanges++;
       return;
     }
     const p = this.pending.get(msg.id);
@@ -305,12 +309,6 @@ class Api {
     this.token = token;
     await saveToken(token);
   }
-}
-
-function deviceName(): string {
-  const ua = navigator.userAgent;
-  const kind = /iPhone|iPad/.test(ua) ? 'iPhone or iPad' : /Android/.test(ua) ? 'Android' : /Mac/.test(ua) ? 'Mac' : /Windows/.test(ua) ? 'Windows' : /Linux/.test(ua) ? 'Linux' : 'Browser';
-  return `${kind} browser`;
 }
 
 export const api = new Api();

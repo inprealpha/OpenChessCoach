@@ -1,17 +1,23 @@
 import { PROTOCOL_VERSION } from '@chess-coach/shared/protocol';
 import { AppError } from '../errors.ts';
 import { pairUrl, qrSvg } from '../network.ts';
+import { phoneStatus, remindLater } from '../phone.ts';
 import { getSettings, updateSettings } from '../settings.ts';
 import type { HandlerMap } from './index.ts';
 
-export const systemHandlers: HandlerMap<'hello' | 'pairing.info' | 'pairing.reset' | 'settings.get' | 'settings.update'> = {
-  hello: async (_req, { app, device }) => ({
-    protocol: PROTOCOL_VERSION,
-    version: app.version,
-    verify: app.verify,
-    deviceId: device.id,
-    coach: await app.coach.status(),
-  }),
+export const systemHandlers: HandlerMap<
+  'hello' | 'pairing.info' | 'pairing.reset' | 'pairing.remindLater' | 'settings.get' | 'settings.update'
+> = {
+  hello: async (req, { app, device }) => {
+    if (typeof req.deviceName === 'string' && req.deviceName !== device.name) app.pairing.rename(device.id, req.deviceName);
+    return {
+      protocol: PROTOCOL_VERSION,
+      version: app.version,
+      verify: app.verify,
+      deviceId: device.id,
+      coach: await app.coach.status(),
+    };
+  },
 
   'pairing.info': async (_req, { app }) => {
     const url = pairUrl(app.lanUrl, app.pairing.code);
@@ -24,6 +30,7 @@ export const systemHandlers: HandlerMap<'hello' | 'pairing.info' | 'pairing.rese
       tunnel,
       tunnelPairUrl,
       tunnelQrSvg: tunnelPairUrl ? await qrSvg(tunnelPairUrl) : null,
+      phone: phoneStatus(app.db, app.clock),
     };
   },
 
@@ -36,6 +43,8 @@ export const systemHandlers: HandlerMap<'hello' | 'pairing.info' | 'pairing.rese
     app.log('Pairing was reset: every other device must scan the new QR code.');
     return { token };
   },
+
+  'pairing.remindLater': async (req, { app }) => remindLater(app.db, app.clock, req.never === true),
 
   'settings.get': async (_req, { app }) => getSettings(app.db),
 

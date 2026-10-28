@@ -60,9 +60,10 @@ What verify mode gives you:
   Reviews and works out every Coach brief's facts, ADR 0007) and in coachctl alike.
 - **A fake clock** (`coachctl clock --set` / `--advance`).
 - **A fresh data folder** in the system temp folder, seeded: `default` is a Player who finished
-  first run (level casual, Goals set) with one Imported Game (an Italian Game, game id 1, the Player
-  as White); `empty` is a fresh install; `many-games` is `default` plus 60 newer games, more than
-  one page of the game list.
+  first run (level casual, Goals set, a phone paired) with one Imported Game (an Italian Game, game
+  id 1, the Player as White); `empty` is a fresh install; `many-games` is `default` plus 60 newer
+  games, more than one page of the game list; `no-phone` is `default` with no phone paired, so the
+  main menu asks for one.
 - **A free port**, never the owner's 8737, so several runs and the owner's own app coexist.
 - **Recorded sites**: username imports answer from `packages/backend/recordings/sites.json`
   (Lichess `CoachVerify`, chess.com `coachverify`; `NoSuchPlayer` is a 404, `BusyPlayer` a 429).

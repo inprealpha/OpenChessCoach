@@ -10,7 +10,8 @@ in the top right of every screen.
 
 ## Sub-features
 
-- Welcome screen ("Welcome to your chess Coach"): level, optional site username, Goals. The
+- Welcome screen ("Welcome to your chess Coach"): on a desktop with no phone paired, first the
+  phone (`phone.md`), then ("Step 2 of 2") level, optional site username, Goals. The
   suggestion counts the opening Lessons in the catalogue ("teach 7 beginner openings").
 - `Start with the Opening Lessons` (opens the Lessons, `#/lessons`) or `Skip to the main menu`.
 - An unknown username (or a site that is limiting requests) shows its error inside the group `Your
@@ -44,7 +45,7 @@ in the top right of every screen.
 
 ## Drive
 
-Browser on an `empty` run: open `pairUrl`, pick a level, type `CoachVerify` (Lichess), add a Goal,
+Browser on an `empty` run: open `pairUrl`, `I’ll do it later` on the phone step, pick a level, type `CoachVerify` (Lichess), add a Goal,
 `Start with the Opening Lessons`. Then `$C db get profile`.
 
 Coach quality, on a `default` run: `#/settings`, check `Best`, then `$C db get settings`; open

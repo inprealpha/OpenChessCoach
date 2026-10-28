@@ -172,3 +172,6 @@ Browser, after the Review: `Move 11. Bxf7+, Mistake` in the list `Moves`, then `
 - A Review's Move Grades are the record that counts. They can differ slightly from those shown
   during an Engine Game, which come from the browser's Engine. In verify mode both run
   single-threaded at the same fixed depth.
+- Each key moment's brief gets the tempting moves of its position (ADR 0011), from the game's own
+  moves: `coach_tempting` has one row per key moment, joined to its `coach_calls` row by `call_id`
+  (`tempting-moves.test.ts`).

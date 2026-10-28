@@ -36,6 +36,8 @@ const MAX_THREADS = 200;
 const MAX_LOGGED_CALLS = 500;
 /** Clears the questions of Coach calls older than the oldest one kept (the parameter), through the index on call_id. */
 export const QUESTION_CLEANUP = 'DELETE FROM coach_questions WHERE call_id < ?';
+/** The same for the tempting moves logged with each call (ADR 0011). */
+export const TEMPTING_CLEANUP = 'DELETE FROM coach_tempting WHERE call_id < ?';
 
 export class CoachService {
   private readonly db: Db;
@@ -105,18 +107,18 @@ export class CoachService {
       );
     } catch (err) {
       if (err instanceof CoachLimitError) {
-        this.log(ask.job, model, brief, null, [], tool?.calls);
+        this.log(ask, model, brief, null, [], tool?.calls);
         this.limitUntil = err.resetsAt ?? new Date(this.clock.now().getTime() + 15 * 60_000);
         const next = await this.status();
         this.onStatus(next);
         throw new AppError('coach-limit', next.reason ?? err.message);
       }
       if (err instanceof CoachUnavailableError) {
-        this.log(ask.job, model, brief, null, [], tool?.calls);
+        this.log(ask, model, brief, null, [], tool?.calls);
         this.onStatus({ state: 'unavailable', reason: err.message });
         throw new AppError('coach-unavailable', err.message);
       }
-      this.log(ask.job, model, brief, null, [], tool?.calls);
+      this.log(ask, model, brief, null, [], tool?.calls);
       // Out of time with the Engine: once, the Coach answers from the brief alone instead.
       if (err instanceof CoachDeadlineError && options.retryWithoutEngine) return this.ask(ask, onText, { ...options, engine: undefined });
       throw new AppError('coach-error', `The Coach couldn't answer: ${err instanceof Error ? err.message : String(err)}`);
@@ -125,12 +127,12 @@ export class CoachService {
       signal?.removeEventListener('abort', cancel);
     }
     if (!raw.text.trim()) {
-      this.log(ask.job, model, brief, raw, [], tool?.calls);
+      this.log(ask, model, brief, raw, [], tool?.calls);
       throw new AppError('coach-error', 'The Coach couldn’t answer: its reply was empty. Try asking again.');
     }
     // Moves the Engine's answers gave the Coach count as Engine output; a move it made up is still stripped.
     const guarded = guardReply(brief, raw, tool?.moves);
-    this.log(ask.job, model, brief, raw, guarded.stripped, tool?.calls);
+    this.log(ask, model, brief, raw, guarded.stripped, tool?.calls);
     const note = guarded.note ? addCoachNote(this.db, this.clock, guarded.note) : null;
     if (ask.threadId) this.remember(ask.threadId, ask.question, raw.text);
     return {
@@ -171,13 +173,20 @@ export class CoachService {
     if (this.threads.size > MAX_THREADS) this.threads.delete(this.threads.keys().next().value as string);
   }
 
-  private log(job: string, model: string, brief: Brief, raw: unknown, stripped: string[], engineCalls: readonly EngineCall[] = []): void {
+  private log(ask: CoachAsk, model: string, brief: Brief, raw: unknown, stripped: string[], engineCalls: readonly EngineCall[] = []): void {
     const { lastInsertRowid } = this.db
       .prepare('INSERT INTO coach_calls (coach, job, model, brief, raw_reply, stripped, at) VALUES (?, ?, ?, ?, ?, ?, ?)')
-      .run(this.coach.name, job, model, JSON.stringify(brief), raw ? JSON.stringify(raw) : null, JSON.stringify(stripped), iso(this.clock));
-    const ask = this.db.prepare('INSERT INTO coach_questions (call_id, question, answer, refused, ms) VALUES (?, ?, ?, ?, ?)');
+      .run(this.coach.name, ask.job, model, JSON.stringify(brief), raw ? JSON.stringify(raw) : null, JSON.stringify(stripped), iso(this.clock));
+    // Where the tempting moves came from, and what an Opus guess cost on top of the call (ADR 0011).
+    const t = ask.temptingFrom;
+    if (t) {
+      this.db
+        .prepare('INSERT INTO coach_tempting (call_id, source, moves, ms, usage) VALUES (?, ?, ?, ?, ?)')
+        .run(lastInsertRowid, t.source, JSON.stringify(t.moves), t.ms, t.usage ? JSON.stringify(t.usage) : null);
+    }
+    const question = this.db.prepare('INSERT INTO coach_questions (call_id, question, answer, refused, ms) VALUES (?, ?, ?, ?, ?)');
     for (const c of engineCalls) {
-      ask.run(lastInsertRowid, JSON.stringify(c.question), c.answer ? JSON.stringify(c.answer) : null, c.refused ?? null, c.ms);
+      question.run(lastInsertRowid, JSON.stringify(c.question), c.answer ? JSON.stringify(c.answer) : null, c.refused ?? null, c.ms);
     }
     const trimmed = this.db
       .prepare('DELETE FROM coach_calls WHERE id NOT IN (SELECT id FROM coach_calls ORDER BY id DESC LIMIT ?)')
@@ -186,6 +195,7 @@ export class CoachService {
     if (trimmed.changes) {
       const oldest = this.db.prepare('SELECT MIN(id) AS id FROM coach_calls').get() as { id: number };
       this.db.prepare(QUESTION_CLEANUP).run(oldest.id);
+      this.db.prepare(TEMPTING_CLEANUP).run(oldest.id);
     }
   }
 }

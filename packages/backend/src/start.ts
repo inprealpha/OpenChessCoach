@@ -6,10 +6,14 @@ import { join } from 'node:path';
 import { checkClaude } from './claude-check.ts';
 import { systemClock } from './clock.ts';
 import { RealCoach } from './coach/real.ts';
+import { desktopThreads } from './engine/node-engine.ts';
 import { pairUrl, qrTerminal } from './network.ts';
 import { defaultDataDir } from './paths.ts';
 import { appVersion, startOptions, webRoot } from './runtime.ts';
 import { startApp } from './server.ts';
+import { ModelDownloader } from './tempting-moves/download.ts';
+import { OpusTemptingMoves } from './tempting-moves/opus.ts';
+import { TemptingMovesService } from './tempting-moves/service.ts';
 
 const HELP = `Usage: npx openchesscoach@latest [options]
 
@@ -49,6 +53,13 @@ async function main(): Promise<void> {
   }
 
   const log = (line: string) => process.stdout.write(`  ${line}\n`);
+  // The moves a Player would reach for (ADR 0011): Maia-3, downloaded in the background into the
+  // data folder; Opus answers until it is ready.
+  const temptingMoves = new TemptingMovesService({
+    local: { downloader: new ModelDownloader({ dir: join(dataDir, 'models'), log }), threads: desktopThreads() },
+    fallback: new OpusTemptingMoves(claude.path ? { claudePath: claude.path } : {}),
+    log,
+  });
   const app = await startApp({
     dataDir,
     host,
@@ -59,6 +70,7 @@ async function main(): Promise<void> {
     clock: systemClock,
     version: appVersion(),
     engine: { depth: 14, multiPv: 5, singleThread: false },
+    temptingMoves,
     log,
     onEvent: (event) => {
       if (event.kind === 'tunnel' && event.tunnel.status === 'running' && event.tunnel.url) {
@@ -81,6 +93,8 @@ async function main(): Promise<void> {
     join(dataDir, 'instance.json'),
     JSON.stringify({ pid: process.pid, port: app.port, url: app.localUrl, lanUrl: app.lanUrl, version: appVersion(), dataDir }, null, 2),
   );
+  // Only once the app is up: the download waits a little more, then runs in the background.
+  temptingMoves.start();
 
   async function printQr(): Promise<void> {
     const url = pairUrl(app.lanUrl, app.pairing.code);

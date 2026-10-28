@@ -87,3 +87,10 @@ $C db get coach_questions                      # each question, the Engine's ans
 - With Why Questions or Reviews on Haiku (the Thrifty preset, or a custom model), the Think deeper
   card warns that on Haiku it makes answers fuller but can add mistakes; Balanced and Best show no
   warning (`first-run.spec.ts`).
+- **Tempting moves (ADR 0011).** A Why Question's brief gets the moves many players would reach for:
+  marked `tempting: true` on the Engine's candidates and on the move, and the others in the brief's
+  `tempting`, each with its Move Grade, line and facts. Verify mode's fake tempting moves are the
+  position's captures and checks. After 1. e4 e5 2. Nf3 Nc6 3. Bc4 Nd4 4. O-O, the fake Coach adds
+  "Many players would reach for … here, but it is graded …" (`board.spec.ts`). Each call's tempting
+  moves are in `coach_tempting` (`source` fake, the moves, and `usage` for an Opus guess). Live
+  Coaching and Lesson turns get none; a Hint gets them only from Maia-3 (`tempting-moves.test.ts`).

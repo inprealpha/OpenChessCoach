@@ -81,6 +81,15 @@ export interface CoachAsk {
   replies?: Candidate[];
   /** What the opponent threatens in `fen`, when the Engine finds a real threat. Only the desktop sets it. */
   threat?: Threat;
+  /**
+   * The tempting moves in `fen` (ADR 0011): the moves many players at the Player's level would reach
+   * for there, from Maia-3 (or Opus until its model is downloaded), each graded by the desktop's
+   * Engine as an asked move is: a candidate as it is, any other with its score and the Engine's line
+   * after it. Only the desktop sets them.
+   */
+  tempting?: Candidate[];
+  /** Where the tempting moves came from and what that cost, for the call log; never in the brief. */
+  temptingFrom?: { source: 'maia' | 'opus' | 'fake'; moves: string[]; ms: number; usage?: CoachUsage };
   /** The Player's question or typed answer. */
   question?: string;
   /** Lesson context: bundled notes and how often players at the Player's level choose each move. */

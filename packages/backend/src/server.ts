@@ -22,6 +22,7 @@ import { createNodeEngine, desktopThreads } from './engine/node-engine.ts';
 import { EngineService } from './engine/service.ts';
 import type { Engine } from '@chess-coach/shared/engine';
 import type { CoachPort } from './coach/port.ts';
+import { TemptingMovesService } from './tempting-moves/service.ts';
 import { TunnelManager, type TunnelStarter } from './tunnel.ts';
 import { verifyRoutes } from './verify/routes.ts';
 
@@ -52,6 +53,8 @@ export interface AppOptions {
   engineStarter?: () => Promise<Engine>;
   /** Sees every event broadcast to clients, for example to print a new QR code. */
   onEvent?: (event: ServerEvent) => void;
+  /** Where the moves a Player would reach for come from (ADR 0011); the fixed fake by default. */
+  temptingMoves?: TemptingMovesService;
 }
 
 export interface RunningApp {
@@ -123,6 +126,7 @@ export async function startApp(options: AppOptions): Promise<RunningApp> {
       for (const s of sockets) if (!pairing.verify(tokens.get(s))) s.close(CLOSE_UNAUTHORISED, 'Pairing was reset');
     },
     stopping: stopping.signal,
+    temptingMoves: options.temptingMoves ?? TemptingMovesService.fake(),
   };
 
   server.on('request', (req, res) => {
@@ -170,6 +174,7 @@ export async function startApp(options: AppOptions): Promise<RunningApp> {
       if (closed) return;
       closed = true;
       await tunnel.stop();
+      await context.temptingMoves.close();
       for (const s of sockets) s.terminate();
       stopping.abort();
       wss.close();

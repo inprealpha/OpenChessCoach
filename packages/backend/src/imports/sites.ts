@@ -150,8 +150,17 @@ async function readJson<T>(res: Response, alive: () => void): Promise<T> {
   return JSON.parse(text) as T;
 }
 
+/** A Player's rating on a site, with the pool it is from and, for Maia-3 (ADR 0011), their blitz rating there. */
+export interface SiteRating {
+  rating: number;
+  /** The site's name for the pool `rating` is from, such as "rapid" or "chess_daily". */
+  pool: string;
+  /** The Player's blitz rating on the site, when they have played blitz there. */
+  blitz?: number;
+}
+
 /** The Player's rating on `site`; `signal` stops the lookup, for example when the Player's connection closes. */
-export async function fetchRating(fetchImpl: typeof fetch, site: RatingSite, username: string, signal?: AbortSignal): Promise<number> {
+export async function fetchRating(fetchImpl: typeof fetch, site: RatingSite, username: string, signal?: AbortSignal): Promise<SiteRating> {
   const u = cleanUsername(username);
   const opts: SiteOptions = { fetch: fetchImpl, ...(signal ? { signal } : {}) };
   // Neither site wants parallel requests, and an import can run for minutes.
@@ -162,18 +171,20 @@ export async function fetchRating(fetchImpl: typeof fetch, site: RatingSite, use
       const data = await request(opts, site, `${LICHESS}/api/user/${encodeURIComponent(u)}`, u, 'application/json', readJson<User>);
       if (data.disabled) throw new AppError('unknown-user', `The Lichess account "${u}" is closed.`);
       const perfs = data.perfs ?? {};
+      const blitz = perfs.blitz?.rating && (perfs.blitz.games ?? 0) > 0 ? { blitz: perfs.blitz.rating } : {};
       for (const key of ['rapid', 'classical', 'blitz', 'bullet', 'correspondence']) {
         const p = perfs[key];
-        if (p?.rating && (p.games ?? 0) > 0) return p.rating;
+        if (p?.rating && (p.games ?? 0) > 0) return { rating: p.rating, pool: key, ...blitz };
       }
-      return perfs.rapid?.rating ?? 1500;
+      return { rating: perfs.rapid?.rating ?? 1500, pool: 'rapid', ...blitz };
     });
   }
   type Stats = Record<string, { last?: { rating?: number } } | undefined>;
   const data = await request(opts, site, `${CHESSCOM}/pub/player/${encodeURIComponent(u.toLowerCase())}/stats`, u, 'application/json', readJson<Stats>);
+  const blitz = data.chess_blitz?.last?.rating ? { blitz: data.chess_blitz.last.rating } : {};
   for (const key of ['chess_rapid', 'chess_daily', 'chess_blitz', 'chess_bullet']) {
     const r = data[key]?.last?.rating;
-    if (r) return r;
+    if (r) return { rating: r, pool: key, ...blitz };
   }
   throw new AppError('unknown-user', `"${u}" has no rated games on chess.com yet.`);
 }

@@ -2,6 +2,8 @@ import { COACH_JOBS, MAX_QUESTION_LENGTH } from '@chess-coach/shared/protocol';
 import { isValidFen } from '@chess-coach/shared/chess';
 import { AppError } from '../errors.ts';
 import { withReviewScores } from '../reviews.ts';
+import { guessTempting, historyFromSans, withTempting } from '../tempting-moves/ask.ts';
+import { playerMaiaRating } from '../tempting-moves/rating.ts';
 import type { HandlerMap } from './index.ts';
 
 export const coachHandlers: HandlerMap<'coach.ask'> = {
@@ -15,7 +17,17 @@ export const coachHandlers: HandlerMap<'coach.ask'> = {
     }
     // Check the Coach can answer before spending the Engine's time on the facts.
     await app.coach.assertAvailable();
-    const ask = withReviewScores(app.db, req.gameId, await app.desktopEngine.factsFor(req));
+    // The moves many players would reach for (ADR 0011), guessed while the Engine works out the facts.
+    const guess = guessTempting(req.job, {
+      service: app.temptingMoves,
+      fen: req.fen,
+      playerSide: req.playerSide === 'white' || req.playerSide === 'black' ? req.playerSide : undefined,
+      rating: playerMaiaRating(app.db),
+      history: historyFromSans(req.fen, Array.isArray(req.recentMoves) ? req.recentMoves : []),
+      signal,
+    });
+    const facts = withReviewScores(app.db, req.gameId, await app.desktopEngine.factsFor(req));
+    const ask = await withTempting(facts, guess, app.desktopEngine);
     return app.coach.ask(ask, (text) => delta(text), { signal, engine: app.desktopEngine, onStatus: (status) => delta('', undefined, status) });
   },
 };

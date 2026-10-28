@@ -51,6 +51,7 @@
     "@tsconfig/svelte": "^5.0.8",
     "@types/qrcode": "^1.5.6",
     "@types/ws": "^8.18.1",
+    "onnxruntime-web": "1.30.0",
     "rolldown": "^1.2.13",
     "stockfish": "^18.0.8"
   },

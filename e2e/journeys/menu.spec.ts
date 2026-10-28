@@ -269,6 +269,14 @@ test('Settings and the Player Profile open from the icons in the top right of ev
   }
 });
 
+test('Settings offer the source code, as the AGPL of the Maia-3 model asks (ADR 0011)', async ({ paired, app }) => {
+  await paired.goto(`${app.url}/#/settings`);
+  const about = paired.getByRole('region', { name: 'About' });
+  await expect(about.getByRole('link', { name: 'Source code' })).toHaveAttribute('href', 'https://github.com/inprealpha/OpenChessCoach');
+  await expect(about.getByRole('link', { name: 'Third-party notices' })).toHaveAttribute('href', /THIRD_PARTY_NOTICES\.md$/);
+  await expect(about).toContainText('GNU AGPL');
+});
+
 test.describe('on a phone', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 

@@ -13,7 +13,18 @@ The brief (ADR 0004, ADR 0009) covers the position, the Engine's best moves, the
 ## Consequences
 
 - Answers with Think deeper on take longer and use more of the owner's Claude limits. The Settings screen says so, and says the setting is meant for deeper study.
-- Measured with the latest Haiku on a fixed set of 20 positions and checked once on 5 held out, each answer judged claim by claim against the Engine at depth 18 without the judge knowing which mode wrote it: answers became somewhat more complete, not more accurate. Answers that missed the main reason went from 3 to 1 of 20, in both rounds of judging, though long tactics did not gain; false claims stayed level (6 off, 5 on; 2 and 2 held out). The typical answer took 15 seconds instead of 10, read about 2.8 times the input tokens (most of them cached) and wrote about a third more output tokens. Most remaining false claims are the Coach's own wording, in both modes: a reply called forced when it is only best, or material added up over a line. Two rules in the Think deeper instructions cut those from 6 to 1 with the tool on; with it off they are still 4 of the 6. Whether a stronger model, as the app's Balanced and Best presets use, gains more from the tool is not measured yet.
+- **Think deeper makes answers more complete, not more accurate, on every model measured.** The Coach answered a fixed set of 20 positions, then 5 held out, with it off and on, from the same brief; Opus judges checked every claim with the Engine at depth 18, without knowing which mode wrote which answer. Over all 25 positions:
+
+  | | Haiku | Sonnet | Opus |
+  |---|---|---|---|
+  | False claims, off → on | 8 → 7 | 6 → 12 | 6 → 7 |
+  | Answers missing the main reason, off → on | 3 → 1 | 0 → 0 | 3 → 0 |
+  | Question fully answered, off → on | 18 → 18 | 15 → 20 | 16 → 21 |
+  | Median time per answer, off → on | 10.7 → 15.0 s | 6.1 → 10.2 s | 14.9 → 17.7 s |
+  | Median input tokens, off → on (mostly cached) | 3,900 → 10,800 | 3,850 → 9,850 | 3,850 → 16,150 |
+  | Estimated cost per answer at API prices, off → on | about $0.001 → $0.002 | $0.013 → $0.018 | $0.040 → $0.055 |
+
+  The same answers judged twice moved by up to 3 out of 20, so only the larger differences mean much: Opus answers miss the point less often and answer the question more fully; Sonnet makes more false claims, mostly material miscounted or a piece placed wrongly deep in a line. Most false claims in every mode are the Coach's own wording, not the Engine's facts: a reply called forced when it is only best, or material added up over a line. Two rules in the Think deeper instructions, added after the first Haiku round, cut those from 6 to 1 for Haiku; with Think deeper off they are still most of the false claims.
 - The questions and the Engine's answers are logged with each Coach call (the `coach_questions` table), and the Coach panel says how many questions an answer asked.
 - The real-Coach check makes one Why Question with Think deeper on, and accepts moves from the Engine's answers exactly as the guard does.
 - The fake Coach asks one question, or scripted ones, so verify mode and the tests exercise the tool end to end.

@@ -1,7 +1,8 @@
 // The Coach port through the protocol seam (ADR 0002, ADR 0004).
 import { describe, expect, it } from 'vitest';
+import type { Options, query } from '@anthropic-ai/claude-agent-sdk';
 import type { CoachRequest } from '@chess-coach/shared/coach/types';
-import { BRIEF_BUDGET } from '@chess-coach/shared/coach/brief';
+import { BRIEF_BUDGET, type Brief } from '@chess-coach/shared/coach/brief';
 import { candidatesFrom, gradeFromAnalyses } from '@chess-coach/shared/analysis';
 import { playSan } from '@chess-coach/shared/chess';
 import { formatScore } from '@chess-coach/shared/grader';
@@ -13,7 +14,7 @@ import { createNodeEngine } from '../src/engine/node-engine.ts';
 import { NOTE_CAP } from '../src/profile.ts';
 import { REPLY_SCHEMA, SYSTEM_PROMPT } from '../src/coach/prompts.ts';
 import { VERIFY_ENGINE } from '../src/verify/instance.ts';
-import { toRawReply } from '../src/coach/real.ts';
+import { RealCoach, toRawReply } from '../src/coach/real.ts';
 import { client, instance, rows } from './helpers.ts';
 
 const START = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
@@ -499,6 +500,20 @@ describe('the Coach port', () => {
     expect(toRawReply('Streamed text. ', { ...structured, text: '' }).text).toBe('Streamed text.');
     expect(toRawReply('', undefined).text).toBe('');
     expect(REPLY_SCHEMA.required).toContain('text');
+  });
+
+  it('keeps the claude.ai account\'s connectors out of real Coach calls', async () => {
+    let sent: Options | undefined;
+    const fakeQuery = (({ options }: { options?: Options }) => {
+      sent = options;
+      return (async function* () {})();
+    }) as unknown as typeof query;
+    const brief: Brief = { job: 'why', level: 'casual', sideToMove: 'white', fen: START, recentMoves: '', candidates: [], maxWords: 120, allowNote: false, hideMoves: false };
+    await new RealCoach({ query: fakeQuery }).ask({ job: 'why', model: 'haiku', brief }, () => {});
+    expect(sent?.mcpServers).toEqual({});
+    expect(sent?.env?.ENABLE_CLAUDEAI_MCP_SERVERS).toBe('false');
+    // The env option replaces Claude Code's whole environment, so the rest must come along.
+    expect(sent?.env?.PATH).toBe(process.env.PATH);
   });
 
   it('refuses an illegal position or move before calling the Coach', async () => {

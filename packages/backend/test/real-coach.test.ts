@@ -24,6 +24,8 @@ const result = {
   subtype: 'success',
   is_error: false,
   num_turns: 2,
+  total_cost_usd: 0.0123,
+  modelUsage: { 'claude-haiku-5-5': {} },
   structured_output: { text: 'Develop a knight.', moves: [], arrows: [], highlights: [], note: null },
   usage: { input_tokens: 10, output_tokens: 20, cache_read_input_tokens: 30, cache_creation_input_tokens: 40 },
 };
@@ -48,7 +50,7 @@ describe('the real Coach', () => {
     const seen: Options[] = [];
     const reply = await new RealCoach({ query: fakeQuery(seen) }).ask({ job: 'why', model: 'haiku', brief }, () => {});
     expect(reply.text).toBe('Develop a knight.');
-    expect(reply.usage).toMatchObject({ inputTokens: 10, outputTokens: 20, cacheReadTokens: 30, cacheWriteTokens: 40, turns: 2 });
+    expect(reply.usage).toMatchObject({ inputTokens: 10, outputTokens: 20, cacheReadTokens: 30, cacheWriteTokens: 40, turns: 2, costUsd: 0.0123, models: ['claude-haiku-5-5'] });
     expect(seen[0]).toMatchObject({ tools: [], allowedTools: [], mcpServers: {}, strictMcpConfig: true, settingSources: [], maxTurns: 3 });
     // The claude.ai account's connectors stay out, and no ceiling is needed on a call without the tool.
     expect(seen[0]?.env?.ENABLE_CLAUDEAI_MCP_SERVERS).toBe('false');

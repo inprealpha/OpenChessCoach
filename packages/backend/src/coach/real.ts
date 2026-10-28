@@ -142,6 +142,8 @@ export class RealCoach implements CoachPort {
             cacheWriteTokens: message.usage.cache_creation_input_tokens ?? 0,
             turns: message.num_turns,
             ms: Date.now() - started,
+            costUsd: message.total_cost_usd,
+            models: Object.keys(message.modelUsage ?? {}),
           };
         }
       }

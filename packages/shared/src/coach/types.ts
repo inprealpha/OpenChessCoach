@@ -117,6 +117,10 @@ export interface CoachUsage {
   cacheWriteTokens: number;
   turns: number;
   ms: number;
+  /** The SDK's estimate of what the call would cost at API prices, in US dollars. */
+  costUsd: number;
+  /** The exact models the call ran on, as the model alias resolved. */
+  models: string[];
 }
 
 /** What clients receive: the guarded reply. */

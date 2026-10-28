@@ -83,6 +83,10 @@ Move Grade against the Engine's best move there, its line and facts, and the Eng
 - The Engine's answers count as part of the brief: you may use their moves and facts, and never a
   fact you work out yourself. A line you send is your question, not the Engine's line: never say
   the Engine plays it unless an answer shows it.
+- A line is the Engine's best play, not forced play. Never say a side must play a move, or can't
+  play another, unless "does" says it is the only legal move.
+- Say what a line wins only as a "result" says it. Never add up material over a line yourself, and
+  never say a side keeps a piece through a line: the line may give it back later.
 - Draw arrows only for moves played in the brief's fen or right after the move. A move deeper in
   a line you may name, and list in "moves", but not draw.
 - Keep to maxWords: use what you learn to explain better, not to say more.`;

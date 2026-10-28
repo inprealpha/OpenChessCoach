@@ -7,7 +7,8 @@
 //   node scripts/think-deeper-eval.ts --out <file>          answer every position both ways on the latest Haiku
 //   node scripts/think-deeper-eval.ts --out <file> --set held-out --model app
 //
-// --set picks the tuning set or the held-out one (default: tuning). --model is a model alias, or
+// --set picks the tuning set or the held-out one (default: tuning), --only some positions by id and
+// --modes one mode (default: off,on). --model is a model alias, or
 // "app" for the model each job uses in the app's Balanced preset. It spends the owner's Claude
 // limits: about two Coach calls per position.
 import { readFileSync, writeFileSync } from 'node:fs';
@@ -135,7 +136,7 @@ export interface EvalAnswer {
   ms: number;
 }
 
-async function answer(positions: EvalPosition[], model: string): Promise<EvalAnswer[]> {
+async function answer(positions: EvalPosition[], model: string, only: readonly string[]): Promise<EvalAnswer[]> {
   const { mkdtempSync } = await import('node:fs');
   const { tmpdir } = await import('node:os');
   const { join } = await import('node:path');
@@ -158,7 +159,7 @@ async function answer(positions: EvalPosition[], model: string): Promise<EvalAns
   for (const p of positions) {
     const ask = await askFor(p, engine, reviewScores);
     // Both modes get the same brief: the Engine's searches are cached, and the order alternates.
-    const modes: ('off' | 'on')[] = out.length % 4 === 0 ? ['off', 'on'] : ['on', 'off'];
+    const modes = (out.length % 4 === 0 ? (['off', 'on'] as const) : (['on', 'off'] as const)).filter((m) => only.includes(m));
     for (const mode of modes) {
       updateSettings(db, { thinkDeeper: mode === 'on' });
       const started = Date.now();
@@ -202,7 +203,7 @@ async function askFor(
   };
 }
 
-const { values } = parseArgs({ options: { select: { type: 'boolean' }, out: { type: 'string' }, set: { type: 'string', default: 'tuning' }, model: { type: 'string', default: 'haiku' }, only: { type: 'string' } } });
+const { values } = parseArgs({ options: { select: { type: 'boolean' }, out: { type: 'string' }, set: { type: 'string', default: 'tuning' }, model: { type: 'string', default: 'haiku' }, only: { type: 'string' }, modes: { type: 'string', default: 'off,on' } } });
 const { quietSqliteWarning } = await import('../packages/backend/src/runtime.ts');
 quietSqliteWarning();
 if (values.select) {
@@ -213,7 +214,7 @@ if (values.select) {
   const all = JSON.parse(readFileSync(POSITIONS, 'utf8')) as EvalPosition[];
   const only = values.only?.split(',');
   const positions = all.filter((p) => p.set === values.set && (!only || only.includes(p.id)));
-  writeFileSync(values.out, `${JSON.stringify(await answer(positions, values.model), null, 1)}\n`);
+  writeFileSync(values.out, `${JSON.stringify(await answer(positions, values.model, values.modes.split(',')), null, 1)}\n`);
 } else {
   process.stderr.write('Pass --select or --out <file>.\n');
   process.exit(2);

@@ -1,0 +1,16 @@
+{
+ "id": "french-defence",
+ "name": "French Defence",
+ "kind": "opening",
+ "track": "openings",
+ "level": "intermediate",
+ "side": "black",
+ "eco": "C11",
+ "puzzleTags": [],
+ "goal": "As Black against 1.e4, you can play the French Defence and know the plan against White's pawn chain: attack its base with c5 and f6.",
+ "priorKnowledge": [
+  "pawn-structure"
+ ],
+ "intro": "",
+ "parts": []
+}

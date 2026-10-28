@@ -1,0 +1,16 @@
+{
+ "id": "sicilian-defence",
+ "name": "Sicilian Defence",
+ "kind": "opening",
+ "track": "openings",
+ "level": "intermediate",
+ "side": "black",
+ "eco": "B90",
+ "puzzleTags": [],
+ "goal": "As Black against 1.e4, you can play the Sicilian Defence: trade the c-pawn for White's d-pawn and fight back on the queenside.",
+ "priorKnowledge": [
+  "opening-principles"
+ ],
+ "intro": "",
+ "parts": []
+}

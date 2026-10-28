@@ -1,0 +1,17 @@
+{
+ "id": "trapped-pieces",
+ "name": "Trapping a piece",
+ "kind": "theme",
+ "track": "themes",
+ "level": "intermediate",
+ "side": "white",
+ "puzzleThemes": [
+  "trappedPiece"
+ ],
+ "goal": "You can win a piece that has no safe square left, and keep your own pieces from walking into a trap.",
+ "priorKnowledge": [
+  "blunder-check"
+ ],
+ "intro": "",
+ "parts": []
+}

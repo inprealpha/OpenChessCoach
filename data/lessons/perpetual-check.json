@@ -1,0 +1,19 @@
+{
+ "id": "perpetual-check",
+ "name": "Perpetual check",
+ "kind": "theme",
+ "track": "themes",
+ "level": "intermediate",
+ "goal": "When you are losing, you can see when checks that never stop will save the game with a draw.",
+ "priorKnowledge": [
+  "checks-captures-threats",
+  "draws"
+ ],
+ "side": "white",
+ "puzzleTags": [],
+ "puzzleThemes": [],
+ "intro": {
+  "text": ""
+ },
+ "parts": []
+}

@@ -1,0 +1,18 @@
+{
+ "id": "checks-captures-threats",
+ "name": "Checks, captures and threats",
+ "kind": "thinking",
+ "track": "thinking",
+ "level": "beginner",
+ "goal": "You can list every check, capture and threat for both sides before choosing a move, and find the forcing move that wins.",
+ "priorKnowledge": [
+  "blunder-check"
+ ],
+ "side": "white",
+ "puzzleTags": [],
+ "puzzleThemes": [],
+ "intro": {
+  "text": ""
+ },
+ "parts": []
+}

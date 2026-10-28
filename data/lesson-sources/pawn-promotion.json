@@ -1,0 +1,15 @@
+{
+ "id": "pawn-promotion",
+ "name": "Pawns: promotion and en passant",
+ "kind": "endgame",
+ "track": "endgames",
+ "level": "beginner",
+ "side": "white",
+ "puzzleThemes": [
+  "promotion"
+ ],
+ "goal": "You can promote a pawn, tell with the square of the pawn whether a king can catch it, and capture en passant.",
+ "priorKnowledge": [],
+ "intro": "",
+ "parts": []
+}

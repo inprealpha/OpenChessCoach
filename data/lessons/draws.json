@@ -1,0 +1,18 @@
+{
+ "id": "draws",
+ "name": "Stalemate and other draws",
+ "kind": "endgame",
+ "track": "endgames",
+ "level": "beginner",
+ "goal": "You can avoid stalemate when you are winning, aim for it when you are losing, and know the other draws: repetition and too little material to mate.",
+ "priorKnowledge": [
+  "queen-mate"
+ ],
+ "side": "white",
+ "puzzleTags": [],
+ "puzzleThemes": [],
+ "intro": {
+  "text": ""
+ },
+ "parts": []
+}

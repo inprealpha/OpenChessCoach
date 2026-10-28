@@ -1,0 +1,17 @@
+{
+ "id": "quiet-moves",
+ "name": "Quiet moves",
+ "kind": "theme",
+ "track": "themes",
+ "level": "intermediate",
+ "side": "white",
+ "puzzleThemes": [
+  "quietMove"
+ ],
+ "goal": "You can find a winning move that is not a check or a capture, such as one that cuts off the king or makes a threat that cannot be met.",
+ "priorKnowledge": [
+  "mating-patterns"
+ ],
+ "intro": "",
+ "parts": []
+}

@@ -1,0 +1,22 @@
+{
+ "id": "attacking-the-king",
+ "name": "Attacking the king",
+ "kind": "thinking",
+ "track": "thinking",
+ "level": "intermediate",
+ "goal": "You can attack a king with more pieces than defend it, open lines towards it, and punish a king left in the centre.",
+ "priorKnowledge": [
+  "mating-patterns",
+  "open-files"
+ ],
+ "side": "white",
+ "puzzleTags": [],
+ "puzzleThemes": [
+  "kingsideAttack",
+  "exposedKing"
+ ],
+ "intro": {
+  "text": ""
+ },
+ "parts": []
+}

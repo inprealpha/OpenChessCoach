@@ -1,0 +1,17 @@
+{
+ "id": "passed-pawns",
+ "name": "Passed pawns",
+ "kind": "endgame",
+ "track": "endgames",
+ "level": "intermediate",
+ "side": "white",
+ "puzzleThemes": [
+  "advancedPawn"
+ ],
+ "goal": "You can make a passed pawn from a pawn majority, use an outside passed pawn to pull the enemy king away, and stop an enemy passed pawn.",
+ "priorKnowledge": [
+  "king-and-pawn"
+ ],
+ "intro": "",
+ "parts": []
+}

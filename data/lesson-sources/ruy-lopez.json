@@ -1,0 +1,78 @@
+{
+ "id": "ruy-lopez",
+ "name": "Ruy Lopez",
+ "kind": "opening",
+ "track": "openings",
+ "level": "intermediate",
+ "side": "white",
+ "eco": "C88",
+ "puzzleTags": [
+  "Ruy_Lopez"
+ ],
+ "goal": "As White, you can play the main line of the Ruy Lopez, and know why the bishop attacks the knight that guards e5.",
+ "priorKnowledge": [
+  "italian-game"
+ ],
+ "intro": "In the Ruy Lopez, or Spanish Game, White develops the bishop to b5 to put pressure on the knight that defends e5. White plays for quick development, castling and control of the centre, and would like to build a big pawn centre later with c3 and d4. The usual reply is 3...a6, the Morphy Defence, which asks the bishop to decide at once: take the knight or retreat.",
+ "introUrl": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bb5",
+ "parts": [
+  {
+   "title": "Ruy Lopez",
+   "fen": "start",
+   "side": "white",
+   "keyIdea": "",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bb5",
+   "line": "e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O Be7 Re1 b5 Bb3 d6 c3",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "e4",
+     "text": "The opening is a race to develop and control the centre. 1.e4 opens lines for your queen and king's bishop, controls d5 and f5, and keeps a Black pawn off e4 so your knight can later sit safely on f3. 1.d4 is the other main choice and gives slower, more closed games; knight moves to the edge like 1.Na3 do little for the centre.",
+     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory"
+    },
+    {
+     "ply": 2,
+     "san": "Nf3",
+     "text": "Black's e5 pawn is undefended. 2.Nf3 attacks it while developing a piece, also eyes d4 and prepares castling; it is by far the most popular move. 2.f4 (King's Gambit) and 2.d4 attack with pawns instead. 2.Qh5 or 2.Qf3 hope for a quick mate, but if Black stays calm they are not dangerous.",
+     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5"
+    },
+    {
+     "ply": 4,
+     "san": "Bb5",
+     "text": "2...Nc6 defends e5 and controls d4. White usually develops the bishop next and keeps c3 and d4 in reserve. 3.Bb5, the Spanish, is the most popular and most studied move: by pressing the knight that guards e5 it threatens that pawn indirectly. 3.Bc4 (Italian) aims at f7 instead, and 3.d4 (Scotch) opens the centre at once.",
+     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6"
+    },
+    {
+     "ply": 6,
+     "san": "Ba4",
+     "text": "3...a6 puts the question to the bishop: take or retreat, but it cannot stay. 4.Bxc6, the Exchange Variation, does not win e5 yet, because after 4...dxc6 5.Nxe5? Qd4! Black forks knight and pawn. 4.Ba4 is the main line: it keeps the bishop and the pressure on the knight. Watch out later for ...b5 and ...c4 trapping a bishop on b3.",
+     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bb5/3...a6"
+    },
+    {
+     "ply": 8,
+     "san": "O-O",
+     "text": "4...Nf6 develops and attacks e4. 5.O-O is the main line: castle to safety and get ready for Re1, leaving e4 to look after itself. If 5...Nxe4 (the Open Spanish), 6.d4 wins the pawn back. 5.d3 or 5.Nc3 defend e4 directly but get in the way of White's plan of c3 and d4.",
+     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bb5/3...a6/4._Ba4/4...Nf6"
+    },
+    {
+     "ply": 10,
+     "san": "Re1",
+     "text": "5...Be7, the Closed Spanish, guards the king along the e-file. Now Black really threatens ...b5 and ...Nxe4, winning the pawn. 6.Re1 defends e4 with a developing move. 6.Qe2 also holds it, but puts the queen on a file likely to open; 6.d3 and 6.Nc3 get in the way of c3 and d4.",
+     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bb5/3...a6/4._Ba4/4...Nf6/5._O-O/5...Be7"
+    },
+    {
+     "ply": 12,
+     "san": "Bb3",
+     "text": "6...b5 ends the pressure on Black's knight by attacking the bishop. 7.Bb3 is necessary to save it, and from b3 the bishop still looks at f7.",
+     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bb5/3...a6/4._Ba4/4...Nf6/5._O-O/5...Be7/6._Re1/6...b5"
+    },
+    {
+     "ply": 14,
+     "san": "c3",
+     "text": "White's plan is to play d4, but 8.d4? at once is a mistake. 8.c3 prepares it, and also gives the bishop on b3 a retreat square on c2. h3 will be useful later, but 8.h3 now allows 8...Na5, swapping off the bishop.",
+     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bb5/3...a6/4._Ba4/4...Nf6/5._O-O/5...Be7/6._Re1/6...b5/7._Bb3/7...d6"
+    }
+   ]
+  }
+ ]
+}

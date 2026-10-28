@@ -1,0 +1,14 @@
+{
+ "id": "check",
+ "name": "Getting out of check",
+ "kind": "theme",
+ "track": "themes",
+ "level": "beginner",
+ "side": "white",
+ "goal": "You can tell when a king is in check and find every way out: move the king, block the check, or take the checking piece.",
+ "priorKnowledge": [
+  "attack-and-defend"
+ ],
+ "intro": "",
+ "parts": []
+}

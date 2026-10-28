@@ -1,0 +1,14 @@
+{
+ "id": "piece-values",
+ "name": "What the pieces are worth",
+ "kind": "thinking",
+ "track": "thinking",
+ "level": "beginner",
+ "side": "white",
+ "goal": "You can count material with the usual values (pawn 1, knight and bishop 3, rook 5, queen 9), and tell a good trade from a bad one.",
+ "priorKnowledge": [
+  "attack-and-defend"
+ ],
+ "intro": "",
+ "parts": []
+}

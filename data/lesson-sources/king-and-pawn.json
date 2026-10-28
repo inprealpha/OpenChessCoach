@@ -1,0 +1,115 @@
+{
+ "id": "king-and-pawn",
+ "name": "King and pawn endgames",
+ "kind": "endgame",
+ "track": "endgames",
+ "level": "intermediate",
+ "side": "white",
+ "puzzleThemes": [
+  "pawnEndgame"
+ ],
+ "goal": "You can tell whether king and pawn win against a lone king, using the opposition and the key squares in front of the pawn.",
+ "priorKnowledge": [
+  "active-king"
+ ],
+ "intro": "Two ideas decide most endgames with only kings and pawns: the rule of the square, which tells you whether a king can catch a pawn, and the opposition, the stand-off between two kings with one square between them. A passed pawn far from the other pawns, an outside passed pawn, is often enough to win.",
+ "introUrl": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings",
+ "playOut": {
+  "title": "Win with the extra pawn",
+  "fen": "8/8/4k3/8/4K3/4P3/8/8 b - - 0 1",
+  "side": "white",
+  "goal": "promote"
+ },
+ "parts": [
+  {
+   "title": "The rule of the square",
+   "fen": "8/8/8/4P3/k7/8/K7/8 w - - 0 1",
+   "side": "white",
+   "keyIdea": "",
+   "text": "Draw a square from the pawn to its queening square (e5-e8-b8-b5). If the enemy king can step into it, it catches the pawn; if not, the pawn queens. Black's king on a4 is outside the square.",
+   "textUrl": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings",
+   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings",
+   "line": "e6 Kb5 e7 Kc6 e8=Q+",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "e6",
+     "text": "With White to move the black king is outside the square, so just push.",
+     "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings"
+    },
+    {
+     "ply": 4,
+     "san": "e8=Q+",
+     "text": "The pawn queens. Had Black been to move, 1...Kb5 would have stepped into the square and caught it.",
+     "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings"
+    }
+   ]
+  },
+  {
+   "title": "The opposition",
+   "fen": "8/8/4k3/8/4K3/4P3/8/8 b - - 0 1",
+   "side": "white",
+   "keyIdea": "",
+   "text": "The kings face each other with one square between them and it is Black to move, so you have the opposition: Black has to give way.",
+   "textUrl": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings",
+   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings",
+   "line": "Kd6 Kf5 Kd7 Kf6 Kd6 e4 Kd7 e5 Ke8 Ke6 Kd8 Kf7 Kd7 e6+ Kd6 e7",
+   "notes": [
+    {
+     "ply": 1,
+     "san": "Kf5",
+     "text": "Black's king stepped aside, so yours goes forward.",
+     "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings"
+    },
+    {
+     "ply": 5,
+     "san": "e4",
+     "text": "Black seems to have the opposition now, but you don't have to move your king: a pawn move hands the move back to Black.",
+     "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings"
+    },
+    {
+     "ply": 9,
+     "san": "Ke6",
+     "text": "Your king stands in front of the pawn on the sixth rank, and the pawn will get through.",
+     "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings"
+    },
+    {
+     "ply": 15,
+     "san": "e7",
+     "text": "The pawn queens next move.",
+     "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings"
+    }
+   ]
+  },
+  {
+   "title": "The outside passed pawn",
+   "fen": "8/8/p1k5/P1p5/2K2P2/8/8/8 w - - 0 1",
+   "side": "white",
+   "keyIdea": "",
+   "text": "Pawns are equal, but your f-pawn is far from the others. Use it as a decoy.",
+   "textUrl": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings",
+   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings",
+   "line": "f5 Kd6 f6 Ke6 Kxc5 Kxf6 Kb6 Ke6 Kxa6 Kd7 Kb7",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "f5",
+     "text": "Push the outside pawn so the black king has to chase it.",
+     "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings"
+    },
+    {
+     "ply": 4,
+     "san": "Kxc5",
+     "text": "While Black's king is away, yours eats the queenside pawns.",
+     "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings"
+    },
+    {
+     "ply": 10,
+     "san": "Kb7",
+     "text": "Your king shields the a-pawn, and it will queen.",
+     "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings"
+    }
+   ]
+  }
+ ]
+}

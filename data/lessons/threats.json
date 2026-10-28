@@ -1,0 +1,20 @@
+{
+ "id": "threats",
+ "name": "What does my opponent want?",
+ "kind": "thinking",
+ "track": "thinking",
+ "level": "beginner",
+ "goal": "After each of your opponent's moves, you can ask what it threatens, and find a move that deals with the threat.",
+ "priorKnowledge": [
+  "piece-values"
+ ],
+ "side": "white",
+ "puzzleTags": [],
+ "puzzleThemes": [
+  "defensiveMove"
+ ],
+ "intro": {
+  "text": ""
+ },
+ "parts": []
+}

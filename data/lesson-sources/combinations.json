@@ -1,0 +1,18 @@
+{
+ "id": "combinations",
+ "name": "Combining Themes",
+ "kind": "theme",
+ "track": "themes",
+ "level": "intermediate",
+ "side": "white",
+ "puzzleThemes": [
+  "sacrifice"
+ ],
+ "goal": "You can see when one forcing move, such as a decoy or a clearing sacrifice, sets up a second Theme that wins.",
+ "priorKnowledge": [
+  "decoy",
+  "clearance-and-interference"
+ ],
+ "intro": "",
+ "parts": []
+}

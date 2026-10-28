@@ -1,0 +1,18 @@
+{
+ "id": "defending",
+ "name": "Defending",
+ "kind": "thinking",
+ "track": "thinking",
+ "level": "intermediate",
+ "goal": "When you are under attack, you can bring defenders, trade off the strongest attacker, give material back, or hit back somewhere else.",
+ "priorKnowledge": [
+  "attacking-the-king"
+ ],
+ "side": "white",
+ "puzzleTags": [],
+ "puzzleThemes": [],
+ "intro": {
+  "text": ""
+ },
+ "parts": []
+}

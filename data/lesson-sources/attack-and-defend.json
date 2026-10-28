@@ -1,0 +1,15 @@
+{
+ "id": "attack-and-defend",
+ "name": "Attack and defence",
+ "kind": "theme",
+ "track": "themes",
+ "level": "beginner",
+ "side": "white",
+ "puzzleThemes": [
+  "hangingPiece"
+ ],
+ "goal": "You can see which pieces each side attacks, take a piece that is left undefended, and save an attacked piece by moving it, guarding it, blocking or taking the attacker.",
+ "priorKnowledge": [],
+ "intro": "",
+ "parts": []
+}

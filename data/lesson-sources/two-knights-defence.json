@@ -1,0 +1,84 @@
+{
+ "id": "two-knights-defence",
+ "name": "Two Knights Defence",
+ "kind": "opening",
+ "track": "openings",
+ "level": "beginner",
+ "side": "black",
+ "eco": "C58",
+ "puzzleTags": [
+  "Italian_Game_Two_Knights_Defense"
+ ],
+ "goal": "As Black against the Italian Game, you can play the Two Knights Defence and know how to meet the attack on f7.",
+ "priorKnowledge": [
+  "italian-game"
+ ],
+ "intro": "In the Two Knights Defence Black answers the Italian Game's 3.Bc4 with 3...Nf6, developing a piece and pressing on e4. After the sharp 4.Ng5, attacking f7 with knight and bishop, Black gives up a pawn with 4...d5 and plays 5...Na5, the Polerio Defence: White may be a pawn up, but Black's pieces become active and the game is considered equal.",
+ "introUrl": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4/3...Nf6/4._Ng5",
+ "parts": [
+  {
+   "title": "Two Knights Defence",
+   "fen": "start",
+   "side": "black",
+   "keyIdea": "",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4/3...Nf6/4._Ng5",
+   "line": "e4 e5 Nf3 Nc6 Bc4 Nf6 Ng5 d5 exd5 Na5 Bb5+ c6 dxc6 bxc6 Bd3 Nd5 Nf3 Bd6",
+   "notes": [
+    {
+     "ply": 1,
+     "san": "e5",
+     "text": "1...e5 takes space in the centre and controls d4, so White cannot easily keep pawns on both d4 and e4. It also stops e4-e5, so your knight can come to f6. 1...c5 (Sicilian) also controls d4; 1...e6 and 1...c6 prepare ...d5, and 1...d5 attacks e4 at once.",
+     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4"
+    },
+    {
+     "ply": 3,
+     "san": "Nc6",
+     "text": "2.Nf3 attacks your e5 pawn. 2...Nc6 is the main line: it develops a piece, defends e5 and controls d4. 2...d6 defends with a pawn but falls behind in development, and 2...f6? weakens your king. 2...Nf6 counter-attacks e4 instead.",
+     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3"
+    },
+    {
+     "ply": 5,
+     "san": "Nf6",
+     "text": "White's bishop eyes f7, your weakest pawn, but there is no immediate threat. 3...Nf6, the Two Knights, develops and attacks e4; it leads to sharp play. 3...Bc5, the Giuoco Piano, keeps the queen's control of g5 and gives a quieter game. If White defends e4 with 4.Nc3, the fork trick 4...Nxe4 5.Nxe4 d5 wins the piece back.",
+     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4"
+    },
+    {
+     "ply": 7,
+     "san": "d5",
+     "text": "4.Ng5 attacks f7 with knight and bishop, and you cannot castle yet. You must defend f7: 4...h6?? loses to 5.Nxf7, forking queen and rook, and 4...Nxe4? fails to 5.Bxf7+. 4...d5 is the best defence: it blocks the bishop's diagonal at the cost of a pawn.",
+     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4/3...Nf6/4._Ng5"
+    },
+    {
+     "ply": 9,
+     "san": "Na5",
+     "text": "5.exd5 wins a pawn. Recapturing with 5...Nxd5?! is common but allows 6.Nxf7, the Fried Liver attack, where your king is hunted into the centre. 5...Na5, the Polerio Defence, is the main line: it attacks the bishop and keeps your knight safe.",
+     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4/3...Nf6/4._Ng5/4...d5/5._exd5"
+    },
+    {
+     "ply": 11,
+     "san": "c6",
+     "text": "In the Polerio line White checks with 6.Bb5+ and you block with 6...c6, attacking the d5 pawn and the bishop together. The main line runs 7.dxc6 bxc6 8.Bd3 Nd5 9.Nf3 Bd6 10.O-O.",
+     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4/3...Nf6/4._Ng5/4...d5/5._exd5"
+    },
+    {
+     "ply": 13,
+     "san": "bxc6",
+     "text": "7.dxc6 takes the pawn; recapture with 7...bxc6 as in the main line. Your bishop and queen gain open lines and the bishop on b5 is attacked again. White stays a pawn ahead, but your pieces are more active.",
+     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4/3...Nf6/4._Ng5/4...d5/5._exd5"
+    },
+    {
+     "ply": 15,
+     "san": "Nd5",
+     "text": "After 8.Bd3 the main line continues 8...Nd5, centralising the knight from f6 to d5 where it is safe and strong. Black is considered equal: the extra pawn is balanced by active pieces.",
+     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4/3...Nf6/4._Ng5/4...d5/5._exd5"
+    },
+    {
+     "ply": 17,
+     "san": "Bd6",
+     "text": "9.Nf3 brings White's knight home. 9...Bd6 develops the bishop and protects e5 so you can castle next; the main line goes 10.O-O. You have given a pawn for quick, active development.",
+     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4/3...Nf6/4._Ng5/4...d5/5._exd5"
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,17 @@
+{
+ "id": "discovered-check",
+ "name": "Discovered check and double check",
+ "kind": "theme",
+ "track": "themes",
+ "level": "beginner",
+ "side": "white",
+ "puzzleThemes": [
+  "doubleCheck"
+ ],
+ "goal": "You can uncover a check with one piece while the other piece wins material, and use a double check, which the king can only answer by moving.",
+ "priorKnowledge": [
+  "discovered-attacks"
+ ],
+ "intro": "",
+ "parts": []
+}

@@ -2,6 +2,12 @@
  "id": "queens-gambit",
  "name": "Queen's Gambit",
  "kind": "opening",
+ "track": "openings",
+ "level": "beginner",
+ "goal": "As White, you can offer the c-pawn with the Queen's Gambit, and win it back while you develop when Black takes it.",
+ "priorKnowledge": [
+  "opening-principles"
+ ],
  "side": "white",
  "eco": "D20",
  "puzzleTags": [
@@ -23,6 +29,7 @@
    "title": "Queen's Gambit",
    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
    "side": "white",
+   "keyIdea": "",
    "credit": {
     "source": "Wikibooks, Chess Opening Theory/1. d4/1...d5/2. c4",
     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._c4",

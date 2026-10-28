@@ -1,0 +1,91 @@
+{
+ "id": "discovered-attacks",
+ "name": "Discovered attacks",
+ "kind": "theme",
+ "track": "themes",
+ "level": "beginner",
+ "side": "white",
+ "puzzleThemes": [
+  "discoveredAttack"
+ ],
+ "goal": "You can move one piece out of the way so that the piece behind it attacks, and use the moving piece to attack something else too.",
+ "priorKnowledge": [
+  "double-attack"
+ ],
+ "intro": "A discovered attack happens when one piece moves out of the way and uncovers an attack by another piece behind it. Two pieces can then threaten at once. When the uncovered attack is a check it is a discovered check, and when the moving piece gives check as well it is a double check: the king must move, because two checks cannot both be blocked or captured.",
+ "introUrl": "https://en.wikibooks.org/wiki/Chess/Tactics",
+ "parts": [
+  {
+   "title": "Discovered mate",
+   "fen": "8/8/8/8/8/2R5/1Q1Pk2K/R7 w - - 0 1",
+   "side": "white",
+   "keyIdea": "",
+   "text": "Your queen would be giving mate along the second rank, but your own pawn on d2 is in the way.",
+   "textUrl": "https://en.wikibooks.org/wiki/Chess/Tactics",
+   "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
+   "line": "d4#",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "d4#",
+     "text": "The pawn steps aside and uncovers the queen's check. Black's king has no square left: discovered checkmate.",
+     "url": "https://en.wikibooks.org/wiki/Chess/Tactics"
+    }
+   ]
+  },
+  {
+   "title": "Double check, then mate",
+   "fen": "1kr3nr/pp3ppp/8/P3N3/3P1B2/6P1/1PP2P1P/R4RK1 w - - 0 1",
+   "side": "white",
+   "keyIdea": "",
+   "text": "Your bishop on f4 aims at b8, but your knight on e5 blocks it. What happens when the knight moves with check?",
+   "textUrl": "https://en.wikibooks.org/wiki/Chess/Tactics",
+   "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
+   "line": "Nd7+ Ka8 Nb6+ axb6 axb6#",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Nd7+",
+     "text": "A double check: the knight checks from d7 and uncovers the bishop's check. The king has to move.",
+     "url": "https://en.wikibooks.org/wiki/Chess/Tactics"
+    },
+    {
+     "ply": 2,
+     "san": "Nb6+",
+     "text": "A sacrifice: the knight checks again and Black has to take it.",
+     "url": "https://en.wikibooks.org/wiki/Chess/Tactics"
+    },
+    {
+     "ply": 4,
+     "san": "axb6#",
+     "text": "The pawn capture opens the a-file for your rook: another discovered check, and this time it is mate.",
+     "url": "https://en.wikibooks.org/wiki/Chess/Tactics"
+    }
+   ]
+  },
+  {
+   "title": "A trap in the French",
+   "fen": "r1b1kbnr/pp3ppp/4p3/3pP3/3q4/3B4/PP3PPP/RNBQK2R w KQkq - 0 9",
+   "side": "white",
+   "keyIdea": "",
+   "text": "French Defence, Advance Variation: Black has just grabbed a pawn with 8...Qxd4. Your bishop on d3 stands between your queen and Black's queen.",
+   "textUrl": "https://en.wikipedia.org/wiki/Discovered_attack",
+   "url": "https://en.wikipedia.org/wiki/Discovered_attack",
+   "line": "Bb5+ Bd7 Qxd4",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Bb5+",
+     "text": "The bishop moves with check and uncovers your queen's attack on d4. Black must deal with the check first.",
+     "url": "https://en.wikipedia.org/wiki/Discovered_attack"
+    },
+    {
+     "ply": 2,
+     "san": "Qxd4",
+     "text": "Black's queen is lost: a whole queen won with one discovered attack.",
+     "url": "https://en.wikipedia.org/wiki/Discovered_attack"
+    }
+   ]
+  }
+ ]
+}

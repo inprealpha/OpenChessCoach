@@ -1,0 +1,14 @@
+{
+ "id": "pawn-structure",
+ "name": "Pawn chains and breaks",
+ "kind": "thinking",
+ "track": "thinking",
+ "level": "intermediate",
+ "side": "white",
+ "goal": "You can read a pawn chain, attack it at its base with a pawn break, and tell open positions from closed ones.",
+ "priorKnowledge": [
+  "weak-pawns"
+ ],
+ "intro": "",
+ "parts": []
+}

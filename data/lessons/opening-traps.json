@@ -1,0 +1,19 @@
+{
+ "id": "opening-traps",
+ "name": "Opening traps",
+ "kind": "thinking",
+ "track": "openings",
+ "level": "intermediate",
+ "goal": "You can spot the common opening traps on f2 and f7 and in other openings, and avoid falling into them.",
+ "priorKnowledge": [
+  "scholars-mate-defence",
+  "italian-game"
+ ],
+ "side": "white",
+ "puzzleTags": [],
+ "puzzleThemes": [],
+ "intro": {
+  "text": ""
+ },
+ "parts": []
+}

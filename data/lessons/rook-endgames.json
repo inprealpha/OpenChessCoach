@@ -2,6 +2,12 @@
  "id": "rook-endgames",
  "name": "Rook endgames: Lucena and Philidor",
  "kind": "endgame",
+ "track": "endgames",
+ "level": "intermediate",
+ "goal": "You can win the Lucena position by building a bridge, and draw the Philidor position with the defending rook on the third rank.",
+ "priorKnowledge": [
+  "rook-endgame-basics"
+ ],
  "side": "white",
  "puzzleTags": [],
  "puzzleThemes": [
@@ -22,7 +28,15 @@
    "title": "Lucena: build a bridge",
    "fen": "1K1k4/1P6/8/8/8/8/r7/2R5 w - - 0 1",
    "side": "white",
+   "keyIdea": "",
    "text": "Your pawn is on the seventh rank but your own king stands in front of it, and Black's rook is ready to check.",
+   "textCredit": {
+    "source": "Wikipedia, Lucena position",
+    "url": "https://en.wikipedia.org/wiki/Lucena_position",
+    "licence": "CC BY-SA 4.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "authors": "Wikipedia contributors (see the page history)"
+   },
    "credit": {
     "source": "Wikipedia, Lucena position",
     "url": "https://en.wikipedia.org/wiki/Lucena_position",
@@ -248,7 +262,15 @@
    "title": "Philidor: hold the draw",
    "fen": "8/8/8/8/4pk2/R7/7r/4K3 b - - 0 1",
    "side": "white",
+   "keyIdea": "",
    "text": "You defend. Your king is on the pawn's queening square and your rook on the third rank keeps Black's king out.",
+   "textCredit": {
+    "source": "Wikipedia, Philidor position",
+    "url": "https://en.wikipedia.org/wiki/Philidor_position",
+    "licence": "CC BY-SA 4.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "authors": "Wikipedia contributors (see the page history)"
+   },
    "credit": {
     "source": "Wikipedia, Philidor position",
     "url": "https://en.wikipedia.org/wiki/Philidor_position",

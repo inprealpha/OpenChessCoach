@@ -1,0 +1,83 @@
+{
+ "id": "queen-mate",
+ "name": "Mate with king and queen",
+ "kind": "endgame",
+ "track": "endgames",
+ "level": "beginner",
+ "side": "white",
+ "puzzleThemes": [],
+ "goal": "You can mate a lone king with king and queen, pushing it to the edge without giving stalemate.",
+ "priorKnowledge": [
+  "mate-in-one"
+ ],
+ "intro": "Mating with king and queen against a lone king is easy once you know the method: use the queen alone to drive the enemy king to the edge of the board, keeping the queen a knight's move away from it, with no checks needed. Then bring your own king up to help, and watch out for stalemate. It takes about ten to fifteen moves.",
+ "introUrl": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Queen_vs._King",
+ "playOut": {
+  "title": "Mate the lone king yourself",
+  "fen": "8/8/3k4/8/8/8/8/KQ6 w - - 0 1",
+  "side": "white",
+  "goal": "mate"
+ },
+ "parts": [
+  {
+   "title": "Drive the king to the edge",
+   "fen": "8/8/3k4/8/8/8/8/KQ6 w - - 0 1",
+   "side": "white",
+   "keyIdea": "",
+   "text": "First the queen works alone. Shrink the black king's space one rank or file at a time.",
+   "textUrl": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Queen_vs._King",
+   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Queen_vs._King",
+   "line": "Qb5 Ke6 Qc5 Kf6 Qd5 Kg6 Qe5 Kf7 Qd6 Kg7 Qe6 Kh7 Qg4 Kh6 Kb2",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Qb5",
+     "text": "Cut the black king off along the fifth rank.",
+     "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Queen_vs._King"
+    },
+    {
+     "ply": 2,
+     "san": "Qc5",
+     "text": "Stay a knight's move away from the king. Checks like Qc6+ only give it more room.",
+     "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Queen_vs._King"
+    },
+    {
+     "ply": 12,
+     "san": "Qg4",
+     "text": "The black king is now trapped on the edge, on the h-file.",
+     "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Queen_vs._King"
+    },
+    {
+     "ply": 14,
+     "san": "Kb2",
+     "text": "Now that the king is stuck, your own king comes in to help finish the job.",
+     "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Queen_vs._King"
+    }
+   ]
+  },
+  {
+   "title": "Finish the mate",
+   "fen": "7k/8/8/4K3/6Q1/8/8/8 w - - 0 1",
+   "side": "white",
+   "keyIdea": "",
+   "text": "Your king has walked over to e5. Beware: Qg6 here would be stalemate, which is exactly what Black hopes for.",
+   "textUrl": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Queen_vs._King",
+   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Queen_vs._King",
+   "line": "Kf6 Kh7 Qg7#",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Kf6",
+     "text": "Bring the king next to g7 so it can protect the queen there.",
+     "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Queen_vs._King"
+    },
+    {
+     "ply": 2,
+     "san": "Qg7#",
+     "text": "The queen, protected by the king, gives mate.",
+     "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Queen_vs._King"
+    }
+   ]
+  }
+ ]
+}

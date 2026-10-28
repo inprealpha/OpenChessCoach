@@ -1,0 +1,55 @@
+{
+ "id": "pins",
+ "name": "Pins",
+ "kind": "theme",
+ "track": "themes",
+ "level": "beginner",
+ "side": "white",
+ "puzzleThemes": [
+  "pin"
+ ],
+ "goal": "You can pin a piece to a more valuable one behind it, and win the pinned piece by attacking it again.",
+ "priorKnowledge": [
+  "piece-values"
+ ],
+ "intro": "A pinned piece cannot move without exposing a more valuable piece behind it. In an absolute pin the piece behind is the king, so moving the pinned piece is illegal. In a relative pin the piece behind is a queen or rook: the pinned piece may move, but it costs material. Once you have pinned a piece, look for a way to attack it again: it cannot run away.",
+ "introUrl": "https://en.wikibooks.org/wiki/Chess/Tactics",
+ "parts": [
+  {
+   "title": "Attack the pinned piece",
+   "fen": "6k1/pp1n1rpp/2p5/8/2BP4/5N2/P4PPP/6K1 w - - 0 1",
+   "side": "white",
+   "keyIdea": "",
+   "text": "Your bishop pins Black's rook on f7 to the king on g8. You could take the rook at once, but there is something stronger.",
+   "textUrl": "https://en.wikibooks.org/wiki/Chess/Tactics",
+   "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
+   "line": "Ng5",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Ng5",
+     "text": "Ng5! attacks the pinned rook a second time. It cannot move, and Black has no good way to defend it again, so Black will lose the rook. Taking on f7 at once only wins the exchange and leaves a close game. If you see a good move, look for a better one.",
+     "url": "https://en.wikibooks.org/wiki/Chess/Tactics"
+    }
+   ]
+  },
+  {
+   "title": "A pin on the g-file",
+   "fen": "5r2/pp6/2b3p1/4k2p/3R3P/2PB2K1/P5P1/8 w - - 0 35",
+   "side": "black",
+   "keyIdea": "",
+   "text": "A position from a game played on Lichess. White has just taken on g6. Find the pin that wins the bishop back.",
+   "url": "https://lichess.org/training/dJDIa",
+   "line": "Bxg6 Rg8 Kf2 Rxg6"
+  },
+  {
+   "title": "A pinned pawn",
+   "fen": "2rqkb1r/pp2pp1p/2n2np1/1N1p4/8/3B2QP/PPP2PP1/R1B1R1K1 b k - 3 12",
+   "side": "white",
+   "keyIdea": "",
+   "text": "A position from a game played on Lichess. Black has just attacked your knight with ...a6. Look at what is pinned on the e-file.",
+   "url": "https://lichess.org/training/faVZw",
+   "line": "a6 Nd6+ Qxd6 Qxd6"
+  }
+ ]
+}

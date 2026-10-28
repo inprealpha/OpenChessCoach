@@ -2,6 +2,12 @@
  "id": "london-system",
  "name": "London System",
  "kind": "opening",
+ "track": "openings",
+ "level": "beginner",
+ "goal": "As White, you can set up the London System against almost any reply: d4, Bf4, e3, Nf3, c3 and Nbd2.",
+ "priorKnowledge": [
+  "opening-principles"
+ ],
  "side": "white",
  "eco": "D00",
  "puzzleTags": [
@@ -26,6 +32,7 @@
    "title": "London System",
    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
    "side": "white",
+   "keyIdea": "",
    "credit": {
     "source": "Wikibooks, Chess Opening Theory/1. d4/1...d5/2. Bf4",
     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._Bf4",

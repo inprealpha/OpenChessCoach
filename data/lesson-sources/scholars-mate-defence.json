@@ -1,0 +1,17 @@
+{
+ "id": "scholars-mate-defence",
+ "name": "Stopping the early queen attack",
+ "kind": "opening",
+ "track": "openings",
+ "level": "beginner",
+ "side": "black",
+ "eco": "C20",
+ "puzzleTags": [],
+ "goal": "As Black, you can stop Scholar's Mate and other early queen attacks, and gain time by developing while you attack the queen.",
+ "priorKnowledge": [
+  "opening-principles",
+  "threats"
+ ],
+ "intro": "",
+ "parts": []
+}

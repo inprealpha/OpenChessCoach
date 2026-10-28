@@ -1,0 +1,15 @@
+{
+ "id": "double-attack",
+ "name": "Double attacks",
+ "kind": "theme",
+ "track": "themes",
+ "level": "beginner",
+ "side": "white",
+ "goal": "You can find a move that attacks two things at once, often with the queen, so the opponent cannot save both.",
+ "priorKnowledge": [
+  "attack-and-defend",
+  "piece-values"
+ ],
+ "intro": "",
+ "parts": []
+}

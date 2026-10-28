@@ -1,0 +1,15 @@
+{
+ "id": "when-to-trade",
+ "name": "When to trade pieces",
+ "kind": "thinking",
+ "track": "thinking",
+ "level": "intermediate",
+ "side": "white",
+ "goal": "You can decide when to trade: when you are ahead in material, to remove a strong enemy piece, or to escape an attack, and when to keep pieces on.",
+ "priorKnowledge": [
+  "piece-values",
+  "good-and-bad-pieces"
+ ],
+ "intro": "",
+ "parts": []
+}

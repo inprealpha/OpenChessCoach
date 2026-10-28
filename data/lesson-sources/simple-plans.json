@@ -1,0 +1,15 @@
+{
+ "id": "simple-plans",
+ "name": "Simple plans",
+ "kind": "thinking",
+ "track": "thinking",
+ "level": "intermediate",
+ "side": "white",
+ "goal": "You can make a small plan from the position: improve your worst piece, attack a weak pawn, or bring a rook to an open file.",
+ "priorKnowledge": [
+  "candidate-moves",
+  "centre-and-activity"
+ ],
+ "intro": "",
+ "parts": []
+}

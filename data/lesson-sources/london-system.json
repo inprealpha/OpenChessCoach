@@ -1,0 +1,75 @@
+{
+ "id": "london-system",
+ "name": "London System",
+ "kind": "opening",
+ "track": "openings",
+ "level": "beginner",
+ "side": "white",
+ "eco": "D00",
+ "puzzleTags": [
+  "London_System",
+  "Queens_Pawn_Game_London_System",
+  "Queens_Pawn_Game_Accelerated_London_System",
+  "Indian_Defense_London_System"
+ ],
+ "goal": "As White, you can set up the London System against almost any reply: d4, Bf4, e3, Nf3, c3 and Nbd2.",
+ "priorKnowledge": [
+  "opening-principles"
+ ],
+ "intro": "The London System is a set-up you can play against almost anything. The bishop goes to f4 before e3 so it is not shut in behind the pawns; then e3 and c3 support d4, Bd3 and Nd2 watch e4, and the king's knight heads for e5 via f3. It is popular at club level because the plans hardly change whatever Black does.",
+ "introUrl": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._Bf4",
+ "parts": [
+  {
+   "title": "London System",
+   "fen": "start",
+   "side": "white",
+   "keyIdea": "",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._Bf4",
+   "line": "d4 d5 Bf4 Nf6 e3 e6 Nf3 c5 c3 Nc6 Nbd2 Bd6 Bg3",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "d4",
+     "text": "The opening is a race to develop and control the centre. 1.d4 frees your queen's bishop, stops ...e5 and controls c5. Unlike 1.e4, the pawn is already guarded by the queen, so games tend to be slower and more closed, which suits the steady London set-up. 1.e4 is the more popular, sharper choice.",
+     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory"
+    },
+    {
+     "ply": 2,
+     "san": "Bf4",
+     "text": "2.Bf4, the Accelerated London, brings the bishop out before e3 so it will not be stuck behind your pawns, and gives simple plans against most Black set-ups. Keep an eye on b2, which the bishop no longer guards. 2.c4 (Queen's Gambit) is the main line; 2.e4?! (Blackmar-Diemer Gambit) gives up a pawn and is dubious.",
+     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5"
+    },
+    {
+     "ply": 4,
+     "san": "e3",
+     "text": "3.e3 is the usual move order: it supports d4 and prepares Bd3. 3.Nf3 transposes to the regular London, while 3.Nc3 instead of c3 leads to the Rapport-Jobava London. Black's two main plans are ...c5 and ...e6.",
+     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...Nf6/2._Bf4/2...d5"
+    },
+    {
+     "ply": 6,
+     "san": "Nf3",
+     "text": "Black chose the solid ...e6 set-up, usually planning ...Bd6 to castle quickly and offer a trade of your London bishop; in these lines Black's light-squared bishop often struggles to develop. 4.Nf3 continues your plan of sending the knight towards e5. 4.Nd2 is also common; most London move orders are interchangeable.",
+     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._Bf4"
+    },
+    {
+     "ply": 8,
+     "san": "c3",
+     "text": "With ...c5 Black hits d4 and often follows with ...Qb6 to attack b2, which your bishop left undefended. Do not grab the c5 pawn: play 5.c3 instead, so that if Black exchanges on d4 you can recapture and keep two pawns in the centre.",
+     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...Nf6/2._Bf4/2...d5"
+    },
+    {
+     "ply": 10,
+     "san": "Nbd2",
+     "text": "Your pawns on d4 and e3 give a solid centre. The usual plan continues with Nbd2 and Be2, followed later by an e4 break or the calmer h3 and O-O. Black's typical ways to challenge your strong f4 bishop are ...c5 and ...Nh5.",
+     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...Nf6/2._Bf4/2...d5/3._e3/3...e6/4._Nf3"
+    },
+    {
+     "ply": 12,
+     "san": "Bg3",
+     "text": "6...Bd6 offers to trade off your London bishop. The standard answer is to drop it back with 7.Bg3: if Black takes, hxg3 gives you the semi-open h-file for your rook in return.",
+     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._Bf4"
+    }
+   ]
+  }
+ ]
+}

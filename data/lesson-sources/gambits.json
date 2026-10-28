@@ -1,0 +1,14 @@
+{
+ "id": "gambits",
+ "name": "Gambits",
+ "kind": "thinking",
+ "track": "openings",
+ "level": "intermediate",
+ "side": "white",
+ "goal": "You can judge when a pawn offered in the opening is worth taking, and when to give one back to finish developing.",
+ "priorKnowledge": [
+  "opening-traps"
+ ],
+ "intro": "",
+ "parts": []
+}

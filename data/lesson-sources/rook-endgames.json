@@ -1,0 +1,97 @@
+{
+ "id": "rook-endgames",
+ "name": "Rook endgames: Lucena and Philidor",
+ "kind": "endgame",
+ "track": "endgames",
+ "level": "intermediate",
+ "side": "white",
+ "puzzleThemes": [
+  "rookEndgame"
+ ],
+ "goal": "You can win the Lucena position by building a bridge, and draw the Philidor position with the defending rook on the third rank.",
+ "priorKnowledge": [
+  "rook-endgame-basics"
+ ],
+ "intro": "Rook and pawn against rook is the most common endgame of all, and two positions are the key to it. With the Lucena position the side with the pawn wins by building a bridge with the rook to shelter its king. With the Philidor position the defender draws by keeping the rook on the third rank and then checking from behind.",
+ "introUrl": "https://en.wikipedia.org/wiki/Lucena_position",
+ "playOut": {
+  "title": "Win the Lucena position",
+  "fen": "1K1k4/1P6/8/8/8/8/r7/2R5 w - - 0 1",
+  "side": "white",
+  "goal": "promote"
+ },
+ "parts": [
+  {
+   "title": "Lucena: build a bridge",
+   "fen": "1K1k4/1P6/8/8/8/8/r7/2R5 w - - 0 1",
+   "side": "white",
+   "keyIdea": "",
+   "text": "Your pawn is on the seventh rank but your own king stands in front of it, and Black's rook is ready to check.",
+   "textUrl": "https://en.wikipedia.org/wiki/Lucena_position",
+   "url": "https://en.wikipedia.org/wiki/Lucena_position",
+   "line": "Rd1+ Ke7 Rd4 Ra1 Kc7 Rc1+ Kb6 Rb1+ Kc6 Rc1+ Kb5 Rb1+ Rb4",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Rd1+",
+     "text": "Drive the black king away from the pawn first.",
+     "url": "https://en.wikipedia.org/wiki/Lucena_position"
+    },
+    {
+     "ply": 2,
+     "san": "Rd4",
+     "text": "The key move: the rook goes to the fourth rank, ready to block checks later.",
+     "url": "https://en.wikipedia.org/wiki/Lucena_position"
+    },
+    {
+     "ply": 4,
+     "san": "Kc7",
+     "text": "Now the king comes out, and Black starts checking.",
+     "url": "https://en.wikipedia.org/wiki/Lucena_position"
+    },
+    {
+     "ply": 12,
+     "san": "Rb4",
+     "text": "The rook blocks the check: the bridge is built. Black cannot stop the pawn queening.",
+     "url": "https://en.wikipedia.org/wiki/Lucena_position"
+    }
+   ]
+  },
+  {
+   "title": "Philidor: hold the draw",
+   "fen": "8/8/8/8/4pk2/R7/7r/4K3 b - - 0 1",
+   "side": "white",
+   "keyIdea": "",
+   "text": "You defend. Your king is on the pawn's queening square and your rook on the third rank keeps Black's king out.",
+   "textUrl": "https://en.wikipedia.org/wiki/Philidor_position",
+   "url": "https://en.wikipedia.org/wiki/Philidor_position",
+   "line": "Rb2 Rc3 Ra2 Rb3 e3 Rb8 Kf3 Rf8+ Ke4 Re8+ Kf4 Rf8+ Ke5 Re8+",
+   "notes": [
+    {
+     "ply": 1,
+     "san": "Rc3",
+     "text": "Keep the rook on the third rank, shuffling along it, until the pawn comes forward.",
+     "url": "https://en.wikipedia.org/wiki/Philidor_position"
+    },
+    {
+     "ply": 5,
+     "san": "Rb8",
+     "text": "With the pawn on e3, Black's king can no longer use that square, so your rook is free to go to the far end of the board. 4.Rb4+?? would lose to 4...Kf3.",
+     "url": "https://en.wikipedia.org/wiki/Philidor_position"
+    },
+    {
+     "ply": 7,
+     "san": "Rf8+",
+     "text": "Check from behind. The king cannot escape the checks without giving up the pawn.",
+     "url": "https://en.wikipedia.org/wiki/Philidor_position"
+    },
+    {
+     "ply": 13,
+     "san": "Re8+",
+     "text": "Black makes no progress: a draw.",
+     "url": "https://en.wikipedia.org/wiki/Philidor_position"
+    }
+   ]
+  }
+ ]
+}

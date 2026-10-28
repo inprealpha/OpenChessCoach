@@ -2,6 +2,12 @@
  "id": "queens-gambit-declined",
  "name": "Queen's Gambit Declined",
  "kind": "opening",
+ "track": "openings",
+ "level": "beginner",
+ "goal": "As Black against the Queen's Gambit, you can hold the centre with e6, develop, castle, and know which pieces still need to come out.",
+ "priorKnowledge": [
+  "queens-gambit"
+ ],
  "side": "black",
  "eco": "D63",
  "puzzleTags": [
@@ -23,6 +29,7 @@
    "title": "Queen's Gambit Declined",
    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
    "side": "black",
+   "keyIdea": "",
    "credit": {
     "source": "Wikibooks, Chess Opening Theory/1. d4/1...d5/2. c4/2...e6",
     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._c4/2...e6",

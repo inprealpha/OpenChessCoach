@@ -2,6 +2,12 @@
  "id": "skewers",
  "name": "Skewers",
  "kind": "theme",
+ "track": "themes",
+ "level": "beginner",
+ "goal": "You can attack a valuable piece so that, when it moves away, you win the piece behind it.",
+ "priorKnowledge": [
+  "pins"
+ ],
  "side": "white",
  "puzzleTags": [],
  "puzzleThemes": [
@@ -22,7 +28,15 @@
    "title": "King in front of the queen",
    "fen": "3q4/pppk1ppp/8/8/8/8/PPP2PPP/R4RK1 w - - 0 1",
    "side": "white",
+   "keyIdea": "",
    "text": "Black's king has stepped onto d7, right in front of the queen on d8. How do you punish it?",
+   "textCredit": {
+    "source": "Wikibooks, Chess/Tactics",
+    "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
+    "licence": "CC BY-SA 4.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "authors": "Wikibooks contributors (see the page history)"
+   },
    "credit": {
     "source": "Wikibooks, Chess/Tactics",
     "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
@@ -98,6 +112,7 @@
    "title": "A queen skewer",
    "fen": "8/1p5p/p2Q2p1/4n3/8/P1Pk3P/6PK/4qN2 b - - 4 35",
    "side": "white",
+   "keyIdea": "",
    "text": "A position from a game played on Lichess. Black's king has just taken on c3. Find the check that wins Black's queen.",
    "credit": {
     "source": "Lichess puzzle database, puzzle Q9GCn",
@@ -167,6 +182,7 @@
    "title": "A rook skewer",
    "fen": "8/5p2/1b2p1k1/1P4p1/N5P1/6r1/8/1R2K3 w - - 2 48",
    "side": "black",
+   "keyIdea": "",
    "text": "A position from a game played on Lichess. White has just taken your bishop. Find the rook check that wins material back.",
    "credit": {
     "source": "Lichess puzzle database, puzzle AOHMD",

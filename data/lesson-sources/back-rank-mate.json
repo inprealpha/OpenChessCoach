@@ -1,0 +1,100 @@
+{
+ "id": "back-rank-mate",
+ "name": "Back-rank mate",
+ "kind": "theme",
+ "track": "themes",
+ "level": "beginner",
+ "side": "white",
+ "puzzleThemes": [
+  "backRankMate"
+ ],
+ "goal": "You can mate a king trapped behind its own pawns on the back rank, and give your own king an escape square in time.",
+ "priorKnowledge": [
+  "mate-in-one"
+ ],
+ "intro": "A back-rank mate is delivered by a rook or queen along the last rank, when the king cannot step forward because its own pawns block the way. The defending rook or queen that guards the back rank can often be lured away, exchanged or simply overloaded. To guard against it, give your king a flight square by moving one of the pawns in front of it.",
+ "introUrl": "https://en.wikipedia.org/wiki/Back-rank_checkmate",
+ "parts": [
+  {
+   "title": "The bishop cannot be taken back",
+   "fen": "r1r3k1/p4ppp/1pb5/q7/2Q5/1P1R4/P1B2PPP/3R2K1 w - - 0 1",
+   "side": "white",
+   "keyIdea": "",
+   "text": "Your rooks are doubled on the d-file and Black's king has no flight square. Black's bishop on c6 is defended only by the rook on c8.",
+   "textUrl": "https://en.wikipedia.org/wiki/Back-rank_checkmate",
+   "url": "https://en.wikipedia.org/wiki/Back-rank_checkmate",
+   "line": "Qxc6 Qa6 Qxa8 Rxa8 Rd8+ Rxd8 Rxd8#",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Qxc6",
+     "text": "Take the bishop. 1...Rxc6 would allow 2.Rd8+ Rxd8 3.Rxd8#, so Black is simply a piece down.",
+     "url": "https://en.wikipedia.org/wiki/Back-rank_checkmate"
+    },
+    {
+     "ply": 2,
+     "san": "Qxa8",
+     "text": "After 1...Qa6 the back rank is still weak: 2.Qxa8! takes a rook, and 2...Rxa8 would lose to mate.",
+     "url": "https://en.wikipedia.org/wiki/Back-rank_checkmate"
+    },
+    {
+     "ply": 4,
+     "san": "Rd8+",
+     "text": "The rook enters with check. Black can only block with the rook.",
+     "url": "https://en.wikipedia.org/wiki/Back-rank_checkmate"
+    },
+    {
+     "ply": 6,
+     "san": "Rxd8#",
+     "text": "Mate on the back rank: the pawns on f7, g7 and h7 keep their own king in.",
+     "url": "https://en.wikipedia.org/wiki/Back-rank_checkmate"
+    }
+   ]
+  },
+  {
+   "title": "Capablanca strikes",
+   "fen": "3r2k1/p4ppp/1q6/8/8/2R1P3/P3QPPP/6K1 b - - 0 29",
+   "side": "black",
+   "keyIdea": "",
+   "text": "Bernstein against Capablanca, Moscow 1914: you are Black. White's queen guards the back rank and the rook on c3. Can you overload it?",
+   "textUrl": "https://en.wikipedia.org/wiki/Back-rank_checkmate",
+   "url": "https://en.wikipedia.org/wiki/Back-rank_checkmate",
+   "line": "Qb2 Qe1 Qxc3 Qxc3 Rd1+ Qe1 Rxe1#",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Qb2",
+     "text": "29...Qb2! attacks the rook and offers the queen. 30.Qxb2 is impossible because of 30...Rd1#.",
+     "url": "https://en.wikipedia.org/wiki/Back-rank_checkmate"
+    },
+    {
+     "ply": 2,
+     "san": "Qxc3",
+     "text": "30.Qe1 seems to defend the rook, but the rook is not really protected: take it.",
+     "url": "https://en.wikipedia.org/wiki/Back-rank_checkmate"
+    },
+    {
+     "ply": 4,
+     "san": "Rd1+",
+     "text": "31.Qxc3 left the back rank, so the rook checks there. 32.Qe1 is the only block.",
+     "url": "https://en.wikipedia.org/wiki/Back-rank_checkmate"
+    },
+    {
+     "ply": 6,
+     "san": "Rxe1#",
+     "text": "Back-rank mate.",
+     "url": "https://en.wikipedia.org/wiki/Back-rank_checkmate"
+    }
+   ]
+  },
+  {
+   "title": "After the queen is gone",
+   "fen": "5r2/6pp/4N2k/2R3b1/4q3/5P2/PP4PP/6K1 w - - 0 37",
+   "side": "black",
+   "keyIdea": "",
+   "text": "A position from a game played on Lichess. White has just taken your queen on e4. White's king has no flight square: find the mate.",
+   "url": "https://lichess.org/training/TtYEa",
+   "line": "fxe4 Be3+ Kh1 Rf1#"
+  }
+ ]
+}

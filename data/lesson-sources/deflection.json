@@ -1,0 +1,17 @@
+{
+ "id": "deflection",
+ "name": "Deflection",
+ "kind": "theme",
+ "track": "themes",
+ "level": "intermediate",
+ "side": "white",
+ "puzzleThemes": [
+  "deflection"
+ ],
+ "goal": "You can force a defending piece away from the square or piece it guards, often with a sacrifice, and then win what it guarded.",
+ "priorKnowledge": [
+  "removing-the-defender"
+ ],
+ "intro": "",
+ "parts": []
+}

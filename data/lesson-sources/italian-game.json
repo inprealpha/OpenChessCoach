@@ -1,0 +1,72 @@
+{
+ "id": "italian-game",
+ "name": "Italian Game",
+ "kind": "opening",
+ "track": "openings",
+ "level": "beginner",
+ "side": "white",
+ "eco": "C54",
+ "puzzleTags": [
+  "Italian_Game"
+ ],
+ "goal": "As White, you can play the Italian Game: aim the bishop at f7, build a centre with c3 and d4, and castle.",
+ "priorKnowledge": [
+  "opening-principles"
+ ],
+ "intro": "In the Italian Game White puts the bishop on c4, where it controls d5 and eyes f7, the weakest pawn in Black's camp, and gets ready to castle early. After 3...Bc5, the Giuoco Piano or \"quiet game\", White's classical plan is to build a big pawn centre with c3 and d4.",
+ "introUrl": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4",
+ "parts": [
+  {
+   "title": "Italian Game",
+   "fen": "start",
+   "side": "white",
+   "keyIdea": "",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4",
+   "line": "e4 e5 Nf3 Nc6 Bc4 Bc5 c3 Nf6 d4 exd4 cxd4 Bb4+ Bd2",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "e4",
+     "text": "The opening is a race to develop and control the centre. 1.e4 opens lines for your queen and king's bishop, controls d5 and f5, and keeps a Black pawn off e4 so your knight can later sit safely on f3. 1.d4 is the other main choice and gives slower, more closed games; knight moves to the edge like 1.Na3 do little for the centre.",
+     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory"
+    },
+    {
+     "ply": 2,
+     "san": "Nf3",
+     "text": "Black's e5 pawn is undefended. 2.Nf3 attacks it while developing a piece, also eyes d4 and prepares castling; it is by far the most popular move. 2.f4 (King's Gambit) and 2.d4 attack with pawns instead. 2.Qh5 or 2.Qf3 hope for a quick mate, but if Black stays calm they are not dangerous.",
+     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5"
+    },
+    {
+     "ply": 4,
+     "san": "Bc4",
+     "text": "2...Nc6 defends e5. White usually develops the bishop next, keeping c3 and d4 in reserve. 3.Bc4, the Italian Game, aims it at Black's weak f7 pawn. 3.Bb5 (Spanish) pressures the knight that guards e5, and 3.d4 (Scotch) opens the centre at once. 3.Nxe5?? simply gives away a knight.",
+     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6"
+    },
+    {
+     "ply": 6,
+     "san": "c3",
+     "text": "Black controls d4 three times to your two, so 4.c3 adds a defender and prepares d4. 4.d3 is the quieter Giuoco Pianissimo, 4.d4 at once is a gambit that is not quite sound, and 4.b4 is the Evans Gambit. Avoid 4.Bxf7+?: the Jerome Gambit comes far too early and is objectively bad for White.",
+     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4/3...Bc5"
+    },
+    {
+     "ply": 8,
+     "san": "d4",
+     "text": "4...Nf6 hits e4, and with your pawn on c3 you can no longer defend it with Nc3. The quiet main line is 5.d3, but 5.d4 strikes at once, attacking the bishop and intending 6.e5 after 5...exd4 (the Greco Gambit). 5.b4!? (Bird's Attack) tries to trap the bishop. Later, Qb3 can add pressure on f7.",
+     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4/3...Bc5/4._c3"
+    },
+    {
+     "ply": 10,
+     "san": "cxd4",
+     "text": "After 5...exd4, 6.cxd4 takes back and attacks the bishop on c5, though Black has the check 6...Bb4+. Many players now prefer 6.e5, hitting the f6 knight, when 6...d5 7.Bb5 Ne4 8.cxd4 Bb6 is slightly better for White. 6.b4!? (Dubov Italian) is somewhat dubious but dangerous if Black is unprepared.",
+     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4/3...Bc5"
+    },
+    {
+     "ply": 12,
+     "san": "Bd2",
+     "text": "Block the check with 7.Bd2, the modern main line. Black can trade with 7...Bxd2+ or grab 7...Nxe4, but that does not really win a pawn: 8.Bxb4 Nxb4 9.Bxf7+ Kxf7 10.Qb3+ Kf8 11.Qxb4+ Qe7 12.Qxe7+ Kxe7 wins it back, though the endgame is slightly easier for Black.",
+     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4/3...Bc5"
+    }
+   ]
+  }
+ ]
+}

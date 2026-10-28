@@ -1,0 +1,15 @@
+{
+ "id": "rook-endgame-basics",
+ "name": "Rook endgame basics",
+ "kind": "endgame",
+ "track": "endgames",
+ "level": "intermediate",
+ "side": "white",
+ "goal": "You can keep your rook active, put it behind a passed pawn, and cut the enemy king off from the pawn.",
+ "priorKnowledge": [
+  "rook-mate",
+  "passed-pawns"
+ ],
+ "intro": "",
+ "parts": []
+}

@@ -1,0 +1,15 @@
+{
+ "id": "perpetual-check",
+ "name": "Perpetual check",
+ "kind": "theme",
+ "track": "themes",
+ "level": "intermediate",
+ "side": "white",
+ "goal": "When you are losing, you can see when checks that never stop will save the game with a draw.",
+ "priorKnowledge": [
+  "checks-captures-threats",
+  "draws"
+ ],
+ "intro": "",
+ "parts": []
+}

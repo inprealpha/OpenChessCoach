@@ -2,6 +2,12 @@
  "id": "removing-the-defender",
  "name": "Removing the defender",
  "kind": "theme",
+ "track": "themes",
+ "level": "beginner",
+ "goal": "You can win a piece by taking or chasing away its only defender, or by giving that defender two jobs at once.",
+ "priorKnowledge": [
+  "forks"
+ ],
  "side": "white",
  "puzzleTags": [],
  "puzzleThemes": [
@@ -22,7 +28,15 @@
    "title": "Kramnik against Topalov",
    "fen": "8/4kp2/1r1p2p1/1p2p1bp/n7/R4P2/PP2B1PP/1K5R w - - 0 1",
    "side": "white",
+   "keyIdea": "",
    "text": "Linares 2004: Black's knight on a4 is defended only by the pawn on b5.",
+   "textCredit": {
+    "source": "Wikipedia, Undermining (chess)",
+    "url": "https://en.wikipedia.org/wiki/Undermining_(chess)",
+    "licence": "CC BY-SA 4.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "authors": "Wikipedia contributors (see the page history)"
+   },
    "credit": {
     "source": "Wikipedia, Undermining (chess)",
     "url": "https://en.wikipedia.org/wiki/Undermining_(chess)",
@@ -98,6 +112,7 @@
    "title": "Take the guard",
    "fen": "rn1qk2r/p1p2pp1/2bpp2p/1Bp5/3PnB2/4PN2/P1Q2PPP/1R3RK1 b kq - 3 14",
    "side": "white",
+   "keyIdea": "",
    "text": "A position from a game played on Lichess. Black has just castled. Black's knight on e4 is attacked by your queen. What defends it?",
    "credit": {
     "source": "Lichess puzzle database, puzzle ZZMzy",
@@ -167,6 +182,7 @@
    "title": "The rook that guards",
    "fen": "3r1rk1/6pp/2n2p1n/1p6/4P3/1P4PP/1B1qQPB1/R3R1K1 w - - 0 26",
    "side": "black",
+   "keyIdea": "",
    "text": "A position from a game played on Lichess. White has just offered a rook on d1 to your queen. Which white piece is doing two jobs?",
    "credit": {
     "source": "Lichess puzzle database, puzzle XX6e7",

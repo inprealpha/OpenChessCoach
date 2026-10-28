@@ -1,0 +1,18 @@
+{
+ "id": "minor-piece-endgames",
+ "name": "Bishop and knight endgames",
+ "kind": "endgame",
+ "track": "endgames",
+ "level": "intermediate",
+ "side": "white",
+ "puzzleThemes": [
+  "bishopEndgame",
+  "knightEndgame"
+ ],
+ "goal": "You can tell when a bishop beats a knight and when the reverse is true, and know two draws: bishops of opposite colours, and the wrong bishop with a rook pawn.",
+ "priorKnowledge": [
+  "good-and-bad-pieces"
+ ],
+ "intro": "",
+ "parts": []
+}

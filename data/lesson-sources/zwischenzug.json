@@ -1,0 +1,17 @@
+{
+ "id": "zwischenzug",
+ "name": "In-between moves",
+ "kind": "theme",
+ "track": "themes",
+ "level": "intermediate",
+ "side": "white",
+ "puzzleThemes": [
+  "intermezzo"
+ ],
+ "goal": "Before you recapture or answer a threat, you can look for a stronger move to play first, such as a check or a bigger threat.",
+ "priorKnowledge": [
+  "candidate-moves"
+ ],
+ "intro": "",
+ "parts": []
+}

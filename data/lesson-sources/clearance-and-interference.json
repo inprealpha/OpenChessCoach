@@ -1,0 +1,19 @@
+{
+ "id": "clearance-and-interference",
+ "name": "Clearing and blocking lines",
+ "kind": "theme",
+ "track": "themes",
+ "level": "intermediate",
+ "side": "white",
+ "puzzleThemes": [
+  "clearance",
+  "interference"
+ ],
+ "goal": "You can move a piece off a square or line so another piece can use it, and put a piece between an enemy piece and what it defends.",
+ "priorKnowledge": [
+  "discovered-attacks",
+  "deflection"
+ ],
+ "intro": "",
+ "parts": []
+}

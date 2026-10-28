@@ -2,6 +2,12 @@
  "id": "italian-game",
  "name": "Italian Game",
  "kind": "opening",
+ "track": "openings",
+ "level": "beginner",
+ "goal": "As White, you can play the Italian Game: aim the bishop at f7, build a centre with c3 and d4, and castle.",
+ "priorKnowledge": [
+  "opening-principles"
+ ],
  "side": "white",
  "eco": "C54",
  "puzzleTags": [
@@ -23,6 +29,7 @@
    "title": "Italian Game",
    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
    "side": "white",
+   "keyIdea": "",
    "credit": {
     "source": "Wikibooks, Chess Opening Theory/1. e4/1...e5/2. Nf3/2...Nc6/3. Bc4",
     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4",

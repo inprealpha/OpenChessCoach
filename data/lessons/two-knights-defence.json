@@ -2,6 +2,12 @@
  "id": "two-knights-defence",
  "name": "Two Knights Defence",
  "kind": "opening",
+ "track": "openings",
+ "level": "beginner",
+ "goal": "As Black against the Italian Game, you can play the Two Knights Defence and know how to meet the attack on f7.",
+ "priorKnowledge": [
+  "italian-game"
+ ],
  "side": "black",
  "eco": "C58",
  "puzzleTags": [
@@ -23,6 +29,7 @@
    "title": "Two Knights Defence",
    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
    "side": "black",
+   "keyIdea": "",
    "credit": {
     "source": "Wikibooks, Chess Opening Theory/1. e4/1...e5/2. Nf3/2...Nc6/3. Bc4/3...Nf6/4. Ng5",
     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4/3...Nf6/4._Ng5",

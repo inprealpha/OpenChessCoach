@@ -1,0 +1,20 @@
+{
+ "id": "decoy",
+ "name": "Decoy",
+ "kind": "theme",
+ "track": "themes",
+ "level": "intermediate",
+ "goal": "You can lure a king or queen onto a square where a fork, a pin or a mate is waiting.",
+ "priorKnowledge": [
+  "deflection"
+ ],
+ "side": "white",
+ "puzzleTags": [],
+ "puzzleThemes": [
+  "attraction"
+ ],
+ "intro": {
+  "text": ""
+ },
+ "parts": []
+}

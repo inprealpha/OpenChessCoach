@@ -1,0 +1,20 @@
+{
+ "id": "mate-in-one",
+ "name": "Mate in one",
+ "kind": "theme",
+ "track": "themes",
+ "level": "beginner",
+ "goal": "You can tell checkmate from check, and find a mate in one move when there is one.",
+ "priorKnowledge": [
+  "check"
+ ],
+ "side": "white",
+ "puzzleTags": [],
+ "puzzleThemes": [
+  "mateIn1"
+ ],
+ "intro": {
+  "text": ""
+ },
+ "parts": []
+}

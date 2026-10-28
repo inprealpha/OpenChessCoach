@@ -1,0 +1,27 @@
+{
+ "id": "mating-patterns",
+ "name": "Mating patterns",
+ "kind": "theme",
+ "track": "themes",
+ "level": "intermediate",
+ "goal": "You can recognise the smothered mate and other common mating patterns, and play the moves that lead to them.",
+ "priorKnowledge": [
+  "mate-in-two",
+  "back-rank-mate"
+ ],
+ "side": "white",
+ "puzzleTags": [],
+ "puzzleThemes": [
+  "smotheredMate",
+  "anastasiaMate",
+  "arabianMate",
+  "bodenMate",
+  "hookMate",
+  "doubleBishopMate",
+  "dovetailMate"
+ ],
+ "intro": {
+  "text": ""
+ },
+ "parts": []
+}

@@ -1,0 +1,72 @@
+{
+ "id": "caro-kann",
+ "name": "Caro-Kann Defence",
+ "kind": "opening",
+ "track": "openings",
+ "level": "beginner",
+ "side": "black",
+ "eco": "B18",
+ "puzzleTags": [
+  "Caro-Kann_Defense"
+ ],
+ "goal": "As Black against 1.e4, you can play the Caro-Kann: support d5 with c6, develop the light-squared bishop early, and keep a solid position.",
+ "priorKnowledge": [
+  "opening-principles"
+ ],
+ "intro": "The Caro-Kann prepares ...d5 with the c-pawn ready to take back, so Black keeps a share of the centre and makes f7 safer. Unlike the French (1...e6), it does not shut in the light-squared bishop, though the knight loses the c6 square. It has a reputation as a solid, defensive reply to 1.e4.",
+ "introUrl": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...c6",
+ "parts": [
+  {
+   "title": "Caro-Kann Defence",
+   "fen": "start",
+   "side": "black",
+   "keyIdea": "",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...c6",
+   "line": "e4 c6 d4 d5 Nc3 dxe4 Nxe4 Bf5 Ng3 Bg6 h4 h6 Nf3 Nd7",
+   "notes": [
+    {
+     "ply": 1,
+     "san": "c6",
+     "text": "1...c6, the Caro-Kann, prepares ...d5 so a pawn can recapture there. Compared with 1...e6 (French), your light-squared bishop stays free, but c6 is taken from your knight and a later ...c5 costs a move. 1...e5 and 1...c5 fight for d4 instead, while 1...f5? weakens your kingside.",
+     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4"
+    },
+    {
+     "ply": 3,
+     "san": "d5",
+     "text": "White has put two pawns in the centre. Play 2...d5 as planned: it attacks e4, and if 3.exd5 cxd5 you have swapped your c-pawn for White's central e-pawn. Other moves are rare: 2...d6 transposes to a Pirc, and 2...Nf6!? invites 3.e5!, chasing the knight.",
+     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...c6/2._d4"
+    },
+    {
+     "ply": 5,
+     "san": "dxe4",
+     "text": "White defends e4 with the knight. 3...dxe4 is the main move, denying White the two-pawn centre. 3...Nf6 invites 4.e5 and a closed game; 3...g6 lets White gain kingside space; 3...e6?! combines the drawbacks of the Caro-Kann and the French.",
+     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...c6/2._d4/2...d5/3._Nc3"
+    },
+    {
+     "ply": 7,
+     "san": "Bf5",
+     "text": "4...Bf5, the Classical Variation, develops your bishop and attacks the e4 knight; the bishop will later control the long diagonal from g6 and then h7. 4...Nf6 5.Nxf6+ leaves you with doubled pawns, and 4...Nd7 (Karpov Variation) looks slower because the knight must move again before that bishop can come out.",
+     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...c6/2._d4/2...d5/3._Nc3/3...dxe4/4._Nxe4"
+    },
+    {
+     "ply": 9,
+     "san": "Bg6",
+     "text": "The knight on g3 attacks your bishop. 5...Bg6 is the only sensible retreat and almost always played. Defending it with 5...g6 is very rare and leaves you with a worse pawn structure.",
+     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...c6/2._d4/2...d5/3._Nc3/3...dxe4/4._Nxe4/4...Bf5/5._Ng3"
+    },
+    {
+     "ply": 11,
+     "san": "h6",
+     "text": "6.h4 puts pressure on your bishop, so you need to look after it. 6...h6 is almost universal. 6...h5 and 6...Nd7 have been tried but are probably inferior.",
+     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...c6/2._d4/2...d5/3._Nc3/3...dxe4/4._Nxe4/4...Bf5/5._Ng3/5...Bg6/6._h4"
+    },
+    {
+     "ply": 13,
+     "san": "Nd7",
+     "text": "White's knight would like to jump to e5, where it is usually too strong. 7...Nd7 covers e5 and stops it, and is the normal choice. 7...Nf6 and 7...e6 are other options.",
+     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...c6/2._d4/2...d5/3._Nc3/3...dxe4/4._Nxe4/4...Bf5/5._Ng3/5...Bg6/6._h4/6...h6/7._Nf3"
+    }
+   ]
+  }
+ ]
+}

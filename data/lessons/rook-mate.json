@@ -2,6 +2,12 @@
  "id": "rook-mate",
  "name": "Mate with king and rook",
  "kind": "endgame",
+ "track": "endgames",
+ "level": "beginner",
+ "goal": "You can mate a lone king with king and rook, using your king to help and a waiting move when you need one.",
+ "priorKnowledge": [
+  "two-rook-mate"
+ ],
  "side": "white",
  "puzzleTags": [],
  "puzzleThemes": [],
@@ -20,7 +26,15 @@
    "title": "Build the box",
    "fen": "8/8/8/8/4k3/8/8/RK6 w - - 0 1",
    "side": "white",
+   "keyIdea": "",
    "text": "First improve your king, then use the rook to fence the black king into a box.",
+   "textCredit": {
+    "source": "Wikibooks, Chess/The Endgame/King and Rook vs. King",
+    "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
+    "licence": "CC BY-SA 4.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "authors": "Wikibooks contributors (see the page history)"
+   },
    "credit": {
     "source": "Wikibooks, Chess/The Endgame/King and Rook vs. King",
     "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
@@ -184,7 +198,15 @@
    "title": "Creep closer",
    "fen": "8/8/8/5k2/4R3/3K4/8/8 b - - 0 1",
    "side": "white",
+   "keyIdea": "",
    "text": "The box is e8-e4-h4. Black's king is keeping its distance, so the rook cannot shrink the box straight away.",
+   "textCredit": {
+    "source": "Wikibooks, Chess/The Endgame/King and Rook vs. King",
+    "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
+    "licence": "CC BY-SA 4.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "authors": "Wikibooks contributors (see the page history)"
+   },
    "credit": {
     "source": "Wikibooks, Chess/The Endgame/King and Rook vs. King",
     "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
@@ -299,7 +321,15 @@
    "title": "Shrink the box to mate",
    "fen": "8/6k1/4R3/3K4/8/8/8/8 w - - 9 6",
    "side": "white",
+   "keyIdea": "",
    "text": "After 8...Kf7 9.Re6 Kg7 the box is down to the last two ranks and files. Keep shrinking it with king and rook together; no checks are needed until the mate.",
+   "textCredit": {
+    "source": "Wikibooks, Chess/The Endgame/King and Rook vs. King",
+    "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
+    "licence": "CC BY-SA 4.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "authors": "Wikibooks contributors (see the page history)"
+   },
    "credit": {
     "source": "Wikibooks, Chess/The Endgame/King and Rook vs. King",
     "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",

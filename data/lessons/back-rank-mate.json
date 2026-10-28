@@ -2,6 +2,12 @@
  "id": "back-rank-mate",
  "name": "Back-rank mate",
  "kind": "theme",
+ "track": "themes",
+ "level": "beginner",
+ "goal": "You can mate a king trapped behind its own pawns on the back rank, and give your own king an escape square in time.",
+ "priorKnowledge": [
+  "mate-in-one"
+ ],
  "side": "white",
  "puzzleTags": [],
  "puzzleThemes": [
@@ -22,7 +28,15 @@
    "title": "The bishop cannot be taken back",
    "fen": "r1r3k1/p4ppp/1pb5/q7/2Q5/1P1R4/P1B2PPP/3R2K1 w - - 0 1",
    "side": "white",
+   "keyIdea": "",
    "text": "Your rooks are doubled on the d-file and Black's king has no flight square. Black's bishop on c6 is defended only by the rook on c8.",
+   "textCredit": {
+    "source": "Wikipedia, Back-rank checkmate",
+    "url": "https://en.wikipedia.org/wiki/Back-rank_checkmate",
+    "licence": "CC BY-SA 4.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "authors": "Wikipedia contributors (see the page history)"
+   },
    "credit": {
     "source": "Wikipedia, Back-rank checkmate",
     "url": "https://en.wikipedia.org/wiki/Back-rank_checkmate",
@@ -170,7 +184,15 @@
    "title": "Capablanca strikes",
    "fen": "3r2k1/p4ppp/1q6/8/8/2R1P3/P3QPPP/6K1 b - - 0 29",
    "side": "black",
+   "keyIdea": "",
    "text": "Bernstein against Capablanca, Moscow 1914: you are Black. White's queen guards the back rank and the rook on c3. Can you overload it?",
+   "textCredit": {
+    "source": "Wikipedia, Back-rank checkmate",
+    "url": "https://en.wikipedia.org/wiki/Back-rank_checkmate",
+    "licence": "CC BY-SA 4.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "authors": "Wikipedia contributors (see the page history)"
+   },
    "credit": {
     "source": "Wikipedia, Back-rank checkmate",
     "url": "https://en.wikipedia.org/wiki/Back-rank_checkmate",
@@ -318,6 +340,7 @@
    "title": "After the queen is gone",
    "fen": "5r2/6pp/4N2k/2R3b1/4q3/5P2/PP4PP/6K1 w - - 0 37",
    "side": "black",
+   "keyIdea": "",
    "text": "A position from a game played on Lichess. White has just taken your queen on e4. White's king has no flight square: find the mate.",
    "credit": {
     "source": "Lichess puzzle database, puzzle TtYEa",

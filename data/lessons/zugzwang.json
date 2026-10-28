@@ -1,0 +1,20 @@
+{
+ "id": "zugzwang",
+ "name": "Zugzwang",
+ "kind": "endgame",
+ "track": "endgames",
+ "level": "intermediate",
+ "goal": "You can win a position where the opponent would be fine if they could pass, by making the move that leaves them only bad moves.",
+ "priorKnowledge": [
+  "king-and-pawn"
+ ],
+ "side": "white",
+ "puzzleTags": [],
+ "puzzleThemes": [
+  "zugzwang"
+ ],
+ "intro": {
+  "text": ""
+ },
+ "parts": []
+}

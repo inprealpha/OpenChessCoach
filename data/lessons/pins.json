@@ -2,6 +2,12 @@
  "id": "pins",
  "name": "Pins",
  "kind": "theme",
+ "track": "themes",
+ "level": "beginner",
+ "goal": "You can pin a piece to a more valuable one behind it, and win the pinned piece by attacking it again.",
+ "priorKnowledge": [
+  "piece-values"
+ ],
  "side": "white",
  "puzzleTags": [],
  "puzzleThemes": [
@@ -22,7 +28,15 @@
    "title": "Attack the pinned piece",
    "fen": "6k1/pp1n1rpp/2p5/8/2BP4/5N2/P4PPP/6K1 w - - 0 1",
    "side": "white",
+   "keyIdea": "",
    "text": "Your bishop pins Black's rook on f7 to the king on g8. You could take the rook at once, but there is something stronger.",
+   "textCredit": {
+    "source": "Wikibooks, Chess/Tactics",
+    "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
+    "licence": "CC BY-SA 4.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "authors": "Wikibooks contributors (see the page history)"
+   },
    "credit": {
     "source": "Wikibooks, Chess/Tactics",
     "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
@@ -62,6 +76,7 @@
    "title": "A pin on the g-file",
    "fen": "5r2/pp6/2b3p1/4k2p/3R3P/2PB2K1/P5P1/8 w - - 0 35",
    "side": "black",
+   "keyIdea": "",
    "text": "A position from a game played on Lichess. White has just taken on g6. Find the pin that wins the bishop back.",
    "credit": {
     "source": "Lichess puzzle database, puzzle dJDIa",
@@ -131,6 +146,7 @@
    "title": "A pinned pawn",
    "fen": "2rqkb1r/pp2pp1p/2n2np1/1N1p4/8/3B2QP/PPP2PP1/R1B1R1K1 b k - 3 12",
    "side": "white",
+   "keyIdea": "",
    "text": "A position from a game played on Lichess. Black has just attacked your knight with ...a6. Look at what is pinned on the e-file.",
    "credit": {
     "source": "Lichess puzzle database, puzzle faVZw",

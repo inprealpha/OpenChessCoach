@@ -1,0 +1,18 @@
+{
+ "id": "active-king",
+ "name": "The king in the endgame",
+ "kind": "endgame",
+ "track": "endgames",
+ "level": "beginner",
+ "goal": "Once the queens are off, you can bring your king into the game to attack pawns and support your own.",
+ "priorKnowledge": [
+  "pawn-promotion"
+ ],
+ "side": "white",
+ "puzzleTags": [],
+ "puzzleThemes": [],
+ "intro": {
+  "text": ""
+ },
+ "parts": []
+}

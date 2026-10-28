@@ -2,6 +2,12 @@
  "id": "caro-kann",
  "name": "Caro-Kann Defence",
  "kind": "opening",
+ "track": "openings",
+ "level": "beginner",
+ "goal": "As Black against 1.e4, you can play the Caro-Kann: support d5 with c6, develop the light-squared bishop early, and keep a solid position.",
+ "priorKnowledge": [
+  "opening-principles"
+ ],
  "side": "black",
  "eco": "B18",
  "puzzleTags": [
@@ -23,6 +29,7 @@
    "title": "Caro-Kann Defence",
    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
    "side": "black",
+   "keyIdea": "",
    "credit": {
     "source": "Wikibooks, Chess Opening Theory/1. e4/1...c6",
     "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...c6",

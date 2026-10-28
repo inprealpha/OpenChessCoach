@@ -1,0 +1,14 @@
+{
+ "id": "weak-pawns",
+ "name": "Weak pawns",
+ "kind": "thinking",
+ "track": "thinking",
+ "level": "intermediate",
+ "side": "white",
+ "goal": "You can recognise isolated, doubled and backward pawns, attack them in your opponent's position, and avoid them in yours.",
+ "priorKnowledge": [
+  "simple-plans"
+ ],
+ "intro": "",
+ "parts": []
+}

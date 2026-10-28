@@ -1,0 +1,14 @@
+{
+ "id": "open-files",
+ "name": "Open files and the seventh rank",
+ "kind": "thinking",
+ "track": "thinking",
+ "level": "intermediate",
+ "side": "white",
+ "goal": "You can put a rook on an open file, double your rooks, and use a rook on the seventh rank to attack pawns and trap the king.",
+ "priorKnowledge": [
+  "weak-squares"
+ ],
+ "intro": "",
+ "parts": []
+}

@@ -1,0 +1,16 @@
+{
+ "id": "scotch-game",
+ "name": "Scotch Game",
+ "kind": "opening",
+ "track": "openings",
+ "level": "intermediate",
+ "side": "white",
+ "eco": "C45",
+ "puzzleTags": [],
+ "goal": "As White, you can open the centre at once with the Scotch Game, and develop quickly when Black takes on d4.",
+ "priorKnowledge": [
+  "italian-game"
+ ],
+ "intro": "",
+ "parts": []
+}

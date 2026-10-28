@@ -2,6 +2,12 @@
  "id": "king-and-pawn",
  "name": "King and pawn endgames",
  "kind": "endgame",
+ "track": "endgames",
+ "level": "intermediate",
+ "goal": "You can tell whether king and pawn win against a lone king, using the opposition and the key squares in front of the pawn.",
+ "priorKnowledge": [
+  "active-king"
+ ],
  "side": "white",
  "puzzleTags": [],
  "puzzleThemes": [
@@ -22,7 +28,15 @@
    "title": "The rule of the square",
    "fen": "8/8/8/4P3/k7/8/K7/8 w - - 0 1",
    "side": "white",
+   "keyIdea": "",
    "text": "Draw a square from the pawn to its queening square (e5-e8-b8-b5). If the enemy king can step into it, it catches the pawn; if not, the pawn queens. Black's king on a4 is outside the square.",
+   "textCredit": {
+    "source": "Wikibooks, Chess/The Endgame/Pawn Endings",
+    "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings",
+    "licence": "CC BY-SA 4.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "authors": "Wikibooks contributors (see the page history)"
+   },
    "credit": {
     "source": "Wikibooks, Chess/The Endgame/Pawn Endings",
     "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings",
@@ -124,7 +138,15 @@
    "title": "The opposition",
    "fen": "8/8/4k3/8/4K3/4P3/8/8 b - - 0 1",
    "side": "white",
+   "keyIdea": "",
    "text": "The kings face each other with one square between them and it is Black to move, so you have the opposition: Black has to give way.",
+   "textCredit": {
+    "source": "Wikibooks, Chess/The Endgame/Pawn Endings",
+    "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings",
+    "licence": "CC BY-SA 4.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "authors": "Wikibooks contributors (see the page history)"
+   },
    "credit": {
     "source": "Wikibooks, Chess/The Endgame/Pawn Endings",
     "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings",
@@ -389,7 +411,15 @@
    "title": "The outside passed pawn",
    "fen": "8/8/p1k5/P1p5/2K2P2/8/8/8 w - - 0 1",
    "side": "white",
+   "keyIdea": "",
    "text": "Pawns are equal, but your f-pawn is far from the others. Use it as a decoy.",
+   "textCredit": {
+    "source": "Wikibooks, Chess/The Endgame/Pawn Endings",
+    "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings",
+    "licence": "CC BY-SA 4.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "authors": "Wikibooks contributors (see the page history)"
+   },
    "credit": {
     "source": "Wikibooks, Chess/The Endgame/Pawn Endings",
     "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings",

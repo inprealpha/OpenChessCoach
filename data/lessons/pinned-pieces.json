@@ -1,0 +1,18 @@
+{
+ "id": "pinned-pieces",
+ "name": "Using a pin",
+ "kind": "theme",
+ "track": "themes",
+ "level": "intermediate",
+ "goal": "You can attack a pinned piece with a pawn, add attackers to it, and take advantage of a pinned piece that can no longer defend.",
+ "priorKnowledge": [
+  "pins"
+ ],
+ "side": "white",
+ "puzzleTags": [],
+ "puzzleThemes": [],
+ "intro": {
+  "text": ""
+ },
+ "parts": []
+}

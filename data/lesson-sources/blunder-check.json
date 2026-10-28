@@ -1,0 +1,14 @@
+{
+ "id": "blunder-check",
+ "name": "Blunder check",
+ "kind": "thinking",
+ "track": "thinking",
+ "level": "beginner",
+ "side": "white",
+ "goal": "Before you play a move, you can check what your opponent could take, check or attack after it, and pick a safer move when the answer is bad.",
+ "priorKnowledge": [
+  "threats"
+ ],
+ "intro": "",
+ "parts": []
+}

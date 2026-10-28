@@ -1,0 +1,18 @@
+{
+ "id": "candidate-moves",
+ "name": "Candidate moves and thinking ahead",
+ "kind": "thinking",
+ "track": "thinking",
+ "level": "intermediate",
+ "goal": "You can list two or three candidate moves, look a few moves ahead in each, and choose with the opponent's best reply in mind.",
+ "priorKnowledge": [
+  "checks-captures-threats"
+ ],
+ "side": "white",
+ "puzzleTags": [],
+ "puzzleThemes": [],
+ "intro": {
+  "text": ""
+ },
+ "parts": []
+}

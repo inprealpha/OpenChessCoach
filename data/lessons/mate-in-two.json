@@ -1,0 +1,21 @@
+{
+ "id": "mate-in-two",
+ "name": "Mate in two",
+ "kind": "theme",
+ "track": "themes",
+ "level": "beginner",
+ "goal": "You can find a mate in two moves by first taking away the king's escape squares or forcing it where you want it.",
+ "priorKnowledge": [
+  "mate-in-one",
+  "checks-captures-threats"
+ ],
+ "side": "white",
+ "puzzleTags": [],
+ "puzzleThemes": [
+  "mateIn2"
+ ],
+ "intro": {
+  "text": ""
+ },
+ "parts": []
+}

@@ -1,0 +1,18 @@
+{
+ "id": "centre-and-activity",
+ "name": "Active pieces and the centre",
+ "kind": "thinking",
+ "track": "thinking",
+ "level": "beginner",
+ "goal": "When nothing can be won at once, you can improve a piece by putting it on a square where it controls more, especially in the centre.",
+ "priorKnowledge": [
+  "opening-principles"
+ ],
+ "side": "white",
+ "puzzleTags": [],
+ "puzzleThemes": [],
+ "intro": {
+  "text": ""
+ },
+ "parts": []
+}

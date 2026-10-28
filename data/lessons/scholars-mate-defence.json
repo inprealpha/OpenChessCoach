@@ -1,0 +1,21 @@
+{
+ "id": "scholars-mate-defence",
+ "name": "Stopping the early queen attack",
+ "kind": "opening",
+ "track": "openings",
+ "level": "beginner",
+ "goal": "As Black, you can stop Scholar's Mate and other early queen attacks, and gain time by developing while you attack the queen.",
+ "priorKnowledge": [
+  "opening-principles",
+  "threats"
+ ],
+ "side": "black",
+ "eco": "C20",
+ "puzzleTags": [],
+ "puzzleThemes": [],
+ "intro": {
+  "text": ""
+ },
+ "parts": [],
+ "statsSource": "Lichess games database (CC0): lichess_db_standard_rated_2013-01.pgn, lichess_db_standard_rated_2014-07.pgn.zst, 1,169,772 rated games"
+}

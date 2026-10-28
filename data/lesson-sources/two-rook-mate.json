@@ -1,0 +1,14 @@
+{
+ "id": "two-rook-mate",
+ "name": "Mate with two rooks",
+ "kind": "endgame",
+ "track": "endgames",
+ "level": "beginner",
+ "side": "white",
+ "goal": "You can mate a lone king with two rooks, taking turns to push it rank by rank to the edge.",
+ "priorKnowledge": [
+  "queen-mate"
+ ],
+ "intro": "",
+ "parts": []
+}

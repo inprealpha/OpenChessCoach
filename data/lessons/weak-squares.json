@@ -1,0 +1,18 @@
+{
+ "id": "weak-squares",
+ "name": "Weak squares and outposts",
+ "kind": "thinking",
+ "track": "thinking",
+ "level": "intermediate",
+ "goal": "You can find a square that no enemy pawn can attack, and put a knight or another piece there.",
+ "priorKnowledge": [
+  "pawn-structure"
+ ],
+ "side": "white",
+ "puzzleTags": [],
+ "puzzleThemes": [],
+ "intro": {
+  "text": ""
+ },
+ "parts": []
+}

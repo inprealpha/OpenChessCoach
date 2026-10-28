@@ -1,0 +1,18 @@
+{
+ "id": "pawn-races",
+ "name": "Breakthroughs and pawn races",
+ "kind": "endgame",
+ "track": "endgames",
+ "level": "intermediate",
+ "goal": "You can break through a pawn wall with a pawn sacrifice, and count who promotes first in a race.",
+ "priorKnowledge": [
+  "passed-pawns"
+ ],
+ "side": "white",
+ "puzzleTags": [],
+ "puzzleThemes": [],
+ "intro": {
+  "text": ""
+ },
+ "parts": []
+}

@@ -1,9 +1,10 @@
-// The ADR 0005 and 0008 data checks: every Lesson line legal, every adapted text and position
-// credited, every Puzzle legal and belonging to its Lesson. Each check is proven to fail on a broken
-// copy of real data.
+// The ADR 0005, 0008 and 0011 data checks: every Lesson line legal, every position and kept text
+// credited, every Lesson with its goal, prior knowledge and key ideas, every Puzzle legal and
+// belonging to its Lesson. Each check is proven to fail on a broken copy of real data.
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { decisions, validateLesson, type LessonData } from '../src/content/lessons.ts';
+import { COURSE } from '../../../data-prep/course.ts';
+import { COURSE_LEVELS, decisions, keptOpenText, priorKnowledgeCycles, TRACKS, validateLesson, type LessonData, type OpenText } from '../src/content/lessons.ts';
 import { pickPuzzles, validatePuzzles, type PuzzleFile } from '../src/content/puzzles.ts';
 
 const dataDir = new URL('../../../data/', import.meta.url);
@@ -13,19 +14,41 @@ const lessons = index.map((l) => read<LessonData>(`lessons/${l.id}.json`));
 const byId = (id: string) => lessons.find((l) => l.id === id) as LessonData;
 const puzzles = read<PuzzleFile>('puzzles.json');
 const themePuzzles = read<PuzzleFile>('theme-puzzles.json');
+const ids = new Set(lessons.map((l) => l.id));
+const openTexts = read<{ texts: OpenText[] }>('open-texts.json').texts;
 const catalogue = Object.fromEntries(lessons.map((l) => [l.id, { tags: l.puzzleTags, themes: l.puzzleThemes }]));
 const copy = <T>(x: T): T => structuredClone(x);
 
 describe('Lesson data', () => {
-  it('covers the openings, the Themes and the basic endgames', () => {
-    const ids = (kind: string) => lessons.filter((l) => l.kind === kind).map((l) => l.id).sort();
-    expect(ids('opening')).toEqual(['caro-kann', 'italian-game', 'london-system', 'queens-gambit', 'queens-gambit-declined', 'ruy-lopez', 'two-knights-defence']);
-    expect(ids('theme')).toEqual(['back-rank-mate', 'discovered-attacks', 'forks', 'pins', 'removing-the-defender', 'skewers']);
-    expect(ids('endgame')).toEqual(['king-and-pawn', 'queen-mate', 'rook-endgames', 'rook-mate']);
+  it('lists every Lesson of the course, in the course order', () => {
+    expect(index.map((l) => l.id)).toEqual(COURSE);
+  });
+
+  it('has Lessons at every level of every track', () => {
+    for (const track of TRACKS) {
+      for (const level of COURSE_LEVELS) expect(lessons.filter((l) => l.track === track && l.level === level).length, `${track} ${level}`).toBeGreaterThan(0);
+    }
   });
 
   it.each(lessons.map((l) => [l.id, l] as const))('%s passes the data check', (_id, lesson) => {
-    expect(validateLesson(lesson)).toEqual([]);
+    expect(validateLesson(lesson, ids)).toEqual([]);
+    expect(keptOpenText(lesson, openTexts)).toEqual([]);
+  });
+
+  it('has no prior knowledge going round in a circle', () => {
+    expect(priorKnowledgeCycles(lessons)).toEqual([]);
+    const circle = [
+      { id: 'a', priorKnowledge: ['b'] },
+      { id: 'b', priorKnowledge: ['c'] },
+      { id: 'c', priorKnowledge: ['a'] },
+    ];
+    expect(priorKnowledgeCycles(circle)).toEqual([['a', 'b', 'c', 'a']]);
+  });
+
+  it('suggests prior knowledge from earlier in the course', () => {
+    const late: string[] = [];
+    for (const l of lessons) for (const p of l.priorKnowledge) if (COURSE.indexOf(p) > COURSE.indexOf(l.id)) late.push(`${l.id} needs ${p}, which comes later`);
+    expect(late).toEqual([]);
   });
 
   it('counts the decisions the catalogue shows', () => {
@@ -55,15 +78,27 @@ describe('Lesson data', () => {
     expect(validateLesson(broken).join('\n')).toMatch(/main-line move 4 \(e1e5\) is not legal/);
   });
 
-  it('fails on a note or intro without its credit', () => {
+  it('fails on a kept Wikibooks text without its credit, or a credit that is not CC BY-SA', () => {
+    const kept = openTexts.find((t) => t.url.includes('Chess_Opening_Theory')) as OpenText;
     const broken = copy(byId('italian-game'));
-    const node = broken.parts[0]?.nodes.find((n) => n.decision && n.notes);
-    if (!node?.notes) throw new Error('no notes');
-    node.notes.credit = { ...node.notes.credit, licence: '' };
-    expect(validateLesson(broken).join('\n')).toMatch(/notes are missing their credit/);
-    const noIntroCredit = copy(byId('london-system'));
-    noIntroCredit.intro.credit.url = 'https://example.com/';
-    expect(validateLesson(noIntroCredit).join('\n')).toMatch(/intro is missing its credit/);
+    const node = broken.parts[0]?.nodes.find((n) => n.decision) as LessonData['parts'][number]['nodes'][number];
+    node.notes = { text: `In short: ${kept.text}` };
+    expect(keptOpenText(broken, openTexts).join('\n')).toMatch(/italian-game: part 1 ply \d+'s note keeps wording from https:\/\/en\.wikibooks\.org\//);
+    node.notes = { text: kept.text, credit: { source: 'Wikibooks', url: kept.url, licence: '', licenceUrl: '', authors: 'x' } };
+    expect(validateLesson(broken).join('\n')).toMatch(/the note's credit is not a Wikibooks or Wikipedia credit/);
+  });
+
+  it('fails on a Lesson without its goal, with unknown prior knowledge, or a part without its key idea', () => {
+    const broken = copy(byId('forks'));
+    broken.goal = ' ';
+    broken.priorKnowledge = ['no-such-lesson'];
+    (broken.parts[1] as { keyIdea: string }).keyIdea = '';
+    (broken.parts[2] as { keyIdea: string }).keyIdea = 'x'.repeat(141);
+    const problems = validateLesson(broken, ids).join('\n');
+    expect(problems).toMatch(/forks: the Lesson has no learning goal/);
+    expect(problems).toMatch(/forks: prior knowledge no-such-lesson is not a Lesson/);
+    expect(problems).toMatch(/forks part 2: a part has no key idea/);
+    expect(problems).toMatch(/forks part 3: the key idea is longer than 140 characters/);
   });
 
   it('fails on a Theme position without its source, or with a line that does not start from it', () => {

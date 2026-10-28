@@ -1,0 +1,61 @@
+{
+ "id": "skewers",
+ "name": "Skewers",
+ "kind": "theme",
+ "track": "themes",
+ "level": "beginner",
+ "side": "white",
+ "puzzleThemes": [
+  "skewer"
+ ],
+ "goal": "You can attack a valuable piece so that, when it moves away, you win the piece behind it.",
+ "priorKnowledge": [
+  "pins"
+ ],
+ "intro": "A skewer is a pin turned around. In a pin the less valuable piece stands in front of the more valuable one; in a skewer the more valuable piece is attacked first, and when it moves away the piece behind it is lost. Skewers through the king are the strongest, because the king must move.",
+ "introUrl": "https://en.wikibooks.org/wiki/Chess/Tactics",
+ "parts": [
+  {
+   "title": "King in front of the queen",
+   "fen": "3q4/pppk1ppp/8/8/8/8/PPP2PPP/R4RK1 w - - 0 1",
+   "side": "white",
+   "keyIdea": "",
+   "text": "Black's king has stepped onto d7, right in front of the queen on d8. How do you punish it?",
+   "textUrl": "https://en.wikibooks.org/wiki/Chess/Tactics",
+   "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
+   "line": "Rad1+ Kc8 Rxd8+",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Rad1+",
+     "text": "Either rook to d1 skewers king and queen. Black cannot block the check, so the king must move.",
+     "url": "https://en.wikibooks.org/wiki/Chess/Tactics"
+    },
+    {
+     "ply": 2,
+     "san": "Rxd8+",
+     "text": "The king has moved out of the way and the queen behind it is lost.",
+     "url": "https://en.wikibooks.org/wiki/Chess/Tactics"
+    }
+   ]
+  },
+  {
+   "title": "A queen skewer",
+   "fen": "8/1p5p/p2Q2p1/4n3/8/P1Pk3P/6PK/4qN2 b - - 4 35",
+   "side": "white",
+   "keyIdea": "",
+   "text": "A position from a game played on Lichess. Black's king has just taken on c3. Find the check that wins Black's queen.",
+   "url": "https://lichess.org/training/Q9GCn",
+   "line": "Kxc3 Qb4+ Kd3 Qxe1"
+  },
+  {
+   "title": "A rook skewer",
+   "fen": "8/5p2/1b2p1k1/1P4p1/N5P1/6r1/8/1R2K3 w - - 2 48",
+   "side": "black",
+   "keyIdea": "",
+   "text": "A position from a game played on Lichess. White has just taken your bishop. Find the rook check that wins material back.",
+   "url": "https://lichess.org/training/AOHMD",
+   "line": "Nxb6 Rg1+ Kd2 Rxb1"
+  }
+ ]
+}

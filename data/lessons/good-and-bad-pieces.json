@@ -1,0 +1,18 @@
+{
+ "id": "good-and-bad-pieces",
+ "name": "Good and bad pieces",
+ "kind": "thinking",
+ "track": "thinking",
+ "level": "intermediate",
+ "goal": "You can tell a good bishop from a bad one blocked by its own pawns, use the two bishops, and decide when a knight is better than a bishop.",
+ "priorKnowledge": [
+  "pawn-structure"
+ ],
+ "side": "white",
+ "puzzleTags": [],
+ "puzzleThemes": [],
+ "intro": {
+  "text": ""
+ },
+ "parts": []
+}

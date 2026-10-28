@@ -11,14 +11,14 @@ Run on 28 October 2026 with `data-prep/human-moves.ts`. The run covered 708 posi
 
 ## Short answer
 
-- **Opus is the best guesser, and it is better than the Engine.** Opus's first guess was the move the human actually played 43% of the time. Its three guesses held the human's move 69% of the time. Stockfish's first choice matched the human only 33% of the time, and its top three 60% of the time. Sonnet (34% and 55%) and Haiku (30% and 49%) are clearly behind Opus. Sonnet's first guess is no better than Stockfish's first choice.
+- **Opus is the best guesser, and it does better than simply guessing the Engine's best move.** Stockfish has no model of human play; it only ranks moves by how good they are. So the Stockfish row answers a simpler question: if you always guessed the best move, how often would you be right? Opus's first guess was the move the human actually played 43% of the time. Its three guesses held the human's move 69% of the time. Stockfish's first choice matched the human only 33% of the time, and its top three 60% of the time. Sonnet (34% and 55%) and Haiku (30% and 49%) are clearly behind Opus. Sonnet's first guess is no better than Stockfish's first choice.
 - **The three models often disagree.** All three gave the same first move in only 30% of positions. In 26% of positions, all three gave different first moves. Any two models gave the same first move 41% to 51% of the time.
 - **No model fits one rating band clearly better than the others.** Opus guesses about equally well at every level, from under 1200 to 2000 and up (41% to 45% first-guess hits). Haiku leans toward weaker players: 34% under 1600 and 26% to 27% above 1600. That lean is weak evidence only (p = 0.07). So the models' unprompted guesses are not "the guesses of a 1200 player" or "the guesses of a 2000 player". They are about equally right at every level.
 - **For widening the Coach's list of moves, the cheap model is as good as the expensive one.** Today the Coach sees the Engine's top 5 moves, and those held the human's move in 76% of positions. Adding a model's 3 guesses raised that to 83% with Opus, 84% with Haiku and 83% with Sonnet. Haiku's guesses look less like the Engine's, so they catch more of the moves the Engine would never list. Haiku costs about a twentieth of what Opus costs.
 
 **My opinion.** The layer is worth building, and which model to use depends on what the layer is for.
 
-- If the Coach should **name the move a Player at that level would most likely play** (for example, "most players here would play Bxb7"), use Opus. It is the only model that clearly beats the Engine at ranking human moves.
+- If the Coach should **name the move a Player at that level would most likely play** (for example, "most players here would play Bxb7"), use Opus. It is the only model that clearly does better than guessing the Engine's best moves.
 - If the Coach should **add a few human-tempting moves for the Engine to check**, so it can talk about the mistake the Player is likely to make, use Haiku. It adds as much as Opus at a fraction of the cost.
 
 Either way, keep it next to the Engine's top 5, not in place of it. Check every proposed move, because 2% to 8% of them are illegal. Run it on demand, not on every move, because each call takes 7 to 9 seconds. Before building it, try Maia2 (see "What's still open"). Maia2 is a free model trained only to predict human moves, and it may beat all three.
@@ -176,7 +176,7 @@ It gives no rating and no hint of level. Each position goes to each model in its
 
 **Baselines.**
 
-- **Stockfish**: the app's own Engine build (`createNodeEngine`) at the desktop's settings: depth 14, 5 lines.
+- **Stockfish**: the app's own Engine build (`createNodeEngine`) at the desktop's settings: depth 14, 5 lines. Its guesses are just its best moves, in order. Stockfish does not try to predict humans. Its "Skill Level" setting makes it play worse by sometimes choosing weaker moves, but that is not modelled on human play, so it was not used here.
 - **"Obvious moves"**: a fixed rule with no search. It ranks recaptures first, then other captures (big pieces taken by small ones first, undefended targets first), promotions, checks, moves that attack an undefended piece, and castling.
 - **Random**: the expected score of three random legal moves.
 

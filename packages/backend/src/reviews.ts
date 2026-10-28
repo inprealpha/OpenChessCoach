@@ -176,6 +176,7 @@ async function makeReview(
       },
       (text) => delta(text, index),
       signal,
+      engine,
     );
     out.push({
       ply: m.ply,

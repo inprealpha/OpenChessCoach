@@ -1,6 +1,7 @@
 // The Coach port: the backend sends a brief and gets back a streamed explanation plus
 // structured data. Two implementations: the real Coach and the fake Coach (ADR 0006).
 import type { Brief } from '@chess-coach/shared/coach/brief';
+import type { EngineQuestion } from '@chess-coach/shared/coach/engine-tool';
 import type { CoachRawReply } from '@chess-coach/shared/coach/types';
 import type { CoachJob, CoachStatus } from '@chess-coach/shared/protocol';
 
@@ -9,6 +10,14 @@ export interface CoachCall {
   model: string;
   brief: Brief;
   signal?: AbortSignal;
+  /** With Think deeper on, the desktop's Engine, which the Coach may ask while it answers (ADR 0010). */
+  engine?: CoachEngine;
+}
+
+/** The one tool the Coach can be given: questions to the desktop's Engine, answered as text for the Coach to read. */
+export interface CoachEngine {
+  readonly maxQuestions: number;
+  ask(question: EngineQuestion): Promise<{ text: string; refused: boolean }>;
 }
 
 export interface CoachPort {

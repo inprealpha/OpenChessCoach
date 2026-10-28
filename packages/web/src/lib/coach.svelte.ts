@@ -11,6 +11,8 @@ export interface Entry {
   streaming: boolean;
   error?: boolean;
   note?: string | null;
+  /** How many questions the Coach asked the Engine for this reply, with Think deeper on. */
+  engineQuestions?: number;
 }
 
 let nextEntry = 1;
@@ -67,7 +69,7 @@ export class CoachThread {
         const current = this.entries[index];
         if (current) this.entries[index] = { ...current, text: current.text + text };
       });
-      this.entries[index] = { ...entry, text: reply.text, streaming: false, note: reply.note };
+      this.entries[index] = { ...entry, text: reply.text, streaming: false, note: reply.note, engineQuestions: reply.engineQuestions };
       this.arrows = reply.arrows;
       this.highlights = reply.highlights;
       return reply;

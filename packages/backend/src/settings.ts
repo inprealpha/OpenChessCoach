@@ -27,6 +27,7 @@ const DEFAULT_SETTINGS: StoredSettings = {
   models: DEFAULT_MODELS,
   liveCoachingDefault: true,
   tunnelEnabled: false,
+  thinkDeeper: false,
 };
 
 /** The preset whose models these are, or custom when they match none. */
@@ -46,6 +47,7 @@ function readStored(db: Db): StoredSettings {
     models: { ...DEFAULT_MODELS, ...(stored.models ?? {}) },
     liveCoachingDefault: stored.liveCoachingDefault ?? DEFAULT_SETTINGS.liveCoachingDefault,
     tunnelEnabled: stored.tunnelEnabled ?? DEFAULT_SETTINGS.tunnelEnabled,
+    thinkDeeper: stored.thinkDeeper ?? DEFAULT_SETTINGS.thinkDeeper,
   };
 }
 
@@ -60,6 +62,7 @@ export function updateSettings(db: Db, patch: SettingsPatch): Settings {
     models: { ...current.models, ...preset, ...cleanModels(patch.models) },
     liveCoachingDefault: patch.liveCoachingDefault ?? current.liveCoachingDefault,
     tunnelEnabled: patch.tunnelEnabled ?? current.tunnelEnabled,
+    thinkDeeper: patch.thinkDeeper ?? current.thinkDeeper,
   };
   const put = db.prepare('INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value');
   for (const [k, v] of Object.entries(next)) put.run(k, JSON.stringify(v));

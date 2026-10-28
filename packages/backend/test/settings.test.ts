@@ -1,4 +1,4 @@
-// Settings over the protocol: the Coach quality choice and the per-job models it stands for.
+// Settings over the protocol: the Coach quality choice, the per-job models it stands for, and Think deeper.
 import { describe, expect, it } from 'vitest';
 import { client, instance } from './helpers.ts';
 
@@ -49,5 +49,18 @@ describe('Coach quality', () => {
     await expect(c.request('settings.update', { quality: 'custom' as never })).rejects.toMatchObject({ code: 'bad-request' });
     await expect(c.request('settings.update', { quality: 'cheap' as never })).rejects.toMatchObject({ code: 'bad-request' });
     expect(await c.request('settings.get', {})).toMatchObject({ quality: 'balanced', models: BALANCED });
+  });
+});
+
+describe('Think deeper', () => {
+  it('is off on a fresh install, and turning it on or off leaves the models alone', async () => {
+    const c = await client(await instance({ seed: 'empty' }));
+    expect(await c.request('settings.get', {})).toMatchObject({ thinkDeeper: false });
+    await c.request('settings.update', { quality: 'best' });
+    expect(await c.request('settings.update', { thinkDeeper: true })).toMatchObject({ thinkDeeper: true, quality: 'best', models: BEST });
+    expect(await c.request('settings.get', {})).toMatchObject({ thinkDeeper: true });
+    // Changing something else leaves it on.
+    expect(await c.request('settings.update', { quality: 'thrifty' })).toMatchObject({ thinkDeeper: true, models: THRIFTY });
+    expect(await c.request('settings.update', { thinkDeeper: false })).toMatchObject({ thinkDeeper: false, models: THRIFTY });
   });
 });

@@ -126,6 +126,11 @@ export interface Settings {
   quality: CoachQuality | 'custom';
   liveCoachingDefault: boolean;
   tunnelEnabled: boolean;
+  /**
+   * Think deeper: in Why Questions and Reviews the Coach may ask the desktop's Engine about other
+   * positions and moves while it answers (ADR 0010). Slower and costlier, so off by default.
+   */
+  thinkDeeper: boolean;
 }
 
 /**

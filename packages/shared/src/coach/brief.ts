@@ -231,7 +231,7 @@ function threatOf(ask: CoachAsk): Brief['threat'] {
 }
 
 /** The Engine's candidates in `fen`, each graded against `best` and with the facts `explain` gives for it. */
-function briefCandidates(
+export function briefCandidates(
   fen: string,
   candidates: readonly Candidate[],
   max: number,
@@ -255,14 +255,14 @@ function briefCandidates(
   return out;
 }
 
-type Facts = Pick<BriefCandidate, 'does' | 'result'>;
+export type Facts = Pick<BriefCandidate, 'does' | 'result'>;
 
 /**
  * The explainability layer's facts for a move from `fen` (see explain.ts): what it does, and, given
  * the Engine's `score` of it for its side, what the forcing moves of the line after it (`line`,
  * starting with the reply) lead to. With `hideMoves` (a Hint) the result names no moves.
  */
-function explained(fen: string, uci: string, line: readonly string[], score?: Score, hideMoves = false): Facts {
+export function explained(fen: string, uci: string, line: readonly string[], score?: Score, hideMoves = false): Facts {
   const out: Facts = {};
   const does = moveFacts(fen, uci, line);
   if (does.length) out.does = does.map(describeFact).join('; ');

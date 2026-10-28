@@ -176,10 +176,17 @@ export class EngineService {
     return Promise.all(
       namedMoves(ask.fen, ask.question, moveUci, ask.playerSide).map(async (uci) => {
         const candidate = candidates.find((c) => c.uci === uci);
-        if (candidate) return candidate;
-        const { move, replies } = await this.grade(ask.fen, uci);
-        return { uci: move.uci, san: move.san, score: move.playedScore, pv: [move.uci, ...(replies[0]?.pv ?? [])] };
+        return candidate ?? (await this.gradeAsked(ask.fen, uci)).move;
       }),
     );
+  }
+
+  /**
+   * A move the Coach asks about, as a candidate: scored by the search after it, the search its Move
+   * Grade uses if it is played, with the Engine's line there, and the Engine's replies to it.
+   */
+  async gradeAsked(fen: string, uci: string): Promise<{ move: Candidate; replies: Candidate[] }> {
+    const { move, replies } = await this.grade(fen, uci);
+    return { move: { uci: move.uci, san: move.san, score: move.playedScore, pv: [move.uci, ...(replies[0]?.pv ?? [])] }, replies };
   }
 }

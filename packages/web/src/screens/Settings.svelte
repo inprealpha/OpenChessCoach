@@ -1,6 +1,6 @@
 <script lang="ts">
   // Pairing (QR code, pairing code and reset), the away-from-home tunnel, Live Coaching, the Coach quality
-  // and, under Advanced, the model per Coach job.
+  // and, under Advanced, the model per Coach job, and Think deeper.
   import {
     COACH_JOBS,
     COACH_QUALITIES,
@@ -14,7 +14,7 @@
   import { pairingCode } from '../lib/pairing-code.ts';
 
   /** A card on this screen, where the outcome of a change made in it is shown. */
-  type Card = 'pairing' | 'tunnel' | 'live' | 'quality';
+  type Card = 'pairing' | 'tunnel' | 'live' | 'quality' | 'deeper';
 
   let settings = $state<Settings | null>(null);
   let pairing = $state<PairingInfo | null>(null);
@@ -226,6 +226,24 @@
         {/each}
       </details>
     </fieldset>
+
+    <section class="card" aria-label="Think deeper">
+      <h2>Think deeper</h2>
+      <label class="check">
+        <input
+          type="checkbox"
+          checked={settings.thinkDeeper}
+          onchange={(e) => update('deeper', { thinkDeeper: (e.currentTarget as HTMLInputElement).checked })}
+        />
+        Let the Coach check its explanations with the Engine
+      </label>
+      <p class="muted small">
+        For deeper study. In Why Questions and Reviews, the Coach can ask the Engine about other moves and where they lead before it
+        answers, up to three questions each time. Answers take longer and use more of your Claude limits than usual. Hints, Live
+        Coaching and Lessons stay as they are.
+      </p>
+      {@render said('deeper')}
+    </section>
   {:else}
     <p class="muted">Loading…</p>
   {/if}

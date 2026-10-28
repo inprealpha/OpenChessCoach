@@ -1,15 +1,18 @@
 // The fake Coach for CI, tests and verify mode (ADR 0006). It replays recorded replies keyed
 // by request, falls back to a deterministic reply built from the brief, and can be scripted to
-// return any reply, including a move the Engine never suggested. The backend records every
+// return any reply, including a move the Engine never suggested. With Think deeper on it asks the
+// desktop's Engine one question, or the scripted ones (ADR 0010). The backend records every
 // brief it receives in the coach_calls table.
 import type { Brief, BriefCandidate } from '@chess-coach/shared/coach/brief';
+import type { EngineAnswer, EngineQuestion } from '@chess-coach/shared/coach/engine-tool';
 import type { CoachRawReply } from '@chess-coach/shared/coach/types';
 import type { CoachStatus } from '@chess-coach/shared/protocol';
 import { positionKey, SIDE_NAMES } from '@chess-coach/shared/chess';
 import { CoachLimitError, CoachUnavailableError, type CoachCall, type CoachPort } from './port.ts';
 
 export type ScriptedReply =
-  | { kind: 'reply'; reply: Partial<CoachRawReply> }
+  /** With Think deeper on, `questions` are what the fake Coach asks the Engine before it answers. */
+  | { kind: 'reply'; reply: Partial<CoachRawReply>; questions?: EngineQuestion[] }
   | { kind: 'limit' }
   | { kind: 'unavailable' };
 
@@ -62,7 +65,14 @@ export class FakeCoach implements CoachPort {
     // No reset time: the backend then assumes one from its own (possibly fake) clock.
     if (scripted?.kind === 'limit') throw new CoachLimitError('Your Claude usage limit has been reached.');
     if (scripted?.kind === 'unavailable') throw new CoachUnavailableError('Claude Code is not logged in on the desktop.');
-    const base = this.recordings[recordingKey(call.brief)] ?? templateReply(call.brief);
+    let base = this.recordings[recordingKey(call.brief)] ?? templateReply(call.brief);
+    if (call.engine) {
+      const questions = (scripted?.kind === 'reply' ? scripted.questions : undefined) ?? defaultQuestions(call.brief);
+      for (const q of questions) {
+        const { text, refused } = await call.engine.ask(q);
+        if (!refused) base = withAnswer(base, JSON.parse(text) as EngineAnswer);
+      }
+    }
     const reply: CoachRawReply = scripted?.kind === 'reply' ? { ...base, ...scripted.reply } : base;
     for (const chunk of chunks(reply.text)) {
       if (call.signal?.aborted) break;
@@ -78,6 +88,22 @@ function chunks(text: string): string[] {
   const out: string[] = [];
   for (let i = 0; i < words.length; i += 3) out.push(words.slice(i, i + 3).join(''));
   return out;
+}
+
+/** The fake Coach's one question: what the Engine plays after its best move, so a reply names a move only the Engine's answer has. */
+function defaultQuestions(brief: Brief): EngineQuestion[] {
+  const best = brief.candidates[0];
+  return best ? [{ line: [best.san] }] : [];
+}
+
+/** Adds what the Engine answered to a reply: the best move in the position asked about, named, not drawn. */
+function withAnswer(reply: CoachRawReply, answer: EngineAnswer): CoachRawReply {
+  const shown = answer.move ?? answer.candidates[0];
+  if (!shown) return reply;
+  const text = answer.move
+    ? `${reply.text} I checked ${shown.san} with the Engine after ${answer.after}: it is graded ${shown.grade}.`
+    : `${reply.text} I checked with the Engine: after ${answer.after}, its best move is ${shown.san}.`;
+  return { ...reply, text, moves: reply.moves.includes(shown.uci) ? reply.moves : [...reply.moves, shown.uci] };
 }
 
 /** A deterministic reply that only uses moves from the brief, in the glossary's words. */

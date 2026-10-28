@@ -56,14 +56,21 @@ Two Opus judges, who didn't know which mode wrote which answer, checked every cl
 | Off → on | Result |
 | --- | --- |
 | Quick mistakes where the answer names the move the player actually made | 4 → 7 of 12 (Maia-3 had it in its three in those 7) |
-| False claims | 25 of 142 → 23 of 158 |
-| Answers with a false claim | 11 → 10 of 18 |
+| **Coach errors: false claims that contradict the brief** | **2 → 2** (in 2 answers each) |
+| Claims the brief's depth-14 search makes and a depth-18 search contradicts | 23 → 21 |
+| All false claims, of all claims | 25 of 142 → 23 of 158 |
+| Answers with a false claim of either kind | 11 → 10 of 18 |
 | Answers missing the main reason | 4 → 4 of 18 |
 | Answers that present a move as a prediction about this Player | 0 → 0 |
 | Median time per answer | 6.9 → 6.7 s |
 | Median brief size | 1,231 → 1,350 characters |
 
-So the Coach warns of the move players actually reach for more often, with no more false claims. Most false claims in both modes are Move Grades from the brief's depth-14 search that a depth-18 search grades one step differently, which this change doesn't touch. When the Coach names a tempting move, it sometimes gives only its Move Grade ("g5 is a Blunder") without the reason, which the brief has.
+Each false claim was split in two:
+
+- **A Coach error:** the claim contradicts the brief. These were "Bxb5 wins your knight" where the brief's line trades bishop for knight, "the free pawn" where the line recaptures, "you lose material", and "a threat on the queen's line" where there is no queen.
+- **A depth difference:** the Coach repeats the brief faithfully, as ADR 0002 asks, and a deeper search sees it differently. For example "Nc6 is an Inaccuracy", where depth 18 says Blunder.
+
+So the Coach warns of the move players actually reach for more often, with no more errors of its own. It stated every tempting move's Move Grade as the brief gives it. When it names a tempting move, it sometimes gives only its Move Grade ("g5 is a Blunder") without the reason, which the brief has.
 
 ## Licence
 

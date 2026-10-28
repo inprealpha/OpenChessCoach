@@ -4,6 +4,7 @@ import {
   PROTOCOL_VERSION,
   type CoachStatus,
   type ErrorCode,
+  type PhoneStatus,
   type RequestBody,
   type RequestType,
   type ResponseBody,
@@ -54,8 +55,10 @@ class Api {
   pairError = $state<string | null>(null);
   /** Increments every time the connection comes back, so screens can resync. */
   reconnects = $state(0);
-  /** Increments every time a device pairs or pairing is reset, so a screen showing the QR code can check for the phone. */
-  pairingChanges = $state(0);
+  /** Increments every time pairing is reset, so a screen showing the QR code shows the new one and asks for the phone again. */
+  pairingResets = $state(0);
+  /** Hears whether a phone is paired each time a device pairs, so a screen showing the QR code says when the phone has paired. */
+  onDevicePaired: ((phone: PhoneStatus) => void) | null = null;
 
   private token: string | null = null;
   private ws: WebSocket | null = null;
@@ -271,7 +274,8 @@ class Api {
       const e = msg.event;
       if (e.kind === 'coach-status') this.coach = e.status;
       if (e.kind === 'tunnel') this.tunnel = e.tunnel;
-      if (e.kind === 'device-paired' || e.kind === 'pairing-reset') this.pairingChanges++;
+      if (e.kind === 'device-paired') this.onDevicePaired?.(e.phone);
+      if (e.kind === 'pairing-reset') this.pairingResets++;
       return;
     }
     const p = this.pending.get(msg.id);

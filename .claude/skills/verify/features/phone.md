@@ -14,8 +14,10 @@ no-phone`).
   (`packages/shared/src/devices.ts`). An iPad whose Safari calls itself a Mac is told by its touch
   screen; an Android tablet whose Chrome asks for desktop sites, and so calls itself Linux, by touch
   being its only pointer. Desktop browsers, `coachctl` and `verify-handshake` are not phones.
-- The web app gives its name at `hello` too, and the desktop renames the device to it: an iPad that
-  paired as a Mac before the app told them apart counts as a phone once it connects.
+- The web app gives its name at `hello` too, and the desktop renames the device to it when that is
+  a phone or tablet's name: an iPad that paired as a Mac before the app told them apart counts as a
+  phone once it connects. It never renames a device away from a phone name, so a tablet whose
+  browser later calls itself a desktop stays a phone.
 - The desktop asks while no phone is paired and not revoked, and the Player hasn't put it off:
   `pairing.info` returns `phone: { paired, remind }`.
 - First run on a desktop: the region `Play on your phone` ("Step 1 of 2") with three steps, the
@@ -24,17 +26,23 @@ no-phone`).
   Goals come second ("Step 2 of 2"). On a phone, or with a phone paired, first run starts at the
   level and Goals with no step numbers.
 - When a phone pairs, every desktop showing the QR code says "Your phone is paired." in its
-  `status`, without a reload (the `device-paired` event), and the QR code goes. First run then
-  offers `Continue here`: to the main menu if the Player finished setting up on the phone, else to
+  `status`, without a reload (the `device-paired` event carries `phone`), and the QR code goes.
+  First run then offers `Continue here`: to the main menu if the Player finished setting up on the
+  phone, else to
   the level and Goals, whose heading `About you` takes the focus. Either device's form saves only if
   the other hasn't finished first run meanwhile.
 - `I’ll do it later` (first run or the reminder) puts it off for 3 days (`ASK_AGAIN_MS`); Escape
   on the reminder counts as later. The reminder's `Don’t ask again` puts it off for good.
 - The main menu's reminder: the dialog `Play on your phone`, modal, focus on its heading, shown
   once per visit to the menu to a Player who finished first run, on a desktop, while the desktop
-  says to ask. Once the phone pairs it shows `Done` instead of the two put-off buttons, and takes
-  the focus if the button that had it went.
+  says to ask. It opens unasked, perhaps on a screen share, so the QR code and the pairing code
+  are not on the page until the Player presses `Show the code` (focus then moves to
+  `No link appears?`). First run's step shows them at once. Once the phone pairs, shown or not,
+  the reminder shows `Done` instead of the two put-off buttons, and takes the focus if the button
+  that had it went.
 - A pairing reset revokes every phone, so the desktop asks again at once (the `pairing-reset` event).
+  When a phone was paired, the reset also clears `phone_reminder`, so it asks even after
+  `Don’t ask again`; a reset with no phone paired keeps the Player's answer.
 - Settings still shows the QR code for any device (`pairing.md`).
 
 ## Drive

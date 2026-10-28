@@ -48,7 +48,8 @@ In the browser: open `pairUrl`, check the main menu shows; then the header's `Se
   the Wi-Fi address; `lan.spec.ts` starts its instance on `0.0.0.0` and opens the machine's own IPv4 address.
 - The verify-mode readiness handshake pairs a device called `verify-handshake`; expect it in `devices`,
   with the `default` seed's `iPhone or iPad browser`. A browser that connects with its token, such as
-  `coachctl screenshot`'s, renames it to the browser's own name (`Linux browser`) at `hello`.
+  `coachctl screenshot`'s, keeps that name: the desktop renames a device at `hello` only to a phone
+  or tablet name.
 - Resetting pairing revokes the run's own token too: coachctl prints the new one, and the
   verify routes (`db get`) need it. Prefer resetting from the browser at the end of a run.
 - A real tunnel needs `cloudflared` and the network; verify mode never opens one.

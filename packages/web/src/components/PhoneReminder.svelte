@@ -1,7 +1,8 @@
 <script lang="ts">
   // The main menu's reminder to pair a phone, for a Player who finished first run on a desktop
   // without one: shown once per visit to the menu while the desktop says to ask. Escape counts as
-  // "I'll do it later", so closing it never brings it straight back.
+  // "I'll do it later", so closing it never brings it straight back. It opens unasked, perhaps on a
+  // screen share, so the codes stay hidden until the Player asks for them.
   import { api } from '../lib/api.svelte.ts';
   import { phone } from '../lib/phone.svelte.ts';
   import { profile } from '../lib/profile.svelte.ts';
@@ -40,7 +41,7 @@
 <dialog bind:this={dialog} class="card" aria-labelledby="phone-reminder-title" oncancel={() => later(false)}>
   <h2 id="phone-reminder-title" tabindex="-1" bind:this={heading}>Play on your phone</h2>
   <p>OpenChessCoach works best on your phone. This desktop does the Coach’s work, and your phone connects to it over your Wi-Fi.</p>
-  {#if phone.info}<PhonePairing info={phone.info} />{/if}
+  {#if phone.info}<PhonePairing info={phone.info} hideCode />{/if}
   <div class="row">
     {#if phone.info?.phone.paired}
       <button type="button" bind:this={done} onclick={() => dialog?.close()}>Done</button>

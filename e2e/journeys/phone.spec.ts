@@ -138,12 +138,20 @@ test.describe('an Android tablet that asks for desktop sites, as Chrome on a lar
 test.describe('a Player who never paired a phone', () => {
   test.use({ seed: 'no-phone' });
 
-  test('the main menu asks, with the QR code; "I\'ll do it later" asks again in a few days', async ({ paired, app }) => {
+  test('the main menu asks, with the codes hidden until asked for; "I\'ll do it later" asks again in a few days', async ({ paired, app }) => {
     const dialog = reminder(paired);
     await expect(dialog).toBeVisible();
     // Read from the top: focus starts on the heading.
     await expect(dialog.getByRole('heading', { name: 'Play on your phone' })).toBeFocused();
+    // It opened unasked, perhaps on a screen share: nothing that pairs a device is on the page yet.
+    await expect(dialog.getByRole('figure', { name: 'Pairing QR code' })).toHaveCount(0);
+    await expect(dialog.getByTestId('phone-pairing-code')).toHaveCount(0);
+    expect(await paired.content()).not.toContain(app.code);
+    await dialog.getByRole('button', { name: 'Show the code' }).click();
     await expect(dialog.getByRole('figure', { name: 'Pairing QR code' })).toBeVisible();
+    await expect(dialog.getByText('No link appears?')).toBeFocused();
+    await dialog.getByText('No link appears?').click();
+    await expect(dialog.getByTestId('phone-pairing-code')).toHaveText(grouped(app.code));
     await dialog.getByRole('button', { name: 'I’ll do it later' }).click();
     await expect(dialog).toBeHidden();
     await expect.poll(() => askAgain(app)).toBe(new Date(app.clock.now().getTime() + ASK_AGAIN_MS).toISOString());
@@ -188,7 +196,9 @@ test.describe('a Player who never paired a phone', () => {
     await expect(menu(phone)).toBeVisible();
     await expect(reminder(phone)).toBeHidden();
 
+    // The news comes whether or not the codes were shown on this desktop: here they never were.
     await expect(dialog.getByRole('status')).toContainText('Your phone is paired.');
+    await expect(dialog.getByRole('button', { name: 'Show the code' })).toHaveCount(0);
     await expect(dialog.getByRole('button', { name: 'I’ll do it later' })).toHaveCount(0);
     // The focused button went: the focus stays in the dialog, on the one that replaced it.
     await expect(dialog.getByRole('button', { name: 'Done' })).toBeFocused();
@@ -207,6 +217,11 @@ test.describe('a Player who never paired a phone', () => {
     const dialog = reminder(page);
     await expect(dialog).toBeVisible();
     await expect(dialog.getByRole('button', { name: 'I’ll do it later' })).toBeInViewport();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+    // With the QR code shown it still fits, scrolling inside the dialog.
+    await dialog.getByRole('button', { name: 'Show the code' }).click();
+    await dialog.getByRole('figure', { name: 'Pairing QR code' }).scrollIntoViewIfNeeded();
+    await expect(dialog.getByRole('figure', { name: 'Pairing QR code' })).toBeInViewport();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
   });
 });

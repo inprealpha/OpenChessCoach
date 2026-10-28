@@ -1,7 +1,8 @@
+import { isPhoneOrTablet } from '@chess-coach/shared/devices';
 import { PROTOCOL_VERSION } from '@chess-coach/shared/protocol';
 import { AppError } from '../errors.ts';
 import { pairUrl, qrSvg } from '../network.ts';
-import { phoneStatus, remindLater } from '../phone.ts';
+import { askAgain, phoneStatus, remindLater } from '../phone.ts';
 import { getSettings, updateSettings } from '../settings.ts';
 import type { HandlerMap } from './index.ts';
 
@@ -9,7 +10,11 @@ export const systemHandlers: HandlerMap<
   'hello' | 'pairing.info' | 'pairing.reset' | 'pairing.remindLater' | 'settings.get' | 'settings.update'
 > = {
   hello: async (req, { app, device }) => {
-    if (typeof req.deviceName === 'string' && req.deviceName !== device.name) app.pairing.rename(device.id, req.deviceName);
+    // Only towards a phone or tablet: an iPad that paired as a Mac before the app told them apart
+    // counts once it connects. Never away from one, so a tablet whose browser later calls itself a
+    // desktop, such as an Android tablet in desktop mode with a trackpad, stays a phone.
+    const name = req.deviceName;
+    if (typeof name === 'string' && name !== device.name && isPhoneOrTablet(name)) app.pairing.rename(device.id, name);
     return {
       protocol: PROTOCOL_VERSION,
       version: app.version,
@@ -35,7 +40,9 @@ export const systemHandlers: HandlerMap<
   },
 
   'pairing.reset': async (_req, { app, device, setToken }) => {
+    const hadPhone = phoneStatus(app.db, app.clock).paired;
     const { token } = app.pairing.reset(device.name);
+    if (hadPhone) askAgain(app.db);
     if (!token) throw new AppError('internal', 'Could not issue a new token.');
     setToken(token);
     app.revalidate();

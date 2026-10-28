@@ -313,8 +313,8 @@ export type ServerEvent =
   | { kind: 'coach-status'; status: CoachStatus }
   | { kind: 'tunnel'; tunnel: TunnelState }
   | { kind: 'pairing-reset' }
-  /** A device paired, so a screen showing the QR code can check whether it was the phone. */
-  | { kind: 'device-paired' };
+  /** A device paired: whether a phone is now paired, so a screen showing the QR code says so without fetching it again. */
+  | { kind: 'device-paired'; phone: PhoneStatus };
 
 export function isClientMessage(value: unknown): value is { v: number; id: string; type: string } {
   if (typeof value !== 'object' || value === null) return false;

@@ -31,11 +31,11 @@
     } else if (api.state === 'offline' && !profile.loaded) void profile.load();
   });
 
-  // A desktop browser asks the Player to pair their phone; a new pairing may be that phone, and a
-  // pairing reset unpairs it.
+  // A desktop browser asks the Player to pair their phone; a pairing reset unpairs it and makes a new
+  // QR code. When a device pairs, the event says whether it was the phone (lib/phone.svelte.ts).
   $effect(() => {
     void api.reconnects;
-    void api.pairingChanges;
+    void api.pairingResets;
     if (api.state === 'online' && !onPhoneOrTablet) void phone.load();
   });
 

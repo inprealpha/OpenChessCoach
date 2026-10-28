@@ -17,7 +17,8 @@ describe('the phone reminder', () => {
     const app = await instance({ seed: 'no-phone' });
     const desktop = await client(app);
     await pairDevice(app.url, app.code, 'Android browser');
-    await expect.poll(() => desktop.events).toContainEqual({ kind: 'device-paired' });
+    // The event says so itself: a screen showing the QR code needn't fetch it again.
+    await expect.poll(() => desktop.events).toContainEqual({ kind: 'device-paired', phone: { paired: true, remind: false } });
     expect((await desktop.request('pairing.info', {})).phone).toEqual({ paired: true, remind: false });
   });
 
@@ -25,21 +26,26 @@ describe('the phone reminder', () => {
     const app = await instance({ seed: 'no-phone' });
     const desktop = await client(app);
     await pairDevice(app.url, app.code, 'Mac browser');
-    await expect.poll(() => desktop.events).toContainEqual({ kind: 'device-paired' });
+    await expect.poll(() => desktop.events).toContainEqual({ kind: 'device-paired', phone: { paired: false, remind: true } });
     expect((await desktop.request('pairing.info', {})).phone.remind).toBe(true);
   });
 
-  it('renames a device to the name it now gives when it connects, so an iPad paired as a Mac counts', async () => {
+  it('renames a device to a phone or tablet name it gives when it connects, never away from one', async () => {
     const app = await instance({ seed: 'no-phone' });
     const ipad = await pairDevice(app.url, app.code, 'Mac browser');
     const desktop = await client(app);
     expect((await desktop.request('pairing.info', {})).phone.paired).toBe(false);
+    // An iPad that paired as a Mac before the app told them apart counts once it connects.
     await (await client(app, ipad)).request('hello', { client: 'web', deviceName: 'iPhone or iPad browser' });
     expect((await desktop.request('pairing.info', {})).phone).toEqual({ paired: true, remind: false });
-    // A client that gives no name, such as coachctl, keeps the one it paired under.
+    // An Android tablet in desktop mode with a trackpad calls itself Linux, but stays a tablet.
+    const tablet = await pairDevice(app.url, app.code, 'Android browser');
+    await (await client(app, tablet)).request('hello', { client: 'web', deviceName: 'Linux browser' });
+    // A desktop browser keeps the name it paired under, and so does a client that gives none, such as coachctl.
+    await desktop.request('hello', { client: 'web', deviceName: 'Linux browser' });
     await desktop.request('hello', { client: 'coachctl' });
     const names = rows<{ name: string }>(app, 'SELECT name FROM devices ORDER BY created_at, rowid').map((d) => d.name);
-    expect(names).toEqual(['verify-handshake', 'iPhone or iPad browser']);
+    expect(names).toEqual(['verify-handshake', 'iPhone or iPad browser', 'Android browser']);
   });
 
   it('"later" asks again after a few days', async () => {
@@ -70,5 +76,24 @@ describe('the phone reminder', () => {
     const { token } = await c.request('pairing.reset', {});
     const fresh = await client(app, token);
     expect((await fresh.request('pairing.info', {})).phone).toEqual({ paired: false, remind: true });
+  });
+
+  it('asks again after a reset unpairs the phone, even when the Player had said "don\'t ask again"', async () => {
+    const app = await instance({ seed: 'no-phone' });
+    const c = await client(app);
+    await c.request('pairing.remindLater', { never: true });
+    await pairDevice(app.url, app.code, 'Android browser');
+    const { token } = await c.request('pairing.reset', {});
+    const fresh = await client(app, token);
+    expect((await fresh.request('pairing.info', {})).phone).toEqual({ paired: false, remind: true });
+  });
+
+  it('keeps "don\'t ask again" after a reset with no phone paired, so the new code isn\'t shown unasked', async () => {
+    const app = await instance({ seed: 'no-phone' });
+    const c = await client(app);
+    await c.request('pairing.remindLater', { never: true });
+    const { token } = await c.request('pairing.reset', {});
+    const fresh = await client(app, token);
+    expect((await fresh.request('pairing.info', {})).phone).toEqual({ paired: false, remind: false });
   });
 });

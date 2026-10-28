@@ -28,3 +28,8 @@ class PhoneState {
 }
 
 export const phone = new PhoneState();
+
+// The QR codes don't change when a device pairs, so the event's answer is all a screen needs.
+api.onDevicePaired = (status) => {
+  if (phone.info) phone.info.phone = status;
+};

@@ -1,13 +1,27 @@
 <script lang="ts">
   // How to open the app on a phone: three steps beside the QR code, the address and pairing code
   // for a phone whose camera opens no link, and, once a phone pairs, a line that says so. Shown by
-  // first run's first step and the main menu's reminder.
+  // first run's first step and the main menu's reminder. With `hideCode`, as in the reminder, which
+  // opens without the Player asking, the QR code and pairing code wait for "Show the code": anyone
+  // who sees them, on a screen share say, can pair a device.
+  import { tick } from 'svelte';
   import type { PairingInfo } from '@chess-coach/shared/protocol';
   import { pairingCode } from '../lib/pairing-code.ts';
 
-  let { info }: { info: PairingInfo } = $props();
+  let { info, hideCode = false }: { info: PairingInfo; hideCode?: boolean } = $props();
+
+  let asked = $state(false);
+  let noLink = $state<HTMLElement>();
 
   const paired = $derived(info.phone.paired);
+  const shown = $derived(!hideCode || asked);
+
+  async function show(): Promise<void> {
+    asked = true;
+    // The button goes: keep the focus nearby, on what replaced it.
+    await tick();
+    noLink?.focus();
+  }
 </script>
 
 <div class="phone-pairing">
@@ -19,14 +33,21 @@
         <li>Tap the link that appears. The app opens on your phone, already paired.</li>
       </ol>
       <p class="muted small">Keep OpenChessCoach running on this desktop while you play: your phone uses it for the Coach.</p>
-      <details>
-        <summary>No link appears?</summary>
-        <p class="small">Open <span class="address">{info.lanUrl}</span> in your phone’s browser and type this pairing code:</p>
-        <p class="code" data-testid="phone-pairing-code">{pairingCode(info.pairUrl)}</p>
-      </details>
+      {#if shown}
+        <details>
+          <summary bind:this={noLink}>No link appears?</summary>
+          <p class="small">Open <span class="address">{info.lanUrl}</span> in your phone’s browser and type this pairing code:</p>
+          <p class="code" data-testid="phone-pairing-code">{pairingCode(info.pairUrl)}</p>
+        </details>
+      {:else}
+        <p class="muted small">Anyone who sees the code can pair a device with this desktop, so check nobody else can see your screen.</p>
+        <button type="button" onclick={show}>Show the code</button>
+      {/if}
     </div>
-    <!-- eslint-disable-next-line svelte/no-at-html-tags -- the desktop draws this SVG from its own pairing URL -->
-    <figure class="qr" aria-label="Pairing QR code">{@html info.qrSvg}</figure>
+    {#if shown}
+      <!-- eslint-disable-next-line svelte/no-at-html-tags -- the desktop draws this SVG from its own pairing URL -->
+      <figure class="qr" aria-label="Pairing QR code">{@html info.qrSvg}</figure>
+    {/if}
   {/if}
   <!-- There from the start, so a screen reader reads the news when the phone pairs. -->
   <div role="status" class="paired">

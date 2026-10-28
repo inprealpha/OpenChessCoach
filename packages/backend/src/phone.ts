@@ -1,7 +1,9 @@
 // Most Players play chess on their phone, so a desktop browser asks them to pair one: as the first
 // step of first run, and on the main menu for a Player who never did. "Later" asks again after a
-// few days; "don't ask again" never does. Pairing a phone ends the asking, and a pairing reset,
-// which unpairs every phone, starts it again.
+// few days; "don't ask again" never does. Pairing a phone ends the asking. A pairing reset that
+// unpairs the phone starts it again, whatever the Player said before; a reset with no phone paired
+// leaves their answer alone, so a Player who reset because the code was seen on a stream isn't
+// shown the new one.
 import { isPhoneOrTablet } from '@chess-coach/shared/devices';
 import type { PhoneStatus } from '@chess-coach/shared/protocol';
 import { type Clock } from './clock.ts';
@@ -24,4 +26,9 @@ export function phoneStatus(db: Db, clock: Clock): PhoneStatus {
 export function remindLater(db: Db, clock: Clock, never = false): PhoneStatus {
   setMeta(db, LATER, never ? 'never' : new Date(clock.now().getTime() + ASK_AGAIN_MS).toISOString());
   return phoneStatus(db, clock);
+}
+
+/** A pairing reset unpaired the phone: ask for it again, whatever the Player said before they paired it. */
+export function askAgain(db: Db): void {
+  db.prepare('DELETE FROM meta WHERE key = ?').run(LATER);
 }

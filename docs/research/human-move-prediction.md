@@ -35,6 +35,8 @@ Both parts also compare against Maia2, a free model built only to predict human 
 - **Over every kind of move (Part 2), the order was the same.** First guess / top three: Opus 43% / 69%, Sonnet 34% / 55%, Haiku 30% / 49%. Always guessing the Engine's best moves gives 33% / 60%.
 - **Together with the Engine, Maia catches three quarters of the tempting mistakes.** The Engine's top 5 alone held the human's quick mistake in 38% of cases. Adding Maia2's 3 guesses raised that to 74%, and Maia-3 5M's to 73%. Adding Opus's raised it to 63%, Sonnet's to 58% to 60% and Haiku's to 57% to 59%.
 
+**Decision (28 October 2026).** Abir chose Maia-3's 5M model and accepted its AGPL licence. ADR 0010 records the decision. What follows is the reasoning, from before the decision.
+
 **My opinion.** The layer is worth building, and a Maia model should do the guessing, not Claude. I recommend Maia-3's 5M model, if Abir accepts its licence. Otherwise use Maia2.
 
 Maia-3 5M is the most accurate source we measured. It is the smallest file (21 MB), and it is the fastest in Node: 4 to 8 ms per position on the native runtime, 9 to 20 ms on WebAssembly. It needs the game's last 8 positions and the Player's rating to be at its best, and the app has the moves of every game it plays or reviews.
@@ -352,7 +354,7 @@ Our numbers sit a little lower because our positions include the opening, bullet
 - The weights themselves are the AGPL part. GPL-3.0 and AGPL-3.0 explicitly allow combining (section 13 of each). But the AGPL's network clause would then apply: people who use the app over a network, such as the owner's phone over the LAN or the tunnel, must be offered its source. OpenChessCoach is already public, so in practice that is a source link, but it is a real obligation.
 - Hosting the converted file ourselves means redistributing the weights. The AGPL allows that, with the licence and a source link. With no licence at all, it would not be allowed. It's worth asking the authors to confirm the weights' licence.
 
-Taking on an AGPL dependency is Abir's call.
+Taking on an AGPL dependency was Abir's call. He accepted it on 28 October 2026 (ADR 0010).
 
 **Running it in Node.** Maia-3's attention code and its RMS normalisation don't export to ONNX as they are. The export script swaps in a plain RMS normalisation layer that computes the same result. Python's moves with the swapped layer matched the original in all 408 positions. The 23M and 79M models were not converted.
 
@@ -406,7 +408,7 @@ Maia-3 5M also needs the least memory, about 425 MB on WebAssembly. For Maia2, i
 
 The pieces:
 
-- **What is downloaded:** the converted ONNX file. That is 21 MB for Maia-3 5M, or 47 MB for Maia2 plus its 15 KB move list. Maia-3's move list is simple enough to compute in code.
+- **What is downloaded:** the converted Maia-3 5M ONNX file, 21 MB (ADR 0010). Its move list is simple enough to compute in code. Maia2, the fallback choice, would be 47 MB plus a 15 KB move list.
 - **Where from:**
   - Not the authors' Google Drive link: it can't be pinned to a version, has no checksum and is rate-limited.
   - Maia-3's weights are on Hugging Face with pinned versions and SHA-256 checksums, but as PyTorch files the app can't read. So the converted ONNX file has to come from somewhere we control too.
@@ -438,7 +440,7 @@ The pieces:
   - Either way, the Engine grades every proposed move before the Coach talks about it, as today.
 - **Verify mode and tests:** verify mode must stay deterministic (ADR 0006). It should use a fixed fake source of moves, or the local model from a fixture path, never the network or Opus.
 
-This is a sketch, not a decision. It changes the brief, the guard and the Coach's instructions, so building it waits until the Think Deeper PR merges.
+The choice of model is decided (ADR 0010). The rest of this design is a sketch. It changes the brief, the guard and the Coach's instructions, so building it waits until the Think Deeper PR merges.
 
 ## Cost and speed
 

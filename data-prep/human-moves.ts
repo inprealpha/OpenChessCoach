@@ -600,12 +600,14 @@ function report(dir: string): void {
     out.push(`| ${a} | ${cells.join(' | ')} |`);
   }
 
-  const models = sources.filter((s) => s !== 'stockfish' && s !== 'obvious');
+  // The Claude models; Maia2 ("maia2", "maia2-1500") is a baseline like Stockfish and the rule.
+  const maia = sources.filter((s) => s.startsWith('maia'));
+  const models = sources.filter((s) => s !== 'stockfish' && s !== 'obvious' && !maia.includes(s));
   const coverage = (title: string, pool: Sample[]) => {
     out.push(`\n## ${title}\n`);
     out.push(`| List | ${BANDS.map((b) => b.label).join(' | ')} | All |`);
     out.push(`| --- | ${BANDS.map(() => '---').join(' | ')} | --- |`);
-    for (const source of [undefined, ...models]) {
+    for (const source of [undefined, ...models, ...maia]) {
       const cells = [...BANDS.map((b) => b.id), 'all'].map((band) => {
         const ss = pool.filter((s) => (band === 'all' || s.band === band) && latest.get(`stockfish/${s.id}`) && (!source || latest.get(`${source}/${s.id}`)));
         const covered = ss.filter((s) => [...latest.get(`stockfish/${s.id}`)!.moves.slice(0, 5), ...(source ? latest.get(`${source}/${s.id}`)!.moves : [])].includes(s.played.uci));
@@ -642,7 +644,7 @@ function report(dir: string): void {
   const pairs = [
     ...models.flatMap((m, i) => models.slice(i + 1).filter((n) => promptOf(n) === promptOf(m)).map((n) => [m, n])),
     ...models.filter((m) => !m.includes('-')).flatMap((m) => models.filter((n) => n.startsWith(`${m}-`)).map((n) => [n, m])),
-    ...models.flatMap((m) => [['stockfish', m], ['obvious', m]]),
+    ...models.flatMap((m) => [['stockfish', m], ['obvious', m], ...maia.map((b) => [b, m])]),
   ].filter(([a, b]) => sources.includes(a!) && sources.includes(b!));
   for (const [a, b] of pairs as [string, string][]) {
     const cells = [1, 3].map((k) => {

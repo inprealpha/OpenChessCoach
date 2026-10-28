@@ -11,26 +11,50 @@ This is a one-off measurement. It does not change the app. Both runs were made o
 - **Part 1, quick moves.** This is the part that matters for the layer. It used 408 moves that the human made in 1 to 3 seconds, bullet games included. Half of them were moves the Engine grades as fine and half were Inaccuracies or worse. Each model was asked twice, with two different prompts: 2,448 calls.
 - **Part 2, every kind of move.** This was the first run. It used 708 positions with no limit on thinking time and no bullet games: 2,124 calls.
 
+Both parts also compare against Maia2, a free model built only to predict human moves. It was added after Abir approved downloading it.
+
 ## Short answer
 
-- **When the human's quick move was a mistake, Opus saw it coming about half the time.** Opus had the human's move among its three guesses 54% of the time. Sonnet had it 46% of the time and Haiku 42%. Opus's lead over both is unlikely to be chance (p = 0.02 against Sonnet, p = 0.004 against Haiku). Sonnet and Haiku are not clearly different from each other. The Engine's top three held the mistake only 19% of the time, as you'd expect, since it lists good moves.
+- **Maia2 beats all three Claude models, and it is free.** Maia2 is a neural network trained only to predict the move a human of a given rating plays. It learned from Lichess games played from 2018 to 2023.
+  - On the quick mistakes, its first guess was the human's move 35% of the time, and its top three held the move 68% of the time. Opus managed 25% and 54%. Both gaps are unlikely to be chance (p = 0.006 and p < 0.001).
+  - Over every kind of move (Part 2), Maia2 scored 51% / 80% against Opus's 43% / 69%.
+  - Told a fixed rating of 1500 for everyone instead of the player's real rating, Maia2 scored almost the same.
+- **Among the Claude models, Opus saw the quick mistake coming most often, about half the time.** Opus had the human's move among its three guesses 54% of the time. Sonnet had it 46% of the time and Haiku 42%. Opus's lead over both is unlikely to be chance (p = 0.02 against Sonnet, p = 0.004 against Haiku). Sonnet and Haiku are not clearly different from each other. The Engine's top three held the mistake only 19% of the time, as you'd expect, since it lists good moves.
 - **On the single most likely guess, the models tie on mistakes.** Each model's first guess was the human's mistake about 25% of the time. Opus's advantage comes from what it puts in second and third place.
 - **On quick moves that were fine, Opus is far ahead.** There, Opus's first guess was right 58% to 61% of the time. Sonnet managed 44% to 47% and Haiku 37% to 41%.
 - **Asking for "the instinctive move" made no difference.** The new prompt says the player moved within a few seconds, on instinct, and asks which moves would jump out at a glance. It scored the same as the original prompt for every model. No difference was beyond chance; the biggest was Opus's top three, 3 points better (p = 0.07). The models already guess the instinctive move when asked for the likely move.
 - **The three models often disagree.** With the instinct prompt, all three gave the same first move in only 31% of quick positions. In 27%, all three gave different first moves.
-- **No model fits one rating band clearly better.** This held in both parts: no model's hit rate differed across the bands by more than chance would explain. Opus and Sonnet found the quick mistakes of 2000+ players the hardest to predict (Opus 43% to 45% in its top three, against 49% to 63% for the other bands).
+- **No model fits one rating band clearly better.** This held in both parts: no Claude model's hit rate differed across the bands by more than chance would explain. Maia2 was the one exception: in Part 1 it found the quick moves of 2000+ players harder to predict (68% in its top three, against 79% to 83% for the other bands; p = 0.03). Opus and Sonnet found the quick mistakes of 2000+ players the hardest to predict (Opus 43% to 45% in its top three, against 49% to 63% for the other bands).
 - **Over every kind of move (Part 2), the order was the same.** First guess / top three: Opus 43% / 69%, Sonnet 34% / 55%, Haiku 30% / 49%. Always guessing the Engine's best moves gives 33% / 60%.
-- **Together with the Engine, Opus catches most tempting mistakes.** The Engine's top 5 alone held the human's quick mistake in 38% of cases. Adding Opus's 3 guesses raised that to 63%. Adding Sonnet's raised it to 58% to 60%, and Haiku's to 57% to 59%.
+- **Together with the Engine, Maia2 catches three quarters of the tempting mistakes.** The Engine's top 5 alone held the human's quick mistake in 38% of cases. Adding Maia2's 3 guesses raised that to 74%. Adding Opus's raised it to 63%, Sonnet's to 58% to 60% and Haiku's to 57% to 59%.
 
-**My opinion.** The layer is worth building, with Opus.
+**My opinion.** The layer is worth building, but Maia2 should do the guessing, not Claude.
 
-The job is to catch the tempting mistake before the Player makes it, and that is where Opus is clearly better. Its top three caught 54% of the quick mistakes, against 46% for Sonnet and 42% for Haiku. Opus costs about 1.5 cents and 8 seconds per position, against 0.08 cents for Haiku. That is affordable when the layer runs on demand, for example when the Player asks "what should I watch out for here?" or in game review. It is too slow to run on every move during play.
+Maia2 catches the tempting mistake more often than Opus: 68% against 54% in its top three. It never proposes an illegal move, and it costs nothing per move. On this desktop's CPU it took well under a tenth of a second per position. Opus takes about 8 seconds and 1.5 cents. That speed means Maia2 could run on every move during play, not only on demand.
 
-Keep the Engine's top 5 next to it. The Coach should explain what is wrong with the obvious move only after the Engine has graded it. Check every proposed move, because 2% to 8% of them are illegal.
+Claude would then do what it is good at: explaining.
 
-Even Opus misses about half of the tempting mistakes. So the Coach should present them as "a move many players would reach for here", not as a prediction of what this Player will do.
+1. Maia2 proposes the moves a player would reach for.
+2. The Engine grades each one.
+3. The Coach explains why the obvious move fails, or says that it's fine.
 
-Before building it, try Maia2 (see "What's still open"). It is a free model trained only to predict human moves, and it may beat all three.
+This is the split the app already has: the Engine judges and the Coach explains (ADR 0002). Maia2 just gives the Coach one more source of moves to discuss.
+
+If Maia2 can't ship, Opus is the best of the Claude models for guessing. It caught 54% of the quick mistakes, against 46% for Sonnet and 42% for Haiku.
+
+Shipping Maia2 is the open question:
+
+- **Licence:** its code is MIT-licensed, but the package doesn't state a licence for the trained weights, so we'd need to check.
+- **Size:** the weights file is 280 MB.
+- **Runtime:** it runs on PyTorch in Python, while the app runs on Node and in the browser. It would need converting to a format the app can run, such as ONNX, and probably shrinking.
+
+That is a separate piece of work, and I'd prototype it before deciding.
+
+Whatever proposes the moves, three rules still apply:
+
+- Keep the Engine's top 5 next to it.
+- Have the Engine grade every proposed move before the Coach talks about it.
+- Present a guess as "a move many players would reach for here", not as a prediction of what this Player will do. Even Maia2 misses about a third of the tempting mistakes.
 
 ## Part 1: quick moves
 
@@ -46,7 +70,9 @@ In each cell, the first number is how often the source's first guess was the hum
 
 | Source | under 1200 | 1200–1599 | 1600–1999 | 2000 and up | All (204) |
 | --- | --- | --- | --- | --- | --- |
-| Opus, instinct prompt | 33% / 59% | 22% / 63% | 25% / 49% | 22% / 45% | 25% / **54%** |
+| Maia2, told the player's rating | 37% / 69% | 43% / 80% | 35% / 69% | 25% / 53% | **35% / 68%** |
+| Maia2, told 1500 for everyone | 33% / 71% | 41% / 80% | 35% / 69% | 24% / 47% | 33% / 67% |
+| Opus, instinct prompt | 33% / 59% | 22% / 63% | 25% / 49% | 22% / 45% | 25% / 54% |
 | Opus, likely prompt | 22% / 51% | 33% / 63% | 29% / 51% | 22% / 43% | 26% / 52% |
 | Sonnet, instinct prompt | 29% / 49% | 22% / 43% | 29% / 53% | 20% / 37% | 25% / 46% |
 | Sonnet, likely prompt | 31% / 43% | 27% / 47% | 29% / 53% | 14% / 37% | 25% / 45% |
@@ -56,20 +82,22 @@ In each cell, the first number is how often the source's first guess was the hum
 | "Obvious moves" rule | 10% / 29% | 18% / 29% | 14% / 27% | 8% / 22% | 12% / 27% |
 | A random legal move | 6% / 18% | 5% / 16% | 7% / 22% | 5% / 15% | 6% / 18% |
 
-How severe the mistake was made little difference to Opus. With the instinct prompt, its top three held the human's move this often:
+How severe the mistake was made little difference to Opus or Maia2. This table shows how often each source's top three held the human's move; the Claude models used the instinct prompt:
 
-| Grade of the human's move | Positions | Opus | Sonnet | Haiku | Stockfish |
-| --- | --- | --- | --- | --- | --- |
-| Inaccuracy | 87 | 53% | 43% | 38% | 16% |
-| Mistake | 69 | 55% | 52% | 45% | 28% |
-| Blunder | 48 | 54% | 42% | 44% | 13% |
+| Grade of the human's move | Positions | Maia2 | Opus | Sonnet | Haiku | Stockfish |
+| --- | --- | --- | --- | --- | --- | --- |
+| Inaccuracy | 87 | 68% | 53% | 43% | 38% | 16% |
+| Mistake | 69 | 68% | 55% | 52% | 45% | 28% |
+| Blunder | 48 | 67% | 54% | 42% | 44% | 13% |
 
 ### When the quick move was fine
 
 | Source | under 1200 | 1200–1599 | 1600–1999 | 2000 and up | All (204) |
 | --- | --- | --- | --- | --- | --- |
-| Opus, instinct prompt | 65% / 88% | 63% / 84% | 53% / 80% | 53% / 76% | 58% / **82%** |
-| Opus, likely prompt | 67% / 88% | 67% / 80% | 55% / 75% | 55% / 71% | **61%** / 78% |
+| Maia2, told the player's rating | 69% / 94% | 67% / 86% | 57% / 90% | 55% / 82% | **62% / 88%** |
+| Maia2, told 1500 for everyone | 71% / 90% | 69% / 86% | 55% / 82% | 51% / 82% | 61% / 85% |
+| Opus, instinct prompt | 65% / 88% | 63% / 84% | 53% / 80% | 53% / 76% | 58% / 82% |
+| Opus, likely prompt | 67% / 88% | 67% / 80% | 55% / 75% | 55% / 71% | 61% / 78% |
 | Sonnet, instinct prompt | 45% / 71% | 43% / 67% | 51% / 76% | 49% / 65% | 47% / 70% |
 | Sonnet, likely prompt | 49% / 73% | 41% / 65% | 43% / 71% | 43% / 63% | 44% / 68% |
 | Haiku, instinct prompt | 45% / 63% | 37% / 59% | 37% / 67% | 29% / 59% | 37% / 62% |
@@ -79,13 +107,15 @@ How severe the mistake was made little difference to Opus. With the instinct pro
 
 ### Is the difference real?
 
-These comparisons use the instinct prompt and the same positions for both models. Each cell counts the positions where only the first model hit, then the positions where only the second hit. The p-value is the chance of a split at least that uneven if the two models were really equal.
+These comparisons use the instinct prompt for the Claude models and the same positions for both sources. Each cell counts the positions where only the first model hit, then the positions where only the second hit. The p-value is the chance of a split at least that uneven if the two models were really equal.
 
 | Comparison | Mistakes, first guess | Mistakes, top three | Fine moves, first guess | Fine moves, top three |
 | --- | --- | --- | --- | --- |
 | Opus vs Sonnet | 21 / 20 (no difference) | 34 / 17 (p = 0.02) | 40 / 17 (p = 0.003) | 36 / 10 (p < 0.001) |
 | Opus vs Haiku | 27 / 23 (no difference) | 47 / 22 (p = 0.004) | 52 / 9 (p < 0.001) | 50 / 8 (p < 0.001) |
 | Sonnet vs Haiku | 26 / 23 (no difference) | 33 / 25 (p = 0.36) | 41 / 21 (p = 0.02) | 40 / 24 (p = 0.06) |
+| Maia2 vs Opus | 34 / 14 (p = 0.006) | 37 / 9 (p < 0.001) | 32 / 25 (no difference) | 19 / 7 (p = 0.03) |
+| Maia2, real rating vs 1500 | 7 / 3 (no difference) | 6 / 4 (no difference) | 6 / 5 (no difference) | 7 / 1 (p = 0.07) |
 
 The instinct prompt and the likely prompt are not clearly different for any model. Over all 408 positions, the instinct prompt's split against the likely prompt was:
 
@@ -102,18 +132,19 @@ How often the human's quick move was in the list:
 | List | All quick moves | Quick mistakes only |
 | --- | --- | --- |
 | Engine top 5 alone | 62% | 38% |
-| Engine top 5 + Opus's 3 (instinct prompt) | 78% | **63%** |
+| Engine top 5 + Maia2's 3 | 83% | **74%** |
+| Engine top 5 + Opus's 3 (instinct prompt) | 78% | 63% |
 | Engine top 5 + Sonnet's 3 (instinct prompt) | 76% | 58% |
 | Engine top 5 + Haiku's 3 (instinct prompt) | 75% | 59% |
 
 ### Bullet against slower games
 
-Bullet moves are harder to predict for every model. They are also closer to pure instinct. This table uses the instinct prompt, first guess / top three:
+Bullet moves are harder to predict for every source. They are also closer to pure instinct. This table uses the instinct prompt for the Claude models, first guess / top three:
 
-| Games | Positions | Opus | Sonnet | Haiku | Stockfish |
-| --- | --- | --- | --- | --- | --- |
-| Bullet | 152 | 38% / 62% | 32% / 52% | 26% / 46% | 24% / 44% |
-| Blitz and slower | 256 | 44% / 72% | 39% / 61% | 33% / 55% | 23% / 48% |
+| Games | Positions | Maia2 | Opus | Sonnet | Haiku | Stockfish |
+| --- | --- | --- | --- | --- | --- | --- |
+| Bullet | 152 | 41% / 71% | 38% / 62% | 32% / 52% | 26% / 46% | 24% / 44% |
+| Blitz and slower | 256 | 53% / 82% | 44% / 72% | 39% / 61% | 33% / 55% | 23% / 48% |
 
 ### Some quick mistakes
 
@@ -144,7 +175,9 @@ In each cell, the first number is how often the source's first guess was the mov
 
 | Source | under 1200 | 1200–1599 | 1600–1999 | 2000 and up | All |
 | --- | --- | --- | --- | --- | --- |
-| Opus | 42% / 67% | 45% / 72% | 41% / 65% | 45% / 71% | **43% / 69%** |
+| Maia2, told the player's rating | 51% / 76% | 54% / 80% | 47% / 82% | 51% / 82% | **51% / 80%** |
+| Maia2, told 1500 for everyone | 52% / 75% | 55% / 81% | 50% / 82% | 51% / 79% | 52% / 79% |
+| Opus | 42% / 67% | 45% / 72% | 41% / 65% | 45% / 71% | 43% / 69% |
 | Sonnet | 33% / 56% | 36% / 59% | 32% / 51% | 34% / 51% | 34% / 55% |
 | Haiku | 34% / 53% | 34% / 54% | 26% / 45% | 27% / 42% | 30% / 49% |
 | Stockfish (depth 14) | 28% / 57% | 37% / 63% | 29% / 56% | 37% / 66% | 33% / 60% |
@@ -157,6 +190,7 @@ These comparisons use the same 708 positions for both sources. Each cell counts 
 
 | Comparison | Top-1 | Top-3 |
 | --- | --- | --- |
+| Maia2 vs Opus | 122 / 67 (p < 0.001) | 105 / 26 (p < 0.001) |
 | Opus vs Stockfish | 150 / 77 (p < 0.001) | 121 / 61 (p < 0.001) |
 | Opus vs Sonnet | 116 / 48 (p < 0.001) | 147 / 45 (p < 0.001) |
 | Opus vs Haiku | 144 / 53 (p < 0.001) | 190 / 46 (p < 0.001) |
@@ -175,6 +209,7 @@ This test checks whether a source's hit rate differs between the four bands more
 | Sonnet | 0.89 | 0.37 | The same at every level |
 | Haiku | 0.18 | 0.07 | Weak lean toward players under 1600 |
 | Stockfish | 0.14 | 0.18 | No clear difference |
+| Maia2 | 0.65 | 0.50 | The same at every level |
 
 This answer differs from the one I gave after the first 204 positions. There, Haiku seemed to fit players under 1200 much better. With 3.5 times the data, that difference shrank to a weak lean. Opus's first-guess rate also stays almost level across the bands (41% to 45%). Stockfish's first choice, by contrast, matches stronger players a little more often. The models were never told a rating, and their guesses do not match any one level. To aim the guesses at a level, the prompt would probably need to state the rating (see "What's still open").
 
@@ -198,8 +233,9 @@ This table shows how often the human's move was in the list.
 | --- | --- | --- | --- | --- | --- |
 | Engine top 5 alone (what the Coach sees today) | 71% | 78% | 76% | 78% | 76% |
 | Engine top 5 + Opus's 3 | 79% | 86% | 85% | 84% | 83% |
-| Engine top 5 + Haiku's 3 | 81% | 86% | 85% | 84% | **84%** |
+| Engine top 5 + Haiku's 3 | 81% | 86% | 85% | 84% | 84% |
 | Engine top 5 + Sonnet's 3 | 80% | 86% | 83% | 84% | 83% |
+| Engine top 5 + Maia2's 3 | 84% | 88% | 90% | 91% | **88%** |
 
 In 172 of the 708 positions, the human played a move outside the Engine's top 5. A model's three guesses held that move 61 times for Haiku, 55 for Opus and 52 for Sonnet. In 79% of positions, at least one of the three models had the human's move among its three guesses.
 
@@ -267,7 +303,9 @@ The quick-move run (Part 1, 2,448 calls) cost about $19 at API prices. The 708-p
 
 **A problem found along the way.** In 76 of the first 612 calls (12%), the owner's claude.ai account connectors (Notion and others) were loaded into the call. Each of those calls carried about 88,000 extra tokens of tool definitions, about $0.70 per Opus call. This happened even though the call sets `mcpServers: {}`, because that setting does not cover account connectors. Setting `ENABLE_CLAUDEAI_MCP_SERVERS=false` in the call's environment stopped it: none of the more than 4,000 calls after that had the extra tokens. The script now sets it, and those 76 calls were redone. **The app's real Coach (`packages/backend/src/coach/real.ts`) uses the same options without this setting, so it probably has the same extra cost.**
 
-**Cost for the layer itself:** about 1.5 cents and 8 seconds per position with Opus, or 0.08 cents with Haiku.
+Maia2 ran on this desktop's CPU. Both parts together, 1,116 positions guessed twice each, took about a minute, most of it loading the model.
+
+**Cost for the layer itself:** about 1.5 cents and 8 seconds per position with Opus, or 0.08 cents with Haiku. Maia2 is free and takes well under a tenth of a second.
 
 ## Method
 
@@ -306,6 +344,7 @@ The quick-move run (Part 1, 2,448 calls) cost about $19 at API prices. The 708-p
 
 - **Stockfish**: the app's own Engine build (`createNodeEngine`) at the desktop's settings: depth 14, 5 lines. Its guesses are just its best moves, in order. Stockfish does not try to predict humans. Its "Skill Level" setting makes it play worse by sometimes choosing weaker moves, but that is not modelled on human play, so it was not used here.
 - **"Obvious moves"**: a fixed rule with no search. It ranks recaptures first, then other captures (big pieces taken by small ones first, undefended targets first), promotions, checks, moves that attack an undefended piece, and castling.
+- **Maia2** (CSSLab, University of Toronto; run by `data-prep/human-moves-maia.py`): its blitz model, given the board and both players' ratings, and a second time with 1500 for both. Its guesses are the three moves it gives the highest chance. It was trained on Lichess games from May 2018 to November 2023, so it has not seen these games either.
 - **Random**: the expected score of three random legal moves.
 
 **Scoring.** Top-1 counts a hit when the first guess is the move the human played. Top-3 counts a hit when the human's move is among the first three guesses. Paired comparisons use an exact sign test (McNemar's test) on the positions where one source hit and the other missed. The band test is a chi-square test across the four bands.
@@ -324,7 +363,7 @@ The quick-move run (Part 1, 2,448 calls) cost about $19 at API prices. The 708-p
 
 ## What's still open
 
-- **Maia2.** I installed Maia2, a model trained on Lichess games to predict the move a human of a given rating plays (from CSSLab at the University of Toronto). Running it was blocked by Claude Code's safety check. Maia2 downloads its weights from the authors' Google Drive and loads them with PyTorch, and loading a file that way can run code. The script is ready as `data-prep/human-moves-maia.py`. If Abir approves, it takes about a minute. If Maia2 matches or beats Opus, the layer could use it instead: it is free, it takes milliseconds, and it is built to be told the Player's rating. But it would add Python and PyTorch, or a ported model, to the app.
+- **Shipping Maia2.** This needs three checks: the licence of its trained weights (the code is MIT), a smaller model than the 280 MB file, and a way to run it from Node or the browser, for example by converting it to ONNX. A prototype would answer all three.
 - **Telling the model the rating.** This run hid the rating on purpose. The next test is the same prompt with a line like "the player is rated about 1100". It would show whether Opus or Haiku can shift its guesses toward a level, which Maia does by design.
 - **Lower effort for Haiku.** At medium effort, Haiku spends about 1,160 output tokens and 8.6 seconds per call. Low effort might be as accurate and faster.
 - **Grading the models' guesses.** Part 1 checks whether a model's list held the human's mistake. It does not yet check how often a model's list holds a bad move at all, which is what the Coach would warn about. That needs the Engine to grade every guessed move, about 3,700 searches.

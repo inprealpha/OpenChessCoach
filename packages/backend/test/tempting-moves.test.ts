@@ -6,7 +6,9 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import type { Options, query } from '@anthropic-ai/claude-agent-sdk';
 import { afterEach, describe, expect, it } from 'vitest';
-import { INITIAL_FEN, legalMoves } from '@chess-coach/shared/chess';
+import { INITIAL_FEN, playSan, playUci } from '@chess-coach/shared/chess';
+import { BRIEF_BUDGET, briefSize, buildBrief, type Brief, type BriefCandidate } from '@chess-coach/shared/coach/brief';
+import { guardReply } from '@chess-coach/shared/coach/guard';
 import { defaultDataDir } from '../src/paths.ts';
 import { MAIA3_5M, ModelDownloader, type ModelAsset } from '../src/tempting-moves/download.ts';
 import { FakeTemptingMoves } from '../src/tempting-moves/fake.ts';
@@ -14,7 +16,9 @@ import { MAIA_WIDTH, MaiaTemptingMoves, maiaInput, maiaMoveIndex, gamePositions 
 import { instinctPrompt, legalOnly, OpusTemptingMoves } from '../src/tempting-moves/opus.ts';
 import type { TemptingMovesPort } from '../src/tempting-moves/port.ts';
 import { TemptingMovesService } from '../src/tempting-moves/service.ts';
-import { client, instance } from './helpers.ts';
+import { historyFromSans } from '../src/tempting-moves/ask.ts';
+import { maiaRating } from '../src/tempting-moves/rating.ts';
+import { client, instance, rows } from './helpers.ts';
 
 const dirs: string[] = [];
 afterEach(() => {
@@ -68,7 +72,7 @@ describe.skipIf(!existsSync(modelPath))('Maia-3 parity with the original model',
     const maia = await MaiaTemptingMoves.load(new Uint8Array(readFileSync(modelPath)), 4);
     const different: string[] = [];
     for (const p of fixture.positions) {
-      const moves = await maia.suggest({ startFen: INITIAL_FEN, moves: p.moves ? p.moves.split(' ') : [], rating: p.rating, opponentRating: p.opponentRating });
+      const { moves } = await maia.suggest({ startFen: INITIAL_FEN, moves: p.moves ? p.moves.split(' ') : [], rating: p.rating, opponentRating: p.opponentRating });
       if (moves.join(' ') !== p.top3) different.push(`${p.id}: ${moves.join(' ')} instead of ${p.top3}`);
     }
     await maia.close();
@@ -232,7 +236,7 @@ function side(name: TemptingMovesPort['name'], answer: string[] | Error) {
     async suggest() {
       s.calls++;
       if (answer instanceof Error) throw answer;
-      return answer;
+      return { moves: answer };
     },
   };
   return s;
@@ -254,11 +258,11 @@ describe('choosing where the tempting moves come from', () => {
     const maia = side('maia', ['e2e4']);
     const opus = side('opus', ['d2d4']);
     const service = new TemptingMovesService({ local: { downloader, load: async () => maia }, fallback: opus });
-    expect(await service.suggest(req)).toEqual({ moves: ['d2d4'], source: 'opus' });
+    expect(await service.suggest(req)).toMatchObject({ moves: ['d2d4'], source: 'opus' });
     expect(service.status()).toMatchObject({ source: 'opus', model: 'missing' });
 
     await downloader.attempt();
-    expect(await service.suggest(req)).toEqual({ moves: ['e2e4'], source: 'maia' });
+    expect(await service.suggest(req)).toMatchObject({ moves: ['e2e4'], source: 'maia' });
     expect(service.status()).toMatchObject({ source: 'maia', model: 'ready' });
     expect(opus.calls).toBe(1);
   });
@@ -267,8 +271,8 @@ describe('choosing where the tempting moves come from', () => {
     const maia = side('maia', new Error('the runtime crashed'));
     const opus = side('opus', ['d2d4']);
     const service = new TemptingMovesService({ local: { downloader: await readyDownloader(), load: async () => maia }, fallback: opus });
-    expect(await service.suggest(req)).toEqual({ moves: ['d2d4'], source: 'opus' });
-    expect(await service.suggest(req)).toEqual({ moves: ['d2d4'], source: 'opus' });
+    expect(await service.suggest(req)).toMatchObject({ moves: ['d2d4'], source: 'opus' });
+    expect(await service.suggest(req)).toMatchObject({ moves: ['d2d4'], source: 'opus' });
     expect(maia.calls).toBe(1);
     expect(service.status()).toMatchObject({ source: 'opus', model: 'failed', detail: expect.stringContaining('the runtime crashed') });
   });
@@ -279,14 +283,14 @@ describe('choosing where the tempting moves come from', () => {
       local: { downloader: await readyDownloader(), load: () => Promise.reject(new Error('not a model')) },
       fallback: opus,
     });
-    expect(await service.suggest(req)).toEqual({ moves: ['d2d4'], source: 'opus' });
+    expect(await service.suggest(req)).toMatchObject({ moves: ['d2d4'], source: 'opus' });
     expect(service.status().detail).toContain('not a model');
   });
 
   it('gives no moves rather than an error when the fallback fails too', async () => {
     const lines: string[] = [];
     const service = new TemptingMovesService({ fallback: side('opus', new Error('usage limit')), log: (l) => lines.push(l) });
-    expect(await service.suggest(req)).toEqual({ moves: [], source: 'opus' });
+    expect(await service.suggest(req)).toMatchObject({ moves: [], source: 'opus' });
     expect(lines.join('\n')).toContain('usage limit');
   });
 
@@ -298,11 +302,13 @@ describe('choosing where the tempting moves come from', () => {
 });
 
 describe('the fake and Opus sides', () => {
-  it('gives the same moves for the same position: captures, then checks, then the rest', async () => {
+  it('gives the same moves for the same position: captures, then checks, and nothing quiet', async () => {
     const fake = new FakeTemptingMoves();
-    expect(await fake.suggest({ startFen: INITIAL_FEN, moves: [] })).toEqual(legalMoves(INITIAL_FEN).slice(0, 3));
+    expect((await fake.suggest({ startFen: INITIAL_FEN, moves: [] })).moves).toEqual([]);
+    // After 1. e4 e5 2. Qh5 Nc6, Qxe5+ and Qxf7+ take a pawn with check; Qxh7 takes one too.
+    expect((await fake.suggest({ startFen: INITIAL_FEN, moves: ['e2e4', 'e7e5', 'd1h5', 'b8c6'] })).moves).toEqual(['h5e5', 'h5f7', 'h5h7']);
     // After 1. e4 d5, exd5 is the only capture.
-    expect((await fake.suggest({ startFen: INITIAL_FEN, moves: ['e2e4', 'd7d5'], count: 1 }))).toEqual(['e4d5']);
+    expect((await fake.suggest({ startFen: INITIAL_FEN, moves: ['e2e4', 'd7d5'], count: 1 })).moves).toEqual(['e4d5']);
   });
 
   it("asks Opus with the research's instinct prompt, which says nothing of the player's level", () => {
@@ -318,11 +324,17 @@ describe('the fake and Opus sides', () => {
     const fakeQuery = (({ options }: { options?: Options }) => {
       sent = options;
       return (async function* () {
-        yield { type: 'result', subtype: 'success', is_error: false, structured_output: { moves: ['Nf3', 'Ke2', '1. e4', 'Qh5', 'Nf3'] } };
+        yield {
+          type: 'result', subtype: 'success', is_error: false, num_turns: 1, total_cost_usd: 0.015,
+          usage: { input_tokens: 1500, output_tokens: 300 }, modelUsage: { 'claude-opus-5-5': {} },
+          structured_output: { moves: ['Nf3', 'Ke2', '1. e4', 'Qh5', 'Nf3'] },
+        };
       })();
     }) as unknown as typeof query;
-    const moves = await new OpusTemptingMoves({ query: fakeQuery }).suggest({ startFen: INITIAL_FEN, moves: [] });
+    const { moves, usage } = await new OpusTemptingMoves({ query: fakeQuery }).suggest({ startFen: INITIAL_FEN, moves: [] });
     expect(moves).toEqual(['g1f3', 'e2e4']);
+    // What the guess cost, for the Coach call log.
+    expect(usage).toMatchObject({ inputTokens: 1500, outputTokens: 300, costUsd: 0.015, models: ['claude-opus-5-5'] });
     expect(sent).toMatchObject({ model: 'opus', tools: [], mcpServers: {}, settingSources: [], persistSession: false });
     expect(sent?.env?.ENABLE_CLAUDEAI_MCP_SERVERS).toBe('false');
     expect(sent?.env?.PATH).toBe(process.env.PATH);
@@ -337,3 +349,131 @@ describe('what the desktop reports', () => {
     expect(hello.temptingMoves).toEqual({ source: 'fake', model: 'off', detail: 'verify mode uses fixed moves' });
   });
 });
+
+// ---------- Part B: the tempting moves in Coach calls ----------
+
+describe('the rating Maia-3 is given', () => {
+  it('uses a Lichess rating as it is, converts chess.com rapid by the ChessGoals table, and 1500 without one', () => {
+    expect(maiaRating(1432, 'lichess')).toBe(1432);
+    expect(maiaRating(1500, 'chesscom')).toBe(1620);
+    expect(maiaRating(1000, 'chesscom')).toBe(1229);
+    // Beyond the table's ends, its nearest row's difference.
+    expect(maiaRating(600, 'chesscom')).toBe(875);
+    expect(maiaRating(2500, 'chesscom')).toBe(2815);
+    expect(maiaRating(null, undefined)).toBe(1500);
+  });
+});
+
+describe("the game Maia-3 reads, from a client's moves", () => {
+  it('is the game from its start when the moves lead to the position, and the position alone otherwise', () => {
+    const fen = gamePositions(INITIAL_FEN, ['e2e4', 'e7e5']).at(-1)!;
+    expect(historyFromSans(fen, ['e4', 'e5'])).toEqual({ startFen: INITIAL_FEN, moves: ['e2e4', 'e7e5'] });
+    // A position set up by hand, or moves that lead elsewhere, or that aren't moves at all.
+    expect(historyFromSans(fen, [])).toEqual({ startFen: fen, moves: [] });
+    expect(historyFromSans(fen, ['d4', 'd5'])).toEqual({ startFen: fen, moves: [] });
+    expect(historyFromSans(fen, ['e4', 42])).toEqual({ startFen: fen, moves: [] });
+  });
+});
+
+// After 1. e4 e5 2. Qh5 Nc6, White to move: the fake suggests Qxe5+, Qxf7+ and Qxh7.
+const QH5 = { job: 'why' as const, fen: gamePositions(INITIAL_FEN, ['e2e4', 'e7e5', 'd1h5', 'b8c6']).at(-1)!, recentMoves: ['e4', 'e5', 'Qh5', 'Nc6'], playerSide: 'white' as const };
+
+describe('the tempting moves in the brief', () => {
+  it('are graded by the Engine, marked on its candidates and listed after them when it didn\'t list them', async () => {
+    const app = await instance();
+    const c = await client(app);
+    await c.request('coach.ask', { ...QH5, question: 'What should I play?' });
+    const brief = app.coach.lastBrief!;
+    const all = [...brief.candidates.filter((x) => x.tempting), ...(brief.tempting ?? [])];
+    expect(all.map((t) => t.san).sort()).toEqual(['Qxe5+', 'Qxf7+', 'Qxh7']);
+    // Each one the Engine didn't list has its Move Grade, its line and what it does.
+    for (const t of brief.tempting ?? []) {
+      expect(brief.candidates.some((x) => x.uci === t.uci)).toBe(false);
+      expect(t).toMatchObject({ grade: expect.any(String), line: expect.any(String), evaluation: expect.any(String) });
+    }
+    // Qxf7+ gives the queen away: a Blunder, which the fake Coach names as a trap.
+    expect(all.find((t) => t.san === 'Qxf7+')?.grade).toBe('Blunder');
+  });
+
+  it("marks the move itself when it's one many players reach for", async () => {
+    const app = await instance();
+    const c = await client(app);
+    await c.request('coach.ask', { ...QH5, moveUci: 'h5f7' });
+    expect(app.coach.lastBrief?.move).toMatchObject({ san: 'Qxf7+', tempting: true });
+    expect((app.coach.lastBrief?.tempting ?? []).map((t) => t.san)).not.toContain('Qxf7+');
+  });
+
+  it('go to Why Questions, Review moments and Hints, never to Live Coaching or Lesson turns', async () => {
+    const app = await instance();
+    const c = await client(app);
+    await c.request('coach.ask', { ...QH5, job: 'hint' });
+    expect(app.coach.lastBrief?.tempting?.length ?? app.coach.lastBrief?.candidates.filter((x) => x.tempting).length).toBeGreaterThan(0);
+    await c.request('coach.ask', { ...QH5, job: 'live', moveUci: 'h5f7' });
+    expect(app.coach.lastBrief?.tempting).toBeUndefined();
+    expect(app.coach.lastBrief?.move?.tempting).toBeUndefined();
+    const review = await c.request('review.start', { gameId: 1 });
+    expect(review.moments.length).toBeGreaterThan(0);
+    const jobs = rows<{ job: string }>(app, 'SELECT c.job FROM coach_tempting t JOIN coach_calls c ON c.id = t.call_id').map((r) => r.job);
+    expect(new Set(jobs)).toEqual(new Set(['hint', 'review-moment']));
+  });
+
+  it('give a Hint none while only Opus could guess them: it must stay quick', async () => {
+    const opus = side('opus', ['h5f7']);
+    const { asset, data } = fakeAsset();
+    const downloader = new ModelDownloader({ dir: tempDir(), asset, fetch: server(data, { status: 404 }).fetch, retryDelaysMs: [] });
+    const app = await instance({ temptingMoves: new TemptingMovesService({ local: { downloader }, fallback: opus }) });
+    const c = await client(app);
+    await c.request('coach.ask', { ...QH5, job: 'hint' });
+    expect(opus.calls).toBe(0);
+    await c.request('coach.ask', QH5);
+    expect(opus.calls).toBe(1);
+  });
+
+  it('log where they came from, and what an Opus guess cost, with each Coach call', async () => {
+    const usage = { inputTokens: 1500, outputTokens: 330, cacheReadTokens: 0, cacheWriteTokens: 1500, turns: 1, ms: 8100, costUsd: 0.0148, models: ['claude-opus-5-5'] };
+    const opus = { name: 'opus' as const, suggest: async () => ({ moves: ['h5f7'], usage }) };
+    const app = await instance({ temptingMoves: new TemptingMovesService({ fallback: opus }) });
+    const c = await client(app);
+    await c.request('coach.ask', QH5);
+    const [row] = rows<{ source: string; moves: string; usage: string }>(app, 'SELECT source, moves, usage FROM coach_tempting');
+    expect(row).toMatchObject({ source: 'opus', moves: '["h5f7"]' });
+    expect(JSON.parse(row!.usage)).toEqual(usage);
+  });
+
+  it('leave the brief within its budget, and are the first thing dropped from a full one', () => {
+    const fen = QH5.fen;
+    const candidate = (uci: string) => ({ uci, san: uci, score: { cp: 0 }, pv: [uci] });
+    const ask = {
+      job: 'why' as const, fen, recentMoves: QH5.recentMoves, candidates: [candidate('f1c4')],
+      tempting: [candidate('h5f7'), candidate('h5e5'), candidate('h5h7')], question: 'x'.repeat(390),
+    };
+    const profile = { level: 'casual' as const, rating: null, goals: [], weaknesses: [], notes: [] };
+    const brief = buildBrief({ ask, profile });
+    expect(brief.tempting?.map((t) => t.uci)).toEqual(['h5f7', 'h5e5', 'h5h7']);
+    expect(briefSize(brief)).toBeLessThanOrEqual(BRIEF_BUDGET);
+  });
+});
+
+describe('the move guard and the tempting moves', () => {
+  it('accepts a tempting move the Engine graded, names its line but never draws it, and strips a made-up move', async () => {
+    const app = await instance();
+    const c = await client(app);
+    await c.request('coach.ask', QH5);
+    const trap = (app.coach.lastBrief?.tempting ?? []).find((t) => t.line);
+    expect(trap).toBeDefined();
+    const reply = buildBriefReply(app.coach.lastBrief!, trap!);
+    expect(reply.moves).toEqual(expect.arrayContaining([trap!.uci]));
+    expect(reply.arrows.map((a) => `${a.from}${a.to}`)).toEqual([trap!.uci]);
+    expect(reply.stripped).toEqual(["move a2a3 is not in the Engine's output", `arrow ${reply.lineMove} is not in the Engine's output`]);
+  });
+});
+
+/** Runs the guard on a reply that shows a tempting move, the first move of its line (also as an arrow), and a made-up move. */
+function buildBriefReply(brief: Brief, trap: BriefCandidate) {
+  const afterTrap = playUci(brief.fen, trap.uci)!.fenAfter;
+  const lineMove = playSan(afterTrap, trap.line.split(' ')[0]!)!.uci;
+  const guarded = guardReply(brief, {
+    text: 'x', moves: [trap.uci, lineMove, 'a2a3'], arrows: [{ uci: trap.uci, brush: 'red' }, { uci: lineMove, brush: 'yellow' }], highlights: [], note: null,
+  });
+  return { ...guarded, lineMove };
+}

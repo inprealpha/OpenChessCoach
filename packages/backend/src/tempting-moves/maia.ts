@@ -5,7 +5,7 @@
 // parity test check it gives the same moves as the original.
 import { legalMoves, piecesOf, playUci, turnOf } from '@chess-coach/shared/chess';
 import { loadOrt, type OrtModule } from './ort.ts';
-import { DEFAULT_RATING, type TemptingMovesPort, type TemptingMovesRequest } from './port.ts';
+import { DEFAULT_RATING, type TemptingMoves, type TemptingMovesPort, type TemptingMovesRequest } from './port.ts';
 
 /** Maia-3 reads the last 8 positions of the game. */
 export const MAIA_HISTORY = 8;
@@ -75,8 +75,8 @@ export class MaiaTemptingMoves implements TemptingMovesPort {
     return new MaiaTemptingMoves(ort, await ort.InferenceSession.create(model));
   }
 
-  suggest(req: TemptingMovesRequest): Promise<string[]> {
-    const run = this.queue.then(() => this.run(req));
+  suggest(req: TemptingMovesRequest): Promise<TemptingMoves> {
+    const run = this.queue.then(async () => ({ moves: await this.run(req) }));
     this.queue = run.catch(() => undefined);
     return run;
   }

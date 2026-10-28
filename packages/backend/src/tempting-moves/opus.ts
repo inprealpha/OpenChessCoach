@@ -7,7 +7,8 @@ import { tmpdir } from 'node:os';
 import { playSan, playUci, turnOf } from '@chess-coach/shared/chess';
 import { isWindowsShim } from '../claude-check.ts';
 import { gamePositions } from './maia.ts';
-import type { TemptingMovesPort, TemptingMovesRequest } from './port.ts';
+import type { CoachUsage } from '@chess-coach/shared/coach/types';
+import type { TemptingMoves, TemptingMovesPort, TemptingMovesRequest } from './port.ts';
 
 export interface OpusTemptingMovesOptions {
   /** Path to the `claude` executable the owner logged in with. */
@@ -62,7 +63,8 @@ export class OpusTemptingMoves implements TemptingMovesPort {
     this.query = options.query ?? query;
   }
 
-  async suggest(req: TemptingMovesRequest): Promise<string[]> {
+  async suggest(req: TemptingMovesRequest): Promise<TemptingMoves> {
+    const started = Date.now();
     const count = req.count ?? 3;
     const fen = gamePositions(req.startFen, req.moves).at(-1)!;
     const abort = new AbortController();
@@ -87,13 +89,26 @@ export class OpusTemptingMoves implements TemptingMovesPort {
       },
     });
     let answer: unknown;
+    let usage: CoachUsage | undefined;
     for await (const message of stream) {
       if (message.type === 'result') {
         if (message.subtype !== 'success' || message.is_error) throw new Error(`Opus stopped early (${message.subtype}).`);
         answer = (message as { structured_output?: { moves?: unknown } }).structured_output?.moves;
+        // As the real Coach reports a call, so the Coach call log shows what each guess cost.
+        const u = (message as { usage?: { input_tokens?: number; output_tokens?: number; cache_read_input_tokens?: number; cache_creation_input_tokens?: number } }).usage;
+        usage = {
+          inputTokens: u?.input_tokens ?? 0,
+          outputTokens: u?.output_tokens ?? 0,
+          cacheReadTokens: u?.cache_read_input_tokens ?? 0,
+          cacheWriteTokens: u?.cache_creation_input_tokens ?? 0,
+          turns: (message as { num_turns?: number }).num_turns ?? 1,
+          ms: Date.now() - started,
+          costUsd: (message as { total_cost_usd?: number }).total_cost_usd ?? 0,
+          models: Object.keys((message as { modelUsage?: Record<string, unknown> }).modelUsage ?? {}),
+        };
       }
     }
-    return legalOnly(fen, Array.isArray(answer) ? answer : [], count);
+    return { moves: legalOnly(fen, Array.isArray(answer) ? answer : [], count), ...(usage ? { usage } : {}) };
   }
 }
 

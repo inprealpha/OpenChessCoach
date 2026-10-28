@@ -7,11 +7,12 @@ import type { TemptingMovesStatus } from '@chess-coach/shared/protocol';
 import type { ModelDownloader } from './download.ts';
 import { FakeTemptingMoves } from './fake.ts';
 import { MaiaTemptingMoves } from './maia.ts';
-import type { TemptingMovesPort, TemptingMovesRequest } from './port.ts';
+import type { TemptingMoves, TemptingMovesPort, TemptingMovesRequest } from './port.ts';
 
-export interface TemptingMovesResult {
-  moves: string[];
+export interface TemptingMovesResult extends TemptingMoves {
   source: TemptingMovesPort['name'];
+  /** How long the guess took, for the Coach call log. */
+  ms: number;
 }
 
 export interface LocalModel {
@@ -54,22 +55,28 @@ export class TemptingMovesService {
   }
 
   async suggest(req: TemptingMovesRequest): Promise<TemptingMovesResult> {
+    const started = Date.now();
     const maia = this.ready();
     if (maia) {
       try {
-        return { moves: await (await maia).suggest(req), source: 'maia' };
+        return { ...(await (await maia).suggest(req)), source: 'maia', ms: Date.now() - started };
       } catch (err) {
         if (req.signal?.aborted) throw err;
         this.switchOff(err);
       }
     }
     try {
-      return { moves: await this.fallback.suggest(req), source: this.fallback.name };
+      return { ...(await this.fallback.suggest(req)), source: this.fallback.name, ms: Date.now() - started };
     } catch (err) {
       if (req.signal?.aborted) throw err;
       this.log(`Tempting moves from ${this.fallback.name} failed: ${err instanceof Error ? err.message : String(err)}`);
-      return { moves: [], source: this.fallback.name };
+      return { moves: [], source: this.fallback.name, ms: Date.now() - started };
     }
+  }
+
+  /** Whether the next answer would come from this desktop's Maia-3 (or the fake), not a Claude call. */
+  isLocal(): boolean {
+    return this.status().source !== 'opus';
   }
 
   status(): TemptingMovesStatus {

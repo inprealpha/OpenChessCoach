@@ -10,7 +10,10 @@ import { type Clock, iso } from './clock.ts';
 import { all, one, transaction, type Db } from './db.ts';
 import { getGame } from './games.ts';
 import { THINK_DEEPER_DEADLINE_MS } from './coach/real.ts';
-import { addGradeCounts, removeGradeCounts } from './profile.ts';
+import { addGradeCounts, getProfile, removeGradeCounts } from './profile.ts';
+import { guessTempting, withTempting } from './tempting-moves/ask.ts';
+import { maiaRating } from './tempting-moves/rating.ts';
+import type { TemptingMovesService } from './tempting-moves/service.ts';
 import type { CoachService } from './coach/service.ts';
 import type { EngineService } from './engine/service.ts';
 
@@ -54,6 +57,8 @@ export interface ReviewDeps {
   clock: Clock;
   coach: CoachService;
   engine: EngineService;
+  /** The moves many players would reach for at each key moment (ADR 0011); none without it. */
+  tempting?: TemptingMovesService;
 }
 
 /** Hears a Review being made: its progress, and the Coach's explanations as they are written. */
@@ -149,7 +154,7 @@ export async function startReview(
 }
 
 async function makeReview(
-  { db, clock, coach, engine }: ReviewDeps,
+  { db, clock, coach, engine, tempting }: ReviewDeps,
   gameId: number,
   delta: (text: string, part: number) => void,
   progress: (done: number, total: number) => void,
@@ -164,12 +169,16 @@ async function makeReview(
   const counts = game.source !== 'sample';
   const out: KeyMoment[] = [];
   const started = clock.now().getTime();
+  const profile = getProfile(db);
+  const rating = maiaRating(profile.rating, profile.ratingSource?.site);
   for (const [index, m] of moments.entries()) {
+    // The moves many players would reach for at the moment (ADR 0011), from the game's own moves.
+    const guess = tempting && guessTempting('review-moment', { service: tempting, rating, history: { startFen: game.startFen, moves: game.moves.slice(0, m.ply - 1) }, ...(signal ? { signal } : {}) });
     // What the opponent threatened before the move: the brief keeps it only when the Engine's best
     // reply to the move is that threat, so the Coach can say the move left it on.
     const threat = await engine.threat(m.fenBefore);
     const left = REVIEW_ENGINE_BUDGET_MS - (clock.now().getTime() - started);
-    const reply = await coach.ask(
+    const ask = await withTempting(
       {
         job: 'review-moment',
         fen: m.fenBefore,
@@ -184,6 +193,11 @@ async function makeReview(
         opening: game.opening,
         allowNote: counts && index === moments.length - 1,
       },
+      guess,
+      engine,
+    );
+    const reply = await coach.ask(
+      ask,
       (text) => delta(text, index),
       // Each moment's questions get the time the Review has left, at most the Coach's own deadline,
       // and a moment that runs out answers again from the brief alone rather than failing.

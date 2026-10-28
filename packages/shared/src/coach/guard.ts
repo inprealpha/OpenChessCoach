@@ -23,7 +23,8 @@ export interface GuardResult {
 /** The moves the Engine produced for this brief, each legal in the position it belongs to. */
 export function allowedMoves(brief: Brief): Set<string> {
   const allowed = new Set<string>();
-  for (const c of brief.candidates) if (playUci(brief.fen, c.uci)) allowed.add(c.uci);
+  // The tempting moves are Engine output too: the Engine graded each one in `fen` (ADR 0011).
+  for (const c of [...brief.candidates, ...(brief.tempting ?? [])]) if (playUci(brief.fen, c.uci)) allowed.add(c.uci);
   // The opponent's threat, legal where it would be played: after the move, or in `fen` after a pass.
   const from = brief.threat ? threatFen(brief) : undefined;
   if (brief.threat && from && playUci(from, brief.threat.uci)) allowed.add(brief.threat.uci);
@@ -38,13 +39,13 @@ export function allowedMoves(brief: Brief): Set<string> {
 }
 
 /**
- * The moves of the Engine's line after a move the Player asked about, each legal where the line
- * plays it. The Coach may name them, but never draw them: the board shows the position before the
- * line, where they aren't played.
+ * The moves of the Engine's line after a move the Player asked about, or after a tempting move the
+ * Engine didn't list, each legal where the line plays it. The Coach may name them, but never draw
+ * them: the board shows the position before the line, where they aren't played.
  */
 export function askedLineMoves(brief: Brief): Set<string> {
   const out = new Set<string>();
-  for (const c of brief.candidates.filter((x) => x.asked)) {
+  for (const c of [...brief.candidates.filter((x) => x.asked), ...(brief.tempting ?? [])]) {
     let played = playUci(brief.fen, c.uci);
     for (const san of c.line.split(' ').filter(Boolean)) {
       played = played && playSan(played.fenAfter, san);

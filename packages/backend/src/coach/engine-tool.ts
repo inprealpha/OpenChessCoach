@@ -7,6 +7,7 @@ import {
   answerMoves,
   engineAnswer,
   MAX_ENGINE_QUESTIONS,
+  MAX_REFUSED_QUESTIONS,
   placeQuestion,
   QuestionError,
   type EngineAnswer,
@@ -26,6 +27,7 @@ export interface EngineCall {
 
 export class EngineTool implements CoachEngine {
   readonly maxQuestions = MAX_ENGINE_QUESTIONS;
+  readonly maxCalls = MAX_ENGINE_QUESTIONS + MAX_REFUSED_QUESTIONS;
   /** Every question, in the order asked. */
   readonly calls: EngineCall[] = [];
   /** Every move the Engine's answers gave the Coach, with the position it is played in. */
@@ -51,8 +53,8 @@ export class EngineTool implements CoachEngine {
       return { text: reason, refused: true };
     };
     // Counted before the search, so questions asked at once can't slip past the cap together.
-    if (this.answered >= this.maxQuestions) {
-      return refuse(`You have asked the Engine ${this.maxQuestions} times, the most for one answer. Answer now from the brief and the Engine's answers so far.`);
+    if (this.answered >= this.maxQuestions || this.calls.length >= this.maxCalls) {
+      return refuse(`You have asked the Engine all the questions one answer may ask. Answer now from the brief and the Engine's answers so far.`);
     }
     let placed;
     try {
@@ -63,10 +65,17 @@ export class EngineTool implements CoachEngine {
     }
     this.answered++;
     const left = this.maxQuestions - this.answered;
-    const [analysis, asked] = await Promise.all([
-      this.engine.analyse(placed.fen),
-      placed.move ? this.engine.gradeAsked(placed.fen, placed.move.uci) : undefined,
-    ]);
+    let analysis, asked;
+    try {
+      [analysis, asked] = await Promise.all([
+        this.engine.analyse(placed.fen),
+        placed.move ? this.engine.gradeAsked(placed.fen, placed.move.uci) : undefined,
+      ]);
+    } catch (err) {
+      // The Coach answers from what it has; a question the Engine couldn't answer isn't spent.
+      this.answered--;
+      return refuse(`The Engine couldn’t answer this question (${err instanceof Error ? err.message : String(err)}). Answer from the brief and the Engine's answers so far.`);
+    }
     const candidates = candidatesFrom(analysis);
     // A move the Engine listed is graded as it is, as a brief grades a candidate the Player asks about.
     const listed = placed.move && candidates.find((c) => c.uci === placed.move?.uci);

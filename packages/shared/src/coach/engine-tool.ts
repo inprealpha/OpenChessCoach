@@ -12,6 +12,11 @@ import { briefCandidates, explained, type BriefCandidate } from './brief.ts';
 export const ENGINE_TOOL_JOBS: readonly CoachJob[] = ['why', 'review-moment'];
 /** How many questions one Coach answer may ask the Engine. A question past it is refused, and the Coach answers. */
 export const MAX_ENGINE_QUESTIONS = 3;
+/**
+ * How many more calls the tool takes besides those, for questions it refuses (an illegal move, an
+ * Engine that can't answer), which don't count as questions. Every call is a turn of the Coach's.
+ */
+export const MAX_REFUSED_QUESTIONS = 2;
 /** The longest line a question may play from the brief's position, in plies. */
 export const MAX_QUESTION_PLIES = 10;
 const ANSWER_CANDIDATES = 3;

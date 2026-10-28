@@ -4,7 +4,9 @@
 import { describe, expect, it } from 'vitest';
 import type { Options, query } from '@anthropic-ai/claude-agent-sdk';
 import type { Brief } from '@chess-coach/shared/coach/brief';
-import { ENGINE_TOOL_NAME, RealCoach, THINK_DEEPER_OUTPUT_TOKENS } from '../src/coach/real.ts';
+import { ENGINE_TOOL_NAME, RealCoach, COACH_OUTPUT_TOKENS } from '../src/coach/real.ts';
+import { EngineTool } from '../src/coach/engine-tool.ts';
+import type { EngineService } from '../src/engine/service.ts';
 import type { CoachEngine } from '../src/coach/port.ts';
 
 const brief: Brief = {
@@ -18,7 +20,7 @@ const brief: Brief = {
   allowNote: false,
   hideMoves: false,
 };
-const engine: CoachEngine = { maxQuestions: 3, ask: async () => ({ text: '{}', refused: false }) };
+const engine: CoachEngine = { maxQuestions: 3, maxCalls: 5, ask: async () => ({ text: '{}', refused: false }) };
 const result = {
   type: 'result',
   subtype: 'success',
@@ -52,9 +54,10 @@ describe('the real Coach', () => {
     expect(reply.text).toBe('Develop a knight.');
     expect(reply.usage).toMatchObject({ inputTokens: 10, outputTokens: 20, cacheReadTokens: 30, cacheWriteTokens: 40, turns: 2, costUsd: 0.0123, models: ['claude-haiku-5-5'] });
     expect(seen[0]).toMatchObject({ tools: [], allowedTools: [], mcpServers: {}, strictMcpConfig: true, settingSources: [], maxTurns: 3 });
-    // The claude.ai account's connectors stay out, and no ceiling is needed on a call without the tool.
+    // The claude.ai account's connectors stay out, and every call has the ceiling on each response:
+    // a runaway answer isn't special to the Engine tool.
     expect(seen[0]?.env?.ENABLE_CLAUDEAI_MCP_SERVERS).toBe('false');
-    expect(seen[0]?.env?.CLAUDE_CODE_MAX_OUTPUT_TOKENS).toBeUndefined();
+    expect(seen[0]?.env?.CLAUDE_CODE_MAX_OUTPUT_TOKENS).toBe(String(COACH_OUTPUT_TOKENS));
     expect(seen[0]?.systemPrompt).not.toContain('ask_engine');
   });
 
@@ -62,9 +65,10 @@ describe('the real Coach', () => {
     const seen: Options[] = [];
     await new RealCoach({ query: fakeQuery(seen) }).ask({ job: 'why', model: 'haiku', brief, engine }, () => {});
     const options = seen[0];
-    expect(options).toMatchObject({ tools: [], allowedTools: [ENGINE_TOOL_NAME], strictMcpConfig: true, settingSources: [], maxTurns: 6 });
+    // A turn for every call the tool takes, refused ones included, besides the answer's own.
+    expect(options).toMatchObject({ tools: [], allowedTools: [ENGINE_TOOL_NAME], strictMcpConfig: true, settingSources: [], maxTurns: 3 + engine.maxCalls });
     expect(Object.keys(options?.mcpServers ?? {})).toEqual(['engine']);
-    expect(options?.env?.CLAUDE_CODE_MAX_OUTPUT_TOKENS).toBe(String(THINK_DEEPER_OUTPUT_TOKENS));
+    expect(options?.env?.CLAUDE_CODE_MAX_OUTPUT_TOKENS).toBe(String(COACH_OUTPUT_TOKENS));
     // The Engine's server is the only one: the claude.ai account's connectors stay out here too.
     expect(options?.env?.ENABLE_CLAUDEAI_MCP_SERVERS).toBe('false');
     // The rest of the environment still reaches Claude Code, so it finds the owner's login.
@@ -82,5 +86,43 @@ describe('the real Coach', () => {
   it('puts no deadline on a call without the Engine tool', async () => {
     const reply = await new RealCoach({ query: fakeQuery([], 60), deadlineMs: 10 }).ask({ job: 'why', model: 'haiku', brief }, () => {});
     expect(reply.text).toBe('Develop a knight.');
+  });
+
+  it('still answers when some of its questions were refused', async () => {
+    const stub = { analyse: async (fen: string) => ({ fen, depth: 10, lines: [] }), gradeAsked: async () => ({ move: { uci: 'e2e4', san: 'e4', score: { cp: 0 }, pv: ['e2e4'] }, replies: [] }) };
+    const tool = new EngineTool(stub as unknown as EngineService, brief.fen);
+    // A model that asks two questions with illegal moves, then three good ones, one turn each, then answers in two turns.
+    const model = ((params: { options?: Options }) => {
+      const maxTurns = params.options?.maxTurns ?? 0;
+      return (async function* () {
+        let turns = 0;
+        for (const q of [{ move: 'Ke2' }, { line: ['Nf6'] }, {}, { move: 'e4' }, { line: ['d4'] }]) {
+          turns++;
+          await tool.ask(q);
+        }
+        turns += 2;
+        yield turns > maxTurns ? { ...result, subtype: 'error_max_turns' } : result;
+      })();
+    }) as unknown as typeof query;
+    const reply = await new RealCoach({ query: model }).ask({ job: 'why', model: 'haiku', brief, engine: tool }, () => {});
+    expect(reply.text).toBe('Develop a knight.');
+    expect(tool.questions).toBe(3);
+  });
+
+  it('never shows the Player what the Coach wrote before asking the Engine', async () => {
+    const delta = (text: string) => ({ type: 'stream_event', parent_tool_use_id: null, event: { type: 'content_block_delta', index: 0, delta: { type: 'text_delta', text } } });
+    const model = (() =>
+      (async function* () {
+        yield delta('Let me check Qxf2+ first. ');
+        yield { type: 'assistant', parent_tool_use_id: null, message: { content: [{ type: 'text', text: 'Let me check Qxf2+ first. ' }, { type: 'tool_use', id: 't1', name: ENGINE_TOOL_NAME, input: {} }] } };
+        yield delta('Nxe5 leaves f2 open.');
+        yield { type: 'assistant', parent_tool_use_id: null, message: { content: [{ type: 'text', text: 'Nxe5 leaves f2 open.' }] } };
+        // No structured output: the streamed text is the explanation.
+        yield { ...result, structured_output: undefined };
+      })()) as unknown as typeof query;
+    let shown = '';
+    const reply = await new RealCoach({ query: model }).ask({ job: 'why', model: 'haiku', brief, engine }, (d) => (shown += d));
+    expect(shown).toBe('Nxe5 leaves f2 open.');
+    expect(reply.text).toBe('Nxe5 leaves f2 open.');
   });
 });

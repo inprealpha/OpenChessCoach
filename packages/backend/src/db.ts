@@ -158,6 +158,7 @@ const MIGRATIONS: string[] = [
     refused TEXT,
     ms INTEGER NOT NULL
   );
+  CREATE INDEX IF NOT EXISTS coach_questions_call ON coach_questions (call_id);
   `,
 ];
 

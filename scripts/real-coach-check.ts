@@ -134,6 +134,7 @@ export class RecordingCoach implements CoachPort {
 function recordAnswers(engine: CoachEngine, answers: EngineAnswer[]): CoachEngine {
   return {
     maxQuestions: engine.maxQuestions,
+    maxCalls: engine.maxCalls,
     async ask(question: EngineQuestion) {
       const out = await engine.ask(question);
       if (!out.refused) answers.push(JSON.parse(out.text) as EngineAnswer);

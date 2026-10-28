@@ -41,6 +41,13 @@ export function withReviewScores(db: Db, gameId: unknown, ask: CoachAsk): CoachA
   return index < 0 ? ask : { ...ask, ...reviewScores(graded, index + 1) };
 }
 
+/**
+ * How long a Review's key moments may spend asking the Engine, with Think deeper on (ADR 0010). Once
+ * they have taken this long, the remaining moments answer from the brief alone, so a Review never
+ * waits on the Engine tool for every moment of a long game.
+ */
+export const REVIEW_ENGINE_BUDGET_MS = 180_000;
+
 export interface ReviewDeps {
   db: Db;
   clock: Clock;
@@ -155,6 +162,7 @@ async function makeReview(
   // The sample game isn't the Player's: its Review never feeds the Player Profile.
   const counts = game.source !== 'sample';
   const out: KeyMoment[] = [];
+  const started = clock.now().getTime();
   for (const [index, m] of moments.entries()) {
     // What the opponent threatened before the move: the brief keeps it only when the Engine's best
     // reply to the move is that threat, so the Coach can say the move left it on.
@@ -176,7 +184,7 @@ async function makeReview(
       },
       (text) => delta(text, index),
       signal,
-      engine,
+      clock.now().getTime() - started < REVIEW_ENGINE_BUDGET_MS ? engine : undefined,
     );
     out.push({
       ply: m.ply,

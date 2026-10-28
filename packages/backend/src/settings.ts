@@ -56,6 +56,9 @@ export function getSettings(db: Db): Settings {
 }
 
 export function updateSettings(db: Db, patch: SettingsPatch): Settings {
+  if (patch.thinkDeeper !== undefined && typeof patch.thinkDeeper !== 'boolean') {
+    throw new AppError('bad-request', 'Think deeper is on (true) or off (false).');
+  }
   const current = readStored(db);
   const preset = patch.quality === undefined ? {} : presetModels(patch.quality);
   const next: StoredSettings = {

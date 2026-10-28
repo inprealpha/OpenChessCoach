@@ -16,6 +16,8 @@ import { CoachLimitError, CoachUnavailableError, type CoachPort } from './port.t
 
 const MAX_THREADS = 200;
 const MAX_LOGGED_CALLS = 500;
+/** Clears the questions of Coach calls older than the oldest one kept (the parameter), through the index on call_id. */
+export const QUESTION_CLEANUP = 'DELETE FROM coach_questions WHERE call_id < ?';
 
 export class CoachService {
   private readonly db: Db;
@@ -135,10 +137,14 @@ export class CoachService {
     for (const c of engineCalls) {
       ask.run(lastInsertRowid, JSON.stringify(c.question), c.answer ? JSON.stringify(c.answer) : null, c.refused ?? null, c.ms);
     }
-    this.db
+    const trimmed = this.db
       .prepare('DELETE FROM coach_calls WHERE id NOT IN (SELECT id FROM coach_calls ORDER BY id DESC LIMIT ?)')
       .run(MAX_LOGGED_CALLS);
-    this.db.prepare('DELETE FROM coach_questions WHERE call_id NOT IN (SELECT id FROM coach_calls)').run();
+    // Only once calls were trimmed: most calls trim nothing and ask the Engine nothing.
+    if (trimmed.changes) {
+      const oldest = this.db.prepare('SELECT MIN(id) AS id FROM coach_calls').get() as { id: number };
+      this.db.prepare(QUESTION_CLEANUP).run(oldest.id);
+    }
   }
 }
 

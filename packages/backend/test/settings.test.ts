@@ -63,4 +63,12 @@ describe('Think deeper', () => {
     expect(await c.request('settings.update', { quality: 'thrifty' })).toMatchObject({ thinkDeeper: true, models: THRIFTY });
     expect(await c.request('settings.update', { thinkDeeper: false })).toMatchObject({ thinkDeeper: false, models: THRIFTY });
   });
+
+  it('is on or off, nothing else', async () => {
+    const c = await client(await instance({ seed: 'empty' }));
+    for (const value of ['no', 1, null]) {
+      await expect(c.request('settings.update', { thinkDeeper: value as never })).rejects.toMatchObject({ code: 'bad-request' });
+    }
+    expect(await c.request('settings.get', {})).toMatchObject({ thinkDeeper: false });
+  });
 });

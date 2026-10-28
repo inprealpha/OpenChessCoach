@@ -17,6 +17,8 @@ export interface CoachCall {
 /** The one tool the Coach can be given: questions to the desktop's Engine, answered as text for the Coach to read. */
 export interface CoachEngine {
   readonly maxQuestions: number;
+  /** How many calls the tool takes in all, refused ones included: the turns the Coach needs for them. */
+  readonly maxCalls: number;
   ask(question: EngineQuestion): Promise<{ text: string; refused: boolean }>;
 }
 

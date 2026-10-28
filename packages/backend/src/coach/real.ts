@@ -19,11 +19,12 @@ const ENGINE_TOOL = 'ask_engine';
 /** The tool's full name, the only tool the Coach may call. */
 export const ENGINE_TOOL_NAME = `mcp__${ENGINE_SERVER}__${ENGINE_TOOL}`;
 /**
- * Ceilings on a call with the Engine tool (ADR 0010), far above any normal answer (under 4,000
- * output tokens and 25 seconds in the off/on comparison): one answer ran away to 130,000 output
- * tokens over ten minutes, repeating itself until the model's own limit, twice.
+ * Ceilings far above any normal answer (under 4,000 output tokens and 25 seconds in the off/on
+ * comparison, ADR 0010): one answer ran away to 130,000 output tokens over ten minutes, repeating
+ * itself until the model's own limit, twice. The output ceiling holds for every Coach call; the
+ * deadline for a call with the Engine tool, which also waits on the Engine.
  */
-export const THINK_DEEPER_OUTPUT_TOKENS = 8000;
+export const COACH_OUTPUT_TOKENS = 8000;
 export const THINK_DEEPER_DEADLINE_MS = 90_000;
 
 /** The desktop's Engine as an in-process MCP server with one tool. It reads no files and opens no connections. */
@@ -95,15 +96,16 @@ export class RealCoach implements CoachPort {
         settingSources: [],
         persistSession: false,
         includePartialMessages: true,
-        // One more turn for each question; a question past the cap is refused before this stops the call.
-        maxTurns: BASE_TURNS + (engine ? engine.maxQuestions : 0),
+        // A turn for every call the tool takes, refused ones included; the tool refuses any past
+        // them, telling the Coach to answer, before this stops the call.
+        maxTurns: BASE_TURNS + (engine ? engine.maxCalls : 0),
         cwd: tmpdir(),
         env: {
           ...process.env,
           // mcpServers: {} doesn't stop the claude.ai account's connectors, which add ~88,000 tokens to a call.
           ENABLE_CLAUDEAI_MCP_SERVERS: 'false',
-          // With the Engine tool, a ceiling on each response, so an answer that runs away can't spend the owner's limits.
-          ...(engine ? { CLAUDE_CODE_MAX_OUTPUT_TOKENS: String(THINK_DEEPER_OUTPUT_TOKENS) } : {}),
+          // A ceiling on each response, so an answer that runs away can't spend the owner's limits.
+          CLAUDE_CODE_MAX_OUTPUT_TOKENS: String(COACH_OUTPUT_TOKENS),
         },
         abortController: abort,
         outputFormat: { type: 'json_schema', schema: REPLY_SCHEMA as unknown as Record<string, unknown> },
@@ -112,14 +114,25 @@ export class RealCoach implements CoachPort {
       },
     });
     let text = '';
+    // With the Engine tool, a turn's text is held until the turn ends: text the Coach writes before
+    // asking the Engine is thinking aloud, which the Player never sees and the reply never keeps.
+    let held = '';
+    const show = (delta: string) => {
+      text += delta;
+      onText(delta);
+    };
     let structured: unknown;
     let usage: CoachUsage | undefined;
     try {
       for await (const message of stream) {
         const delta = textDelta(message);
         if (delta) {
-          text += delta;
-          onText(delta);
+          if (engine) held += delta;
+          else show(delta);
+        }
+        if (engine && message.type === 'assistant' && !message.parent_tool_use_id) {
+          if (!asksEngine(message)) show(held);
+          held = '';
         }
         if (message.type === 'rate_limit_event' && message.rate_limit_info.status === 'rejected') {
           const resets = message.rate_limit_info.resetsAt;
@@ -132,6 +145,7 @@ export class RealCoach implements CoachPort {
           }
         }
         if (message.type === 'result') {
+          if (held) show(held);
           if (message.subtype !== 'success') throw new Error(`The Coach stopped early (${message.subtype}).`);
           if (message.is_error) throw new Error(message.result || 'The Coach returned an error.');
           structured = (message as { structured_output?: unknown }).structured_output;
@@ -161,6 +175,11 @@ export class RealCoach implements CoachPort {
 /** What the Player reads when a call with the Engine tool reaches its deadline. */
 function tooLate(ms: number): Error {
   return new Error(`thinking deeper took longer than ${Math.round(ms / 1000)} seconds, so it stopped. Ask again, or turn Think deeper off in Settings.`);
+}
+
+/** Whether a turn of the Coach's ends by asking the Engine. */
+function asksEngine(message: Extract<SDKMessage, { type: 'assistant' }>): boolean {
+  return message.message.content.some((block) => block.type === 'tool_use' && block.name === ENGINE_TOOL_NAME);
 }
 
 function textDelta(message: SDKMessage): string | undefined {

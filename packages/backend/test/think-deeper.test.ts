@@ -6,6 +6,11 @@ import { candidatesFrom } from '@chess-coach/shared/analysis';
 import { playSan } from '@chess-coach/shared/chess';
 import { MAX_ENGINE_QUESTIONS, type EngineAnswer } from '@chess-coach/shared/coach/engine-tool';
 import type { CoachRequest } from '@chess-coach/shared/coach/types';
+import { EngineTool } from '../src/coach/engine-tool.ts';
+import { QUESTION_CLEANUP } from '../src/coach/service.ts';
+import type { EngineService } from '../src/engine/service.ts';
+import { AppError } from '../src/errors.ts';
+import { REVIEW_ENGINE_BUDGET_MS } from '../src/reviews.ts';
 import { client, instance, rows } from './helpers.ts';
 
 // 1. e4 d5: 2. Nf3?? leaves e4 to dxe4. The Engine's best is exd5, and Black's best reply to it Qxd5.
@@ -159,5 +164,41 @@ describe('Think deeper', () => {
     expect(moments).toHaveLength(review.moments.length);
     for (const m of moments) expect(engineCalls(app, m).filter((x) => x.answer)).toHaveLength(1);
     for (const m of review.moments) expect(m.explanation).toContain('I checked with the Engine');
+  });
+
+  it('refuses a question the Engine can’t answer, without spending one, and the Coach still answers', async () => {
+    const broken = { analyse: async () => Promise.reject(new AppError('engine-unavailable', 'The Engine couldn’t start on the desktop.')), gradeAsked: async () => Promise.reject(new Error('unused')) };
+    const tool = new EngineTool(broken as unknown as EngineService, AFTER_E4_D5);
+    const out = await tool.ask({ line: ['exd5'] });
+    expect(out.refused).toBe(true);
+    expect(out.text).toContain('The Engine couldn’t answer this question');
+    expect(tool.questions).toBe(0);
+    expect(tool.calls).toEqual([expect.objectContaining({ question: { line: ['exd5'] }, refused: expect.stringContaining('couldn’t start') })]);
+  });
+
+  it(`stops asking the Engine in a Review once its key moments have taken ${REVIEW_ENGINE_BUDGET_MS / 1000} seconds`, async () => {
+    const app = await instance();
+    const c = await client(app);
+    await c.request('settings.update', { thinkDeeper: true });
+    // Each key moment takes half the budget on the fake clock.
+    const ask = app.coach.ask.bind(app.coach);
+    app.coach.ask = async (call, onText) => {
+      const reply = await ask(call, onText);
+      app.clock.advance(REVIEW_ENGINE_BUDGET_MS / 2);
+      return reply;
+    };
+    const review = await c.request('review.start', { gameId: 1 });
+    const moments = rows<CallRow>(app, "SELECT id, job FROM coach_calls WHERE job = 'review-moment' ORDER BY id");
+    expect(review.moments.length).toBeGreaterThan(2);
+    // The first two moments ask; the rest answer from the brief alone, still each with an explanation.
+    expect(moments.map((m) => engineCalls(app, m).length)).toEqual(moments.map((_, i) => (i < 2 ? 1 : 0)));
+    for (const m of review.moments) expect(m.explanation).not.toBe('');
+  });
+
+  it('clears the questions of trimmed Coach calls by an index, not a scan of both tables', async () => {
+    const app = await instance();
+    const plan = rows<{ detail: string }>(app, `EXPLAIN QUERY PLAN ${QUESTION_CLEANUP}`, 1).map((r) => r.detail).join(' | ');
+    expect(plan).toContain('SEARCH coach_questions USING INDEX coach_questions_call');
+    expect(plan).not.toMatch(/SCAN coach_calls/);
   });
 });

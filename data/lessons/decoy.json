@@ -14,7 +14,255 @@
   "attraction"
  ],
  "intro": {
-  "text": ""
+  "text": "A decoy lures an enemy piece, usually the king or the queen, onto a bad square. You offer something it has to take, and on its new square a fork, a pin or a mate is waiting. Deflection is about the square a defender leaves; a decoy is about the square a piece lands on."
  },
- "parts": []
+ "parts": [
+  {
+   "title": "Drag the king onto the fork square",
+   "fen": "7k/pp4r1/3b1N2/8/4pP2/8/5P1P/6RK w - - 4 42",
+   "side": "white",
+   "keyIdea": "A capture can drag the king onto the square where your knight's fork is waiting.",
+   "text": "From a game played on Lichess. You are White. Black's rook has just come to g7 to block your rook. Look at the squares your knight can reach, and think about where you would like Black's king to stand.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle ukS1g",
+    "url": "https://lichess.org/training/ukS1g",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "g1g7",
+    "h8g7",
+    "f6e8",
+    "g7g6",
+    "e8d6"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "7k/pp4r1/3b1N2/8/4pP2/8/5P1P/6RK w - - 4 42",
+     "decision": true,
+     "main": "g1g7",
+     "mainSan": "Rxg7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Trade the rooks. Black has to take back with the king, because any other move allows mate in one. So the king has to come to g7."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "7k/pp4R1/3b1N2/8/4pP2/8/5P1P/7K b - - 0 42",
+     "decision": false,
+     "main": "h8g7",
+     "mainSan": "Kxg7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "8/pp4k1/3b1N2/8/4pP2/8/5P1P/7K w - - 0 43",
+     "decision": true,
+     "main": "f6e8",
+     "mainSan": "Ne8+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The knight checks the king on g7 and attacks the bishop on d6 at the same time. The king must move, and the bishop is lost."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "4N3/pp4k1/3b4/8/4pP2/8/5P1P/7K b - - 1 43",
+     "decision": false,
+     "main": "g7g6",
+     "mainSan": "Kg6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "4N3/pp6/3b2k1/8/4pP2/8/5P1P/7K w - - 2 44",
+     "decision": true,
+     "main": "e8d6",
+     "mainSan": "Nxd6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Take the bishop. The rook trade brought the king to g7, right where the knight could fork it with the bishop."
+     }
+    }
+   ]
+  },
+  {
+   "title": "Lure the queen into a fork",
+   "fen": "5q1k/1p5p/1np2ppN/p3p2n/Pr2P1QP/5P2/4N1P1/3R3K w - - 1 32",
+   "side": "white",
+   "keyIdea": "Offer a piece the queen has to take, so that it lands on a square your knight can fork.",
+   "text": "From a game played on Lichess. You are White. Your knight on h6 could check the king from f7. Which square would you like Black's queen to be on when it does?",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle 3Bt6U",
+    "url": "https://lichess.org/training/3Bt6U",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "d1d8",
+    "f8d8",
+    "h6f7",
+    "h8g8",
+    "f7d8"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "5q1k/1p5p/1np2ppN/p3p2n/Pr2P1QP/5P2/4N1P1/3R3K w - - 1 32",
+     "decision": true,
+     "main": "d1d8",
+     "mainSan": "Rd8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The rook offers itself on d8 and attacks the queen. The queen is pinned to the king along the back rank, so it cannot leave that rank, and it has little choice but to take the rook."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "3R1q1k/1p5p/1np2ppN/p3p2n/Pr2P1QP/5P2/4N1P1/7K b - - 2 32",
+     "decision": false,
+     "main": "f8d8",
+     "mainSan": "Qxd8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "3q3k/1p5p/1np2ppN/p3p2n/Pr2P1QP/5P2/4N1P1/7K w - - 0 33",
+     "decision": true,
+     "main": "h6f7",
+     "mainSan": "Nf7+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Now the knight checks from f7 and attacks the queen on d8 at the same time: a fork of king and queen."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "3q3k/1p3N1p/1np2pp1/p3p2n/Pr2P1QP/5P2/4N1P1/7K b - - 1 33",
+     "decision": false,
+     "main": "h8g8",
+     "mainSan": "Kg8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "3q2k1/1p3N1p/1np2pp1/p3p2n/Pr2P1QP/5P2/4N1P1/7K w - - 2 34",
+     "decision": true,
+     "main": "f7d8",
+     "mainSan": "Nxd8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Take the queen. You gave a rook and won a queen, because the queen was lured onto d8."
+     }
+    }
+   ]
+  },
+  {
+   "title": "Lure the king into a mate",
+   "fen": "4b1k1/pp2p2p/1q2P1p1/3r4/8/1PQ1P3/P5PP/5RK1 w - - 0 26",
+   "side": "white",
+   "keyIdea": "A sacrifice with check can drag the king onto a square where its own pieces box it in.",
+   "text": "From a game played on Lichess. You are White. Black has just taken your bishop on d5. Your queen's long diagonal ends on h8: where would Black's king have to stand for a queen move there to be mate?",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle qSq7D",
+    "url": "https://lichess.org/training/qSq7D",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "f1f8",
+    "g8f8",
+    "c3h8"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "4b1k1/pp2p2p/1q2P1p1/3r4/8/1PQ1P3/P5PP/5RK1 w - - 0 26",
+     "decision": true,
+     "main": "f1f8",
+     "mainSan": "Rf8+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The rook offers itself with check. The king has only one move: it must take the rook, because g7 and h8 are covered by your queen and f7 by your pawn on e6. Now the king stands on f8."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "4bRk1/pp2p2p/1q2P1p1/3r4/8/1PQ1P3/P5PP/6K1 b - - 1 26",
+     "decision": false,
+     "main": "g8f8",
+     "mainSan": "Kxf8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "4bk2/pp2p2p/1q2P1p1/3r4/8/1PQ1P3/P5PP/6K1 w - - 0 27",
+     "decision": true,
+     "main": "c3h8",
+     "mainSan": "Qh8#",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The queen comes to h8 along the long diagonal and gives check. Black's own bishop on e8 and pawn on e7 block the king, your pawn on e6 covers f7, and the queen covers g7 and g8: mate."
+     }
+    }
+   ]
+  }
+ ]
 }

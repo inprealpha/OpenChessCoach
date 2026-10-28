@@ -21,7 +21,347 @@
   "dovetailMate"
  ],
  "intro": {
-  "text": ""
+  "text": "Some mates happen again and again, so strong players recognise them at a glance. Each part of this Lesson shows one pattern: the smothered mate, Anastasia's mate, the Arabian mate and Boden's mate. Learn the shape of the final position, and you will start to see the moves that lead to it."
  },
- "parts": []
+ "parts": [
+  {
+   "title": "Smothered mate",
+   "fen": "5r1k/6pp/8/3QP1N1/P7/7P/1q4PK/8 w - - 4 35",
+   "side": "white",
+   "keyIdea": "Smothered mate: a knight mates a king whose own pieces fill every square around it.",
+   "text": "From a game played on Lichess. You are White. Black's king sits in the corner, hemmed in by its own pawns and rook. Your queen and knight can work together to give mate.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle L6ufT",
+    "url": "https://lichess.org/training/L6ufT",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "g5f7",
+    "h8g8",
+    "f7h6",
+    "g8h8",
+    "d5g8",
+    "f8g8",
+    "h6f7"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "5r1k/6pp/8/3QP1N1/P7/7P/1q4PK/8 w - - 4 35",
+     "decision": true,
+     "main": "g5f7",
+     "mainSan": "Nf7+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The knight checks from f7. Taking it with the rook loses quickly to Qd8+, so the king goes back to g8."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "5r1k/5Npp/8/3QP3/P7/7P/1q4PK/8 b - - 5 35",
+     "decision": false,
+     "main": "h8g8",
+     "mainSan": "Kg8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "5rk1/5Npp/8/3QP3/P7/7P/1q4PK/8 w - - 6 36",
+     "decision": true,
+     "main": "f7h6",
+     "mainSan": "Nh6+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "A double check: the knight checks from h6 and your queen on d5 checks along the diagonal. The king must move, and h8 is its only square."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "5rk1/6pp/7N/3QP3/P7/7P/1q4PK/8 b - - 7 36",
+     "decision": false,
+     "main": "g8h8",
+     "mainSan": "Kh8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "5r1k/6pp/7N/3QP3/P7/7P/1q4PK/8 w - - 8 37",
+     "decision": true,
+     "main": "d5g8",
+     "mainSan": "Qg8+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The queen sacrifice. The knight on h6 guards g8, so the king cannot take the queen, and the rook must. Now the rook fills the king's last free square."
+     }
+    },
+    {
+     "ply": 5,
+     "fen": "5rQk/6pp/7N/4P3/P7/7P/1q4PK/8 b - - 9 37",
+     "decision": false,
+     "main": "f8g8",
+     "mainSan": "Rxg8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 6,
+     "fen": "6rk/6pp/7N/4P3/P7/7P/1q4PK/8 w - - 0 38",
+     "decision": true,
+     "main": "h6f7",
+     "mainSan": "Nf7#",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The knight checks from f7, and the king is walled in by its own rook and pawns: a smothered mate."
+     }
+    }
+   ]
+  },
+  {
+   "title": "Anastasia's mate",
+   "fen": "5r1k/pp2Nrpp/2p5/8/3nR2Q/3q1p2/6PP/4R2K w - - 0 33",
+   "side": "white",
+   "keyIdea": "Anastasia's mate: a knight covers the king's escape squares while a rook mates along the edge file.",
+   "text": "From a game played on Lichess. You are White. Black's pawn on f3 is about to break open your king. Your knight on e7 already guards g8 and g6, so look for the fastest way to finish first.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle Jgeir",
+    "url": "https://lichess.org/training/Jgeir",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "h4h7",
+    "h8h7",
+    "e4h4"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "5r1k/pp2Nrpp/2p5/8/3nR2Q/3q1p2/6PP/4R2K w - - 0 33",
+     "decision": true,
+     "main": "h4h7",
+     "mainSan": "Qxh7+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "A queen sacrifice that opens the h-file. The king must take, because the knight on e7 guards g8."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "5r1k/pp2NrpQ/2p5/8/3nR3/3q1p2/6PP/4R2K b - - 0 33",
+     "decision": false,
+     "main": "h8h7",
+     "mainSan": "Kxh7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "5r2/pp2Nrpk/2p5/8/3nR3/3q1p2/6PP/4R2K w - - 0 34",
+     "decision": true,
+     "main": "e4h4",
+     "mainSan": "Rh4#",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The rook swings to the h-file and gives mate. The knight covers g6 and g8, and Black's own pawn on g7 blocks the last square: this is Anastasia's mate."
+     }
+    }
+   ]
+  },
+  {
+   "title": "The Arabian mate",
+   "fen": "6k1/1q3pr1/p7/1p1p4/6N1/2P2P2/P5P1/4R1K1 w - - 0 38",
+   "side": "white",
+   "keyIdea": "Arabian mate: a knight guards the rook and covers the last escape square of a king in the corner.",
+   "text": "From a game played on Lichess. You are White. Black has just taken your queen on d5, but Black's king is short of room. A rook and a knight can mate it near the corner.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle 2Xepn",
+    "url": "https://lichess.org/training/2Xepn",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "g4f6",
+    "g8h8",
+    "e1e8",
+    "g7g8",
+    "e8g8"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "6k1/1q3pr1/p7/1p1p4/6N1/2P2P2/P5P1/4R1K1 w - - 0 38",
+     "decision": true,
+     "main": "g4f6",
+     "mainSan": "Nf6+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The knight checks from f6. From there it also covers h7 and e8, squares that matter for the mate. If the king goes to f8 instead, Re8 is mate at once."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "6k1/1q3pr1/p4N2/1p1p4/8/2P2P2/P5P1/4R1K1 b - - 1 38",
+     "decision": false,
+     "main": "g8h8",
+     "mainSan": "Kh8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "7k/1q3pr1/p4N2/1p1p4/8/2P2P2/P5P1/4R1K1 w - - 2 39",
+     "decision": true,
+     "main": "e1e8",
+     "mainSan": "Re8+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The rook checks along the back rank. Black's only way out is to block with the rook on g8."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "4R2k/1q3pr1/p4N2/1p1p4/8/2P2P2/P5P1/6K1 b - - 3 39",
+     "decision": false,
+     "main": "g7g8",
+     "mainSan": "Rg8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "4R1rk/1q3p2/p4N2/1p1p4/8/2P2P2/P5P1/6K1 w - - 4 40",
+     "decision": true,
+     "main": "e8g8",
+     "mainSan": "Rxg8#",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The rook takes on g8, guarded by the knight. The king cannot go to g7, which the rook covers, or to h7, which the knight covers: this is the Arabian mate."
+     }
+    }
+   ]
+  },
+  {
+   "title": "Boden's mate",
+   "fen": "2r3k1/p3bpp1/6b1/1Bqp4/5Q2/2P4P/PP1N1P2/2KR3R b - - 0 27",
+   "side": "black",
+   "keyIdea": "Boden's mate: two bishops on crossing diagonals mate a king that its own pieces have hemmed in.",
+   "text": "From a game played on Lichess. You are Black, and White has just taken your rook on b5. White's king on c1 is hemmed in by its own rook and knight. Look at what your two bishops could cover.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle 9hAv2",
+    "url": "https://lichess.org/training/9hAv2",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "c5c3",
+    "b2c3",
+    "e7a3"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "2r3k1/p3bpp1/6b1/1Bqp4/5Q2/2P4P/PP1N1P2/2KR3R b - - 0 27",
+     "decision": true,
+     "main": "c5c3",
+     "mainSan": "Qxc3+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "A queen sacrifice with check. The king cannot step to b1 or c2, because your bishop on g6 covers both, so the pawn on b2 has to take the queen. That opens the diagonal from a3 to c1."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "2r3k1/p3bpp1/6b1/1B1p4/5Q2/2q4P/PP1N1P2/2KR3R w - - 0 28",
+     "decision": false,
+     "main": "b2c3",
+     "mainSan": "bxc3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "2r3k1/p3bpp1/6b1/1B1p4/5Q2/2P4P/P2N1P2/2KR3R b - - 0 28",
+     "decision": true,
+     "main": "e7a3",
+     "mainSan": "Ba3#",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The bishop comes to a3 and checks along the open diagonal. Your other bishop covers b1 and c2, and White's own rook and knight block d1 and d2: this is Boden's mate."
+     }
+    }
+   ]
+  }
+ ]
 }

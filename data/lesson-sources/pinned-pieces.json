@@ -9,6 +9,70 @@
  "priorKnowledge": [
   "pins"
  ],
- "intro": "",
- "parts": []
+ "intro": "A pinned piece is stuck: if it moves, something more valuable behind it is lost. That makes it a good piece to attack. In this Lesson you attack a pinned piece with a pawn, aim more pieces at it than can defend it, and take things it seems to guard but cannot.",
+ "parts": [
+  {
+   "title": "A pawn attacks the pinned knight",
+   "fen": "rn1q1rk1/pbb2ppp/2p1pn2/1p6/4P2B/2NB1N2/PP3PPP/R2QK2R w KQ - 2 13",
+   "side": "white",
+   "keyIdea": "Attack a pinned piece with a pawn: it cannot step away without losing what stands behind it.",
+   "text": "From a game played on Lichess. You are White. Black's queen has just gone back to d8, so your bishop on h4 now pins the knight on f6 to the queen. Find the cheapest way to attack that knight.",
+   "url": "https://lichess.org/training/s9v1Z",
+   "line": "e5 Nbd7 exf6",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "e5",
+     "text": "The pawn attacks the knight on f6. The knight cannot move away, because your bishop would then take the queen on d8. Whatever Black does, a piece is lost."
+    },
+    {
+     "ply": 2,
+     "san": "exf6",
+     "text": "Take the knight. Black can take back on f6 with the other knight, but you have won a knight for a pawn."
+    }
+   ]
+  },
+  {
+   "title": "Two attackers against one defender",
+   "fen": "r2k1r2/pp1b3p/2p2p2/6p1/2B5/4N1P1/PPP2PP1/3R2K1 w - - 0 25",
+   "side": "white",
+   "keyIdea": "Pile up on a pinned piece: when it has more attackers than defenders, it falls.",
+   "text": "From a game played on Lichess. You are White. Your rook on d1 pins Black's bishop on d7 to the king on d8. Count the pieces that attack the bishop and the pieces that defend it.",
+   "url": "https://lichess.org/training/CAM9l",
+   "line": "Be6 Ke7 Bxd7",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Be6",
+     "text": "Your bishop joins the rook in attacking d7. Black's bishop cannot take yours or run away, because it is pinned to its king. Now two of your pieces attack it and only the king defends it."
+    },
+    {
+     "ply": 2,
+     "san": "Bxd7",
+     "text": "Take the bishop. The king on e7 cannot take back, because your rook on d1 guards d7. You have won a bishop for nothing."
+    }
+   ]
+  },
+  {
+   "title": "A pinned pawn guards nothing",
+   "fen": "4rrk1/p4p2/5Rpp/4p3/2B3bP/1P6/P3R3/6K1 w - - 0 26",
+   "side": "white",
+   "keyIdea": "A piece pinned to its king cannot capture, so whatever it seems to guard is free to take.",
+   "text": "From a game played on Lichess. You are White. Black's bishop has just taken a pawn on g4. Before you count the guards of a square, check whether any of them is pinned.",
+   "url": "https://lichess.org/training/m7Yrw",
+   "line": "Rxg6+ Kh7 Rxg4",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Rxg6+",
+     "text": "The rook takes the pawn on g6 with check. The pawn on f7 cannot take back, because your bishop on c4 pins it to the king on g8."
+    },
+    {
+     "ply": 2,
+     "san": "Rxg4",
+     "text": "The king has stepped to h7 and attacks your rook, but the rook moves on and takes the bishop on g4, which stood on the same file. You have won a pawn and a bishop."
+    }
+   ]
+  }
+ ]
 }

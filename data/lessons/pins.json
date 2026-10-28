@@ -14,29 +14,167 @@
   "pin"
  ],
  "intro": {
-  "text": "A pinned piece cannot move without exposing a more valuable piece behind it. In an absolute pin the piece behind is the king, so moving the pinned piece is illegal. In a relative pin the piece behind is a queen or rook: the pinned piece may move, but it costs material. Once you have pinned a piece, look for a way to attack it again: it cannot run away.",
-  "credit": {
-   "source": "Wikibooks, Chess/Tactics",
-   "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
-   "licence": "CC BY-SA 4.0",
-   "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-   "authors": "Wikibooks contributors (see the page history)"
-  }
+  "text": "A bishop, rook or queen pins an enemy piece when it attacks that piece and, behind it on the same line, a more valuable one. If the piece behind is the king, the pinned piece is not allowed to move at all; if it is the queen, moving away would give the queen up. Either way the pinned piece is stuck, so you can attack it again or simply take it."
  },
  "parts": [
   {
-   "title": "Attack the pinned piece",
+   "title": "Pin a piece to the king",
+   "fen": "8/1p6/2n3R1/pk6/8/2K5/8/8 b - - 3 61",
+   "side": "white",
+   "keyIdea": "A piece pinned to its king cannot move away, so if nothing guards it, you win it.",
+   "text": "From a game played on Lichess. Black's knight has just jumped to e5, attacking your rook on g6. The black king stands on b5, on the same rank as the knight. Can your rook use that?",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle F1Ury",
+    "url": "https://lichess.org/training/F1Ury",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "c6e5",
+    "g6g5",
+    "b5c6",
+    "g5e5"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "8/1p6/2n3R1/pk6/8/2K5/8/8 b - - 3 61",
+     "decision": false,
+     "main": "c6e5",
+     "mainSan": "Ne5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "8/1p6/6R1/pk2n3/8/2K5/8/8 w - - 4 62",
+     "decision": true,
+     "main": "g6g5",
+     "mainSan": "Rg5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The rook steps out of the knight's reach to g5, on the same rank as the knight and the king behind it. The knight is pinned: moving it would leave the king in check, which is not allowed. Nothing defends it, and Black cannot bring a defender in one move."
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "8/1p6/8/pk2n1R1/8/2K5/8/8 b - - 5 62",
+     "decision": false,
+     "main": "b5c6",
+     "mainSan": "Kc6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "8/1p6/2k5/p3n1R1/8/2K5/8/8 w - - 6 63",
+     "decision": true,
+     "main": "g5e5",
+     "mainSan": "Rxe5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Black's king has stepped off the rank, but it is too late: the knight is still attacked and still undefended. Take it."
+     }
+    }
+   ]
+  },
+  {
+   "title": "Pin the queen",
+   "fen": "7k/p5p1/6bp/3q4/3P4/4Q1P1/P2R2K1/8 w - - 3 34",
+   "side": "black",
+   "keyIdea": "Pin the queen to the king with a guarded piece, and the queen is lost for that piece.",
+   "text": "From a game played on Lichess. You are Black. White's queen has just moved to f3, offering a trade of queens. Look at White's queen and king: which line do they share?",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle pnMc2",
+    "url": "https://lichess.org/training/pnMc2",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "e3f3",
+    "g6e4",
+    "f3e4",
+    "d5e4"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "7k/p5p1/6bp/3q4/3P4/4Q1P1/P2R2K1/8 w - - 3 34",
+     "decision": false,
+     "main": "e3f3",
+     "mainSan": "Qf3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "7k/p5p1/6bp/3q4/3P4/5QP1/P2R2K1/8 b - - 4 34",
+     "decision": true,
+     "main": "g6e4",
+     "mainSan": "Be4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The bishop steps between the two queens on e4, where your queen guards it. It attacks White's queen, and the queen cannot move away, because the king on g2 stands behind it on the same diagonal. White will lose the queen for your bishop."
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "7k/p5p1/7p/3q4/3Pb3/5QP1/P2R2K1/8 w - - 5 35",
+     "decision": false,
+     "main": "f3e4",
+     "mainSan": "Qxe4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "7k/p5p1/7p/3q4/3PQ3/6P1/P2R2K1/8 b - - 0 35",
+     "decision": true,
+     "main": "d5e4",
+     "mainSan": "Qxe4+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "White took the bishop, so take the queen back, with check. You have traded a bishop for a queen."
+     }
+    }
+   ]
+  },
+  {
+   "title": "Attack the pinned piece again",
    "fen": "6k1/pp1n1rpp/2p5/8/2BP4/5N2/P4PPP/6K1 w - - 0 1",
    "side": "white",
-   "keyIdea": "",
-   "text": "Your bishop pins Black's rook on f7 to the king on g8. You could take the rook at once, but there is something stronger.",
-   "textCredit": {
-    "source": "Wikibooks, Chess/Tactics",
-    "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
-    "licence": "CC BY-SA 4.0",
-    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-    "authors": "Wikibooks contributors (see the page history)"
-   },
+   "keyIdea": "A pinned piece cannot run away, so attack it a second time and win it.",
+   "text": "A position from Wikibooks. Black's rook on f7 is stuck: if it moved, your bishop on c4 would give check to the king on g8. Taking the rook at once with the bishop lets the king take back. Can you win it for free?",
    "credit": {
     "source": "Wikibooks, Chess/Tactics",
     "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
@@ -45,7 +183,9 @@
     "authors": "Wikibooks contributors (see the page history)"
    },
    "mainLine": [
-    "f3g5"
+    "f3g5",
+    "g8f8",
+    "c4f7"
    ],
    "nodes": [
     {
@@ -60,56 +200,15 @@
       "club": []
      },
      "notes": {
-      "text": "Ng5! attacks the pinned rook a second time. It cannot move, and Black has no good way to defend it again, so Black will lose the rook. Taking on f7 at once only wins the exchange and leaves a close game. If you see a good move, look for a better one.",
-      "credit": {
-       "source": "Wikibooks, Chess/Tactics",
-       "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
-       "licence": "CC BY-SA 4.0",
-       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-       "authors": "Wikibooks contributors (see the page history)"
-      }
-     }
-    }
-   ]
-  },
-  {
-   "title": "A pin on the g-file",
-   "fen": "5r2/pp6/2b3p1/4k2p/3R3P/2PB2K1/P5P1/8 w - - 0 35",
-   "side": "black",
-   "keyIdea": "",
-   "text": "A position from a game played on Lichess. White has just taken on g6. Find the pin that wins the bishop back.",
-   "credit": {
-    "source": "Lichess puzzle database, puzzle dJDIa",
-    "url": "https://lichess.org/training/dJDIa",
-    "licence": "CC0 1.0",
-    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
-    "authors": "Lichess; the position is from a game played there"
-   },
-   "mainLine": [
-    "d3g6",
-    "f8g8",
-    "g3f2",
-    "g8g6"
-   ],
-   "nodes": [
-    {
-     "ply": 0,
-     "fen": "5r2/pp6/2b3p1/4k2p/3R3P/2PB2K1/P5P1/8 w - - 0 35",
-     "decision": false,
-     "main": "d3g6",
-     "mainSan": "Bxg6",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
+      "text": "The knight attacks the pinned rook a second time. The rook cannot move away, and the king is its only defender, so Black cannot hold it."
      }
     },
     {
      "ply": 1,
-     "fen": "5r2/pp6/2b3B1/4k2p/3R3P/2P3K1/P5P1/8 b - - 0 35",
-     "decision": true,
-     "main": "f8g8",
-     "mainSan": "Rg8",
+     "fen": "6k1/pp1n1rpp/2p5/6N1/2BP4/8/P4PPP/6K1 b - - 1 1",
+     "decision": false,
+     "main": "g8f8",
+     "mainSan": "Kf8",
      "popular": {
       "beginner": [],
       "casual": [],
@@ -118,96 +217,17 @@
     },
     {
      "ply": 2,
-     "fen": "6r1/pp6/2b3B1/4k2p/3R3P/2P3K1/P5P1/8 w - - 1 36",
-     "decision": false,
-     "main": "g3f2",
-     "mainSan": "Kf2",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 3,
-     "fen": "6r1/pp6/2b3B1/4k2p/3R3P/2P5/P4KP1/8 b - - 2 36",
+     "fen": "5k2/pp1n1rpp/2p5/6N1/2BP4/8/P4PPP/6K1 w - - 2 2",
      "decision": true,
-     "main": "g8g6",
-     "mainSan": "Rxg6",
+     "main": "c4f7",
+     "mainSan": "Bxf7",
      "popular": {
       "beginner": [],
       "casual": [],
       "club": []
-     }
-    }
-   ]
-  },
-  {
-   "title": "A pinned pawn",
-   "fen": "2rqkb1r/pp2pp1p/2n2np1/1N1p4/8/3B2QP/PPP2PP1/R1B1R1K1 b k - 3 12",
-   "side": "white",
-   "keyIdea": "",
-   "text": "A position from a game played on Lichess. Black has just attacked your knight with ...a6. Look at what is pinned on the e-file.",
-   "credit": {
-    "source": "Lichess puzzle database, puzzle faVZw",
-    "url": "https://lichess.org/training/faVZw",
-    "licence": "CC0 1.0",
-    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
-    "authors": "Lichess; the position is from a game played there"
-   },
-   "mainLine": [
-    "a7a6",
-    "b5d6",
-    "d8d6",
-    "g3d6"
-   ],
-   "nodes": [
-    {
-     "ply": 0,
-     "fen": "2rqkb1r/pp2pp1p/2n2np1/1N1p4/8/3B2QP/PPP2PP1/R1B1R1K1 b k - 3 12",
-     "decision": false,
-     "main": "a7a6",
-     "mainSan": "a6",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 1,
-     "fen": "2rqkb1r/1p2pp1p/p1n2np1/1N1p4/8/3B2QP/PPP2PP1/R1B1R1K1 w k - 0 13",
-     "decision": true,
-     "main": "b5d6",
-     "mainSan": "Nd6+",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 2,
-     "fen": "2rqkb1r/1p2pp1p/p1nN1np1/3p4/8/3B2QP/PPP2PP1/R1B1R1K1 b k - 1 13",
-     "decision": false,
-     "main": "d8d6",
-     "mainSan": "Qxd6",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 3,
-     "fen": "2r1kb1r/1p2pp1p/p1nq1np1/3p4/8/3B2QP/PPP2PP1/R1B1R1K1 w k - 0 14",
-     "decision": true,
-     "main": "g3d6",
-     "mainSan": "Qxd6",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
+     },
+     "notes": {
+      "text": "The king moved to f8 to guard the rook, but the rook is attacked twice and guarded once. Take it with the bishop: the king cannot take back, because your knight guards f7."
      }
     }
    ]

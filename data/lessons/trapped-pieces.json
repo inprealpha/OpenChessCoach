@@ -14,7 +14,255 @@
   "trappedPiece"
  ],
  "intro": {
-  "text": ""
+  "text": "A piece is trapped when it is attacked and every square it could move to is unsafe. You do not need a check or a fork to win it: take away its squares first, then attack it. Pieces on the edge of the board, and queens that wander far from home to grab pawns, are caught most often. So before you send one of your own pieces somewhere, check that it can get back out."
  },
- "parts": []
+ "parts": [
+  {
+   "title": "The king traps a knight",
+   "fen": "8/p2k4/2p3pp/3p1p2/3P3P/P4P1n/1P2N3/5K2 w - - 0 34",
+   "side": "white",
+   "keyIdea": "A knight on the edge of the board has few squares. Cover them all, then attack it.",
+   "text": "From a game played on Lichess. White to move. Black's knight sits deep in your camp on h3. Before you chase it, count the squares it could run to.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle yahGO",
+    "url": "https://lichess.org/training/yahGO",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "f1g2",
+    "h3g5",
+    "h4g5"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "8/p2k4/2p3pp/3p1p2/3P3P/P4P1n/1P2N3/5K2 w - - 0 34",
+     "decision": true,
+     "main": "f1g2",
+     "mainSan": "Kg2",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The king attacks the knight and covers g1 and f2. Your knight on e2 covers f4, and the pawn on h4 covers g5. The knight has no safe square left."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "8/p2k4/2p3pp/3p1p2/3P3P/P4P1n/1P2N1K1/8 b - - 1 34",
+     "decision": false,
+     "main": "h3g5",
+     "mainSan": "Ng5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "8/p2k4/2p3pp/3p1pn1/3P3P/P4P2/1P2N1K1/8 w - - 2 35",
+     "decision": true,
+     "main": "h4g5",
+     "mainSan": "hxg5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Black gives the knight up for your h-pawn rather than lose it for nothing. Take it: you have won a knight for a pawn."
+     }
+    }
+   ]
+  },
+  {
+   "title": "Pawns hunt a bishop",
+   "fen": "8/pppn1kpp/5pb1/2p5/2P2P1N/1P5P/P2N2P1/4K3 w - - 3 27",
+   "side": "white",
+   "keyIdea": "Pawns make good hunters: each push takes squares from a piece, and they cost little if the piece takes one.",
+   "text": "From a game played on Lichess. White to move, a pawn down. Black's bishop on g6 has very few squares, because its own king and pawns are in the way. Your pawns can take the rest.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle 7mll4",
+    "url": "https://lichess.org/training/7mll4",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "f4f5",
+    "g6h5",
+    "g2g4",
+    "h5g4",
+    "h3g4"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "8/pppn1kpp/5pb1/2p5/2P2P1N/1P5P/P2N2P1/4K3 w - - 3 27",
+     "decision": true,
+     "main": "f4f5",
+     "mainSan": "f5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The pawn attacks the bishop. It cannot take on f5, which your knight on h4 guards, and its own king blocks f7. So it has to go to h5."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "8/pppn1kpp/5pb1/2p2P2/2P4N/1P5P/P2N2P1/4K3 b - - 0 27",
+     "decision": false,
+     "main": "g6h5",
+     "mainSan": "Bh5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "8/pppn1kpp/5p2/2p2P1b/2P4N/1P5P/P2N2P1/4K3 w - - 1 28",
+     "decision": true,
+     "main": "g2g4",
+     "mainSan": "g4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The bishop on h5 is attacked again. Going back to g6 loses it to the f5 pawn or the knight, and Black's king still blocks f7. The bishop is trapped."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "8/pppn1kpp/5p2/2p2P1b/2P3PN/1P5P/P2N4/4K3 b - - 0 28",
+     "decision": false,
+     "main": "h5g4",
+     "mainSan": "Bxg4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "8/pppn1kpp/5p2/2p2P2/2P3bN/1P5P/P2N4/4K3 w - - 0 29",
+     "decision": true,
+     "main": "h3g4",
+     "mainSan": "hxg4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Black takes a pawn with the bishop so as not to lose it for nothing. Take back: you have won a bishop for a pawn."
+     }
+    }
+   ]
+  },
+  {
+   "title": "The greedy queen",
+   "fen": "r4rk1/3n1ppp/3p1n2/p7/3NP3/3PPP2/q1PQ3P/1R3RK1 w - - 0 17",
+   "side": "white",
+   "keyIdea": "A queen that grabs a pawn far from home can run out of squares. Punish the grab by attacking it where it cannot hide.",
+   "text": "From a game played on Lichess. Black's queen has just taken your pawn on a2. White to move. Look at every square that queen could escape to.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle FIStC",
+    "url": "https://lichess.org/training/FIStC",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "b1a1",
+    "a2b2",
+    "f1b1",
+    "b2b1",
+    "a1b1"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "r4rk1/3n1ppp/3p1n2/p7/3NP3/3PPP2/q1PQ3P/1R3RK1 w - - 0 17",
+     "decision": true,
+     "main": "b1a1",
+     "mainSan": "Ra1",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The rook attacks the queen. Its only safe square is b2. Your rook covers the a-file and the other rook covers b1, while the diagonal towards e6 is covered square by square: b3 by the c-pawn, c4 and d5 by your other pawns, e6 by the knight."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "r4rk1/3n1ppp/3p1n2/p7/3NP3/3PPP2/q1PQ3P/R4RK1 b - - 1 17",
+     "decision": false,
+     "main": "a2b2",
+     "mainSan": "Qb2",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "r4rk1/3n1ppp/3p1n2/p7/3NP3/3PPP2/1qPQ3P/R4RK1 w - - 2 18",
+     "decision": true,
+     "main": "f1b1",
+     "mainSan": "Rfb1",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The second rook attacks the queen again. Now every square the queen can reach is covered by your rooks, your queen on d2 or your pawns. Black can only give the queen up for a rook."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "r4rk1/3n1ppp/3p1n2/p7/3NP3/3PPP2/1qPQ3P/RR4K1 b - - 3 18",
+     "decision": false,
+     "main": "b2b1",
+     "mainSan": "Qxb1+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "r4rk1/3n1ppp/3p1n2/p7/3NP3/3PPP2/2PQ3P/Rq4K1 w - - 0 19",
+     "decision": true,
+     "main": "a1b1",
+     "mainSan": "Rxb1",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Take back. For one pawn on a2, Black has lost the queen for a rook."
+     }
+    }
+   ]
+  }
+ ]
 }

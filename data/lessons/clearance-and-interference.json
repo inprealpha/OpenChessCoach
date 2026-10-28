@@ -16,7 +16,260 @@
   "interference"
  ],
  "intro": {
-  "text": ""
+  "text": "Sometimes your own piece is in the way: it stands on a square or a line that another of your pieces needs. Clearance means moving it away, best of all with a check or a threat, so the other piece can use what it left behind. Interference is the opposite trick: you put a piece on the line between an enemy piece and the piece or square it guards, so the guard is cut off."
  },
- "parts": []
+ "parts": [
+  {
+   "title": "Clearing a square for the queen",
+   "fen": "2r2r1k/p1q1ppR1/5n1p/2p5/2BP2QP/2P5/P2K1P2/6R1 w - - 1 24",
+   "side": "white",
+   "keyIdea": "When your own piece sits on the square where another piece could give mate, move it away with check.",
+   "text": "From a game played on Lichess. White to move. Your queen and your rook on g1 both point up the g-file at g7, but your other rook already sits on g7.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle qIzvt",
+    "url": "https://lichess.org/training/qIzvt",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "g7h7",
+    "f6h7",
+    "g4g7"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "2r2r1k/p1q1ppR1/5n1p/2p5/2BP2QP/2P5/P2K1P2/6R1 w - - 1 24",
+     "decision": true,
+     "main": "g7h7",
+     "mainSan": "Rh7+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The rook leaves g7 with check, so the square is free for your queen, and the rook on g1 guards it. Your queen now covers g8 too, so Black has to take the rook on h7, with the knight or the king."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "2r2r1k/p1q1pp1R/5n1p/2p5/2BP2QP/2P5/P2K1P2/6R1 b - - 2 24",
+     "decision": false,
+     "main": "f6h7",
+     "mainSan": "Nxh7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "2r2r1k/p1q1pp1n/7p/2p5/2BP2QP/2P5/P2K1P2/6R1 w - - 0 25",
+     "decision": true,
+     "main": "g4g7",
+     "mainSan": "Qg7#",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Mate. The queen on g7 is guarded by the rook on g1, and the king has no square left."
+     }
+    }
+   ]
+  },
+  {
+   "title": "Clearing a line with check",
+   "fen": "6k1/p2r1qpp/1p6/4Q3/8/5P1P/P5P1/4R2K w - - 1 30",
+   "side": "white",
+   "keyIdea": "Move the front piece off a line with check, and the piece behind it gets the open line before the opponent can react.",
+   "text": "From a game played on Lichess. White to move, with equal material. Your rook on e1 would like the e-file, but your own queen on e5 stands in front of it.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle 7czFj",
+    "url": "https://lichess.org/training/7czFj",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "e5b8",
+    "f7f8",
+    "e1e8"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "6k1/p2r1qpp/1p6/4Q3/8/5P1P/P5P1/4R2K w - - 1 30",
+     "decision": true,
+     "main": "e5b8",
+     "mainSan": "Qb8+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The queen leaves the e-file with check. Black's king has no square, so Black must put a piece in the way, and the queen on f8 is the best block."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "1Q4k1/p2r1qpp/1p6/8/8/5P1P/P5P1/4R2K b - - 2 30",
+     "decision": false,
+     "main": "f7f8",
+     "mainSan": "Qf8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "1Q3qk1/p2r2pp/1p6/8/8/5P1P/P5P1/4R2K w - - 3 31",
+     "decision": true,
+     "main": "e1e8",
+     "mainSan": "Re8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Now the rook uses the open file. It pins Black's queen on f8 to the king, and your queen on b8 guards the rook. Black's queen is lost for a rook."
+     }
+    }
+   ]
+  },
+  {
+   "title": "A bishop cuts the guard",
+   "fen": "3rr1k1/3b1ppp/3q1b2/1p2p3/1n6/1P2BN2/3N1PPP/2RQR1K1 w - - 0 27",
+   "side": "white",
+   "keyIdea": "Put a piece between a defender and what it guards. If that piece also makes a threat, the defender has no time to fix it.",
+   "text": "From a game played on Lichess. White to move, a pawn down. Black's knight on b4 has one guard: the queen on d6, along the diagonal.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle 807ML",
+    "url": "https://lichess.org/training/807ML",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "e3c5",
+    "d6b8",
+    "c5b4"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "3rr1k1/3b1ppp/3q1b2/1p2p3/1n6/1P2BN2/3N1PPP/2RQR1K1 w - - 0 27",
+     "decision": true,
+     "main": "e3c5",
+     "mainSan": "Bc5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The bishop steps onto the diagonal between Black's queen and the knight, and attacks the queen. Your rook on c1 guards the bishop. The queen must move, and from no safe square can it still guard b4."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "3rr1k1/3b1ppp/3q1b2/1pB1p3/1n6/1P3N2/3N1PPP/2RQR1K1 b - - 1 27",
+     "decision": false,
+     "main": "d6b8",
+     "mainSan": "Qb8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "1q1rr1k1/3b1ppp/5b2/1pB1p3/1n6/1P3N2/3N1PPP/2RQR1K1 w - - 2 28",
+     "decision": true,
+     "main": "c5b4",
+     "mainSan": "Bxb4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The knight has lost its guard, so take it. You have won a knight."
+     }
+    }
+   ]
+  },
+  {
+   "title": "A pawn cuts the guard",
+   "fen": "r2r2k1/p3qpbp/6p1/2nPPp2/5P2/3PB3/1R2Q1PP/1R4K1 w - - 5 26",
+   "side": "white",
+   "keyIdea": "Even a pawn can block a defending line, and a pawn that attacks a bigger piece forces it to move at once.",
+   "text": "From a game played on Lichess. White to move, two pawns down. Your bishop on e3 attacks the knight on c5, but Black's queen on e7 guards it along the diagonal.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle mPefF",
+    "url": "https://lichess.org/training/mPefF",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "d5d6",
+    "e7e8",
+    "e3c5"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "r2r2k1/p3qpbp/6p1/2nPPp2/5P2/3PB3/1R2Q1PP/1R4K1 w - - 5 26",
+     "decision": true,
+     "main": "d5d6",
+     "mainSan": "d6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The pawn steps onto the diagonal between the queen and the knight, and attacks the queen. The pawn on e5 guards it. The queen must move, and from no safe square can it still guard the knight on c5."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "r2r2k1/p3qpbp/3P2p1/2n1Pp2/5P2/3PB3/1R2Q1PP/1R4K1 b - - 0 26",
+     "decision": false,
+     "main": "e7e8",
+     "mainSan": "Qe8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "r2rq1k1/p4pbp/3P2p1/2n1Pp2/5P2/3PB3/1R2Q1PP/1R4K1 w - - 1 27",
+     "decision": true,
+     "main": "e3c5",
+     "mainSan": "Bxc5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Take the knight. Nothing guards it any more, and you have won back more than the two pawns."
+     }
+    }
+   ]
+  }
+ ]
 }

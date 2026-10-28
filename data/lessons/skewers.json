@@ -14,138 +14,49 @@
   "skewer"
  ],
  "intro": {
-  "text": "A skewer is a pin turned around. In a pin the less valuable piece stands in front of the more valuable one; in a skewer the more valuable piece is attacked first, and when it moves away the piece behind it is lost. Skewers through the king are the strongest, because the king must move.",
-  "credit": {
-   "source": "Wikibooks, Chess/Tactics",
-   "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
-   "licence": "CC BY-SA 4.0",
-   "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-   "authors": "Wikibooks contributors (see the page history)"
-  }
+  "text": "A skewer is an attack on a valuable piece that has a less valuable piece standing behind it on the same line. When the front piece gets out of the way, you take the one behind. It is the reverse of a pin, where the piece in front is the less valuable one. Rooks, bishops and queens can all skewer, and the strongest skewers go through the king, which has to get out of check."
  },
  "parts": [
   {
    "title": "King in front of the queen",
-   "fen": "3q4/pppk1ppp/8/8/8/8/PPP2PPP/R4RK1 w - - 0 1",
+   "fen": "8/3k3q/3r4/2Q5/8/8/8/4K3 w - - 2 67",
    "side": "white",
-   "keyIdea": "",
-   "text": "Black's king has stepped onto d7, right in front of the queen on d8. How do you punish it?",
-   "textCredit": {
-    "source": "Wikibooks, Chess/Tactics",
-    "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
-    "licence": "CC BY-SA 4.0",
-    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-    "authors": "Wikibooks contributors (see the page history)"
-   },
+   "keyIdea": "Check a king that has a valuable piece behind it on the same line; when the king moves, take that piece.",
+   "text": "From a game played on Lichess. Black's king has just stepped to d7. Look along the seventh rank: what stands behind the king?",
    "credit": {
-    "source": "Wikibooks, Chess/Tactics",
-    "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
-    "licence": "CC BY-SA 4.0",
-    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-    "authors": "Wikibooks contributors (see the page history)"
-   },
-   "mainLine": [
-    "a1d1",
-    "d7c8",
-    "d1d8"
-   ],
-   "nodes": [
-    {
-     "ply": 0,
-     "fen": "3q4/pppk1ppp/8/8/8/8/PPP2PPP/R4RK1 w - - 0 1",
-     "decision": true,
-     "main": "a1d1",
-     "mainSan": "Rad1+",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     },
-     "notes": {
-      "text": "Either rook to d1 skewers king and queen. Black cannot block the check, so the king must move.",
-      "credit": {
-       "source": "Wikibooks, Chess/Tactics",
-       "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
-       "licence": "CC BY-SA 4.0",
-       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-       "authors": "Wikibooks contributors (see the page history)"
-      }
-     }
-    },
-    {
-     "ply": 1,
-     "fen": "3q4/pppk1ppp/8/8/8/8/PPP2PPP/3R1RK1 b - - 1 1",
-     "decision": false,
-     "main": "d7c8",
-     "mainSan": "Kc8",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 2,
-     "fen": "2kq4/ppp2ppp/8/8/8/8/PPP2PPP/3R1RK1 w - - 2 2",
-     "decision": true,
-     "main": "d1d8",
-     "mainSan": "Rxd8+",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     },
-     "notes": {
-      "text": "The king has moved out of the way and the queen behind it is lost.",
-      "credit": {
-       "source": "Wikibooks, Chess/Tactics",
-       "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
-       "licence": "CC BY-SA 4.0",
-       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-       "authors": "Wikibooks contributors (see the page history)"
-      }
-     }
-    }
-   ]
-  },
-  {
-   "title": "A queen skewer",
-   "fen": "8/1p5p/p2Q2p1/4n3/8/P1Pk3P/6PK/4qN2 b - - 4 35",
-   "side": "white",
-   "keyIdea": "",
-   "text": "A position from a game played on Lichess. Black's king has just taken on c3. Find the check that wins Black's queen.",
-   "credit": {
-    "source": "Lichess puzzle database, puzzle Q9GCn",
-    "url": "https://lichess.org/training/Q9GCn",
+    "source": "Lichess puzzle database, puzzle 5dvpM",
+    "url": "https://lichess.org/training/5dvpM",
     "licence": "CC0 1.0",
     "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
     "authors": "Lichess; the position is from a game played there"
    },
    "mainLine": [
-    "d3c3",
-    "d6b4",
-    "c3d3",
-    "b4e1"
+    "c5a7",
+    "d7c6",
+    "a7h7"
    ],
    "nodes": [
     {
      "ply": 0,
-     "fen": "8/1p5p/p2Q2p1/4n3/8/P1Pk3P/6PK/4qN2 b - - 4 35",
-     "decision": false,
-     "main": "d3c3",
-     "mainSan": "Kxc3",
+     "fen": "8/3k3q/3r4/2Q5/8/8/8/4K3 w - - 2 67",
+     "decision": true,
+     "main": "c5a7",
+     "mainSan": "Qa7+",
      "popular": {
       "beginner": [],
       "casual": [],
       "club": []
+     },
+     "notes": {
+      "text": "Your queen checks along the seventh rank, and Black's queen on h7 stands directly behind the king. Black has nothing that can step in between, so the king has to leave the rank."
      }
     },
     {
      "ply": 1,
-     "fen": "8/1p5p/p2Q2p1/4n3/8/P1k4P/6PK/4qN2 w - - 0 36",
-     "decision": true,
-     "main": "d6b4",
-     "mainSan": "Qb4+",
+     "fen": "8/Q2k3q/3r4/8/8/8/8/4K3 b - - 3 67",
+     "decision": false,
+     "main": "d7c6",
+     "mainSan": "Kc6",
      "popular": {
       "beginner": [],
       "casual": [],
@@ -154,10 +65,61 @@
     },
     {
      "ply": 2,
-     "fen": "8/1p5p/p5p1/4n3/1Q6/P1k4P/6PK/4qN2 b - - 1 36",
+     "fen": "8/Q6q/2kr4/8/8/8/8/4K3 w - - 4 68",
+     "decision": true,
+     "main": "a7h7",
+     "mainSan": "Qxh7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "With the king gone from the rank, your queen takes Black's queen. You are left with a queen against a rook."
+     }
+    }
+   ]
+  },
+  {
+   "title": "A bishop skewer",
+   "fen": "1b6/8/P4pp1/4k3/6P1/5K2/3B4/8 w - - 3 43",
+   "side": "white",
+   "keyIdea": "A bishop skewers along a diagonal: check the king, and win the piece that stands behind it.",
+   "text": "From a game played on Lichess. Black's king has just come to e5, on the same diagonal as Black's bishop on b8. That bishop is also the piece that holds back your pawn on a6.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle sLBYX",
+    "url": "https://lichess.org/training/sLBYX",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "d2f4",
+    "e5d5",
+    "f4b8"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "1b6/8/P4pp1/4k3/6P1/5K2/3B4/8 w - - 3 43",
+     "decision": true,
+     "main": "d2f4",
+     "mainSan": "Bf4+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Your bishop checks from f4, with Black's bishop on b8 behind the king on the same diagonal. The king cannot take your bishop, because your king on f3 protects it, so it has to step aside."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "1b6/8/P4pp1/4k3/5BP1/5K2/8/8 b - - 4 43",
      "decision": false,
-     "main": "c3d3",
-     "mainSan": "Kd3",
+     "main": "e5d5",
+     "mainSan": "Kd5",
      "popular": {
       "beginner": [],
       "casual": [],
@@ -165,57 +127,62 @@
      }
     },
     {
-     "ply": 3,
-     "fen": "8/1p5p/p5p1/4n3/1Q6/P2k3P/6PK/4qN2 w - - 2 37",
+     "ply": 2,
+     "fen": "1b6/8/P4pp1/3k4/5BP1/5K2/8/8 w - - 5 44",
      "decision": true,
-     "main": "b4e1",
-     "mainSan": "Qxe1",
+     "main": "f4b8",
+     "mainSan": "Bxb8",
      "popular": {
       "beginner": [],
       "casual": [],
       "club": []
+     },
+     "notes": {
+      "text": "Take the bishop. You are now a whole piece ahead, and the bishop that held back your a-pawn is gone."
      }
     }
    ]
   },
   {
-   "title": "A rook skewer",
-   "fen": "8/5p2/1b2p1k1/1P4p1/N5P1/6r1/8/1R2K3 w - - 2 48",
+   "title": "Queen in front of a rook",
+   "fen": "3q1rk1/5ppp/p7/1rb5/5B2/2Q5/P1P3PP/R4R1K b - - 1 23",
    "side": "black",
-   "keyIdea": "",
-   "text": "A position from a game played on Lichess. White has just taken your bishop. Find the rook check that wins material back.",
+   "keyIdea": "A skewer does not need a check: attack the queen, and when it moves, take the rook behind it.",
+   "text": "From a game played on Lichess. White's queen has just moved to c3. Look at what stands behind it on the diagonal towards a1.",
    "credit": {
-    "source": "Lichess puzzle database, puzzle AOHMD",
-    "url": "https://lichess.org/training/AOHMD",
+    "source": "Lichess puzzle database, puzzle LQKHl",
+    "url": "https://lichess.org/training/LQKHl",
     "licence": "CC0 1.0",
     "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
     "authors": "Lichess; the position is from a game played there"
    },
    "mainLine": [
-    "a4b6",
-    "g3g1",
-    "e1d2",
-    "g1b1"
+    "c5d4",
+    "c3g3",
+    "d4a1"
    ],
    "nodes": [
     {
      "ply": 0,
-     "fen": "8/5p2/1b2p1k1/1P4p1/N5P1/6r1/8/1R2K3 w - - 2 48",
-     "decision": false,
-     "main": "a4b6",
-     "mainSan": "Nxb6",
+     "fen": "3q1rk1/5ppp/p7/1rb5/5B2/2Q5/P1P3PP/R4R1K b - - 1 23",
+     "decision": true,
+     "main": "c5d4",
+     "mainSan": "Bd4",
      "popular": {
       "beginner": [],
       "casual": [],
       "club": []
+     },
+     "notes": {
+      "text": "Your bishop attacks the queen, and White's rook on a1 stands behind it on the same diagonal. Taking the bishop would cost White the queen, because your queen on d8 protects it, so the queen steps away."
      }
     },
     {
      "ply": 1,
-     "fen": "8/5p2/1N2p1k1/1P4p1/6P1/6r1/8/1R2K3 b - - 0 48",
-     "decision": true,
-     "main": "g3g1",
-     "mainSan": "Rg1+",
+     "fen": "3q1rk1/5ppp/p7/1r6/3b1B2/2Q5/P1P3PP/R4R1K w - - 2 24",
+     "decision": false,
+     "main": "c3g3",
+     "mainSan": "Qg3",
      "popular": {
       "beginner": [],
       "casual": [],
@@ -224,26 +191,17 @@
     },
     {
      "ply": 2,
-     "fen": "8/5p2/1N2p1k1/1P4p1/6P1/8/8/1R2K1r1 w - - 1 49",
-     "decision": false,
-     "main": "e1d2",
-     "mainSan": "Kd2",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 3,
-     "fen": "8/5p2/1N2p1k1/1P4p1/6P1/8/3K4/1R4r1 b - - 2 49",
+     "fen": "3q1rk1/5ppp/p7/1r6/3b1B2/6Q1/P1P3PP/R4R1K b - - 3 24",
      "decision": true,
-     "main": "g1b1",
-     "mainSan": "Rxb1",
+     "main": "d4a1",
+     "mainSan": "Bxa1",
      "popular": {
       "beginner": [],
       "casual": [],
       "club": []
+     },
+     "notes": {
+      "text": "The queen has gone, so take the rook. White can take back with the other rook, but you have won a rook for a bishop."
      }
     }
    ]

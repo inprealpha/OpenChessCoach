@@ -6,12 +6,77 @@
  "level": "beginner",
  "side": "white",
  "puzzleThemes": [
+  "discoveredCheck",
   "doubleCheck"
  ],
  "goal": "You can uncover a check with one piece while the other piece wins material, and use a double check, which the king can only answer by moving.",
  "priorKnowledge": [
   "discovered-attacks"
  ],
- "intro": "",
- "parts": []
+ "intro": "A discovered check is a discovered attack in which the piece behind gives check. Your opponent has to answer the check, so the piece that moved is free to attack whatever it likes, even the queen. If the piece that moves also gives check, the king is attacked by two pieces at once. That is a double check, and since no single move can block or capture two attackers, the king itself has to move.",
+ "parts": [
+  {
+   "title": "The rook moves, the queen checks",
+   "fen": "8/5pk1/4q1r1/1p6/3RP3/2Q2PP1/2P1K1Br/8 w - - 0 46",
+   "side": "white",
+   "keyIdea": "Move the front piece so that the piece behind gives check, and use the free move to attack something valuable.",
+   "text": "From a game played on Lichess. Black's rook has just taken your pawn on h2. Your queen on c3 aims at Black's king on g7, but your rook on d4 stands on that diagonal.",
+   "url": "https://lichess.org/training/g4tHm",
+   "line": "Rd6+ Kh7 Rxe6",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Rd6+",
+     "text": "Your rook steps off the diagonal, and your queen now gives check. From d6 the rook attacks Black's queen on e6. Whatever Black does about the check, the queen is lost."
+    },
+    {
+     "ply": 2,
+     "san": "Rxe6",
+     "text": "The king has stepped away, so your rook takes the queen. Black can take back, but winning a queen for a rook is a big gain."
+    }
+   ]
+  },
+  {
+   "title": "Double check",
+   "fen": "r1b2rk1/pp3pp1/1q5p/3PP3/2BnN3/8/PP1Q2PP/R4RK1 b - - 0 15",
+   "side": "black",
+   "keyIdea": "A double check can only be answered by a king move, so the piece that gave it is free to take what it attacks.",
+   "text": "From a game played on Lichess. White has just taken your pawn on e5. Your queen on b6 aims at White's king on g1, but your knight on d4 stands on that diagonal.",
+   "url": "https://lichess.org/training/fHIQf",
+   "line": "Nf3+ Kh1 Nxd2",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Nf3+",
+     "text": "The knight checks from f3, and your queen on b6 checks along the diagonal it has opened: a double check. Taking the knight or blocking the queen would still leave one check, so the king has to move, and h1 is its only square."
+    },
+    {
+     "ply": 2,
+     "san": "Nxd2",
+     "text": "From f3 the knight was also attacking White's queen on d2. Take it. White can take back with the knight on e4, but you have won a queen for a knight."
+    }
+   ]
+  },
+  {
+   "title": "Double check and mate",
+   "fen": "8/5ppk/1r5p/3Pb3/4N1P1/3Q3P/5P1q/5K2 w - - 0 37",
+   "side": "white",
+   "keyIdea": "A double check forces the king to move, even when one of the checking pieces could normally be captured.",
+   "text": "From a game played on Lichess. Black's rook has just taken your rook on b6, and Black's queen is close to your king. Your queen on d3 and your knight on e4 stand on the same diagonal as Black's king on h7.",
+   "url": "https://lichess.org/training/qD0cD",
+   "line": "Nf6+ Kh8 Qh7#",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Nf6+",
+     "text": "Double check: the knight checks from f6, and your queen checks along the diagonal it has opened. The pawn on g7 could take a lone knight, but here the queen's check would remain, so that is not allowed. The king must move, and h8 is its only square."
+    },
+    {
+     "ply": 2,
+     "san": "Qh7#",
+     "text": "Your queen lands on h7, protected by the knight on f6. The king on h8 has no square left: mate."
+    }
+   ]
+  }
+ ]
 }

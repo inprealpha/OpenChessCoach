@@ -13,6 +13,101 @@
   "decoy",
   "clearance-and-interference"
  ],
- "intro": "",
- "parts": []
+ "intro": "Many winning moves are two Themes in a row. The first move forces the opponent's hand, often with a sacrifice: it lures a piece onto a bad square (a decoy), pulls a defender away (a deflection), or moves your own piece out of the way with check (a clearance). The second move is a Theme you already know: a fork, a pin or a mate. When a fork or a mate is almost there, ask which forcing move would make it work.",
+ "parts": [
+  {
+   "title": "Decoy, then fork",
+   "fen": "8/2p4R/1pPq2k1/6p1/3N1p2/4P1P1/5P1P/6K1 w - - 1 43",
+   "side": "white",
+   "keyIdea": "A sacrifice can drag the king onto a square where a knight fork is waiting.",
+   "text": "From a game between two masters, played on Lichess. White to move, with equal material. Black's king on g6 and queen on d6 stand on the same rank, and your knight is close by.",
+   "url": "https://lichess.org/training/54H4F",
+   "line": "Rh6+ Kxh6 Nf5+ Kg6 Nxd6",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Rh6+",
+     "text": "Step one, the decoy: a rook sacrifice with check. If the king steps to f7 or g7, your rook takes the queen along the sixth rank. So Black takes the rook, and the king lands on h6."
+    },
+    {
+     "ply": 2,
+     "san": "Nf5+",
+     "text": "Step two, the fork: the knight checks the king on h6 and attacks the queen on d6. The king must move, and the queen is lost."
+    },
+    {
+     "ply": 4,
+     "san": "Nxd6",
+     "text": "Take the queen. You gave a rook and won the queen: neither move works without the other."
+    }
+   ]
+  },
+  {
+   "title": "Decoy, then pin",
+   "fen": "r2r2k1/pq2bppp/1p2p3/4P3/3B1P2/1P4P1/P1PQ3P/3R1RK1 b - - 0 18",
+   "side": "black",
+   "keyIdea": "Give material to lure a piece onto a line with its own king, then pin it there.",
+   "text": "From a game played on Lichess. You are Black, a pawn down. Look at the diagonal that runs from c5 through d4 to White's king on g1.",
+   "url": "https://lichess.org/training/8VTTY",
+   "line": "Rxd4 Qxd4 Bc5 Qxc5 bxc5",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Rxd4",
+     "text": "Step one, the decoy: give your rook for the bishop. White's best is to take back with the queen, and that puts the queen on d4, on the same diagonal as White's king."
+    },
+    {
+     "ply": 2,
+     "san": "Bc5",
+     "text": "Step two, the pin: the bishop attacks the queen, which cannot leave the diagonal because its king is behind it. It can take the bishop, step along the diagonal and be taken, or stay and be taken. The queen is lost."
+    },
+    {
+     "ply": 4,
+     "san": "bxc5",
+     "text": "White gave the queen for the bishop. You gave a rook and a bishop, and now have a queen against a rook."
+    }
+   ]
+  },
+  {
+   "title": "Deflection, then mate",
+   "fen": "4kb1B/1bq2p1p/4pQ2/2p1N3/1n2P3/1p6/2r2PPP/3R2K1 w - - 6 25",
+   "side": "white",
+   "keyIdea": "Force the only real defender of a square away with a check, and the square is open for mate.",
+   "text": "From a game played on Lichess. White to move, a piece and a pawn down. Your queen and knight both aim at f7. Count what guards it.",
+   "url": "https://lichess.org/training/Lnh28",
+   "line": "Rd8+ Qxd8 Qxf7#",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Rd8+",
+     "text": "Step one, the deflection: a rook sacrifice with check. The king cannot take, because your queen guards d8, so Black's queen must take. It leaves the seventh rank, where it guarded f7."
+    },
+    {
+     "ply": 2,
+     "san": "Qxf7#",
+     "text": "Step two, the mate: the knight on e5 guards your queen, Black's own queen and bishop block d8 and f8, and your queen covers the rest."
+    }
+   ]
+  },
+  {
+   "title": "Clearance, then mate",
+   "fen": "2r2Q2/1b5k/5nNP/1p1p4/6P1/q4PN1/npPQ4/1K1R3R b - - 0 27",
+   "side": "black",
+   "keyIdea": "Move a piece out of your queen's way with check, and the line it opens can lead to mate.",
+   "text": "From a game played on Lichess. You are Black and far behind: White has just made a second queen. But White's king on b1 is short of squares, and your queen, knight and b2 pawn are right beside it.",
+   "url": "https://lichess.org/training/ZtntP",
+   "line": "Nc3+ Qxc3 Qa1#",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Nc3+",
+     "text": "Step one, the clearance: the knight leaves a2 with check, so the a-file opens for your queen. White's king has no square to go to, so the queen on d2 must take the knight."
+    },
+    {
+     "ply": 2,
+     "san": "Qa1#",
+     "text": "Step two, the mate: your queen lands on a1, guarded by the b2 pawn, and the king has nowhere to go. Two queens could not save White."
+    }
+   ]
+  }
+ ]
 }

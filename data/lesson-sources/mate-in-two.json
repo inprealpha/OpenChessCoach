@@ -13,6 +13,70 @@
   "mate-in-one",
   "checks-captures-threats"
  ],
- "intro": "",
- "parts": []
+ "intro": "In a mate in two, your first move prepares the mate and your second move gives it. The first move is often a check that drives the king where you want it, or a sacrifice that drags it there. Sometimes it is a quiet move that takes away the king's last free squares. Before you play it, look at every reply your opponent has and make sure each one still allows mate.",
+ "parts": [
+  {
+   "title": "Check, then mate",
+   "fen": "7k/p3R2p/r3B3/4b1K1/5p2/8/8/8 w - - 0 38",
+   "side": "white",
+   "keyIdea": "A check can drive the king onto the one square where your next move mates it.",
+   "text": "From a game played on Lichess. Black's king in the corner has very few squares, and your king, rook and bishop are all close to it.",
+   "url": "https://lichess.org/training/Viebs",
+   "line": "Re8+ Kg7 Rg8#",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Re8+",
+     "text": "Your rook checks along the back rank. Black cannot block it, and your bishop on e6 covers g8, so the king's only move is 38...Kg7."
+    },
+    {
+     "ply": 2,
+     "san": "Rg8#",
+     "text": "The rook checks again from g8, where the bishop protects it. Your king covers f6, g6 and h6, the bishop covers f7, and the rook covers f8 and h8: mate."
+    }
+   ]
+  },
+  {
+   "title": "Drag the king out",
+   "fen": "6rk/1pp5/p4q2/4p2p/4B2r/P1PP4/1P2QP1P/R3R2K b - - 2 31",
+   "side": "black",
+   "keyIdea": "A sacrifice with check can force the king onto a square where it can be mated.",
+   "text": "From a game played on Lichess. White's king has just stepped into the corner. Your rook on g8 controls the open g-file, and your queen and other rook are close by.",
+   "url": "https://lichess.org/training/ZIGSD",
+   "line": "Rxh2+ Kxh2 Qh4#",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Rxh2+",
+     "text": "Your rook takes the pawn on h2 with check. The king cannot go to g1, because your rook on g8 covers the whole g-file, so White has to take: 32.Kxh2."
+    },
+    {
+     "ply": 2,
+     "san": "Qh4#",
+     "text": "Your queen checks down the h-file, so the king cannot use h1 or h3. Your rook on g8 covers g1, g2 and g3, and nothing can block on h3: mate."
+    }
+   ]
+  },
+  {
+   "title": "A quiet move takes the last squares",
+   "fen": "7r/8/p3p2p/Pn1pPp2/2pP1Pk1/2P3P1/4NK2/2R5 w - - 7 41",
+   "side": "white",
+   "keyIdea": "A move that is not a check can still mate: take away the king's last free squares and threaten a mate that cannot be stopped.",
+   "text": "From a game played on Lichess. Black's king has wandered up to g4, in among your pawns. Count its free squares: there are very few, but right now you have no check at all.",
+   "url": "https://lichess.org/training/CdV36",
+   "line": "Rh1 h5 Rh4#",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Rh1",
+     "text": "This is not a check, but it decides the game. Your rook takes the h-file, so the king cannot use h3, h4 or h5, and you threaten 42.Rh4 mate. Black has no way to stop it."
+    },
+    {
+     "ply": 2,
+     "san": "Rh4#",
+     "text": "The rook checks from h4, protected by your pawn on g3, which also guards f4. Your king guards f3 and g3, the rook covers h3, the pawn on f4 guards g5, and Black's own pawns block f5 and h5: mate."
+    }
+   ]
+  }
+ ]
 }

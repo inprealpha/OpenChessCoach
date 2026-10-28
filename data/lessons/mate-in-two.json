@@ -15,7 +15,197 @@
   "mateIn2"
  ],
  "intro": {
-  "text": ""
+  "text": "In a mate in two, your first move prepares the mate and your second move gives it. The first move is often a check that drives the king where you want it, or a sacrifice that drags it there. Sometimes it is a quiet move that takes away the king's last free squares. Before you play it, look at every reply your opponent has and make sure each one still allows mate."
  },
- "parts": []
+ "parts": [
+  {
+   "title": "Check, then mate",
+   "fen": "7k/p3R2p/r3B3/4b1K1/5p2/8/8/8 w - - 0 38",
+   "side": "white",
+   "keyIdea": "A check can drive the king onto the one square where your next move mates it.",
+   "text": "From a game played on Lichess. Black's king in the corner has very few squares, and your king, rook and bishop are all close to it.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle Viebs",
+    "url": "https://lichess.org/training/Viebs",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "e7e8",
+    "h8g7",
+    "e8g8"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "7k/p3R2p/r3B3/4b1K1/5p2/8/8/8 w - - 0 38",
+     "decision": true,
+     "main": "e7e8",
+     "mainSan": "Re8+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Your rook checks along the back rank. Black cannot block it, and your bishop on e6 covers g8, so the king's only move is 38...Kg7."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "4R2k/p6p/r3B3/4b1K1/5p2/8/8/8 b - - 1 38",
+     "decision": false,
+     "main": "h8g7",
+     "mainSan": "Kg7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "4R3/p5kp/r3B3/4b1K1/5p2/8/8/8 w - - 2 39",
+     "decision": true,
+     "main": "e8g8",
+     "mainSan": "Rg8#",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The rook checks again from g8, where the bishop protects it. Your king covers f6, g6 and h6, the bishop covers f7, and the rook covers f8 and h8: mate."
+     }
+    }
+   ]
+  },
+  {
+   "title": "Drag the king out",
+   "fen": "6rk/1pp5/p4q2/4p2p/4B2r/P1PP4/1P2QP1P/R3R2K b - - 2 31",
+   "side": "black",
+   "keyIdea": "A sacrifice with check can force the king onto a square where it can be mated.",
+   "text": "From a game played on Lichess. White's king has just stepped into the corner. Your rook on g8 controls the open g-file, and your queen and other rook are close by.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle ZIGSD",
+    "url": "https://lichess.org/training/ZIGSD",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "h4h2",
+    "h1h2",
+    "f6h4"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "6rk/1pp5/p4q2/4p2p/4B2r/P1PP4/1P2QP1P/R3R2K b - - 2 31",
+     "decision": true,
+     "main": "h4h2",
+     "mainSan": "Rxh2+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Your rook takes the pawn on h2 with check. The king cannot go to g1, because your rook on g8 covers the whole g-file, so White has to take: 32.Kxh2."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "6rk/1pp5/p4q2/4p2p/4B3/P1PP4/1P2QP1r/R3R2K w - - 0 32",
+     "decision": false,
+     "main": "h1h2",
+     "mainSan": "Kxh2",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "6rk/1pp5/p4q2/4p2p/4B3/P1PP4/1P2QP1K/R3R3 b - - 0 32",
+     "decision": true,
+     "main": "f6h4",
+     "mainSan": "Qh4#",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Your queen checks down the h-file, so the king cannot use h1 or h3. Your rook on g8 covers g1, g2 and g3, and nothing can block on h3: mate."
+     }
+    }
+   ]
+  },
+  {
+   "title": "A quiet move takes the last squares",
+   "fen": "7r/8/p3p2p/Pn1pPp2/2pP1Pk1/2P3P1/4NK2/2R5 w - - 7 41",
+   "side": "white",
+   "keyIdea": "A move that is not a check can still mate: take away the king's last free squares and threaten a mate that cannot be stopped.",
+   "text": "From a game played on Lichess. Black's king has wandered up to g4, in among your pawns. Count its free squares: there are very few, but right now you have no check at all.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle CdV36",
+    "url": "https://lichess.org/training/CdV36",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "c1h1",
+    "h6h5",
+    "h1h4"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "7r/8/p3p2p/Pn1pPp2/2pP1Pk1/2P3P1/4NK2/2R5 w - - 7 41",
+     "decision": true,
+     "main": "c1h1",
+     "mainSan": "Rh1",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "This is not a check, but it decides the game. Your rook takes the h-file, so the king cannot use h3, h4 or h5, and you threaten 42.Rh4 mate. Black has no way to stop it."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "7r/8/p3p2p/Pn1pPp2/2pP1Pk1/2P3P1/4NK2/7R b - - 8 41",
+     "decision": false,
+     "main": "h6h5",
+     "mainSan": "h5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "7r/8/p3p3/Pn1pPp1p/2pP1Pk1/2P3P1/4NK2/7R w - - 0 42",
+     "decision": true,
+     "main": "h1h4",
+     "mainSan": "Rh4#",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The rook checks from h4, protected by your pawn on g3, which also guards f4. Your king guards f3 and g3, the rook covers h3, the pawn on f4 guards g5, and Black's own pawns block f5 and h5: mate."
+     }
+    }
+   ]
+  }
+ ]
 }

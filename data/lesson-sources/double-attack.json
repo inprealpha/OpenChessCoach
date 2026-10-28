@@ -10,6 +10,70 @@
   "attack-and-defend",
   "piece-values"
  ],
- "intro": "",
- "parts": []
+ "intro": "A double attack is one move that attacks two things at once. Your opponent can usually save only one of them, so you win the other. The queen is the best piece for it, because she moves in every direction: look for a queen move that gives check, threatens mate or hits an undefended piece, and attacks something else at the same time.",
+ "parts": [
+  {
+   "title": "Check and attack",
+   "fen": "8/7Q/3p1k1p/4n1p1/4P3/3P1r1P/4K3/8 b - - 7 35",
+   "side": "white",
+   "keyIdea": "A queen check that also hits a loose piece wins it, because the king must answer the check first.",
+   "text": "From a game played on Lichess. Black's rook has just taken your pawn on h3, and nothing guards it there. Your queen cannot reach h3 in one move, but a check can help.",
+   "url": "https://lichess.org/training/RUP5c",
+   "line": "Rxh3 Qf5+ Kg7 Qxh3",
+   "notes": [
+    {
+     "ply": 1,
+     "san": "Qf5+",
+     "text": "From f5 the queen checks the king on f6 and also attacks the rook on h3 along the diagonal. The e4 pawn guards the queen, so the king cannot take her, and Black has to deal with the check first."
+    },
+    {
+     "ply": 3,
+     "san": "Qxh3",
+     "text": "The king has moved, and the rook is still hanging. Take it: now your queen faces only a knight and pawns."
+    }
+   ]
+  },
+  {
+   "title": "Two loose pieces",
+   "fen": "8/p1R3pp/4p1k1/8/8/8/P2q1PPP/R5K1 w - - 3 20",
+   "side": "black",
+   "keyIdea": "A queen in the centre can hit two undefended pieces at once along different lines.",
+   "text": "From a game played on Lichess. You are Black. White's rook has just taken your pawn on a7, so White has rooks on a7 and a1, and the a2 pawn between them means neither one guards the other. Can one queen move attack both?",
+   "url": "https://lichess.org/training/74sFg",
+   "line": "Rxa7 Qd4 Re1 Qxa7",
+   "notes": [
+    {
+     "ply": 1,
+     "san": "Qd4",
+     "text": "From d4 the queen attacks the rook on a7 along one diagonal and the rook on a1 along the other. White can save only one of them."
+    },
+    {
+     "ply": 3,
+     "san": "Qxa7",
+     "text": "White moved the rook from a1 to safety on e1. The rook on a7 is still undefended, so take it."
+    }
+   ]
+  },
+  {
+   "title": "Threaten mate and attack",
+   "fen": "8/6k1/4q3/6p1/1Np2p2/2P2P2/7P/2B2R1K w - - 0 46",
+   "side": "black",
+   "keyIdea": "A threat of mate is the strongest attack of all: while the opponent stops it, the other piece falls.",
+   "text": "From a game played on Lichess. You are Black. White's bishop has just moved to d2, and nothing defends it. Look for a queen move that attacks the bishop and threatens something even bigger.",
+   "url": "https://lichess.org/training/CCiSH",
+   "line": "Bd2 Qe2 Kg1 Qxd2",
+   "notes": [
+    {
+     "ply": 1,
+     "san": "Qe2",
+     "text": "From e2 the queen attacks the bishop on d2 and the rook on f1. Taking the rook would be checkmate, because the king on h1 could not escape and nothing could take your queen. White has to stop the mate first, so the bishop cannot be saved."
+    },
+    {
+     "ply": 3,
+     "san": "Qxd2",
+     "text": "The king moved to g1 to guard the rook, so the mate threat is gone. But the bishop is still undefended: take it."
+    }
+   ]
+  }
+ ]
 }

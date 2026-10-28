@@ -12,50 +12,70 @@
  "priorKnowledge": [
   "forks"
  ],
- "intro": "Removing the defender means capturing, chasing away or pinning the piece that guards something else, so that the piece it guarded is left hanging. Your opponent then has an unpleasant choice: take back, or save the piece that has lost its guard.",
- "introUrl": "https://en.wikipedia.org/wiki/Undermining_(chess)",
+ "intro": "Many pieces are safe only because one other piece protects them. Take that protector away and the piece is left hanging. You can capture the defender, chase it off with a pawn, or spot a defender that protects two things at once and cannot do both jobs.",
  "parts": [
   {
-   "title": "Kramnik against Topalov",
-   "fen": "8/4kp2/1r1p2p1/1p2p1bp/n7/R4P2/PP2B1PP/1K5R w - - 0 1",
+   "title": "Capture the defender",
+   "fen": "r2qk2r/ppp2pp1/2np1n1p/3Np2P/4P1b1/3PP3/PPP3P1/R2QKBNR w KQkq - 2 9",
    "side": "white",
-   "keyIdea": "",
-   "text": "Linares 2004: Black's knight on a4 is defended only by the pawn on b5.",
-   "textUrl": "https://en.wikipedia.org/wiki/Undermining_(chess)",
-   "url": "https://en.wikipedia.org/wiki/Undermining_(chess)",
-   "line": "Bxb5 Rxb5 Rxa4",
+   "keyIdea": "If a piece has only one defender, capture the defender and the piece is left unprotected.",
+   "text": "From a game played on Lichess. Black's bishop has just come to g4, where it attacks your queen. Before you move the queen away, look at what protects that bishop.",
+   "url": "https://lichess.org/training/GR16R",
+   "line": "Nxf6+ Qxf6 Qxg4",
    "notes": [
     {
      "ply": 0,
-     "san": "Bxb5",
-     "text": "Take the defender. If 1...Rxb5, the knight on a4 is left alone; if 1...Nxb2, 2.Rb3 wins the exchange.",
-     "url": "https://en.wikipedia.org/wiki/Undermining_(chess)"
+     "san": "Nxf6+",
+     "text": "Your knight takes the knight on f6, the only piece protecting the bishop on g4, and it comes with check. Whatever Black does now, the bishop has lost its guard."
     },
     {
      "ply": 2,
-     "san": "Rxa4",
-     "text": "The knight falls, and White is a pawn up.",
-     "url": "https://en.wikipedia.org/wiki/Undermining_(chess)"
+     "san": "Qxg4",
+     "text": "Black took back with the queen, which does not protect g4. Your queen takes the bishop: you have traded knights and won a bishop on top."
     }
    ]
   },
   {
-   "title": "Take the guard",
-   "fen": "rn1qk2r/p1p2pp1/2bpp2p/1Bp5/3PnB2/4PN2/P1Q2PPP/1R3RK1 b kq - 3 14",
-   "side": "white",
-   "keyIdea": "",
-   "text": "A position from a game played on Lichess. Black has just castled. Black's knight on e4 is attacked by your queen. What defends it?",
-   "url": "https://lichess.org/training/ZZMzy",
-   "line": "O-O Bxc6 Nxc6 Qxe4"
+   "title": "Chase the defender away",
+   "fen": "3r1rk1/p3q1pp/1p6/n2PppN1/4P3/4Q2P/P4PP1/1R2R1K1 b - - 1 24",
+   "side": "black",
+   "keyIdea": "Attack a defender with a pawn: when it runs away, the piece it was guarding is left alone.",
+   "text": "From a game played on Lichess. White's knight has just jumped to g5. Your queen on e7 attacks it, but White's queen on e3 protects it.",
+   "url": "https://lichess.org/training/peMSq",
+   "line": "f4 Qf3 Qxg5",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "f4",
+     "text": "The pawn attacks White's queen, and it also stands on the line from e3 to g5. White's queen has to move, and no square it can safely go to protects the knight."
+    },
+    {
+     "ply": 2,
+     "san": "Qxg5",
+     "text": "The queen has stepped away, and the knight on g5 has no protection left. Take it: you are a piece ahead."
+    }
+   ]
   },
   {
-   "title": "The rook that guards",
-   "fen": "3r1rk1/6pp/2n2p1n/1p6/4P3/1P4PP/1B1qQPB1/R3R1K1 w - - 0 26",
-   "side": "black",
-   "keyIdea": "",
-   "text": "A position from a game played on Lichess. White has just offered a rook on d1 to your queen. Which white piece is doing two jobs?",
-   "url": "https://lichess.org/training/XX6e7",
-   "line": "Rad1 Qxe2 Rxe2 Rxd1+"
+   "title": "One defender, two jobs",
+   "fen": "2rr2k1/5pp1/1p2p3/p3P1P1/P2q4/3Q4/5P2/2R2RK1 w - - 0 25",
+   "side": "white",
+   "keyIdea": "When one piece guards two things, take one of them; if the defender takes back, the other is left unguarded.",
+   "text": "From a game played on Lichess. Black's queen has just come to d4, offering a trade of queens. Look at Black's rook on d8: how many pieces is it protecting?",
+   "url": "https://lichess.org/training/OtXkV",
+   "line": "Qxd4 Rxd4 Rxc8+",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Qxd4",
+     "text": "Take the queen. Black's rook on d8 is the only piece that can take back, and it is also the only guard of the rook on c8."
+    },
+    {
+     "ply": 2,
+     "san": "Rxc8+",
+     "text": "The rook on d8 took back on d4 and left the rook on c8 unprotected. Take it with check: you have won a whole rook."
+    }
+   ]
   }
  ]
 }

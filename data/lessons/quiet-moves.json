@@ -14,7 +14,226 @@
   "quietMove"
  ],
  "intro": {
-  "text": ""
+  "text": "Checks and captures are the first moves to look at, but sometimes the winning move is neither. A quiet move can take away the enemy king's last free square, or make a threat that the opponent cannot stop. When the checks run out too soon, look for a calm move that tightens the net first."
  },
- "parts": []
+ "parts": [
+  {
+   "title": "The knight takes the last square",
+   "fen": "r6k/1p3R2/1p2p2p/7N/8/p7/6PP/7K w - - 0 38",
+   "side": "white",
+   "keyIdea": "A quiet move that covers the king's last free square can set up a mate threat that nothing stops.",
+   "text": "From a game played on Lichess. White to move. Black's king on h8 has one free square, g8, and Black's a-pawn is racing to become a queen. No check works yet.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle JupYf",
+    "url": "https://lichess.org/training/JupYf",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "h5f6",
+    "a3a2",
+    "f7h7"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "r6k/1p3R2/1p2p2p/7N/8/p7/6PP/7K w - - 0 38",
+     "decision": true,
+     "main": "h5f6",
+     "mainSan": "Nf6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "A quiet knight move. From f6 the knight covers g8, the king's only free square, and guards h7. You threaten Rh7 mate, and Black has no check, block or capture to stop it."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "r6k/1p3R2/1p2pN1p/8/8/p7/6PP/7K b - - 1 38",
+     "decision": false,
+     "main": "a3a2",
+     "mainSan": "a2",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "r6k/1p3R2/1p2pN1p/8/8/8/p5PP/7K w - - 0 39",
+     "decision": true,
+     "main": "f7h7",
+     "mainSan": "Rh7#",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Mate. The rook checks from h7, the knight guards it, and the king has no square. Black's pawn on a2 was one move too slow."
+     }
+    }
+   ]
+  },
+  {
+   "title": "The king joins in",
+   "fen": "7k/4R2P/8/5K2/1p6/2p3P1/1r6/8 w - - 1 42",
+   "side": "white",
+   "keyIdea": "Your own king can make the quiet move that takes the enemy king's last squares, so the next check is mate.",
+   "text": "From a game played on Lichess. White to move. A check on e8 now would let Black's king out to g7, or let it take your pawn on h7. Bring one more piece up first.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle 7a1CB",
+    "url": "https://lichess.org/training/7a1CB",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "f5g6",
+    "b2f2",
+    "e7e8",
+    "f2f8",
+    "e8f8"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "7k/4R2P/8/5K2/1p6/2p3P1/1r6/8 w - - 1 42",
+     "decision": true,
+     "main": "f5g6",
+     "mainSan": "Kg6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "A quiet king move. Your king guards the pawn on h7 and the g7 square, so Black's king cannot move at all, and you threaten Re8 mate. Black's rook heads for f8 to block, but that only delays the mate."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "7k/4R2P/6K1/8/1p6/2p3P1/1r6/8 b - - 2 42",
+     "decision": false,
+     "main": "b2f2",
+     "mainSan": "Rf2",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "7k/4R2P/6K1/8/1p6/2p3P1/5r2/8 w - - 3 43",
+     "decision": true,
+     "main": "e7e8",
+     "mainSan": "Re8+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The check. Black's only answer is to put the rook in the way on f8."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "4R2k/7P/6K1/8/1p6/2p3P1/5r2/8 b - - 4 43",
+     "decision": false,
+     "main": "f2f8",
+     "mainSan": "Rf8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "4Rr1k/7P/6K1/8/1p6/2p3P1/8/8 w - - 5 44",
+     "decision": true,
+     "main": "e8f8",
+     "mainSan": "Rxf8#",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Mate. The rook takes on f8 with check, and the king still has no square: your king and the h7 pawn cover the rest."
+     }
+    }
+   ]
+  },
+  {
+   "title": "A threat that cannot be met",
+   "fen": "6k1/ppp2p1p/3p1P1B/8/8/3P4/Pbr3PP/5R1K w - - 0 24",
+   "side": "white",
+   "keyIdea": "A quiet move that threatens mate can force a defence that loses material.",
+   "text": "From a game played on Lichess. White to move, a pawn down. Your bishop on h6 and your pawn on f6 keep Black's king shut in on the back rank.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle 4WQmC",
+    "url": "https://lichess.org/training/4WQmC",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "f1e1",
+    "b2e5",
+    "d3d4"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "6k1/ppp2p1p/3p1P1B/8/8/3P4/Pbr3PP/5R1K w - - 0 24",
+     "decision": true,
+     "main": "f1e1",
+     "mainSan": "Re1",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "A quiet rook move that threatens Re8 mate: the bishop on h6 covers f8, and with the f6 pawn it covers g7. Black's best defence is to block the e-file with the bishop on e5."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "6k1/ppp2p1p/3p1P1B/8/8/3P4/Pbr3PP/4R2K b - - 1 24",
+     "decision": false,
+     "main": "b2e5",
+     "mainSan": "Be5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "6k1/ppp2p1p/3p1P1B/4b3/8/3P4/P1r3PP/4R2K w - - 2 25",
+     "decision": true,
+     "main": "d3d4",
+     "mainSan": "d4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Another quiet move: the pawn attacks the bishop. The bishop cannot leave the e-file, or Re8 is mate, so Black loses it."
+     }
+    }
+   ]
+  }
+ ]
 }

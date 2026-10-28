@@ -12,7 +12,225 @@
   "hangingPiece"
  ],
  "intro": {
-  "text": ""
+  "text": "A piece is attacked when an enemy piece could capture it on the next move. If nothing defends it, or the attacker is a cheaper piece, you will lose it unless you do something. In this Lesson you take pieces your opponent leaves undefended, and you save your own in four ways: move the piece away, guard it, block the attack, or take the attacker."
  },
- "parts": []
+ "parts": [
+  {
+   "title": "Take a piece nobody defends",
+   "fen": "6R1/pp2n2p/3p1N1k/8/8/2P4K/PP6/8 b - - 0 43",
+   "side": "white",
+   "keyIdea": "A piece that is attacked and not defended can be taken for free.",
+   "text": "From a game played on Lichess. Black's knight has just taken your rook on g8. Look at that knight: is any black piece guarding it?",
+   "credit": {
+    "source": "Lichess games database, game kagmmo22",
+    "url": "https://lichess.org/kagmmo22#85",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "e7g8",
+    "f6g8",
+    "h6g7",
+    "g8e7"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "6R1/pp2n2p/3p1N1k/8/8/2P4K/PP6/8 b - - 0 43",
+     "decision": false,
+     "main": "e7g8",
+     "mainSan": "Nxg8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "6n1/pp5p/3p1N1k/8/8/2P4K/PP6/8 w - - 0 44",
+     "decision": true,
+     "main": "f6g8",
+     "mainSan": "Nxg8+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Your knight on f6 takes the knight on g8. No black piece guards g8, so nothing can take back, and the capture even gives check to the king on h6."
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "6N1/pp5p/3p3k/8/8/2P4K/PP6/8 b - - 0 44",
+     "decision": false,
+     "main": "h6g7",
+     "mainSan": "Kg7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "6N1/pp4kp/3p4/8/8/2P4K/PP6/8 w - - 1 45",
+     "decision": true,
+     "main": "g8e7",
+     "mainSan": "Ne7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Now the black king on g7 attacks your knight. The knight can jump to e7, f6 or h6, but f6 and h6 are next to the king, so e7 is the only safe square."
+     }
+    }
+   ]
+  },
+  {
+   "title": "Guard it",
+   "fen": "6k1/5p2/6p1/2R2Pr1/6P1/6K1/8/8 w - - 0 35",
+   "side": "black",
+   "keyIdea": "When an attacked piece has no safe square, defend it with another piece.",
+   "text": "From a game played on Lichess. You are Black. White's king has just stepped to f4, where it attacks your rook on g5. Check every square the rook could move to before you decide.",
+   "credit": {
+    "source": "Lichess games database, game c9g77vz8",
+    "url": "https://lichess.org/c9g77vz8#68",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "g3f4",
+    "f7f6"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "6k1/5p2/6p1/2R2Pr1/6P1/6K1/8/8 w - - 0 35",
+     "decision": false,
+     "main": "g3f4",
+     "mainSan": "Kf4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "6k1/5p2/6p1/2R2Pr1/5KP1/8/8/8 b - - 1 35",
+     "decision": true,
+     "main": "f7f6",
+     "mainSan": "f6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The rook has no safe square: on g4 or f5 the king takes it, and on h5 the g4 pawn does. So guard it instead. After f6 your pawn defends g5, and the white king cannot take the rook, because a king may never move to a square the enemy guards."
+     }
+    }
+   ]
+  },
+  {
+   "title": "Block the attack",
+   "fen": "1r3rk1/4b1p1/7p/1p1N4/2P5/6P1/P2R1P1P/5RK1 b - - 0 25",
+   "side": "white",
+   "keyIdea": "A bishop, rook or queen attacks along a line, so a piece put in the way blocks the attack.",
+   "text": "From a game played on Lichess. Black's bishop has just moved to g5, and it attacks your rook on d2 along the diagonal. A long-range piece can be stopped by putting something in its path.",
+   "credit": {
+    "source": "Lichess games database, game JEJHaLCH",
+    "url": "https://lichess.org/JEJHaLCH#49",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "e7g5",
+    "f2f4"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "1r3rk1/4b1p1/7p/1p1N4/2P5/6P1/P2R1P1P/5RK1 b - - 0 25",
+     "decision": false,
+     "main": "e7g5",
+     "mainSan": "Bg5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "1r3rk1/6p1/7p/1p1N2b1/2P5/6P1/P2R1P1P/5RK1 w - - 1 26",
+     "decision": true,
+     "main": "f2f4",
+     "mainSan": "f4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The pawn steps from f2 to f4, into the bishop's diagonal, so the rook on d2 is no longer attacked. The pawn is safe there, because the g3 pawn and the rook on f1 guard it, and it attacks the bishop, so Black will have to move the bishop again or lose it for a pawn. Moving the rook would also save it, but the block gains a move."
+     }
+    }
+   ]
+  },
+  {
+   "title": "Take the attacker",
+   "fen": "8/1p6/p7/5N1p/2n2p2/1P3P2/P1P1K1k1/8 b - - 0 50",
+   "side": "white",
+   "keyIdea": "The piece that attacks yours may be undefended itself; then the best defence is to take it.",
+   "text": "From a game played on Lichess. Black's knight has just jumped to d6, where it attacks your knight on f5. Before you move your knight away, ask whether the attacker itself is safe.",
+   "credit": {
+    "source": "Lichess games database, game j2w2i4ov",
+    "url": "https://lichess.org/j2w2i4ov#99",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "c4d6",
+    "f5d6"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "8/1p6/p7/5N1p/2n2p2/1P3P2/P1P1K1k1/8 b - - 0 50",
+     "decision": false,
+     "main": "c4d6",
+     "mainSan": "Nd6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "8/1p6/p2n4/5N1p/5p2/1P3P2/P1P1K1k1/8 w - - 1 51",
+     "decision": true,
+     "main": "f5d6",
+     "mainSan": "Nxd6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "A knight that attacks a knight is attacked by it in return. Nothing guards the black knight on d6, so your knight takes it and you are a whole piece up. Moving your knight away would also save it, but you would miss this free piece."
+     }
+    }
+   ]
+  }
+ ]
 }

@@ -14,7 +14,197 @@
   "deflection"
  ],
  "intro": {
-  "text": ""
+  "text": "Many defenders have one important job, such as guarding a piece, a square or the back rank. Deflection means forcing that defender away from its job, usually with a check or a capture it has to answer. Once the defender has gone, you take what it was guarding."
  },
- "parts": []
+ "parts": [
+  {
+   "title": "A check pulls the guard away",
+   "fen": "r5k1/ppq1r1pp/2n1p3/8/2B2Q2/P1N5/1P4PP/5R1K w - - 2 25",
+   "side": "white",
+   "keyIdea": "A check that the defender has to answer by capturing drags it away from the piece it guards.",
+   "text": "From a game played on Lichess. You are White. Black has just offered a queen trade on c7, and only the rook on e7 guards Black's queen. Look for a forcing move that gives that rook something else to do.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle hPNWj",
+    "url": "https://lichess.org/training/hPNWj",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "c4e6",
+    "e7e6",
+    "f4c7"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "r5k1/ppq1r1pp/2n1p3/8/2B2Q2/P1N5/1P4PP/5R1K w - - 2 25",
+     "decision": true,
+     "main": "c4e6",
+     "mainSan": "Bxe6+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The bishop takes a pawn with check. Black's best answer is to take the bishop with the rook, but then the rook leaves the seventh rank and no longer guards the queen. Every other answer is even worse for Black."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "r5k1/ppq1r1pp/2n1B3/8/5Q2/P1N5/1P4PP/5R1K b - - 0 25",
+     "decision": false,
+     "main": "e7e6",
+     "mainSan": "Rxe6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "r5k1/ppq3pp/2n1r3/8/5Q2/P1N5/1P4PP/5R1K w - - 0 26",
+     "decision": true,
+     "main": "f4c7",
+     "mainSan": "Qxc7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Nothing guards the queen on c7 any more, so you take it. You gave a bishop and won a queen."
+     }
+    }
+   ]
+  },
+  {
+   "title": "The king is a defender too",
+   "fen": "rn5r/pp3Rp1/1kp4p/2q1p3/8/4Q3/1PP3PP/2KR4 w - - 4 23",
+   "side": "white",
+   "keyIdea": "A king can be deflected too: a check it must answer by capturing pulls it away from what it guards.",
+   "text": "From a game played on Lichess. You are White. Black has just put the queen on c5 to offer a trade, and only the king on b6 guards it. Can you make the king leave?",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle jZIco",
+    "url": "https://lichess.org/training/jZIco",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "f7b7",
+    "b6b7",
+    "e3c5"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "rn5r/pp3Rp1/1kp4p/2q1p3/8/4Q3/1PP3PP/2KR4 w - - 4 23",
+     "decision": true,
+     "main": "f7b7",
+     "mainSan": "Rxb7+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "A rook sacrifice with check. If the king takes the rook, it leaves the queen on c5 behind. If it steps to a6 or a5 instead, it leaves the queen just the same."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "rn5r/pR4p1/1kp4p/2q1p3/8/4Q3/1PP3PP/2KR4 b - - 0 23",
+     "decision": false,
+     "main": "b6b7",
+     "mainSan": "Kxb7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "rn5r/pk4p1/2p4p/2q1p3/8/4Q3/1PP3PP/2KR4 w - - 0 24",
+     "decision": true,
+     "main": "e3c5",
+     "mainSan": "Qxc5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The king took the rook, so nothing guards the queen any more. You gave a rook and won a queen."
+     }
+    }
+   ]
+  },
+  {
+   "title": "Deflection that leads to mate",
+   "fen": "1rb1k1r1/2q2p2/4pQ2/pp5p/4P2p/P1P5/1P4N1/3R1RK1 w - - 2 31",
+   "side": "white",
+   "keyIdea": "Pull away the piece that guards the mating square, and the mate works.",
+   "text": "From a game played on Lichess. You are White. Your queen on f6, with the rook on f1 behind it, aims at f7, but Black's queen on c7 guards that pawn along the seventh rank. Look for a check that gives Black's queen a different job.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle 8plnM",
+    "url": "https://lichess.org/training/8plnM",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "d1d8",
+    "c7d8",
+    "f6f7"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "1rb1k1r1/2q2p2/4pQ2/pp5p/4P2p/P1P5/1P4N1/3R1RK1 w - - 2 31",
+     "decision": true,
+     "main": "d1d8",
+     "mainSan": "Rd8+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "A rook sacrifice with check. The king cannot take, because your queen guards d8, and every square it could step to is covered. So Black's queen must take the rook, and that pulls it off the seventh rank."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "1rbRk1r1/2q2p2/4pQ2/pp5p/4P2p/P1P5/1P4N1/5RK1 b - - 3 31",
+     "decision": false,
+     "main": "c7d8",
+     "mainSan": "Qxd8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "1rbqk1r1/5p2/4pQ2/pp5p/4P2p/P1P5/1P4N1/5RK1 w - - 0 32",
+     "decision": true,
+     "main": "f6f7",
+     "mainSan": "Qxf7#",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Black's queen no longer guards f7. Your queen takes the pawn, supported by the rook on f1, and it is mate."
+     }
+    }
+   ]
+  }
+ ]
 }

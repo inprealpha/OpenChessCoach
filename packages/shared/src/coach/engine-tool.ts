@@ -6,7 +6,8 @@
 import type { Candidate } from '../analysis.ts';
 import { outcomeOf, playSan, playUci, SIDE_NAMES, turnOf, type Side } from '../chess.ts';
 import type { CoachJob } from '../protocol.ts';
-import { briefCandidates, explained, type BriefCandidate } from './brief.ts';
+import { negateScore } from '../grader.ts';
+import { briefCandidates, explained, type BriefCandidate, type Facts } from './brief.ts';
 
 /** The Coach jobs that may ask the Engine. Hints and Live Coaching must stay short; Lessons have their own notes. */
 export const ENGINE_TOOL_JOBS: readonly CoachJob[] = ['why', 'review-moment'];
@@ -34,6 +35,8 @@ export interface PlacedQuestion {
   line: string[];
   fen: string;
   move?: { uci: string; san: string };
+  /** The line's last move, and the position it is played in. */
+  last?: { fen: string; uci: string; san: string };
 }
 
 /** The Engine's answer, worded like a brief so the Coach reads it the same way. */
@@ -44,6 +47,12 @@ export interface EngineAnswer {
   sideToMove: Side;
   /** The game is over in the position: then there are no candidates. */
   over?: string;
+  /**
+   * What the last move of the line does, as the brief says what the Player's move does: read off
+   * the board, and along the Engine's best line after it for "result". A candidate's facts are
+   * about that candidate only.
+   */
+  lastMove?: { san: string } & Facts;
   /** The Engine's best moves there, each graded against its best, with its line and facts. */
   candidates: BriefCandidate[];
   /** The move asked about: its Move Grade against the Engine's best move there, its line, its facts and the Engine's replies to it. */
@@ -70,23 +79,26 @@ export function placeQuestion(fen: string, question: EngineQuestion): PlacedQues
   if (line.length > MAX_QUESTION_PLIES) throw new QuestionError(`A line can be at most ${MAX_QUESTION_PLIES} moves long.`);
   let current = fen;
   const played: string[] = [];
+  let last: PlacedQuestion['last'];
   for (const san of line) {
     const move = playSan(current, san.trim());
     if (!move) {
       const where = played.length ? `after ${played.join(' ')}` : 'in the brief’s position';
       throw new QuestionError(`${san} is not a legal move ${where}. Write the line in SAN, from the brief's fen.`);
     }
+    last = { fen: current, uci: move.uci, san: move.san };
     played.push(move.san);
     current = move.fenAfter;
   }
-  if (question.move === undefined || question.move === '') return { line: played, fen: current };
+  const placed: PlacedQuestion = { line: played, fen: current, ...(last ? { last } : {}) };
+  if (question.move === undefined || question.move === '') return placed;
   if (typeof question.move !== 'string') throw new QuestionError('move must be one SAN move.');
   const move = playSan(current, question.move.trim());
   if (!move) {
     const where = played.length ? `after ${played.join(' ')}` : 'in the brief’s position';
     throw new QuestionError(`${question.move} is not a legal move ${where}.`);
   }
-  return { line: played, fen: current, move: { uci: move.uci, san: move.san } };
+  return { ...placed, move: { uci: move.uci, san: move.san } };
 }
 
 /**
@@ -110,6 +122,11 @@ export function engineAnswer(
     candidates: [],
     questionsLeft,
   };
+  if (placed.last) {
+    // Scored for the side that played it by the Engine's best line after it, as the brief scores the Player's move.
+    const best = candidates[0];
+    answer.lastMove = { san: placed.last.san, ...explained(placed.last.fen, placed.last.uci, best?.pv ?? [], best && negateScore(best.score)) };
+  }
   const over = outcomeOf(fen);
   if (over) {
     answer.over = over.reason === 'checkmate' && over.winner ? `${SIDE_NAMES[over.winner]} has given mate` : `the game is drawn (${over.reason})`;

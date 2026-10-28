@@ -72,7 +72,8 @@ accepted that it takes longer. You can ask the Engine with the tool ask_engine. 
 SAN moves played one after another from the brief's fen (leave it out for that position), and
 optionally "move", one SAN move in the position after the line. It answers like the brief: the
 Engine's best moves there, each with its Move Grade, line, "does" and "result"; for "move", its
-Move Grade against the Engine's best move there, its line and facts, and the Engine's replies to it.
+Move Grade against the Engine's best move there, its line and facts, and the Engine's replies to it;
+and for a line, "lastMove": what the line's last move does, as "move" says it for the brief's move.
 - Before you answer, ask the Engine at least once, and at most ${maxQuestions} times, to look
   further than the brief's short lines. Choose your questions first. Good questions:
   after a mistake, the position at the end of the Engine's best reply line, to see what it wins;
@@ -85,6 +86,9 @@ Move Grade against the Engine's best move there, its line and facts, and the Eng
   the Engine plays it unless an answer shows it.
 - A line is the Engine's best play, not forced play. Never say a side must play a move, or can't
   play another, unless "does" says it is the only legal move.
+- Facts belong to the move they are on. Say what a move does only from that move's own "does" and
+  "result" (or lastMove's, for the last move of your line): a candidate's facts are about that
+  candidate, never about the move before it.
 - Say what a line wins only as a "result" says it. Never add up material over a line yourself, and
   never say a side keeps a piece through a line: the line may give it back later.
 - Draw arrows only for moves played in the brief's fen or right after the move. A move deeper in

@@ -64,10 +64,27 @@ describe('the Engine tool’s answers', () => {
     const after = g.moves[14];
     if (!next || !after) throw new Error('fixture too short');
     const placed = placeQuestion(m.fenBefore, { line: [m.san, next.san] });
-    expect(placed).toEqual({ line: [m.san, next.san], fen: after.fenBefore });
+    expect(placed).toEqual({ line: [m.san, next.san], fen: after.fenBefore, last: { fen: next.fenBefore, uci: next.uci, san: next.san } });
     const answer = engineAnswer(placed, after.candidates, undefined, 1);
     expect(answer).toMatchObject({ after: `${m.san} ${next.san}`, sideToMove: after.side });
     expect(answer.candidates[0]?.uci).toBe(after.candidates[0]?.uci);
+  });
+
+  it('say what the last move of the line does, exactly as the brief says what the Player’s move does', () => {
+    // A move of a real game with facts on it: the brief's move, and the same move as the end of a line.
+    const at = g.moves.findIndex((m, i) => {
+      const replies = g.moves[i + 1]?.candidates;
+      if (!replies?.length) return false;
+      const b = buildBrief({ ask: { job: 'why', fen: m.fenBefore, recentMoves: [], candidates: m.candidates, move: { uci: m.uci, san: m.san, grade: m.grade, playedScore: m.playedScore }, replies }, profile });
+      return Boolean(b.move?.does);
+    });
+    const { m, replies } = moment(at);
+    const brief = buildBrief({ ask: { job: 'why', fen: m.fenBefore, recentMoves: [], candidates: m.candidates, move: { uci: m.uci, san: m.san, grade: m.grade, playedScore: m.playedScore }, replies }, profile });
+    const answer = engineAnswer(placeQuestion(m.fenBefore, { line: [m.san] }), replies, undefined, 2);
+    expect(brief.move?.does).toBeTruthy();
+    expect(answer.lastMove).toMatchObject({ san: m.san, does: brief.move?.does });
+    // Without a line there is no last move to describe.
+    expect(engineAnswer(placeQuestion(m.fenBefore, {}), m.candidates, undefined, 2).lastMove).toBeUndefined();
   });
 
   it('say when the game is over in the position, with no moves', () => {

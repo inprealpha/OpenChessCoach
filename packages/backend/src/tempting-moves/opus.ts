@@ -15,7 +15,14 @@ export interface OpusTemptingMovesOptions {
   claudePath?: string;
   /** The Agent SDK's `query`; tests pass their own to see what is sent. */
   query?: typeof query;
+  /** How long a guess may take before the Coach answers without one; 15 seconds by default. */
+  deadlineMs?: number;
 }
+
+/** A guess usually takes about 8 seconds; past this the Coach answers without tempting moves. */
+export const OPUS_DEADLINE_MS = 15_000;
+/** A guess is three moves in JSON: this bounds a call that runs away, as the Coach's own ceiling does. */
+export const OPUS_OUTPUT_TOKENS = 2000;
 
 const SYSTEM_PROMPT = 'You predict the moves human chess players make in online games. Answer only with the JSON asked for.';
 const SCHEMA = {
@@ -57,10 +64,12 @@ export class OpusTemptingMoves implements TemptingMovesPort {
   readonly name = 'opus' as const;
   private readonly claudePath: string | undefined;
   private readonly query: typeof query;
+  private readonly deadlineMs: number;
 
   constructor(options: OpusTemptingMovesOptions = {}) {
     this.claudePath = options.claudePath;
     this.query = options.query ?? query;
+    this.deadlineMs = options.deadlineMs ?? OPUS_DEADLINE_MS;
   }
 
   async suggest(req: TemptingMovesRequest): Promise<TemptingMoves> {
@@ -68,7 +77,29 @@ export class OpusTemptingMoves implements TemptingMovesPort {
     const count = req.count ?? 3;
     const fen = gamePositions(req.startFen, req.moves).at(-1)!;
     const abort = new AbortController();
-    req.signal?.addEventListener('abort', () => abort.abort());
+    // A Review shares one signal across its moments: the listener goes once this guess is done.
+    const cancel = () => abort.abort();
+    req.signal?.addEventListener('abort', cancel, { once: true });
+    // Out of time: the Coach answers without tempting moves rather than waiting longer, and the
+    // call is stopped.
+    let deadline: NodeJS.Timeout | undefined;
+    const late = new Promise<TemptingMoves>((resolve) => {
+      deadline = setTimeout(() => {
+        abort.abort();
+        resolve({ moves: [] });
+      }, this.deadlineMs);
+    });
+    const asked = this.ask(req, fen, count, abort, started);
+    asked.catch(() => undefined);
+    try {
+      return await Promise.race([asked, late]);
+    } finally {
+      clearTimeout(deadline);
+      req.signal?.removeEventListener('abort', cancel);
+    }
+  }
+
+  private async ask(req: TemptingMovesRequest, fen: string, count: number, abort: AbortController, started: number): Promise<TemptingMoves> {
     const stream = this.query({
       prompt: instinctPrompt(req.startFen, req.moves, count),
       options: {
@@ -82,7 +113,7 @@ export class OpusTemptingMoves implements TemptingMovesPort {
         persistSession: false,
         maxTurns: 3,
         cwd: tmpdir(),
-        env: { ...process.env, ENABLE_CLAUDEAI_MCP_SERVERS: 'false' },
+        env: { ...process.env, ENABLE_CLAUDEAI_MCP_SERVERS: 'false', CLAUDE_CODE_MAX_OUTPUT_TOKENS: String(OPUS_OUTPUT_TOKENS) },
         abortController: abort,
         outputFormat: { type: 'json_schema', schema: SCHEMA as unknown as Record<string, unknown> },
         ...(this.claudePath && !isWindowsShim(this.claudePath) ? { pathToClaudeCodeExecutable: this.claudePath } : {}),

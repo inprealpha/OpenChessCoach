@@ -22,9 +22,11 @@ So Maia-3's 5M model proposes the moves a Player would reach for. The Engine gra
 | --- | --- | --- |
 | Why Question | Yes | The Coach has room to say why the natural move fails, or that it is fine. |
 | Review moment | Yes | The Player's own move is often one many players reach for; the Coach can say so, and name another trap. |
-| Hint | Only from Maia-3 | A Hint may warn of a trap without naming the move. An Opus guess would add about 8 seconds to an answer that must stay quick, so while the model downloads, Hints get none. |
+| Hint | Only from Maia-3, and only those the Engine already lists | A Hint may warn of a trap without naming the move. It must stay quick: an Opus guess would add about 8 seconds, so while the model downloads, Hints get none; and a tempting move the Engine didn't list would cost a search of its own, so a Hint keeps only the tempting moves among the Engine's candidates. |
 | Live Coaching | No | One or two short sentences right after the move leave no room. |
 | Lesson turn | No | It already has how often players at the Player's level choose each move (ADR 0005). |
+
+Tempting moves describe what players at the Player's level reach for, so a position where it isn't the Player's turn (when the Player's side is known) gets none.
 
 **How they reach the brief:**
 
@@ -36,12 +38,17 @@ So Maia-3's 5M model proposes the moves a Player would reach for. The Engine gra
 **What Maia-3 reads:**
 
 - **The game.** A Review gives the game's own moves. Otherwise the client's moves are replayed from the usual start position. If they lead to the position asked about, Maia-3 gets the last 8 positions; if not, as for a position set up by hand, it gets that position alone.
-- **The rating.** It comes from the Player Profile. A Lichess rating is used as it is. A chess.com rapid rating is converted to the Lichess blitz scale Maia-3 learned, with ChessGoals' rating comparison (July 2026, <https://chessgoals.com/rating-comparison/>): straight lines between its rows, for example chess.com 1000 → 1229 and 1500 → 1620. Without a rating it is 1500. The opponent's rating isn't known, so it is taken as the Player's.
+- **The rating.** Maia-3 learned Lichess blitz ratings. The Player Profile shows the rating of the first pool the Player has played on Lichess or chess.com, rapid first. The desktop also records which pool that is, and the Player's blitz rating on that site (the `rating_pools` table). Maia-3 gets, in this order:
+  1. The blitz rating, when the Player has one: Lichess as it is, or chess.com converted.
+  2. The Profile's rating when its pool converts soundly: Lichess rapid as it is (the nearest pool on the same site), or chess.com rapid converted.
+  3. Otherwise 1500. That covers Lichess classical, bullet and correspondence, chess.com daily and bullet, and a rating linked before the desktop recorded its pool.
+
+  The conversions use ChessGoals' rating comparison (July 2026, <https://chessgoals.com/rating-comparison/>), with straight lines between its rows: for example chess.com rapid 1500 → 1620, and chess.com blitz 1390 → 1681. The opponent's rating isn't known, so it is taken as the Player's.
 
 **What it costs:**
 
 - With Maia-3: a few milliseconds per call, and nothing from the owner's Claude limits.
-- While the model downloads, or if Maia-3 fails: one more Opus call per Why Question and Review moment, about 8 seconds and 1.5 cents at API prices. It runs alongside the Engine's searches.
+- While the model downloads, or if Maia-3 fails: one more Opus call per Why Question and Review moment, about 8 seconds and 1.5 cents at API prices. It runs alongside the Engine's searches. It has a 15-second deadline, after which the Coach answers without tempting moves, and an output ceiling of 2,000 tokens, as the Coach's own calls have one.
 - Each call's tempting moves are logged with it, in the `coach_tempting` table: where they came from, the moves, how long the guess took, and what an Opus guess cost.
 
 ## Measured

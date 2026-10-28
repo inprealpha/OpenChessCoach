@@ -1,10 +1,9 @@
 import { COACH_JOBS, MAX_QUESTION_LENGTH } from '@chess-coach/shared/protocol';
 import { isValidFen } from '@chess-coach/shared/chess';
 import { AppError } from '../errors.ts';
-import { getProfile } from '../profile.ts';
 import { withReviewScores } from '../reviews.ts';
 import { guessTempting, historyFromSans, withTempting } from '../tempting-moves/ask.ts';
-import { maiaRating } from '../tempting-moves/rating.ts';
+import { playerMaiaRating } from '../tempting-moves/rating.ts';
 import type { HandlerMap } from './index.ts';
 
 export const coachHandlers: HandlerMap<'coach.ask'> = {
@@ -19,10 +18,11 @@ export const coachHandlers: HandlerMap<'coach.ask'> = {
     // Check the Coach can answer before spending the Engine's time on the facts.
     await app.coach.assertAvailable();
     // The moves many players would reach for (ADR 0011), guessed while the Engine works out the facts.
-    const profile = getProfile(app.db);
     const guess = guessTempting(req.job, {
       service: app.temptingMoves,
-      rating: maiaRating(profile.rating, profile.ratingSource?.site),
+      fen: req.fen,
+      playerSide: req.playerSide === 'white' || req.playerSide === 'black' ? req.playerSide : undefined,
+      rating: playerMaiaRating(app.db),
       history: historyFromSans(req.fen, Array.isArray(req.recentMoves) ? req.recentMoves : []),
       signal,
     });

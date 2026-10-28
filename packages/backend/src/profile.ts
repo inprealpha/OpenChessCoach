@@ -60,7 +60,8 @@ export interface ProfilePatch {
   level?: string;
   goals?: string[];
   onboarded?: boolean;
-  rating?: { site: RatingSite; username: string; rating: number } | null;
+  /** `pool` and `blitz` are for Maia-3 (ADR 0011): the Player Profile shows only `rating`. */
+  rating?: { site: RatingSite; username: string; rating: number; pool?: string; blitz?: number } | null;
 }
 
 export function updateProfile(db: Db, patch: ProfilePatch): PlayerProfile {
@@ -80,6 +81,10 @@ export function updateProfile(db: Db, patch: ProfilePatch): PlayerProfile {
       r?.rating ?? null,
       r?.site ?? null,
       r?.username ?? null,
+    );
+    db.prepare('INSERT INTO rating_pools (id, pool, blitz) VALUES (1, ?, ?) ON CONFLICT(id) DO UPDATE SET pool = excluded.pool, blitz = excluded.blitz').run(
+      r?.pool ?? null,
+      r?.blitz ?? null,
     );
   }
   return getProfile(db);

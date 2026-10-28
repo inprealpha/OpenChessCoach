@@ -1,6 +1,7 @@
 // The tempting moves (ADR 0011): Maia-3's input and output, its parity with the original model, the
 // model download, the choice between Maia-3, Opus and the fake, and what the desktop reports.
 import { createHash } from 'node:crypto';
+import { getEventListeners } from 'node:events';
 import { existsSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -13,11 +14,11 @@ import { defaultDataDir } from '../src/paths.ts';
 import { MAIA3_5M, ModelDownloader, type ModelAsset } from '../src/tempting-moves/download.ts';
 import { FakeTemptingMoves } from '../src/tempting-moves/fake.ts';
 import { MAIA_WIDTH, MaiaTemptingMoves, maiaInput, maiaMoveIndex, gamePositions } from '../src/tempting-moves/maia.ts';
-import { instinctPrompt, legalOnly, OpusTemptingMoves } from '../src/tempting-moves/opus.ts';
+import { instinctPrompt, legalOnly, OPUS_OUTPUT_TOKENS, OpusTemptingMoves } from '../src/tempting-moves/opus.ts';
 import type { TemptingMovesPort } from '../src/tempting-moves/port.ts';
 import { TemptingMovesService } from '../src/tempting-moves/service.ts';
 import { historyFromSans } from '../src/tempting-moves/ask.ts';
-import { maiaRating } from '../src/tempting-moves/rating.ts';
+import { maiaRating, playerMaiaRating } from '../src/tempting-moves/rating.ts';
 import { client, instance, rows } from './helpers.ts';
 
 const dirs: string[] = [];
@@ -337,8 +338,32 @@ describe('the fake and Opus sides', () => {
     expect(usage).toMatchObject({ inputTokens: 1500, outputTokens: 300, costUsd: 0.015, models: ['claude-opus-5-5'] });
     expect(sent).toMatchObject({ model: 'opus', tools: [], mcpServers: {}, settingSources: [], persistSession: false });
     expect(sent?.env?.ENABLE_CLAUDEAI_MCP_SERVERS).toBe('false');
+    expect(sent?.env?.CLAUDE_CODE_MAX_OUTPUT_TOKENS).toBe(String(OPUS_OUTPUT_TOKENS));
     expect(sent?.env?.PATH).toBe(process.env.PATH);
     expect(legalOnly(INITIAL_FEN, ['O-O', 42, 'e2e4'], 3)).toEqual(['e2e4']);
+  });
+});
+
+describe('the Opus side, when it is slow or a Review shares one signal', () => {
+  it('gives up after its deadline, so the Coach answers without tempting moves', async () => {
+    // A call that never answers.
+    const stuck = (() => (async function* () {
+      await new Promise(() => {});
+      yield { type: 'result' };
+    })()) as unknown as typeof query;
+    const started = Date.now();
+    expect(await new OpusTemptingMoves({ query: stuck, deadlineMs: 50 }).suggest({ startFen: INITIAL_FEN, moves: [] })).toEqual({ moves: [] });
+    expect(Date.now() - started).toBeLessThan(2000);
+  });
+
+  it("removes its listener from the caller's signal once each guess is done", async () => {
+    const done = (() => (async function* () {
+      yield { type: 'result', subtype: 'success', is_error: false, structured_output: { moves: ['e4'] } };
+    })()) as unknown as typeof query;
+    const review = new AbortController();
+    const opus = new OpusTemptingMoves({ query: done });
+    for (let i = 0; i < 3; i++) await opus.suggest({ startFen: INITIAL_FEN, moves: [], signal: review.signal });
+    expect(getEventListeners(review.signal, 'abort')).toHaveLength(0);
   });
 });
 
@@ -353,14 +378,38 @@ describe('what the desktop reports', () => {
 // ---------- Part B: the tempting moves in Coach calls ----------
 
 describe('the rating Maia-3 is given', () => {
-  it('uses a Lichess rating as it is, converts chess.com rapid by the ChessGoals table, and 1500 without one', () => {
-    expect(maiaRating(1432, 'lichess')).toBe(1432);
-    expect(maiaRating(1500, 'chesscom')).toBe(1620);
-    expect(maiaRating(1000, 'chesscom')).toBe(1229);
-    // Beyond the table's ends, its nearest row's difference.
-    expect(maiaRating(600, 'chesscom')).toBe(875);
-    expect(maiaRating(2500, 'chesscom')).toBe(2815);
-    expect(maiaRating(null, undefined)).toBe(1500);
+  it('prefers the blitz rating, converts only the pools that convert soundly, and gives 1500 otherwise', () => {
+    // Blitz first: Lichess as it is, chess.com by the ChessGoals blitz table.
+    expect(maiaRating({ rating: 1800, site: 'lichess', pool: 'rapid', blitz: 1600 })).toBe(1600);
+    expect(maiaRating({ rating: 1488, site: 'chesscom', pool: 'chess_rapid', blitz: 1390 })).toBe(1681);
+    // No blitz: Lichess rapid as it is, chess.com rapid by the ChessGoals rapid table.
+    expect(maiaRating({ rating: 1432, site: 'lichess', pool: 'rapid' })).toBe(1432);
+    expect(maiaRating({ rating: 1500, site: 'chesscom', pool: 'chess_rapid' })).toBe(1620);
+    expect(maiaRating({ rating: 1000, site: 'chesscom', pool: 'chess_rapid' })).toBe(1229);
+    expect(maiaRating({ rating: 600, site: 'chesscom', pool: 'chess_rapid' })).toBe(875);
+    expect(maiaRating({ rating: 2500, site: 'chesscom', pool: 'chess_rapid' })).toBe(2815);
+    // Pools with no sound conversion, and a rating linked before its pool was recorded: 1500.
+    expect(maiaRating({ rating: 1900, site: 'lichess', pool: 'classical' })).toBe(1500);
+    expect(maiaRating({ rating: 1900, site: 'lichess', pool: 'correspondence' })).toBe(1500);
+    expect(maiaRating({ rating: 1300, site: 'chesscom', pool: 'chess_daily' })).toBe(1500);
+    expect(maiaRating({ rating: 1300, site: 'chesscom', pool: 'chess_bullet' })).toBe(1500);
+    expect(maiaRating({ rating: 1700, site: 'lichess', pool: null })).toBe(1500);
+    expect(maiaRating({ rating: null })).toBe(1500);
+  });
+
+  it('records the pool and the blitz rating when the Player links an account', async () => {
+    const app = await instance();
+    const c = await client(app);
+    // The recorded Lichess player has played rapid, not blitz; the chess.com one has both.
+    await c.request('profile.update', { rating: { site: 'lichess', username: 'CoachVerify' } });
+    expect(rows(app, 'SELECT pool, blitz FROM rating_pools')).toEqual([{ pool: 'rapid', blitz: null }]);
+    expect(playerMaiaRating(app.app.db)).toBe(1612);
+    const profile = await c.request('profile.update', { rating: { site: 'chesscom', username: 'coachverify' } });
+    expect(profile.rating).toBe(1488);
+    expect(rows(app, 'SELECT pool, blitz FROM rating_pools')).toEqual([{ pool: 'chess_rapid', blitz: 1390 }]);
+    expect(playerMaiaRating(app.app.db)).toBe(1681);
+    await c.request('profile.update', { rating: null });
+    expect(playerMaiaRating(app.app.db)).toBe(1500);
   });
 });
 
@@ -407,7 +456,6 @@ describe('the tempting moves in the brief', () => {
     const app = await instance();
     const c = await client(app);
     await c.request('coach.ask', { ...QH5, job: 'hint' });
-    expect(app.coach.lastBrief?.tempting?.length ?? app.coach.lastBrief?.candidates.filter((x) => x.tempting).length).toBeGreaterThan(0);
     await c.request('coach.ask', { ...QH5, job: 'live', moveUci: 'h5f7' });
     expect(app.coach.lastBrief?.tempting).toBeUndefined();
     expect(app.coach.lastBrief?.move?.tempting).toBeUndefined();
@@ -415,6 +463,34 @@ describe('the tempting moves in the brief', () => {
     expect(review.moments.length).toBeGreaterThan(0);
     const jobs = rows<{ job: string }>(app, 'SELECT c.job FROM coach_tempting t JOIN coach_calls c ON c.id = t.call_id').map((r) => r.job);
     expect(new Set(jobs)).toEqual(new Set(['hint', 'review-moment']));
+  });
+
+  it('give a Hint only those the Engine already lists, with no search of their own', async () => {
+    const app = await instance();
+    const c = await client(app);
+    const engine = app.app.context.desktopEngine;
+    let searched = 0;
+    const gradeAsked = engine.gradeAsked.bind(engine);
+    engine.gradeAsked = (...args) => {
+      searched++;
+      return gradeAsked(...args);
+    };
+    await c.request('coach.ask', { ...QH5, job: 'hint' });
+    expect(searched).toBe(0);
+    expect(app.coach.lastBrief?.tempting).toBeUndefined();
+    const [logged] = rows<{ moves: string }>(app, 'SELECT moves FROM coach_tempting');
+    const listed = new Set(app.coach.lastBrief?.candidates.map((x) => x.uci));
+    const marked = app.coach.lastBrief?.candidates.filter((x) => x.tempting).map((x) => x.uci) ?? [];
+    expect(marked).toEqual((JSON.parse(logged!.moves) as string[]).filter((uci) => listed.has(uci)));
+  });
+
+  it("are left out when it isn't the Player's turn: they describe the Player's level", async () => {
+    const app = await instance();
+    const c = await client(app);
+    await c.request('coach.ask', { ...QH5, playerSide: 'black' });
+    expect(app.coach.lastBrief?.tempting).toBeUndefined();
+    expect(app.coach.lastBrief?.candidates.some((x) => x.tempting)).toBe(false);
+    expect(rows(app, 'SELECT * FROM coach_tempting')).toEqual([]);
   });
 
   it('give a Hint none while only Opus could guess them: it must stay quick', async () => {

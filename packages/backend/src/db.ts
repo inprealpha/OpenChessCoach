@@ -173,6 +173,15 @@ const MIGRATIONS: string[] = [
   );
   CREATE INDEX IF NOT EXISTS coach_tempting_call ON coach_tempting (call_id);
   `,
+  // Which pool the Player Profile's rating is from, and the Player's blitz rating on that site, so
+  // Maia-3 gets a rating on the scale it learned (ADR 0011). One row, like the profile.
+  `
+  CREATE TABLE IF NOT EXISTS rating_pools (
+    id INTEGER PRIMARY KEY CHECK (id = 1),
+    pool TEXT,
+    blitz INTEGER
+  );
+  `,
 ];
 
 /** Tables `coachctl db get` may read. */
@@ -194,6 +203,7 @@ export const READABLE_TABLES = [
   'coach_calls',
   'coach_questions',
   'coach_tempting',
+  'rating_pools',
 ] as const;
 
 export type Db = DatabaseSync;

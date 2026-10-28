@@ -2,7 +2,7 @@
 // guesses the moves many players at the Player's level would reach for, and the desktop's Engine
 // grades each one as it grades a move the Player asks about, before the brief is built. The guess
 // starts alongside the Engine's other searches, so an Opus guess adds only its own wait.
-import { INITIAL_FEN, playSan, positionKey } from '@chess-coach/shared/chess';
+import { INITIAL_FEN, playSan, positionKey, turnOf, type Side } from '@chess-coach/shared/chess';
 import type { Candidate } from '@chess-coach/shared/analysis';
 import type { CoachAsk } from '@chess-coach/shared/coach/types';
 import type { CoachJob } from '@chess-coach/shared/protocol';
@@ -21,6 +21,9 @@ export const TEMPTING_COUNT = 3;
 
 export interface Guess {
   service: TemptingMovesService;
+  /** The position, and the Player's side when it is known. */
+  fen: string;
+  playerSide?: Side | undefined;
   /** The Player's rating on the Lichess blitz scale (see rating.ts). */
   rating: number;
   /** The game up to the position: its first position and its moves in UCI. */
@@ -35,6 +38,8 @@ export interface Guess {
  */
 export function guessTempting(job: CoachJob, guess: Guess): Promise<TemptingMovesResult> | undefined {
   if (!TEMPTING_JOBS.includes(job)) return undefined;
+  // The moves "many players at your level would reach for" only fit the Player's own turn.
+  if (guess.playerSide && turnOf(guess.fen) !== guess.playerSide) return undefined;
   if (job === 'hint' && !guess.service.isLocal()) return undefined;
   const { startFen, moves } = guess.history;
   const out = guess.service.suggest({
@@ -70,14 +75,16 @@ export function historyFromSans(fen: string, sans: readonly unknown[]): Guess['h
 
 /**
  * The ask with its tempting moves graded by the Engine: an Engine candidate as it is, any other as
- * `gradeAsked` grades a move the Player asks about, cached like the brief's other searches. Records
- * where they came from for the call log.
+ * `gradeAsked` grades a move the Player asks about, cached like the brief's other searches. A Hint,
+ * which must stay quick, keeps only those among the Engine's candidates: no search of its own.
+ * Records where they came from for the call log.
  */
 export async function withTempting(ask: CoachAsk, guess: Promise<TemptingMovesResult> | undefined, engine: EngineService): Promise<CoachAsk> {
   if (!guess) return ask;
   const result = await guess;
+  const moves = ask.job === 'hint' ? result.moves.filter((uci) => ask.candidates.some((c) => c.uci === uci)) : result.moves;
   const tempting: Candidate[] = await Promise.all(
-    result.moves.map(async (uci) => ask.candidates.find((c) => c.uci === uci) ?? (await engine.gradeAsked(ask.fen, uci)).move),
+    moves.map(async (uci) => ask.candidates.find((c) => c.uci === uci) ?? (await engine.gradeAsked(ask.fen, uci)).move),
   );
   return {
     ...ask,

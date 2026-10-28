@@ -121,7 +121,7 @@ async function answer(positions: TemptingPosition[], model: string): Promise<Tem
     db.prepare("UPDATE profile SET rating = ?, rating_site = 'lichess', rating_username = 'eval' WHERE id = 1").run(p.rating ?? null);
     const facts = await factsFor(p, engine, reviewScores);
     const history = p.history ? { startFen: INITIAL_FEN, moves: p.history } : { startFen: p.fen, moves: [] };
-    const on = await withTempting(facts, guessTempting(p.job, { service: tempting, rating: p.rating ?? 1500, history }), engine);
+    const on = await withTempting(facts, guessTempting(p.job, { service: tempting, fen: p.fen, playerSide: p.playerSide, rating: p.rating ?? 1500, history }), engine);
     // Both modes get the same facts; the order alternates.
     const modes = out.length % 4 === 0 ? (['off', 'on'] as const) : (['on', 'off'] as const);
     for (const mode of modes) {

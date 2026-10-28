@@ -10,9 +10,9 @@ import { type Clock, iso } from './clock.ts';
 import { all, one, transaction, type Db } from './db.ts';
 import { getGame } from './games.ts';
 import { THINK_DEEPER_DEADLINE_MS } from './coach/real.ts';
-import { addGradeCounts, getProfile, removeGradeCounts } from './profile.ts';
+import { addGradeCounts, removeGradeCounts } from './profile.ts';
 import { guessTempting, withTempting } from './tempting-moves/ask.ts';
-import { maiaRating } from './tempting-moves/rating.ts';
+import { playerMaiaRating } from './tempting-moves/rating.ts';
 import type { TemptingMovesService } from './tempting-moves/service.ts';
 import type { CoachService } from './coach/service.ts';
 import type { EngineService } from './engine/service.ts';
@@ -169,11 +169,10 @@ async function makeReview(
   const counts = game.source !== 'sample';
   const out: KeyMoment[] = [];
   const started = clock.now().getTime();
-  const profile = getProfile(db);
-  const rating = maiaRating(profile.rating, profile.ratingSource?.site);
+  const rating = playerMaiaRating(db);
   for (const [index, m] of moments.entries()) {
     // The moves many players would reach for at the moment (ADR 0011), from the game's own moves.
-    const guess = tempting && guessTempting('review-moment', { service: tempting, rating, history: { startFen: game.startFen, moves: game.moves.slice(0, m.ply - 1) }, ...(signal ? { signal } : {}) });
+    const guess = tempting && guessTempting('review-moment', { service: tempting, fen: m.fenBefore, playerSide: game.playerSide, rating, history: { startFen: game.startFen, moves: game.moves.slice(0, m.ply - 1) }, ...(signal ? { signal } : {}) });
     // What the opponent threatened before the move: the brief keeps it only when the Engine's best
     // reply to the move is that threat, so the Coach can say the move left it on.
     const threat = await engine.threat(m.fenBefore);

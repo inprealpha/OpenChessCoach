@@ -17,8 +17,8 @@ export const profileHandlers: HandlerMap<'profile.get' | 'profile.update' | 'pro
     if (req.rating === null) patch.rating = null;
     else if (req.rating) {
       if (req.rating.site !== 'lichess' && req.rating.site !== 'chesscom') throw new AppError('bad-request', 'Pick Lichess or chess.com.');
-      const rating = await fetchRating(app.fetch, req.rating.site, req.rating.username, signal);
-      patch.rating = { site: req.rating.site, username: req.rating.username.trim(), rating };
+      const { rating, pool, blitz } = await fetchRating(app.fetch, req.rating.site, req.rating.username, signal);
+      patch.rating = { site: req.rating.site, username: req.rating.username.trim(), rating, pool, ...(blitz ? { blitz } : {}) };
     }
     // The app tells the Player a change wasn't saved when its connection is lost, so a closed one
     // saves nothing. Wait a turn first: a desktop waking from sleep reads a message and the close

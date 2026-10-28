@@ -160,6 +160,28 @@ const MIGRATIONS: string[] = [
   );
   CREATE INDEX IF NOT EXISTS coach_questions_call ON coach_questions (call_id);
   `,
+  // Where each Coach call's tempting moves came from (Maia-3, Opus or the fake), the moves, how
+  // long the guess took and, for Opus, what it cost (ADR 0011). A job that gets none has no row.
+  `
+  CREATE TABLE IF NOT EXISTS coach_tempting (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    call_id INTEGER NOT NULL,
+    source TEXT NOT NULL,
+    moves TEXT NOT NULL,
+    ms INTEGER NOT NULL,
+    usage TEXT
+  );
+  CREATE INDEX IF NOT EXISTS coach_tempting_call ON coach_tempting (call_id);
+  `,
+  // Which pool the Player Profile's rating is from, and the Player's blitz rating on that site, so
+  // Maia-3 gets a rating on the scale it learned (ADR 0011). One row, like the profile.
+  `
+  CREATE TABLE IF NOT EXISTS rating_pools (
+    id INTEGER PRIMARY KEY CHECK (id = 1),
+    pool TEXT,
+    blitz INTEGER
+  );
+  `,
 ];
 
 /** Tables `coachctl db get` may read. */
@@ -180,6 +202,8 @@ export const READABLE_TABLES = [
   'puzzle_attempts',
   'coach_calls',
   'coach_questions',
+  'coach_tempting',
+  'rating_pools',
 ] as const;
 
 export type Db = DatabaseSync;

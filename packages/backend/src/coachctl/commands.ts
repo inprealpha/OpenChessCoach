@@ -189,6 +189,15 @@ async function doctor(flags: Flags): Promise<Result> {
         const hello = await client.request('hello', { client: 'coachctl-doctor' });
         await client.close();
         add('pairing', true, `paired device ${hello.deviceId} connected; Coach ${hello.coach.state}`);
+        // Where the moves a Player would reach for come from (ADR 0011). Until the Maia-3 model is
+        // ready Opus answers, so only a failed download is a problem worth fixing.
+        const tempting = hello.temptingMoves;
+        add(
+          'tempting-moves',
+          tempting.model !== 'failed',
+          `from ${tempting.source}; Maia-3 model ${tempting.model}: ${tempting.detail}`,
+          'Check this desktop can reach github.com, then restart the app to download the model again.',
+        );
         if (t.run) {
           const engine = await engineConfig(t);
           add('engine', engine.singleThread && engine.depth === 10, `depth ${engine.depth}, ${engine.multiPv} lines, ${engine.singleThread ? 'one thread' : 'several threads'}`, 'Verify mode should fix the Engine at depth 10 on one thread.');

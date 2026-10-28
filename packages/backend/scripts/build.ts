@@ -55,6 +55,19 @@ mkdirSync(new URL('stockfish/', dist));
 cpSync(new URL('index.js', stockfishPkg), new URL('stockfish/index.cjs', dist));
 cpSync(new URL('Copying.txt', stockfishPkg), new URL('stockfish/COPYING.txt', dist));
 writeFileSync(new URL('web/engine/package.json', dist), '{ "type": "commonjs" }\n');
+// The tempting moves' runtime (ADR 0011): onnxruntime's Node build, bundled with the one package it
+// requires, beside its WebAssembly files; its MIT notice is in THIRD_PARTY_NOTICES.md. The Maia-3
+// model itself is downloaded after install.
+const ortDist = new URL('node_modules/onnxruntime-web/dist/', repo);
+await build({
+  input: new URL('ort.node.min.js', ortDist).pathname,
+  platform: 'node',
+  external: [/^node:/],
+  logLevel: 'warn',
+  output: { file: new URL('ort/ort.node.min.js', dist).pathname, format: 'cjs', codeSplitting: false },
+});
+for (const file of ['ort-wasm-simd-threaded.mjs', 'ort-wasm-simd-threaded.wasm']) cpSync(new URL(file, ortDist), new URL(`ort/${file}`, dist));
+writeFileSync(new URL('ort/package.json', dist), '{ "type": "commonjs" }\n');
 for (const file of ['LICENSE', 'THIRD_PARTY_NOTICES.md', 'README.md']) {
   if (existsSync(new URL(file, repo))) cpSync(new URL(file, repo), new URL(file, pkg));
 }

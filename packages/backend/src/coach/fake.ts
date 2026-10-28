@@ -1,8 +1,9 @@
 // The fake Coach for CI, tests and verify mode (ADR 0006). It replays recorded replies keyed
 // by request, falls back to a deterministic reply built from the brief, and can be scripted to
 // return any reply, including a move the Engine never suggested. With Think deeper on it asks the
-// desktop's Engine one question, or the scripted ones (ADR 0010). The backend records every
-// brief it receives in the coach_calls table.
+// desktop's Engine one question, or the scripted ones (ADR 0010). It names a tempting move that
+// fails, as the real Coach is told to (ADR 0011). The backend records every brief it receives in
+// the coach_calls table.
 import type { Brief, BriefCandidate } from '@chess-coach/shared/coach/brief';
 import type { EngineAnswer, EngineQuestion } from '@chess-coach/shared/coach/engine-tool';
 import type { CoachRawReply } from '@chess-coach/shared/coach/types';
@@ -179,6 +180,19 @@ export function templateReply(brief: Brief): CoachRawReply {
       // An asked move that is the Engine's best is already drawn in green, and the other option is drawn in its place.
       add(asked && asked.uci !== best?.uci ? asked : alt, 'blue');
       break;
+    }
+  }
+  // The tempting moves (ADR 0011): the move itself, when many players reach for it, or the first
+  // tempting move that fails, as a move many players would reach for here.
+  if (brief.job === 'why' || brief.job === 'review-moment') {
+    const trap = [...brief.candidates.filter((c) => c.tempting), ...(brief.tempting ?? [])].find(
+      (t) => t.uci !== brief.move?.uci && t.grade !== 'Best' && t.grade !== 'Good',
+    );
+    if (brief.move?.tempting) text += ` Many players would reach for ${brief.move.san} here.`;
+    else if (trap) {
+      text += ` Many players would reach for ${trap.san} here, but it is graded ${trap.grade}.`;
+      if (trap.does) text += ` It ${trap.does}.`;
+      add(trap, 'red');
     }
   }
   // The threat, by the side that makes it: in the position, as the board's Threat arrow names

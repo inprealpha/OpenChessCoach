@@ -47,6 +47,8 @@ export interface BriefCandidate {
   result?: string;
   /** The Player's question names this move. When the Engine didn't list it, it comes after the candidates. */
   asked?: true;
+  /** Many players at the Player's level would reach for this move here (ADR 0011). */
+  tempting?: true;
 }
 
 /**
@@ -61,10 +63,16 @@ export interface Brief {
   sideToMove: Side;
   fen: string;
   recentMoves: string;
-  move?: { san: string; uci: string; grade: MoveGrade; evaluationAfter: string; does?: string; result?: string };
+  move?: { san: string; uci: string; grade: MoveGrade; evaluationAfter: string; does?: string; result?: string; tempting?: true };
   /** The Player's Winning Chances in `fen` and after the move, worded exactly as the screen shows them. */
   winningChances?: { before: string; after?: string };
   candidates: BriefCandidate[];
+  /**
+   * The tempting moves the Engine didn't list (ADR 0011): moves many players at the Player's level
+   * would reach for in `fen`, each graded and explained against the Engine's best move as the
+   * candidates are. The tempting moves among the candidates and the move are marked `tempting`.
+   */
+  tempting?: BriefCandidate[];
   replies?: BriefCandidate[];
   /**
    * What `by`, the side not to move in `fen`, would play if it were their move: a forcing move the
@@ -122,6 +130,12 @@ export function buildBrief({ ask, profile, summary }: BriefInput): Brief {
   const others = asked.filter((a) => !candidates.some((c) => c.uci === a.uci));
   const extra = briefCandidates(ask.fen, others, others.length, (a) => explained(ask.fen, a.uci, a.pv.slice(1), a.score, hideMoves), ask.candidates[0]);
   candidates.push(...extra.map((c) => ({ ...c, asked: true as const })));
+  // The tempting moves (ADR 0011): marked among the candidates and on the move, the rest listed
+  // apart, graded against the Engine's best move as the candidates are.
+  const tempting = ask.tempting ?? [];
+  for (const c of candidates) if (tempting.some((t) => t.uci === c.uci)) c.tempting = true;
+  const unlisted = tempting.filter((t) => t.uci !== ask.move?.uci && !candidates.some((c) => c.uci === t.uci));
+  const temptingOthers = briefCandidates(ask.fen, unlisted, unlisted.length, (t) => explained(ask.fen, t.uci, t.pv.slice(1), t.score, hideMoves), ask.candidates[0]);
   const brief: Brief = {
     job: ask.job,
     level: profile.level,
@@ -131,6 +145,7 @@ export function buildBrief({ ask, profile, summary }: BriefInput): Brief {
     fen: ask.fen,
     recentMoves: formatRecent(ask.recentMoves, ask.fen),
     candidates,
+    ...(temptingOthers.length ? { tempting: temptingOthers } : {}),
     maxWords: MAX_WORDS[ask.job],
     allowNote: Boolean(ask.allowNote || ask.lesson?.finalTurn),
     hideMoves,
@@ -144,6 +159,7 @@ export function buildBrief({ ask, profile, summary }: BriefInput): Brief {
         grade: ask.move.grade,
         evaluationAfter: formatScore(ask.move.playedScore),
         ...explained(ask.fen, played.uci, ask.replies?.[0]?.pv ?? [], ask.move.playedScore, hideMoves),
+        ...(tempting.some((t) => t.uci === played.uci) ? { tempting: true as const } : {}),
       };
       // The replies say what they do; what the line leads to is the move's result.
       if (ask.replies?.length) {
@@ -337,6 +353,9 @@ function fitToBudget(brief: Brief): Brief {
     // The facts about the weaker alternatives go first: the best moves, the move and the moves the Player asked about matter most.
     (b) => { b.candidates.slice(2).forEach((c) => { if (!c.asked) delete c.does; }); b.replies?.slice(1).forEach((r) => delete r.does); },
     (b) => { b.candidates.slice(1).forEach((c) => { if (!c.asked) { delete c.does; delete c.result; } }); },
+    // The tempting moves the Engine didn't list: their lines short, then their facts but the result.
+    (b) => { b.tempting?.forEach((t) => { t.line = t.line.split(' ').slice(0, 2).join(' '); }); },
+    (b) => { b.tempting?.forEach((t) => delete t.does); },
     (b) => { if (b.summary) b.summary = clip(b.summary, 250); },
     (b) => { if (b.lesson) b.lesson.notes = clip(b.lesson.notes, 300); },
     (b) => { if (b.profile) b.profile.notes = b.profile.notes.slice(-1); },
@@ -347,6 +366,7 @@ function fitToBudget(brief: Brief): Brief {
     (b) => { if (b.question) b.question = clip(b.question, 200); },
     (b) => { delete b.profile; },
     (b) => { delete b.summary; },
+    (b) => { delete b.tempting; },
     // Last, the facts on the key moves themselves.
     (b) => { b.replies?.forEach((r) => delete r.does); b.candidates.forEach((c) => { delete c.does; delete c.result; }); },
     (b) => { if (b.move) { delete b.move.does; delete b.move.result; } },

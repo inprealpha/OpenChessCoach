@@ -21,6 +21,7 @@ export const systemHandlers: HandlerMap<
       verify: app.verify,
       deviceId: device.id,
       coach: await app.coach.status(),
+      temptingMoves: app.temptingMoves.status(),
     };
   },
 

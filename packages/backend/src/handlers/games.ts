@@ -147,7 +147,7 @@ export const gameHandlers: HandlerMap<
   // connection leaves it to finish and be saved, and asking again joins it. It stops only when
   // the desktop app does.
   'review.start': async (req, { app, delta, progress }) =>
-    startReview({ db: app.db, clock: app.clock, coach: app.coach, engine: app.desktopEngine }, Number(req.gameId), delta, progress, app.stopping),
+    startReview({ db: app.db, clock: app.clock, coach: app.coach, engine: app.desktopEngine, tempting: app.temptingMoves }, Number(req.gameId), delta, progress, app.stopping),
 
   'review.get': async (req, { app }) => {
     const gameId = Number(req.gameId);

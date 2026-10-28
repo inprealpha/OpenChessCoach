@@ -70,3 +70,7 @@ $C screenshot --route "#/" --width 390 --height 844 --full-page   # phone size
 - After 1. e4 d5 2. exd5 and the Engine's reply in an Engine Game (Beginner), the menu's `Play a game` shows `Continue your game` and
   "Move 3, you play White"; after `Resign` it is gone.
 - From any screen, the banner's `Settings` and `Player Profile` open those screens.
+- `#/settings` ends with the region `About`: a `Source code` link to
+  `https://github.com/inprealpha/OpenChessCoach` and a `Third-party notices` link, shown even when
+  the desktop can't be reached. The Maia-3 model's AGPL asks that every Player on the Wi-Fi or
+  through the tunnel is offered the source (ADR 0011).

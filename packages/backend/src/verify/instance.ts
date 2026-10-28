@@ -12,6 +12,7 @@ import { appVersion, webRoot } from '../runtime.ts';
 import { startApp, type AppOptions, type RunningApp } from '../server.ts';
 import type { TunnelStarter } from '../tunnel.ts';
 import type { CoachPort } from '../coach/port.ts';
+import type { TemptingMovesService } from '../tempting-moves/service.ts';
 import { recordedFetch } from './recorded-sites.ts';
 import { seed, type Seed } from './seed.ts';
 
@@ -31,6 +32,8 @@ export interface VerifyOptions {
   log?: (line: string) => void;
   /** Use this Coach instead of the fake one: only the desktop real-Coach check does. */
   coachPort?: CoachPort;
+  /** Where the tempting moves come from; the fixed fake by default (ADR 0011). */
+  temptingMoves?: TemptingMovesService;
 }
 
 export interface VerifyInstance {
@@ -75,6 +78,7 @@ export async function startVerifyInstance(options: VerifyOptions = {}): Promise<
     log: options.log ?? (() => {}),
     // Imports by username answer from recordings (see recordings/sites.json), never the network.
     fetch: options.fetch ?? recordedFetch(),
+    ...(options.temptingMoves ? { temptingMoves: options.temptingMoves } : {}),
   };
   const app = await startApp(appOptions);
   const url = `http://127.0.0.1:${app.port}`;

@@ -31,6 +31,9 @@ A rule that only lives in a document gets broken. When agents repeat a mistake, 
 | A PR that changes what a Player sees embeds before and after screenshots inline, desktop and phone | `scripts/before-after.ts` makes the picture; otherwise only this file and `.claude/skills/verify/SKILL.md` (section 4) |
 | Verify mode is deterministic: same position, same evaluation and Move Grades (ADR 0006) | `e2e/journeys/board.spec.ts` |
 | Player-facing text uses the glossary, not its avoided terms (`CONTEXT.md`) | `scripts/glossary-lint.ts` in `npm run lint` |
+| Maia-3 on the desktop gives the same moves as the original model (ADR 0011) | `packages/backend/test/tempting-moves.test.ts` (parity on 408 positions, when the model file is on the machine) |
+| Tempting moves reach the Coach only as Engine-graded output, and only in Why Questions, Review moments and (from Maia-3) Hints (ADR 0011) | `packages/backend/test/tempting-moves.test.ts` |
+| Players on the Wi-Fi and through the tunnel are offered the app's source, as the Maia-3 model's AGPL asks (ADR 0011) | `e2e/journeys/menu.spec.ts` (the Settings source link), `THIRD_PARTY_NOTICES.md` |
 | The owner reviews changes to protected paths | `.github/protected-paths.txt` → `CODEOWNERS` (`npm run check:paths`) and the `protected-path` label |
 | Coach changes are checked against the real Coach before merging | `.github/coach-paths.txt`, the `touches-coach` label and the `real Coach` status |
 | Tests that call a real model use the latest Haiku (the `haiku` alias), never the app's per-job models | `scripts/test/real-coach-check.test.ts` (`CHECK_MODEL`) |

@@ -634,6 +634,31 @@ test('a Why Question about a move the Engine didn’t list gets that move graded
   expect(JSON.parse(call?.stripped ?? '[]')).toEqual([]);
 });
 
+test('with Think deeper on in Settings, the Coach asks the Engine while it answers a Why Question', async ({ paired, app }) => {
+  await paired.goto(`${app.url}/#/settings`);
+  const deeper = paired.getByRole('region', { name: 'Think deeper' });
+  const box = deeper.getByRole('checkbox', { name: 'Let the Coach check its explanations with the Engine' });
+  await expect(box).not.toBeChecked();
+  // The cost is said before the Player turns it on.
+  await expect(deeper).toContainText('Answers take longer and use more of your Claude limits than usual.');
+  await box.check();
+  await expect(deeper.getByRole('status')).toHaveText('Saved.');
+  expect((await app.rows<{ key: string; value: string }>('settings')).find((r) => r.key === 'thinkDeeper')?.value).toBe('true');
+
+  await paired.goto(`${app.url}/#/board`);
+  for (const uci of ['e2e4', 'e7e5', 'd1h5']) await play(paired, uci);
+  await expect(paired.getByRole('button', { name: /Move 2\. Qh5, / })).toBeVisible();
+  await paired.getByRole('button', { name: 'Ask the Coach why' }).click();
+  await coachIdle(paired);
+  // The fake Coach asks what the Engine plays after its best move, and names the answer.
+  const conversation = paired.getByLabel('Coach conversation');
+  await expect(conversation).toContainText('I checked with the Engine: after');
+  await expect(conversation).toContainText('Checked with the Engine: 1 question');
+  const questions = await app.rows<{ question: string; answer: string }>('coach_questions');
+  expect(questions).toHaveLength(1);
+  expect(JSON.parse(questions[0]?.answer ?? '{}')).toMatchObject({ sideToMove: 'black', questionsLeft: 2 });
+});
+
 test('the Coach quotes the Winning Chances the bar shows either side of the move', async ({ paired, app }) => {
   await paired.goto(`${app.url}/#/board`);
   for (const uci of MOVES.slice(0, 5)) await play(paired, uci);

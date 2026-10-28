@@ -60,6 +60,47 @@ How to answer:
    - note: only when allowNote is true and you noticed something new and lasting about the
      Player (one terse line, under 120 characters); otherwise null.`;
 
+/**
+ * Added to the instructions when the Coach may ask the Engine (Think deeper, ADR 0010). The
+ * answers are Engine facts like the brief's, so every rule above holds for them too.
+ */
+export function engineToolPrompt(maxQuestions: number, followUp = false): string {
+  // A follow-up may be answered by what the thread already covered: asking is then the Coach's call.
+  const ask = followUp
+    ? `This is a follow-up (the brief has a summary): ask the Engine only if the brief and the summary
+  don't already answer the new question, at most ${maxQuestions} times. When you ask, choose your questions first. Good questions:`
+    : `Before you answer, ask the Engine at least once, and at most ${maxQuestions} times, to look
+  further than the brief's short lines. Choose your questions first. Good questions:`;
+  return `
+
+Think deeper is on: the Player wants a deeper explanation than the brief alone gives, and has
+accepted that it takes longer. You can ask the Engine with the tool ask_engine. It takes "line",
+SAN moves played one after another from the brief's fen (leave it out for that position), and
+optionally "move", one SAN move in the position after the line. It answers like the brief: the
+Engine's best moves there, each with its Move Grade, line, "does" and "result"; for "move", its
+Move Grade against the Engine's best move there, its line and facts, and the Engine's replies to it;
+and for a line, "lastMove": what the line's last move does, as "move" says it for the brief's move.
+- ${ask}
+  after a mistake, the position at the end of the Engine's best reply line, to see what it wins;
+  for the Engine's best move, the position after its line, to see why it holds;
+  for a move the Player asked about, the Engine's answer to it a move or two further on;
+  a natural-looking move the Player might try instead, to see why it fails.
+- An answer with "questionsLeft": 0 is your last. A refused question says why; fix it or move on.
+- The Engine's answers count as part of the brief: you may use their moves and facts, and never a
+  fact you work out yourself. A line you send is your question, not the Engine's line: never say
+  the Engine plays it unless an answer shows it.
+- A line is the Engine's best play, not forced play. Never say a side must play a move, or can't
+  play another, unless "does" says it is the only legal move.
+- Facts belong to the move they are on. Say what a move does only from that move's own "does" and
+  "result" (or lastMove's, for the last move of your line): a candidate's facts are about that
+  candidate, never about the move before it.
+- Say what a line wins only as a "result" says it. Never add up material over a line yourself, and
+  never say a side keeps a piece through a line: the line may give it back later.
+- Draw arrows only for moves played in the brief's fen or right after the move. A move deeper in
+  a line you may name, and list in "moves", but not draw.
+- Keep to maxWords: use what you learn to explain better, not to say more.`;
+}
+
 const JOB_INSTRUCTIONS: Record<CoachJob, string> = {
   why: 'Answer the Player\'s Why Question about this move or position. Name the alternatives the Engine considered and explain why they are worse. If there is a summary, this is a follow-up: answer only the new question.',
   'review-moment':

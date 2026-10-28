@@ -105,6 +105,22 @@ export interface CoachRawReply {
   arrows: { uci: string; brush: Brush }[];
   highlights: string[];
   note: string | null;
+  /** What the call cost, when the Coach reports it. Logged, never shown. */
+  usage?: CoachUsage;
+}
+
+/** One Coach call's cost: tokens, turns and time, as the Claude Agent SDK reports them. */
+export interface CoachUsage {
+  inputTokens: number;
+  outputTokens: number;
+  cacheReadTokens: number;
+  cacheWriteTokens: number;
+  turns: number;
+  ms: number;
+  /** The SDK's estimate of what the call would cost at API prices, in US dollars. */
+  costUsd: number;
+  /** The exact models the call ran on, as the model alias resolved. */
+  models: string[];
 }
 
 /** What clients receive: the guarded reply. */
@@ -119,4 +135,6 @@ export interface CoachReply {
   /** How many moves or arrows the guard removed. */
   stripped: number;
   model: string;
+  /** How many questions the Coach asked the Engine while it answered, with Think deeper on (ADR 0010). */
+  engineQuestions: number;
 }

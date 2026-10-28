@@ -90,6 +90,9 @@ with no Coach call.
   the position on the board, from the desktop's Engine (`engine.threat`, ADR 0007); see
   `board-and-engine.md`. Works before the Review is started too.
 - The Player Profile's Move Grade counts update, and the Coach may add one note.
+- With Think deeper on in Settings, each key moment's Coach call may ask the desktop's Engine up to
+  3 questions (see `why-question.md`); the fake Coach asks one each, logged in `coach_questions`
+  (`think-deeper.test.ts`).
 
 ## Drive
 

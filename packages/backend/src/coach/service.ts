@@ -1,5 +1,7 @@
-// Runs one Coach call: fresh brief, budget check, Coach port, move guard, profile note.
+// Runs one Coach call: fresh brief, budget check, the Engine tool with Think deeper on, Coach
+// port, move guard, profile note.
 import { assertBriefWithinBudget, BriefTooLargeError, buildBrief, type Brief } from '@chess-coach/shared/coach/brief';
+import { ENGINE_TOOL_JOBS } from '@chess-coach/shared/coach/engine-tool';
 import { guardReply } from '@chess-coach/shared/coach/guard';
 import type { CoachAsk, CoachReply } from '@chess-coach/shared/coach/types';
 import type { CoachStatus } from '@chess-coach/shared/protocol';
@@ -7,11 +9,33 @@ import { type Clock, iso } from '../clock.ts';
 import type { Db } from '../db.ts';
 import { AppError } from '../errors.ts';
 import { addCoachNote, getProfile } from '../profile.ts';
+import type { EngineService } from '../engine/service.ts';
 import { getSettings } from '../settings.ts';
-import { CoachLimitError, CoachUnavailableError, type CoachPort } from './port.ts';
+import { EngineTool, type EngineCall } from './engine-tool.ts';
+import { CoachDeadlineError, CoachLimitError, CoachUnavailableError, type CoachPort } from './port.ts';
+
+/** How the Coach panel says the Coach is asking the Engine, numbered so the Player sees it move on. */
+export function checkingText(n: number): string {
+  return `The Coach is checking with the Engine (question ${n})…`;
+}
+
+/** What a Coach call may use besides its ask. */
+export interface AskOptions {
+  signal?: AbortSignal;
+  /** The desktop's Engine, which the Coach may ask with Think deeper on (ADR 0010). */
+  engine?: EngineService;
+  /** Hears what the Coach is doing while no text streams, such as asking the Engine. */
+  onStatus?: (status: string) => void;
+  /** With the Engine, a shorter deadline than the Coach's own, when a Review has less time left. */
+  deadlineMs?: number;
+  /** With the Engine, answer once more from the brief alone when the deadline stops the call. */
+  retryWithoutEngine?: boolean;
+}
 
 const MAX_THREADS = 200;
 const MAX_LOGGED_CALLS = 500;
+/** Clears the questions of Coach calls older than the oldest one kept (the parameter), through the index on call_id. */
+export const QUESTION_CLEANUP = 'DELETE FROM coach_questions WHERE call_id < ?';
 
 export class CoachService {
   private readonly db: Db;
@@ -48,35 +72,65 @@ export class CoachService {
     if (status.state === 'unavailable') throw new AppError('coach-unavailable', status.reason ?? 'The Coach is unavailable.');
   }
 
-  /** Asks the Coach. Every Engine fact in `ask` comes from the desktop's Engine (ADR 0007). */
-  async ask(ask: CoachAsk, onText: (delta: string) => void, signal?: AbortSignal): Promise<CoachReply> {
+  /**
+   * Asks the Coach. Every Engine fact in `ask` comes from the desktop's Engine (ADR 0007). With
+   * Think deeper on, a Why Question or a Review moment may also ask `options.engine` while it answers (ADR 0010).
+   */
+  async ask(ask: CoachAsk, onText: (delta: string) => void, options: AskOptions = {}): Promise<CoachReply> {
     await this.assertAvailable();
 
     const brief = this.brief(ask);
-    const model = getSettings(this.db).models[ask.job];
+    const settings = getSettings(this.db);
+    const model = settings.models[ask.job];
+    const { engine, signal } = options;
+    // The tool's Engine searches end with the call: when the client cancels, and once the Coach is done or stopped.
+    const stop = new AbortController();
+    const cancel = () => stop.abort();
+    signal?.addEventListener('abort', cancel, { once: true });
+    const tool =
+      engine && settings.thinkDeeper && ENGINE_TOOL_JOBS.includes(ask.job)
+        ? new EngineTool(engine, brief.fen, { signal: stop.signal, onQuestion: (n) => options.onStatus?.(checkingText(n)) })
+        : undefined;
     let raw;
     try {
-      raw = await this.coach.ask({ job: ask.job, model, brief, ...(signal ? { signal } : {}) }, onText);
+      raw = await this.coach.ask(
+        {
+          job: ask.job,
+          model,
+          brief,
+          ...(signal ? { signal } : {}),
+          ...(tool ? { engine: tool, ...(options.deadlineMs !== undefined ? { deadlineMs: options.deadlineMs } : {}) } : {}),
+        },
+        onText,
+      );
     } catch (err) {
       if (err instanceof CoachLimitError) {
+        this.log(ask.job, model, brief, null, [], tool?.calls);
         this.limitUntil = err.resetsAt ?? new Date(this.clock.now().getTime() + 15 * 60_000);
         const next = await this.status();
         this.onStatus(next);
         throw new AppError('coach-limit', next.reason ?? err.message);
       }
       if (err instanceof CoachUnavailableError) {
+        this.log(ask.job, model, brief, null, [], tool?.calls);
         this.onStatus({ state: 'unavailable', reason: err.message });
         throw new AppError('coach-unavailable', err.message);
       }
-      this.log(ask.job, model, brief, null, []);
+      this.log(ask.job, model, brief, null, [], tool?.calls);
+      // Out of time with the Engine: once, the Coach answers from the brief alone instead.
+      if (err instanceof CoachDeadlineError && options.retryWithoutEngine) return this.ask(ask, onText, { ...options, engine: undefined });
       throw new AppError('coach-error', `The Coach couldn't answer: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      stop.abort();
+      signal?.removeEventListener('abort', cancel);
     }
     if (!raw.text.trim()) {
-      this.log(ask.job, model, brief, raw, []);
+      this.log(ask.job, model, brief, raw, [], tool?.calls);
       throw new AppError('coach-error', 'The Coach couldn’t answer: its reply was empty. Try asking again.');
     }
-    const guarded = guardReply(brief, raw);
-    this.log(ask.job, model, brief, raw, guarded.stripped);
+    // Moves the Engine's answers gave the Coach count as Engine output; a move it made up is still stripped.
+    const guarded = guardReply(brief, raw, tool?.moves);
+    this.log(ask.job, model, brief, raw, guarded.stripped, tool?.calls);
     const note = guarded.note ? addCoachNote(this.db, this.clock, guarded.note) : null;
     if (ask.threadId) this.remember(ask.threadId, ask.question, raw.text);
     return {
@@ -87,6 +141,7 @@ export class CoachService {
       note,
       stripped: guarded.stripped.length,
       model,
+      engineQuestions: tool?.questions ?? 0,
     };
   }
 
@@ -116,13 +171,22 @@ export class CoachService {
     if (this.threads.size > MAX_THREADS) this.threads.delete(this.threads.keys().next().value as string);
   }
 
-  private log(job: string, model: string, brief: Brief, raw: unknown, stripped: string[]): void {
-    this.db
+  private log(job: string, model: string, brief: Brief, raw: unknown, stripped: string[], engineCalls: readonly EngineCall[] = []): void {
+    const { lastInsertRowid } = this.db
       .prepare('INSERT INTO coach_calls (coach, job, model, brief, raw_reply, stripped, at) VALUES (?, ?, ?, ?, ?, ?, ?)')
       .run(this.coach.name, job, model, JSON.stringify(brief), raw ? JSON.stringify(raw) : null, JSON.stringify(stripped), iso(this.clock));
-    this.db
+    const ask = this.db.prepare('INSERT INTO coach_questions (call_id, question, answer, refused, ms) VALUES (?, ?, ?, ?, ?)');
+    for (const c of engineCalls) {
+      ask.run(lastInsertRowid, JSON.stringify(c.question), c.answer ? JSON.stringify(c.answer) : null, c.refused ?? null, c.ms);
+    }
+    const trimmed = this.db
       .prepare('DELETE FROM coach_calls WHERE id NOT IN (SELECT id FROM coach_calls ORDER BY id DESC LIMIT ?)')
       .run(MAX_LOGGED_CALLS);
+    // Only once calls were trimmed: most calls trim nothing and ask the Engine nothing.
+    if (trimmed.changes) {
+      const oldest = this.db.prepare('SELECT MIN(id) AS id FROM coach_calls').get() as { id: number };
+      this.db.prepare(QUESTION_CLEANUP).run(oldest.id);
+    }
   }
 }
 

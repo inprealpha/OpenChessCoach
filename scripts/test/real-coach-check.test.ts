@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import type { Brief } from '@chess-coach/shared/coach/brief';
 import type { CoachRawReply, CoachReply } from '@chess-coach/shared/coach/types';
+import type { EngineAnswer } from '@chess-coach/shared/coach/engine-tool';
 import { avoidedTerms } from '../glossary-lint.ts';
 import { CHECK_MODEL, type CallVerdict, checkCall, RecordingCoach, ROLE_BREAK_TERMS, summarize } from '../real-coach-check.ts';
 import type { CoachCall, CoachPort } from '../../packages/backend/src/coach/port.ts';
@@ -33,6 +34,7 @@ const good: CoachReply = {
   note: null,
   stripped: 0,
   model: 'sonnet',
+  engineQuestions: 0,
 };
 const terms = ['accuracy', 'tutor', 'computer'];
 const check = (reply: Partial<CoachReply>, b: Partial<Brief> = {}) => checkCall({ job: 'why', brief: { ...brief, ...b }, raw }, { ...good, ...reply }, terms);
@@ -89,6 +91,26 @@ describe('the real-Coach check', () => {
     expect(checkCall({ job: 'why', brief, raw }, { ...good, text: 'The user should take back with exd5.' }, contextTerms).problems).toEqual(['the text uses "user", so the Coach broke role']);
   });
 
+  it('accepts moves and names from the Engine’s answers with Think deeper on, drawn only on the board’s position', () => {
+    // The Coach asked what Black plays after exd5: Qxd5, which the brief doesn't have.
+    const answer: EngineAnswer = {
+      after: 'exd5',
+      fen: 'rnbqkbnr/ppp1pppp/8/3P4/8/8/PPPP1PPP/RNBQKBNR b KQkq - 0 2',
+      sideToMove: 'black',
+      candidates: [{ san: 'Qxd5', uci: 'd8d5', evaluation: '-0.30', grade: 'Best', line: 'Nc3 Qa5' }],
+      questionsLeft: 2,
+    };
+    const text = 'After exd5, the Engine answers Qxd5, taking the pawn back.';
+    const record = (answers?: EngineAnswer[]) => ({ job: 'why' as const, brief, raw: { ...raw, moves: ['d8d5'] }, ...(answers ? { answers } : {}) });
+    // Without the answer, Qxd5 is no move the reply may show.
+    expect(checkCall(record(), { ...good, text, moves: ['d8d5'] }, terms).problems).toEqual(['the reply shows d8d5, which is not legal here']);
+    expect(checkCall(record([answer]), { ...good, text, moves: ['d8d5'] }, terms).problems).toEqual([]);
+    // Deeper than the board, an answer's move is named, not drawn.
+    expect(checkCall(record([answer]), { ...good, text, moves: [], arrows: [{ from: 'd8', to: 'd5', brush: 'yellow' }] }, terms).problems).toEqual([
+      'the reply shows d8d5, which is not legal here',
+    ]);
+  });
+
   it('passes a run whose calls only have warnings, and counts them in the posted status', () => {
     const call = (warnings: string[], problems: string[] = []): CallVerdict => ({ job: 'why', words: 30, maxWords: 150, problems, warnings });
     expect(summarize([call([]), call([])])).toEqual({ ok: true, description: '2 Coach calls passed the structural checks' });
@@ -119,5 +141,23 @@ describe('the real-Coach check', () => {
     expect(CHECK_MODEL).toBe('haiku');
     expect(models).toEqual(['haiku', 'haiku']);
     expect(coach.calls.map((c) => c.job)).toEqual(['why', 'hint']);
+  });
+
+  it('keeps the Engine’s answers in a call with Think deeper on', async () => {
+    const answer = { after: 'the brief’s position', fen: AFTER_E4_D5, sideToMove: 'white', candidates: [], questionsLeft: 2 };
+    const inner: CoachPort = {
+      name: 'fake',
+      status: async () => ({ state: 'ready' }),
+      ask: async (call: CoachCall) => {
+        await call.engine?.ask({});
+        await call.engine?.ask({ line: ['Ke7'] });
+        return raw;
+      },
+    };
+    const engine = { maxQuestions: 3, maxCalls: 5, exhausted: false, ask: async (q: { line?: string[] }) => (q.line ? { text: 'Ke7 is not legal', refused: true } : { text: JSON.stringify(answer), refused: false }) };
+    const coach = new RecordingCoach(inner);
+    await coach.ask({ job: 'why', model: 'sonnet', brief, engine }, () => {});
+    await coach.ask({ job: 'why', model: 'sonnet', brief }, () => {});
+    expect(coach.calls.map((c) => c.answers)).toEqual([[answer], undefined]);
   });
 });

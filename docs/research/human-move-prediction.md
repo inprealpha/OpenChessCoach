@@ -352,7 +352,7 @@ Our numbers sit a little lower because our positions include the opening, bullet
 
 - The app would not ship Maia-3's code. The encoding in `data-prep/maia3-node.ts` is written in TypeScript on chessops from reading theirs, and the authors' Python is used once, to convert the weights to ONNX.
 - The weights themselves are the AGPL part. GPL-3.0 and AGPL-3.0 explicitly allow combining (section 13 of each). But the AGPL's network clause would then apply: people who use the app over a network, such as the owner's phone over the LAN or the tunnel, must be offered its source. OpenChessCoach is already public, so in practice that is a source link, but it is a real obligation.
-- Hosting the converted file ourselves means redistributing the weights. The AGPL allows that, with the licence and a source link. With no licence at all, it would not be allowed. It's worth asking the authors to confirm the weights' licence.
+- Hosting the converted file ourselves means redistributing the weights. The AGPL allows that, with the licence and a source link. We treat the weights as AGPL-3.0 (ADR 0011).
 
 Taking on an AGPL dependency was Abir's call. He accepted it on 28 October 2026 (ADR 0011).
 
@@ -518,7 +518,6 @@ Maia2 ran on this desktop's CPU. Both parts together, 1,116 positions guessed tw
 
 ## What's still open
 
-- **The licence of Maia-3's weights.** Ask the CSSLab authors whether the weights are AGPL-3.0 and whether we may host a converted copy.
 - **The Player's rating.** Maia-3 is clearly better when it knows the player's rating. The app needs a rating for the Player, for example from their imported Lichess games.
 - **Telling the model the rating.** This run hid the rating on purpose. The next test is the same prompt with a line like "the player is rated about 1100". It would show whether Opus or Haiku can shift its guesses toward a level, which Maia does by design.
 - **Lower effort for Haiku.** At medium effort, Haiku spends about 1,160 output tokens and 8.6 seconds per call. Low effort might be as accurate and faster.

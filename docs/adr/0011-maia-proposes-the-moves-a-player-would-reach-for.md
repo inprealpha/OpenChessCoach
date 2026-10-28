@@ -20,7 +20,7 @@ Maia-3's code is AGPL-3.0, and its weights have no licence of their own; the mod
 
 - The app does not ship Maia-3's code. Its board encoding is our own TypeScript, and the authors' Python is used once, offline, to convert the weights.
 - The weights bring in the AGPL's network clause: anyone who uses the app over a network, such as the owner's phone on the LAN or through the tunnel, must be offered its source. The repository is public, so the app links to it.
-- Hosting the converted weights redistributes them, under the AGPL with its licence text. We should still ask the authors to confirm the weights' licence.
+- Hosting the converted weights redistributes them, under the AGPL with its licence text.
 
 ## Consequences
 

@@ -9,6 +9,7 @@
 //   node data-prep/human-moves.ts sample <games.pgn> <dir> [--per-band=50] [--seed=1] [--quick]
 //   node data-prep/human-moves.ts guess <dir> [--models=haiku,sonnet,opus] [--prompts=likely,instinct] [--effort=medium] [--concurrency=24]
 //   node data-prep/human-moves.ts engine <dir>
+//   node data-prep/human-moves.ts history <games.pgn> <dir>      (adds each game's moves, for Maia-3)
 //   <dir>/../maia/.venv/bin/python -I data-prep/human-moves-maia.py <dir>
 //   node data-prep/human-moves.ts report <dir>
 // Games: the first part of a monthly file from https://database.lichess.org (CC0), for example
@@ -53,6 +54,8 @@ export interface Sample {
   /** The move the human played, in UCI and SAN. */
   played: { uci: string; san: string };
   legalCount: number;
+  /** The game's moves up to the position, in UCI from the start (the `history` step adds them; Maia-3 reads the last 8 positions). */
+  moves?: string[];
   /** Seconds the human spent on the move, from the game's clocks (whole seconds). */
   seconds?: number;
   /** Quick mode: the played move's Move Grade, and whether it was fine (Best or Good) or a mistake. */
@@ -344,6 +347,44 @@ async function askModel(model: string, prompt: PromptId, effort: string, s: Samp
   }
   guess.ms = Date.now() - started;
   return guess;
+}
+
+/** Adds each position's moves from the start of its game, found in the same PGN file by the game's address. */
+async function history(pgnPath: string, dir: string): Promise<void> {
+  const samples = readSamples(dir);
+  const bySite = new Map<string, Sample[]>();
+  for (const s of samples) bySite.set(s.site, [...(bySite.get(s.site) ?? []), s]);
+  let site = '';
+  let movetext: string[] = [];
+  let found = 0;
+  const finish = () => {
+    for (const s of bySite.get(site) ?? []) {
+      const game = parsePgnGames(`[Event "x"]\n\n${movetext.join(' ').replace(/\{[^}]*\}/g, '')}`)[0];
+      if (!game) continue;
+      let fen = game.startFen;
+      for (let ply = 0; ply < game.moves.length; ply++) {
+        if (fen === s.fen) {
+          s.moves = game.moves.slice(0, ply);
+          found++;
+          break;
+        }
+        fen = playUci(fen, game.moves[ply]!)!.fenAfter;
+      }
+    }
+    movetext = [];
+  };
+  const lines = createInterface({ input: createReadStream(pgnPath) });
+  for await (const line of lines) {
+    if (line.startsWith('[Event ')) {
+      finish();
+      if (found === samples.length) break;
+    } else if (line.startsWith('[Site ')) site = line.slice(7, -2);
+    else if (!line.startsWith('[') && line.trim()) movetext.push(line);
+  }
+  finish();
+  lines.close();
+  writeFileSync(join(dir, 'samples.json'), `${JSON.stringify(samples, null, 1)}\n`);
+  console.error(`Move history added to ${found} of ${samples.length} positions`);
 }
 
 function readSamples(dir: string): Sample[] {
@@ -725,6 +766,7 @@ if (command === 'import') {
 else if (command === 'guess') await guess(positional[0]!);
 else if (command === 'engine') await engine(positional[0]!);
 else if (command === 'report') report(positional[0]!);
+else if (command === 'history') await history(positional[0]!, positional[1]!);
 else {
   console.error('Usage: node data-prep/human-moves.ts sample|guess|engine|report … (see the top of this file)');
   process.exit(2);

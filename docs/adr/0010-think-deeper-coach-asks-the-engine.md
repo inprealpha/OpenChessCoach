@@ -22,7 +22,7 @@ The brief (ADR 0004, ADR 0009) covers the position, the Engine's best moves, the
   | Answers missing the main reason | 3 → 2 | 1 → 0 | 3 → 0 |
   | Question fully answered | 18 → 18 | 13 → 18 | 17 → 20 |
   | Median time per answer | 10.7 → 15.1 s | 6.3 → 9.8 s | 14.9 → 15.4 s |
-  | Median input tokens (mostly cached) | 3,900 → 10,800 | 3,850 → 9,850 | 3,850 → 13,800 |
+  | Median input tokens (mostly cached) | 3,900 → 11,000 | 3,850 → 10,650 | 3,850 → 10,850 |
 
   The same answers judged twice moved by up to 3 out of 20, so only the larger differences mean much. Before the last fix, Sonnet's false claims doubled with the tool on (6 → 12): it described the last move of its own question line from the facts on the moves after it, and added up material over that line. Giving that move its own facts (`lastMove`) and telling the Coach that facts belong to their own move brought Sonnet back to level. Most remaining false claims, in both modes, are the Coach's own wording: a reply called forced when it is only best, or material added up over a line.
 - The questions and the Engine's answers are logged with each Coach call (the `coach_questions` table), and the Coach panel says how many questions an answer asked.

@@ -4,7 +4,7 @@
  "kind": "thinking",
  "track": "thinking",
  "level": "intermediate",
- "goal": "You can decide when to trade: when you are ahead in material, to remove a strong enemy piece, or to escape an attack, and when to keep pieces on.",
+ "goal": "Before a trade, you can look at king safety, material and the pieces it would remove, and decide whether to trade or to keep the pieces on.",
  "priorKnowledge": [
   "piece-values",
   "good-and-bad-pieces"
@@ -13,49 +13,49 @@
  "puzzleTags": [],
  "puzzleThemes": [],
  "intro": {
-  "text": "Every trade changes the position, so before you make one, ask what it does for you. When you are ahead in material, trades make your extra material count, because your opponent has fewer pieces left to fight back with. Trade off your opponent's best piece, and the piece that is attacking your king. But when you are the one attacking, or you are behind, keep the pieces on the board."
+  "text": "Trading pieces of equal value keeps the material count the same, but it changes which pieces are left on the board. Before you trade, or accept a trade, ask three questions: whose king is less safe, who has more material, and which of the two pieces does more work. The answers tell you whether the trade helps you or your opponent."
  },
  "parts": [
   {
-   "title": "Ahead? Trade queens",
-   "fen": "8/p1k4p/1n4pb/8/3P4/1PPB1qP1/P4B1P/5QK1 w - - 9 38",
+   "title": "An offer to trade queens",
+   "fen": "3r4/3r4/p3kpp1/1qP1p3/7P/P3B1P1/1P2QP2/2R3K1 w - - 2 36",
    "side": "white",
-   "keyIdea": "When you are ahead in material, trade pieces, above all the queens: fewer pieces left means fewer chances for your opponent.",
-   "text": "From a game played on Lichess. You are White and three pawns up. Black's queen has just come to f3, the only black piece close to your king.",
+   "keyIdea": "When the enemy king is the less safe one, keep the queens on: your queen is the piece that can hunt that king.",
+   "text": "From a game played on Lichess. You are White. Black's queen on b5 attacks yours and offers a trade, but Black's king is standing out in the open on e6.",
    "credit": {
-    "source": "Lichess games database, game 9g139wIt",
-    "url": "https://lichess.org/9g139wIt#74",
+    "source": "Lichess games database, game Unze3sq3",
+    "url": "https://lichess.org/Unze3sq3#70",
     "licence": "CC0 1.0",
     "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
     "authors": "Lichess; the players of the game"
    },
    "mainLine": [
-    "f1e2",
-    "f3e2",
-    "d3e2"
+    "e2g4",
+    "e6f7",
+    "h4h5"
    ],
    "nodes": [
     {
      "ply": 0,
-     "fen": "8/p1k4p/1n4pb/8/3P4/1PPB1qP1/P4B1P/5QK1 w - - 9 38",
+     "fen": "3r4/3r4/p3kpp1/1qP1p3/7P/P3B1P1/1P2QP2/2R3K1 w - - 2 36",
      "decision": true,
-     "main": "f1e2",
-     "mainSan": "Qe2",
+     "main": "e2g4",
+     "mainSan": "Qg4+",
      "popular": {
       "beginner": [],
       "casual": [],
       "club": []
      },
      "notes": {
-      "text": "Offer the queen trade. Your bishop on d3 guards e2, so if Black takes, you take back. Without queens your king is safe, and three extra pawns will count for a lot in the endgame."
+      "text": "36.Qg4+ moves your queen away with check instead of trading. After 36.Qxb5 axb5 the endgame would be about equal, but with the queens on, Black's king on e6 is in danger."
      }
     },
     {
      "ply": 1,
-     "fen": "8/p1k4p/1n4pb/8/3P4/1PPB1qP1/P3QB1P/6K1 b - - 10 38",
+     "fen": "3r4/3r4/p3kpp1/1qP1p3/6QP/P3B1P1/1P3P2/2R3K1 b - - 3 36",
      "decision": false,
-     "main": "f3e2",
-     "mainSan": "Qxe2",
+     "main": "e6f7",
+     "mainSan": "Kf7",
      "popular": {
       "beginner": [],
       "casual": [],
@@ -64,118 +64,26 @@
     },
     {
      "ply": 2,
-     "fen": "8/p1k4p/1n4pb/8/3P4/1PPB2P1/P3qB1P/6K1 w - - 0 39",
+     "fen": "3r4/3r1k2/p4pp1/1qP1p3/6QP/P3B1P1/1P3P2/2R3K1 w - - 4 37",
      "decision": true,
-     "main": "d3e2",
-     "mainSan": "Bxe2",
+     "main": "h4h5",
+     "mainSan": "h5",
      "popular": {
       "beginner": [],
       "casual": [],
       "club": []
      },
      "notes": {
-      "text": "Take back. Two bishops and three extra pawns against a knight and a bishop is a winning endgame, and your king is now free to walk up the board and help the pawns."
+      "text": "37.h5 adds pressure: the h-pawn attacks g6 to open more lines towards Black's king."
      }
     }
    ]
   },
   {
-   "title": "Remove their best piece",
-   "fen": "5rk1/r2b2pp/pp1pN2q/2pPnp2/2P1P2P/1P6/P3BQP1/R4RK1 b - - 2 26",
-   "side": "black",
-   "keyIdea": "A piece that dominates the board is worth trading off, even for a piece of the same value.",
-   "text": "From a game played on Lichess. You are Black, and White's knight has just jumped to e6, deep in your half of the board.",
-   "credit": {
-    "source": "Lichess games database, game PQZszL13",
-    "url": "https://lichess.org/PQZszL13#51",
-    "licence": "CC0 1.0",
-    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
-    "authors": "Lichess; the players of the game"
-   },
-   "mainLine": [
-    "d7e6",
-    "d5e6",
-    "f5f4",
-    "a1d1",
-    "h6e6"
-   ],
-   "nodes": [
-    {
-     "ply": 0,
-     "fen": "5rk1/r2b2pp/pp1pN2q/2pPnp2/2P1P2P/1P6/P3BQP1/R4RK1 b - - 2 26",
-     "decision": true,
-     "main": "d7e6",
-     "mainSan": "Bxe6",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     },
-     "notes": {
-      "text": "The knight on e6 is White's best piece: the pawn on d5 guards it, none of your pawns can ever chase it away, and it attacks your rook on f8. Trade it off with your bishop."
-     }
-    },
-    {
-     "ply": 1,
-     "fen": "5rk1/r5pp/pp1pb2q/2pPnp2/2P1P2P/1P6/P3BQP1/R4RK1 w - - 0 27",
-     "decision": false,
-     "main": "d5e6",
-     "mainSan": "dxe6",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 2,
-     "fen": "5rk1/r5pp/pp1pP2q/2p1np2/2P1P2P/1P6/P3BQP1/R4RK1 b - - 0 27",
-     "decision": true,
-     "main": "f5f4",
-     "mainSan": "f4",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     },
-     "notes": {
-      "text": "Not 27...Qxe6 at once: 28.exf5 would hit your queen with a pawn, and that is what happened in the game. Push the f-pawn past White's e-pawn first, and take on e6 next move."
-     }
-    },
-    {
-     "ply": 3,
-     "fen": "5rk1/r5pp/pp1pP2q/2p1n3/2P1Pp1P/1P6/P3BQP1/R4RK1 w - - 0 28",
-     "decision": false,
-     "main": "a1d1",
-     "mainSan": "Rad1",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 4,
-     "fen": "5rk1/r5pp/pp1pP2q/2p1n3/2P1Pp1P/1P6/P3BQP1/3R1RK1 b - - 1 28",
-     "decision": true,
-     "main": "h6e6",
-     "mainSan": "Qxe6",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     },
-     "notes": {
-      "text": "Now take the pawn. You are two pawns up, and your knight on e5 can never be chased away by a white pawn, because White has no d-pawn or f-pawn left."
-     }
-    }
-   ]
-  },
-  {
-   "title": "Trade off the attacker",
+   "title": "A queen next to your king",
    "fen": "r6k/1p2b1pp/p3n3/8/2Q5/4PPBq/PP3P2/2R2RK1 w - - 4 24",
    "side": "white",
-   "keyIdea": "If one enemy piece is doing all the attacking near your king, offer to trade it off.",
+   "keyIdea": "When one enemy piece is doing all the attacking near your king, a trade that removes it ends the danger.",
    "text": "From a game played on Lichess. You are White and ahead in material, but Black's queen on h3 has come right up to your king.",
    "credit": {
     "source": "Lichess games database, game zZrt97K5",
@@ -204,7 +112,7 @@
       "club": []
      },
      "notes": {
-      "text": "Black's queen is the only black piece near your king. Offer the trade on g4, where your pawn on f3 guards your queen. Whether the queens come off or Black's queen goes back, the danger to your king is over."
+      "text": "Black's queen is the only black piece near your king, and 24.Qg4 offers to trade it on g4, where your pawn on f3 guards your queen. Whether the queens come off or Black's queen goes back, the danger to your king is over."
      }
     },
     {
@@ -231,7 +139,7 @@
       "club": []
      },
      "notes": {
-      "text": "Take back with the pawn. With the queens off, your king is safe and your extra material counts for more."
+      "text": "Black took the trade, and 25.fxg4 takes back with the pawn. With the queens off, your king is safe and your extra material counts for more."
      }
     },
     {
@@ -258,51 +166,51 @@
       "club": []
      },
      "notes": {
-      "text": "Now use your extra rook: put it on the open d-file, ready to go to d7 on Black's second rank."
+      "text": "26.Rfd1 puts a rook on the open d-file, where no pawns stand in its way, ready to go to d7, deep in Black's half."
      }
     }
    ]
   },
   {
-   "title": "Keep the queens when you attack",
-   "fen": "3r4/3r4/p3kpp1/1qP1p3/7P/P3B1P1/1P2QP2/2R3K1 w - - 2 36",
+   "title": "Three pawns up",
+   "fen": "8/p1k4p/1n4pb/8/3P4/1PPB1qP1/P4B1P/5QK1 w - - 9 38",
    "side": "white",
-   "keyIdea": "When the enemy king is out in the open, avoid trading queens: your queen is your best attacker.",
-   "text": "From a game played on Lichess. You are White. Black's queen on b5 attacks yours and offers a trade, but Black's king is standing out in the open on e6.",
+   "keyIdea": "When you are ahead in material, trade pieces, the queens first: the fewer pieces your opponent keeps, the fewer chances they get.",
+   "text": "From a game played on Lichess. You are White and three pawns up. Black's queen has just come to f3, the only black piece close to your king.",
    "credit": {
-    "source": "Lichess games database, game Unze3sq3",
-    "url": "https://lichess.org/Unze3sq3#70",
+    "source": "Lichess games database, game 9g139wIt",
+    "url": "https://lichess.org/9g139wIt#74",
     "licence": "CC0 1.0",
     "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
     "authors": "Lichess; the players of the game"
    },
    "mainLine": [
-    "e2g4",
-    "e6f7",
-    "h4h5"
+    "f1e2",
+    "f3e2",
+    "d3e2"
    ],
    "nodes": [
     {
      "ply": 0,
-     "fen": "3r4/3r4/p3kpp1/1qP1p3/7P/P3B1P1/1P2QP2/2R3K1 w - - 2 36",
+     "fen": "8/p1k4p/1n4pb/8/3P4/1PPB1qP1/P4B1P/5QK1 w - - 9 38",
      "decision": true,
-     "main": "e2g4",
-     "mainSan": "Qg4+",
+     "main": "f1e2",
+     "mainSan": "Qe2",
      "popular": {
       "beginner": [],
       "casual": [],
       "club": []
      },
      "notes": {
-      "text": "Do not trade. After 36.Qxb5 axb5 the endgame would be about equal, but with the queens on, Black's king on e6 is in danger. Move your queen away with check."
+      "text": "38.Qe2 offers the queen trade. Your bishop on d3 guards e2, so if Black takes, you take back. Without queens your king is safe, and three extra pawns will count for a lot in the endgame."
      }
     },
     {
      "ply": 1,
-     "fen": "3r4/3r4/p3kpp1/1qP1p3/6QP/P3B1P1/1P3P2/2R3K1 b - - 3 36",
+     "fen": "8/p1k4p/1n4pb/8/3P4/1PPB1qP1/P3QB1P/6K1 b - - 10 38",
      "decision": false,
-     "main": "e6f7",
-     "mainSan": "Kf7",
+     "main": "f3e2",
+     "mainSan": "Qxe2",
      "popular": {
       "beginner": [],
       "casual": [],
@@ -311,17 +219,109 @@
     },
     {
      "ply": 2,
-     "fen": "3r4/3r1k2/p4pp1/1qP1p3/6QP/P3B1P1/1P3P2/2R3K1 w - - 4 37",
+     "fen": "8/p1k4p/1n4pb/8/3P4/1PPB2P1/P3qB1P/6K1 w - - 0 39",
      "decision": true,
-     "main": "h4h5",
-     "mainSan": "h5",
+     "main": "d3e2",
+     "mainSan": "Bxe2",
      "popular": {
       "beginner": [],
       "casual": [],
       "club": []
      },
      "notes": {
-      "text": "Keep adding pressure: the h-pawn attacks g6 to open more lines towards Black's king."
+      "text": "Black took, and 39.Bxe2 takes back. Two bishops and three extra pawns against a knight and a bishop is a winning endgame, and your king is now free to walk up the board and help the pawns."
+     }
+    }
+   ]
+  },
+  {
+   "title": "A knight on e6",
+   "fen": "5rk1/r2b2pp/pp1pN2q/2pPnp2/2P1P2P/1P6/P3BQP1/R4RK1 b - - 2 26",
+   "side": "black",
+   "keyIdea": "Compare the two pieces a trade would remove: giving a bishop for a knight that no pawn can chase is often a good deal.",
+   "text": "From a game played on Lichess. You are Black, and White's knight has just jumped to e6, deep in your half of the board.",
+   "credit": {
+    "source": "Lichess games database, game PQZszL13",
+    "url": "https://lichess.org/PQZszL13#51",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "d7e6",
+    "d5e6",
+    "f5f4",
+    "a1d1",
+    "h6e6"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "5rk1/r2b2pp/pp1pN2q/2pPnp2/2P1P2P/1P6/P3BQP1/R4RK1 b - - 2 26",
+     "decision": true,
+     "main": "d7e6",
+     "mainSan": "Bxe6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "26...Bxe6 trades your bishop for the knight on e6. That knight was White's best piece: the pawn on d5 guarded it, none of your pawns could ever chase it away, and it attacked your rook on f8."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "5rk1/r5pp/pp1pb2q/2pPnp2/2P1P2P/1P6/P3BQP1/R4RK1 w - - 0 27",
+     "decision": false,
+     "main": "d5e6",
+     "mainSan": "dxe6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "5rk1/r5pp/pp1pP2q/2p1np2/2P1P2P/1P6/P3BQP1/R4RK1 b - - 0 27",
+     "decision": true,
+     "main": "f5f4",
+     "mainSan": "f4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "27...f4 pushes the f-pawn past White's e-pawn first. Taking on e6 at once with 27...Qxe6 would have let 28.exf5 hit your queen with a pawn, as happened in the game. Now the e6 pawn can be taken next move."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "5rk1/r5pp/pp1pP2q/2p1n3/2P1Pp1P/1P6/P3BQP1/R4RK1 w - - 0 28",
+     "decision": false,
+     "main": "a1d1",
+     "mainSan": "Rad1",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "5rk1/r5pp/pp1pP2q/2p1n3/2P1Pp1P/1P6/P3BQP1/3R1RK1 b - - 1 28",
+     "decision": true,
+     "main": "h6e6",
+     "mainSan": "Qxe6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "28...Qxe6 takes the pawn. You are a pawn up, and your knight on e5 can never be chased away by a white pawn, because White has no d-pawn or f-pawn left."
      }
     }
    ]

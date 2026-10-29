@@ -12,77 +12,50 @@
  "puzzleTags": [],
  "puzzleThemes": [],
  "intro": {
-  "text": "A gambit gives up a pawn, sometimes more, to get ahead in development or to open lines towards the enemy king. To judge one, count both sides: the material on offer, and the moves it costs you to take it and keep it. A pawn that costs little time and leaves no weak spot is worth taking. If keeping it would leave your pieces at home and your king in the centre, give it back and develop. And when your opponent grabs too much, open the position before they can catch up."
+  "text": "A gambit offers a pawn, sometimes more, in return for time: quicker development, open lines or an attack. Before you take one, weigh the pawn against the moves it will cost you to win it and keep it. Some gambits only look like gifts: in the Queen's Gambit, Black can take the pawn on c4 but cannot keep it for long. In this Lesson you take a pawn that costs little, turn down one that costs too much, and let a pawn go when holding on to it would leave your pieces at home."
  },
  "parts": [
   {
-   "title": "A pawn worth taking",
-   "fen": "rnbqkbnr/pp1ppppp/8/8/3pP3/2P5/PP3PPP/RNBQKBNR b KQkq - 0 3",
+   "title": "The King's Gambit",
+   "fen": "rnbqkbnr/pppp1ppp/8/4p3/4PP2/8/PPPP2PP/RNBQKBNR b KQkq - 0 2",
    "side": "black",
-   "keyIdea": "Take a gambit pawn when it costs little time, then develop quickly and block the lines your opponent wants to use.",
-   "text": "From a game played on Lichess, in the Smith-Morra Gambit. You are Black: after 1.e4 c5 2.d4 cxd4, White offers a second pawn with 3.c3. Decide whether to take it, and then how to keep your position safe.",
+   "keyIdea": "A pawn that costs you one move and leaves the enemy king less sheltered is worth taking; then develop rather than cling to it.",
+   "text": "From a game played on Lichess. You are Black. After 1.e4 e5, White has pushed the f-pawn two squares with 2.f4, the King's Gambit, and offers it to your e-pawn. Is the pawn worth taking?",
    "credit": {
-    "source": "Lichess games database, game 3oVG5rUp",
-    "url": "https://lichess.org/3oVG5rUp#5",
+    "source": "Lichess games database, game K16jPKW9",
+    "url": "https://lichess.org/K16jPKW9#3",
     "licence": "CC0 1.0",
     "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
     "authors": "Lichess; the players of the game"
    },
    "mainLine": [
-    "d4c3",
-    "b1c3",
-    "b8c6",
+    "e5f4",
     "g1f3",
-    "d7d6",
+    "d7d5",
+    "e4d5",
+    "g8f6",
     "f1c4",
-    "e7e6"
+    "f6d5"
    ],
    "nodes": [
     {
      "ply": 0,
-     "fen": "rnbqkbnr/pp1ppppp/8/8/3pP3/2P5/PP3PPP/RNBQKBNR b KQkq - 0 3",
+     "fen": "rnbqkbnr/pppp1ppp/8/4p3/4PP2/8/PPPP2PP/RNBQKBNR b KQkq - 0 2",
      "decision": true,
-     "main": "d4c3",
-     "mainSan": "dxc3",
+     "main": "e5f4",
+     "mainSan": "exf4",
      "popular": {
       "beginner": [],
       "casual": [],
       "club": []
      },
      "notes": {
-      "text": "Take it: 3...dxc3 4.Nxc3 leaves you a pawn up. White gets a knight out and open lines for the bishops and rooks, but that is only a small lead in development, and your king is not under any direct threat."
+      "text": "2...exf4 takes the pawn. It costs you only one move, and with White's f-pawn gone, the diagonal from a7 to g1 leads straight to White's king. The Engine prefers taking to turning the pawn down."
      }
     },
     {
      "ply": 1,
-     "fen": "rnbqkbnr/pp1ppppp/8/8/4P3/2p5/PP3PPP/RNBQKBNR w KQkq - 0 4",
-     "decision": false,
-     "main": "b1c3",
-     "mainSan": "Nxc3",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 2,
-     "fen": "rnbqkbnr/pp1ppppp/8/8/4P3/2N5/PP3PPP/R1BQKBNR b KQkq - 0 4",
-     "decision": true,
-     "main": "b8c6",
-     "mainSan": "Nc6",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     },
-     "notes": {
-      "text": "Now the job is to catch up. 4...Nc6 brings a piece out at once and controls d4 and e5, two squares White's pieces would like to use."
-     }
-    },
-    {
-     "ply": 3,
-     "fen": "r1bqkbnr/pp1ppppp/2n5/8/4P3/2N5/PP3PPP/R1BQKBNR w KQkq - 1 5",
+     "fen": "rnbqkbnr/pppp1ppp/8/8/4Pp2/8/PPPP2PP/RNBQKBNR w KQkq - 0 3",
      "decision": false,
      "main": "g1f3",
      "mainSan": "Nf3",
@@ -93,23 +66,50 @@
      }
     },
     {
-     "ply": 4,
-     "fen": "r1bqkbnr/pp1ppppp/2n5/8/4P3/2N2N2/PP3PPP/R1BQKB1R b KQkq - 2 5",
+     "ply": 2,
+     "fen": "rnbqkbnr/pppp1ppp/8/8/4Pp2/5N2/PPPP2PP/RNBQKB1R b KQkq - 1 3",
      "decision": true,
-     "main": "d7d6",
-     "mainSan": "d6",
+     "main": "d7d5",
+     "mainSan": "d5",
      "popular": {
       "beginner": [],
       "casual": [],
       "club": []
      },
      "notes": {
-      "text": "5...d6 stops White from pushing e4-e5 and opens a path for the c8-bishop. Your pawns on d6 and soon e6 make a solid wall in front of your pieces."
+      "text": "3.Nf3 developed a knight and stopped ...Qh4+. Instead of spending moves on keeping the f4 pawn, 3...d5 hits White's centre and opens a path for your bishop on c8. Holding the pawn with 3...g5 is also played, but it loosens your kingside pawns."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "rnbqkbnr/ppp2ppp/8/3p4/4Pp2/5N2/PPPP2PP/RNBQKB1R w KQkq - 0 4",
+     "decision": false,
+     "main": "e4d5",
+     "mainSan": "exd5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "rnbqkbnr/ppp2ppp/8/3P4/5p2/5N2/PPPP2PP/RNBQKB1R b KQkq - 0 4",
+     "decision": true,
+     "main": "g8f6",
+     "mainSan": "Nf6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "4.exd5 took your d-pawn. 4...Nf6 develops a knight that attacks d5 at once, so a piece, not your queen, will win the pawn back."
      }
     },
     {
      "ply": 5,
-     "fen": "r1bqkbnr/pp2pppp/2np4/8/4P3/2N2N2/PP3PPP/R1BQKB1R w KQkq - 0 6",
+     "fen": "rnbqkb1r/ppp2ppp/5n2/3P4/5p2/5N2/PPPP2PP/RNBQKB1R w KQkq - 1 5",
      "decision": false,
      "main": "f1c4",
      "mainSan": "Bc4",
@@ -121,47 +121,45 @@
     },
     {
      "ply": 6,
-     "fen": "r1bqkbnr/pp2pppp/2np4/8/2B1P3/2N2N2/PP3PPP/R1BQK2R b KQkq - 1 6",
+     "fen": "rnbqkb1r/ppp2ppp/5n2/3P4/2B2p2/5N2/PPPP2PP/RNBQK2R b KQkq - 2 5",
      "decision": true,
-     "main": "e7e6",
-     "mainSan": "e6",
+     "main": "f6d5",
+     "mainSan": "Nxd5",
      "popular": {
       "beginner": [],
       "casual": [],
       "club": []
      },
      "notes": {
-      "text": "6.Bc4 aims at f7, Black's weak spot. 6...e6 blocks that diagonal and also guards d5, so a White knight cannot settle there safely. Next come ...Nf6, ...Be7 and castling. You keep the extra pawn, and White has to find real play to make up for it."
+      "text": "5.Bc4 defended the pawn, but your knight and your queen both attack d5 and only the bishop defends it, so 5...Nxd5 takes it. You are a pawn up again, your pieces are coming out, and White's king has no f-pawn to shelter it."
      }
     }
    ]
   },
   {
-   "title": "Give it back and develop",
-   "fen": "rnbqkbnr/pppp1ppp/8/8/3pP3/2P5/PP3PPP/RNBQKBNR b KQkq - 0 3",
+   "title": "The Vienna Gambit",
+   "fen": "rnbqkb1r/pppp1ppp/5n2/4p3/4PP2/2N5/PPPP2PP/R1BQKBNR b KQkq - 0 3",
    "side": "black",
-   "keyIdea": "If keeping an extra pawn would cost you development, return it with a counter-attack that brings your pieces out.",
-   "text": "From a game played on Lichess, in the Danish Gambit. You are Black: you took a pawn with 2...exd4, and White offers another with 3.c3. Grabbing more would leave you well behind in development. Look for a move that fights for the centre instead.",
+   "keyIdea": "If taking a pawn lets your opponent chase your pieces back home, turn it down and strike in the centre instead.",
+   "text": "From a game played on Lichess. You are Black. After 1.e4 e5 2.Nc3 Nf6, White offers the f-pawn with 3.f4, the Vienna Gambit. This time, look at what taking it would cost you before you decide.",
    "credit": {
-    "source": "Lichess games database, game 1pdcarlw",
-    "url": "https://lichess.org/1pdcarlw#5",
+    "source": "Lichess games database, game OqLRRlZE",
+    "url": "https://lichess.org/OqLRRlZE#5",
     "licence": "CC0 1.0",
     "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
     "authors": "Lichess; the players of the game"
    },
    "mainLine": [
     "d7d5",
-    "e4d5",
-    "d8d5",
-    "c3d4",
-    "b8c6",
+    "f4e5",
+    "f6e4",
     "g1f3",
-    "c8g4"
+    "f8e7"
    ],
    "nodes": [
     {
      "ply": 0,
-     "fen": "rnbqkbnr/pppp1ppp/8/8/3pP3/2P5/PP3PPP/RNBQKBNR b KQkq - 0 3",
+     "fen": "rnbqkb1r/pppp1ppp/5n2/4p3/4PP2/2N5/PPPP2PP/R1BQKBNR b KQkq - 0 3",
      "decision": true,
      "main": "d7d5",
      "mainSan": "d5",
@@ -171,15 +169,15 @@
       "club": []
      },
      "notes": {
-      "text": "3...d5 strikes at e4 instead of taking a second pawn. You are ready to give your extra pawn back: what you want in return is quick development. White usually trades with 4.exd5."
+      "text": "3...d5 turns the pawn down and strikes at the centre. After 3...exf4 White would push 4.e5, and your knight on f6 would be driven back to g8: you would have an extra pawn, but White would have the centre and a lead in development. The Engine grades 3...exf4 as an inaccuracy."
      }
     },
     {
      "ply": 1,
-     "fen": "rnbqkbnr/ppp2ppp/8/3p4/3pP3/2P5/PP3PPP/RNBQKBNR w KQkq - 0 4",
+     "fen": "rnbqkb1r/ppp2ppp/5n2/3pp3/4PP2/2N5/PPPP2PP/R1BQKBNR w KQkq - 0 4",
      "decision": false,
-     "main": "e4d5",
-     "mainSan": "exd5",
+     "main": "f4e5",
+     "mainSan": "fxe5",
      "popular": {
       "beginner": [],
       "casual": [],
@@ -188,49 +186,22 @@
     },
     {
      "ply": 2,
-     "fen": "rnbqkbnr/ppp2ppp/8/3P4/3p4/2P5/PP3PPP/RNBQKBNR b KQkq - 0 4",
+     "fen": "rnbqkb1r/ppp2ppp/5n2/3pP3/4P3/2N5/PPPP2PP/R1BQKBNR b KQkq - 0 4",
      "decision": true,
-     "main": "d8d5",
-     "mainSan": "Qxd5",
+     "main": "f6e4",
+     "mainSan": "Nxe4",
      "popular": {
       "beginner": [],
       "casual": [],
       "club": []
      },
      "notes": {
-      "text": "4...Qxd5 takes back. The queen is out early, but it stands well in the centre: it protects your d4 pawn and eyes g2, and White cannot hit it with a knight from c3 while a pawn sits there."
+      "text": "4.fxe5 took your e-pawn, and 4...Nxe4 takes White's e-pawn in return. Material is level, and your knight sits on a strong central square, where it attacks White's knight on c3."
      }
     },
     {
      "ply": 3,
-     "fen": "rnb1kbnr/ppp2ppp/8/3q4/3p4/2P5/PP3PPP/RNBQKBNR w KQkq - 0 5",
-     "decision": false,
-     "main": "c3d4",
-     "mainSan": "cxd4",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 4,
-     "fen": "rnb1kbnr/ppp2ppp/8/3q4/3P4/8/PP3PPP/RNBQKBNR b KQkq - 0 5",
-     "decision": true,
-     "main": "b8c6",
-     "mainSan": "Nc6",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     },
-     "notes": {
-      "text": "White has won back the pawn with 5.cxd4, so material is level again. In return your pieces come out with threats: 5...Nc6 develops and attacks the d4 pawn a second time, together with your queen."
-     }
-    },
-    {
-     "ply": 5,
-     "fen": "r1b1kbnr/ppp2ppp/2n5/3q4/3P4/8/PP3PPP/RNBQKBNR w KQkq - 1 6",
+     "fen": "rnbqkb1r/ppp2ppp/8/3pP3/4n3/2N5/PPPP2PP/R1BQKBNR w KQkq - 0 5",
      "decision": false,
      "main": "g1f3",
      "mainSan": "Nf3",
@@ -241,64 +212,68 @@
      }
     },
     {
-     "ply": 6,
-     "fen": "r1b1kbnr/ppp2ppp/2n5/3q4/3P4/5N2/PP3PPP/RNBQKB1R b KQkq - 2 6",
+     "ply": 4,
+     "fen": "rnbqkb1r/ppp2ppp/8/3pP3/4n3/2N2N2/PPPP2PP/R1BQKB1R b KQkq - 1 5",
      "decision": true,
-     "main": "c8g4",
-     "mainSan": "Bg4",
+     "main": "f8e7",
+     "mainSan": "Be7",
      "popular": {
       "beginner": [],
       "casual": [],
       "club": []
      },
      "notes": {
-      "text": "6.Nf3 defends d4. 6...Bg4 develops another piece and pins that knight to White's queen. Count the pieces: you have three out and are ready to castle queenside, while White has one. Giving the pawn back has bought you a comfortable game with level material."
+      "text": "5.Nf3 developed. 5...Be7 brings out your bishop and gets you ready to castle. White's f-pawn has left its place in front of White's king, and you have given nothing away."
      }
     }
    ]
   },
   {
-   "title": "When greed goes wrong",
-   "fen": "rnbqkb1r/ppp2pp1/3p1n1p/8/2B1P3/5N2/PB3PPP/RN1Q1RK1 w kq - 0 8",
+   "title": "The Budapest Gambit",
+   "fen": "rnbqkb1r/pppp1ppp/5n2/4p3/2PP4/8/PP2PPPP/RNBQKBNR w KQkq - 0 3",
    "side": "white",
-   "keyIdea": "Against a king left in the centre, open lines with pawn breaks and checks, even if it costs more material.",
-   "text": "From a game played on Lichess, in the Danish Gambit. You are White. Black took both pawns you offered and is two pawns up, but has only one piece out and the king is still on e8, while your bishops aim at Black's kingside and your own king is castled. Find the move that opens lines.",
+   "keyIdea": "When your opponent is sure to win the pawn back, defend it with moves that develop, and let it go rather than spend more moves on it.",
+   "text": "From a game played on Lichess. You are White. After 1.d4 Nf6 2.c4, Black has pushed 2...e5, the Budapest Gambit, and offers the e-pawn. Decide whether to take it, and then how hard to fight to keep it.",
    "credit": {
-    "source": "Lichess games database, game p40d24f5",
-    "url": "https://lichess.org/p40d24f5#14",
+    "source": "Lichess games database, game f3WBr3QB",
+    "url": "https://lichess.org/f3WBr3QB#4",
     "licence": "CC0 1.0",
     "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
     "authors": "Lichess; the players of the game"
    },
    "mainLine": [
-    "e4e5",
-    "f6e4",
-    "f1e1",
-    "e4c5",
-    "e5d6"
+    "d4e5",
+    "f6g4",
+    "c1f4",
+    "b8c6",
+    "g1f3",
+    "f8b4",
+    "b1d2",
+    "d8e7",
+    "e2e3"
    ],
    "nodes": [
     {
      "ply": 0,
-     "fen": "rnbqkb1r/ppp2pp1/3p1n1p/8/2B1P3/5N2/PB3PPP/RN1Q1RK1 w kq - 0 8",
+     "fen": "rnbqkb1r/pppp1ppp/5n2/4p3/2PP4/8/PP2PPPP/RNBQKBNR w KQkq - 0 3",
      "decision": true,
-     "main": "e4e5",
-     "mainSan": "e5",
+     "main": "d4e5",
+     "mainSan": "dxe5",
      "popular": {
       "beginner": [],
       "casual": [],
       "club": []
      },
      "notes": {
-      "text": "8.e5! attacks the f6 knight and opens lines towards Black's king. If Black takes with 8...dxe5, the d-file opens and 9.Bxf7+ wins: after 9...Kxf7 10.Qxd8 takes the queen. So the knight has to move."
+      "text": "3.dxe5 takes the pawn. It costs you nothing, and now Black has to spend moves winning it back. The Engine prefers taking."
      }
     },
     {
      "ply": 1,
-     "fen": "rnbqkb1r/ppp2pp1/3p1n1p/4P3/2B5/5N2/PB3PPP/RN1Q1RK1 b kq - 0 8",
+     "fen": "rnbqkb1r/pppp1ppp/5n2/4P3/2P5/8/PP2PPPP/RNBQKBNR b KQkq - 0 3",
      "decision": false,
-     "main": "f6e4",
-     "mainSan": "Ne4",
+     "main": "f6g4",
+     "mainSan": "Ng4",
      "popular": {
       "beginner": [],
       "casual": [],
@@ -307,25 +282,25 @@
     },
     {
      "ply": 2,
-     "fen": "rnbqkb1r/ppp2pp1/3p3p/4P3/2B1n3/5N2/PB3PPP/RN1Q1RK1 w kq - 1 9",
+     "fen": "rnbqkb1r/pppp1ppp/8/4P3/2P3n1/8/PP2PPPP/RNBQKBNR w KQkq - 1 4",
      "decision": true,
-     "main": "f1e1",
-     "mainSan": "Re1",
+     "main": "c1f4",
+     "mainSan": "Bf4",
      "popular": {
       "beginner": [],
       "casual": [],
       "club": []
      },
      "notes": {
-      "text": "The knight went to e4. 9.Re1 attacks it and puts your rook on the same file as Black's king. Your bishops, rook and knight are all aimed at the centre and Black's king, while Black's queenside pieces have not moved."
+      "text": "3...Ng4 attacked the pawn on e5. 4.Bf4 defends it and brings a bishop into play at the same time."
      }
     },
     {
      "ply": 3,
-     "fen": "rnbqkb1r/ppp2pp1/3p3p/4P3/2B1n3/5N2/PB3PPP/RN1QR1K1 b kq - 2 9",
+     "fen": "rnbqkb1r/pppp1ppp/8/4P3/2P2Bn1/8/PP2PPPP/RN1QKBNR b KQkq - 2 4",
      "decision": false,
-     "main": "e4c5",
-     "mainSan": "Nc5",
+     "main": "b8c6",
+     "mainSan": "Nc6",
      "popular": {
       "beginner": [],
       "casual": [],
@@ -334,17 +309,71 @@
     },
     {
      "ply": 4,
-     "fen": "rnbqkb1r/ppp2pp1/3p3p/2n1P3/2B5/5N2/PB3PPP/RN1QR1K1 w kq - 3 10",
+     "fen": "r1bqkb1r/pppp1ppp/2n5/4P3/2P2Bn1/8/PP2PPPP/RN1QKBNR w KQkq - 3 5",
      "decision": true,
-     "main": "e5d6",
-     "mainSan": "exd6+",
+     "main": "g1f3",
+     "mainSan": "Nf3",
      "popular": {
       "beginner": [],
       "casual": [],
       "club": []
      },
      "notes": {
-      "text": "10.exd6+ is a discovered check: the pawn takes on d6 and uncovers your rook against Black's king. Black has to block or move the king, and your attack keeps rolling. Two extra pawns were not worth falling this far behind in development."
+      "text": "4...Nc6 attacked e5 a second time, and 5.Nf3 defends it a second time while it develops another piece."
+     }
+    },
+    {
+     "ply": 5,
+     "fen": "r1bqkb1r/pppp1ppp/2n5/4P3/2P2Bn1/5N2/PP2PPPP/RN1QKB1R b KQkq - 4 5",
+     "decision": false,
+     "main": "f8b4",
+     "mainSan": "Bb4+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 6,
+     "fen": "r1bqk2r/pppp1ppp/2n5/4P3/1bP2Bn1/5N2/PP2PPPP/RN1QKB1R w KQkq - 5 6",
+     "decision": true,
+     "main": "b1d2",
+     "mainSan": "Nbd2",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "5...Bb4+ checked your king. 6.Nbd2 blocks the check with a knight that comes into play, and your knight on f3 still guards e5."
+     }
+    },
+    {
+     "ply": 7,
+     "fen": "r1bqk2r/pppp1ppp/2n5/4P3/1bP2Bn1/5N2/PP1NPPPP/R2QKB1R b KQkq - 6 6",
+     "decision": false,
+     "main": "d8e7",
+     "mainSan": "Qe7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 8,
+     "fen": "r1b1k2r/ppppqppp/2n5/4P3/1bP2Bn1/5N2/PP1NPPPP/R2QKB1R w KQkq - 7 7",
+     "decision": true,
+     "main": "e2e3",
+     "mainSan": "e3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "6...Qe7 attacked e5 a third time, and you have only two defenders, so the pawn will go back to Black. Rather than spend more moves on it, 7.e3 opens the way for your bishop on f1 so you can castle soon. After 7...Ngxe5 8.Nxe5 Nxe5 material is level again, and the Engine prefers your position slightly."
      }
     }
    ]

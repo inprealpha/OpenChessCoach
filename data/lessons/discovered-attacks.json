@@ -22,7 +22,7 @@
    "fen": "rn1q1r2/4p1kp/2P3p1/p4p2/2pP4/2P2QP1/4PPKP/R2R4 w - - 0 21",
    "side": "white",
    "keyIdea": "Move the front piece with a threat of its own, and the piece behind it attacks too: two threats with one move.",
-   "text": "From a game played on Lichess. Your queen on f3 and Black's rook on a8 stand on the same long diagonal, but your pawn on c6 blocks the line between them.",
+   "text": "From a game played on Lichess. You are White. Your queen on f3 and Black's rook on a8 stand on the same long diagonal, but your pawn on c6 blocks the line between them.",
    "credit": {
     "source": "Lichess puzzle database, puzzle QolLZ",
     "url": "https://lichess.org/training/QolLZ",
@@ -48,7 +48,7 @@
       "club": []
      },
      "notes": {
-      "text": "The pawn steps forward and attacks Black's queen on d8 and knight on b8. At the same time it opens the diagonal, so your queen now attacks the rook on a8. Black cannot deal with all of that in one move."
+      "text": "c7, the pawn one step forward, attacks Black's queen on d8 and knight on b8. At the same time it opens the diagonal, so your queen now attacks the rook on a8. Black cannot deal with all of that in one move."
      }
     },
     {
@@ -75,7 +75,7 @@
       "club": []
      },
      "notes": {
-      "text": "Black took the pawn with the queen, but the rook on a8 was left with no protection. Your queen takes it: you have won a rook for a pawn."
+      "text": "Black took the pawn with the queen, but that left the rook on a8 undefended. Your queen takes it: you have won a rook for a pawn."
      }
     }
    ]
@@ -84,8 +84,8 @@
    "title": "A knight move with a threat",
    "fen": "r1b2rk1/pp3p2/3p1qpp/3P4/2P5/3n1B2/P2N1PPP/2RQR1K1 w - - 10 19",
    "side": "white",
-   "keyIdea": "Move the front piece to a square where it attacks the queen; while the queen escapes, the piece behind wins material.",
-   "text": "From a game played on Lichess. Black's knight has just jumped to d3, where it attacks both of your rooks. Your queen on d1 would like to take it, but your own knight on d2 is in the way.",
+   "keyIdea": "Move the front piece to a square where it attacks the queen; while the queen escapes, the piece behind it captures what it attacks.",
+   "text": "From a game played on Lichess. You are White. Black's knight has just jumped to d3, where it attacks both of your rooks. Your queen on d1 would like to take it, but your own knight on d2 is in the way.",
    "credit": {
     "source": "Lichess puzzle database, puzzle v7tdT",
     "url": "https://lichess.org/training/v7tdT",
@@ -111,7 +111,7 @@
       "club": []
      },
      "notes": {
-      "text": "The knight gets out of the way with a threat: from e4 it attacks Black's queen on f6. At the same time your queen on d1 now attacks the knight on d3. Black has to save the queen first."
+      "text": "Ne4, the knight to e4, gets out of the way with a threat: from e4 it attacks Black's queen on f6. At the same time your queen on d1 now attacks the knight on d3. Black has to save the queen first."
      }
     },
     {
@@ -138,7 +138,7 @@
       "club": []
      },
      "notes": {
-      "text": "After 19...Qg7 nothing protects the knight on d3. Take it: you have won a piece, and your rooks are safe again."
+      "text": "Black's queen went to g7, and now nothing protects the knight on d3. Your queen takes it: you have won a piece, and your rooks are safe again."
      }
     }
    ]
@@ -148,7 +148,7 @@
    "fen": "1r4k1/2p2ppp/Q2b1q2/p7/8/1P5P/P4PP1/3R1RK1 b - - 1 22",
    "side": "black",
    "keyIdea": "When the moving piece gives check, the opponent must answer it and has no time to save what the piece behind attacks.",
-   "text": "From a game played on Lichess. White's queen has just moved to a6. Your bishop on d6 stands between your queen on f6 and White's queen.",
+   "text": "From a game played on Lichess. You are Black. White's queen has just moved to a6. Your bishop on d6 stands between your queen on f6 and White's queen.",
    "credit": {
     "source": "Lichess puzzle database, puzzle aD8Ct",
     "url": "https://lichess.org/training/aD8Ct",

@@ -19,14 +19,14 @@
    "fen": "7k/7p/8/p4Q2/8/8/5KP1/2q5 b - - 14 61",
    "side": "white",
    "keyIdea": "Not every check is mate: test each check for an escape square, a block and a capture.",
-   "text": "From a game played on Lichess. Black's queen has just moved to c6. Your queen can give check in several ways, but only one of them is mate. For each check, ask where the king could go and whether Black could block or capture.",
+   "text": "From a game played on Lichess. You are White. Black's queen has just moved to c6. Your queen can give check in several ways, but only one of them is mate. For each check, ask where the king could go and whether Black could block or capture.",
    "url": "https://lichess.org/training/dDqjo",
    "line": "Qc6 Qf8#",
    "notes": [
     {
      "ply": 1,
      "san": "Qf8#",
-     "text": "Qf8 gives check along the back rank. The king cannot go to g8 or g7, because the queen covers both, and h7 is taken by its own pawn. Black's queen cannot block on g8 or take on f8, so it is mate. Compare Qc8+, which is only check: Black's queen simply takes yours."
+     "text": "Qf8, the queen to f8, gives check along the back rank (the row Black's king started on). The king cannot go to g8 or g7, because the queen covers both, and h7 holds its own pawn. Black's queen cannot block on g8 or take on f8, so it is mate. Compare Qc8+, which is only check: Black's queen simply takes yours."
     }
    ]
   },
@@ -34,45 +34,40 @@
    "title": "The queen and a helper",
    "fen": "5r1k/p5p1/8/6Q1/2P5/7P/6RK/2q5 b - - 0 41",
    "side": "white",
-   "keyIdea": "The queen can mate right next to the king when another piece guards her.",
-   "text": "From a game played on Lichess. Black has just taken a pawn on c4. Your queen and your rook on g2 stand on the same file. Find the mate.",
+   "keyIdea": "The queen can mate right next to the king when another piece guards it.",
+   "text": "From a game played on Lichess. You are White. Black's queen has just taken your pawn on c4. One of your checks is mate: find it.",
    "url": "https://lichess.org/training/BYPTm",
    "line": "Qxc4 Qxg7#",
    "notes": [
     {
      "ply": 1,
      "san": "Qxg7#",
-     "text": "The queen takes the g7 pawn and checks the king. The king cannot take her, because your rook on g2 guards g7, and it has nowhere to run: the queen covers g8 and h7. Checkmate."
+     "text": "The queen takes the g7 pawn and checks the king. The king cannot take the queen, because your rook on g2 guards g7, and the king has nowhere to run: the queen covers g8 and h7. Checkmate."
     }
    ]
   },
   {
-   "title": "Check, block, mate",
-   "fen": "r5k1/6pp/8/2KQ4/8/4rp2/8/8 b - - 0 47",
+   "title": "Six checks, one mate",
+   "fen": "1k1r4/3q4/8/7p/Q4B2/6PP/5P1K/8 b - - 2 65",
    "side": "white",
-   "keyIdea": "A king boxed in by its own pawns can be mated along the back rank.",
-   "text": "From a game played on Lichess. Black's king has just stepped into the corner on h8, where its own pawns on g7 and h7 box it in. Look along the back rank.",
-   "url": "https://lichess.org/training/LDHGK",
-   "line": "Kh8 Qxa8+ Re8 Qxe8#",
+   "keyIdea": "When you have many checks, test each one: a check that can be blocked or captured is only check.",
+   "text": "From a game played on Lichess. You are White. Black's king has just stepped from b8 to c8. Your queen can give check in six different ways, but only one of them is mate. Test each one.",
+   "url": "https://lichess.org/training/CzEOB",
+   "line": "Kc8 Qa8#",
    "notes": [
     {
      "ply": 1,
-     "san": "Qxa8+",
-     "text": "The queen takes the rook on a8, and the capture gives check along the eighth rank. The king cannot move, so Black's only answer is to block on e8 with the other rook."
-    },
-    {
-     "ply": 3,
-     "san": "Qxe8#",
-     "text": "Take the rook that blocked. Now nothing stands between your queen and the king, and the king still has no square: the queen covers g8, and g7 and h7 hold its own pawns. Checkmate."
+     "san": "Qa8#",
+     "text": "The queen checks the king along the back rank. The king cannot go to b8, b7 or c7, because your queen and your bishop on f4 cover them, and its own pieces fill d7 and d8. Nothing can block on b8 or take the queen, so it is mate. The other checks all leave a way out: Black takes the queen after Qc6+ or Qxd7+, and blocks Qa6+, Qc4+ or Qc2+ with the queen."
     }
    ]
   },
   {
-   "title": "The knight's mate",
+   "title": "A crowded king",
    "fen": "6rk/1p4pp/6p1/p4QN1/8/6PK/7P/8 b - - 0 39",
    "side": "white",
    "keyIdea": "A king hemmed in by its own pieces can be mated by a lone knight, because a knight's check cannot be blocked.",
-   "text": "From a game played on Lichess. Black has just taken your queen on f5. You have only a knight left to attack with, but look at how Black's own pieces crowd the king on h8.",
+   "text": "From a game played on Lichess. You are White. Black has just taken your queen on f5. You have only a knight left to attack with, but look at how Black's own pieces crowd the king on h8.",
    "url": "https://lichess.org/training/B6HXQ",
    "line": "gxf5 Nf7#",
    "notes": [

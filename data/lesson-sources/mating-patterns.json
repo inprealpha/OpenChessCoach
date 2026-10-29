@@ -19,10 +19,10 @@
   "mate-in-two",
   "back-rank-mate"
  ],
- "intro": "Some mates happen again and again, so strong players recognise them at a glance. Each part of this Lesson shows one pattern: the smothered mate, Anastasia's mate, the Arabian mate and Boden's mate. Learn the shape of the final position, and you will start to see the moves that lead to it.",
+ "intro": "Some mates happen again and again, so strong players recognise them at a glance. Each part of this Lesson shows one pattern: the smothered mate, Anastasia's Mate, the Arabian Mate and Boden's Mate. Learn the shape of the final position, and you will start to see the moves that lead to it.",
  "parts": [
   {
-   "title": "Smothered mate",
+   "title": "The smothered mate",
    "fen": "5r1k/6pp/8/3QP1N1/P7/7P/1q4PK/8 w - - 4 35",
    "side": "white",
    "keyIdea": "Smothered mate: a knight mates a king whose own pieces fill every square around it.",
@@ -33,51 +33,51 @@
     {
      "ply": 0,
      "san": "Nf7+",
-     "text": "The knight checks from f7. Taking it with the rook loses quickly to Qd8+, so the king goes back to g8."
+     "text": "35.Nf7+ checks from f7. Taking the knight with the rook loses quickly to Qd8+, so the king goes back to g8."
     },
     {
      "ply": 2,
      "san": "Nh6+",
-     "text": "A double check: the knight checks from h6 and your queen on d5 checks along the diagonal. The king must move, and h8 is its only square."
+     "text": "36.Nh6+ gives two checks at once: one from the knight on h6, and one from your queen on d5, whose diagonal to g8 the knight has just opened. The king has to move, and h8 is the only square it can reach."
     },
     {
      "ply": 4,
      "san": "Qg8+",
-     "text": "The queen sacrifice. The knight on h6 guards g8, so the king cannot take the queen, and the rook must. Now the rook fills the king's last free square."
+     "text": "37.Qg8+ is the queen sacrifice. The knight on h6 guards g8, so the king cannot take the queen, and the rook must. Now the rook fills the king's last free square."
     },
     {
      "ply": 6,
      "san": "Nf7#",
-     "text": "The knight checks from f7, and the king is walled in by its own rook and pawns: a smothered mate."
+     "text": "38.Nf7# checks from f7, and the king is walled in by its own rook and pawns: a smothered mate."
     }
    ]
   },
   {
-   "title": "Anastasia's mate",
+   "title": "Anastasia's Mate",
    "fen": "5r1k/pp2Nrpp/2p5/8/3nR2Q/3q1p2/6PP/4R2K w - - 0 33",
    "side": "white",
-   "keyIdea": "Anastasia's mate: a knight covers the king's escape squares while a rook mates along the edge file.",
-   "text": "From a game played on Lichess. You are White. Black's pawn on f3 is about to break open your king. Your knight on e7 already guards g8 and g6, so look for the fastest way to finish first.",
+   "keyIdea": "Anastasia's Mate: a knight covers the king's escape squares while a rook mates along the edge file.",
+   "text": "From a game played on Lichess. You are White. Black's pawn on f3 is about to break open the pawns around your king. Your knight on e7 already guards g8 and g6, so look for the fastest way to finish first.",
    "url": "https://lichess.org/training/Jgeir",
    "line": "Qxh7+ Kxh7 Rh4#",
    "notes": [
     {
      "ply": 0,
      "san": "Qxh7+",
-     "text": "A queen sacrifice that opens the h-file. The king must take, because the knight on e7 guards g8."
+     "text": "33.Qxh7+ is a queen sacrifice that opens the h-file. The king must take, because the knight on e7 guards g8."
     },
     {
      "ply": 2,
      "san": "Rh4#",
-     "text": "The rook swings to the h-file and gives mate. The knight covers g6 and g8, and Black's own pawn on g7 blocks the last square: this is Anastasia's mate."
+     "text": "34.Rh4# swings the rook to the h-file and gives mate. The knight covers g6 and g8, and Black's own pawn on g7 blocks the last square: this is Anastasia's Mate."
     }
    ]
   },
   {
-   "title": "The Arabian mate",
+   "title": "The Arabian Mate",
    "fen": "6k1/1q3pr1/p7/1p1p4/6N1/2P2P2/P5P1/4R1K1 w - - 0 38",
    "side": "white",
-   "keyIdea": "Arabian mate: a knight guards the rook and covers the last escape square of a king in the corner.",
+   "keyIdea": "Arabian Mate: a knight guards the rook and covers the last escape square of a king in the corner.",
    "text": "From a game played on Lichess. You are White. Black has just taken your queen on d5, but Black's king is short of room. A rook and a knight can mate it near the corner.",
    "url": "https://lichess.org/training/2Xepn",
    "line": "Nf6+ Kh8 Re8+ Rg8 Rxg8#",
@@ -85,25 +85,25 @@
     {
      "ply": 0,
      "san": "Nf6+",
-     "text": "The knight checks from f6. From there it also covers h7 and e8, squares that matter for the mate. If the king goes to f8 instead, Re8 is mate at once."
+     "text": "38.Nf6+ checks from f6. From there the knight also covers h7 and e8, squares that matter for the mate. If the king goes to f8 instead, Re8 is mate at once."
     },
     {
      "ply": 2,
      "san": "Re8+",
-     "text": "The rook checks along the back rank. Black's only way out is to block with the rook on g8."
+     "text": "39.Re8+ checks along the back rank, the row the king started on. Black's only way out is to block with the rook on g8."
     },
     {
      "ply": 4,
      "san": "Rxg8#",
-     "text": "The rook takes on g8, guarded by the knight. The king cannot go to g7, which the rook covers, or to h7, which the knight covers: this is the Arabian mate."
+     "text": "40.Rxg8# takes on g8, with the knight guarding the rook. The king cannot go to g7, which the rook covers, or to h7, which the knight covers: this is the Arabian Mate."
     }
    ]
   },
   {
-   "title": "Boden's mate",
+   "title": "Boden's Mate",
    "fen": "2r3k1/p3bpp1/6b1/1Bqp4/5Q2/2P4P/PP1N1P2/2KR3R b - - 0 27",
    "side": "black",
-   "keyIdea": "Boden's mate: two bishops on crossing diagonals mate a king that its own pieces have hemmed in.",
+   "keyIdea": "Boden's Mate: two bishops on crossing diagonals mate a king that its own pieces have hemmed in.",
    "text": "From a game played on Lichess. You are Black, and White has just taken your rook on b5. White's king on c1 is hemmed in by its own rook and knight. Look at what your two bishops could cover.",
    "url": "https://lichess.org/training/9hAv2",
    "line": "Qxc3+ bxc3 Ba3#",
@@ -111,12 +111,12 @@
     {
      "ply": 0,
      "san": "Qxc3+",
-     "text": "A queen sacrifice with check. The king cannot step to b1 or c2, because your bishop on g6 covers both, so the pawn on b2 has to take the queen. That opens the diagonal from a3 to c1."
+     "text": "27...Qxc3+ is a queen sacrifice with check. The king cannot step to b1 or c2, because your bishop on g6 covers both, so the pawn on b2 has to take the queen. That opens the diagonal from a3 to c1."
     },
     {
      "ply": 2,
      "san": "Ba3#",
-     "text": "The bishop comes to a3 and checks along the open diagonal. Your other bishop covers b1 and c2, and White's own rook and knight block d1 and d2: this is Boden's mate."
+     "text": "28...Ba3# brings the bishop to a3, where it checks along the open diagonal. Your other bishop covers b1 and c2, and White's own rook and knight block d1 and d2: this is Boden's Mate."
     }
    ]
   }

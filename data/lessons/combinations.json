@@ -15,7 +15,7 @@
   "sacrifice"
  ],
  "intro": {
-  "text": "Many winning moves are two Themes in a row. The first move forces the opponent's hand, often with a sacrifice: it lures a piece onto a bad square (a decoy), pulls a defender away (a deflection), or moves your own piece out of the way with check (a clearance). The second move is a Theme you already know: a fork, a pin or a mate. When a fork or a mate is almost there, ask which forcing move would make it work."
+  "text": "Many wins come from two Themes in a row. The first move forces a reply, often with a sacrifice: it lures a piece onto a bad square (a decoy), pulls a defender away (a deflection), or moves your own piece out of the way with check (a clearance). The second move is a Theme you already know: a fork, a pin or a mate. When a fork or a mate is almost there, ask which forcing move would make it work."
  },
  "parts": [
   {
@@ -23,7 +23,7 @@
    "fen": "8/2p4R/1pPq2k1/6p1/3N1p2/4P1P1/5P1P/6K1 w - - 1 43",
    "side": "white",
    "keyIdea": "A sacrifice can drag the king onto a square where a knight fork is waiting.",
-   "text": "From a game between two masters, played on Lichess. White to move, with equal material. Black's king on g6 and queen on d6 stand on the same rank, and your knight is close by.",
+   "text": "From a game played on Lichess. You are White, and material is level. Black's king on g6 and queen on d6 stand on the same rank, and your knight is close by.",
    "credit": {
     "source": "Lichess puzzle database, puzzle 54H4F",
     "url": "https://lichess.org/training/54H4F",
@@ -105,7 +105,7 @@
       "club": []
      },
      "notes": {
-      "text": "Take the queen. You gave a rook and won the queen: neither move works without the other."
+      "text": "Your knight takes the queen. You gave a rook and won the queen: neither move works without the other."
      }
     }
    ]
@@ -115,7 +115,7 @@
    "fen": "r2r2k1/pq2bppp/1p2p3/4P3/3B1P2/1P4P1/P1PQ3P/3R1RK1 b - - 0 18",
    "side": "black",
    "keyIdea": "Give material to lure a piece onto a line with its own king, then pin it there.",
-   "text": "From a game played on Lichess. You are Black, a pawn down. Look at the diagonal that runs from c5 through d4 to White's king on g1.",
+   "text": "From a game played on Lichess. You are Black, and you are a pawn down. Look at the diagonal that runs from c5 through d4 to White's king on g1.",
    "credit": {
     "source": "Lichess puzzle database, puzzle 8VTTY",
     "url": "https://lichess.org/training/8VTTY",
@@ -143,7 +143,7 @@
       "club": []
      },
      "notes": {
-      "text": "Step one, the decoy: give your rook for the bishop. White's best is to take back with the queen, and that puts the queen on d4, on the same diagonal as White's king."
+      "text": "Step one, the decoy: your rook takes the bishop and gives itself up. White's best move is to take back with the queen, and that puts the queen on d4, on the same diagonal as White's king."
      }
     },
     {
@@ -197,7 +197,7 @@
       "club": []
      },
      "notes": {
-      "text": "White gave the queen for the bishop. You gave a rook and a bishop, and now have a queen against a rook."
+      "text": "White's queen took your bishop, and your pawn takes the queen. You gave a rook and a bishop for a bishop and the queen, so you now have a queen and a rook against two rooks."
      }
     }
    ]
@@ -207,7 +207,7 @@
    "fen": "4kb1B/1bq2p1p/4pQ2/2p1N3/1n2P3/1p6/2r2PPP/3R2K1 w - - 6 25",
    "side": "white",
    "keyIdea": "Force the only real defender of a square away with a check, and the square is open for mate.",
-   "text": "From a game played on Lichess. White to move, a piece and a pawn down. Your queen and knight both aim at f7. Count what guards it.",
+   "text": "From a game played on Lichess. You are White, and you are a piece and a pawn down. Your queen and knight both aim at f7. Count what guards it.",
    "credit": {
     "source": "Lichess puzzle database, puzzle Lnh28",
     "url": "https://lichess.org/training/Lnh28",
@@ -270,7 +270,7 @@
    "fen": "2r2Q2/1b5k/5nNP/1p1p4/6P1/q4PN1/npPQ4/1K1R3R b - - 0 27",
    "side": "black",
    "keyIdea": "Move a piece out of your queen's way with check, and the line it opens can lead to mate.",
-   "text": "From a game played on Lichess. You are Black and far behind: White has just made a second queen. But White's king on b1 is short of squares, and your queen, knight and b2 pawn are right beside it.",
+   "text": "From a game played on Lichess. You are Black and far behind: White has just promoted a pawn to a second queen. But White's king on b1 is short of squares, and your queen, knight and b2 pawn are right beside it.",
    "credit": {
     "source": "Lichess puzzle database, puzzle ZtntP",
     "url": "https://lichess.org/training/ZtntP",

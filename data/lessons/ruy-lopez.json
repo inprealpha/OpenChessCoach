@@ -23,7 +23,7 @@
    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
    "side": "white",
    "keyIdea": "Attacking the knight that guards e5 only wins a pawn once e4 is safe, so develop and castle first.",
-   "text": "You are White, from the first move. The line is the Closed Ruy Lopez as Lichess's list of openings names it. At each move, ask what it does for your centre, your pieces and your king, and whether e5 is really under threat yet.",
+   "text": "You are White, from the first move. The first moves are the Closed Ruy Lopez, as Lichess's list of openings names it. At each move, ask what it does for your centre, your pieces and your king, and whether e5 is really under threat yet.",
    "credit": {
     "source": "Lichess chess-openings",
     "url": "https://github.com/lichess-org/chess-openings",
@@ -757,7 +757,7 @@
       ]
      },
      "notes": {
-      "text": "3...a6 asks the bishop to take or step back. 4.Ba4 keeps it on the same diagonal, so the pressure on the knight is saved for later. 4.Bxc6 is also played, but it gives Black the two bishops and still does not win e5."
+      "text": "3...a6 attacks the bishop, so it must take the knight or step back. 4.Ba4 keeps it on the same diagonal, so the pressure on the knight is saved for later. 4.Bxc6 is also played, but it gives Black two bishops against your knight and bishop, and still does not win e5."
      }
     },
     {
@@ -970,7 +970,7 @@
       ]
      },
      "notes": {
-      "text": "4...Nf6 attacks your e4 pawn, but you can leave it and castle. If 5...Nxe4, then 6.d4 opens the centre while Black's king is still in it, and you win the pawn back."
+      "text": "4...Nf6 attacks your e4 pawn, but 5.O-O leaves it and castles. If 5...Nxe4, then 6.d4 opens the centre while Black's king is still in it, and you win the pawn back."
      }
     },
     {
@@ -1183,7 +1183,7 @@
       ]
      },
      "notes": {
-      "text": "5...Be7 gets Black ready to castle, and now taking on e4 would be a real threat. 6.Re1 guards the pawn with a developing move. With e4 safe, your old idea finally works: Bxc6 and Nxe5 would win a pawn, because ...Qd4 no longer wins it back."
+      "text": "5...Be7 gets Black ready to castle, and now Black really does threaten to take your e4 pawn. 6.Re1 guards it with a developing move. With e4 safe, your old idea finally works: Bxc6 and Nxe5 would win a pawn, because ...Qd4 no longer wins it back."
      }
     },
     {

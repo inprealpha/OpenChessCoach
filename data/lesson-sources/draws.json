@@ -9,26 +9,26 @@
  "priorKnowledge": [
   "queen-mate"
  ],
- "intro": "Not every game ends in mate. Stalemate is a draw: the player to move is not in check but has no legal move. A game is also drawn when the same position comes up three times with the same player to move, and when neither side has enough pieces left to give mate, such as king against king, or king and knight against king. When you are winning, these rules are traps to avoid; when you are losing, they can save half a point.",
+ "intro": "Not every game ends in mate. Stalemate is a draw: the player to move is not in check but has no legal move. A game is also drawn when the same position comes up three times with the same player to move, and when neither side has enough pieces left to give mate, such as king against king, or king and knight against king. When you are winning, these rules are traps to avoid; when you are losing, they can save the game.",
  "parts": [
   {
    "title": "Mate, not stalemate",
    "fen": "8/k7/8/1QK5/8/8/8/8 w - - 29 75",
    "side": "white",
    "keyIdea": "Against a lone king, check before every move that it will still have a legal move, unless your move is mate.",
-   "text": "From a game played on Lichess: White has a queen against a lone king, and Black's king is stuck near the corner. A move later, White in the game played a natural-looking queen move and only drew. Find the mate instead.",
+   "text": "From a game played on Lichess. You are White, with a queen against a lone king, and Black's king is stuck near the corner. In the game, White's next queen move looked natural but left Black with no legal move, and the game was only a draw. Find the mate instead.",
    "url": "https://lichess.org/uxxySEvi#148",
    "line": "Kc6 Ka8 Qb7#",
    "notes": [
     {
      "ply": 0,
      "san": "Kc6",
-     "text": "Your king comes closer, so that it can protect the queen on b7 next move. Black's king still has a8 to go to, so this is not stalemate."
+     "text": "75.Kc6: your king steps from c5 to c6, so that it can protect the queen on b7 next move. Black's king still has a8 to go to, so this is not stalemate."
     },
     {
      "ply": 2,
      "san": "Qb7#",
-     "text": "Mate: the queen checks from b7, and your king on c6 guards it, so Black's king cannot take it. In the game White played Qb6 here instead. That gave no check, but it took away a7, b7 and b8, so Black's king had no legal move left: stalemate, and the game was drawn."
+     "text": "76.Qb7# is mate: the queen checks from b7, and your king on c6 guards it, so Black's king cannot take it. In the game White played Qb6 here instead. That gave no check, but it took away a7, b7 and b8, so Black's king had no legal move left: stalemate, and the game was drawn."
     }
    ]
   },
@@ -36,20 +36,56 @@
    "title": "Stalemate to the rescue",
    "fen": "8/8/8/8/6k1/5q2/6KR/8 w - - 24 85",
    "side": "white",
-   "keyIdea": "If your king has no legal moves, giving away your last piece can force stalemate and save a lost game.",
-   "text": "From a game played on Lichess: you have only a rook against a queen, which is normally lost. Your king is in check. Look at how many squares it will have left after this move, and think about what that could mean.",
+   "keyIdea": "When your king has no legal move, a check with your last piece can force stalemate: if it is taken, you cannot move.",
+   "text": "From a game played on Lichess. You have only a rook against a queen, which is normally lost, and your king is in check. Look at how many squares your king will have after this move, and think about what that could mean.",
    "url": "https://lichess.org/lPrsxeLO#168",
    "line": "Kg1 Kg3 Rh3+ Kxh3",
    "notes": [
     {
      "ply": 0,
      "san": "Kg1",
-     "text": "The only legal move. Now your king has no squares at all: Black's queen covers f1, f2, g2 and h1, and your rook stands on h2. Only the rook can still move."
+     "text": "85.Kg1 is the only legal move. Now your king has no squares at all: Black's queen covers f1, f2, g2 and h1, and your rook stands on h2. Only the rook can still move."
     },
     {
      "ply": 2,
      "san": "Rh3+",
-     "text": "Black's king has just attacked your rook, and the rook answers with a check right next to it. If Black takes it, with the king or with the queen, you have no legal move and you are not in check: stalemate. In the game Black took with the king, and it was a draw."
+     "text": "Black's last move, 85...Kg3, was a mistake: with its king kept away from your rook, the queen wins. Now the king stands next to your rook, and 86.Rh3+ checks right beside it. If Black takes the rook, with the king or with the queen, you have no legal move and you are not in check: stalemate. If the king steps away instead, the rook takes the queen. In the game Black took with the king, and it was a draw."
+    }
+   ]
+  },
+  {
+   "title": "A knight against a queen",
+   "fen": "5N1k/5K2/6pp/8/q6P/6P1/8/8 w - - 2 39",
+   "side": "white",
+   "keyIdea": "A draw by repetition can save a lost game: look for moves that force the same position to come back three times.",
+   "text": "From a game played on Lichess. You are White, with only a knight against a queen, which is normally lost. But Black's king is shut in the corner, and your king on f7 covers g7 and g8. What can your knight do?",
+   "url": "https://lichess.org/lDHGn6Ex#76",
+   "line": "Nxg6+ Kh7 Nf8+ Kh8 Ng6+ Kh7 Nf8+ Kh8 Ng6+",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Nxg6+",
+     "text": "39.Nxg6+: the knight takes the pawn on g6 with check. A knight's check cannot be blocked, and the king cannot reach the knight, so it has to go to h7, the only square your king and knight leave it. Any other move would give Black's queen time to start checking your king."
+    },
+    {
+     "ply": 2,
+     "san": "Nf8+",
+     "text": "40.Nf8+: the knight jumps back to f8 and checks the king on h7. Your king covers g6, g7 and g8, so the black king's only square is h8 again."
+    },
+    {
+     "ply": 4,
+     "san": "Ng6+",
+     "text": "41.Ng6+: the knight is back on g6 and the king on h8, with Black to move. This exact position, every piece on the same square, has now come up for the second time."
+    },
+    {
+     "ply": 6,
+     "san": "Nf8+",
+     "text": "42.Nf8+ checks again from f8. Black's king has to go back to h8: there is nothing else it can do."
+    },
+    {
+     "ply": 8,
+     "san": "Ng6+",
+     "text": "43.Ng6+: the same position, with Black to move, has now come up three times, so the game is a draw by repetition. The game on Lichess was drawn this way: a knight held a queen."
     }
    ]
   },
@@ -57,20 +93,20 @@
    "title": "Too little to mate",
    "fen": "8/8/8/5k2/5p2/2q5/5RK1/8 b - - 5 64",
    "side": "white",
-   "keyIdea": "When you are losing, trading off the last pieces can leave too little material to mate, which is a draw.",
-   "text": "A Lichess Puzzle: Black has a queen and a pawn against your rook, and the pawn is about to give check. You are losing, but remember the third kind of draw: with only the two kings left, nobody can give mate.",
+   "keyIdea": "Mate needs enough pieces: once trades leave only the two kings, the game is drawn at once.",
+   "text": "From a game played on Lichess. Black has a queen and a pawn against your rook, and Black's pawn has just given check from f3. Black was winning, but this check is a mistake. Think about what would be left on the board after a few captures.",
    "url": "https://lichess.org/training/cBvHI",
    "line": "f3+ Rxf3+ Qxf3+ Kxf3",
    "notes": [
     {
      "ply": 1,
      "san": "Rxf3+",
-     "text": "The rook takes the pawn with check, and from f3 it also attacks Black's queen on c3 along the third rank. If Black's king steps away, you take the queen, so Black's best is to take your rook."
+     "text": "65.Rxf3+: the rook takes the pawn with check, and from f3 it also attacks Black's queen on c3 along the third rank. If Black's king steps away, you take the queen, so Black's best move is to take your rook."
     },
     {
      "ply": 3,
      "san": "Kxf3",
-     "text": "Black's queen took your rook, and your king takes the queen. Only the two kings are left, so neither side can ever give mate, and the game is a draw at once."
+     "text": "Black's queen took your rook, and 66.Kxf3 takes the queen. Only the two kings are left, so neither side can ever give mate, and the game is a draw at once."
     }
    ]
   }

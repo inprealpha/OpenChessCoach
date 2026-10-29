@@ -15,7 +15,7 @@
  ],
  "puzzleThemes": [],
  "intro": {
-  "text": "The Scotch Game starts 1.e4 e5 2.Nf3 Nc6 3.d4. Instead of building up slowly, White opens the centre at once, and after 3...exd4 4.Nxd4 a White knight stands in the middle of the board. Black will attack that knight, so your job is to keep it guarded while you bring out your pieces and castle."
+  "text": "The Scotch Game starts 1.e4 e5 2.Nf3 Nc6 3.d4. Instead of building up slowly, White opens the centre at once, and after 3...exd4 4.Nxd4 a white knight stands in the centre of the board. Black will attack that knight, so your job is to keep it guarded while you bring out your pieces and castle."
  },
  "parts": [
   {
@@ -23,7 +23,7 @@
    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
    "side": "white",
    "keyIdea": "Open the centre with d4, then guard your knight on d4 as often as Black attacks it while you develop and castle.",
-   "text": "You are White, from the first move. The line is the Classical Variation as Lichess's list of openings names it. At each move, count how many Black pieces attack your knight on d4 and how many of yours guard it.",
+   "text": "You are White, from the first move. The first moves are the Classical Variation, as Lichess's list of openings names it. At each move, count how many black pieces attack your knight on d4 and how many of yours guard it.",
    "credit": {
     "source": "Lichess chess-openings",
     "url": "https://github.com/lichess-org/chess-openings",
@@ -580,7 +580,7 @@
       ]
      },
      "notes": {
-      "text": "3.d4 is the Scotch Game. The e5 pawn is now attacked twice and guarded once, so the centre opens at once. Black's usual answer is 3...exd4, swapping the e-pawn for your d-pawn."
+      "text": "3.d4 is the Scotch Game. The e5 pawn is now attacked twice and guarded once, so the centre opens at once. Black's usual answer is 3...exd4, trading the e-pawn for your d-pawn."
      }
     },
     {
@@ -775,7 +775,7 @@
       ]
      },
      "notes": {
-      "text": "Take back with 4.Nxd4: your knight now stands in the centre, and your queen guards it. If Black swaps knights with 4...Nxd4, take back with the queen, and 5.Qxd4 puts it on a strong central square."
+      "text": "4.Nxd4 takes back: your knight now stands in the centre, and your queen guards it. If Black trades knights with 4...Nxd4, take back with the queen: 5.Qxd4 puts it on a strong central square."
      }
     },
     {
@@ -1396,7 +1396,7 @@
       ]
      },
      "notes": {
-      "text": "6...Nge7 develops Black's last knight; it goes to e7 because the queen is on f6. Bring out your last bishop with 7.Bc4, which aims at f7 and clears the way to castle. If Black attacks it with ...Ne5, it can step back to e2 or b3."
+      "text": "6...Nge7 develops Black's last knight; it goes to e7 because the queen is on f6. 7.Bc4 brings out your last bishop, aims it at f7 and clears the way to castle. If Black attacks it with ...Ne5, it can step back to e2 or b3."
      }
     },
     {
@@ -1523,7 +1523,7 @@
       ]
      },
      "notes": {
-      "text": "Black has castled, and you do the same: 8.O-O puts your king safe and brings a rook towards the centre. Your knight on d4 is guarded three times, and your pawn on e4 gives you more room in the centre. The knight on b1 is your last piece to develop."
+      "text": "Black has castled, and 8.O-O castles too: it makes your king safe and brings a rook towards the centre. Your knight on d4 is guarded three times, and your pawn on e4 gives you more room in the centre. The knight on b1 is your last piece to develop."
      }
     }
    ]

@@ -1,6 +1,6 @@
 {
  "id": "threats",
- "name": "What does my opponent want?",
+ "name": "Spot the threat",
  "kind": "thinking",
  "track": "thinking",
  "level": "beginner",
@@ -12,31 +12,31 @@
  "priorKnowledge": [
   "piece-values"
  ],
- "intro": "Every move your opponent makes has a reason. Before you choose your own move, ask what their last move threatens: does it attack one of your pieces, attack two at once, or aim at your king? Once you have seen the threat, you can deal with it by moving the piece, guarding it, or blocking the line.",
+ "intro": "Your opponent's last move usually has a purpose. Before you look for a move of your own, find out what that move threatens: does it attack one of your pieces, attack two at once, or aim at your king? Once you have seen the threat, you can deal with it by moving the piece that is attacked, guarding it, or blocking the line.",
  "parts": [
   {
-   "title": "A pawn attacks your bishop",
+   "title": "A pawn steps forward",
    "fen": "r4rk1/p1p1qppp/3pbn2/2p3B1/4P3/2N5/PPP2PPP/R2Q1RK1 b - - 1 13",
    "side": "white",
    "keyIdea": "When a pawn attacks one of your pieces, move the piece to a safe square where it still does a job.",
-   "text": "From a game played on Lichess. You are White, and Black has just played 13...h6. Before you choose a move, ask what that pawn move threatens.",
+   "text": "From a game played on Lichess. You are White, and Black has just played 13...h6, moving a pawn from h7 to h6. Before you choose a move, ask what that pawn move threatens.",
    "url": "https://lichess.org/m3rzsv91#25",
    "line": "h6 Bh4 g5 Bg3",
    "notes": [
     {
      "ply": 1,
      "san": "Bh4",
-     "text": "13...h6 attacks your bishop, and nothing guards it: if you ignore the pawn, 14...hxg5 wins a piece. On h4 the bishop is safe and still lines up with the knight on f6 and the queen on e7 behind it."
+     "text": "14.Bh4: your bishop steps back from g5 to h4. The pawn on h6 was attacking it and nothing guarded it, so ignoring the pawn would have lost a piece to 14...hxg5. On h4 the bishop is safe and still lines up with the knight on f6 and the queen on e7 behind it."
     },
     {
      "ply": 3,
      "san": "Bg3",
-     "text": "14...g5 attacks the bishop again, so ask the same question and step back to g3, where no black piece attacks it. From g3 it still looks along the diagonal at the pawn on d6."
+     "text": "14...g5 attacked the bishop again, and the same question gives the same answer: 15.Bg3 steps back to a square no black piece attacks. From g3 the bishop still looks along the diagonal at the pawn on d6."
     }
    ]
   },
   {
-   "title": "One move saves two pieces",
+   "title": "A knight jumps in",
    "fen": "r2q1rk1/ppp1bppp/2np1n2/8/2B1P3/2N2Q1P/PPP2PP1/R1B2RK1 b - - 0 10",
    "side": "white",
    "keyIdea": "When a move attacks two of your pieces, look for one move that saves both: move one so that it guards the other.",
@@ -47,17 +47,17 @@
     {
      "ply": 1,
      "san": "Qe2",
-     "text": "The knight attacks your queen on f3 and your bishop on c4. 11.Qe2 takes the queen out of reach and guards the bishop from e2, so neither piece is lost. A queen move that leaves the bishop unguarded would lose it to 11...Nxc4."
+     "text": "The knight was attacking your queen on f3 and your bishop on c4. 11.Qe2 takes the queen out of reach and guards the bishop from e2, so neither piece is lost. A queen move that left the bishop undefended would have lost it to 11...Nxc4."
     },
     {
      "ply": 3,
      "san": "Qxc4",
-     "text": "Black has traded the knight for your bishop. Take back with the queen: 3 points for 3 is an even trade."
+     "text": "Black traded the knight for your bishop, and 12.Qxc4 takes back with the queen: 3 points for 3, an even trade."
     }
    ]
   },
   {
-   "title": "A threat of mate",
+   "title": "The queen comes closer",
    "fen": "2rr2k1/5ppp/p2bpq2/1p4B1/1P4Q1/P4P1P/5P2/3R1RK1 b - - 6 25",
    "side": "white",
    "keyIdea": "Ask whether the last move threatens mate; if it does, stop the mate first, ideally with a move that also helps elsewhere.",
@@ -68,12 +68,12 @@
     {
      "ply": 1,
      "san": "f4",
-     "text": "With the bishop on d6 behind it, the queen threatens 26...Qh2, which would be mate. 26.f4 blocks that diagonal, attacks the queen and guards your bishop on g5, all in one move."
+     "text": "With the bishop on d6 behind it, the queen was threatening 26...Qh2, which would be mate. 26.f4 blocks that diagonal, attacks the queen and guards your bishop on g5, all in one move."
     },
     {
      "ply": 3,
      "san": "Bxd8",
-     "text": "The queen has left f6, so your bishop on g5 now reaches d8. Take the rook: after 27...Rxd8 you have won a rook for your bishop, 5 points for 3."
+     "text": "The mate is stopped and Black's queen has gone to c3, so 27.Bxd8 takes the rook on d8. After 27...Rxd8 you have won a rook for your bishop, 5 points for 3. Taking the rook one move earlier would have allowed 26...Qh2 mate."
     }
    ]
   }

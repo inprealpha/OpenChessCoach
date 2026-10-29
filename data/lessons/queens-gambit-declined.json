@@ -15,7 +15,7 @@
  ],
  "puzzleThemes": [],
  "intro": {
-  "text": "In the Queen's Gambit Declined, Black answers 2.c4 with 2...e6. The e-pawn backs up the pawn on d5, so Black keeps a pawn in the centre and the bishop on f8 can come out. The cost is the other bishop: the pawn on e6 shuts in the bishop on c8. You develop the kingside, castle, and then look for a way to free that bishop."
+  "text": "In the Queen's Gambit Declined, Black answers White's 2.c4 (the c-pawn to c4) with 2...e6 (the e-pawn to e6). The e-pawn backs up the pawn on d5, so Black keeps a pawn in the centre and the bishop on f8 can come out. The cost is the other bishop: the pawn on e6 shuts in the bishop on c8. You develop the pieces on your kingside, the half of the board where your king starts (to develop a knight or bishop is to bring it off its starting square), then castle, and then look for a way to bring that bishop into play."
  },
  "parts": [
   {
@@ -23,7 +23,7 @@
    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
    "side": "black",
    "keyIdea": "Hold d5 with pawns, develop the kingside and castle; the bishop on c8 is the piece that still needs a plan.",
-   "text": "You are Black, and White opens with 1.d4. The line is the Orthodox Defence as Lichess's list of openings names it. At each move, ask what it does for your centre, your pieces and your king.",
+   "text": "You are Black, and White opens with 1.d4. These moves reach the position that Lichess's list of openings calls the Orthodox Defence. At each move, ask what it does for your centre, your pieces and your king.",
    "credit": {
     "source": "Lichess chess-openings",
     "url": "https://github.com/lichess-org/chess-openings",
@@ -256,7 +256,7 @@
       ]
      },
      "notes": {
-      "text": "1...d5 meets White's centre pawn with one of your own. It also makes e4 hard for White to play, because your pawn on d5 attacks that square."
+      "text": "1...d5, the pawn to d5, meets White's centre pawn with one of your own. It also makes e4 hard for White to play, because your pawn on d5 attacks that square."
      }
     },
     {
@@ -1108,7 +1108,7 @@
       ]
      },
      "notes": {
-      "text": "5.e3 opens the way for White's other bishop. Castle now with 5...O-O, so your king is safe before the centre opens. 5...h6, asking the bishop on g5 to decide, is just as good."
+      "text": "5.e3 opens the way for White's other bishop. 5...O-O castles, so your king is safe before the centre opens. 5...h6, which attacks the bishop on g5 so that it must take your knight or step back, is just as good."
      }
     },
     {
@@ -1290,7 +1290,7 @@
       ]
      },
      "notes": {
-      "text": "6...Nbd7 develops your last knight. It goes to d7, not c6, so your c-pawn stays free to move to c6 or c5. Of your minor pieces, only the bishop on c8 is still at home: one plan is ...c6, ...dxc4 and ...Nd5 to trade some pieces, then ...e5 to open its diagonal; another is ...b6 and ...Bb7."
+      "text": "6...Nbd7 develops your last knight. It goes to d7, not c6, so your c-pawn can still move to c6 or c5. Of your knights and bishops, only the bishop on c8 has not moved yet. One plan is ...c6, ...dxc4 and ...Nd5 to trade some pieces, then ...e5 to open its diagonal; another is ...b6 and ...Bb7."
      }
     }
    ]

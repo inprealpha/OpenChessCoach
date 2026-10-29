@@ -9,20 +9,20 @@
   "italian-game"
  ],
  "side": "black",
- "eco": "C58",
+ "eco": "C59",
  "puzzleTags": [
   "Italian_Game_Two_Knights_Defense"
  ],
  "puzzleThemes": [],
  "intro": {
-  "text": "The Two Knights Defence is a reply to the Italian Game: after 1.e4 e5 2.Nf3 Nc6 3.Bc4, Black brings out the second knight with 3...Nf6 and attacks the pawn on e4. White's sharpest answer, 4.Ng5, attacks f7 with knight and bishop together. You will learn how to block that attack, and why giving up a pawn for quick, active pieces is a fair deal for Black."
+  "text": "The Two Knights Defence is a reply to the Italian Game (1.e4 e5 2.Nf3 Nc6 3.Bc4): Black brings out the second knight with 3...Nf6, the knight to f6, and attacks the pawn on e4. White's most aggressive answer, 4.Ng5, the knight to g5, attacks f7 with knight and bishop together. You will learn how to block that attack, and why giving up a pawn for quick, active pieces is a fair deal for Black."
  },
  "parts": [
   {
    "title": "Two Knights Defence",
    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
    "side": "black",
-   "keyIdea": "Develop fast and hit e4; when Ng5 attacks f7, block with ...d5 and use the time to make your pieces active.",
+   "keyIdea": "When knight and bishop aim at f7, block the bishop with a pawn that also attacks it, then gain time by chasing White's pieces.",
    "credit": {
     "source": "Lichess chess-openings",
     "url": "https://github.com/lichess-org/chess-openings",
@@ -45,10 +45,10 @@
     "c7c6",
     "d5c6",
     "b7c6",
-    "b5d3",
-    "f6d5",
+    "b5e2",
+    "h7h6",
     "g5f3",
-    "f8d6"
+    "e5e4"
    ],
    "nodes": [
     {
@@ -474,7 +474,7 @@
       ]
      },
      "notes": {
-      "text": "2.Nf3 attacks your e5 pawn. 2...Nc6 defends it with a piece that also comes into play and watches d4. Defending with 2...f6 would take your knight's best square and open lines towards your king."
+      "text": "2.Nf3 attacked your e5 pawn. 2...Nc6 defends it with a piece that also comes into play and watches d4. Defending with 2...f6 would take your knight's best square and open lines towards your king."
      }
     },
     {
@@ -687,7 +687,7 @@
       ]
      },
      "notes": {
-      "text": "White's bishop on c4 aims at f7. 3...Nf6, the Two Knights Defence, develops your other knight and attacks the e4 pawn, which nothing defends, so White has to think about defence too. 3...Bc5 is the other main move."
+      "text": "White's bishop on c4 aims at f7. 3...Nf6, the Two Knights Defence, develops your other knight (brings it off its starting square) and attacks the e4 pawn, which nothing defends, so White has to think about defence too. 3...Bc5 is the other main move."
      }
     },
     {
@@ -882,7 +882,7 @@
       ]
      },
      "notes": {
-      "text": "4.Ng5 attacks f7 with knight and bishop, and only your king defends it. Block the bishop with 4...d5: the pawn stands in its way and attacks it too. 4...h6? fails to 5.Nxf7, which attacks your queen and your rook at once."
+      "text": "4.Ng5 attacks f7 with knight and bishop, and only your king defends it. 4...d5 puts a pawn in the bishop's path, and the pawn attacks the bishop too. 4...h6 is a mistake, because of 5.Nxf7, which attacks your queen and your rook at once."
      }
     },
     {
@@ -1047,7 +1047,7 @@
       ]
      },
      "notes": {
-      "text": "5.exd5 takes the pawn. Taking back with 5...Nxd5 lets White give up a knight on f7 and chase your king into the open. 5...Na5 attacks the bishop on c4 instead, so White must spend a move saving it."
+      "text": "5.exd5 took the pawn. Taking back with 5...Nxd5 would let White give up a knight on f7 and chase your king into the open. 5...Na5 attacks the bishop on c4 instead, so White must spend a move saving it."
      }
     },
     {
@@ -1206,7 +1206,7 @@
       ]
      },
      "notes": {
-      "text": "6.Bb5+ saves the bishop with check. Block with 6...c6: the pawn attacks the bishop again and the pawn on d5 too."
+      "text": "6.Bb5+ saved the bishop with check. 6...c6 blocks the check, and the pawn attacks the bishop again and the pawn on d5 too."
      }
     },
     {
@@ -1311,15 +1311,15 @@
       ]
      },
      "notes": {
-      "text": "7.dxc6 takes your pawn. Take back with 7...bxc6: the new pawn on c6 attacks the bishop on b5 once more, and the b-file and the diagonal from c8 open up for your pieces. White is a pawn up, but White's bishop and knight have used several moves and will soon have to step back again, which gives you time."
+      "text": "7.dxc6 took your pawn, and 7...bxc6 takes back. The pawn on c6 attacks the bishop on b5 once more, and the b-file and the diagonal from c8 open up for your pieces. White is a pawn up, but White's bishop and knight have used several moves and will have to step back again, which gives you time."
      }
     },
     {
      "ply": 14,
      "fen": "r1bqkb1r/p4ppp/2p2n2/nB2p1N1/8/8/PPPP1PPP/RNBQK2R w KQkq - 0 8",
      "decision": false,
-     "main": "b5d3",
-     "mainSan": "Bd3",
+     "main": "b5e2",
+     "mainSan": "Be2",
      "popular": {
       "beginner": [
        {
@@ -1421,168 +1421,44 @@
     },
     {
      "ply": 15,
-     "fen": "r1bqkb1r/p4ppp/2p2n2/n3p1N1/8/3B4/PPPP1PPP/RNBQK2R b KQkq - 1 8",
+     "fen": "r1bqkb1r/p4ppp/2p2n2/n3p1N1/8/8/PPPPBPPP/RNBQK2R b KQkq - 1 8",
      "decision": true,
-     "main": "f6d5",
-     "mainSan": "Nd5",
-     "popular": {
-      "beginner": [
-       {
-        "uci": "h7h6",
-        "san": "h6",
-        "percent": 47.8,
-        "games": 11
-       },
-       {
-        "uci": "f8c5",
-        "san": "Bc5",
-        "percent": 13,
-        "games": 3
-       },
-       {
-        "uci": "f8e7",
-        "san": "Be7",
-        "percent": 13,
-        "games": 3
-       },
-       {
-        "uci": "f6g4",
-        "san": "Ng4",
-        "percent": 8.7,
-        "games": 2
-       },
-       {
-        "uci": "g7g6",
-        "san": "g6",
-        "percent": 4.3,
-        "games": 1
-       }
-      ],
-      "casual": [
-       {
-        "uci": "h7h6",
-        "san": "h6",
-        "percent": 53.2,
-        "games": 116
-       },
-       {
-        "uci": "f8c5",
-        "san": "Bc5",
-        "percent": 14.7,
-        "games": 32
-       },
-       {
-        "uci": "f6d5",
-        "san": "Nd5",
-        "percent": 8.3,
-        "games": 18
-       },
-       {
-        "uci": "f8e7",
-        "san": "Be7",
-        "percent": 7.8,
-        "games": 17
-       },
-       {
-        "uci": "f8d6",
-        "san": "Bd6",
-        "percent": 6,
-        "games": 13
-       }
-      ],
-      "club": [
-       {
-        "uci": "h7h6",
-        "san": "h6",
-        "percent": 53.7,
-        "games": 87
-       },
-       {
-        "uci": "f6d5",
-        "san": "Nd5",
-        "percent": 14.8,
-        "games": 24
-       },
-       {
-        "uci": "f8d6",
-        "san": "Bd6",
-        "percent": 9.3,
-        "games": 15
-       },
-       {
-        "uci": "f8c5",
-        "san": "Bc5",
-        "percent": 6.2,
-        "games": 10
-       },
-       {
-        "uci": "f8e7",
-        "san": "Be7",
-        "percent": 5.6,
-        "games": 9
-       }
-      ]
-     },
-     "notes": {
-      "text": "The bishop went back to d3. 8...Nd5 moves your knight to the centre and uncovers an attack: your queen on d8 now hits the knight on g5, which has no defender. From d5 your knight can also jump to f4 or b4 to hit the bishop on d3."
-     }
-    },
-    {
-     "ply": 16,
-     "fen": "r1bqkb1r/p4ppp/2p5/n2np1N1/8/3B4/PPPP1PPP/RNBQK2R w KQkq - 2 9",
-     "decision": false,
-     "main": "g5f3",
-     "mainSan": "Nf3",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": [
-       {
-        "uci": "g5f3",
-        "san": "Nf3",
-        "percent": 37.5,
-        "games": 9
-       },
-       {
-        "uci": "g5e4",
-        "san": "Ne4",
-        "percent": 33.3,
-        "games": 8
-       },
-       {
-        "uci": "b1c3",
-        "san": "Nc3",
-        "percent": 8.3,
-        "games": 2
-       },
-       {
-        "uci": "d1f3",
-        "san": "Qf3",
-        "percent": 4.2,
-        "games": 1
-       },
-       {
-        "uci": "h2h4",
-        "san": "h4",
-        "percent": 4.2,
-        "games": 1
-       }
-      ]
-     }
-    },
-    {
-     "ply": 17,
-     "fen": "r1bqkb1r/p4ppp/2p5/n2np3/8/3B1N2/PPPP1PPP/RNBQK2R b KQkq - 3 9",
-     "decision": true,
-     "main": "f8d6",
-     "mainSan": "Bd6",
+     "main": "h7h6",
+     "mainSan": "h6",
      "popular": {
       "beginner": [],
       "casual": [],
       "club": []
      },
      "notes": {
-      "text": "9.Nf3 saves the knight and attacks e5. 9...Bd6 defends the pawn and brings out the bishop from f8, so your king can castle next. Your active pieces make up for the pawn."
+      "text": "8.Be2 is the main line, though beginners play 8.Ba4 even more often. 8...h6 attacks the knight on g5 with a pawn, so it has to move yet again. Against 8.Ba4 or 8.Bd3, 8...h6 is a good answer too."
+     }
+    },
+    {
+     "ply": 16,
+     "fen": "r1bqkb1r/p4pp1/2p2n1p/n3p1N1/8/8/PPPPBPPP/RNBQK2R w KQkq - 0 9",
+     "decision": false,
+     "main": "g5f3",
+     "mainSan": "Nf3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 17,
+     "fen": "r1bqkb1r/p4pp1/2p2n1p/n3p3/8/5N2/PPPPBPPP/RNBQK2R b KQkq - 1 9",
+     "decision": true,
+     "main": "e5e4",
+     "mainSan": "e4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "9.Nf3 went back, and 9...e4 chases the knight once more. It has to move for the fourth time, and White's bishop has already moved three times, while your pieces are ready to come out. Next you bring out the bishop from f8 and castle, and your active pieces make up for the pawn."
      }
     }
    ]

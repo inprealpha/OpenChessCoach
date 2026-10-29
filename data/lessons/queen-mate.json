@@ -12,53 +12,56 @@
  "puzzleTags": [],
  "puzzleThemes": [],
  "intro": {
-  "text": "With a king and a queen against a lone king you can always force mate, and with the best moves it never takes more than ten. First the queen works on its own: it shuts the enemy king into a smaller and smaller box until the king reaches the edge of the board. Then your own king walks over to help, because a queen cannot give mate without it. Take care at the end: if the lone king has no legal move and is not in check, the game is a draw by stalemate."
+  "text": "A king and a queen can always mate a lone king, and with the right moves it never takes more than ten moves. The queen does most of the work: on its own it can fence the enemy king in, taking away a rank or a file at a time, until the king is stuck on the edge of the board. It cannot give mate alone, so at the end your king has to come and help. At every move, watch out for stalemate: if the lone king is not in check and has no legal move, the game is a draw."
  },
  "parts": [
   {
-   "title": "Shrink the box",
-   "fen": "8/8/3k4/8/8/8/8/KQ6 w - - 0 1",
+   "title": "Fence the king in",
+   "fen": "8/8/3k4/Q7/8/8/8/6K1 w - - 3 61",
    "side": "white",
-   "keyIdea": "The queen alone can fence the king into a box; keep it a knight's jump from the king and the box only gets smaller.",
-   "text": "A worked example from Wikibooks. Your king is far away in the corner, so for now the queen works alone. Black's king stands in the middle: find a queen move that fences it in, without giving check.",
+   "keyIdea": "Keep the queen a knight's jump from the enemy king: each move then takes away another rank or file, until the king reaches the edge.",
+   "text": "From a game played on Lichess. You are White, and your king is far away on g1, so for now the queen works alone. It already stops Black's king from crossing the fifth rank: find a queen move that takes away more squares without giving check.",
    "credit": {
-    "source": "Wikibooks, Chess/The Endgame/King and Queen vs. King",
-    "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Queen_vs._King",
-    "licence": "CC BY-SA 4.0",
-    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-    "authors": "Wikibooks contributors (see the page history)"
+    "source": "Lichess games database, game gfElZN6P",
+    "url": "https://lichess.org/gfElZN6P#120",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
    },
    "mainLine": [
-    "b1b5",
-    "d6e6",
-    "b5c5",
-    "e6f6",
-    "c5d5",
-    "f6g6",
-    "d5e5"
+    "a5f5",
+    "d6c7",
+    "f5e6",
+    "c7b7",
+    "e6d6",
+    "b7c8",
+    "d6e7",
+    "c8b8",
+    "e7d7",
+    "b8a8"
    ],
    "nodes": [
     {
      "ply": 0,
-     "fen": "8/8/3k4/8/8/8/8/KQ6 w - - 0 1",
+     "fen": "8/8/3k4/Q7/8/8/8/6K1 w - - 3 61",
      "decision": true,
-     "main": "b1b5",
-     "mainSan": "Qb5",
+     "main": "a5f5",
+     "mainSan": "Qf5",
      "popular": {
       "beginner": [],
       "casual": [],
       "club": []
      },
      "notes": {
-      "text": "The queen takes the whole fifth rank and the b-file, so Black's king cannot come down to the fifth rank or cross to the b-file. It stands a knight's jump from the king (two files across, one rank down), close enough to take squares away but out of the king's reach."
+      "text": "Qf5, the queen to f5, still covers the fifth rank and now closes the f-file too. Black's king is shut in on the files a to e, above the fifth rank. The queen stands a knight's jump from the king (two files across, one rank down): near enough to cover squares next to it, too far away to be taken."
      }
     },
     {
      "ply": 1,
-     "fen": "8/8/3k4/1Q6/8/8/8/K7 b - - 1 1",
+     "fen": "8/8/3k4/5Q2/8/8/8/6K1 b - - 4 61",
      "decision": false,
-     "main": "d6e6",
-     "mainSan": "Ke6",
+     "main": "d6c7",
+     "mainSan": "Kc7",
      "popular": {
       "beginner": [],
       "casual": [],
@@ -67,143 +70,9 @@
     },
     {
      "ply": 2,
-     "fen": "8/8/4k3/1Q6/8/8/8/K7 w - - 2 2",
+     "fen": "8/2k5/8/5Q2/8/8/8/6K1 w - - 5 62",
      "decision": true,
-     "main": "b5c5",
-     "mainSan": "Qc5",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     },
-     "notes": {
-      "text": "The king stepped to e6, so the queen follows to c5, again a knight's jump away. Now the c-file is shut too. A check is not needed: Qc6+ would leave the fifth rank, and the king could walk back down through e5 or f5."
-     }
-    },
-    {
-     "ply": 3,
-     "fen": "8/8/4k3/2Q5/8/8/8/K7 b - - 3 2",
-     "decision": false,
-     "main": "e6f6",
-     "mainSan": "Kf6",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 4,
-     "fen": "8/8/5k2/2Q5/8/8/8/K7 w - - 4 3",
-     "decision": true,
-     "main": "c5d5",
-     "mainSan": "Qd5",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     },
-     "notes": {
-      "text": "Same pattern: the king went to f6, the queen goes to d5. Black's king can no longer use the d-file or the fifth rank, so its box keeps getting smaller."
-     }
-    },
-    {
-     "ply": 5,
-     "fen": "8/8/5k2/3Q4/8/8/8/K7 b - - 5 3",
-     "decision": false,
-     "main": "f6g6",
-     "mainSan": "Kg6",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 6,
-     "fen": "8/8/6k1/3Q4/8/8/8/K7 w - - 6 4",
-     "decision": true,
-     "main": "d5e5",
-     "mainSan": "Qe5",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     },
-     "notes": {
-      "text": "The king keeps running to the side, and the queen keeps following it. After Qe5 Black's king is shut into the f-, g- and h-files, above the fifth rank."
-     }
-    }
-   ]
-  },
-  {
-   "title": "Pin the king to the edge",
-   "fen": "8/8/6k1/4Q3/8/8/8/K7 b - - 7 4",
-   "side": "white",
-   "keyIdea": "Once the lone king is stuck on the edge, stop chasing it and bring your own king over to help.",
-   "text": "The same example, one move later, with Black to move. Keep shrinking the box with the queen until Black's king is stuck on the edge of the board, then think about your king on a1.",
-   "credit": {
-    "source": "Wikibooks, Chess/The Endgame/King and Queen vs. King",
-    "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Queen_vs._King",
-    "licence": "CC BY-SA 4.0",
-    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-    "authors": "Wikibooks contributors (see the page history)"
-   },
-   "mainLine": [
-    "g6f7",
-    "e5d6",
-    "f7g7",
-    "d6e6",
-    "g7h7",
-    "e6g4",
-    "h7h6",
-    "a1b2"
-   ],
-   "nodes": [
-    {
-     "ply": 0,
-     "fen": "8/8/6k1/4Q3/8/8/8/K7 b - - 7 4",
-     "decision": false,
-     "main": "g6f7",
-     "mainSan": "Kf7",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 1,
-     "fen": "8/5k2/8/4Q3/8/8/8/K7 w - - 8 5",
-     "decision": true,
-     "main": "e5d6",
-     "mainSan": "Qd6",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     },
-     "notes": {
-      "text": "The king went to f7, so the queen goes to d6, a knight's jump away once more. It shuts the sixth rank, and from d6 it also covers e7 and f8, so Black's king is left with the top two ranks."
-     }
-    },
-    {
-     "ply": 2,
-     "fen": "8/5k2/3Q4/8/8/8/8/K7 b - - 9 5",
-     "decision": false,
-     "main": "f7g7",
-     "mainSan": "Kg7",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 3,
-     "fen": "8/6k1/3Q4/8/8/8/8/K7 w - - 10 6",
-     "decision": true,
-     "main": "d6e6",
+     "main": "f5e6",
      "mainSan": "Qe6",
      "popular": {
       "beginner": [],
@@ -211,15 +80,15 @@
       "club": []
      },
      "notes": {
-      "text": "The same step again. The queen on e6 covers the sixth rank, the e-file, f7 and g8, so the king is squeezed towards the corner."
+      "text": "The king stepped to c7, and the queen follows it to e6, a knight's jump away again. Now the sixth rank is closed as well, so the king is kept on the two top ranks."
      }
     },
     {
-     "ply": 4,
-     "fen": "8/6k1/4Q3/8/8/8/8/K7 b - - 11 6",
+     "ply": 3,
+     "fen": "8/2k5/4Q3/8/8/8/8/6K1 b - - 6 62",
      "decision": false,
-     "main": "g7h7",
-     "mainSan": "Kh7",
+     "main": "c7b7",
+     "mainSan": "Kb7",
      "popular": {
       "beginner": [],
       "casual": [],
@@ -227,25 +96,158 @@
      }
     },
     {
-     "ply": 5,
-     "fen": "8/7k/4Q3/8/8/8/8/K7 w - - 12 7",
+     "ply": 4,
+     "fen": "8/1k6/4Q3/8/8/8/8/6K1 w - - 7 63",
      "decision": true,
-     "main": "e6g4",
-     "mainSan": "Qg4",
+     "main": "e6d6",
+     "mainSan": "Qd6",
      "popular": {
       "beginner": [],
       "casual": [],
       "club": []
      },
      "notes": {
-      "text": "Black's king has reached the edge. With the queen on g4 the whole g-file is shut, so the king can only walk up and down the h-file, between h6 and h8. It still has a square to go to, so there is no stalemate."
+      "text": "The king went to b7, and the queen comes along to d6. The d-file is closed now, and the queen also covers c7 and b8, so the king has only a few squares left in the corner."
+     }
+    },
+    {
+     "ply": 5,
+     "fen": "8/1k6/3Q4/8/8/8/8/6K1 b - - 8 63",
+     "decision": false,
+     "main": "b7c8",
+     "mainSan": "Kc8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
      }
     },
     {
      "ply": 6,
-     "fen": "8/7k/8/8/6Q1/8/8/K7 b - - 13 7",
+     "fen": "2k5/8/3Q4/8/8/8/8/6K1 w - - 9 64",
+     "decision": true,
+     "main": "d6e7",
+     "mainSan": "Qe7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The king went to c8, and Qe7 closes the seventh rank. Black's king is on the edge of the board now, with only b8 to go to."
+     }
+    },
+    {
+     "ply": 7,
+     "fen": "2k5/4Q3/8/8/8/8/8/6K1 b - - 10 64",
      "decision": false,
-     "main": "h7h6",
+     "main": "c8b8",
+     "mainSan": "Kb8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 8,
+     "fen": "1k6/4Q3/8/8/8/8/8/6K1 w - - 11 65",
+     "decision": true,
+     "main": "e7d7",
+     "mainSan": "Qd7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The queen follows the king once more. Black's king can only step between a8 and b8, so it still has a move and this is not stalemate. The queen has done its part: from here, your king must come over and help."
+     }
+    },
+    {
+     "ply": 9,
+     "fen": "1k6/3Q4/8/8/8/8/8/6K1 b - - 12 65",
+     "decision": false,
+     "main": "b8a8",
+     "mainSan": "Ka8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    }
+   ]
+  },
+  {
+   "title": "Bring your king",
+   "fen": "8/8/7k/2K5/8/8/6Q1/8 w - - 1 73",
+   "side": "white",
+   "keyIdea": "Once the lone king is stuck on the edge, leave the queen where it is and walk your own king over to help.",
+   "text": "From another game played on Lichess. You are White, and your queen on g2 covers the whole g-file, so Black's king cannot leave the h-file, the edge of the board. The queen cannot give mate on its own, and your king is far away on c5.",
+   "credit": {
+    "source": "Lichess games database, game XkakrM47",
+    "url": "https://lichess.org/XkakrM47#144",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "c5d5",
+    "h6h5",
+    "d5e5",
+    "h5h6",
+    "e5f6",
+    "h6h7",
+    "g2g7"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "8/8/7k/2K5/8/8/6Q1/8 w - - 1 73",
+     "decision": true,
+     "main": "c5d5",
+     "mainSan": "Kd5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Kd5, the king to d5, starts the walk towards Black's king. The queen stays on g2 and keeps the king on the h-file, so there is no need to move it."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "8/8/7k/3K4/8/8/6Q1/8 b - - 2 73",
+     "decision": false,
+     "main": "h6h5",
+     "mainSan": "Kh5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "8/8/8/3K3k/8/8/6Q1/8 w - - 3 74",
+     "decision": true,
+     "main": "d5e5",
+     "mainSan": "Ke5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Black's king moved to h5, but it still cannot get off the h-file. Your king comes one step closer."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "8/8/8/4K2k/8/8/6Q1/8 b - - 4 74",
+     "decision": false,
+     "main": "h5h6",
      "mainSan": "Kh6",
      "popular": {
       "beginner": [],
@@ -254,44 +256,8 @@
      }
     },
     {
-     "ply": 7,
-     "fen": "8/8/7k/8/6Q1/8/8/K7 w - - 14 8",
-     "decision": true,
-     "main": "a1b2",
-     "mainSan": "Kb2",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     },
-     "notes": {
-      "text": "Black's king cannot get off the h-file, so the queen's job is done for now. Your king leaves the corner and walks over to help: the queen cannot give mate on its own."
-     }
-    }
-   ]
-  },
-  {
-   "title": "Mate, and beware of stalemate",
-   "fen": "7k/8/8/4K3/6Q1/8/8/8 w - - 0 1",
-   "side": "white",
-   "keyIdea": "Mate needs your king's help; before every move, check that the lone king still has a legal move.",
-   "text": "The same example a few moves later: your king has arrived on e5, and Black's king is in the corner on h8. Bring your king close enough to protect the queen. Careful: Qg6 here looks strong, but it would leave Black with no legal move and no check, which is stalemate.",
-   "credit": {
-    "source": "Wikibooks, Chess/The Endgame/King and Queen vs. King",
-    "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Queen_vs._King",
-    "licence": "CC BY-SA 4.0",
-    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-    "authors": "Wikibooks contributors (see the page history)"
-   },
-   "mainLine": [
-    "e5f6",
-    "h8h7",
-    "g4g7"
-   ],
-   "nodes": [
-    {
-     "ply": 0,
-     "fen": "7k/8/8/4K3/6Q1/8/8/8 w - - 0 1",
+     "ply": 4,
+     "fen": "8/8/7k/4K3/8/8/6Q1/8 w - - 5 75",
      "decision": true,
      "main": "e5f6",
      "mainSan": "Kf6",
@@ -301,14 +267,14 @@
       "club": []
      },
      "notes": {
-      "text": "Your king steps next to g7, the square where the queen wants to give mate. Black's king still has h7 to go to, so this is not stalemate."
+      "text": "Your king is now close enough to guard g7 and g5, the squares beside Black's king. The king can still go to h5 or h7, so it is not stalemate, and wherever it goes, your queen can mate it next move with your king's help."
      }
     },
     {
-     "ply": 1,
-     "fen": "7k/8/5K2/8/6Q1/8/8/8 b - - 1 1",
+     "ply": 5,
+     "fen": "8/8/5K1k/8/8/8/6Q1/8 b - - 6 75",
      "decision": false,
-     "main": "h8h7",
+     "main": "h6h7",
      "mainSan": "Kh7",
      "popular": {
       "beginner": [],
@@ -317,10 +283,10 @@
      }
     },
     {
-     "ply": 2,
-     "fen": "8/7k/5K2/8/6Q1/8/8/8 w - - 2 2",
+     "ply": 6,
+     "fen": "8/7k/5K2/8/8/8/6Q1/8 w - - 7 76",
      "decision": true,
-     "main": "g4g7",
+     "main": "g2g7",
      "mainSan": "Qg7#",
      "popular": {
       "beginner": [],
@@ -328,7 +294,99 @@
       "club": []
      },
      "notes": {
-      "text": "Mate. The queen checks from g7 and Black's king cannot take it, because your king on f6 guards it. The queen also covers g8, h8, g6 and h6, so the king has nowhere to go."
+      "text": "Mate. The queen checks from g7, right next to Black's king, and your king on f6 guards it, so the king cannot take it. The queen also covers g8, h8 and h6, so the king has nowhere to go."
+     }
+    }
+   ]
+  },
+  {
+   "title": "Mate, and beware of stalemate",
+   "fen": "7k/8/4Q3/5K2/8/8/8/8 w - - 27 91",
+   "side": "white",
+   "keyIdea": "Near the edge, a queen a knight's jump from the king can take its last squares; before each move, check that the king can still move.",
+   "text": "From another game played on Lichess. You are White, your king has come close, and Black's king is in the corner on h8. In the first part your queen kept a knight's jump from the king, but here that habit is a trap: Qg6 or Qf7, each a knight's jump from h8, would leave the king no legal move without giving check, which is stalemate (and so would Kg6).",
+   "credit": {
+    "source": "Lichess games database, game 19FKEkIY",
+    "url": "https://lichess.org/19FKEkIY#180",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "e6e7",
+    "h8g8",
+    "f5g6",
+    "g8h8",
+    "e7g7"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "7k/8/4Q3/5K2/8/8/8/8 w - - 27 91",
+     "decision": true,
+     "main": "e6e7",
+     "mainSan": "Qe7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Qe7, the queen to e7, closes the seventh rank. Black's king is left with g8 and h8, so it still has a move, and your king can now come closer."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "7k/4Q3/8/5K2/8/8/8/8 b - - 28 91",
+     "decision": false,
+     "main": "h8g8",
+     "mainSan": "Kg8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "6k1/4Q3/8/5K2/8/8/8/8 w - - 29 92",
+     "decision": true,
+     "main": "f5g6",
+     "mainSan": "Kg6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Black's king went to g8. Your king steps to g6, where it guards g7 and h7. Black's king still has h8 to go to, so this is not stalemate."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "6k1/4Q3/6K1/8/8/8/8/8 b - - 30 92",
+     "decision": false,
+     "main": "g8h8",
+     "mainSan": "Kh8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "7k/4Q3/6K1/8/8/8/8/8 w - - 31 93",
+     "decision": true,
+     "main": "e7g7",
+     "mainSan": "Qg7#",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Mate. The queen checks from g7, and your king on g6 guards it, so Black's king cannot take it and has no square left. Qe8, a check along the eighth rank, would also have been mate."
      }
     }
    ]
@@ -336,7 +394,7 @@
  ],
  "playOut": {
   "title": "Mate the lone king yourself",
-  "fen": "8/8/3k4/8/8/8/8/KQ6 w - - 0 1",
+  "fen": "7Q/8/8/3k4/8/8/8/5K2 w - - 1 70",
   "side": "white",
   "goal": "mate"
  }

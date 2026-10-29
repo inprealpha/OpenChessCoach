@@ -12,14 +12,14 @@
  "priorKnowledge": [
   "mating-patterns"
  ],
- "intro": "Checks and captures are the first moves to look at, but sometimes the winning move is neither. A quiet move can take away the enemy king's last free square, or make a threat that the opponent cannot stop. When the checks run out too soon, look for a calm move that tightens the net first.",
+ "intro": "When you look for a winning move, you look at checks and captures first. Sometimes none of them works yet, and the winning move is a quiet one: it takes nothing and gives no check, but leaves your opponent with no good answer. In this Lesson your quiet moves shut the enemy king in, so that the next check is mate, or make a threat that cannot be stopped.",
  "parts": [
   {
-   "title": "The knight takes the last square",
+   "title": "One free square left",
    "fen": "r6k/1p3R2/1p2p2p/7N/8/p7/6PP/7K w - - 0 38",
    "side": "white",
-   "keyIdea": "A quiet move that covers the king's last free square can set up a mate threat that nothing stops.",
-   "text": "From a game played on Lichess. White to move. Black's king on h8 has one free square, g8, and Black's a-pawn is racing to become a queen. No check works yet.",
+   "keyIdea": "Before you check, take away the king's last square: then a mate threat may have no defence at all.",
+   "text": "From a game played on Lichess. You are White. Black's king on h8 has one free square, g8, and Black's a-pawn is racing to promote. No check works yet.",
    "url": "https://lichess.org/training/JupYf",
    "line": "Nf6 a2 Rh7#",
    "notes": [
@@ -36,11 +36,11 @@
    ]
   },
   {
-   "title": "The king joins in",
+   "title": "Not yet a check",
    "fen": "7k/4R2P/8/5K2/1p6/2p3P1/1r6/8 w - - 1 42",
    "side": "white",
    "keyIdea": "Your own king can make the quiet move that takes the enemy king's last squares, so the next check is mate.",
-   "text": "From a game played on Lichess. White to move. A check on e8 now would let Black's king out to g7, or let it take your pawn on h7. Bring one more piece up first.",
+   "text": "From a game played on Lichess. You are White. A check on e8 now would let Black's king out to g7, or let it take your pawn on h7. Bring one more piece up first.",
    "url": "https://lichess.org/training/7a1CB",
    "line": "Kg6 Rf2 Re8+ Rf8 Rxf8#",
    "notes": [
@@ -66,7 +66,7 @@
    "fen": "6k1/ppp2p1p/3p1P1B/8/8/3P4/Pbr3PP/5R1K w - - 0 24",
    "side": "white",
    "keyIdea": "A quiet move that threatens mate can force a defence that loses material.",
-   "text": "From a game played on Lichess. White to move, a pawn down. Your bishop on h6 and your pawn on f6 keep Black's king shut in on the back rank.",
+   "text": "From a game played on Lichess. You are White, and you are a pawn down. Your bishop on h6 and your pawn on f6 keep Black's king shut in on the back rank (the row the king started on).",
    "url": "https://lichess.org/training/4WQmC",
    "line": "Re1 Be5 d4",
    "notes": [
@@ -78,7 +78,7 @@
     {
      "ply": 2,
      "san": "d4",
-     "text": "Another quiet move: the pawn attacks the bishop. The bishop cannot leave the e-file, or Re8 is mate, so Black loses it."
+     "text": "Another quiet move: the pawn attacks the bishop. The bishop has to stay on e5 to block the e-file, or Re8 is mate, so Black loses material."
     }
    ]
   }

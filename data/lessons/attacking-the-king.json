@@ -16,15 +16,15 @@
   "exposedKing"
  ],
  "intro": {
-  "text": "An attack on the king works when you bring more pieces to it than your opponent can bring to defend it. Pawn pushes and sacrifices can tear open the lines in front of the king, so your pieces can get in. And a king that is still in the centre when the lines open is in the most danger of all."
+  "text": "Count before you attack: if you can bring more pieces to the enemy king than your opponent can bring to defend it, the attack has a good chance. Pawns help by breaking up the wall of pawns in front of the king, sometimes at the cost of material, so that your pieces can get in. And a king that has not castled is the easiest one to reach once the centre opens."
  },
  "parts": [
   {
-   "title": "One more attacker than defenders",
+   "title": "Counting attackers",
    "fen": "3rr1k1/ppq1np1p/2p1p1pQ/4P3/2BR4/P6P/1P3PP1/4R1K1 w - - 5 23",
    "side": "white",
    "keyIdea": "Count the attackers and defenders of a square next to the king, then bring one more attacker than there are defenders.",
-   "text": "A Lichess Puzzle. You are White, and Black's knight has just gone back to e7. Your queen on h6 attacks the pawn on h7: who defends it, and what can you add?",
+   "text": "From a game played on Lichess. You are White, and Black's knight has just gone back to e7. Your queen on h6 attacks the pawn on h7: who defends it, and what can you add?",
    "credit": {
     "source": "Lichess puzzle database, puzzle wKouZ",
     "url": "https://lichess.org/training/wKouZ",
@@ -34,7 +34,7 @@
    },
    "mainLine": [
     "d4h4",
-    "e7d5",
+    "e7f5",
     "h6h7"
    ],
    "nodes": [
@@ -57,8 +57,8 @@
      "ply": 1,
      "fen": "3rr1k1/ppq1np1p/2p1p1pQ/4P3/2B4R/P6P/1P3PP1/4R1K1 b - - 6 23",
      "decision": false,
-     "main": "e7d5",
-     "mainSan": "Nd5",
+     "main": "e7f5",
+     "mainSan": "Nf5",
      "popular": {
       "beginner": [],
       "casual": [],
@@ -67,7 +67,7 @@
     },
     {
      "ply": 2,
-     "fen": "3rr1k1/ppq2p1p/2p1p1pQ/3nP3/2B4R/P6P/1P3PP1/4R1K1 w - - 7 24",
+     "fen": "3rr1k1/ppq2p1p/2p1p1pQ/4Pn2/2B4R/P6P/1P3PP1/4R1K1 w - - 7 24",
      "decision": true,
      "main": "h6h7",
      "mainSan": "Qxh7+",
@@ -77,17 +77,17 @@
       "club": []
      },
      "notes": {
-      "text": "Two attackers against one defender: the pawn falls with check, and the king has to run to f8, the only square left."
+      "text": "Black's knight on f5 attacks your queen and your rook, but it is too late. Two attackers against one defender: the queen takes the pawn with check, and the king has to run to f8, the only square left."
      }
     }
    ]
   },
   {
-   "title": "Open lines with pawns",
+   "title": "Breaking the king's cover",
    "fen": "r2q1rk1/1p2b1pp/p2p1p2/3npPPQ/4P2P/1P1P4/1P6/R1B2RK1 w - - 0 18",
    "side": "white",
    "keyIdea": "Push your pawns at the enemy king, then break its pawn cover, even with a sacrifice, so your pieces can get at it.",
-   "text": "A Lichess Puzzle. You are White. Black has just taken your knight on d5, but your queen and your pawns are already close to Black's king.",
+   "text": "From a game played on Lichess. You are White. Black has just taken your knight on d5, but your queen and your pawns are already close to Black's king.",
    "credit": {
     "source": "Lichess puzzle database, puzzle YEHZC",
     "url": "https://lichess.org/training/YEHZC",
@@ -117,7 +117,7 @@
       "club": []
      },
      "notes": {
-      "text": "Do not take back on d5. The g-pawn hits h7 and threatens Qxh7 mate: the king could not escape to f7, because your pawn on g6 guards it."
+      "text": "The pawn push leaves the knight on d5 alone for now. The g-pawn hits h7 and threatens Qxh7 mate: the king could not escape to f7, because your pawn on g6 guards it."
      }
     },
     {
@@ -144,7 +144,7 @@
       "club": []
      },
      "notes": {
-      "text": "Black blocked with h6. Now break the wall: the bishop takes the pawn on h6 to tear away the king's cover."
+      "text": "Black pushed the h-pawn to h6, where it blocks your queen's path to h7. The bishop takes that pawn and tears away the king's cover."
      }
     },
     {
@@ -171,7 +171,7 @@
       "club": []
      },
      "notes": {
-      "text": "Take back with the queen. Black's g-pawn and h-pawn are gone, and Qh7 mate is threatened again."
+      "text": "The queen takes back. Black's g-pawn and h-pawn are gone, and Qh7 mate is threatened again."
      }
     },
     {
@@ -198,13 +198,13 @@
       "club": []
      },
      "notes": {
-      "text": "Black put a rook on f7 to guard h7. Take it with check: you win the rook, and the attack goes on."
+      "text": "Black put a rook on f7 to guard h7. The pawn takes it with check: you win the rook, and the attack goes on."
      }
     }
    ]
   },
   {
-   "title": "Punish the king in the centre",
+   "title": "The king in the centre",
    "fen": "rn2kb1r/p3qppp/2p2n2/1p2p1B1/2B1P3/1QN5/PPP2PPP/R3K2R w KQkq - 0 10",
    "side": "white",
    "keyIdea": "When the enemy king is stuck in the centre, open lines towards it, even at the cost of material, and bring every piece.",
@@ -240,7 +240,7 @@
       "club": []
      },
      "notes": {
-      "text": "Do not retreat the bishop. Give up the knight for pawns to tear open the lines to Black's king: after 10...cxb5 your bishop takes on b5 with check."
+      "text": "Instead of moving the bishop away, you give up the knight for pawns to tear open the lines to Black's king: after 10...cxb5 your bishop takes on b5 with check."
      }
     },
     {
@@ -294,7 +294,7 @@
       "club": []
      },
      "notes": {
-      "text": "Castle long: your king is safe, and your rook lands at once on the open d-file, where it attacks the pinned knight on d7."
+      "text": "You castle queenside: the king goes to c1 and the rook to d1. Your king is safe, and the rook lands at once on the open d-file, where it attacks the pinned knight on d7."
      }
     },
     {
@@ -321,7 +321,7 @@
       "club": []
      },
      "notes": {
-      "text": "Black defended d7 with a rook. Take the knight anyway: after 13...Rxd7 the black rook on d7 is pinned too, and your other rook is ready to join."
+      "text": "Black defended d7 with a rook. Your rook takes the knight anyway: after 13...Rxd7 the black rook on d7 is pinned too, and your other rook is ready to join."
      }
     },
     {
@@ -348,7 +348,7 @@
       "club": []
      },
      "notes": {
-      "text": "Every white piece is now in the attack, while Black's rook on h8 and bishop on f8 have still not moved. In the game, after 14...Qe6, Morphy finished with 15.Bxd7+ Nxd7 16.Qb8+! Nxb8 17.Rd8 mate."
+      "text": "Every white piece is now in the attack, while Black's rook on h8 and bishop on f8 have still not moved. In the game, after 14...Qe6, Morphy finished with a queen sacrifice: 15.Bxd7+ Nxd7 16.Qb8+ Nxb8 17.Rd8 mate."
      }
     }
    ]

@@ -12,15 +12,15 @@
  "puzzleTags": [],
  "puzzleThemes": [],
  "intro": {
-  "text": "Two rooks can mate a lone king without any help from your own king. They take turns: one rook guards a rank so the king cannot come back, while the other gives check on the next rank and pushes the king one step towards the edge. Rung by rung, like climbing a ladder, the king is driven to the last rank, where the final check is mate."
+  "text": "Two rooks can mate a lone king without any help from your own king. They work in turns: one rook guards a rank so the king cannot step back, and the other gives check on the rank in front of it, which pushes the king one rank nearer the edge. Then the two rooks change jobs. Once the king is on the edge of the board, the next check is mate."
  },
  "parts": [
   {
-   "title": "Climb the ladder",
+   "title": "Push the king rank by rank",
    "fen": "8/8/8/8/5k2/R6R/6K1/8 w - - 8 61",
    "side": "white",
-   "keyIdea": "One rook guards a rank while the other checks on the next one; then they swap jobs, one rank at a time.",
-   "text": "From a game played on Lichess: you have two rooks, and Black's king stands alone on f4. Your rook on a3 already guards the whole third rank, so the king cannot come down. Find the check that starts pushing it up the board.",
+   "keyIdea": "One rook guards a rank while the other checks on the next one; then they change jobs, one rank at a time.",
+   "text": "From a game played on Lichess. You are White, with two rooks, and Black's king stands alone on f4. Your rook on a3 already guards the whole third rank, so the king cannot come down. Find the check that starts pushing it up the board.",
    "credit": {
     "source": "Lichess games database, game 4oh7JkMh",
     "url": "https://lichess.org/4oh7JkMh#120",
@@ -52,7 +52,7 @@
       "club": []
      },
      "notes": {
-      "text": "The rook checks along the fourth rank. The king must leave that rank, and it cannot go down to the third, which the other rook guards, so it has to step up to the fifth."
+      "text": "Rh4+, the rook to h4, checks along the fourth rank. The king must leave that rank, and it cannot go down to the third, which the other rook guards, so it has to step up to the fifth. If it steps to g5, where it attacks the rook on h4, move that rook away along the h-file first, then carry on checking."
      }
     },
     {
@@ -79,7 +79,7 @@
       "club": []
      },
      "notes": {
-      "text": "Now the other rook takes its turn: it moves up to the fifth rank and checks. The rook on h4 guards the fourth rank behind the king, so the king has to climb again."
+      "text": "Now the other rook takes its turn: it moves up to the fifth rank and checks. The rook on h4 guards the fourth rank behind the king, so the king has to go up again."
      }
     },
     {
@@ -133,7 +133,7 @@
       "club": []
      },
      "notes": {
-      "text": "One more rung: the king is pushed up to the eighth rank, the edge of the board."
+      "text": "Another check, and the king is pushed up to the eighth rank, the edge of the board."
      }
     },
     {
@@ -170,7 +170,7 @@
    "fen": "8/3k3K/1R6/R7/8/8/8/8 w - - 6 52",
    "side": "white",
    "keyIdea": "If the king can reach the square a rook needs, move that rook to the far side of the board first, then check.",
-   "text": "From a game played on Lichess: the ladder has already pushed Black's king up to the seventh rank, with your rooks on a5 and b6. Keep climbing, but before each check, ask whether the king could take the rook that gives it.",
+   "text": "From a game played on Lichess. You are White, and Black's king has already been pushed up to the seventh rank, with your rooks on a5 and b6. Keep pushing, but before each check, ask whether the king could take the rook that gives it.",
    "credit": {
     "source": "Lichess games database, game ssh2gBsw",
     "url": "https://lichess.org/ssh2gBsw#102",
@@ -258,11 +258,11 @@
    ]
   },
   {
-   "title": "A queen can climb too",
+   "title": "A queen and a rook take turns",
    "fen": "8/8/4Q3/6k1/4R3/8/8/6K1 w - - 0 63",
    "side": "white",
-   "keyIdea": "A queen and a rook can share the ladder: one guards a rank while the other checks on the next.",
-   "text": "From a game played on Lichess: a queen and a rook against a lone king. The ladder works the same way, with the queen taking one of the rook's turns. Black's king is on g5, and your rook on e4 already guards the fourth rank.",
+   "keyIdea": "A queen and a rook can share the work: one guards a rank while the other checks on the next.",
+   "text": "From a game played on Lichess. You are White, with a queen and a rook against a lone king: they can take turns in the same way, with the queen doing one of the rooks' jobs. Black's king is on g5, and your rook on e4 already guards the fourth rank.",
    "credit": {
     "source": "Lichess games database, game YKLXC5Ov",
     "url": "https://lichess.org/YKLXC5Ov#124",
@@ -292,7 +292,7 @@
       "club": []
      },
      "notes": {
-      "text": "The queen checks along the fifth rank while the rook guards the fourth, so the king must climb to the sixth. (The Engine also finds a quicker mate here that starts with Rg4+, but the ladder gets there just as surely.)"
+      "text": "Qd5+, the queen to d5, checks along the fifth rank while the rook guards the fourth, so the king must go up to the sixth. (The Engine also finds a quicker mate here that starts with Rg4+, but taking turns gets there just as surely.)"
      }
     },
     {
@@ -319,7 +319,7 @@
       "club": []
      },
      "notes": {
-      "text": "Now the rook checks on the sixth rank. It stands right next to Black's king, but the queen on d5 protects it, so the king cannot take it and has to climb to the seventh."
+      "text": "Now the rook checks on the sixth rank. It stands right next to Black's king, but the queen on d5 protects it, so the king cannot take it and has to go up to the seventh."
      }
     },
     {

@@ -14,15 +14,15 @@
   "backRankMate"
  ],
  "intro": {
-  "text": "A king tucked behind its own pawns is safe from most attacks, but those same pawns can trap it. If an enemy rook or queen reaches the king's first rank with check, the king has nowhere to go, and it is mate. This back-rank mate decides many games at every level. You will learn to give it, to deal with the piece that guards against it, and to give your own king a way out before it is too late."
+  "text": "A king tucked behind its own pawns is safe from most attacks, but those same pawns can trap it. The back rank is the row the king started on. If an enemy rook or queen gives check along it, the king has nowhere to go, and it is mate. This back-rank mate decides many games at every level. You will learn to give it, to deal with the piece that guards against it, and to give your own king a way out before it is too late."
  },
  "parts": [
   {
    "title": "Mate on the back rank",
    "fen": "6k1/p4ppp/4p3/8/4K3/PR1r2P1/5r1P/8 w - - 0 32",
    "side": "white",
-   "keyIdea": "A rook or queen that checks along the first rank mates a king whose own pawns block its way out.",
-   "text": "From a game played on Lichess. Black has just taken your rook on d3 and is a rook ahead. But that rook has left Black's back rank, and the king on g8 is walled in by its own pawns.",
+   "keyIdea": "A rook or queen that checks along the back rank mates a king whose own pawns block its way out.",
+   "text": "From a game played on Lichess. You are White. Black has just taken your rook on d3 and is now a rook and two pawns ahead. You could take back with your king, but first look at Black's back rank: both black rooks have left it, and the king on g8 is walled in by its own pawns.",
    "credit": {
     "source": "Lichess puzzle database, puzzle TIyEl",
     "url": "https://lichess.org/training/TIyEl",
@@ -48,7 +48,7 @@
       "club": []
      },
      "notes": {
-      "text": "Your rook checks along the eighth rank. The king cannot step up, because its own pawns stand on f7, g7 and h7. Black's only way out of check is to block with the rook: 32...Rd8."
+      "text": "Rb8+, your rook to b8, gives check along the back rank. Black's own pawns on f7, g7 and h7 stop the king from moving up, and your rook covers the rest of the back rank. Black's only way out of check is to bring the rook back from d3 to block on d8."
      }
     },
     {
@@ -75,7 +75,7 @@
       "club": []
      },
      "notes": {
-      "text": "Take the rook that blocked. It is check again, nothing is left to block with, and the king still cannot move: back-rank mate."
+      "text": "Your rook takes the rook that blocked. It is check again, nothing is left to block with, and the king still cannot move: back-rank mate."
      }
     }
    ]
@@ -85,7 +85,7 @@
    "fen": "4r1k1/5ppp/3n4/8/8/4BQ2/5PPP/1qR3K1 b - - 2 24",
    "side": "black",
    "keyIdea": "If a single piece guards the square where you would mate, take that piece, even if it costs your queen.",
-   "text": "From a game played on Lichess. White's rook has just dropped back to c1, where it attacks your queen. Your rook on e8 would mate on e1 if nothing guarded that square. What guards it?",
+   "text": "From a game played on Lichess. You are Black. White's rook has just dropped back to c1, where it attacks your queen. Your rook on e8 would like to reach e1, but two white pieces stop it: the bishop on e3 stands in its way, and the rook on c1 guards e1. Look for a move that deals with both.",
    "credit": {
     "source": "Lichess puzzle database, puzzle popOX",
     "url": "https://lichess.org/training/popOX",
@@ -111,7 +111,7 @@
       "club": []
      },
      "notes": {
-      "text": "Give up your queen for the rook. It is check, so White has to answer it, and the rook on c1 was the only piece guarding e1."
+      "text": "Your queen takes the rook on c1 with check, giving itself up. The rook was the piece guarding e1. White must answer the check: the only piece that can take back is the bishop on e3, the piece that blocks your rook, and blocking on d1 with the queen loses it to your queen, with mate."
      }
     },
     {
@@ -138,7 +138,7 @@
       "club": []
      },
      "notes": {
-      "text": "White's bishop took back on c1, so nothing guards e1 any more. Your rook checks along the first rank, and the pawns on f2, g2 and h2 keep the king in: mate."
+      "text": "The bishop left e3 to take back, so the e-file is open and nothing guards e1. Your rook checks along the back rank, and the pawns on f2, g2 and h2 keep the king in: mate."
      }
     }
    ]
@@ -147,8 +147,8 @@
    "title": "One guard, two jobs",
    "fen": "3r2k1/p4ppp/1q6/8/8/2R1P3/P3QPPP/6K1 b - - 0 29",
    "side": "black",
-   "keyIdea": "A piece that guards the back rank cannot also guard something else; attack the other thing and the back rank opens.",
-   "text": "From the game Bernstein–Capablanca, Moscow 1914, with you playing Black. Only White's queen on e2 stops your rook from landing on d1, and White's rook on c3 has no protection at all.",
+   "keyIdea": "When one piece guards both the back rank and another piece, attack that other piece: the guard cannot do both jobs.",
+   "text": "From the game Bernstein against Capablanca, played in Moscow in 1914. You are Black. Only White's queen on e2 stops your rook from landing on d1, and White's rook on c3 has no protection at all. The game ended after your first move, when White resigned; the moves after it show why.",
    "credit": {
     "source": "Wikipedia, Back-rank checkmate",
     "url": "https://en.wikipedia.org/wiki/Back-rank_checkmate",
@@ -178,7 +178,7 @@
       "club": []
      },
      "notes": {
-      "text": "Your queen attacks the rook on c3 and White's queen at the same time. White cannot take your queen: 30.Qxb2 would leave d1 unguarded, and 30...Rd1 is mate."
+      "text": "Capablanca's move: your queen attacks the rook on c3 and White's queen at the same time. White cannot take your queen, because then nothing guards d1 and your rook mates there. Bernstein resigned at this point."
      }
     },
     {
@@ -205,7 +205,7 @@
       "club": []
      },
      "notes": {
-      "text": "30.Qe1 protects the rook and still guards the first rank, so the queen now has two jobs. Take the rook: if White takes back, the back rank is left without a guard."
+      "text": "Suppose White had gone on with Qe1, which guards the rook on c3 and still guards the back rank. Your queen takes the rook anyway, because the white queen cannot take back without leaving the back rank."
      }
     },
     {
@@ -232,7 +232,7 @@
       "club": []
      },
      "notes": {
-      "text": "31.Qxc3 was a mistake, because the queen has left the first rank. Your rook checks on d1, and White's only defence is to block with the queen: 32.Qe1."
+      "text": "Here White's queen takes back on c3, a mistake, because it leaves the back rank. Your rook checks on d1, and White's only defence is to block with the queen on e1."
      }
     },
     {
@@ -259,7 +259,7 @@
       "club": []
      },
      "notes": {
-      "text": "Take the queen with check. The king on g1 is shut in by its own pawns: back-rank mate."
+      "text": "Your rook takes the queen with check. The king on g1 is shut in by its own pawns: back-rank mate."
      }
     }
    ]
@@ -269,7 +269,7 @@
    "fen": "5rk1/p4q1p/1p4p1/4Q3/8/P1P1P3/1P4PP/R5K1 w - - 1 23",
    "side": "white",
    "keyIdea": "Before the back rank becomes a trap, move a pawn in front of your king so that it has a square to escape to.",
-   "text": "From a game played on Lichess. Black's queen and rook are lined up on the f-file, and your king cannot leave the first rank: g2 and h2 hold its own pawns, and Black's queen covers f2. In the game White played 23.Qe4 and allowed a mate in three; find a move that ends the danger for good.",
+   "text": "From a game played on Lichess. You are White. Black's queen and rook are lined up on the f-file, and your king cannot leave the back rank: its own pawns stand on g2 and h2, and Black's queen covers f2. In the game, White moved the queen to e4 and allowed a mate in three moves. Find a move that ends the danger for good.",
    "credit": {
     "source": "Lichess puzzle database, puzzle 06X5t",
     "url": "https://lichess.org/training/06X5t",
@@ -295,7 +295,7 @@
       "club": []
      },
      "notes": {
-      "text": "Black was threatening 23...Qf2+ 24.Kh1 Qf1+ 25.Rxf1 Rxf1, mate on the back rank. The pawn move gives your king the h2 square, so that mate no longer works."
+      "text": "h3, the h-pawn one step forward, gives your king the square h2. Black was threatening to check on f2, and after your king stepped to h1, to check again on f1: your rook would have to take the queen there, and Black's rook would take back with mate. Now the king has a way out, so that mate no longer works."
      }
     },
     {

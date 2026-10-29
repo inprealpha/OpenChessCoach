@@ -10,26 +10,26 @@
  ],
  "goal": "You can see which pieces each side attacks, take a piece that is left undefended, and save an attacked piece by moving it, guarding it, blocking or taking the attacker.",
  "priorKnowledge": [],
- "intro": "A piece is attacked when an enemy piece could capture it on the next move. If nothing defends it, or the attacker is a cheaper piece, you will lose it unless you do something. In this Lesson you take pieces your opponent leaves undefended, and you save your own in four ways: move the piece away, guard it, block the attack, or take the attacker.",
+ "intro": "A piece is attacked when an enemy piece could capture it on the next move. It is guarded, or defended, when one of your own pieces could take back if it were captured. If nothing guards an attacked piece, or the attacker is worth less than it (a pawn attacking a knight, say), you will lose it unless you do something. In this Lesson you take pieces your opponent leaves undefended, and you save your own in four ways: move the piece away, guard it, block the attack, or take the attacker.",
  "parts": [
   {
    "title": "Take a piece nobody defends",
    "fen": "6R1/pp2n2p/3p1N1k/8/8/2P4K/PP6/8 b - - 0 43",
    "side": "white",
    "keyIdea": "A piece that is attacked and not defended can be taken for free.",
-   "text": "From a game played on Lichess. Black's knight has just taken your rook on g8. Look at that knight: is any black piece guarding it?",
+   "text": "From a game played on Lichess. You are White. Black's knight has just taken your rook on g8. Look at that knight: is any black piece guarding it?",
    "url": "https://lichess.org/kagmmo22#85",
    "line": "Nxg8 Nxg8+ Kg7 Ne7",
    "notes": [
     {
      "ply": 1,
      "san": "Nxg8+",
-     "text": "Your knight on f6 takes the knight on g8. No black piece guards g8, so nothing can take back, and the capture even gives check to the king on h6."
+     "text": "Nxg8+: your knight on f6 takes the knight on g8 (x means a capture, + a check). No black piece guards g8, so nothing can take back, and the capture even gives check to the king on h6."
     },
     {
      "ply": 3,
      "san": "Ne7",
-     "text": "Now the black king on g7 attacks your knight. The knight can jump to e7, f6 or h6, but f6 and h6 are next to the king, so e7 is the only safe square."
+     "text": "The black king on g7 attacked your knight. The knight could jump to e7, f6 or h6, but f6 and h6 are next to the king, so e7 is the only safe square."
     }
    ]
   },
@@ -45,7 +45,7 @@
     {
      "ply": 1,
      "san": "f6",
-     "text": "The rook has no safe square: on g4 or f5 the king takes it, and on h5 the g4 pawn does. So guard it instead. After f6 your pawn defends g5, and the white king cannot take the rook, because a king may never move to a square the enemy guards."
+     "text": "The rook had no safe square: on g4 the king takes it, and on f5 or h5 the g4 pawn does. So f6, the pawn one step forward, guards it instead. Now the white king cannot take the rook, because a king may never move to a square the enemy guards."
     }
    ]
   },
@@ -54,14 +54,14 @@
    "fen": "1r3rk1/4b1p1/7p/1p1N4/2P5/6P1/P2R1P1P/5RK1 b - - 0 25",
    "side": "white",
    "keyIdea": "A bishop, rook or queen attacks along a line, so a piece put in the way blocks the attack.",
-   "text": "From a game played on Lichess. Black's bishop has just moved to g5, and it attacks your rook on d2 along the diagonal. A long-range piece can be stopped by putting something in its path.",
+   "text": "From a game played on Lichess. You are White. Black's bishop has just moved to g5, and it attacks your rook on d2 along the diagonal. Look at the squares between the bishop and your rook.",
    "url": "https://lichess.org/JEJHaLCH#49",
    "line": "Bg5 f4",
    "notes": [
     {
      "ply": 1,
      "san": "f4",
-     "text": "The pawn steps from f2 to f4, into the bishop's diagonal, so the rook on d2 is no longer attacked. The pawn is safe there, because the g3 pawn and the rook on f1 guard it, and it attacks the bishop, so Black will have to move the bishop again or lose it for a pawn. Moving the rook would also save it, but the block gains a move."
+     "text": "f4, the pawn from f2 to f4, steps into the bishop's diagonal, so the rook on d2 is no longer attacked. The pawn is safe there, because the g3 pawn and the rook on f1 guard it. It also attacks the bishop, so Black must spend the next move saving the bishop. Moving the rook would also have saved it, but then Black would not have had to spend a move on the bishop."
     }
    ]
   },
@@ -70,14 +70,14 @@
    "fen": "8/1p6/p7/5N1p/2n2p2/1P3P2/P1P1K1k1/8 b - - 0 50",
    "side": "white",
    "keyIdea": "The piece that attacks yours may be undefended itself; then the best defence is to take it.",
-   "text": "From a game played on Lichess. Black's knight has just jumped to d6, where it attacks your knight on f5. Before you move your knight away, ask whether the attacker itself is safe.",
+   "text": "From a game played on Lichess. You are White. Black's knight has just jumped to d6, where it attacks your knight on f5. Before you move your knight away, ask whether the attacker itself is safe.",
    "url": "https://lichess.org/j2w2i4ov#99",
    "line": "Nd6 Nxd6",
    "notes": [
     {
      "ply": 1,
      "san": "Nxd6",
-     "text": "A knight that attacks a knight is attacked by it in return. Nothing guards the black knight on d6, so your knight takes it and you are a whole piece up. Moving your knight away would also save it, but you would miss this free piece."
+     "text": "A knight that attacks a knight is attacked by it in return. Nothing guards the black knight on d6, so your knight takes it, and you are a whole piece up. Moving your knight away would also have saved it, but you would have missed a free piece."
     }
    ]
   }

@@ -9,45 +9,45 @@
  "puzzleTags": [
   "Caro-Kann_Defense"
  ],
- "goal": "As Black against 1.e4, you can play the Caro-Kann: support d5 with c6, develop the light-squared bishop early, and keep a solid position.",
+ "goal": "As Black against 1.e4, you can play the Caro-Kann: support d5 with c6, bring out the bishop on c8 early, and keep a solid position.",
  "priorKnowledge": [
   "opening-principles"
  ],
- "intro": "The Caro-Kann answers 1.e4 with 1...c6 and then ...d5. The c-pawn backs up the d-pawn, so Black gets a firm hold in the centre. Unlike the French Defence (1...e6), it leaves the road open for the light-squared bishop, which comes out early. The result is a solid position with few weak points for White to attack.",
+ "intro": "The Caro-Kann answers 1.e4, White's pawn to e4, with 1...c6, your c-pawn one step forward, and then ...d5. The c-pawn backs up the d-pawn, so you keep a firm share of the centre. Unlike 1...e6, which shuts the bishop on c8 in behind a pawn, it leaves that bishop a clear road out, and the bishop comes out early. You get a solid position with few weak points for White to attack.",
  "parts": [
   {
    "title": "Bishop out before the pawns close",
    "fen": "start",
    "side": "black",
-   "keyIdea": "Back up ...d5 with the c-pawn, and bring the light-squared bishop out before ...e6 shuts it in.",
-   "text": "You are Black, and White opens with 1.e4. The line is the Classical Variation as Lichess's list of openings names it. At each move, ask what it does for your centre and your pieces, and what White is threatening.",
+   "keyIdea": "Back up ...d5 with the c-pawn, and bring the bishop on c8 out before ...e6 shuts it in.",
+   "text": "You are Black, and White opens with 1.e4. The moves you will play are known as the Classical Variation. At each move, ask what it does for your centre and your pieces, and what White is threatening.",
    "url": "https://github.com/lichess-org/chess-openings",
    "line": "e4 c6 d4 d5 Nc3 dxe4 Nxe4 Bf5 Ng3 Bg6 h4 h6 Nf3 Nd7",
    "notes": [
     {
      "ply": 1,
      "san": "c6",
-     "text": "1...c6 looks quiet, but it prepares 2...d5 with a pawn ready to take back on d5. Unlike 1...e6, it keeps the diagonal of your light-squared bishop open, so that bishop can come out early."
+     "text": "1...c6 looks modest, but it is there to support ...d5: if White ever takes a pawn on d5, your c-pawn can take back. The bishop on c8, the one that moves on light squares, still has its diagonal open, so it can come out early."
     },
     {
      "ply": 3,
      "san": "d5",
-     "text": "White has two pawns in the centre. 2...d5 challenges the e4 pawn at once, and if White swaps with 3.exd5, you take back with the c-pawn and still have a pawn in the centre."
+     "text": "White has two pawns in the centre. 2...d5 challenges the pawn on e4 at once. If White takes with 3.exd5, you take back with the c-pawn and still have a pawn in the centre."
     },
     {
      "ply": 5,
      "san": "dxe4",
-     "text": "3.Nc3 guards e4. Take it anyway: 3...dxe4 removes White's e-pawn, and after the knight takes back, your next move can attack it."
+     "text": "3.Nc3 guards e4. 3...dxe4 takes the pawn anyway: White's e-pawn is gone, and after the knight takes back, your next move can attack it."
     },
     {
      "ply": 7,
      "san": "Bf5",
-     "text": "4...Bf5 is the Classical Variation. The bishop comes out before ...e6 can shut it in, and it attacks the knight on e4. 4...Nd7 and 4...Nf6 are the other main moves."
+     "text": "4...Bf5 starts the Classical Variation, one of the named ways to play this opening. It develops the bishop, which means it brings it off its starting square, before ...e6 can shut it in, and it attacks the knight on e4. 4...Nd7 and 4...Nf6 are the other main moves."
     },
     {
      "ply": 9,
      "san": "Bg6",
-     "text": "5.Ng3 attacks your bishop. 5...Bg6 keeps it on the same diagonal, outside your pawns, where it still looks into White's camp at d3 and c2."
+     "text": "5.Ng3 attacks your bishop. 5...Bg6 keeps it on the same diagonal, in front of your pawns, where it still aims at d3 and c2 in White's half of the board."
     },
     {
      "ply": 11,
@@ -57,7 +57,7 @@
     {
      "ply": 13,
      "san": "Nd7",
-     "text": "White's knight would like to jump to e5 and hit your bishop. 7...Nd7 guards e5, so a knight that lands there can be taken. Next come ...e6, ...Ngf6 and the dark-squared bishop, and then you castle."
+     "text": "7.Nf3 eyes e5, where a white knight would attack your bishop on g6. 7...Nd7 guards e5, so a knight that lands there can be taken. Next you play ...e6, bring your other knight from g8 to f6, bring out the bishop on f8, and castle."
     }
    ]
   }

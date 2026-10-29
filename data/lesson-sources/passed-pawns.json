@@ -12,31 +12,31 @@
  "priorKnowledge": [
   "king-and-pawn"
  ],
- "intro": "A passed pawn is a pawn with no enemy pawns in front of it or on the files next to it, so only pieces can stop it. In an endgame it is often the strongest thing on the board, because the enemy king has to drop everything to stop it. Here you make one from a pawn majority, use one far from the other pawns to drag the enemy king away, and stop an enemy one by putting your king in its path.",
+ "intro": "A passed pawn is a pawn with no enemy pawns in front of it or on the files next to it, so only pieces can stop it. In an endgame it is often the strongest thing on the board, because the enemy king has to drop everything to stop it. Here you make one from a pawn majority (more pawns than your opponent on one side of the board), use one on the far side of the board to pull the enemy king away, and stop an enemy one by putting your king in its path.",
  "parts": [
   {
    "title": "Make a passed pawn",
    "fen": "8/7p/1p4p1/1P6/P2kp3/6P1/5P2/6K1 w - - 0 39",
    "side": "white",
    "keyIdea": "Two pawns against one can make a passed pawn: push the one with no enemy pawn in front of it.",
-   "text": "From a game played on Lichess. On the queenside you have two pawns, on a4 and b5, against Black's one on b6: a pawn majority. Black's king is heading over, so use the majority now.",
+   "text": "From a game played on Lichess. On the queenside you have two pawns, on a4 and b5, against Black's one on b6: a pawn majority. Black's king is heading over, so there is no time to lose.",
    "url": "https://lichess.org/training/pgZms",
    "line": "a5 Kc5 a6 Kxb5 a7",
    "notes": [
     {
      "ply": 0,
      "san": "a5",
-     "text": "Push the pawn that has no black pawn in front of it. If 39...bxa5, then 40.b6 and your b-pawn is passed and too fast for Black's king."
+     "text": "39.a5 pushes the pawn that has no black pawn in front of it. If 39...bxa5, then 40.b6, and your b-pawn is passed and too fast for Black's king."
     },
     {
      "ply": 2,
      "san": "a6",
-     "text": "Black's king is going for b5, so the a-pawn runs. Nothing stands between it and a8."
+     "text": "Black's king is going for b5, so 40.a6 runs with the a-pawn. Nothing stands between it and a8."
     },
     {
      "ply": 4,
      "san": "a7",
-     "text": "Black's king took the b5 pawn, but it is one step too far from a8 to stop the a-pawn. Your pawn queens next move."
+     "text": "Black's king took the b5 pawn, but it is one step too far from a8 to stop the a-pawn, and after 41.a7 the pawn promotes next move."
     }
    ]
   },
@@ -44,30 +44,30 @@
    "title": "The outside passed pawn",
    "fen": "8/p7/5k2/3p4/1P1P2Kp/8/P7/8 b - - 1 45",
    "side": "black",
-   "keyIdea": "A passed pawn far from the other pawns pulls the enemy king to the edge, and your king wins pawns on the other side.",
-   "text": "From a game played on Lichess. You are Black. Your h-pawn is a passed pawn far from all the other pawns, an outside passed pawn. White's king on g4 is watching it, which keeps it a long way from the pawns on b4 and d4.",
+   "keyIdea": "An outside passed pawn pulls the enemy king to the edge; while it is busy there, your king wins pawns elsewhere.",
+   "text": "From a game played on Lichess. You are Black. Your h-pawn is passed, and it stands on the other side of the board from all the other pawns: an outside passed pawn. White's king on g4 has to watch it, which keeps that king a long way from White's pawns on b4 and d4.",
    "url": "https://lichess.org/training/0Gn6F",
    "line": "h3 Kxh3 Kf5 Kg3 Ke4 b5 Kxd4",
    "notes": [
     {
      "ply": 0,
      "san": "h3",
-     "text": "Give the pawn up on purpose. To stop it, White's king has to chase it towards the corner, even further from the centre."
+     "text": "45...h3 gives the pawn up on purpose. To stop it, White's king has to chase it towards the corner, even further from the centre."
     },
     {
      "ply": 2,
      "san": "Kf5",
-     "text": "While White's king was taking the pawn, yours sets off for the centre and the d4 pawn."
+     "text": "While White's king took the pawn, 46...Kf5 sets off for the centre and the d4 pawn."
     },
     {
      "ply": 4,
      "san": "Ke4",
-     "text": "Your king is now next to the d4 pawn, and White's king is too far away to defend it."
+     "text": "47...Ke4 puts your king next to the d4 pawn, and White's king is too far away to defend it."
     },
     {
      "ply": 6,
      "san": "Kxd4",
-     "text": "The d4 pawn falls, and your d-pawn is now a passed pawn with your king just in front of it to lead the way. White's king is stuck on the far side of the board, so the d-pawn will decide the game."
+     "text": "48...Kxd4 wins the d4 pawn. Your d-pawn is now a passed pawn with your king just in front of it to lead the way, and White's king is stuck on the far side of the board, so the d-pawn will decide the game."
     }
    ]
   },
@@ -76,34 +76,34 @@
    "fen": "8/8/8/p7/P1k5/3p3P/5K2/8 w - - 0 55",
    "side": "white",
    "keyIdea": "Stop a passed pawn by putting your king on its path; then your own passed pawn can pull the enemy king away.",
-   "text": "From a game played on Lichess. Black's d-pawn is a passed pawn two steps from queening, with Black's king close by. Your king has to get in front of it, and only one route works.",
+   "text": "From a game played on Lichess. Black's d-pawn is a passed pawn two steps from promoting, with Black's king close by. Your king has to get in front of it, and only one route works.",
    "url": "https://lichess.org/training/HVbtU",
    "line": "Ke1 Kd4 Kd2 Ke4 h4 Kd4 h5 Ke5 Kxd3",
    "notes": [
     {
      "ply": 0,
      "san": "Ke1",
-     "text": "Head for d1 and d2, the squares in front of the pawn. 55.Ke3 looks closer, but after 55...Kc3 Black's king supports the pawn all the way to d1 and it queens."
+     "text": "55.Ke1 heads for d1 and d2, the squares in front of the pawn. 55.Ke3 looks closer, but after 55...Kc3 Black's king supports the pawn all the way to d1, and it promotes."
     },
     {
      "ply": 2,
      "san": "Kd2",
-     "text": "Your king stands on d2, right in front of the pawn, so the pawn cannot move."
+     "text": "56.Kd2: your king stands right in front of the pawn, so the pawn cannot move."
     },
     {
      "ply": 4,
      "san": "h4",
-     "text": "Now your own passed pawn goes. Black's king cannot guard the d3 pawn and stop this one for long."
+     "text": "57.h4: now your own passed pawn sets off. Black's king cannot guard the d3 pawn and stop this one for long."
     },
     {
      "ply": 6,
      "san": "h5",
-     "text": "Keep pushing. If Black's king stays near the d3 pawn, the h-pawn runs through and queens."
+     "text": "58.h5 pushes on. If Black's king stays near the d3 pawn, the h-pawn runs through and promotes."
     },
     {
      "ply": 8,
      "san": "Kxd3",
-     "text": "Black's king went after the h-pawn, so yours takes the d3 pawn. Next it heads for the a5 pawn, and Black's king, busy on the kingside, is too far away to save it."
+     "text": "Black's king went after the h-pawn, so 59.Kxd3 takes the d3 pawn. Next your king heads for the a5 pawn, and Black's king, busy on the kingside, is too far away to save it."
     }
    ]
   }

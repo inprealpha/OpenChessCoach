@@ -4,25 +4,25 @@
  "kind": "opening",
  "track": "openings",
  "level": "intermediate",
- "goal": "As Black against 1.e4, you can play the Sicilian Defence: trade the c-pawn for White's d-pawn and fight back on the queenside.",
+ "goal": "As Black against 1.e4, you can play the Sicilian Defence: trade your c-pawn for White's d-pawn, then build the Dragon set-up with ...g6, ...Bg7, castling and ...Nc6.",
  "priorKnowledge": [
   "opening-principles"
  ],
  "side": "black",
- "eco": "B92",
+ "eco": "B76",
  "puzzleTags": [
   "Sicilian_Defense"
  ],
  "puzzleThemes": [],
  "intro": {
-  "text": "The Sicilian Defence, 1...c5, is the most popular answer to 1.e4. Black does not copy White in the centre. Instead the c-pawn fights for the d4 square, and when White opens the game with d4, Black trades that wing pawn for White's centre pawn. Black gets an extra centre pawn and an open road for the rooks on the c-file; White gets more space and quicker development. The games are sharp: White often plays in the centre or on the kingside, while Black fights back on the queenside."
+  "text": "The Sicilian Defence, 1...c5, is the most popular answer to 1.e4. You do not copy White in the centre: your c-pawn fights for the d4 square, and when White opens the game with d4, you trade that side pawn for White's centre pawn. You get an extra centre pawn and an open road for your rooks on the c-file, while White gets more space and quicker development. In the Dragon set-up taught here, your bishop goes to g7 and your king castles behind it."
  },
  "parts": [
   {
-   "title": "The Najdorf Variation",
+   "title": "The Dragon Variation",
    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
    "side": "black",
-   "keyIdea": "Trade the c-pawn for White's d-pawn, develop, castle, then use the c-file and queenside pawn moves to fight back.",
+   "keyIdea": "Trade the c-pawn for White's d-pawn, then put the bishop on g7, castle and bring out the knights.",
    "credit": {
     "source": "Lichess chess-openings",
     "url": "https://github.com/lichess-org/chess-openings",
@@ -40,13 +40,13 @@
     "f3d4",
     "g8f6",
     "b1c3",
-    "a7a6",
-    "f1e2",
-    "e7e5",
-    "d4b3",
-    "f8e7",
-    "e1g1",
-    "e8g8"
+    "g7g6",
+    "c1e3",
+    "f8g7",
+    "f2f3",
+    "e8g8",
+    "d1d2",
+    "b8c6"
    ],
    "nodes": [
     {
@@ -259,7 +259,7 @@
       ]
      },
      "notes": {
-      "text": "1...c5 controls d4 from the side instead of meeting e4 head on. If White plays d4, you can take with the c-pawn and swap a wing pawn for a centre pawn. 1...e5 is the other classical reply; 1...c5 leads to unbalanced positions where both sides have chances."
+      "text": "1...c5 controls d4 from the side instead of meeting e4 head on. About half the time White answers with 2.Nf3, often followed by 3.d4 as in this Lesson. Against 2.Bc4, which aims at f7, play ...e6 to block the bishop's diagonal; against 2.c3, which gets ready for d4 with a pawn, attack e4 at once with 2...Nf6 or 2...d5; against 2.Nc3, use the same set-up as here, with ...g6, ...Bg7, ...d6 and ...Nc6."
      }
     },
     {
@@ -472,7 +472,7 @@
       ]
      },
      "notes": {
-      "text": "2...d6 opens a path for the c8-bishop and covers e5, so White cannot later chase a knight from f6 with e4-e5. 2...Nc6 and 2...e6 are the other main moves; all three get ready for White's d4."
+      "text": "2...d6 opens a path for your bishop on c8 and covers e5, so White cannot later chase a knight from f6 by pushing the e-pawn to e5. 2...Nc6 and 2...e6 are the other main moves."
      }
     },
     {
@@ -667,7 +667,7 @@
       ]
      },
      "notes": {
-      "text": "White opens the centre with 3.d4. Take with 3...cxd4: this trade is the heart of the Sicilian. Your c-pawn is gone, but so is White's d-pawn, so you have two centre pawns (d6 and e7) against White's one (e4). The c-file is now half-open: none of your pawns stands on it, so your rooks can use it."
+      "text": "White opens the centre with 3.d4. 3...cxd4 takes, and this trade is the heart of the Sicilian. Your c-pawn is gone, but so is White's d-pawn, so you have two centre pawns (d6 and e7) against White's one (e4). The c-file is now half-open: none of your pawns stands on it, so your rooks can use it later."
      }
     },
     {
@@ -862,7 +862,7 @@
       ]
      },
      "notes": {
-      "text": "4...Nf6 develops with a threat: the knight attacks the e4 pawn, so White has to spend a move defending it. 5.Nc3 is the usual answer."
+      "text": "4...Nf6 develops with a threat: the knight attacks the pawn on e4, so White has to spend a move defending it. 5.Nc3 is the usual answer."
      }
     },
     {
@@ -968,8 +968,8 @@
      "ply": 9,
      "fen": "rnbqkb1r/pp2pppp/3p1n2/8/3NP3/2N5/PPP2PPP/R1BQKB1R b KQkq - 2 5",
      "decision": true,
-     "main": "a7a6",
-     "mainSan": "a6",
+     "main": "g7g6",
+     "mainSan": "g6",
      "popular": {
       "beginner": [
        {
@@ -1069,523 +1069,88 @@
       ]
      },
      "notes": {
-      "text": "5...a6 is the Najdorf Variation. It looks slow, but it takes the b5 square away from White's knights and bishop (a knight on b5 would hit d6), and it prepares ...b5 to gain space on the queenside, where your c-file already points."
+      "text": "5...g6 starts the Dragon Variation, one of the named ways to play the Sicilian. The pawn makes room for your bishop on g7, on the long diagonal from h8 to a1. You can play the same set-up against most of White's sixth moves."
      }
     },
     {
      "ply": 10,
-     "fen": "rnbqkb1r/1p2pppp/p2p1n2/8/3NP3/2N5/PPP2PPP/R1BQKB1R w KQkq - 0 6",
+     "fen": "rnbqkb1r/pp2pp1p/3p1np1/8/3NP3/2N5/PPP2PPP/R1BQKB1R w KQkq - 0 6",
      "decision": false,
-     "main": "f1e2",
-     "mainSan": "Be2",
+     "main": "c1e3",
+     "mainSan": "Be3",
      "popular": {
-      "beginner": [
-       {
-        "uci": "c1g5",
-        "san": "Bg5",
-        "percent": 20,
-        "games": 114
-       },
-       {
-        "uci": "c1e3",
-        "san": "Be3",
-        "percent": 19.4,
-        "games": 111
-       },
-       {
-        "uci": "f1c4",
-        "san": "Bc4",
-        "percent": 16.5,
-        "games": 94
-       },
-       {
-        "uci": "f1d3",
-        "san": "Bd3",
-        "percent": 13.8,
-        "games": 79
-       },
-       {
-        "uci": "f1e2",
-        "san": "Be2",
-        "percent": 11.7,
-        "games": 67
-       }
-      ],
-      "casual": [
-       {
-        "uci": "c1g5",
-        "san": "Bg5",
-        "percent": 19.4,
-        "games": 1284
-       },
-       {
-        "uci": "c1e3",
-        "san": "Be3",
-        "percent": 18.8,
-        "games": 1248
-       },
-       {
-        "uci": "f1e2",
-        "san": "Be2",
-        "percent": 15.4,
-        "games": 1022
-       },
-       {
-        "uci": "f1c4",
-        "san": "Bc4",
-        "percent": 14.5,
-        "games": 961
-       },
-       {
-        "uci": "f1d3",
-        "san": "Bd3",
-        "percent": 10.2,
-        "games": 678
-       }
-      ],
-      "club": [
-       {
-        "uci": "c1g5",
-        "san": "Bg5",
-        "percent": 22.6,
-        "games": 1215
-       },
-       {
-        "uci": "c1e3",
-        "san": "Be3",
-        "percent": 19.5,
-        "games": 1048
-       },
-       {
-        "uci": "f1e2",
-        "san": "Be2",
-        "percent": 17.5,
-        "games": 941
-       },
-       {
-        "uci": "f1c4",
-        "san": "Bc4",
-        "percent": 12.8,
-        "games": 689
-       },
-       {
-        "uci": "f2f3",
-        "san": "f3",
-        "percent": 9.1,
-        "games": 489
-       }
-      ]
+      "beginner": [],
+      "casual": [],
+      "club": []
      }
     },
     {
      "ply": 11,
-     "fen": "rnbqkb1r/1p2pppp/p2p1n2/8/3NP3/2N5/PPP1BPPP/R1BQK2R b KQkq - 1 6",
+     "fen": "rnbqkb1r/pp2pp1p/3p1np1/8/3NP3/2N1B3/PPP2PPP/R2QKB1R b KQkq - 1 6",
      "decision": true,
-     "main": "e7e5",
-     "mainSan": "e5",
+     "main": "f8g7",
+     "mainSan": "Bg7",
      "popular": {
-      "beginner": [
-       {
-        "uci": "e7e6",
-        "san": "e6",
-        "percent": 41.1,
-        "games": 30
-       },
-       {
-        "uci": "e7e5",
-        "san": "e5",
-        "percent": 19.2,
-        "games": 14
-       },
-       {
-        "uci": "b8c6",
-        "san": "Nc6",
-        "percent": 12.3,
-        "games": 9
-       },
-       {
-        "uci": "g7g6",
-        "san": "g6",
-        "percent": 6.8,
-        "games": 5
-       },
-       {
-        "uci": "b7b5",
-        "san": "b5",
-        "percent": 6.8,
-        "games": 5
-       }
-      ],
-      "casual": [
-       {
-        "uci": "e7e5",
-        "san": "e5",
-        "percent": 41.6,
-        "games": 423
-       },
-       {
-        "uci": "e7e6",
-        "san": "e6",
-        "percent": 31.9,
-        "games": 324
-       },
-       {
-        "uci": "b7b5",
-        "san": "b5",
-        "percent": 7.8,
-        "games": 79
-       },
-       {
-        "uci": "b8c6",
-        "san": "Nc6",
-        "percent": 7.7,
-        "games": 78
-       },
-       {
-        "uci": "g7g6",
-        "san": "g6",
-        "percent": 5.9,
-        "games": 60
-       }
-      ],
-      "club": [
-       {
-        "uci": "e7e5",
-        "san": "e5",
-        "percent": 47.6,
-        "games": 447
-       },
-       {
-        "uci": "e7e6",
-        "san": "e6",
-        "percent": 35.3,
-        "games": 331
-       },
-       {
-        "uci": "b7b5",
-        "san": "b5",
-        "percent": 5.1,
-        "games": 48
-       },
-       {
-        "uci": "g7g6",
-        "san": "g6",
-        "percent": 4.4,
-        "games": 41
-       },
-       {
-        "uci": "b8c6",
-        "san": "Nc6",
-        "percent": 3.3,
-        "games": 31
-       }
-      ]
+      "beginner": [],
+      "casual": [],
+      "club": []
      },
      "notes": {
-      "text": "6...e5 pushes White's knight out of the centre and gives you a share of d4 and f4. The price is a hole on d5 and a pawn on d6 that no other pawn can protect. Black's answer is to keep d5 under control with pieces, such as the f6 knight and later a bishop on e6."
+      "text": "6.Be3 brings out White's bishop. 6...Bg7 puts yours on the long diagonal. Once your knight on f6 moves out of the way, the bishop will press on d4 and, further along, on White's queenside. It also clears the way for castling."
      }
     },
     {
      "ply": 12,
-     "fen": "rnbqkb1r/1p3ppp/p2p1n2/4p3/3NP3/2N5/PPP1BPPP/R1BQK2R w KQkq - 0 7",
+     "fen": "rnbqk2r/pp2ppbp/3p1np1/8/3NP3/2N1B3/PPP2PPP/R2QKB1R w KQkq - 2 7",
      "decision": false,
-     "main": "d4b3",
-     "mainSan": "Nb3",
+     "main": "f2f3",
+     "mainSan": "f3",
      "popular": {
-      "beginner": [
-       {
-        "uci": "d4f3",
-        "san": "Nf3",
-        "percent": 52.4,
-        "games": 11
-       },
-       {
-        "uci": "d4b3",
-        "san": "Nb3",
-        "percent": 42.9,
-        "games": 9
-       },
-       {
-        "uci": "d4f5",
-        "san": "Nf5",
-        "percent": 4.8,
-        "games": 1
-       }
-      ],
-      "casual": [
-       {
-        "uci": "d4b3",
-        "san": "Nb3",
-        "percent": 67.9,
-        "games": 286
-       },
-       {
-        "uci": "d4f3",
-        "san": "Nf3",
-        "percent": 25.9,
-        "games": 109
-       },
-       {
-        "uci": "d4f5",
-        "san": "Nf5",
-        "percent": 4.8,
-        "games": 20
-       },
-       {
-        "uci": "e1g1",
-        "san": "O-O",
-        "percent": 1.4,
-        "games": 6
-       }
-      ],
-      "club": [
-       {
-        "uci": "d4b3",
-        "san": "Nb3",
-        "percent": 78.1,
-        "games": 345
-       },
-       {
-        "uci": "d4f3",
-        "san": "Nf3",
-        "percent": 19.7,
-        "games": 87
-       },
-       {
-        "uci": "d4f5",
-        "san": "Nf5",
-        "percent": 2,
-        "games": 9
-       }
-      ]
+      "beginner": [],
+      "casual": [],
+      "club": []
      }
     },
     {
      "ply": 13,
-     "fen": "rnbqkb1r/1p3ppp/p2p1n2/4p3/4P3/1NN5/PPP1BPPP/R1BQK2R b KQkq - 1 7",
-     "decision": true,
-     "main": "f8e7",
-     "mainSan": "Be7",
-     "popular": {
-      "beginner": [],
-      "casual": [
-       {
-        "uci": "c8e6",
-        "san": "Be6",
-        "percent": 45.6,
-        "games": 134
-       },
-       {
-        "uci": "f8e7",
-        "san": "Be7",
-        "percent": 40.1,
-        "games": 118
-       },
-       {
-        "uci": "b8c6",
-        "san": "Nc6",
-        "percent": 6.1,
-        "games": 18
-       },
-       {
-        "uci": "b7b5",
-        "san": "b5",
-        "percent": 5.8,
-        "games": 17
-       },
-       {
-        "uci": "b8d7",
-        "san": "Nbd7",
-        "percent": 1.4,
-        "games": 4
-       }
-      ],
-      "club": [
-       {
-        "uci": "f8e7",
-        "san": "Be7",
-        "percent": 48.7,
-        "games": 164
-       },
-       {
-        "uci": "c8e6",
-        "san": "Be6",
-        "percent": 44.2,
-        "games": 149
-       },
-       {
-        "uci": "b7b5",
-        "san": "b5",
-        "percent": 4.5,
-        "games": 15
-       },
-       {
-        "uci": "b8c6",
-        "san": "Nc6",
-        "percent": 1.8,
-        "games": 6
-       },
-       {
-        "uci": "h7h6",
-        "san": "h6",
-        "percent": 0.6,
-        "games": 2
-       }
-      ]
-     },
-     "notes": {
-      "text": "The knight has gone back to b3. 7...Be7 develops the bishop, protects the d6 pawn and clears the way for castling. 7...Be6 first, aiming at d5 at once, is also played."
-     }
-    },
-    {
-     "ply": 14,
-     "fen": "rnbqk2r/1p2bppp/p2p1n2/4p3/4P3/1NN5/PPP1BPPP/R1BQK2R w KQkq - 2 8",
-     "decision": false,
-     "main": "e1g1",
-     "mainSan": "O-O",
-     "popular": {
-      "beginner": [],
-      "casual": [
-       {
-        "uci": "e1g1",
-        "san": "O-O",
-        "percent": 43.3,
-        "games": 52
-       },
-       {
-        "uci": "c1e3",
-        "san": "Be3",
-        "percent": 37.5,
-        "games": 45
-       },
-       {
-        "uci": "c1g5",
-        "san": "Bg5",
-        "percent": 7.5,
-        "games": 9
-       },
-       {
-        "uci": "a2a4",
-        "san": "a4",
-        "percent": 2.5,
-        "games": 3
-       },
-       {
-        "uci": "f2f3",
-        "san": "f3",
-        "percent": 1.7,
-        "games": 2
-       }
-      ],
-      "club": [
-       {
-        "uci": "e1g1",
-        "san": "O-O",
-        "percent": 44.2,
-        "games": 72
-       },
-       {
-        "uci": "c1e3",
-        "san": "Be3",
-        "percent": 35,
-        "games": 57
-       },
-       {
-        "uci": "g2g4",
-        "san": "g4",
-        "percent": 8.6,
-        "games": 14
-       },
-       {
-        "uci": "c1g5",
-        "san": "Bg5",
-        "percent": 6.7,
-        "games": 11
-       },
-       {
-        "uci": "a2a4",
-        "san": "a4",
-        "percent": 2.5,
-        "games": 4
-       }
-      ]
-     }
-    },
-    {
-     "ply": 15,
-     "fen": "rnbqk2r/1p2bppp/p2p1n2/4p3/4P3/1NN5/PPP1BPPP/R1BQ1RK1 b kq - 3 8",
+     "fen": "rnbqk2r/pp2ppbp/3p1np1/8/3NP3/2N1BP2/PPP3PP/R2QKB1R b KQkq - 0 7",
      "decision": true,
      "main": "e8g8",
      "mainSan": "O-O",
      "popular": {
       "beginner": [],
-      "casual": [
-       {
-        "uci": "e8g8",
-        "san": "O-O",
-        "percent": 59.2,
-        "games": 29
-       },
-       {
-        "uci": "c8e6",
-        "san": "Be6",
-        "percent": 30.6,
-        "games": 15
-       },
-       {
-        "uci": "b7b6",
-        "san": "b6",
-        "percent": 2,
-        "games": 1
-       },
-       {
-        "uci": "b7b5",
-        "san": "b5",
-        "percent": 2,
-        "games": 1
-       },
-       {
-        "uci": "d8c7",
-        "san": "Qc7",
-        "percent": 2,
-        "games": 1
-       }
-      ],
-      "club": [
-       {
-        "uci": "e8g8",
-        "san": "O-O",
-        "percent": 63.5,
-        "games": 47
-       },
-       {
-        "uci": "c8e6",
-        "san": "Be6",
-        "percent": 29.7,
-        "games": 22
-       },
-       {
-        "uci": "b8d7",
-        "san": "Nbd7",
-        "percent": 4.1,
-        "games": 3
-       },
-       {
-        "uci": "b7b5",
-        "san": "b5",
-        "percent": 1.4,
-        "games": 1
-       },
-       {
-        "uci": "d8c7",
-        "san": "Qc7",
-        "percent": 1.4,
-        "games": 1
-       }
-      ]
+      "casual": [],
+      "club": []
      },
      "notes": {
-      "text": "8...O-O puts your king safe before the fight starts. The usual plan from here is ...Be6 to watch d5, a knight to d7 or c6, a rook to c8 on the half-open c-file, and ...b5 or ...a5 to push on the queenside, while White tries to use the d5 square."
+      "text": "7.f3 guards e4 and keeps your knight off g4, where it would attack the bishop on e3. 7...O-O makes your king safe, tucked behind its pawns and the bishop on g7."
+     }
+    },
+    {
+     "ply": 14,
+     "fen": "rnbq1rk1/pp2ppbp/3p1np1/8/3NP3/2N1BP2/PPP3PP/R2QKB1R w KQ - 1 8",
+     "decision": false,
+     "main": "d1d2",
+     "mainSan": "Qd2",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 15,
+     "fen": "rnbq1rk1/pp2ppbp/3p1np1/8/3NP3/2N1BP2/PPPQ2PP/R3KB1R b KQ - 2 8",
+     "decision": true,
+     "main": "b8c6",
+     "mainSan": "Nc6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "8.Qd2 lines the queen up with the bishop on e3, ready for Bh6 to trade off your bishop on g7, which guards your king. 8...Nc6 develops your last knight and adds pressure on d4. White often castles queenside next and pushes the kingside pawns at your king, so you fight back on the queenside: a bishop to d7 or e6, a rook to c8 on the half-open c-file, and ...Ne5 or ...d5 to hit the centre."
      }
     }
    ]

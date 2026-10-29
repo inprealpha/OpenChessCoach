@@ -9,10 +9,10 @@
  "priorKnowledge": [
   "simple-plans"
  ],
- "intro": "A pawn that no other pawn can protect is weak: only pieces can guard it, and a piece busy guarding a pawn is not doing much else. Three kinds come up all the time. An isolated pawn has no friendly pawns on the files beside it, doubled pawns stand one behind the other on the same file, and a backward pawn has been left behind by its neighbours and cannot move forward safely. Attack these pawns when your opponent has them, and think twice before a capture or a pawn move gives you one.",
+ "intro": "Pawns never move backwards, so a pawn that has lost the help of its neighbours stays weak for good: only pieces can guard it, and a piece busy guarding a pawn is not doing much else. Three kinds come up all the time. An isolated pawn has no friendly pawns on the files beside it, doubled pawns stand one behind the other on the same file, and a backward pawn has been left behind by its neighbours and cannot move forward safely. Attack these pawns when your opponent has them, and think twice before a capture or a pawn move gives you one.",
  "parts": [
   {
-   "title": "Block the isolated pawn",
+   "title": "The isolated pawn",
    "fen": "r2q1rk1/pp1b1ppp/1n2pb2/8/3P1P2/2N2N2/PP2Q1PP/R1B2RK1 b - - 8 15",
    "side": "black",
    "keyIdea": "Put a knight on the square in front of an isolated pawn, where no pawn can chase it, then attack the pawn.",
@@ -23,7 +23,7 @@
     {
      "ply": 0,
      "san": "Bc6",
-     "text": "Put the bishop on the long diagonal. From c6 it guards d5, and it also looks at the knight on f3, one of the pieces that defend d4."
+     "text": "The bishop goes to the long diagonal from a8 to h1. From c6 it guards d5, and it also looks at the knight on f3, one of the pieces that defend d4."
     },
     {
      "ply": 2,
@@ -33,12 +33,12 @@
     {
      "ply": 4,
      "san": "Qb6",
-     "text": "Now aim another piece at the pawn. Your queen and your bishop on f6 both attack d4, so White's pieces have to stay back and guard it."
+     "text": "Now another piece aims at the pawn. Your queen and your bishop on f6 both attack d4, so White's pieces have to stay back and guard it."
     }
    ]
   },
   {
-   "title": "Attack the doubled pawns",
+   "title": "Doubled pawns",
    "fen": "r1b2rk1/p2p1ppp/1pn1pn2/2q5/2P5/P1P1PN2/3BBPPP/R2Q1RK1 b - - 1 11",
    "side": "black",
    "keyIdea": "Doubled pawns cannot guard each other: attack the front one with more pieces than can defend it.",
@@ -54,20 +54,20 @@
     {
      "ply": 2,
      "san": "Bxc4",
-     "text": "Two attackers against one defender, so take the pawn. If White takes your bishop, your queen takes back and you are still a pawn up."
+     "text": "Two attackers against one defender, so the bishop takes the pawn. If White takes your bishop, your queen takes back and you are still a pawn up."
     },
     {
      "ply": 4,
      "san": "Bxe2",
-     "text": "Trade bishops. You are a pawn ahead, and White's last c-pawn, on c3, has no pawns beside it: it is isolated and the next weak pawn to aim at."
+     "text": "The bishops are traded. You are a pawn ahead, and White's last c-pawn, on c3, has no pawns beside it: it is isolated and the next weak pawn to aim at."
     }
    ]
   },
   {
-   "title": "Pile up on the backward pawn",
+   "title": "The backward pawn",
    "fen": "r1bq1rk1/3nbppp/p1p1pn2/3p4/1PNP4/P2BPN2/1B3PPP/R2Q1RK1 w - - 0 12",
    "side": "white",
-   "keyIdea": "A backward pawn on a file without your pawns is a fixed weakness: pile up on it with knights and rooks.",
+   "keyIdea": "A backward pawn cannot step forward safely, and no pawn can help it: pile up on it with knights and rooks.",
    "text": "From a game played on Lichess. You are White. Look at Black's pawn on c6. The b-pawn that could protect it is gone, the d-pawn has moved past it, and your pawns on b4 and d4 guard c5, so it cannot move forward safely.",
    "url": "https://lichess.org/nEbgPaCw#22",
    "line": "Na5 Qc7 Rc1 Bb7 Qe2 Rfc8 Rc2",
@@ -90,7 +90,7 @@
     {
      "ply": 6,
      "san": "Rc2",
-     "text": "Make room for the other rook: Rfc1 comes next. The pawn on c6 cannot run and no pawn can help it, so Black's pieces stay tied to its defence."
+     "text": "The rook steps up to make room for the other one: Rfc1 comes next. The pawn on c6 cannot run and no pawn can help it, so Black's pieces stay tied to its defence."
     }
    ]
   }

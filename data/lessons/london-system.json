@@ -4,7 +4,7 @@
  "kind": "opening",
  "track": "openings",
  "level": "beginner",
- "goal": "As White, you can set up the London System against almost any reply: d4, Bf4, e3, Nf3, c3 and Nbd2.",
+ "goal": "As White, you can set up the London System: the bishop out to f4 before e3, pawns on d4, e3 and c3, and knights on f3 and d2.",
  "priorKnowledge": [
   "opening-principles"
  ],
@@ -18,14 +18,14 @@
  ],
  "puzzleThemes": [],
  "intro": {
-  "text": "The London System is a set-up for White that you can play against almost anything Black does. Your pawns go to d4, e3 and c3, a solid wall in the centre, and the bishop from c1 comes out to f4 before the e-pawn moves and shuts it in. Because the plan hardly changes from game to game, you can save your thinking for the middlegame."
+  "text": "The London System is a calm way to start a game as White, with a clear plan for your first moves. The bishop from c1 comes out to f4 early, before your e-pawn moves and blocks its path. Then pawns on d4, e3 and c3 make a solid wall in the centre, and your knights come out to f3 and d2. In this Lesson Black answers in a common, solid way, and you build the whole set-up."
  },
  "parts": [
   {
    "title": "London System",
    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
    "side": "white",
-   "keyIdea": "Bishop out to f4 before e3, then pawns on d4, e3 and c3 and knights on f3 and d2: one set-up against almost anything.",
+   "keyIdea": "Bishop out to f4 before e3, then pawns on d4, e3 and c3 and knights on f3 and d2, with castling to follow.",
    "credit": {
     "source": "Lichess chess-openings",
     "url": "https://github.com/lichess-org/chess-openings",
@@ -154,7 +154,7 @@
       ]
      },
      "notes": {
-      "text": "1.d4 puts a pawn in the centre that your queen already defends. It also opens the way for the bishop on c1, the first piece you bring out in the London."
+      "text": "1.d4, the pawn in front of your queen two squares forward, puts a pawn in the centre that your queen already defends. It also opens the way for the bishop on c1, the first piece you bring out in the London."
      }
     },
     {
@@ -367,7 +367,7 @@
       ]
      },
      "notes": {
-      "text": "Black also claimed the centre with 1...d5. Bring the bishop out now with 2.Bf4, while its path is open: once you play e3, a bishop still on c1 would be stuck behind your own pawns. From f4 it watches e5 and the squares around it."
+      "text": "Black also claimed the centre with 1...d5. 2.Bf4 develops the bishop, which means it brings it off its starting square, while its path is still open: once you play e3, a bishop left on c1 would be stuck behind your own pawns. From f4 it watches e5 and the squares around it."
      }
     },
     {
@@ -580,7 +580,7 @@
       ]
      },
      "notes": {
-      "text": "3.e3 supports your d4 pawn, guards the bishop on f4, and opens a path for your other bishop. Because your bishop on f4 is already outside the pawn wall, e3 costs it nothing."
+      "text": "3.e3 supports your d4 pawn, guards the bishop on f4, and opens a path for your other bishop. Your bishop on f4 is already outside the pawn wall, so e3 does not shut it in."
      }
     },
     {
@@ -944,7 +944,7 @@
       "club": []
      },
      "notes": {
-      "text": "4...c5 attacks your d4 pawn. 5.c3 supports it with another pawn, so if Black takes on d4 you can take back with a pawn and keep one in the centre. Later, Black's queen may come to b6 to attack b2, which your bishop no longer guards."
+      "text": "4...c5 attacks your d4 pawn. 5.c3 supports it with another pawn, so if Black takes on d4 you can take back with a pawn and keep one in the centre. Later, Black's queen may come to b6 to attack your pawn on b2, which your bishop no longer guards."
      }
     },
     {
@@ -1033,7 +1033,7 @@
       "club": []
      },
      "notes": {
-      "text": "5...Nc6 adds more pressure on d4, which is still well defended. 6.Nbd2 brings out your last knight. With your pawn on c3, d2 is its natural square, and from there it supports e4 and c4."
+      "text": "5...Nc6 adds more pressure on d4, which is still well defended. 6.Nbd2 brings out your last knight. With your pawn on c3, d2 is its natural square, and from there it supports the squares e4 and c4."
      }
     },
     {
@@ -1060,7 +1060,7 @@
       "club": []
      },
      "notes": {
-      "text": "6...Bd6 offers to trade off your London bishop. Step back with 7.Bg3, keeping it on the same diagonal. If Black takes on g3, take back with the h-pawn: your rook on h1 then has a file with no pawn of yours in front of it. Bd3 and castling come next."
+      "text": "6...Bd6 offers to trade off your bishop on f4. 7.Bg3 steps back and keeps the bishop on the same diagonal. If Black takes on g3, you take back with the h-pawn, and your rook on h1 then has a file with no pawn of yours in front of it. Bd3 and castling come next."
      }
     }
    ]

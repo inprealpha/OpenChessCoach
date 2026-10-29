@@ -14,7 +14,7 @@
   "skewer"
  ],
  "intro": {
-  "text": "A skewer is an attack on a valuable piece that has a less valuable piece standing behind it on the same line. When the front piece gets out of the way, you take the one behind. It is the reverse of a pin, where the piece in front is the less valuable one. Rooks, bishops and queens can all skewer, and the strongest skewers go through the king, which has to get out of check."
+  "text": "A skewer is an attack on a valuable piece that has a less valuable piece standing behind it on the same line. When the front piece gets out of the way, you take the one behind. It works the other way round from a pin, where the piece in front is the less valuable one. Rooks, bishops and queens can all skewer, and the strongest skewers start with a check, because the king must move out of the way."
  },
  "parts": [
   {
@@ -22,7 +22,7 @@
    "fen": "8/3k3q/3r4/2Q5/8/8/8/4K3 w - - 2 67",
    "side": "white",
    "keyIdea": "Check a king that has a valuable piece behind it on the same line; when the king moves, take that piece.",
-   "text": "From a game played on Lichess. Black's king has just stepped to d7. Look along the seventh rank: what stands behind the king?",
+   "text": "From a game played on Lichess. Black's king has just stepped to d7. Look along the seventh rank (the row numbered 7): what stands behind the king?",
    "credit": {
     "source": "Lichess puzzle database, puzzle 5dvpM",
     "url": "https://lichess.org/training/5dvpM",
@@ -48,7 +48,7 @@
       "club": []
      },
      "notes": {
-      "text": "Your queen checks along the seventh rank, and Black's queen on h7 stands directly behind the king. Black has nothing that can step in between, so the king has to leave the rank."
+      "text": "67.Qa7+: your queen moves to a7 and gives check along the seventh rank, with Black's queen on h7 directly behind the king. Black has nothing that can step in between, so the king has to leave the rank."
      }
     },
     {
@@ -75,7 +75,7 @@
       "club": []
      },
      "notes": {
-      "text": "With the king gone from the rank, your queen takes Black's queen. You are left with a queen against a rook."
+      "text": "With the king gone from the rank, 68.Qxh7 takes Black's queen. You are left with a queen against a rook."
      }
     }
    ]
@@ -85,7 +85,7 @@
    "fen": "1b6/8/P4pp1/4k3/6P1/5K2/3B4/8 w - - 3 43",
    "side": "white",
    "keyIdea": "A bishop skewers along a diagonal: check the king, and win the piece that stands behind it.",
-   "text": "From a game played on Lichess. Black's king has just come to e5, on the same diagonal as Black's bishop on b8. That bishop is also the piece that holds back your pawn on a6.",
+   "text": "From a game played on Lichess. Black's king has just come to e5, on the same diagonal as Black's bishop on b8. That bishop is also the piece that stops your pawn on a6 from promoting.",
    "credit": {
     "source": "Lichess puzzle database, puzzle sLBYX",
     "url": "https://lichess.org/training/sLBYX",
@@ -111,7 +111,7 @@
       "club": []
      },
      "notes": {
-      "text": "Your bishop checks from f4, with Black's bishop on b8 behind the king on the same diagonal. The king cannot take your bishop, because your king on f3 protects it, so it has to step aside."
+      "text": "43.Bf4+: your bishop checks from f4, with Black's bishop on b8 behind the king on the same diagonal. Your king on f3 protects the bishop, so Black's king cannot take it and has to step aside."
      }
     },
     {
@@ -138,7 +138,7 @@
       "club": []
      },
      "notes": {
-      "text": "Take the bishop. You are now a whole piece ahead, and the bishop that held back your a-pawn is gone."
+      "text": "44.Bxb8 takes the bishop. You are now a whole piece ahead, and Black no longer has a bishop to stop your a-pawn."
      }
     }
    ]
@@ -174,7 +174,7 @@
       "club": []
      },
      "notes": {
-      "text": "Your bishop attacks the queen, and White's rook on a1 stands behind it on the same diagonal. Taking the bishop would cost White the queen, because your queen on d8 protects it, so the queen steps away."
+      "text": "23...Bd4: your bishop attacks the queen, and White's rook on a1 stands behind it on the same diagonal. Your queen on d8 protects the bishop, so taking it would cost White the queen, and White's queen has to step away."
      }
     },
     {
@@ -201,7 +201,7 @@
       "club": []
      },
      "notes": {
-      "text": "The queen has gone, so take the rook. White can take back with the other rook, but you have won a rook for a bishop."
+      "text": "The queen has gone, and 24...Bxa1 takes the rook. White can take back with the other rook, but you have won a rook for a bishop."
      }
     }
    ]

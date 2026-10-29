@@ -9,93 +9,98 @@
  "priorKnowledge": [
   "opening-traps"
  ],
- "intro": "A gambit gives up a pawn, sometimes more, to get ahead in development or to open lines towards the enemy king. To judge one, count both sides: the material on offer, and the moves it costs you to take it and keep it. A pawn that costs little time and leaves no weak spot is worth taking. If keeping it would leave your pieces at home and your king in the centre, give it back and develop. And when your opponent grabs too much, open the position before they can catch up.",
+ "intro": "A gambit offers a pawn, sometimes more, in return for time: quicker development, open lines or an attack. Before you take one, weigh the pawn against the moves it will cost you to win it and keep it. Some gambits only look like gifts: in the Queen's Gambit, Black can take the pawn on c4 but cannot keep it for long. In this Lesson you take a pawn that costs little, turn down one that costs too much, and let a pawn go when holding on to it would leave your pieces at home.",
  "parts": [
   {
-   "title": "A pawn worth taking",
-   "fen": "rnbqkbnr/pp1ppppp/8/8/3pP3/2P5/PP3PPP/RNBQKBNR b KQkq - 0 3",
+   "title": "The King's Gambit",
+   "fen": "rnbqkbnr/pppp1ppp/8/4p3/4PP2/8/PPPP2PP/RNBQKBNR b KQkq - 0 2",
    "side": "black",
-   "keyIdea": "Take a gambit pawn when it costs little time, then develop quickly and block the lines your opponent wants to use.",
-   "text": "From a game played on Lichess, in the Smith-Morra Gambit. You are Black: after 1.e4 c5 2.d4 cxd4, White offers a second pawn with 3.c3. Decide whether to take it, and then how to keep your position safe.",
-   "url": "https://lichess.org/3oVG5rUp#5",
-   "line": "dxc3 Nxc3 Nc6 Nf3 d6 Bc4 e6",
+   "keyIdea": "A pawn that costs you one move and leaves the enemy king less sheltered is worth taking; then develop rather than cling to it.",
+   "text": "From a game played on Lichess. You are Black. After 1.e4 e5, White has pushed the f-pawn two squares with 2.f4, the King's Gambit, and offers it to your e-pawn. Is the pawn worth taking?",
+   "url": "https://lichess.org/K16jPKW9#3",
+   "line": "exf4 Nf3 d5 exd5 Nf6 Bc4 Nxd5",
    "notes": [
     {
      "ply": 0,
-     "san": "dxc3",
-     "text": "Take it: 3...dxc3 4.Nxc3 leaves you a pawn up. White gets a knight out and open lines for the bishops and rooks, but that is only a small lead in development, and your king is not under any direct threat."
+     "san": "exf4",
+     "text": "2...exf4 takes the pawn. It costs you only one move, and with White's f-pawn gone, the diagonal from a7 to g1 leads straight to White's king. The Engine prefers taking to turning the pawn down."
     },
     {
      "ply": 2,
-     "san": "Nc6",
-     "text": "Now the job is to catch up. 4...Nc6 brings a piece out at once and controls d4 and e5, two squares White's pieces would like to use."
+     "san": "d5",
+     "text": "3.Nf3 developed a knight and stopped ...Qh4+. Instead of spending moves on keeping the f4 pawn, 3...d5 hits White's centre and opens a path for your bishop on c8. Holding the pawn with 3...g5 is also played, but it loosens your kingside pawns."
     },
     {
      "ply": 4,
-     "san": "d6",
-     "text": "5...d6 stops White from pushing e4-e5 and opens a path for the c8-bishop. Your pawns on d6 and soon e6 make a solid wall in front of your pieces."
+     "san": "Nf6",
+     "text": "4.exd5 took your d-pawn. 4...Nf6 develops a knight that attacks d5 at once, so a piece, not your queen, will win the pawn back."
     },
     {
      "ply": 6,
-     "san": "e6",
-     "text": "6.Bc4 aims at f7, Black's weak spot. 6...e6 blocks that diagonal and also guards d5, so a White knight cannot settle there safely. Next come ...Nf6, ...Be7 and castling. You keep the extra pawn, and White has to find real play to make up for it."
+     "san": "Nxd5",
+     "text": "5.Bc4 defended the pawn, but your knight and your queen both attack d5 and only the bishop defends it, so 5...Nxd5 takes it. You are a pawn up again, your pieces are coming out, and White's king has no f-pawn to shelter it."
     }
    ]
   },
   {
-   "title": "Give it back and develop",
-   "fen": "rnbqkbnr/pppp1ppp/8/8/3pP3/2P5/PP3PPP/RNBQKBNR b KQkq - 0 3",
+   "title": "The Vienna Gambit",
+   "fen": "rnbqkb1r/pppp1ppp/5n2/4p3/4PP2/2N5/PPPP2PP/R1BQKBNR b KQkq - 0 3",
    "side": "black",
-   "keyIdea": "If keeping an extra pawn would cost you development, return it with a counter-attack that brings your pieces out.",
-   "text": "From a game played on Lichess, in the Danish Gambit. You are Black: you took a pawn with 2...exd4, and White offers another with 3.c3. Grabbing more would leave you well behind in development. Look for a move that fights for the centre instead.",
-   "url": "https://lichess.org/1pdcarlw#5",
-   "line": "d5 exd5 Qxd5 cxd4 Nc6 Nf3 Bg4",
+   "keyIdea": "If taking a pawn lets your opponent chase your pieces back home, turn it down and strike in the centre instead.",
+   "text": "From a game played on Lichess. You are Black. After 1.e4 e5 2.Nc3 Nf6, White offers the f-pawn with 3.f4, the Vienna Gambit. This time, look at what taking it would cost you before you decide.",
+   "url": "https://lichess.org/OqLRRlZE#5",
+   "line": "d5 fxe5 Nxe4 Nf3 Be7",
    "notes": [
     {
      "ply": 0,
      "san": "d5",
-     "text": "3...d5 strikes at e4 instead of taking a second pawn. You are ready to give your extra pawn back: what you want in return is quick development. White usually trades with 4.exd5."
+     "text": "3...d5 turns the pawn down and strikes at the centre. After 3...exf4 White would push 4.e5, and your knight on f6 would be driven back to g8: you would have an extra pawn, but White would have the centre and a lead in development. The Engine grades 3...exf4 as an inaccuracy."
     },
     {
      "ply": 2,
-     "san": "Qxd5",
-     "text": "4...Qxd5 takes back. The queen is out early, but it stands well in the centre: it protects your d4 pawn and eyes g2, and White cannot hit it with a knight from c3 while a pawn sits there."
+     "san": "Nxe4",
+     "text": "4.fxe5 took your e-pawn, and 4...Nxe4 takes White's e-pawn in return. Material is level, and your knight sits on a strong central square, where it attacks White's knight on c3."
     },
     {
      "ply": 4,
-     "san": "Nc6",
-     "text": "White has won back the pawn with 5.cxd4, so material is level again. In return your pieces come out with threats: 5...Nc6 develops and attacks the d4 pawn a second time, together with your queen."
-    },
-    {
-     "ply": 6,
-     "san": "Bg4",
-     "text": "6.Nf3 defends d4. 6...Bg4 develops another piece and pins that knight to White's queen. Count the pieces: you have three out and are ready to castle queenside, while White has one. Giving the pawn back has bought you a comfortable game with level material."
+     "san": "Be7",
+     "text": "5.Nf3 developed. 5...Be7 brings out your bishop and gets you ready to castle. White's f-pawn has left its place in front of White's king, and you have given nothing away."
     }
    ]
   },
   {
-   "title": "When greed goes wrong",
-   "fen": "rnbqkb1r/ppp2pp1/3p1n1p/8/2B1P3/5N2/PB3PPP/RN1Q1RK1 w kq - 0 8",
+   "title": "The Budapest Gambit",
+   "fen": "rnbqkb1r/pppp1ppp/5n2/4p3/2PP4/8/PP2PPPP/RNBQKBNR w KQkq - 0 3",
    "side": "white",
-   "keyIdea": "Against a king left in the centre, open lines with pawn breaks and checks, even if it costs more material.",
-   "text": "From a game played on Lichess, in the Danish Gambit. You are White. Black took both pawns you offered and is two pawns up, but has only one piece out and the king is still on e8, while your bishops aim at Black's kingside and your own king is castled. Find the move that opens lines.",
-   "url": "https://lichess.org/p40d24f5#14",
-   "line": "e5 Ne4 Re1 Nc5 exd6+",
+   "keyIdea": "When your opponent is sure to win the pawn back, defend it with moves that develop, and let it go rather than spend more moves on it.",
+   "text": "From a game played on Lichess. You are White. After 1.d4 Nf6 2.c4, Black has pushed 2...e5, the Budapest Gambit, and offers the e-pawn. Decide whether to take it, and then how hard to fight to keep it.",
+   "url": "https://lichess.org/f3WBr3QB#4",
+   "line": "dxe5 Ng4 Bf4 Nc6 Nf3 Bb4+ Nbd2 Qe7 e3",
    "notes": [
     {
      "ply": 0,
-     "san": "e5",
-     "text": "8.e5! attacks the f6 knight and opens lines towards Black's king. If Black takes with 8...dxe5, the d-file opens and 9.Bxf7+ wins: after 9...Kxf7 10.Qxd8 takes the queen. So the knight has to move."
+     "san": "dxe5",
+     "text": "3.dxe5 takes the pawn. It costs you nothing, and now Black has to spend moves winning it back. The Engine prefers taking."
     },
     {
      "ply": 2,
-     "san": "Re1",
-     "text": "The knight went to e4. 9.Re1 attacks it and puts your rook on the same file as Black's king. Your bishops, rook and knight are all aimed at the centre and Black's king, while Black's queenside pieces have not moved."
+     "san": "Bf4",
+     "text": "3...Ng4 attacked the pawn on e5. 4.Bf4 defends it and brings a bishop into play at the same time."
     },
     {
      "ply": 4,
-     "san": "exd6+",
-     "text": "10.exd6+ is a discovered check: the pawn takes on d6 and uncovers your rook against Black's king. Black has to block or move the king, and your attack keeps rolling. Two extra pawns were not worth falling this far behind in development."
+     "san": "Nf3",
+     "text": "4...Nc6 attacked e5 a second time, and 5.Nf3 defends it a second time while it develops another piece."
+    },
+    {
+     "ply": 6,
+     "san": "Nbd2",
+     "text": "5...Bb4+ checked your king. 6.Nbd2 blocks the check with a knight that comes into play, and your knight on f3 still guards e5."
+    },
+    {
+     "ply": 8,
+     "san": "e3",
+     "text": "6...Qe7 attacked e5 a third time, and you have only two defenders, so the pawn will go back to Black. Rather than spend more moves on it, 7.e3 opens the way for your bishop on f1 so you can castle soon. After 7...Ngxe5 8.Nxe5 Nxe5 material is level again, and the Engine prefers your position slightly."
     }
    ]
   }

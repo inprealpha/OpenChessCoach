@@ -19,8 +19,8 @@
    "title": "Win the race to promote",
    "fen": "8/8/1P6/4k3/2K2p1p/8/7P/8 b - - 0 48",
    "side": "white",
-   "keyIdea": "In a pawn race, count the moves each pawn needs to promote; the side that gets there first, ideally with check, wins.",
-   "text": "A Lichess Puzzle with only kings and pawns left. Black's f-pawn is running down the board, and your b-pawn is running up. Count how many moves each pawn needs to reach the last rank.",
+   "keyIdea": "Count the moves each pawn needs. Promoting first wins only if your new queen can stop the other pawn at once, for example with check.",
+   "text": "From a game played on Lichess. You are White. Only kings and pawns are left. Black's f-pawn is running down the board, and your b-pawn is running up. Count how many moves each pawn needs to reach the last rank.",
    "credit": {
     "source": "Lichess puzzle database, puzzle KM0Nq",
     "url": "https://lichess.org/training/KM0Nq",
@@ -61,7 +61,7 @@
       "club": []
      },
      "notes": {
-      "text": "Your pawn needs two more moves to promote, and so does Black's pawn on f3. It is your turn, so you are one step ahead: keep pushing."
+      "text": "Your pawn steps up to b7. Before this push each pawn needed two more moves to promote, and it was your turn, so you are one step ahead. That alone is not enough, because Black's pawn can promote straight after yours: your new queen will have to deal with it at once."
      }
     },
     {
@@ -125,7 +125,7 @@
    "fen": "8/8/8/8/8/6kp/P7/6K1 w - - 1 58",
    "side": "white",
    "keyIdea": "A king catches a pawn only if it can step into the pawn's square; if it cannot, the pawn runs through on its own.",
-   "text": "A Lichess Puzzle: your king on g1 stands in front of Black's h-pawn, so everything depends on your a-pawn. To see whether a king can catch a pawn, picture a square: one side runs from the pawn to its promotion square, and the square spreads the same distance sideways. A king that can get inside that square on its move is in time to stop the pawn; a king that cannot is too slow.",
+   "text": "From a game played on Lichess. You are White. Your king on g1 stands in front of Black's h-pawn, so everything depends on your a-pawn. To tell whether a king can catch a pawn, picture a square on the board: one side runs from the pawn up to the square where it would promote, and the square reaches the same number of squares sideways, towards the enemy king. If the king can step inside that square on its move, it is in time to stop the pawn; if it cannot, the pawn gets through.",
    "credit": {
     "source": "Lichess puzzle database, puzzle Ezeci",
     "url": "https://lichess.org/training/Ezeci",
@@ -135,13 +135,13 @@
    },
    "mainLine": [
     "a2a4",
-    "g3f3",
+    "g3f4",
     "a4a5",
-    "f3e4",
+    "f4e5",
     "a5a6",
-    "e4e5",
+    "e5d6",
     "a6a7",
-    "e5d5",
+    "d6c7",
     "a7a8q"
    ],
    "nodes": [
@@ -157,15 +157,15 @@
       "club": []
      },
      "notes": {
-      "text": "A pawn on its starting square may move two squares, and here that decides the game. After a4 the pawn's square reaches only from the a-file to the e-file, and Black's king on g3 cannot step into it. After a3 the square would reach the f-file, and the king could walk in and catch the pawn."
+      "text": "From its starting square a pawn may move two squares at once, and here that decides the game. With the pawn on a4, its square runs from a4 up to a8 and across to the e-file, and Black's king on g3 cannot step into it. After a3 the square would reach the f-file, and the king could walk in and catch the pawn."
      }
     },
     {
      "ply": 1,
      "fen": "8/8/8/8/P7/6kp/8/6K1 b - - 0 58",
      "decision": false,
-     "main": "g3f3",
-     "mainSan": "Kf3",
+     "main": "g3f4",
+     "mainSan": "Kf4",
      "popular": {
       "beginner": [],
       "casual": [],
@@ -174,7 +174,7 @@
     },
     {
      "ply": 2,
-     "fen": "8/8/8/8/P7/5k1p/8/6K1 w - - 1 59",
+     "fen": "8/8/8/8/P4k2/7p/8/6K1 w - - 1 59",
      "decision": true,
      "main": "a4a5",
      "mainSan": "a5",
@@ -184,15 +184,15 @@
       "club": []
      },
      "notes": {
-      "text": "Black's king chases the pawn, but it is still outside the square, which now runs from a5 across to d5 and up to the eighth rank. Keep pushing."
+      "text": "Black's king is chasing, but the pawn moves on and its square shrinks: now it runs from a5 across to d5 and up to the eighth rank. Black's king on f4 is still outside it."
      }
     },
     {
      "ply": 3,
-     "fen": "8/8/8/P7/8/5k1p/8/6K1 b - - 0 59",
+     "fen": "8/8/8/P7/5k2/7p/8/6K1 b - - 0 59",
      "decision": false,
-     "main": "f3e4",
-     "mainSan": "Ke4",
+     "main": "f4e5",
+     "mainSan": "Ke5",
      "popular": {
       "beginner": [],
       "casual": [],
@@ -201,7 +201,7 @@
     },
     {
      "ply": 4,
-     "fen": "8/8/8/P7/4k3/7p/8/6K1 w - - 1 60",
+     "fen": "8/8/8/P3k3/8/7p/8/6K1 w - - 1 60",
      "decision": true,
      "main": "a5a6",
      "mainSan": "a6",
@@ -216,10 +216,10 @@
     },
     {
      "ply": 5,
-     "fen": "8/8/P7/8/4k3/7p/8/6K1 b - - 0 60",
+     "fen": "8/8/P7/4k3/8/7p/8/6K1 b - - 0 60",
      "decision": false,
-     "main": "e4e5",
-     "mainSan": "Ke5",
+     "main": "e5d6",
+     "mainSan": "Kd6",
      "popular": {
       "beginner": [],
       "casual": [],
@@ -228,7 +228,7 @@
     },
     {
      "ply": 6,
-     "fen": "8/8/P7/4k3/8/7p/8/6K1 w - - 1 61",
+     "fen": "8/8/P2k4/8/8/7p/8/6K1 w - - 1 61",
      "decision": true,
      "main": "a6a7",
      "mainSan": "a7",
@@ -238,15 +238,15 @@
       "club": []
      },
      "notes": {
-      "text": "One more step. Black's king is still too far away to stop the pawn."
+      "text": "One more step. Black's king on d6 is still too far away to stop the pawn."
      }
     },
     {
      "ply": 7,
-     "fen": "8/P7/8/4k3/8/7p/8/6K1 b - - 0 61",
+     "fen": "8/P7/3k4/8/8/7p/8/6K1 b - - 0 61",
      "decision": false,
-     "main": "e5d5",
-     "mainSan": "Kd5",
+     "main": "d6c7",
+     "mainSan": "Kc7",
      "popular": {
       "beginner": [],
       "casual": [],
@@ -255,17 +255,17 @@
     },
     {
      "ply": 8,
-     "fen": "8/P7/8/3k4/8/7p/8/6K1 w - - 1 62",
+     "fen": "8/P1k5/8/8/8/7p/8/6K1 w - - 1 62",
      "decision": true,
      "main": "a7a8q",
-     "mainSan": "a8=Q+",
+     "mainSan": "a8=Q",
      "popular": {
       "beginner": [],
       "casual": [],
       "club": []
      },
      "notes": {
-      "text": "The pawn becomes a queen, and with check: from a8 the queen sees Black's king on d5 along the long diagonal. A queen against a lone pawn is a winning position."
+      "text": "The pawn promotes to a queen. Black's king on c7 arrived one move too late. A queen against a lone pawn is an easy win."
      }
     }
    ]
@@ -274,8 +274,8 @@
    "title": "Capturing en passant",
    "fen": "8/5Kp1/7p/5k1P/8/8/8/8 b - - 1 66",
    "side": "white",
-   "keyIdea": "A pawn that jumps two squares past an enemy pawn can be taken en passant, but only on the very next move.",
-   "text": "A Lichess Puzzle with a special rule. Black's g-pawn is about to jump two squares, from g7 to g5, straight past your pawn on h5. Your pawn attacks g6, the square the black pawn skips over, and that gives you the right to capture it en passant, but only on the very next move.",
+   "keyIdea": "A pawn that moves two squares and lands beside an enemy pawn can be taken en passant, but only on the very next move.",
+   "text": "From a game played on Lichess. You are White, and a special rule decides the game. Black's g-pawn has just moved two squares, from g7 to g5, and landed beside your pawn on h5. Your pawn attacks g6, the square the black pawn passed over, and that gives you the right to capture it en passant, but only on this move.",
    "credit": {
     "source": "Lichess puzzle database, puzzle PuJBt",
     "url": "https://lichess.org/training/PuJBt",
@@ -286,9 +286,9 @@
    "mainLine": [
     "g7g5",
     "h5g6",
-    "f5e5",
-    "g6g7",
     "h6h5",
+    "g6g7",
+    "h5h4",
     "g7g8q"
    ],
    "nodes": [
@@ -316,39 +316,12 @@
       "club": []
      },
      "notes": {
-      "text": "En passant, step by step: your pawn on h5 moves diagonally to g6, the square Black's pawn jumped over, and the black pawn on g5 is taken off the board, just as if it had moved only to g6. You may do this only straight after the two-square move. Every other move loses here, because Black's g-pawn would run down the board to promote."
+      "text": "En passant, step by step: your pawn on h5 moves diagonally to g6, the square Black's pawn passed over, and the black pawn on g5 comes off the board, just as if it had moved only one square. This capture is allowed only straight after the two-square move. Any other move loses here, because Black's g-pawn would run down the board and promote."
      }
     },
     {
      "ply": 2,
      "fen": "8/5K2/6Pp/5k2/8/8/8/8 b - - 0 67",
-     "decision": false,
-     "main": "f5e5",
-     "mainSan": "Ke5",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 3,
-     "fen": "8/5K2/6Pp/4k3/8/8/8/8 w - - 1 68",
-     "decision": true,
-     "main": "g6g7",
-     "mainSan": "g7",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     },
-     "notes": {
-      "text": "Your new pawn on g6 marches on. Your king on f7 guards g8, so Black's king cannot stop it."
-     }
-    },
-    {
-     "ply": 4,
-     "fen": "8/5KP1/7p/4k3/8/8/8/8 b - - 0 68",
      "decision": false,
      "main": "h6h5",
      "mainSan": "h5",
@@ -359,8 +332,35 @@
      }
     },
     {
+     "ply": 3,
+     "fen": "8/5K2/6P1/5k1p/8/8/8/8 w - - 0 68",
+     "decision": true,
+     "main": "g6g7",
+     "mainSan": "g7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Your pawn, now on g6, moves on to g7. Your king on f7 guards g8, so Black's king cannot stop it."
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "8/5KP1/8/5k1p/8/8/8/8 b - - 0 68",
+     "decision": false,
+     "main": "h5h4",
+     "mainSan": "h4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
      "ply": 5,
-     "fen": "8/5KP1/8/4k2p/8/8/8/8 w - - 0 69",
+     "fen": "8/5KP1/8/5k2/7p/8/8/8 w - - 0 69",
      "decision": true,
      "main": "g7g8q",
      "mainSan": "g8=Q",
@@ -370,7 +370,7 @@
       "club": []
      },
      "notes": {
-      "text": "Promotion: the pawn becomes a queen, and with a queen against a lone pawn you are winning."
+      "text": "The pawn promotes to a queen. Nothing could stop it, so there was no hurry, but promoting now is the simplest way: a queen against a lone pawn is an easy win."
      }
     }
    ]

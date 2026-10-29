@@ -19,19 +19,19 @@
    "fen": "8/p2k4/2p3pp/3p1p2/3P3P/P4P1n/1P2N3/5K2 w - - 0 34",
    "side": "white",
    "keyIdea": "A knight on the edge of the board has few squares. Cover them all, then attack it.",
-   "text": "From a game played on Lichess. White to move. Black's knight sits deep in your camp on h3. Before you chase it, count the squares it could run to.",
+   "text": "From a game played on Lichess. You are White. Black's knight sits deep in your camp on h3. Before you chase it, count the squares it could run to.",
    "url": "https://lichess.org/training/yahGO",
    "line": "Kg2 Ng5 hxg5",
    "notes": [
     {
      "ply": 0,
      "san": "Kg2",
-     "text": "The king attacks the knight and covers g1 and f2. Your knight on e2 covers f4, and the pawn on h4 covers g5. The knight has no safe square left."
+     "text": "Kg2, the king to g2, attacks the knight and covers g1 and f2. Your knight on e2 covers f4, and the pawn on h4 covers g5. The knight has no safe square left."
     },
     {
      "ply": 2,
      "san": "hxg5",
-     "text": "Black gives the knight up for your h-pawn rather than lose it for nothing. Take it: you have won a knight for a pawn."
+     "text": "The knight jumped to g5 so that, after your pawn takes it, Black's h-pawn can take back: Black gets a pawn for the knight instead of nothing. Your pawn takes, and you have won a knight for a pawn."
     }
    ]
   },
@@ -40,14 +40,14 @@
    "fen": "8/pppn1kpp/5pb1/2p5/2P2P1N/1P5P/P2N2P1/4K3 w - - 3 27",
    "side": "white",
    "keyIdea": "Pawns make good hunters: each push takes squares from a piece, and they cost little if the piece takes one.",
-   "text": "From a game played on Lichess. White to move, a pawn down. Black's bishop on g6 has very few squares, because its own king and pawns are in the way. Your pawns can take the rest.",
+   "text": "From a game played on Lichess. You are White, and you are a pawn down. Black's bishop on g6 is short of squares: its own king and pawn block f7 and h7, so it can only leave by h5 or along the diagonal towards b1. See whether your pawns can close those ways out.",
    "url": "https://lichess.org/training/7mll4",
    "line": "f5 Bh5 g4 Bxg4 hxg4",
    "notes": [
     {
      "ply": 0,
      "san": "f5",
-     "text": "The pawn attacks the bishop. It cannot take on f5, which your knight on h4 guards, and its own king blocks f7. So it has to go to h5."
+     "text": "f5, the pawn one step forward, attacks the bishop and closes its diagonal. The bishop cannot take on f5, which your knight on h4 guards, and its own king blocks f7. So it has to go to h5."
     },
     {
      "ply": 2,
@@ -57,7 +57,7 @@
     {
      "ply": 4,
      "san": "hxg4",
-     "text": "Black takes a pawn with the bishop so as not to lose it for nothing. Take back: you have won a bishop for a pawn."
+     "text": "Black took a pawn with the bishop so as not to lose it for nothing. Your h-pawn takes back: you have won a bishop for a pawn."
     }
    ]
   },
@@ -66,14 +66,14 @@
    "fen": "r4rk1/3n1ppp/3p1n2/p7/3NP3/3PPP2/q1PQ3P/1R3RK1 w - - 0 17",
    "side": "white",
    "keyIdea": "A queen that grabs a pawn far from home can run out of squares. Punish the grab by attacking it where it cannot hide.",
-   "text": "From a game played on Lichess. Black's queen has just taken your pawn on a2. White to move. Look at every square that queen could escape to.",
+   "text": "From a game played on Lichess. You are White. Black's queen has just taken your pawn on a2. Look at every square that queen could escape to.",
    "url": "https://lichess.org/training/FIStC",
    "line": "Ra1 Qb2 Rfb1 Qxb1+ Rxb1",
    "notes": [
     {
      "ply": 0,
      "san": "Ra1",
-     "text": "The rook attacks the queen. Its only safe square is b2. Your rook covers the a-file and the other rook covers b1, while the diagonal towards e6 is covered square by square: b3 by the c-pawn, c4 and d5 by your other pawns, e6 by the knight."
+     "text": "Ra1, the rook to a1, attacks the queen. The queen's only safe square is b2. Your rook covers the a-file and the other rook covers b1, while the diagonal towards e6 is covered square by square: b3 by the c-pawn, c4 and d5 by your other pawns, e6 by the knight."
     },
     {
      "ply": 2,
@@ -83,7 +83,28 @@
     {
      "ply": 4,
      "san": "Rxb1",
-     "text": "Take back. For one pawn on a2, Black has lost the queen for a rook."
+     "text": "Your rook takes back. For one pawn on a2, Black has lost the queen for a rook."
+    }
+   ]
+  },
+  {
+   "title": "Before you grab a pawn",
+   "fen": "rn2k2r/pp2npbp/2p1b1p1/3pP3/1q3B2/P1N1PN2/1PP1BPPP/R2QK2R b KQkq - 0 10",
+   "side": "black",
+   "keyIdea": "Before a piece takes a pawn deep in the enemy camp, check that it has a safe way back; if it has none, the pawn is bait.",
+   "text": "From a game played on Lichess. You are Black, and White's pawn on a3 attacks your queen on b4, so the queen has to move. The pawn on b2 has nothing guarding it, but before you take it, check whether your queen could get back out.",
+   "url": "https://lichess.org/training/XbkkA",
+   "line": "Qb6 O-O O-O",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Qb6",
+     "text": "Qb6, the queen back to b6, puts it on a safe square. Taking on b2 would have been a mistake: Na4 attacks the queen there, and every square it could run to is covered by White's pawns and pieces, so it would be lost for a rook. In the game Black took the pawn and lost the queen this way."
+    },
+    {
+     "ply": 2,
+     "san": "O-O",
+     "text": "White castled, but the b2 pawn is still poisoned: after Qxb2, Na4 would trap the queen in just the same way. You castle too, so your king is safe and your rook comes into play."
     }
    ]
   }

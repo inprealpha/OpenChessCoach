@@ -12,26 +12,26 @@
  "priorKnowledge": [
   "piece-values"
  ],
- "intro": "A bishop, rook or queen pins an enemy piece when it attacks that piece and, behind it on the same line, a more valuable one. If the piece behind is the king, the pinned piece is not allowed to move at all; if it is the queen, moving away would give the queen up. Either way the pinned piece is stuck, so you can attack it again or simply take it.",
+ "intro": "A bishop, rook or queen pins an enemy piece when it attacks that piece and, behind it on the same line, a more valuable one. If the piece behind is the king, the pinned piece is not allowed to leave that line; if it is the queen, moving away would give the queen up. Either way the pinned piece is stuck, so you can attack it again or simply take it.",
  "parts": [
   {
    "title": "Pin a piece to the king",
    "fen": "8/1p6/2n3R1/pk6/8/2K5/8/8 b - - 3 61",
    "side": "white",
    "keyIdea": "A piece pinned to its king cannot move away, so if nothing guards it, you win it.",
-   "text": "From a game played on Lichess. Black's knight has just jumped to e5, attacking your rook on g6. The black king stands on b5, on the same rank as the knight. Can your rook use that?",
+   "text": "From a game played on Lichess. Black's knight has just jumped to e5, attacking your rook on g6. The black king stands on b5, on the same rank (row) as the knight. Can your rook use that?",
    "url": "https://lichess.org/training/F1Ury",
    "line": "Ne5 Rg5 Kc6 Rxe5",
    "notes": [
     {
      "ply": 1,
      "san": "Rg5",
-     "text": "The rook steps out of the knight's reach to g5, on the same rank as the knight and the king behind it. The knight is pinned: moving it would leave the king in check, which is not allowed. Nothing defends it, and Black cannot bring a defender in one move."
+     "text": "62.Rg5: your rook steps out of the knight's reach to g5, on the same row as the knight and the king behind it. The knight is pinned: moving it would leave the king in check, which is not allowed. Nothing defends it, and Black cannot bring a defender in one move."
     },
     {
      "ply": 3,
      "san": "Rxe5",
-     "text": "Black's king has stepped off the rank, but it is too late: the knight is still attacked and still undefended. Take it."
+     "text": "Black's king has stepped off the row, but it is too late: the knight is still attacked and still undefended, and 63.Rxe5 takes it."
     }
    ]
   },
@@ -47,12 +47,12 @@
     {
      "ply": 1,
      "san": "Be4",
-     "text": "The bishop steps between the two queens on e4, where your queen guards it. It attacks White's queen, and the queen cannot move away, because the king on g2 stands behind it on the same diagonal. White will lose the queen for your bishop."
+     "text": "34...Be4: the bishop steps to e4, between the two queens, where your queen guards it. It attacks White's queen, and the queen cannot move away, because the king on g2 stands behind it on the same diagonal. White will lose the queen for your bishop."
     },
     {
      "ply": 3,
      "san": "Qxe4+",
-     "text": "White took the bishop, so take the queen back, with check. You have traded a bishop for a queen."
+     "text": "White took the bishop, and 35...Qxe4+ takes the queen back with check. You have traded a bishop for a queen."
     }
    ]
   },
@@ -68,12 +68,12 @@
     {
      "ply": 0,
      "san": "Ng5",
-     "text": "The knight attacks the pinned rook a second time. The rook cannot move away, and the king is its only defender, so Black cannot hold it."
+     "text": "1.Ng5: the knight jumps to g5 and attacks the pinned rook a second time. The rook cannot move away, and the king is its only defender, so Black cannot save it."
     },
     {
      "ply": 2,
      "san": "Bxf7",
-     "text": "The king moved to f8 to guard the rook, but the rook is attacked twice and guarded once. Take it with the bishop: the king cannot take back, because your knight guards f7."
+     "text": "The king stepped out of the pin to f8, so next move the rook would be free to leave. But it is attacked twice and guarded once, and 2.Bxf7 takes it first. The king cannot take back, because your knight guards f7."
     }
    ]
   }

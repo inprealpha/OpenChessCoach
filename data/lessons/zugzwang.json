@@ -14,15 +14,15 @@
   "zugzwang"
  ],
  "intro": {
-  "text": "Zugzwang is a German word for a position where having to move hurts: every move makes things worse, but a player is not allowed to pass. It happens most in endgames with only kings and pawns, where a king is guarding something important and every step it takes gives that up. You win these positions by making the move that hands the turn to your opponent, often by taking the opposition or with a quiet pawn move."
+  "text": "In some positions the side to move would gladly pass, because every possible move makes things worse, but passing is not allowed. That is zugzwang, from a German word meaning roughly \"forced to move\". It comes up most in endgames with only kings and pawns, where a king guards something important and every step it takes gives that up. You win these positions with a move that hands the turn to your opponent, often by taking the opposition or with a waiting move."
  },
  "parts": [
   {
-   "title": "Take the opposition",
+   "title": "One king, two pawns",
    "fen": "8/4k1p1/7p/5P1P/5K2/8/8/8 b - - 4 52",
    "side": "black",
    "keyIdea": "Taking the opposition can leave the other king with no good square: wherever it steps, it gives something up.",
-   "text": "From a game played on Lichess. You are Black. White's king on f4 is guarding both its pawns, on f5 and h5, and if it ever has to step away, one of them will fall.",
+   "text": "From a game played on Lichess. You are Black. White's king on f4 guards the f5 pawn, and from g4 it could guard both f5 and h5. If it ever has to step away from them, a pawn falls.",
    "credit": {
     "source": "Lichess puzzle database, puzzle gXycb",
     "url": "https://lichess.org/training/gXycb",
@@ -50,7 +50,7 @@
       "club": []
      },
      "notes": {
-      "text": "Your king faces White's king with one square between them, f6 against f4. Both White pawns are now blocked, so White has to move the king, and only one square, g4, still guards both pawns."
+      "text": "Your king faces White's king with one square between them, f6 against f4. Both white pawns are now blocked, so White has to move the king, and only one square, g4, still guards both pawns."
      }
     },
     {
@@ -77,7 +77,7 @@
       "club": []
      },
      "notes": {
-      "text": "Now attack the f5 pawn from the other side. White has to move again: no square the king can reach still guards f5, and 54.f6 just gives the pawn away."
+      "text": "Your king attacks the f5 pawn from the other side. White has to move again: no square the king can reach still guards f5, and 54.f6 just gives the pawn away."
      }
     },
     {
@@ -110,11 +110,11 @@
    ]
   },
   {
-   "title": "A waiting move",
+   "title": "Running out of moves",
    "fen": "8/8/2pk4/p5p1/2KP2P1/8/P7/8 w - - 0 35",
    "side": "white",
-   "keyIdea": "When you want the other side to be the one who moves, a spare pawn move hands them the turn.",
-   "text": "From a game played on Lichess. Your king would love to get to c5 or d5, but Black's king on d6 guards both squares. Count the spare pawn moves each side has left.",
+   "keyIdea": "When you want the other side to be the one who moves, a waiting move with a pawn hands them the turn.",
+   "text": "From a game played on Lichess. You are White. Your king would love to get to c5 or d5, but Black's king on d6 guards both squares. Count the waiting moves each side has left with its pawns.",
    "credit": {
     "source": "Lichess puzzle database, puzzle SUhwA",
     "url": "https://lichess.org/training/SUhwA",
@@ -142,7 +142,7 @@
       "club": []
      },
      "notes": {
-      "text": "A waiting move: your king stays put and Black must move. Black's a- and g-pawns are blocked and 35...c5 just loses a pawn, so Black's king has to step back. 35.a3 would not work, because Black answers 35...a4 and it is White who runs out of useful moves."
+      "text": "A waiting move: your king stays put and Black must move. Black's a- and g-pawns are blocked and 35...c5 just loses a pawn, so Black's king has to step back. 35.a3 would not work, because Black answers with the waiting move 35...a4, and it is White who runs out of useful moves."
      }
     },
     {
@@ -196,7 +196,7 @@
       "club": []
      },
      "notes": {
-      "text": "Black's king came back to guard c6, so go after a5 instead. Black cannot defend both pawns, and you win one with a winning endgame."
+      "text": "Black's king came back to guard c6, so your king goes after a5 instead. Black cannot defend both pawns, and you win one of them, with a won endgame."
      }
     }
    ]
@@ -232,7 +232,7 @@
       "club": []
      },
      "notes": {
-      "text": "Your king takes b3 away from White's king, and your pawns already cover a5 and b5, so the king cannot move at all. The a-pawn is stuck behind its own king, which leaves White only one legal move: b4-b5."
+      "text": "Your king covers b3, and your pawns already cover a5 and b5, so White's king cannot move at all. The a-pawn is stuck behind its own king, which leaves White only one legal move: pushing the b-pawn to b5."
      }
     },
     {

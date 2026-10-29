@@ -12,7 +12,7 @@
  "priorKnowledge": [
   "rook-endgame-basics"
  ],
- "intro": "With a rook each and one extra pawn, the result often depends on whether you know two famous positions. The Lucena position is a win: the side with the pawn uses its rook as a bridge that shields its king from checks. The Philidor position is a draw: the defending rook guards its own third rank, and once the pawn advances, it drops back and gives check after check from behind.",
+ "intro": "When each side has a rook and one side has an extra pawn, two famous positions decide a great many games. In the Lucena position the pawn wins: its king walks out from in front of the pawn, and its rook blocks the checks like a bridge. In the Philidor position the defender holds the draw: the rook keeps the enemy king off its third rank, and once the pawn steps onto that rank, the rook moves as far from the enemy king as it can and checks it from behind until the attack runs out.",
  "playOut": {
   "title": "Win the Lucena position",
   "fen": "1K1k4/1P6/8/8/8/8/r7/2R5 w - - 0 1",
@@ -24,45 +24,45 @@
    "title": "Lucena: build a bridge",
    "fen": "1K1k4/1P6/8/8/8/8/r7/2R5 w - - 0 1",
    "side": "white",
-   "keyIdea": "Push the enemy king one more file away, lift your rook to the fourth rank, then walk your king out and block a check with the rook.",
-   "text": "The Lucena position. You are White: your pawn is on b7, but your own king blocks its way on b8, and Black's rook on a2 is ready to check the king as soon as it steps out. Your rook on c1 keeps Black's king off the c-file.",
+   "keyIdea": "Push the enemy king one more file away, move your rook up to the fourth rank, then walk your king out and block a check with the rook.",
+   "text": "The Lucena position, from Wikipedia. You are White: your pawn is on b7, but your own king blocks its way on b8, and Black's rook on a2 waits to check your king the moment it steps out. Your rook on c1 keeps Black's king off the c-file.",
    "url": "https://en.wikipedia.org/wiki/Lucena_position",
    "line": "Rd1+ Ke7 Rd4 Ra1 Kc7 Rc1+ Kb6 Rb1+ Kc6 Rc1+ Kb5 Rb1+ Rb4",
    "notes": [
     {
      "ply": 0,
      "san": "Rd1+",
-     "text": "Check first, to push Black's king one file further away. With the king on e7, your rook on the d-file keeps it out of d7 and d8, so it cannot come back to help."
+     "text": "1.Rd1+ checks first, to push Black's king one file further away. With the king on e7, your rook on the d-file keeps it out of d7 and d8, so it cannot come back to help."
     },
     {
      "ply": 2,
      "san": "Rd4",
-     "text": "This is the move to remember. The rook goes up to the fourth rank, where it seems to do nothing. In a few moves it will step across to b4 and block a check: that is the bridge."
+     "text": "2.Rd4 is the move to remember. The rook moves up to the fourth rank, where for now it seems to do nothing. In a few moves it will step across to b4 and block a check: that is the bridge."
     },
     {
      "ply": 4,
      "san": "Kc7",
-     "text": "Now the king leaves b8, so the pawn's path is open. Black's rook will start checking your king from the c-file and the b-file."
+     "text": "3.Kc7: the king leaves b8, so the pawn's path is open. Black's rook will start checking your king from the c-file and the b-file."
     },
     {
      "ply": 6,
      "san": "Kb6",
-     "text": "Step away from the check, staying next to the pawn on b7 so it stays protected."
+     "text": "4.Kb6 steps away from the check and stays next to the pawn on b7, so the pawn stays protected."
     },
     {
      "ply": 8,
      "san": "Kc6",
-     "text": "Out of the check again, still beside the pawn. Each step brings your king nearer to the fourth rank, where your rook waits."
+     "text": "5.Kc6 steps out of the check again, still beside the pawn. Each step brings your king nearer to the fourth rank, where your rook waits."
     },
     {
      "ply": 10,
      "san": "Kb5",
-     "text": "Now the king stands just above the fourth rank. If Black checks on the b-file again, your rook is ready to block on b4."
+     "text": "6.Kb5: now the king stands just above the fourth rank. If Black checks on the b-file again, your rook is ready to block on b4."
     },
     {
      "ply": 12,
      "san": "Rb4",
-     "text": "The rook blocks the check, and the bridge is built. Black has no more useful checks, and nothing can stop the pawn from queening."
+     "text": "7.Rb4 puts your rook between Black's rook and your king, and the bridge is complete. Black has no useful checks left, and the pawn will promote."
     }
    ]
   },
@@ -70,35 +70,35 @@
    "title": "Philidor: hold the third rank",
    "fen": "8/8/8/8/4pk2/R7/7r/4K3 b - - 0 1",
    "side": "white",
-   "keyIdea": "Keep your rook on your third rank until the pawn steps onto it, then go to the far end of the board and check from behind.",
-   "text": "The Philidor position. You are White and a pawn down. Your king already stands on e1, the square where the pawn wants to queen, and your rook on a3 guards the whole third rank, so Black's king cannot advance. Black moves first.",
+   "keyIdea": "Guard your third rank until the pawn steps onto it; then send the rook far away from the enemy king and check from behind.",
+   "text": "The Philidor position, from Wikipedia. You are White and a pawn down. Your king already stands on e1, the square where the pawn wants to promote, and your rook on a3 guards the whole third rank, so Black's king cannot advance. Black moves first.",
    "url": "https://en.wikipedia.org/wiki/Philidor_position",
    "line": "Rb2 Rc3 Ra2 Rb3 e3 Rb8 Kf3 Rf8+ Ke4 Re8+",
    "notes": [
     {
      "ply": 1,
      "san": "Rc3",
-     "text": "Just wait along the third rank. As long as your rook holds that rank, Black's king cannot step onto it to help the pawn forward."
+     "text": "2.Rc3 just waits along the third rank. As long as your rook holds that rank, Black's king cannot step onto it to help the pawn forward."
     },
     {
      "ply": 3,
      "san": "Rb3",
-     "text": "Keep waiting on the third rank. Black's king cannot get past it, so Black tries pushing the pawn instead, as happens next."
+     "text": "3.Rb3 waits on the third rank again. Black's king cannot get past it, so Black tries pushing the pawn instead, as happens next."
     },
     {
      "ply": 5,
      "san": "Rb8",
-     "text": "Now the pawn on e3 blocks your rook's view along the third rank, so that job is over. Send the rook to the far end of the board. From there it can check Black's king from behind, and the king has no shelter: it cannot hide on e2, next to your king."
+     "text": "Now the pawn on e3 blocks your rook's view along the third rank, so that job is over. 4.Rb8 takes the rook to the eighth rank, as far from Black's king as it can go, ready to check it from behind. Black's king will find no shelter from those checks: it cannot hide on e2, next to your king."
     },
     {
      "ply": 7,
      "san": "Rf8+",
-     "text": "Check at once. Black's king on f3 and rook on a2 now threaten your king on the back rank, and every other move here loses."
+     "text": "4...Kf3 brought Black's king up, and together with the rook on a2 it threatens to mate your king on the back rank, the row your king started on. 5.Rf8+ checks at once, and any other move here loses."
     },
     {
      "ply": 9,
      "san": "Re8+",
-     "text": "Keep checking from behind. Black's king has nowhere to hide near its pawn, and the Engine judges the position a draw."
+     "text": "6.Re8+ keeps checking from behind. Black's king has nowhere to hide near its pawn, and the Engine sees the position as a draw."
     }
    ]
   }

@@ -26,17 +26,17 @@
     {
      "ply": 0,
      "san": "Rxg7",
-     "text": "Trade the rooks. Black has to take back with the king, because any other move allows mate in one. So the king has to come to g7."
+     "text": "42.Rxg7 trades the rooks. Black has to take back with the king, because any other move allows mate in one, so the king has to come to g7."
     },
     {
      "ply": 2,
      "san": "Ne8+",
-     "text": "The knight checks the king on g7 and attacks the bishop on d6 at the same time. The king must move, and the bishop is lost."
+     "text": "43.Ne8+: the knight checks the king on g7 and attacks the bishop on d6 at the same time. The king must move, and the bishop is lost."
     },
     {
      "ply": 4,
      "san": "Nxd6",
-     "text": "Take the bishop. The rook trade brought the king to g7, right where the knight could fork it with the bishop."
+     "text": "44.Nxd6 takes the bishop. The rook trade brought the king to g7, right where the knight could fork it with the bishop."
     }
    ]
   },
@@ -52,17 +52,17 @@
     {
      "ply": 0,
      "san": "Rd8",
-     "text": "The rook offers itself on d8 and attacks the queen. The queen is pinned to the king along the back rank, so it cannot leave that rank, and it has little choice but to take the rook."
+     "text": "32.Rd8: the rook offers itself on d8 and attacks the queen. The queen is pinned to the king along the back rank, the row the king started on, so it cannot leave that row, and it has little choice but to take the rook."
     },
     {
      "ply": 2,
      "san": "Nf7+",
-     "text": "Now the knight checks from f7 and attacks the queen on d8 at the same time: a fork of king and queen."
+     "text": "33.Nf7+: the knight checks from f7 and attacks the queen on d8 at the same time, a fork of king and queen."
     },
     {
      "ply": 4,
      "san": "Nxd8",
-     "text": "Take the queen. You gave a rook and won a queen, because the queen was lured onto d8."
+     "text": "34.Nxd8 takes the queen. You gave a rook and won a queen, because the queen was lured onto d8."
     }
    ]
   },
@@ -71,19 +71,45 @@
    "fen": "4b1k1/pp2p2p/1q2P1p1/3r4/8/1PQ1P3/P5PP/5RK1 w - - 0 26",
    "side": "white",
    "keyIdea": "A sacrifice with check can drag the king onto a square where its own pieces box it in.",
-   "text": "From a game played on Lichess. You are White. Black has just taken your bishop on d5. Your queen's long diagonal ends on h8: where would Black's king have to stand for a queen move there to be mate?",
+   "text": "From a game played on Lichess. You are White. Black has just taken your bishop on d5. Your queen's diagonal from c3 runs all the way to h8: where would Black's king have to stand for a queen move there to be mate?",
    "url": "https://lichess.org/training/qSq7D",
    "line": "Rf8+ Kxf8 Qh8#",
    "notes": [
     {
      "ply": 0,
      "san": "Rf8+",
-     "text": "The rook offers itself with check. The king has only one move: it must take the rook, because g7 and h8 are covered by your queen and f7 by your pawn on e6. Now the king stands on f8."
+     "text": "26.Rf8+: the rook offers itself with check. The king has only one move: it must take the rook, because g7 and h8 are covered by your queen and f7 by your pawn on e6. Then the king stands on f8."
     },
     {
      "ply": 2,
      "san": "Qh8#",
-     "text": "The queen comes to h8 along the long diagonal and gives check. Black's own bishop on e8 and pawn on e7 block the king, your pawn on e6 covers f7, and the queen covers g7 and g8: mate."
+     "text": "27.Qh8#: the queen comes to h8 along the long diagonal and gives check. Black's own bishop on e8 and pawn on e7 block the king, your pawn on e6 covers f7, and the queen covers g7 and g8: mate."
+    }
+   ]
+  },
+  {
+   "title": "Lure the queen into a pin",
+   "fen": "6R1/8/1p1kqrR1/p6P/8/8/P4PK1/8 w - - 4 43",
+   "side": "white",
+   "keyIdea": "A trade can pull the queen onto the same line as its own king, where your next move pins it.",
+   "text": "From a game played on Lichess. You are White, with two rooks against a queen and a rook. Black's rook has just come to f6 to attack your rook on g6. Black's king, queen and rook all stand on the sixth rank, side by side.",
+   "url": "https://lichess.org/training/0Aq3m",
+   "line": "Rxf6 Qxf6 Rg6 Qxg6+ hxg6",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Rxf6",
+     "text": "43.Rxf6 trades rooks on f6. If Black does not take back, Black is simply a rook down, so the queen takes on f6 and lands on the same rank as its king on d6, with nothing in between."
+    },
+    {
+     "ply": 2,
+     "san": "Rg6",
+     "text": "44.Rg6: your other rook comes to g6 and pins the queen. Your rook, Black's queen and Black's king now stand on one line, so the queen cannot step off the sixth rank. Whatever Black does, the queen is lost for a rook."
+    },
+    {
+     "ply": 4,
+     "san": "hxg6",
+     "text": "Black's queen took your rook, and 45.hxg6 takes back. Only kings and pawns are left, and the Engine sees this pawn endgame as a clear win for you: three pawns against two, one of them a passed pawn on g6."
     }
    ]
   }

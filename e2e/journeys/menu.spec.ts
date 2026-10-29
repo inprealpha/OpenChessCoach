@@ -297,7 +297,27 @@ test('on a phone, Back to Settings returns to the place the Player had scrolled 
   await about.scrollIntoViewIfNeeded();
   const y = await paired.evaluate(() => scrollY);
   expect(y).toBeGreaterThan(500);
-  await paired.getByRole('link', { name: 'Player Profile' }).click();
+  // Leave from where the Player is. A click on the header's link would first scroll the page to the
+  // top, as a Player reaching for it would, and that is then the place Back returns to.
+  await paired.evaluate(() => (location.hash = '#/profile'));
+  await expect(paired.getByRole('heading', { name: 'Player Profile', level: 1 })).toBeVisible();
+  await paired.goBack();
+  await expect(paired.getByRole('heading', { name: 'Settings', level: 1 })).toBeVisible();
+  await expect.poll(() => paired.evaluate(() => scrollY)).toBe(y);
+});
+
+test('Back returns to the place the Player left a screen at, even when they left before their last scroll was heard', async ({ paired, app }) => {
+  await paired.setViewportSize({ width: 390, height: 664 });
+  await paired.goto(`${app.url}/#/settings`);
+  await expect(paired.getByRole('region', { name: 'Pairing' })).toBeVisible();
+  // Scroll and open the Player Profile in one go, before the browser delivers the scroll event, as a
+  // slow phone (or a busy CI runner) can: the router must keep the place of the step it leaves.
+  const y = await paired.evaluate(() => {
+    scrollTo(0, 900);
+    history.pushState(null, '', '#/profile');
+    dispatchEvent(new HashChangeEvent('hashchange'));
+    return 900;
+  });
   await expect(paired.getByRole('heading', { name: 'Player Profile', level: 1 })).toBeVisible();
   await paired.goBack();
   await expect(paired.getByRole('heading', { name: 'Settings', level: 1 })).toBeVisible();

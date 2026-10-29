@@ -1,4 +1,5 @@
-// Settings over the protocol: the Coach quality choice, the per-job models it stands for, and Think deeper.
+// Settings over the protocol: the Coach quality choice, the per-job models it stands for, Think deeper
+// and the Review overview.
 import { describe, expect, it } from 'vitest';
 import { client, instance } from './helpers.ts';
 
@@ -70,5 +71,27 @@ describe('Think deeper', () => {
       await expect(c.request('settings.update', { thinkDeeper: value as never })).rejects.toMatchObject({ code: 'bad-request' });
     }
     expect(await c.request('settings.get', {})).toMatchObject({ thinkDeeper: false });
+  });
+});
+
+describe('the Review overview', () => {
+  it('is on on a fresh install, and turning it off or on leaves the models alone', async () => {
+    const c = await client(await instance({ seed: 'empty' }));
+    expect(await c.request('settings.get', {})).toMatchObject({ reviewOverview: true });
+    await c.request('settings.update', { quality: 'best' });
+    expect(await c.request('settings.update', { reviewOverview: false })).toMatchObject({ reviewOverview: false, quality: 'best', models: BEST });
+    expect(await c.request('settings.get', {})).toMatchObject({ reviewOverview: false });
+    // Changing something else leaves it off.
+    expect(await c.request('settings.update', { quality: 'thrifty' })).toMatchObject({ reviewOverview: false, models: THRIFTY });
+    expect(await c.request('settings.update', { reviewOverview: true })).toMatchObject({ reviewOverview: true, models: THRIFTY });
+  });
+
+  it('is on or off, nothing else, and has no model of its own: the presets set the Review moments’ model', async () => {
+    const c = await client(await instance({ seed: 'empty' }));
+    for (const value of ['no', 1, null]) {
+      await expect(c.request('settings.update', { reviewOverview: value as never })).rejects.toMatchObject({ code: 'bad-request' });
+    }
+    await expect(c.request('settings.update', { models: { 'review-overview': 'opus' } as never })).rejects.toMatchObject({ code: 'bad-request' });
+    expect(await c.request('settings.get', {})).toMatchObject({ reviewOverview: true, quality: 'balanced', models: BALANCED });
   });
 });

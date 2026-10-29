@@ -1,11 +1,11 @@
 <script lang="ts">
-  // Pairing (QR code, pairing code and reset), the away-from-home tunnel, Live Coaching, the Coach quality
-  // and, under Advanced, the model per Coach job, and Think deeper.
+  // Pairing (QR code, pairing code and reset), the away-from-home tunnel, Live Coaching, Reviews' overview,
+  // the Coach quality and, under Advanced, the model per Coach job, and Think deeper.
   import {
-    COACH_JOBS,
     COACH_QUALITIES,
-    type CoachJob,
+    MODEL_JOBS,
     type CoachQuality,
+    type ModelJob,
     type PairingInfo,
     type Settings,
     type SettingsPatch,
@@ -15,7 +15,7 @@
   import { router } from '../lib/router.svelte.ts';
 
   /** A card on this screen, where the outcome of a change made in it is shown. */
-  type Card = 'pairing' | 'tunnel' | 'live' | 'quality' | 'deeper';
+  type Card = 'pairing' | 'tunnel' | 'live' | 'review' | 'quality' | 'deeper';
 
   let settings = $state<Settings | null>(null);
   let pairing = $state<PairingInfo | null>(null);
@@ -27,7 +27,8 @@
   const code = $derived(pairing ? pairingCode(pairing.pairUrl) : '');
   const canCopy = typeof navigator !== 'undefined' && Boolean(navigator.clipboard);
 
-  const JOB_NAMES: Record<CoachJob, string> = {
+  // A Review's overview has no model of its own: it runs on the Reviews model.
+  const JOB_NAMES: Record<ModelJob, string> = {
     'review-moment': 'Reviews',
     why: 'Why Questions',
     'lesson-turn': 'Lessons',
@@ -43,11 +44,11 @@
     },
     balanced: {
       name: 'Balanced (recommended)',
-      cost: 'Sonnet for Reviews, Why Questions and Lessons; Haiku for Hints and Live Coaching. A moderate share of your Claude limits.',
+      cost: 'Sonnet for Reviews (the overview and the key moments), Why Questions and Lessons; Haiku for Hints and Live Coaching. A moderate share of your Claude limits.',
     },
     best: {
       name: 'Best',
-      cost: 'Opus for Reviews, Why Questions and Lessons; Haiku for Hints and Live Coaching, which must stay quick. Uses your Claude limits fastest.',
+      cost: 'Opus for Reviews (the overview and the key moments), Why Questions and Lessons; Haiku for Hints and Live Coaching, which must stay quick. Uses your Claude limits fastest.',
     },
   };
 
@@ -195,6 +196,23 @@
       {@render said('live')}
     </section>
 
+    <section class="card" aria-label="Reviews">
+      <h2>Reviews</h2>
+      <label class="check">
+        <input
+          type="checkbox"
+          checked={settings.reviewOverview}
+          onchange={(e) => update('review', { reviewOverview: (e.currentTarget as HTMLInputElement).checked })}
+        />
+        Open each Review with the Coach’s overview of the whole game
+      </label>
+      <p class="muted small">
+        How you and your opponent played, and the moves that stood out, before the key moments. Turned off, a Review uses one Coach
+        call less. Reviews you already have stay as they are.
+      </p>
+      {@render said('review')}
+    </section>
+
     <fieldset class="card" aria-label="Coach quality">
       <legend>Coach quality</legend>
       <p class="muted small">A faster model saves your Claude limits; a stronger one explains better.</p>
@@ -220,8 +238,8 @@
 
       <details class="advanced">
         <summary>Advanced</summary>
-        <p class="muted small">The model for each Coach job.</p>
-        {#each COACH_JOBS as job (job)}
+        <p class="muted small">The model for each Coach job. A Review’s overview uses the model for Reviews.</p>
+        {#each MODEL_JOBS as job (job)}
           <label class="model">
             <span>{JOB_NAMES[job]}</span>
             <select

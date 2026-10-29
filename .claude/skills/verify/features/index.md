@@ -19,12 +19,13 @@ npm run build -w @chess-coach/web && npm run test:journeys
 | Lesson (the four tracks, the Player's next Lesson) | Main menu → Learn → Lessons, or first run's `Start with the Lessons` | `lesson.spec.ts` | [lesson.md](lesson.md) |
 | Puzzle | Main menu → Learn → Puzzles, or the end of a Lesson | `puzzles.spec.ts` | [puzzles.md](puzzles.md) |
 | Imported Game | Main menu → Review your games, Import your games or Import more | `imported-game.spec.ts` | [imported-game.md](imported-game.md) |
-| Review | Main menu → Review your games → Review, or the end of an Engine Game | `imported-game.spec.ts`, `first-run.spec.ts` | [review.md](review.md) |
+| Review (the overview, then the key moments) | Main menu → Review your games → Review, or the end of an Engine Game | `imported-game.spec.ts`, `first-run.spec.ts` | [review.md](review.md) |
 | Engine Game, with Hints and Live Coaching | Main menu → Play a game | `engine-game.spec.ts` | [engine-game.md](engine-game.md) |
 | Offline mode | any screen while the desktop is unreachable | `offline.spec.ts` | [offline-mode.md](offline-mode.md) |
 
 The seed (`packages/backend/src/verify/seed.ts`): `default` is a casual-level Player with Goals, a
 paired phone and one Imported Game (game 1, an Italian Game, the Player as White, with four key moments for White:
-11. Bxf7+ and 12. Bg5 graded Mistake, 18. d5 and 24. Bxc5 graded Inaccuracy). `empty` is a fresh
+11. Bxf7+ and 12. Bg5 graded Mistake, 18. d5 and 24. Bxc5 graded Inaccuracy, and one other standout move, Black's
+9… d5, the only good move there; the fake Coach has a recorded overview of the game). `empty` is a fresh
 install (with first run done, `#/menu` shows the menu with no games). `no-phone` is `default`
 without the phone, so the main menu asks the Player to pair one.

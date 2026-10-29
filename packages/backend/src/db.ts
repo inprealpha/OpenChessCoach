@@ -182,6 +182,11 @@ const MIGRATIONS: string[] = [
     blitz INTEGER
   );
   `,
+  // A Review's overview of the whole game (its text and the moves it names), as JSON. Reviews saved
+  // before there was one, or made with it turned off in Settings, have none.
+  `
+  ALTER TABLE reviews ADD COLUMN overview TEXT;
+  `,
 ];
 
 /** Tables `coachctl db get` may read. */

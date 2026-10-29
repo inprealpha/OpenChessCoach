@@ -7,15 +7,17 @@ import { describe, expect, it, onTestFinished } from 'vitest';
 import WebSocket from 'ws';
 import { gradeGame } from '@chess-coach/shared/analysis';
 import { INITIAL_FEN } from '@chess-coach/shared/chess';
-import { GAMES_PAGE_SIZE, PROTOCOL_VERSION, type EngineGameRecord } from '@chess-coach/shared/protocol';
+import { BRIEF_BUDGET, type Brief } from '@chess-coach/shared/coach/brief';
+import { GAMES_PAGE_SIZE, PROTOCOL_VERSION, type EngineGameRecord, type ReviewPart } from '@chess-coach/shared/protocol';
+import { FakeClock } from '../src/clock.ts';
 import { openDb } from '../src/db.ts';
 import { createNodeEngine } from '../src/engine/node-engine.ts';
 import { listGames } from '../src/games.ts';
-import { reviewInProgress } from '../src/reviews.ts';
+import { getReview, reviewInProgress } from '../src/reviews.ts';
 import { CHESSCOM, fetchGamesSince } from '../src/imports/sites.ts';
 import { recordedFetch } from '../src/verify/recorded-sites.ts';
 import { VERIFY_ENGINE } from '../src/verify/instance.ts';
-import { SEED_GAME_PGN } from '../src/verify/seed.ts';
+import { seed, SEED_GAME_PGN } from '../src/verify/seed.ts';
 import { client, instance, rows } from './helpers.ts';
 
 /** A finished client frame (1 text, 8 close), masked as clients must, with a zero key so the payload reads as sent. */
@@ -470,7 +472,7 @@ describe('importing a PGN', () => {
     onTestFinished(() => rmSync(dir, { recursive: true, force: true }));
     // A database as it was before: no date_known column, the import time stored as the date.
     const old = openDb(dir);
-    old.exec('ALTER TABLE games DROP COLUMN date_known; UPDATE schema_version SET version = 1;');
+    old.exec('ALTER TABLE games DROP COLUMN date_known; ALTER TABLE reviews DROP COLUMN overview; UPDATE schema_version SET version = 1;');
     const put = old.prepare(
       `INSERT INTO games (kind, source, source_id, pgn, start_fen, moves, white, black, player_side, result, opening, played_at, imported_at)
        VALUES ('imported', ?, ?, ?, ?, 'e2e4 e7e5', 'a', 'b', 'white', '1-0', 'x', ?, '2026-01-01T12:00:00.000Z')`,
@@ -493,7 +495,7 @@ describe('importing a PGN', () => {
     const dir = mkdtempSync(join(tmpdir(), 'chess-coach-dates-'));
     onTestFinished(() => rmSync(dir, { recursive: true, force: true }));
     const old = openDb(dir);
-    old.exec('UPDATE schema_version SET version = 2;');
+    old.exec('ALTER TABLE reviews DROP COLUMN overview; UPDATE schema_version SET version = 2;');
     const put = old.prepare(
       `INSERT INTO games (kind, source, source_id, pgn, start_fen, moves, white, black, player_side, result, opening, played_at, date_known, imported_at)
        VALUES ('imported', 'pgn', ?, ?, ?, 'e2e4 e7e5', 'a', 'b', 'white', '1-0', 'x', ?, 1, '2026-01-01T12:00:00.000Z')`,
@@ -560,16 +562,18 @@ describe('Reviews', () => {
     const app = await instance();
     const c = await client(app);
     const game = await c.request('games.get', { gameId: 1 });
-    const parts = new Set<number>();
+    const parts = new Set<ReviewPart>();
     const progress: number[] = [];
     const review = await c.request('review.start', { gameId: 1 }, (_t, part) => parts.add(part ?? -1), (done) => progress.push(done));
     // The desktop's Engine graded every position, and reported each one.
     expect(progress).toEqual(Array.from({ length: game.moves.length + 1 }, (_, i) => i + 1));
     expect(review.moments.map((m) => `${m.ply}:${m.san}:${m.grade}`)).toEqual(['21:Bxf7+:Mistake', '23:Bg5:Mistake', '35:d5:Inaccuracy', '47:Bxc5:Inaccuracy']);
-    expect([...parts]).toEqual([0, 1, 2, 3]);
+    // The overview streamed first, then each key moment.
+    expect([...parts]).toEqual(['overview', 0, 1, 2, 3]);
     for (const m of review.moments) expect(m.explanation).toContain(m.san);
-    const calls = rows(app, "SELECT * FROM coach_calls WHERE job = 'review-moment'").length;
-    expect(calls).toBe(4);
+    expect(rows(app, "SELECT * FROM coach_calls WHERE job = 'review-moment'")).toHaveLength(4);
+    const calls = rows(app, 'SELECT * FROM coach_calls').length;
+    expect(calls).toBe(5);
 
     const again = await c.request('review.start', { gameId: 1 });
     const reread = await c.request('review.get', { gameId: 1 });
@@ -581,6 +585,177 @@ describe('Reviews', () => {
     expect(Object.values(profile.gradeCounts)[0]).toMatchObject({ Mistake: 2, Inaccuracy: 2 });
   });
 
+  it('opens with the Coach’s overview of the whole game, from the fake Coach’s recorded reply, saved with the Review', async () => {
+    const app = await instance();
+    const c = await client(app);
+    const review = await c.request('review.start', { gameId: 1 });
+    // The recorded reply for game 1 (verify/recordings/coach.json), and the game's moves it names, in game order.
+    expect(review.overview?.text).toMatch(/^Your opening went well, and your opponent had to find 9… d5 there/);
+    expect(review.overview?.moves.map((m) => `${m.label} ${m.side} ${m.grade}`)).toEqual([
+      '9… d5 black Best',
+      '11. Bxf7+ white Mistake',
+      '12. Bg5 white Mistake',
+      '18. d5 white Inaccuracy',
+      '24. Bxc5 white Inaccuracy',
+    ]);
+    expect(review.overview?.moves.map((m) => m.ply)).toEqual([18, 21, 23, 35, 47]);
+
+    // One overview call, on the Review moments' model, before any key moment.
+    const calls = rows<{ job: string; model: string; brief: string; stripped: string }>(app, 'SELECT job, model, brief, stripped FROM coach_calls ORDER BY id');
+    expect(calls.map((r) => r.job)).toEqual(['review-overview', 'review-moment', 'review-moment', 'review-moment', 'review-moment']);
+    expect(calls[0]?.model).toBe('sonnet');
+    // Its recorded brief: Move Grade counts for both sides, the key moments and the standout moves, within its budget (ADR 0004).
+    const brief = JSON.parse(calls[0]?.brief as string) as Brief;
+    expect(calls[0]?.brief.length).toBeLessThanOrEqual(BRIEF_BUDGET);
+    expect(brief.game).toMatchObject({
+      grades: { player: 'Best 10, Good 10, Inaccuracy 2, Mistake 2, Blunder 0', opponent: 'Best 14, Good 9, Inaccuracy 1, Mistake 0, Blunder 0' },
+      standouts: [{ move: '9… d5', by: 'black', grade: 'Best', only: true }],
+    });
+    expect(brief.game?.moments.map((m) => m.move)).toEqual(['11. Bxf7+', '12. Bg5', '18. d5', '24. Bxc5']);
+    // Every move in the recorded reply came from the brief: the guard stripped nothing.
+    expect(JSON.parse(calls[0]?.stripped as string)).toEqual([]);
+    // The Review's one Player Profile note is the overview's, a pattern across the whole game.
+    expect(rows<{ text: string }>(app, 'SELECT text FROM coach_notes').map((n) => n.text)).toEqual(['Lets one Mistake follow another in the middlegame.']);
+    expect(rows<{ allowNote: boolean }>(app, "SELECT json_extract(brief, '$.allowNote') AS allowNote FROM coach_calls WHERE job = 'review-moment'").map((r) => r.allowNote)).toEqual([0, 0, 0, 0]);
+
+    // Reopened, the overview is there with no Coach call.
+    const reread = await c.request('review.get', { gameId: 1 });
+    expect(reread.review?.overview).toEqual(review.overview);
+    expect(await c.request('review.start', { gameId: 1 })).toEqual(review);
+    expect(rows(app, 'SELECT * FROM coach_calls')).toHaveLength(5);
+  });
+
+  it('gives game 1 reviewed as Black an overview for Black: the recording is White’s alone', async () => {
+    const app = await instance();
+    const c = await client(app);
+    await c.request('games.setSide', { gameId: 1, playerSide: 'black' });
+    const review = await c.request('review.start', { gameId: 1 });
+    // The fake Coach's template, from the brief for Black: Black's Move Grades are the Player's.
+    expect(review.overview?.text).toMatch(/^Your Move Grades: Best 14, Good 9, Inaccuracy 1, Mistake 0, Blunder 0\./);
+    expect(review.overview?.moves.map((m) => m.label)).toEqual(['9… d5', '11. Bxf7+', '12. Bg5', '16… Nc6']);
+    const [call] = rows<{ stripped: string }>(app, "SELECT stripped FROM coach_calls WHERE job = 'review-overview'");
+    expect(JSON.parse(call?.stripped as string)).toEqual([]);
+  });
+
+  it('saves the overview’s Player Profile note with the Review, so a Review that fails leaves none', async () => {
+    const app = await instance();
+    const c = await client(app);
+    // The overview writes a note, then the Coach can't be reached for the first key moment.
+    app.coach.script({ kind: 'reply', reply: { note: 'Loses the thread after the opening.' } });
+    app.coach.script({ kind: 'unavailable' });
+    await expect(c.request('review.start', { gameId: 1 })).rejects.toMatchObject({ code: 'coach-unavailable' });
+    expect(rows(app, 'SELECT * FROM reviews')).toHaveLength(0);
+    expect(rows(app, 'SELECT * FROM coach_notes')).toEqual([]);
+    // Started again, the Review saves one note: the new overview's.
+    app.coach.script({ kind: 'reply', reply: { note: 'Lets the middlegame slip after a good opening.' } });
+    await c.request('review.start', { gameId: 1 });
+    expect(rows<{ text: string }>(app, 'SELECT text FROM coach_notes').map((n) => n.text)).toEqual(['Lets the middlegame slip after a good opening.']);
+  });
+
+  it('keeps the recorded overview brief of a long game within its budget (ADR 0004)', async () => {
+    const app = await instance({ seed: 'empty' });
+    const c = await client(app);
+    // The longest golden game: 67 plies of a real Lichess game.
+    const pgn = PGNS.find((p) => p.includes('lichess.org/fzjtms6a')) as string;
+    const { game } = await c.request('games.importPgn', { pgn, playerSide: 'white' });
+    const review = await c.request('review.start', { gameId: game.id });
+    expect(review.moves).toHaveLength(67);
+    const [call] = rows<{ brief: string }>(app, "SELECT brief FROM coach_calls WHERE job = 'review-overview'");
+    expect(call?.brief.length).toBeLessThanOrEqual(BRIEF_BUDGET);
+    const brief = JSON.parse(call?.brief as string) as Brief;
+    expect(brief.game?.moments.length).toBeGreaterThan(0);
+    expect(brief.game?.standouts.length).toBeGreaterThan(0);
+  });
+
+  it('lets the last key moment write the note when the overview’s note is one the Player Profile has', async () => {
+    const app = await instance();
+    const c = await client(app);
+    await c.request('review.start', { gameId: 1 });
+    // A second game, whose overview repeats the note game 1's overview wrote.
+    const pgn = PGNS.find((p) => p.includes('lichess.org/fzjtms6a')) as string;
+    const { game } = await c.request('games.importPgn', { pgn, playerSide: 'white' });
+    app.coach.script({ kind: 'reply', reply: { note: 'Lets one Mistake follow another in the middlegame.' } });
+    await c.request('review.start', { gameId: game.id });
+    const lastMoment = rows<{ allowNote: number }>(app, "SELECT json_extract(brief, '$.allowNote') AS allowNote FROM coach_calls WHERE job = 'review-moment' ORDER BY id DESC LIMIT 1");
+    expect(lastMoment[0]?.allowNote).toBe(1);
+    // The fake Coach's key moment writes "Worked on a Review." when it may.
+    expect(rows<{ text: string }>(app, 'SELECT text FROM coach_notes ORDER BY id').map((n) => n.text)).toEqual([
+      'Lets one Mistake follow another in the middlegame.',
+      'Worked on a Review.',
+    ]);
+  });
+
+  it('makes no overview of a game with no moves', async () => {
+    const app = await instance({ seed: 'empty' });
+    const c = await client(app);
+    const { game } = await c.request('games.saveEngineGame', {
+      game: { clientId: 'resigned-at-once', playerSide: 'white', strength: 2, moves: [], result: '0-1', termination: 'resignation', startedAt: '2026-01-01T10:00:00.000Z', finishedAt: '2026-01-01T10:00:05.000Z' },
+    });
+    const review = await c.request('review.start', { gameId: game.id });
+    expect(review).toMatchObject({ overview: null, moments: [] });
+    expect(rows(app, 'SELECT * FROM coach_calls')).toEqual([]);
+  });
+
+  it('runs the overview on the model set for Review moments, whatever it is', async () => {
+    const app = await instance();
+    const c = await client(app);
+    await c.request('settings.update', { models: { 'review-moment': 'opus' } });
+    await c.request('review.start', { gameId: 1 });
+    expect(rows<{ job: string; model: string }>(app, 'SELECT DISTINCT job, model FROM coach_calls')).toEqual([
+      { job: 'review-overview', model: 'opus' },
+      { job: 'review-moment', model: 'opus' },
+    ]);
+  });
+
+  it('strips any move the overview names that its brief doesn’t list, and draws nothing', async () => {
+    const app = await instance();
+    const c = await client(app);
+    app.coach.script({
+      kind: 'reply',
+      reply: { text: 'It went wrong with 11. Bxf7+, not 1. e4.', moves: ['c4f7', 'e2e4'], arrows: [{ uci: 'c4f7', brush: 'red' }], highlights: ['f7'], note: null },
+    });
+    const review = await c.request('review.start', { gameId: 1 });
+    expect(review.overview?.moves.map((m) => m.label)).toEqual(['11. Bxf7+']);
+    const [call] = rows<{ stripped: string }>(app, "SELECT stripped FROM coach_calls WHERE job = 'review-overview'");
+    expect(JSON.parse(call?.stripped as string)).toEqual(["move e2e4 is not in the Engine's output", 'arrow c4f7: an overview draws no arrows']);
+    // With no note from the overview, the last key moment may still add the Review's one note.
+    expect(rows<{ allowNote: number }>(app, "SELECT json_extract(brief, '$.allowNote') AS allowNote FROM coach_calls WHERE job = 'review-moment'").map((r) => r.allowNote)).toEqual([0, 0, 0, 1]);
+  });
+
+  it('with the overview turned off in Settings, makes the key moments only, with no overview call', async () => {
+    const app = await instance();
+    const c = await client(app);
+    expect(await c.request('settings.get', {})).toMatchObject({ reviewOverview: true });
+    expect(await c.request('settings.update', { reviewOverview: false })).toMatchObject({ reviewOverview: false });
+    const parts = new Set<ReviewPart>();
+    const review = await c.request('review.start', { gameId: 1 }, (_t, part) => parts.add(part ?? -1));
+    expect(review.overview).toBeNull();
+    expect(review.moments).toHaveLength(4);
+    expect([...parts]).toEqual([0, 1, 2, 3]);
+    // The Coach call log has the four key moments and nothing else.
+    expect(rows<{ job: string }>(app, 'SELECT job FROM coach_calls').map((r) => r.job)).toEqual(['review-moment', 'review-moment', 'review-moment', 'review-moment']);
+    // Turned on again, a Review saved without an overview stays that way.
+    await c.request('settings.update', { reviewOverview: true });
+    expect((await c.request('review.get', { gameId: 1 })).review?.overview).toBeNull();
+    expect((await c.request('review.start', { gameId: 1 })).overview).toBeNull();
+    expect(rows(app, 'SELECT * FROM coach_calls')).toHaveLength(4);
+  });
+
+  it('reads a Review saved before there were overviews as one with no overview', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'chess-coach-overview-'));
+    onTestFinished(() => rmSync(dir, { recursive: true, force: true }));
+    // A database as it was before: no overview column, and a saved Review of game 1.
+    const old = openDb(dir);
+    seed(old, new FakeClock(), 'default');
+    old.exec('ALTER TABLE reviews DROP COLUMN overview; UPDATE schema_version SET version = version - 1;');
+    old.prepare("INSERT INTO reviews (game_id, created_at, moments) VALUES (1, '2026-01-01T12:00:00.000Z', '[]')").run();
+    old.close();
+
+    const db = openDb(dir);
+    onTestFinished(() => db.close());
+    expect(getReview(db, 1)).toMatchObject({ gameId: 1, overview: null, moments: [] });
+  });
+
   it('Reviews the sample game without counting it in the Player Profile', async () => {
     const app = await instance({ seed: 'empty' });
     const c = await client(app);
@@ -589,8 +764,8 @@ describe('Reviews', () => {
     expect(duplicate).toBe(false);
     expect(await c.request('games.importSample', {})).toMatchObject({ game: { id: game.id }, duplicate: true });
 
-    // Every Coach reply offers a note, as a real Coach might.
-    for (let i = 0; i < 4; i++) app.coach.script({ kind: 'reply', reply: { note: 'Gives up the bishop for a pawn too early.' } });
+    // Every Coach reply offers a note, as a real Coach might: the overview's and each key moment's.
+    for (let i = 0; i < 5; i++) app.coach.script({ kind: 'reply', reply: { note: 'Gives up the bishop for a pawn too early.' } });
     const review = await c.request('review.start', { gameId: game.id });
     expect(review.moments.map((m) => `${m.ply}:${m.san}:${m.grade}`)).toEqual(['21:Bxf7+:Mistake', '23:Bg5:Mistake', '35:d5:Inaccuracy', '47:Bxc5:Inaccuracy']);
     // The Review works, but the sample is not the Player's game: no Move Grade counts, no Coach note.
@@ -661,13 +836,13 @@ describe('Reviews', () => {
     // Right away, as the app's retry after a blip does: the Review is still being made.
     const again = await client(app);
     const progress: number[] = [];
-    const parts = new Set<number>();
+    const parts = new Set<ReviewPart>();
     const review = await again.request('review.start', { gameId: 1 }, (_t, part) => parts.add(part ?? -1), (done) => progress.push(done));
     expect(review.moments).toHaveLength(4);
-    // It joined: where the Review had got to first, then the rest, and every explanation the Coach wrote.
+    // It joined: where the Review had got to first, then the rest, and the overview and every explanation the Coach wrote.
     expect(progress[0]).toBeGreaterThan(2);
     expect(progress.at(-1)).toBe(49);
-    expect([...parts]).toEqual([0, 1, 2, 3]);
+    expect([...parts]).toEqual(['overview', 0, 1, 2, 3]);
     expect(rows(app, 'SELECT * FROM reviews')).toHaveLength(1);
     expect(rows(app, "SELECT * FROM coach_calls WHERE job = 'review-moment'")).toHaveLength(4);
   });

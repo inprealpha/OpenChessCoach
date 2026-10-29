@@ -4,7 +4,7 @@ import { assertBriefWithinBudget, BriefTooLargeError, buildBrief, type Brief } f
 import { ENGINE_TOOL_JOBS } from '@chess-coach/shared/coach/engine-tool';
 import { guardReply } from '@chess-coach/shared/coach/guard';
 import type { CoachAsk, CoachReply } from '@chess-coach/shared/coach/types';
-import type { CoachStatus } from '@chess-coach/shared/protocol';
+import { modelJobOf, type CoachStatus } from '@chess-coach/shared/protocol';
 import { type Clock, iso } from '../clock.ts';
 import type { Db } from '../db.ts';
 import { AppError } from '../errors.ts';
@@ -30,6 +30,11 @@ export interface AskOptions {
   deadlineMs?: number;
   /** With the Engine, answer once more from the brief alone when the deadline stops the call. */
   retryWithoutEngine?: boolean;
+  /**
+   * Return the reply's Player Profile note without saving it, for a caller that saves it later: a
+   * Review saves its one note together with the Review, so a Review that fails leaves none.
+   */
+  holdNote?: boolean;
 }
 
 const MAX_THREADS = 200;
@@ -83,7 +88,7 @@ export class CoachService {
 
     const brief = this.brief(ask);
     const settings = getSettings(this.db);
-    const model = settings.models[ask.job];
+    const model = settings.models[modelJobOf(ask.job)];
     const { engine, signal } = options;
     // The tool's Engine searches end with the call: when the client cancels, and once the Coach is done or stopped.
     const stop = new AbortController();
@@ -133,7 +138,7 @@ export class CoachService {
     // Moves the Engine's answers gave the Coach count as Engine output; a move it made up is still stripped.
     const guarded = guardReply(brief, raw, tool?.moves);
     this.log(ask, model, brief, raw, guarded.stripped, tool?.calls);
-    const note = guarded.note ? addCoachNote(this.db, this.clock, guarded.note) : null;
+    const note = guarded.note && !options.holdNote ? addCoachNote(this.db, this.clock, guarded.note) : guarded.note;
     if (ask.threadId) this.remember(ask.threadId, ask.question, raw.text);
     return {
       text: raw.text,

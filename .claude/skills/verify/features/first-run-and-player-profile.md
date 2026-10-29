@@ -45,7 +45,10 @@ in the top right of every screen.
   per-job models, and when they match no preset a checked, disabled `Custom` radio shows. Choosing a
   preset writes every job's model. `Advanced` (a disclosure) holds one select per job, `Model for
   <Reviews | Why Questions | Lessons | Hints | Live Coaching>`, with options `Fastest, latest Haiku`,
-  `Balanced, latest Sonnet` and `Strongest, latest Opus` (values `haiku`, `sonnet`, `opus`).
+  `Balanced, latest Sonnet` and `Strongest, latest Opus` (values `haiku`, `sonnet`, `opus`). A
+  Review's overview has no select of its own: it runs on the model for Reviews in every preset.
+- Settings → the region `Reviews`: the checkbox `Open each Review with the Coach’s overview of the
+  whole game`, on by default (see `review.md`).
 
 ## Drive
 
@@ -59,7 +62,8 @@ Coach quality, on a `default` run: `#/settings`, check `Best`, then `$C db get s
 
 - `profile` row: `onboarded: 1`, the chosen `level`, `rating: 1612` for Lichess `CoachVerify`
   (1488 for chess.com `coachverify`), and the Goals.
-- After a Review, `grade_counts` has rows for the opening and `coach_notes` may have one note; at
+- After a Review, `grade_counts` has rows for the opening and `coach_notes` may have one note (the
+  overview's, or with the overview off the last key moment's); at
   390px the Profile has no horizontal scroll.
 - After `NoSuchPlayer`, the `profile` row still has `onboarded: 0`; with Site set to None, Skip
   reaches the main menu.

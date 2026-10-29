@@ -200,6 +200,8 @@ describe('Think deeper', () => {
     const app = await instance();
     const c = await client(app);
     await c.request('settings.update', { thinkDeeper: true });
+    // The overview comes first and never asks the Engine: its reply as recorded, then the first moment's deadline.
+    app.coach.script({ kind: 'reply', reply: {} });
     app.coach.script({ kind: 'deadline' });
     const review = await c.request('review.start', { gameId: 1 });
     for (const m of review.moments) expect(m.explanation).not.toBe('');

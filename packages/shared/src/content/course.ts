@@ -21,7 +21,7 @@ export interface CatalogueItem {
 }
 
 export const TRACK_NAMES: Record<Track, { name: string; text: string }> = {
-  themes: { name: 'Themes', text: 'Patterns that win material or give mate, such as forks and pins.' },
+  themes: { name: 'Themes', text: 'Patterns that win material, give mate or save a game, such as forks and pins.' },
   endgames: { name: 'Endgames', text: 'Positions with few pieces left, and how to win or save them.' },
   openings: { name: 'Openings', text: 'How to start a game, and openings for White and for Black.' },
   thinking: { name: 'How to think during a game', text: 'What to check before every move, and how to make a plan.' },

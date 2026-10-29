@@ -652,6 +652,39 @@ describe('Reviews', () => {
     expect(rows<{ text: string }>(app, 'SELECT text FROM coach_notes').map((n) => n.text)).toEqual(['Lets the middlegame slip after a good opening.']);
   });
 
+  it('keeps the recorded overview brief of a long game within its budget (ADR 0004)', async () => {
+    const app = await instance({ seed: 'empty' });
+    const c = await client(app);
+    // The longest golden game: 67 plies of a real Lichess game.
+    const pgn = PGNS.find((p) => p.includes('lichess.org/fzjtms6a')) as string;
+    const { game } = await c.request('games.importPgn', { pgn, playerSide: 'white' });
+    const review = await c.request('review.start', { gameId: game.id });
+    expect(review.moves).toHaveLength(67);
+    const [call] = rows<{ brief: string }>(app, "SELECT brief FROM coach_calls WHERE job = 'review-overview'");
+    expect(call?.brief.length).toBeLessThanOrEqual(BRIEF_BUDGET);
+    const brief = JSON.parse(call?.brief as string) as Brief;
+    expect(brief.game?.moments.length).toBeGreaterThan(0);
+    expect(brief.game?.standouts.length).toBeGreaterThan(0);
+  });
+
+  it('lets the last key moment write the note when the overview’s note is one the Player Profile has', async () => {
+    const app = await instance();
+    const c = await client(app);
+    await c.request('review.start', { gameId: 1 });
+    // A second game, whose overview repeats the note game 1's overview wrote.
+    const pgn = PGNS.find((p) => p.includes('lichess.org/fzjtms6a')) as string;
+    const { game } = await c.request('games.importPgn', { pgn, playerSide: 'white' });
+    app.coach.script({ kind: 'reply', reply: { note: 'Lets one Mistake follow another in the middlegame.' } });
+    await c.request('review.start', { gameId: game.id });
+    const lastMoment = rows<{ allowNote: number }>(app, "SELECT json_extract(brief, '$.allowNote') AS allowNote FROM coach_calls WHERE job = 'review-moment' ORDER BY id DESC LIMIT 1");
+    expect(lastMoment[0]?.allowNote).toBe(1);
+    // The fake Coach's key moment writes "Worked on a Review." when it may.
+    expect(rows<{ text: string }>(app, 'SELECT text FROM coach_notes ORDER BY id').map((n) => n.text)).toEqual([
+      'Lets one Mistake follow another in the middlegame.',
+      'Worked on a Review.',
+    ]);
+  });
+
   it('makes no overview of a game with no moves', async () => {
     const app = await instance({ seed: 'empty' });
     const c = await client(app);

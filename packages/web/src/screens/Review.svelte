@@ -333,7 +333,7 @@
             <!-- The overview comes first when Settings have it on: the desktop says so as it starts on it. -->
             <p>{run.overviewFirst && !run.streaming.length ? 'The Coach is writing an overview of the game…' : 'The Coach is explaining the key moments…'}</p>
             {#if run.overview}<p class="stream" data-testid="overview-stream">{run.overview}</p>{/if}
-            {#each run.streaming as text, i (i)}<p class="stream">{text}</p>{/each}
+            {#each run.streaming as text, i (i)}{#if text}<p class="stream">{text}</p>{/if}{/each}
           </div>
         {/if}
 

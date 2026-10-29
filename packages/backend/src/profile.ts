@@ -90,16 +90,21 @@ export function updateProfile(db: Db, patch: ProfilePatch): PlayerProfile {
   return getProfile(db);
 }
 
+/** Whether a Coach note would be new: no equivalent one is saved yet. */
+export function isNewNote(db: Db, text: string): boolean {
+  const line = text.replace(/\s+/g, ' ').trim().slice(0, NOTE_MAX_LENGTH);
+  if (!line) return false;
+  const key = noteKey(line);
+  return !all<{ text: string }>(db, 'SELECT text FROM coach_notes').some((n) => noteKey(n.text) === key);
+}
+
 /**
  * Saves a terse Coach note unless an equivalent one is already there. When the cap is
  * reached, the oldest notes are dropped first. Returns the saved text, or null.
  */
 export function addCoachNote(db: Db, clock: Clock, text: string): string | null {
   const line = text.replace(/\s+/g, ' ').trim().slice(0, NOTE_MAX_LENGTH);
-  if (!line) return null;
-  const key = noteKey(line);
-  const existing = all<{ text: string }>(db, 'SELECT text FROM coach_notes');
-  if (existing.some((n) => noteKey(n.text) === key)) return null;
+  if (!isNewNote(db, line)) return null;
   transaction(db, () => {
     db.prepare('INSERT INTO coach_notes (text, created_at) VALUES (?, ?)').run(line, iso(clock));
     db.prepare(

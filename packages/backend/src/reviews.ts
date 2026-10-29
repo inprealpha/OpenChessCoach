@@ -12,7 +12,7 @@ import { type Clock, iso } from './clock.ts';
 import { all, one, transaction, type Db } from './db.ts';
 import { getGame } from './games.ts';
 import { THINK_DEEPER_DEADLINE_MS } from './coach/real.ts';
-import { addCoachNote, addGradeCounts, removeGradeCounts } from './profile.ts';
+import { addCoachNote, addGradeCounts, isNewNote, removeGradeCounts } from './profile.ts';
 import { getSettings } from './settings.ts';
 import { guessTempting, withTempting } from './tempting-moves/ask.ts';
 import { playerMaiaRating } from './tempting-moves/rating.ts';
@@ -202,12 +202,16 @@ async function makeReview(
       { holdNote: true, ...(signal ? { signal } : {}) },
     );
     overview = { text: reply.text, moves: namedMoves(facts, reply.text, reply.moves) };
-    note = reply.note;
+    // A note the Player Profile already has is no note: the last key moment may still write one.
+    note = reply.note && isNewNote(db, reply.note) ? reply.note : null;
   }
   const out: KeyMoment[] = [];
   const started = clock.now().getTime();
   const rating = playerMaiaRating(db);
   for (const [index, m] of moments.entries()) {
+    // Says at once that the Coach is on this key moment, before its first words: the threat, the
+    // tempting moves and, with Think deeper on, the Engine's answers can take a while.
+    delta('', index);
     // The moves many players would reach for at the moment (ADR 0011), from the game's own moves.
     const guess = tempting && guessTempting('review-moment', { service: tempting, fen: m.fenBefore, playerSide: game.playerSide, rating, history: { startFen: game.startFen, moves: game.moves.slice(0, m.ply - 1) }, ...(signal ? { signal } : {}) });
     // What the opponent threatened before the move: the brief keeps it only when the Engine's best

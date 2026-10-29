@@ -4,7 +4,8 @@
   // At each of the Player's decisions the Coach asks "what are your options here?", the Engine grades
   // the chosen move, the app shows how often players at the Player's level choose each move (openings
   // only), and the Coach explains. One Coach call per decision. Every Coach call carries the Lesson's
-  // goal and the part's key idea; the Player sees a key idea only once its part is played.
+  // learning goal and the part's key idea; the Player sees a key idea only once its part is played.
+  // "How moves are written" explains the move notation the Lesson's texts use, for a beginner.
   import { candidatesFrom, type GradedMove } from '@chess-coach/shared/analysis';
   import { playUci, SIDE_NAMES } from '@chess-coach/shared/chess';
   import type { CoachRequest } from '@chess-coach/shared/coach/types';
@@ -86,7 +87,7 @@
   /** Popularity at the Player's band, when the games database has enough games for this position. */
   const popular = $derived(node ? node.popular[band] : []);
   const poorChoice = $derived(result !== null && ['Inaccuracy', 'Mistake', 'Blunder'].includes(result.grade));
-  const thinkingExample = $derived(lesson ? (THINKING[lesson.id] ?? KIND_THINKING[lesson.kind] ?? KIND_THINKING.theme) : '');
+  const thinkingExample = $derived(lesson ? (THINKING[lesson.id] ?? KIND_THINKING[lesson.kind]) : '');
   /** The Lessons this one builds on, with how far the Player got in each. Nothing is locked: they are links, not a gate. */
   const builtOn = $derived(
     (lesson?.priorKnowledge ?? []).flatMap((id) => {
@@ -97,7 +98,7 @@
   /** Whether the decision on screen is the last of its part, so the part's key idea can show once it is played well. */
   const lastOfPart = $derived(current !== undefined && decisionList[step + 1]?.partIndex !== current.partIndex);
   /** The key ideas of every part, for the summary at the end. */
-  const keyIdeas = $derived((lesson?.parts ?? []).map((p) => p.keyIdea?.trim()).filter(Boolean));
+  const keyIdeas = $derived((lesson?.parts ?? []).map((p) => p.keyIdea));
   /** "5 Best, 1 Good, 2 Mistakes": the Player's first tries, in Move Grade order. */
   const tally = $derived(
     MOVE_GRADES.map((g) => [g, Object.values(firstGrades).filter((x) => x === g).length] as const)
@@ -119,10 +120,10 @@
     return suggestNext(lessonCatalogue, [...progress.list.filter((p) => p.lessonId !== id), done], profile.profile?.level ?? 'beginner')?.lesson;
   });
 
-  /** The Lesson's goal and the part's key idea, sent with every Coach call during the Lesson (ADR 0012). */
+  /** The Lesson's learning goal and the part's key idea, sent with every Coach call during the Lesson (ADR 0012). */
   function lessonFocus(p: LessonPart | undefined = part): Pick<CoachRequest, 'lessonFocus'> {
     if (!lesson || !p) return {};
-    return { lessonFocus: { name: lesson.name, goal: lesson.goal ?? '', keyIdea: p.keyIdea ?? '' } };
+    return { lessonFocus: { lesson: lesson.name, learningGoal: lesson.goal, keyIdea: p.keyIdea } };
   }
 
   $effect(() => {
@@ -174,7 +175,7 @@
     hintArrow = null;
     coach.clearAnnotations();
     phase = 'decide';
-    if (lesson.kind === 'opening') coach.say(`Move ${Math.floor(n.ply / 2) + 1}${n.ply % 2 ? '…' : '.'} What are your options here? Play the move you would choose.`);
+    if (lesson.kind === 'opening') coach.say(`Move ${Math.floor(n.ply / 2) + 1}, ${SIDE_NAMES[d.part.side]} to play. What are your options here? Play the move you would choose.`);
     else coach.say(`${SIDE_NAMES[d.part.side]} to move. What are your options here? Play the move you would choose.`);
   }
 
@@ -253,7 +254,7 @@
     advancing = true;
     const from = step;
     try {
-      if (result && result.uci !== node.main) coach.say(`The Lesson continues with the main line, ${node.mainSan}.`);
+      if (result && result.uci !== node.main) coach.say(`The Lesson continues with the move it teaches, ${node.mainSan}.`);
       if (from >= decisionList.length - 1) {
         const last = decisionList[from]?.part;
         if (last) line.reset(last.fen, last.mainLine);
@@ -282,8 +283,9 @@
       if (hintLevel === 1) {
         if (api.coachReady) {
           await coach.ask({ job: 'hint', fen: node.fen, recentMoves: line.sansUntilCursor(), ...(part ? { playerSide: part.side } : {}), ...lessonFocus() }, 'Hint, please.');
+        } else {
+          coach.say('Hints need the Coach, which is unavailable. Press Hint again to see the Engine’s move.');
         }
-        else coach.say('Hints need the Coach, which is unavailable. Press Hint again to see the Engine’s move.');
         return;
       }
       const fen = node.fen;
@@ -354,17 +356,45 @@
   {:else}
     {#snippet credited(c: Credit)}<a href={c.url} target="_blank" rel="noreferrer">{c.source}</a>, {c.authors},
       <a href={c.licenceUrl} target="_blank" rel="noreferrer">{c.licence}</a>{/snippet}
+    <!-- The notation every Lesson's text uses, in plain words; closed until the Player opens it. -->
+    {#snippet notation()}
+      <details class="notation">
+        <summary>How moves are written</summary>
+        <p>
+          A square is named by a letter and a number, such as e4. The letters a to h are the files: the columns, from White’s left. The
+          numbers 1 to 8 are the ranks: the rows, counted from White’s side.
+        </p>
+        <dl>
+          <dt>K Q R B N</dt>
+          <dd>king, queen, rook, bishop, knight. A pawn has no letter: e4 is a pawn moving to e4.</dd>
+          <dt>x</dt>
+          <dd>takes: Nxe5 is a knight taking on e5</dd>
+          <dt>+</dt>
+          <dd>check</dd>
+          <dt>#</dt>
+          <dd>checkmate</dd>
+          <dt>O-O</dt>
+          <dd>castles kingside, on the king’s side of the board</dd>
+          <dt>O-O-O</dt>
+          <dd>castles queenside, on the queen’s side of the board</dd>
+          <dt>=Q</dt>
+          <dd>a pawn reaches the last rank and becomes a queen</dd>
+          <dt>12.</dt>
+          <dd>White’s 12th move</dd>
+          <dt>12...</dt>
+          <dd>Black’s 12th move</dd>
+        </dl>
+      </details>
+    {/snippet}
     <h1>{lesson.name}</h1>
     {#if phase === 'intro'}
       {@const firstPart = lesson.parts[0]}
       <section class="card intro" aria-label="About this Lesson">
-        <p class="muted small track">{TRACK_NAMES[lesson.track]?.name ?? ''} · {LEVEL_NAMES[lesson.level] ?? ''}</p>
-        {#if lesson.goal?.trim()}
-          <div class="goal">
-            <h2>What you will learn</h2>
-            <p>{lesson.goal}</p>
-          </div>
-        {/if}
+        <p class="muted small track">{TRACK_NAMES[lesson.track].name} · {LEVEL_NAMES[lesson.level]}</p>
+        <div class="goal">
+          <h2>What you will learn</h2>
+          <p>{lesson.goal}</p>
+        </div>
         {#if builtOn.length}
           <div class="built-on">
             <h2 id="built-on-heading">It builds on</h2>
@@ -382,9 +412,17 @@
         {#if lesson.intro.credit}
           <p class="credit small">Text adapted from {@render credited(lesson.intro.credit)}.</p>
         {/if}
+        <!-- An opening has no Position card while it is played, so its one part's text shows here. -->
+        {#if isOpening && firstPart?.text}
+          <p>{firstPart.text}</p>
+          {#if firstPart.textCredit}
+            <p class="credit small">Text adapted from {@render credited(firstPart.textCredit)}.</p>
+          {/if}
+        {/if}
         {#if isOpening && firstPart && firstPart.credit.url !== lesson.intro.credit?.url}
           <p class="credit small">Moves from {@render credited(firstPart.credit)}.</p>
         {/if}
+        {@render notation()}
         {#if isOpening}
           <p>You play {SIDE_NAMES[lesson.side]}. There are {decisionList.length} decisions.</p>
         {:else}
@@ -457,13 +495,13 @@
               <div class="row">
                 {#if poorChoice}
                   <button type="button" onclick={retry}>Try another move</button>
-                  <button type="button" class="secondary" onclick={next} disabled={coach.busy || advancing}>Continue with the main line</button>
+                  <button type="button" class="secondary" onclick={next} disabled={coach.busy || advancing}>Continue with the Lesson’s move</button>
                 {:else}
                   <button type="button" onclick={next} disabled={coach.busy || advancing}>Continue</button>
                 {/if}
               </div>
               <!-- After Continue, so on a phone the summing-up line never pushes the button off the screen. -->
-              {#if lastOfPart && !poorChoice && part.keyIdea?.trim()}
+              {#if lastOfPart && !poorChoice}
                 <p class="key-idea"><strong>Key idea:</strong> {part.keyIdea}</p>
               {/if}
             </section>
@@ -500,6 +538,7 @@
               {/if}
             {/snippet}
           </CoachPanel>
+          {@render notation()}
           {#if node?.notes?.credit || (lesson.statsSource && popular.length)}
             <p class="credit small">
               {#if node?.notes?.credit}Lesson notes adapted from {@render credited(node.notes.credit)}.{/if}
@@ -522,6 +561,14 @@
   .built-on .complete { color: var(--accent); font-weight: 600; }
   .built-on p { margin-top: 0.2rem; }
   .key-idea { margin: 0.6rem 0 0; }
+  /* How moves are written: one quiet line until opened, then a short two-column list. */
+  .notation { font-size: 0.85rem; max-width: 42rem; }
+  .notation summary { cursor: pointer; color: var(--muted); }
+  .notation summary:hover { color: var(--text); }
+  .notation p { margin: 0.4rem 0; }
+  .notation dl { display: grid; grid-template-columns: max-content 1fr; gap: 0.15rem 0.7rem; margin: 0; }
+  .notation dt { font-weight: 700; white-space: nowrap; }
+  .notation dd { margin: 0; }
   .learned { margin: 0 0 0.6rem; padding-left: 1.2rem; }
   .learned li { margin: 0.2rem 0; }
   .credit { color: var(--muted); }

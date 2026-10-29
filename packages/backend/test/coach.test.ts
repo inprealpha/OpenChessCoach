@@ -2,8 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Options, query } from '@anthropic-ai/claude-agent-sdk';
 import type { CoachRequest } from '@chess-coach/shared/coach/types';
-import { BRIEF_BUDGET, type Brief } from '@chess-coach/shared/coach/brief';
-import { MAX_GOAL, MAX_KEY_IDEA } from '@chess-coach/shared/content/lessons';
+import { BRIEF_BUDGET, MAX_KEY_IDEA, MAX_LEARNING_GOAL, type Brief } from '@chess-coach/shared/coach/brief';
 import { candidatesFrom, gradeFromAnalyses } from '@chess-coach/shared/analysis';
 import { playSan } from '@chess-coach/shared/chess';
 import { formatScore } from '@chess-coach/shared/grader';
@@ -558,42 +557,64 @@ describe('the Coach port', () => {
     const app = await instance();
     const c = await client(app);
     const lessonFocus = {
-      name: 'Italian Game',
-      goal: 'Play the first moves of the Italian Game and say what each one is for.',
+      lesson: 'Italian Game',
+      learningGoal: 'Play the first moves of the Italian Game and say what each one is for.',
       keyIdea: 'Take the centre with a pawn and bring the pieces out behind it.',
     };
-    const focus = { lesson: 'Italian Game', goal: lessonFocus.goal, keyIdea: lessonFocus.keyIdea };
     const lesson = { lessonId: 'italian-game', opening: 'Italian Game', notes: '', popularity: [], finalTurn: false };
     const turn = await c.request('coach.ask', { ...whyAsk(), job: 'lesson-turn', question: undefined, lesson, lessonFocus });
-    expect(app.coach.lastBrief?.focus).toEqual(focus);
+    // A Lesson turn's brief names the Lesson in lesson.opening, so its focus doesn't repeat it.
+    expect(app.coach.lastBrief?.focus).toEqual({ learningGoal: lessonFocus.learningGoal, keyIdea: lessonFocus.keyIdea });
     // The fake Coach names the key idea, so Player journeys see the focus reached the Coach.
     expect(turn.text).toContain(`Key idea: ${lessonFocus.keyIdea}`);
     await c.request('coach.ask', { job: 'hint', fen: START, recentMoves: [], playerSide: 'white', lessonFocus });
-    expect(app.coach.lastBrief?.focus).toEqual(focus);
+    expect(app.coach.lastBrief?.focus).toEqual(lessonFocus);
     await c.request('coach.ask', { ...whyAsk(), hideWinningChances: true, lessonFocus });
-    expect(app.coach.lastBrief?.focus).toEqual(focus);
+    expect(app.coach.lastBrief?.focus).toEqual(lessonFocus);
     // Outside a Lesson there is none.
     await c.request('coach.ask', whyAsk());
     expect(app.coach.lastBrief).not.toHaveProperty('focus');
-    // It is the client's text, not an Engine fact: clipped to the Lesson limits, and nothing else it carries is kept.
-    const long = { name: 'n'.repeat(5000), goal: 'g'.repeat(5000), keyIdea: 'k'.repeat(5000), candidates: [{ uci: 'h2h4', san: 'h4', score: { cp: 500 }, pv: ['h2h4'] }] };
-    await c.request('coach.ask', { ...whyAsk(), lessonFocus: long as never });
-    expect(app.coach.lastBrief?.focus).toEqual({ lesson: `${'n'.repeat(79)}…`, goal: `${'g'.repeat(MAX_GOAL - 1)}…`, keyIdea: `${'k'.repeat(MAX_KEY_IDEA - 1)}…` });
-    expect(app.coach.lastBrief?.candidates.map((x) => x.uci)).not.toContain('h2h4');
+    // It is the client's text, not an Engine fact: clipped to the Lesson limits.
+    await c.request('coach.ask', { ...whyAsk(), lessonFocus: { lesson: 'n'.repeat(5000), learningGoal: 'g'.repeat(5000), keyIdea: 'k'.repeat(5000) } });
+    expect(app.coach.lastBrief?.focus).toEqual({
+      lesson: `${'n'.repeat(79)}…`,
+      learningGoal: `${'g'.repeat(MAX_LEARNING_GOAL - 1)}…`,
+      keyIdea: `${'k'.repeat(MAX_KEY_IDEA - 1)}…`,
+    });
+    // The prompt keeps the Coach on the key idea, never calls the learning goal the Player's Goal, and
+    // the Engine's facts still decide what is true (ADR 0002, ADR 0009).
+    const rule = SYSTEM_PROMPT.split('\n- ').find((r) => r.startsWith('When the brief has focus')) ?? '';
+    expect(rule).toContain('focus.learningGoal');
+    expect(rule).toContain('focus.keyIdea');
+    expect(rule).toMatch(/not one of the Player's Goals/);
+    expect(rule).toMatch(/the Engine's facts still decide what is true/);
+  });
+
+  it('turns control characters a client sends in Lesson text into spaces, so a forged focus can’t push the brief over its budget', async () => {
+    const app = await instance();
+    const c = await client(app);
+    // Each control character is six characters in JSON, and half of a UTF-16 pair five.
+    const forged = (n: number) => '\u0001\ud83d'.repeat(n).slice(0, n);
+    const lessonFocus = { lesson: forged(80), learningGoal: forged(MAX_LEARNING_GOAL), keyIdea: forged(MAX_KEY_IDEA) };
+    const lesson = { lessonId: 'italian-game', opening: forged(80), notes: forged(700), popularity: [{ san: forged(8), percent: -Number.MAX_VALUE }], finalTurn: false };
+    await c.request('coach.ask', { ...whyAsk(), job: 'lesson-turn', question: undefined, lesson, lessonFocus });
+    const brief = app.coach.lastBrief as Brief;
+    const text = JSON.stringify([brief.focus, brief.lesson]);
+    expect(text).not.toMatch(/\\u00|\\ud8/);
+    // A control character becomes a space and half a pair the replacement character; the brief trims the ends.
+    expect(brief.focus?.keyIdea).toBe(' \ufffd'.repeat(MAX_KEY_IDEA / 2).trim());
+    // A share of games is clamped to 0 to 100.
+    expect(brief.lesson?.popularity).toMatch(/ 0%$/);
     const [call] = rows<{ brief: string }>(app, 'SELECT brief FROM coach_calls ORDER BY id DESC LIMIT 1');
     expect(call?.brief.length).toBeLessThanOrEqual(BRIEF_BUDGET);
-    // The prompt keeps the Coach on the key idea, and the Engine's facts still decide what is true (ADR 0002, ADR 0009).
-    const rule = SYSTEM_PROMPT.split('\n- ').find((r) => r.startsWith('When the brief has focus')) ?? '';
-    expect(rule).toContain('focus.keyIdea');
-    expect(rule).toMatch(/the Engine's facts\s+still decide what is true/);
   });
 
   it('refuses a malformed Lesson focus before calling the Coach', async () => {
     const app = await instance();
     const c = await client(app);
-    const lessonFocus = { name: 'Italian Game', goal: 'Play the first moves of the Italian Game.', keyIdea: 'Aim the bishop at f7.' };
+    const lessonFocus = { lesson: 'Italian Game', learningGoal: 'Play the first moves of the Italian Game.', keyIdea: 'Aim the bishop at f7.' };
     const { keyIdea: _missing, ...noKeyIdea } = lessonFocus;
-    for (const bad of [noKeyIdea, { ...lessonFocus, goal: 3 }, { ...lessonFocus, keyIdea: ['Aim the bishop at f7.'] }, 'Italian Game', null]) {
+    for (const bad of [noKeyIdea, { ...lessonFocus, lesson: 5 }, { ...lessonFocus, learningGoal: 3 }, { ...lessonFocus, keyIdea: ['Aim the bishop at f7.'] }, 'Italian Game', null]) {
       await expect(c.request('coach.ask', { ...whyAsk(), lessonFocus: bad as never })).rejects.toMatchObject({ code: 'bad-request' });
     }
     expect(rows(app, 'SELECT * FROM coach_calls')).toHaveLength(0);

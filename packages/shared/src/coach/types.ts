@@ -102,10 +102,11 @@ export interface CoachAsk {
     finalTurn: boolean;
   };
   /**
-   * During a Lesson, on every Coach call (a Lesson turn, a Hint, a Why Question): the Lesson's
-   * learning goal and the current part's key idea, so the Coach stays on the Lesson's point (ADR 0012).
+   * During a Lesson, on every Coach call (a Lesson turn, a Hint, a Why Question): the Lesson's name,
+   * its learning goal and the current part's key idea, so the Coach stays on the Lesson's point
+   * (ADR 0012). The brief's `focus` uses the same names.
    */
-  lessonFocus?: { name: string; goal: string; keyIdea: string };
+  lessonFocus?: { lesson: string; learningGoal: string; keyIdea: string };
   /** Opening or theme, used to pick the relevant slice of the Player Profile. */
   opening?: string;
   /** For Reviews: the last moment may carry a profile note. */

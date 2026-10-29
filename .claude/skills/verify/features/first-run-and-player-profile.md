@@ -12,8 +12,9 @@ in the top right of every screen.
 
 - Welcome screen ("Welcome to your chess Coach"): on a desktop with no phone paired, first the
   phone (`phone.md`), then ("Step 2 of 2") level, optional site username, Goals. "Where to
-  begin" names the first Lesson the app suggests for the level picked ("At your level, the first
-  Lesson is Italian Game."), from `suggestNext` in `packages/shared/src/content/course.ts`.
+  begin" names the first Lesson for the level picked ("At your level, the first Lesson is Attack
+  and defence." for a beginner, "Candidate moves and thinking ahead" for casual or club), from
+  `suggestNext` in `packages/shared/src/content/course.ts`.
 - `Start with the Lessons` (opens the Lessons, `#/lessons`) or `Skip to the main menu`.
 - An unknown username (or a site that is limiting requests) shows its error inside the group `Your
   online account (optional)`, under the `Username` box, which takes the focus with

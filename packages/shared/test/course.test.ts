@@ -84,6 +84,17 @@ describe('suggestNext', () => {
     expect(suggest([done('mate')], 'casual')).toEqual({ id: 'double-attack', why: 'next' });
   });
 
+  it('counts a beginner Lesson in the prior knowledge as known for a casual Player, so the Lesson built on it comes first', () => {
+    // iA builds on iB, which builds only on a beginner Lesson: iB is ready, iA is not.
+    const catalogue = [lesson('b1', 'beginner'), lesson('iA', 'intermediate', ['iB']), lesson('iB', 'intermediate', ['b1'])];
+    expect(suggestNext(catalogue, [], 'casual')).toMatchObject({ lesson: { id: 'iB' }, why: 'first' });
+  });
+
+  it('when no Lesson at a casual Player’s level is ready, still suggests one at their level, not a beginner one', () => {
+    const circle = [lesson('b1', 'beginner'), lesson('i1', 'intermediate', ['i2']), lesson('i2', 'intermediate', ['i1'])];
+    expect(suggestNext(circle, [], 'casual')).toMatchObject({ lesson: { id: 'i1' }, why: 'first' });
+  });
+
   it('once a casual Player has finished the intermediate Lessons, suggests the beginner ones they skipped', () => {
     expect(suggest([done('double-attack'), done('overloading')], 'casual')).toEqual({ id: 'forks', why: 'next' });
   });

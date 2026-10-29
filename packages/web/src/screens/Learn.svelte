@@ -1,16 +1,20 @@
 <script lang="ts">
   // Learn: the Lessons and the Puzzles that practise them, one choice on the main menu, with the
-  // suggested next Lesson a click away.
-  import { suggestNext } from '@chess-coach/shared/content/course';
+  // Player's next Lesson a click away.
+  import { suggestNext, TRACK_NAMES } from '@chess-coach/shared/content/course';
+  import { TRACKS } from '@chess-coach/shared/content/lessons';
   import { lessonCatalogue } from '../lib/content.ts';
   import { lessonProgress } from '../lib/lesson-progress.svelte.ts';
   import { profile } from '../lib/profile.svelte.ts';
 
+  /** The tracks as the Lessons screen names them: "Themes, Endgames, Openings and How to think during a game". */
+  const trackNames = TRACKS.map((t) => TRACK_NAMES[t].name);
+  const tracks = `${trackNames.slice(0, -1).join(', ')} and ${trackNames.at(-1)}`;
   const entries = [
     {
       href: '#/lessons',
       title: 'Lessons',
-      text: 'From your first moves to club level, in four tracks: Themes, endgames, openings, and how to think during a game. Choose moves and the Coach explains each choice.',
+      text: `From your first moves to the end of intermediate level, in four tracks: ${tracks}. Choose moves and the Coach explains each choice.`,
     },
     { href: '#/puzzles', title: 'Puzzles', text: 'Find the strongest move in positions from real games, picked near your level.' },
   ];
@@ -35,7 +39,7 @@
   </nav>
   {#if suggestion}
     <p class="next">
-      Suggested next Lesson: <a href={`#/lesson/${suggestion.lesson.id}`}>{suggestion.lesson.name}</a>
+      Your next Lesson: <a href={`#/lesson/${suggestion.lesson.id}`}>{suggestion.lesson.name}</a>
     </p>
   {/if}
 </section>

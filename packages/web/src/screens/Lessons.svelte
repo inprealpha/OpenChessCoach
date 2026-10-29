@@ -1,7 +1,7 @@
 <script lang="ts">
-  // The Lessons (ADR 0012): the suggested next Lesson first, then the four tracks, each by level in
-  // the suggested order, with each Lesson's progress from the Player Profile. Nothing is locked: the
-  // suggestion only says where to go next. With about sixty Lessons, links at the top jump to a track.
+  // The Lessons (ADR 0012): the Player's next Lesson first, then the four tracks, each by level in
+  // the course order, with each Lesson's progress from the Player Profile. Nothing is locked: the
+  // next Lesson only says where to go next. With about sixty Lessons, links at the top jump to a track.
   import { SIDE_NAMES } from '@chess-coach/shared/chess';
   import { LEVEL_NAMES, suggestNext, TRACK_NAMES, type CatalogueItem, type Suggestion } from '@chess-coach/shared/content/course';
   import { COURSE_LEVELS, TRACKS, type Track } from '@chess-coach/shared/content/lessons';
@@ -27,22 +27,22 @@
   const status = (l: CatalogueItem) => lessonStatus(progress.list, l.id, l.decisions);
   const completeIn = (items: CatalogueItem[]) => items.filter((l) => progress.list.some((p) => p.lessonId === l.id && p.completed)).length;
 
-  /** "C54 · as White · 7 decisions": an opening's code and colour, then how many choices the Lesson asks for. */
+  /** "Opening code C54 · as White · 7 decisions": an opening's code and colour, then how many choices the Lesson asks for. */
   function about(l: CatalogueItem): string {
-    const opening = l.kind === 'opening' ? [l.eco, `as ${SIDE_NAMES[l.side]}`].filter(Boolean) : [];
+    const opening = l.kind === 'opening' ? [l.eco && `Opening code ${l.eco}`, `as ${SIDE_NAMES[l.side]}`].filter(Boolean) : [];
     return [...opening, `${l.decisions} decisions`].join(' · ');
   }
 
-  /** One line on why this Lesson is suggested. */
+  /** One line on why this Lesson comes next. */
   function because(s: Suggestion): string {
     const { lesson: l } = s;
     if (s.why === 'unfinished') {
       const p = progress.list.find((x) => x.lessonId === l.id);
-      return `You started this Lesson and have done ${p?.step ?? 0} of ${l.decisions} decisions.`;
+      return `You started this Lesson and have made ${p?.step ?? 0} of its ${l.decisions} decisions.`;
     }
     if (s.why === 'first') return level !== 'beginner' && l.level !== 'beginner' ? 'Start here. At your level you can skip the beginner Lessons.' : 'Start here.';
     if (s.why === 'ready') return 'You have done the Lessons it builds on.';
-    return 'It comes next in the suggested order.';
+    return 'It comes next in the order of the Lessons.';
   }
 
   /** Brings a track's heading into view and gives it the focus, so the keyboard carries on from there. */
@@ -62,13 +62,13 @@
 <section class="screen">
   <h1>Lessons</h1>
   <p class="muted intro">
-    From your first moves to club level, in four tracks. Open any Lesson at any time. In each one you choose moves, the Engine grades each choice and the Coach
+    From your first moves to the end of intermediate level, in four tracks. Open any Lesson at any time. In each one you choose moves, the Engine grades each choice and the Coach
     explains it.
   </p>
 
   <div class="top">
     <section class="card next" aria-labelledby="next-heading">
-      <h2 id="next-heading">Suggested next</h2>
+      <h2 id="next-heading">Your next Lesson</h2>
       {#if suggestion}
         {@const s = suggestion.lesson}
         <h3>{s.name}</h3>
@@ -129,7 +129,7 @@
   h2 { font-size: 1.15rem; margin: 0 0 0.3rem; }
   h3 { font-size: 1rem; margin: 0.9rem 0 0.5rem; }
 
-  /* The suggestion, then the tracks: beside it on a wide screen, under it otherwise. */
+  /* The next Lesson, then the tracks: beside it on a wide screen, under it otherwise. */
   .top { display: grid; gap: 0.75rem; margin: 1rem 0 0.5rem; }
   @media (min-width: 900px) { .top { grid-template-columns: minmax(0, 46rem) minmax(12rem, 1fr); } }
   .next { border: 2px solid var(--accent); display: flex; flex-direction: column; align-items: flex-start; gap: 0.35rem; }

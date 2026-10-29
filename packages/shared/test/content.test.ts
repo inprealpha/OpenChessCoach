@@ -5,7 +5,19 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { COURSE } from '../../../data-prep/course.ts';
 import type { CatalogueItem } from '../src/content/course.ts';
-import { COURSE_LEVELS, decisions, keptOpenText, priorKnowledgeCycles, TRACKS, validateLesson, type LessonData, type OpenText } from '../src/content/lessons.ts';
+import {
+  checkPositionCredit,
+  COURSE_LEVELS,
+  decisions,
+  keptOpenText,
+  LICHESS_LICENCE,
+  LICHESS_LICENCE_URL,
+  priorKnowledgeCycles,
+  TRACKS,
+  validateLesson,
+  type LessonData,
+  type OpenText,
+} from '../src/content/lessons.ts';
 import { pickPuzzles, validatePuzzles, type PuzzleFile } from '../src/content/puzzles.ts';
 
 const dataDir = new URL('../../../data/', import.meta.url);
@@ -134,6 +146,68 @@ describe('Lesson data', () => {
     expect(problems).toMatch(/forks: prior knowledge no-such-lesson is not a Lesson/);
     expect(problems).toMatch(/forks part 2: a part has no key idea/);
     expect(problems).toMatch(/forks part 3: the key idea is longer than 140 characters/);
+  });
+
+  it('fails on an unknown track or level, a kind in a track it does not belong to, or a Lesson that builds on itself', () => {
+    const check = (id: string, change: (l: LessonData) => void) => {
+      const broken = copy(byId(id));
+      change(broken);
+      return validateLesson(broken, ids).join('\n');
+    };
+    expect(check('forks', (l) => ((l as { track: string }).track = 'tactics'))).toMatch(/forks: unknown track tactics/);
+    expect(check('forks', (l) => (l.track = 'endgames'))).toMatch(/forks: a theme Lesson cannot sit in the endgames track/);
+    expect(check('piece-values', (l) => (l.track = 'themes'))).toMatch(/piece-values: a thinking Lesson cannot sit in the themes track/);
+    expect(check('forks', (l) => ((l as { level: string }).level = 'advanced'))).toMatch(/forks: unknown level advanced/);
+    expect(check('forks', (l) => (l.priorKnowledge = ['forks']))).toMatch(/forks: a Lesson cannot be its own prior knowledge/);
+  });
+
+  it('holds a learning goal to 240 characters and a key idea to one line of 140', () => {
+    const check = (change: (l: LessonData) => void) => {
+      const broken = copy(byId('forks'));
+      change(broken);
+      return validateLesson(broken, ids).join('\n');
+    };
+    expect(check((l) => (l.goal = 'g'.repeat(240)))).not.toMatch(/learning goal/);
+    expect(check((l) => (l.goal = 'g'.repeat(241)))).toMatch(/forks: the learning goal is longer than 240 characters/);
+    expect(check((l) => ((l.parts[0] as { keyIdea: string }).keyIdea = 'k'.repeat(140)))).not.toMatch(/part 1: the key idea/);
+    expect(check((l) => ((l.parts[0] as { keyIdea: string }).keyIdea = 'One idea.\nAnother.'))).toMatch(/forks part 1: the key idea must be one line/);
+  });
+
+  it('fails on a kept intro or part text whose credit is not a Wikibooks or Wikipedia one', () => {
+    const broken = copy(byId('forks'));
+    const notWikibooks = { source: 'Wikibooks', url: 'https://example.com/', licence: 'CC BY-SA 4.0', licenceUrl: 'https://creativecommons.org/licenses/by-sa/4.0/', authors: 'a' };
+    broken.intro.credit = notWikibooks;
+    (broken.parts[0] as LessonData['parts'][number]).textCredit = { ...notWikibooks, url: 'https://en.wikibooks.org/wiki/Chess/Tactics', licence: '' };
+    const problems = validateLesson(broken).join('\n');
+    expect(problems).toMatch(/forks: the intro's credit is not a Wikibooks or Wikipedia credit/);
+    expect(problems).toMatch(/forks part 1: the text's credit is not a Wikibooks or Wikipedia credit/);
+  });
+
+  it('counts 8 words in a row from an earlier open text as kept wording in an intro or a part text, and 7 as not', () => {
+    // An open text that starts with 8 plain words, put between words of no text.
+    const kept = openTexts.find((t) => t.text.split(' ').slice(0, 8).every((w) => /^[A-Za-z]+[,;]?$/.test(w))) as OpenText;
+    const run = (n: number) => `Zzz zzz. ${kept.text.split(' ').slice(0, n).join(' ')} zzz.`;
+    const withText = (n: number, where: 'intro' | 'part') => {
+      const broken = copy(byId('pins'));
+      if (where === 'intro') broken.intro.text = run(n);
+      else (broken.parts[0] as { text: string }).text = run(n);
+      return keptOpenText(broken, openTexts).join('\n');
+    };
+    const url = kept.url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    expect(withText(8, 'intro')).toMatch(new RegExp(`pins: the intro keeps wording from ${url} without its credit`));
+    expect(withText(7, 'intro')).not.toMatch(/the intro keeps wording/);
+    expect(withText(8, 'part')).toMatch(new RegExp(`pins: part 1's text keeps wording from ${url}`));
+    expect(withText(7, 'part')).not.toMatch(/part 1's text keeps wording/);
+  });
+
+  it('takes a position from a Lichess puzzle or game, or the chess-openings list, and not from another Lichess page', () => {
+    const credit = (url: string) => ({ source: 'Lichess games database', url, licence: LICHESS_LICENCE, licenceUrl: LICHESS_LICENCE_URL, authors: 'Lichess players' });
+    for (const url of ['https://lichess.org/training/F1Ury', 'https://lichess.org/AbCd1234', 'https://lichess.org/AbCd1234#12', 'https://github.com/lichess-org/chess-openings']) {
+      expect(checkPositionCredit(credit(url)), url).toBe(true);
+    }
+    for (const url of ['https://lichess.org/training', 'https://lichess.org/analysis', 'https://lichess.org/practice', 'https://lichess.org/abcdefgh/black', 'https://lichess.org/study/AbCd1234']) {
+      expect(checkPositionCredit(credit(url)), url).toBe(false);
+    }
   });
 
   it('fails on a Theme position without its source, or with a line that does not start from it', () => {

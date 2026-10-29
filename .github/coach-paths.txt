@@ -5,3 +5,4 @@ packages/backend/src/coach/
 packages/shared/src/coach/
 packages/backend/src/claude-check.ts
 packages/backend/src/tempting-moves/
+packages/backend/src/engine/service.ts

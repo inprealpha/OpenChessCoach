@@ -1,7 +1,6 @@
 // Builds the compact, fresh brief every Coach call starts from (ADR 0004).
 import type { Candidate } from '../analysis.ts';
 import { playUci, turnOf, type Side } from '../chess.ts';
-import { MAX_GOAL, MAX_KEY_IDEA } from '../content/lessons.ts';
 import type { Score } from '../engine.ts';
 import { formatScore, gradeMove, type MoveGrade } from '../grader.ts';
 import { finishedScore, type PositionScore } from '../position-score.ts';
@@ -30,6 +29,13 @@ const MAX_QUESTION = 400;
 const MAX_SUMMARY = 600;
 const MAX_NOTES = 700;
 const MAX_PROFILE_ITEMS = 3;
+/**
+ * Longest Lesson learning goal and key idea (ADR 0012). The Lesson data check holds the data to them,
+ * and the brief never trims them, so the largest brief still fits its budget (ADR 0004).
+ */
+export const MAX_LEARNING_GOAL = 240;
+export const MAX_KEY_IDEA = 140;
+const MAX_LESSON_NAME = 80;
 /** Jobs that must stay short: their briefs explain only the move, the Engine's best move and its best reply. */
 const CHEAP_JOBS: readonly CoachJob[] = ['live', 'hint'];
 
@@ -85,9 +91,11 @@ export interface Brief {
   lesson?: { opening: string; notes: string; popularity: string };
   /**
    * During a Lesson, on every Coach call: the Lesson, its learning goal and the current part's key
-   * idea, so the Coach stays on the Lesson's point (ADR 0012). The Lesson's aim, never an Engine fact.
+   * idea, so the Coach stays on the Lesson's point (ADR 0012). The Lesson's aim, never an Engine fact,
+   * and not the Player's Goals (`profile.goals`). A Lesson turn leaves the name out: `lesson.opening`
+   * already gives it.
    */
-  focus?: { lesson: string; goal: string; keyIdea: string };
+  focus?: { lesson?: string; learningGoal: string; keyIdea: string };
   profile?: { goals: string[]; weaknesses: string[]; notes: string[] };
   question?: string;
   summary?: string;
@@ -181,7 +189,7 @@ export function buildBrief({ ask, profile, summary }: BriefInput): Brief {
   if (threat) brief.threat = threat;
   if (ask.lesson) {
     brief.lesson = {
-      opening: clip(ask.lesson.opening, 80),
+      opening: clip(ask.lesson.opening, MAX_LESSON_NAME),
       notes: clip(ask.lesson.notes, MAX_NOTES),
       popularity: ask.lesson.popularity
         .slice(0, 5)
@@ -191,8 +199,13 @@ export function buildBrief({ ask, profile, summary }: BriefInput): Brief {
     };
   }
   const focus = ask.lessonFocus;
-  if (focus && (focus.goal.trim() || focus.keyIdea.trim())) {
-    brief.focus = { lesson: clip(focus.name.trim(), 80), goal: clip(focus.goal.trim(), MAX_GOAL), keyIdea: clip(focus.keyIdea.trim(), MAX_KEY_IDEA) };
+  if (focus && (focus.learningGoal.trim() || focus.keyIdea.trim())) {
+    const name = clip(focus.lesson.trim(), MAX_LESSON_NAME);
+    brief.focus = {
+      ...(brief.lesson?.opening === name ? {} : { lesson: name }),
+      learningGoal: clip(focus.learningGoal.trim(), MAX_LEARNING_GOAL),
+      keyIdea: clip(focus.keyIdea.trim(), MAX_KEY_IDEA),
+    };
   }
   const slice = profileSlice(profile, ask.opening ?? ask.lesson?.opening);
   if (slice) brief.profile = slice;
@@ -355,37 +368,40 @@ function keywords(text: string): string[] {
 }
 
 function clip(text: string, max: number): string {
-  return text.length <= max ? text : `${text.slice(0, max - 1)}…`;
+  // Never cut a pair of UTF-16 code units in half (an emoji, say): half a pair is not text.
+  return text.length <= max ? text : `${text.slice(0, max - 1).replace(/[\uD800-\uDBFF]$/, '')}…`;
 }
 
 /**
- * Trims the least important parts until the brief fits. A Lesson's focus is never trimmed: it is what
- * keeps the Coach on the Lesson's point, and the worst case fits with it whole (see the tests).
+ * The ways to make a brief smaller, least important first. None of them touches a Lesson's focus: it
+ * is what keeps the Coach on the Lesson's point, and the worst case fits with it whole (see the tests).
  */
+export const TRIM_STEPS: readonly ((b: Brief) => void)[] = [
+  // The facts about the weaker alternatives go first: the best moves, the move and the moves the Player asked about matter most.
+  (b) => { b.candidates.slice(2).forEach((c) => { if (!c.asked) delete c.does; }); b.replies?.slice(1).forEach((r) => delete r.does); },
+  (b) => { b.candidates.slice(1).forEach((c) => { if (!c.asked) { delete c.does; delete c.result; } }); },
+  // The tempting moves the Engine didn't list: their lines short, then their facts but the result.
+  (b) => { b.tempting?.forEach((t) => { t.line = t.line.split(' ').slice(0, 2).join(' '); }); },
+  (b) => { b.tempting?.forEach((t) => delete t.does); },
+  (b) => { if (b.summary) b.summary = clip(b.summary, 250); },
+  (b) => { if (b.lesson) b.lesson.notes = clip(b.lesson.notes, 300); },
+  (b) => { if (b.profile) b.profile.notes = b.profile.notes.slice(-1); },
+  (b) => { b.candidates.forEach((c) => { if (!c.asked) c.line = c.line.split(' ').slice(0, 2).join(' '); }); },
+  (b) => { if (b.threat) b.threat.line = b.threat.line.split(' ').slice(0, 2).join(' '); },
+  (b) => { if (b.replies) b.replies = b.replies.slice(0, 2); },
+  (b) => { b.recentMoves = b.recentMoves.split(' ').slice(-12).join(' '); },
+  (b) => { if (b.question) b.question = clip(b.question, 200); },
+  (b) => { delete b.profile; },
+  (b) => { delete b.summary; },
+  (b) => { delete b.tempting; },
+  // Last, the facts on the key moves themselves.
+  (b) => { b.replies?.forEach((r) => delete r.does); b.candidates.forEach((c) => { delete c.does; delete c.result; }); },
+  (b) => { if (b.move) { delete b.move.does; delete b.move.result; } },
+];
+
+/** Trims the least important parts until the brief fits. */
 function fitToBudget(brief: Brief): Brief {
-  const steps: ((b: Brief) => void)[] = [
-    // The facts about the weaker alternatives go first: the best moves, the move and the moves the Player asked about matter most.
-    (b) => { b.candidates.slice(2).forEach((c) => { if (!c.asked) delete c.does; }); b.replies?.slice(1).forEach((r) => delete r.does); },
-    (b) => { b.candidates.slice(1).forEach((c) => { if (!c.asked) { delete c.does; delete c.result; } }); },
-    // The tempting moves the Engine didn't list: their lines short, then their facts but the result.
-    (b) => { b.tempting?.forEach((t) => { t.line = t.line.split(' ').slice(0, 2).join(' '); }); },
-    (b) => { b.tempting?.forEach((t) => delete t.does); },
-    (b) => { if (b.summary) b.summary = clip(b.summary, 250); },
-    (b) => { if (b.lesson) b.lesson.notes = clip(b.lesson.notes, 300); },
-    (b) => { if (b.profile) b.profile.notes = b.profile.notes.slice(-1); },
-    (b) => { b.candidates.forEach((c) => { if (!c.asked) c.line = c.line.split(' ').slice(0, 2).join(' '); }); },
-    (b) => { if (b.threat) b.threat.line = b.threat.line.split(' ').slice(0, 2).join(' '); },
-    (b) => { if (b.replies) b.replies = b.replies.slice(0, 2); },
-    (b) => { b.recentMoves = b.recentMoves.split(' ').slice(-12).join(' '); },
-    (b) => { if (b.question) b.question = clip(b.question, 200); },
-    (b) => { delete b.profile; },
-    (b) => { delete b.summary; },
-    (b) => { delete b.tempting; },
-    // Last, the facts on the key moves themselves.
-    (b) => { b.replies?.forEach((r) => delete r.does); b.candidates.forEach((c) => { delete c.does; delete c.result; }); },
-    (b) => { if (b.move) { delete b.move.does; delete b.move.result; } },
-  ];
-  for (const step of steps) {
+  for (const step of TRIM_STEPS) {
     if (briefSize(brief) <= BRIEF_BUDGET) break;
     step(brief);
   }

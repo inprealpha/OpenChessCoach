@@ -1,8 +1,8 @@
-// The Engine check (ADR 0008): every move the Player is asked to find in a Lesson must be graded
-// Best or Good by the Engine, at the depth verify mode grades at and at the desktop's depth, so a
-// Player who plays the book move is never told it is an Inaccuracy or worse. Run it after changing
-// any Lesson line, passing the ids you changed (all 17 at both depths take a few minutes). npm test
-// runs it at depth 10 on every Lesson. Exits 1 and lists the moves that fail.
+// The Engine check (ADR 0008, ADR 0012): every move the Player is asked to find in a Lesson must be
+// graded Best or Good by the Engine, at the depth verify mode grades at and at the desktop's depth,
+// so a Player who plays the move the Lesson teaches is never told it is an Inaccuracy or worse. Run
+// it after changing any Lesson line, passing the ids you changed (all 64 Lessons at both depths take
+// many minutes). npm test runs it at depth 10 on every Lesson. Exits 1 and lists the moves that fail.
 //
 // Usage: node data-prep/engine-check.ts [lesson-id ...] [--depth=10,14]
 import { readFileSync } from 'node:fs';

@@ -223,7 +223,7 @@
 
     <div class="card suggest">
       <p>
-        <strong>Where to begin:</strong> the Lessons take you from your first moves to club level, one choice of move at a time.
+        <strong>Where to begin:</strong> the Lessons take you from your first moves to the end of intermediate level, one choice of move at a time.
         {#if firstLesson}At your level, the first Lesson is {firstLesson.name}.{/if}
       </p>
       <button type="button" onclick={() => finish('lessons')} disabled={busy || api.state !== 'online'}>Start with the Lessons</button>

@@ -5,6 +5,8 @@
 // games database.
 import { gradeFromAnalyses } from '../analysis.ts';
 import { INITIAL_FEN, isValidFen, outcomeOf, playUci, positionKey, turnOf, type Side } from '../chess.ts';
+// The Coach brief sets how long a learning goal and a key idea may be, so it stays within its budget.
+import { MAX_KEY_IDEA, MAX_LEARNING_GOAL } from '../coach/brief.ts';
 import type { Engine } from '../engine.ts';
 import type { PlayerLevel } from '../protocol.ts';
 
@@ -21,9 +23,6 @@ export type Track = (typeof TRACKS)[number];
 export const COURSE_LEVELS = ['beginner', 'intermediate'] as const;
 export type CourseLevel = (typeof COURSE_LEVELS)[number];
 
-/** Longest learning goal and key idea, so the Coach brief stays within its budget (ADR 0004). */
-export const MAX_GOAL = 240;
-export const MAX_KEY_IDEA = 140;
 
 export interface Credit {
   /** Where the text or position was adapted from. */
@@ -80,7 +79,7 @@ export interface LessonPart {
 /**
  * How a Lesson is taught. An opening is one line from the starting position, with move popularity
  * and a note at every decision. The others are several positions: a Theme, an endgame, or a way
- * of thinking during a game (including the opening principles).
+ * of thinking during a game (including the opening principles, opening traps and gambits).
  */
 export type LessonKind = 'opening' | 'theme' | 'endgame' | 'thinking';
 
@@ -164,7 +163,7 @@ export async function engineCheck(engine: Engine, lesson: LessonData, depth: num
   return failures;
 }
 
-/** Which tracks a kind of Lesson may sit in: the opening principles are taught in the openings track. */
+/** Which tracks a kind of Lesson may sit in: the opening principles, traps and gambits are taught in the openings track. */
 const KIND_TRACKS: Record<LessonKind, readonly Track[]> = {
   opening: ['openings'],
   theme: ['themes'],
@@ -186,7 +185,7 @@ export function validateLesson(lesson: LessonData, ids?: ReadonlySet<string>): s
   else if (!KIND_TRACKS[lesson.kind]?.includes(lesson.track)) problems.push(`${lesson.id}: a ${lesson.kind} Lesson cannot sit in the ${lesson.track} track`);
   if (!COURSE_LEVELS.includes(lesson.level)) problems.push(`${lesson.id}: unknown level ${lesson.level}`);
   if (!lesson.goal?.trim()) problems.push(`${lesson.id}: the Lesson has no learning goal`);
-  else if (lesson.goal.length > MAX_GOAL) problems.push(`${lesson.id}: the learning goal is longer than ${MAX_GOAL} characters`);
+  else if (lesson.goal.length > MAX_LEARNING_GOAL) problems.push(`${lesson.id}: the learning goal is longer than ${MAX_LEARNING_GOAL} characters`);
   if (!Array.isArray(lesson.priorKnowledge)) problems.push(`${lesson.id}: the Lesson has no prior knowledge list`);
   else {
     if (lesson.priorKnowledge.includes(lesson.id)) problems.push(`${lesson.id}: a Lesson cannot be its own prior knowledge`);
@@ -277,7 +276,7 @@ function validatePart(lesson: LessonData, part: LessonPart, index: number): stri
 }
 
 /** Text kept from Wikibooks or Wikipedia, under CC BY-SA. */
-export function checkTextCredit(credit: Credit | undefined): boolean {
+function checkTextCredit(credit: Credit | undefined): boolean {
   return Boolean(
     credit &&
       credit.licence === WIKIBOOKS_LICENCE &&

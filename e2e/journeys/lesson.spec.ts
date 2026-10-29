@@ -1,18 +1,19 @@
 // Feature map: Lesson, one of each kind walked decision by decision: an opening (for Black, so the
-// Engine moves first), a Theme and an endgame (several parts, then a play-out). One Coach call per
-// decision, every main-line move graded Best or Good, progress survives a reload, and the catalogue
-// shows progress from the database. The catalogue's four tracks and its suggested next Lesson
-// (ADR 0012), which finishing a Lesson moves on; the intro's goal and the Lessons it builds on; the
-// Lesson's goal and key idea sent with every Coach call. Every other Lesson's data is checked
-// without a browser: content.test.ts (legal, credited, goals and key ideas) and lesson-engine.test.ts
-// (every move Best or Good). Goals and key ideas are read from the data, never written here.
+// Engine moves first), a Theme, an endgame (several parts, then a play-out) and a way of thinking
+// during a game. One Coach call per decision, every main-line move graded Best or Good, progress
+// survives a reload, and the catalogue shows progress from the database. The catalogue's four tracks
+// and the Player's next Lesson (ADR 0012), which finishing a Lesson moves on; the intro's goal, the
+// Lessons it builds on and How moves are written; the Lesson's learning goal and the current part's
+// key idea sent with every Coach call. Every other Lesson's data is checked without a browser:
+// content.test.ts (legal, credited, goals and key ideas) and lesson-engine.test.ts (every move Best
+// or Good). Goals and key ideas are read from the data, never written here.
 import { readFileSync } from 'node:fs';
 import type { Page } from '@playwright/test';
 import { legalMoves, piecesOf } from '../../packages/shared/src/chess.ts';
 import { LEVEL_NAMES, suggestNext, TRACK_NAMES, type CatalogueItem } from '../../packages/shared/src/content/course.ts';
 import { decisions, TRACKS, type LessonData } from '../../packages/shared/src/content/lessons.ts';
 import type { LessonProgress } from '../../packages/shared/src/protocol.ts';
-import { coachIdle, connection, expect, fenOf, play, test } from '../fixtures/app.ts';
+import { coachIdle, coachPanel, connection, expect, fenOf, play, test } from '../fixtures/app.ts';
 
 const index = JSON.parse(readFileSync(new URL('../../data/lessons/index.json', import.meta.url), 'utf8')) as CatalogueItem[];
 const readLesson = (id: string) => JSON.parse(readFileSync(new URL(`../../data/lessons/${id}.json`, import.meta.url), 'utf8')) as LessonData;
@@ -30,18 +31,36 @@ function saveProgress(app: { app: { db: { prepare(sql: string): { run(...args: u
     .run(id, step, completed ? 1 : 0, '2026-10-01T10:00:00.000Z');
 }
 
-/** The Coach requests the page sends from now on: watch from a fresh connection. */
-async function watchCoachAsks(page: Page): Promise<{ type: string; job: string; lessonFocus?: unknown }[]> {
-  const sent: { type: string; job: string; lessonFocus?: unknown }[] = [];
+interface CoachAskFrame {
+  type: string;
+  job: string;
+  moveUci?: string;
+  lessonFocus?: unknown;
+}
+
+/**
+ * The Coach requests the page sends from now on, watched from a fresh connection. It starts the
+ * Lesson and waits until the Coach is ready: the desktop is connected a moment before it says
+ * whether the Coach is, and a Hint pressed in between would not reach the Coach.
+ */
+async function watchCoachAsks(page: Page, start: 'Start the Lesson' | 'Resume the Lesson' = 'Start the Lesson'): Promise<CoachAskFrame[]> {
+  const sent: CoachAskFrame[] = [];
   page.on('websocket', (ws) =>
     ws.on('framesent', (f) => {
-      const frame = JSON.parse(String(f.payload)) as { type: string; job: string };
+      const frame = JSON.parse(String(f.payload)) as CoachAskFrame;
       if (frame.type === 'coach.ask') sent.push(frame);
     }),
   );
   await page.reload();
   await expect(connection(page)).toHaveText(/Desktop connected/);
+  await page.getByRole('button', { name: start }).click();
+  await expect(coachPanel(page).getByText('Coach ready', { exact: true })).toBeVisible();
   return sent;
+}
+
+/** The Lesson's focus as the desktop puts it in a brief: a Lesson turn names the Lesson in `lesson.opening` instead. */
+function briefFocus(lesson: LessonData, job: string, keyIdea: string): unknown {
+  return { ...(job === 'lesson-turn' ? {} : { lesson: lesson.name }), learningGoal: lesson.goal, keyIdea };
 }
 
 for (const id of ['caro-kann', 'pins', 'queen-mate']) {
@@ -58,6 +77,9 @@ for (const id of ['caro-kann', 'pins', 'queen-mate']) {
     const about = paired.getByRole('region', { name: 'About this Lesson' });
     if (lesson.intro.credit) await expect(about.getByRole('link', { name: lesson.intro.credit.source })).toBeVisible();
     else await expect(about).not.toContainText('Text adapted from');
+    // An opening shows no Position card while it is played, so its part's text is in the intro.
+    const opening = lesson.parts[0]!;
+    if (lesson.kind === 'opening' && opening.text) await expect(about).toContainText(opening.text);
     await paired.getByRole('button', { name: 'Start the Lesson' }).click();
 
     for (const [i, { node, part }] of steps.entries()) {
@@ -83,7 +105,7 @@ for (const id of ['caro-kann', 'pins', 'queen-mate']) {
         if (!part.textCredit) await expect(position).not.toContainText('Text adapted from');
         // The part's key idea would give the answer away: the screen shows it only once the part is
         // played (the Coach's replies may use it after a move, as the fake Coach does).
-        if (part.keyIdea.trim()) await expect(position).not.toContainText(part.keyIdea);
+        await expect(position).not.toContainText(part.keyIdea);
       }
       await expect(paired.getByRole('region', { name: 'Your choice' })).toHaveCount(0);
       await expect(paired.getByLabel('Coach conversation')).toContainText('What are your options here?');
@@ -91,9 +113,10 @@ for (const id of ['caro-kann', 'pins', 'queen-mate']) {
       await expect(paired.getByRole('region', { name: 'Your choice' })).toContainText(`You played ${node.mainSan}`);
       // The Engine check (ADR 0008): the move the Lesson teaches is never graded worse than Good.
       await expect(paired.getByRole('region', { name: 'Your choice' }).getByTitle(/^Move Grade: (Best|Good)$/)).toBeVisible();
-      // Once the part's last decision is played well, its key idea sums it up.
+      // Once the part's last decision is played well, its key idea sums it up; not before.
       const lastOfPart = steps[i + 1]?.partIndex !== steps[i]!.partIndex;
-      if (lastOfPart && part.keyIdea.trim()) await expect(paired.getByRole('region', { name: 'Your choice' })).toContainText(`Key idea: ${part.keyIdea}`);
+      if (lastOfPart) await expect(paired.getByRole('region', { name: 'Your choice' })).toContainText(`Key idea: ${part.keyIdea}`);
+      else await expect(paired.getByRole('region', { name: 'Your choice' })).not.toContainText('Key idea:');
       await coachIdle(paired);
       expect(await lessonCalls()).toBe(i + 1);
       if (i === 0) {
@@ -112,10 +135,10 @@ for (const id of ['caro-kann', 'pins', 'queen-mate']) {
     await expect(done).toBeVisible();
     if (lesson.playOut) await expect(done.getByRole('link', { name: /^Play it out against the Engine/ })).toHaveAttribute('href', `#/play-out/${id}`);
     // What the Lesson taught, part by part, once it is over.
-    for (const part of lesson.parts.filter((p) => p.keyIdea.trim())) await expect(done.getByRole('list', { name: 'What you learned' })).toContainText(part.keyIdea);
+    for (const part of lesson.parts) await expect(done.getByRole('list', { name: 'What you learned' })).toContainText(part.keyIdea);
     // The next Lesson is the one the app suggests now this one is complete, not the next in its track.
-    const next = suggestNext(index, [finished(id)], SEED_LEVEL)?.lesson;
-    if (next) await expect(done.getByRole('link', { name: `Next Lesson: ${next.name}` })).toHaveAttribute('href', `#/lesson/${next.id}`);
+    const next = suggestNext(index, [finished(id)], SEED_LEVEL)!.lesson;
+    await expect(done.getByRole('link', { name: `Next Lesson: ${next.name}` })).toHaveAttribute('href', `#/lesson/${next.id}`);
     await expect.poll(async () => (await app.rows<{ step: number; completed: number }>('lesson_progress'))[0]).toMatchObject({
       step: steps.length,
       completed: 1,
@@ -325,13 +348,13 @@ test('on a 375px phone, each Lesson’s example in the thinking box shows whole'
   }
 });
 
-test('the catalogue shows the four tracks and suggests a Lesson; finishing it moves the suggestion on', async ({ paired, app }) => {
+test('the catalogue shows the four tracks and the Player’s next Lesson; finishing it moves the next Lesson on', async ({ paired, app }) => {
   const first = suggestNext(index, [], SEED_LEVEL)!.lesson;
   await paired.goto(`${app.url}/#/lessons`);
-  const suggested = paired.getByRole('region', { name: 'Suggested next' });
+  const suggested = paired.getByRole('region', { name: 'Your next Lesson' });
   await expect(suggested.getByRole('heading', { name: first.name })).toBeVisible();
   await expect(suggested).toContainText(`${TRACK_NAMES[first.track].name} · ${LEVEL_NAMES[first.level]}`);
-  if (first.goal.trim()) await expect(suggested).toContainText(first.goal);
+  await expect(suggested).toContainText(first.goal);
   await expect(suggested).toContainText('Start here.');
   await expect(suggested.getByRole('link', { name: `Start ${first.name}` })).toHaveAttribute('href', `#/lesson/${first.id}`);
 
@@ -349,9 +372,16 @@ test('the catalogue shows the four tracks and suggests a Lesson; finishing it mo
   const lastHeading = paired.getByRole('heading', { name: lastTrack, level: 2, exact: true });
   await expect(lastHeading).toBeFocused();
   await expect(lastHeading).toBeInViewport();
+  // A link with a track opens the catalogue there.
+  await paired.goto(`${app.url}/#/learn`);
+  await paired.goto(`${app.url}/#/lessons?track=endgames`);
+  const endgames = paired.getByRole('heading', { name: TRACK_NAMES.endgames.name, level: 2, exact: true });
+  await expect(endgames).toBeFocused();
+  await expect(endgames).toBeInViewport();
 
   // Learn offers the same Lesson, a click away.
   await paired.goto(`${app.url}/#/learn`);
+  await expect(paired.getByText(/^Your next Lesson:/)).toContainText(first.name);
   await expect(paired.getByRole('link', { name: first.name, exact: true })).toHaveAttribute('href', `#/lesson/${first.id}`);
 
   // Started on another device and one decision from the end: the suggestion says so and resumes it.
@@ -359,7 +389,7 @@ test('the catalogue shows the four tracks and suggests a Lesson; finishing it mo
   saveProgress(app, first.id, steps.length - 1, false);
   await paired.goto(`${app.url}/#/lessons`);
   // The catalogue counts decisions from the index, as the Lesson cards do.
-  await expect(suggested).toContainText(`You started this Lesson and have done ${steps.length - 1} of ${first.decisions} decisions.`);
+  await expect(suggested).toContainText(`You started this Lesson and have made ${steps.length - 1} of its ${first.decisions} decisions.`);
   await suggested.getByRole('link', { name: `Resume ${first.name}` }).click();
   await paired.getByRole('button', { name: 'Resume the Lesson' }).click();
   await play(paired, steps[steps.length - 1]!.node.main, `${first.name} Lesson board`);
@@ -373,8 +403,15 @@ test('the catalogue shows the four tracks and suggests a Lesson; finishing it mo
     'href',
     `#/lesson/${then.id}`,
   );
+  // The screen shows the end before the desktop has saved it: leave only once it has.
+  await expect
+    .poll(async () => (await app.rows<{ lesson_id: string; completed: number }>('lesson_progress')).find((r) => r.lesson_id === first.id)?.completed)
+    .toBe(1);
   await paired.goto(`${app.url}/#/lessons`);
   await expect(suggested.getByRole('heading', { name: then.name })).toBeVisible();
+  const why = suggestNext(index, [finished(first.id)], SEED_LEVEL)!.why;
+  expect(why === 'ready' || why === 'next').toBe(true);
+  await expect(suggested).toContainText(why === 'ready' ? 'You have done the Lessons it builds on.' : 'It comes next in the order of the Lessons.');
   await expect(paired.getByRole('link', { name: `${first.name}: Complete` })).toBeVisible();
   await expect(jumps.filter({ hasText: TRACK_NAMES[first.track].name })).toContainText(`1 of ${index.filter((l) => l.track === first.track).length} complete`);
 });
@@ -382,30 +419,23 @@ test('the catalogue shows the four tracks and suggests a Lesson; finishing it mo
 test('once every Lesson is complete, the catalogue says so', async ({ paired, app }) => {
   for (const l of index) saveProgress(app, l.id, l.decisions, true);
   await paired.goto(`${app.url}/#/lessons`);
-  await expect(paired.getByRole('region', { name: 'Suggested next' })).toContainText('You have done every Lesson.');
+  await expect(paired.getByRole('region', { name: 'Your next Lesson' })).toContainText('You have done every Lesson.');
   await expect(paired.getByRole('link', { name: `${index[0]!.name}: Complete` })).toBeVisible();
 });
 
 test('the Lesson intro says what the Player will learn and links the Lessons it builds on, without locking it', async ({ paired, app }) => {
-  // A Lesson with prior knowledge, if the data has one yet; the goal is read from the data either way.
-  const target = index.find((l) => l.priorKnowledge.length) ?? index[0]!;
-  const lesson = readLesson(target.id);
-  await paired.goto(`${app.url}/#/lesson/${target.id}`);
+  // A Lesson with prior knowledge; its goal and prior knowledge are read from the data.
+  const target = index.find((l) => l.priorKnowledge.length);
+  expect(target, 'a Lesson with prior knowledge').toBeDefined();
+  const lesson = readLesson(target!.id);
+  await paired.goto(`${app.url}/#/lesson/${lesson.id}`);
   const about = paired.getByRole('region', { name: 'About this Lesson' });
   await expect(about).toContainText(`${TRACK_NAMES[lesson.track].name} · ${LEVEL_NAMES[lesson.level]}`);
-  const goal = about.getByRole('heading', { name: 'What you will learn' });
-  if (lesson.goal.trim()) {
-    await expect(goal).toBeVisible();
-    await expect(about).toContainText(lesson.goal);
-  } else await expect(goal).toHaveCount(0);
+  await expect(about.getByRole('heading', { name: 'What you will learn' })).toBeVisible();
+  await expect(about).toContainText(lesson.goal);
 
   const builtOn = about.getByRole('list', { name: 'It builds on' });
-  const priorId = lesson.priorKnowledge[0];
-  if (!priorId) {
-    await expect(builtOn).toHaveCount(0);
-    return;
-  }
-  const prior = index.find((l) => l.id === priorId)!;
+  const prior = index.find((l) => l.id === lesson.priorKnowledge[0])!;
   const item = builtOn.getByRole('listitem').filter({ has: paired.getByRole('link', { name: prior.name, exact: true }) });
   await expect(item.getByRole('link')).toHaveAttribute('href', `#/lesson/${prior.id}`);
   await expect(item).toContainText('Not started');
@@ -416,12 +446,11 @@ test('the Lesson intro says what the Player will learn and links the Lessons it 
   await expect(item).toContainText('Complete');
 });
 
-test('every Coach call in a Lesson carries the Lesson’s goal and the part’s key idea', async ({ paired, app }) => {
+test('every Coach call in a Lesson carries the Lesson’s learning goal and the part’s key idea', async ({ paired, app }) => {
   const lesson = readLesson('italian-game');
   const { node, part } = decisions(lesson)[0]!;
   await paired.goto(`${app.url}/#/lesson/${lesson.id}`);
   const sent = await watchCoachAsks(paired);
-  await paired.getByRole('button', { name: 'Start the Lesson' }).click();
   await paired.getByRole('button', { name: 'Hint' }).click();
   await coachIdle(paired);
   await play(paired, node.main, `${lesson.name} Lesson board`);
@@ -430,20 +459,62 @@ test('every Coach call in a Lesson carries the Lesson’s goal and the part’s 
   await coachIdle(paired);
 
   // The page sends it with a Hint, a Lesson turn and a Why Question alike (ADR 0012).
-  const focus = { name: lesson.name, goal: lesson.goal, keyIdea: part.keyIdea };
+  const focus = { lesson: lesson.name, learningGoal: lesson.goal, keyIdea: part.keyIdea };
   expect(sent.map((f) => f.job)).toEqual(['hint', 'lesson-turn', 'why']);
   expect(sent.map((f) => f.lessonFocus)).toEqual([focus, focus, focus]);
-  // The desktop puts it in each brief as `focus`, when the Lesson has a goal or a key idea to give.
+  // The desktop puts it in each brief as `focus`.
   const briefs = (await app.rows<{ job: string; brief: string }>('coach_calls')).map((c) => ({ job: c.job, focus: JSON.parse(c.brief).focus }));
   expect(briefs.map((b) => b.job)).toEqual(['hint', 'lesson-turn', 'why']);
-  const expected = lesson.goal.trim() || part.keyIdea.trim() ? { lesson: lesson.name, goal: lesson.goal.trim(), keyIdea: part.keyIdea.trim() } : undefined;
-  expect(briefs.map((b) => b.focus)).toEqual([expected, expected, expected]);
+  expect(briefs.map((b) => b.focus)).toEqual(briefs.map((b) => briefFocus(lesson, b.job, part.keyIdea)));
 });
 
-test('on a phone, the catalogue and a Lesson intro fit the screen, with the suggestion and the tracks first', async ({ paired, app }) => {
+test('a thinking Lesson, played to the end: each Coach call carries its part’s key idea, which the screen shows only once the part is played', async ({ paired, app }) => {
+  const lesson = readLesson('piece-values');
+  const steps = decisions(lesson);
+  const boardName = `${lesson.name} Lesson board`;
+  // Several parts, each with a decision before its last: the key idea must wait for the part's end.
+  expect(lesson.kind).toBe('thinking');
+  expect(new Set(steps.map((s) => s.partIndex)).size).toBeGreaterThan(1);
+  expect(steps.some((s, i) => steps[i + 1]?.partIndex === s.partIndex)).toBe(true);
+  await paired.goto(`${app.url}/#/lesson/${lesson.id}`);
+  const sent = await watchCoachAsks(paired);
+  const choice = paired.getByRole('region', { name: 'Your choice' });
+  await paired.getByRole('button', { name: 'Hint' }).click();
+  await coachIdle(paired);
+  for (const [i, { node, part }] of steps.entries()) {
+    await expect(paired.getByText(`Decision ${i + 1} of ${steps.length}`)).toBeVisible();
+    await expect(paired.getByRole('region', { name: 'Position' })).toContainText(part.title);
+    await play(paired, node.main, boardName);
+    await expect(choice).toContainText(`You played ${node.mainSan}`);
+    await expect(choice.getByTitle(/^Move Grade: (Best|Good)$/)).toBeVisible();
+    await coachIdle(paired);
+    if (steps[i + 1]?.partIndex === steps[i]!.partIndex) await expect(choice).not.toContainText('Key idea:');
+    else await expect(choice).toContainText(`Key idea: ${part.keyIdea}`);
+    await paired.getByRole('button', { name: /^Continue/ }).click();
+  }
+  // Once the Lesson is over, a Why Question asks about the position on the board, with no move.
+  const done = paired.getByRole('region', { name: 'Lesson complete' });
+  await expect(done).toBeVisible();
+  for (const part of lesson.parts) await expect(done.getByRole('list', { name: 'What you learned' })).toContainText(part.keyIdea);
+  await paired.getByRole('button', { name: 'Ask the Coach why' }).click();
+  await coachIdle(paired);
+
+  // The Hint and every Lesson turn carry their own part's key idea; the last Why Question, the last part's.
+  const last = steps[steps.length - 1]!.part;
+  const parts = [steps[0]!.part, ...steps.map((s) => s.part), last];
+  expect(sent.map((f) => f.job)).toEqual(['hint', ...steps.map(() => 'lesson-turn'), 'why']);
+  expect(sent.map((f) => f.lessonFocus)).toEqual(parts.map((p) => ({ lesson: lesson.name, learningGoal: lesson.goal, keyIdea: p.keyIdea })));
+  expect(sent[sent.length - 1]).not.toHaveProperty('moveUci');
+  const briefs = (await app.rows<{ job: string; brief: string }>('coach_calls')).map((c) => ({ job: c.job, brief: JSON.parse(c.brief) as { fen: string; focus?: unknown; move?: unknown } }));
+  expect(briefs.map((b) => b.job)).toEqual(sent.map((f) => f.job));
+  expect(briefs.map((b) => b.brief.focus)).toEqual(briefs.map((b, i) => briefFocus(lesson, b.job, parts[i]!.keyIdea)));
+  expect(briefs[briefs.length - 1]!.brief).not.toHaveProperty('move');
+});
+
+test('on a phone, the catalogue and a Lesson intro fit the screen, with the next Lesson and the tracks first', async ({ paired, app }) => {
   await paired.setViewportSize({ width: 390, height: 844 });
   await paired.goto(`${app.url}/#/lessons`);
-  const suggested = paired.getByRole('region', { name: 'Suggested next' });
+  const suggested = paired.getByRole('region', { name: 'Your next Lesson' });
   await expect(suggested.getByRole('link', { name: /^(Start|Resume) / })).toBeInViewport();
   await expect(paired.getByRole('navigation', { name: 'Tracks' })).toBeInViewport();
   // Nothing wider than the screen, and every Lesson's card within it.
@@ -457,6 +528,31 @@ test('on a phone, the catalogue and a Lesson intro fit the screen, with the sugg
   await expect(paired.getByRole('region', { name: 'About this Lesson' })).toBeVisible();
   expect(await paired.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
   await expect(paired.getByRole('button', { name: 'Start the Lesson' })).toBeVisible();
+  // How moves are written, opened, still fits.
+  await paired.getByText('How moves are written', { exact: true }).click();
+  await expect(paired.getByText('takes: Nxe5 is a knight taking on e5')).toBeVisible();
+  expect(await paired.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+});
+
+test('How moves are written explains the notation, closed until the Player opens it, in the intro and while playing', async ({ paired, app }) => {
+  await paired.goto(`${app.url}/#/lesson/italian-game`);
+  const about = paired.getByRole('region', { name: 'About this Lesson' });
+  const help = paired.getByText('How moves are written', { exact: true });
+  const takes = paired.getByText('takes: Nxe5 is a knight taking on e5');
+  await expect(about.getByText('How moves are written', { exact: true })).toBeVisible();
+  await expect(takes).toBeHidden();
+  await help.click();
+  for (const text of ['The letters a to h are the files', 'king, queen, rook, bishop, knight', 'checkmate', 'castles kingside', 'castles queenside', 'becomes a queen', 'White’s 12th move', 'Black’s 12th move']) {
+    await expect(about).toContainText(text);
+  }
+  await expect(takes).toBeVisible();
+  // While playing, beside the board: one, closed again.
+  await paired.getByRole('button', { name: 'Start the Lesson' }).click();
+  await expect(paired.getByText('Decision 1 of')).toBeVisible();
+  await expect(help).toHaveCount(1);
+  await expect(takes).toBeHidden();
+  await help.click();
+  await expect(takes).toBeVisible();
 });
 
 /** How many king moves apart two squares are. */

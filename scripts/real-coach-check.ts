@@ -1,7 +1,9 @@
 // The real-Coach check (ADR 0006). It runs on the owner's desktop, where Claude Code is logged
 // in, because the real Coach can't run in cloud CI (ADR 0001). It starts a verify-mode instance with
 // the real Coach in place of the fake one, makes one call of every Coach job through the protocol,
-// and checks only structure, so the verdict doesn't flip when the Coach words something differently:
+// and Lesson calls that carry a Lesson's focus as the Lesson screen sends them (ADR 0012: a Lesson
+// turn in an opening and in a Theme, and a Hint in a way-of-thinking Lesson). It checks only
+// structure, so the verdict doesn't flip when the Coach words something differently:
 //   - every move a reply shows is legal and came from the Engine (the move guard, ADR 0002), the
 //     briefed threat included, where the guard plays it, and with Think deeper on the Engine's
 //     answers to the Coach's questions (ADR 0010);
@@ -21,7 +23,7 @@
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { playSan, playUci, sansIn } from '@chess-coach/shared/chess';
+import { playSan, playUci, sanLine, sansIn } from '@chess-coach/shared/chess';
 import { allowedMoves, answeredMoves, askedLineMoves, guardReply } from '@chess-coach/shared/coach/guard';
 import { answerMoves, type EngineAnswer, type EngineQuestion } from '@chess-coach/shared/coach/engine-tool';
 import { MAX_WORDS, threatFen, type Brief } from '@chess-coach/shared/coach/brief';
@@ -192,7 +194,14 @@ async function driveEveryJob(client: CoachClient, root: URL): Promise<{ job: Coa
   // Lesson turns, each with its Lesson's learning goal and the part's key idea, as every Coach call
   // in a Lesson carries them (ADR 0012). First the Italian Game's 3.Bc4, with its bundled notes.
   const readLesson = (id: string) => JSON.parse(readFileSync(new URL(`data/lessons/${id}.json`, root), 'utf8')) as LessonData;
-  const focusOf = (lesson: LessonData, part: LessonPart | undefined) => ({ name: lesson.name, goal: lesson.goal, keyIdea: part?.keyIdea ?? '' });
+  const focusOf = (lesson: LessonData, part: LessonPart | undefined) => ({ lesson: lesson.name, learningGoal: lesson.goal, keyIdea: part?.keyIdea ?? '' });
+  /** A part's first decision, and the moves played before it from the part's position, as the Lesson screen sends them. */
+  const firstDecision = (lesson: LessonData) => {
+    const part = lesson.parts[0];
+    const node = part?.nodes.find((n) => n.decision);
+    if (!part || !node) throw new Error(`The ${lesson.name} Lesson has no decision.`);
+    return { part, node, recentMoves: sanLine(part.fen, part.mainLine.slice(0, node.ply)) };
+  };
   const lesson = readLesson('italian-game');
   const node = lesson.parts[0]?.nodes.find((n) => n.ply === 4);
   out.push({
@@ -209,22 +218,34 @@ async function driveEveryJob(client: CoachClient, root: URL): Promise<{ job: Coa
     }),
   });
 
-  // Then a Theme: the Forks Lesson's first decision, a check that sets up a fork, where the Coach
-  // has to explain the key idea from the Engine's facts.
+  // Then a Theme: the Forks Lesson's first decision, where the Coach has to explain the key idea
+  // from the Engine's facts. The part starts with the opponent's move, which the screen sends too.
   const forks = readLesson('forks');
-  const part = forks.parts[0];
-  const first = part?.nodes.find((n) => n.decision);
-  if (!part || !first) throw new Error('The Forks Lesson has no decision.');
+  const fork = firstDecision(forks);
   out.push({
     job: 'lesson-turn',
     reply: await client.request('coach.ask', {
       job: 'lesson-turn',
-      fen: first.fen,
-      recentMoves: [],
-      playerSide: part.side,
-      moveUci: first.main,
-      lesson: { lessonId: forks.id, opening: forks.name, notes: first.notes?.text ?? '', popularity: [], finalTurn: false },
-      lessonFocus: focusOf(forks, part),
+      fen: fork.node.fen,
+      recentMoves: fork.recentMoves,
+      playerSide: fork.part.side,
+      moveUci: fork.node.main,
+      lesson: { lessonId: forks.id, opening: forks.name, notes: fork.node.notes?.text ?? '', popularity: [], finalTurn: false },
+      lessonFocus: focusOf(forks, fork.part),
+    }),
+  });
+
+  // A Hint in a way-of-thinking Lesson: it may point to the key idea, but still names no move.
+  const blunderCheck = readLesson('blunder-check');
+  const check = firstDecision(blunderCheck);
+  out.push({
+    job: 'hint',
+    reply: await client.request('coach.ask', {
+      job: 'hint',
+      fen: check.node.fen,
+      recentMoves: check.recentMoves,
+      playerSide: check.part.side,
+      lessonFocus: focusOf(blunderCheck, check.part),
     }),
   });
 

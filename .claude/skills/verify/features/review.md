@@ -13,10 +13,9 @@ call.
 - `Start the Review`: grading progress as the desktop reports each position analysed, then the
   overview streams ("The Coach is writing an overview of the game…", from the moment the desktop
   starts on it), then the key moments ("The Coach is explaining the key moments…", from the moment
-  it starts on the first one)
-  ("The Coach is explaining the key moments…"), and the region `Key moments` shows. The button is disabled from the first click, and a second
-  `review.start` for a game whose Review is being made waits for that one, so a double click
-  makes one Review with no error.
+  it starts on the first one), and the region `Key moments` shows. The button is disabled from the
+  first click, and a second `review.start` for a game whose Review is being made waits for that
+  one, so a double click makes one Review with no error.
 - A Review being made goes on while the Player is on another screen: coming back (inside the
   app, no reload) shows its progress again, not `Start the Review`, and it finishes there with no
   second `review.start` (the device keeps the request in `packages/web/src/lib/review-runs.svelte.ts`).

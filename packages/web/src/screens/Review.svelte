@@ -316,7 +316,7 @@
       <div class="side" bind:this={side}>
         {#if phase === 'ready'}
           <div class="card">
-            <p>The Engine grades every move, then the Coach explains the moments that mattered most.</p>
+            <p>The Engine grades every move, then the Coach sums up the game and explains the moments that mattered most.</p>
             <button type="button" onclick={start} disabled={api.state !== 'online'}>Start the Review</button>
           </div>
         {:else if phase === 'running' && run?.interrupted}
@@ -330,8 +330,8 @@
           </div>
         {:else if phase === 'running' && run?.phase === 'explaining'}
           <div class="card" role="status" aria-live="polite">
-            <!-- The overview comes first when Settings have it on; this screen only knows once its text streams. -->
-            <p>{run.overview && !run.streaming.length ? 'The Coach is writing an overview of the game…' : 'The Coach is explaining the key moments…'}</p>
+            <!-- The overview comes first when Settings have it on: the desktop says so as it starts on it. -->
+            <p>{run.overviewFirst && !run.streaming.length ? 'The Coach is writing an overview of the game…' : 'The Coach is explaining the key moments…'}</p>
             {#if run.overview}<p class="stream" data-testid="overview-stream">{run.overview}</p>{/if}
             {#each run.streaming as text, i (i)}<p class="stream">{text}</p>{/each}
           </div>

@@ -637,6 +637,32 @@ describe('Reviews', () => {
     expect(JSON.parse(call?.stripped as string)).toEqual([]);
   });
 
+  it('saves the overview’s Player Profile note with the Review, so a Review that fails leaves none', async () => {
+    const app = await instance();
+    const c = await client(app);
+    // The overview writes a note, then the Coach can't be reached for the first key moment.
+    app.coach.script({ kind: 'reply', reply: { note: 'Loses the thread after the opening.' } });
+    app.coach.script({ kind: 'unavailable' });
+    await expect(c.request('review.start', { gameId: 1 })).rejects.toMatchObject({ code: 'coach-unavailable' });
+    expect(rows(app, 'SELECT * FROM reviews')).toHaveLength(0);
+    expect(rows(app, 'SELECT * FROM coach_notes')).toEqual([]);
+    // Started again, the Review saves one note: the new overview's.
+    app.coach.script({ kind: 'reply', reply: { note: 'Lets the middlegame slip after a good opening.' } });
+    await c.request('review.start', { gameId: 1 });
+    expect(rows<{ text: string }>(app, 'SELECT text FROM coach_notes').map((n) => n.text)).toEqual(['Lets the middlegame slip after a good opening.']);
+  });
+
+  it('makes no overview of a game with no moves', async () => {
+    const app = await instance({ seed: 'empty' });
+    const c = await client(app);
+    const { game } = await c.request('games.saveEngineGame', {
+      game: { clientId: 'resigned-at-once', playerSide: 'white', strength: 2, moves: [], result: '0-1', termination: 'resignation', startedAt: '2026-01-01T10:00:00.000Z', finishedAt: '2026-01-01T10:00:05.000Z' },
+    });
+    const review = await c.request('review.start', { gameId: game.id });
+    expect(review).toMatchObject({ overview: null, moments: [] });
+    expect(rows(app, 'SELECT * FROM coach_calls')).toEqual([]);
+  });
+
   it('runs the overview on the model set for Review moments, whatever it is', async () => {
     const app = await instance();
     const c = await client(app);

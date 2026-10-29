@@ -30,6 +30,11 @@ export interface AskOptions {
   deadlineMs?: number;
   /** With the Engine, answer once more from the brief alone when the deadline stops the call. */
   retryWithoutEngine?: boolean;
+  /**
+   * Return the reply's Player Profile note without saving it, for a caller that saves it later: a
+   * Review saves its one note together with the Review, so a Review that fails leaves none.
+   */
+  holdNote?: boolean;
 }
 
 const MAX_THREADS = 200;
@@ -133,7 +138,7 @@ export class CoachService {
     // Moves the Engine's answers gave the Coach count as Engine output; a move it made up is still stripped.
     const guarded = guardReply(brief, raw, tool?.moves);
     this.log(ask, model, brief, raw, guarded.stripped, tool?.calls);
-    const note = guarded.note ? addCoachNote(this.db, this.clock, guarded.note) : null;
+    const note = guarded.note && !options.holdNote ? addCoachNote(this.db, this.clock, guarded.note) : guarded.note;
     if (ask.threadId) this.remember(ask.threadId, ask.question, raw.text);
     return {
       text: raw.text,

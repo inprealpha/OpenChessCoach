@@ -29,6 +29,8 @@ export class ReviewRun {
   progress = $state({ done: 0, total: 0 });
   /** The Coach's overview of the whole game, as it is written; empty with the overview turned off. */
   overview = $state('');
+  /** The desktop said the overview comes first: it does as soon as it starts writing one. */
+  overviewFirst = $state(false);
   /** The Coach's explanation of each key moment, as it is written. */
   streaming = $state<string[]>([]);
   /** True while the connection to the desktop is down: the Review goes on once it is back. */
@@ -52,6 +54,7 @@ export class ReviewRun {
           (text, part) => {
             this.phase = 'explaining';
             if (part === 'overview') {
+              this.overviewFirst = true;
               this.overview += text;
               return;
             }
@@ -73,6 +76,7 @@ export class ReviewRun {
         this.interrupted = false;
         // Asked again, the desktop returns the Review it finished meanwhile, joins the one it is
         // still making from where it has got to, or starts over if it was restarted.
+        this.overviewFirst = false;
         this.overview = '';
         this.streaming = [];
       }

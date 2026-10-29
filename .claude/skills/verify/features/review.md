@@ -11,7 +11,8 @@ call.
 ## Sub-features
 
 - `Start the Review`: grading progress as the desktop reports each position analysed, then the
-  overview streams ("The Coach is writing an overview of the game…"), then the key moments
+  overview streams ("The Coach is writing an overview of the game…", from the moment the desktop
+  starts on it), then the key moments
   ("The Coach is explaining the key moments…"), and the region `Key moments` shows. The button is disabled from the first click, and a second
   `review.start` for a game whose Review is being made waits for that one, so a double click
   makes one Review with no error.
@@ -58,8 +59,10 @@ call.
   guard lets it name only those moves and the key moments' better moves, and draw nothing. Each
   game move it names is a button `Go to move <N. SAN>, <Move Grade>`, inline in its text, that
   puts the board on the position after that move, as the move list does; a named move its text
-  doesn't write with its number is listed after the text. The overview may add the Review's one
-  Player Profile note; when it adds none, the last key moment still may. Saved with the Review
+  doesn't write with its number is listed after the text. The overview may write the Review's one
+  Player Profile note; when it writes none, the last key moment still may. The note is saved with
+  the Review, so a Review that fails part way leaves none (`games.test.ts`). A game with no moves
+  gets no overview and no Coach call. Saved with the Review
   (`reviews.overview`, JSON), it reopens with no Coach call; a Review saved before there were
   overviews, or made with the overview off, has none (`overview: null`).
 - Settings → `Reviews` → `Open each Review with the Coach’s overview of the whole game` (on by

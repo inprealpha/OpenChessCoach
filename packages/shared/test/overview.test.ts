@@ -83,4 +83,13 @@ describe('the overview’s facts', () => {
     // A better move isn't one of the game's moves: there is no place in the game to link it to.
     expect(namedMoves(facts, 'axb4 held.', ['a3b4']).map((m) => m.label)).toEqual([]);
   });
+
+  it('never takes a listed UCI for a game move when another move in the brief has the same UCI', () => {
+    // The Player plays 14. axb4 later, as a Mistake: a3b4 is now both 11. Bxf7+'s better move and that move.
+    const axb4 = { ply: 27, side: 'white' as const, uci: 'a3b4', san: 'axb4', label: '14. axb4', grade: 'Mistake' as const, only: false };
+    const withAxb4 = { ...facts, standouts: [...facts.standouts, axb4] };
+    expect(namedMoves(withAxb4, 'At 11. Bxf7+, axb4 would have held.', ['c4f7', 'a3b4']).map((m) => m.label)).toEqual(['11. Bxf7+']);
+    // Named with its number, it is that move.
+    expect(namedMoves(withAxb4, 'Then 14. axb4 lost more.', ['a3b4']).map((m) => m.label)).toEqual(['14. axb4']);
+  });
 });

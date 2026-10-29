@@ -183,7 +183,7 @@ export interface CoachReply {
   moves: string[];
   arrows: Arrow[];
   highlights: string[];
-  /** The note saved to the Player Profile, if any. */
+  /** The note saved to the Player Profile, if any (or, for a Review, the one it saves with itself). */
   note: string | null;
   /** How many moves or arrows the guard removed. */
   stripped: number;

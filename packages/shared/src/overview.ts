@@ -83,15 +83,17 @@ export function gameFacts(game: Pick<GameDetail, 'opening' | 'result'>, graded: 
 }
 
 /**
- * The game's moves an overview names, in game order: the key moments and standout moves its
- * guarded reply lists, or its text names with their number. Any other move was never the Engine's
- * and the guard has already stripped it (ADR 0002).
+ * The game's moves an overview names, in game order: the key moments and standout moves its text
+ * names with their number, or its guarded reply lists. A UCI in the reply counts only when it can
+ * be no other move in the brief: the same UCI can be a key moment's better move, or a piece going
+ * the same way at another point of the game. Any other move was never the Engine's and the guard
+ * has already stripped it (ADR 0002).
  */
 export function namedMoves(facts: GameFacts, text: string, guarded: readonly string[]): OverviewMove[] {
-  const all: OverviewMove[] = [...facts.moments, ...facts.standouts]
-    .sort((a, b) => a.ply - b.ply)
-    .map((m) => ({ ply: m.ply, side: m.side, san: m.san, grade: m.grade, label: m.label }));
+  const played = [...facts.moments, ...facts.standouts].sort((a, b) => a.ply - b.ply);
+  const all: OverviewMove[] = played.map((m) => ({ ply: m.ply, side: m.side, san: m.san, grade: m.grade, label: m.label }));
   const inText = new Set(overviewSegments(text, all).flatMap((s) => (s.move ? [s.move.ply] : [])));
-  const ucis = new Map([...facts.moments, ...facts.standouts].map((m) => [m.ply, m.uci]));
-  return all.filter((m) => inText.has(m.ply) || guarded.includes(ucis.get(m.ply) ?? ''));
+  const ucis = [...played.map((m) => m.uci), ...facts.moments.flatMap((m) => (m.better ? [m.better.uci] : []))];
+  const listed = (uci: string) => guarded.includes(uci) && ucis.filter((u) => u === uci).length === 1;
+  return all.filter((m, i) => inText.has(m.ply) || listed(played[i]?.uci ?? ''));
 }

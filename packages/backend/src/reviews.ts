@@ -12,7 +12,7 @@ import { type Clock, iso } from './clock.ts';
 import { all, one, transaction, type Db } from './db.ts';
 import { getGame } from './games.ts';
 import { THINK_DEEPER_DEADLINE_MS } from './coach/real.ts';
-import { addGradeCounts, removeGradeCounts } from './profile.ts';
+import { addCoachNote, addGradeCounts, removeGradeCounts } from './profile.ts';
 import { getSettings } from './settings.ts';
 import { guessTempting, withTempting } from './tempting-moves/ask.ts';
 import { playerMaiaRating } from './tempting-moves/rating.ts';
@@ -177,12 +177,16 @@ async function makeReview(
   const moments = pickKeyMoments(graded, game.playerSide);
   // The sample game isn't the Player's: its Review never feeds the Player Profile.
   const counts = game.source !== 'sample';
-  // The overview first, so it streams before the key moments. It may add the Review's one note to
-  // the Player Profile (ADR 0004); when it adds none, the last key moment still may.
+  // The overview first, so it streams before the key moments. It may write the Review's one note
+  // for the Player Profile (ADR 0004); when it writes none, the last key moment still may. The note
+  // is saved with the Review, so a Review that fails part way leaves none.
   let overview: ReviewOverview | null = null;
-  let noted = false;
-  if (getSettings(db).reviewOverview) {
+  let note: string | null = null;
+  // A game with no moves has nothing to give an overview of.
+  if (getSettings(db).reviewOverview && graded.length) {
     const facts = gameFacts(game, graded, moments);
+    // Says at once that the overview comes first, before its first words arrive.
+    delta('', 'overview');
     const reply = await coach.ask(
       {
         job: 'review-overview',
@@ -195,10 +199,10 @@ async function makeReview(
         game: facts,
       },
       (text) => delta(text, 'overview'),
-      signal ? { signal } : {},
+      { holdNote: true, ...(signal ? { signal } : {}) },
     );
     overview = { text: reply.text, moves: namedMoves(facts, reply.text, reply.moves) };
-    noted = reply.note !== null;
+    note = reply.note;
   }
   const out: KeyMoment[] = [];
   const started = clock.now().getTime();
@@ -223,7 +227,7 @@ async function makeReview(
         replies: graded[m.ply]?.candidates ?? [],
         ...(threat ? { threat } : {}),
         opening: game.opening,
-        allowNote: counts && !noted && index === moments.length - 1,
+        allowNote: counts && note === null && index === moments.length - 1,
       },
       guess,
       engine,
@@ -233,8 +237,9 @@ async function makeReview(
       (text) => delta(text, index),
       // Each moment's questions get the time the Review has left, at most the Coach's own deadline,
       // and a moment that runs out answers again from the brief alone rather than failing.
-      left > 0 ? { ...(signal ? { signal } : {}), engine, deadlineMs: Math.min(THINK_DEEPER_DEADLINE_MS, left), retryWithoutEngine: true } : signal ? { signal } : {},
+      { holdNote: true, ...(signal ? { signal } : {}), ...(left > 0 ? { engine, deadlineMs: Math.min(THINK_DEEPER_DEADLINE_MS, left), retryWithoutEngine: true } : {}) },
     );
+    note ??= reply.note;
     out.push({
       ply: m.ply,
       san: m.san,
@@ -269,5 +274,7 @@ async function makeReview(
       graded.filter((m) => m.side === game.playerSide).map((m) => m.grade),
     );
   }
+  // The Review's one note, now that the Review is saved (ADR 0004).
+  if (note) addCoachNote(db, clock, note);
   return getReview(db, gameId) as Review;
 }

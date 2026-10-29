@@ -93,6 +93,27 @@
      "text": "The rook steps up to make room for the other one: Rfc1 comes next. The pawn on c6 cannot run and no pawn can help it, so Black's pieces stay tied to its defence."
     }
    ]
+  },
+  {
+   "title": "A knight trade on d5",
+   "fen": "rn2k2r/1bqpb1pp/pp2p3/2pNP3/8/5N2/PPP1BPPP/R1BQ1RK1 b kq - 0 11",
+   "side": "black",
+   "keyIdea": "When you can take back with a piece or a pawn, ask what each does to your pawns; keep them healthy unless the pawn capture gains more.",
+   "text": "From a game played on Lichess. You are Black. White's knight has just taken your knight on d5, and you can take back with the bishop on b7 or with the pawn on e6. Before you choose, picture your pawns after each capture.",
+   "url": "https://lichess.org/mrj6xak3#21",
+   "line": "Bxd5 Re1 O-O",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Bxd5",
+     "text": "11...Bxd5 takes back with the bishop and leaves your pawns as they were. Taking with the e-pawn would have given you doubled pawns, one behind the other on d7 and d5, which cannot guard each other. The Engine prefers the bishop capture by more than a pawn."
+    },
+    {
+     "ply": 2,
+     "san": "O-O",
+     "text": "12.Re1 developed White's rook. 12...O-O castles: your king is safe, your rook comes to f8, and your pawns have no new weaknesses."
+    }
+   ]
   }
  ]
 }

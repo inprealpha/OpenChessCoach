@@ -4,7 +4,7 @@
  "kind": "opening",
  "track": "openings",
  "level": "beginner",
- "goal": "As Black against 1.e4, you can play the Caro-Kann: support d5 with c6, bring out the bishop on c8 early, and keep a solid position.",
+ "goal": "As Black against 1.e4, you can play the Caro-Kann: support d5 with the c-pawn on c6, bring out the bishop on c8 early, and keep a solid position.",
  "priorKnowledge": [
   "opening-principles"
  ],
@@ -15,14 +15,14 @@
  ],
  "puzzleThemes": [],
  "intro": {
-  "text": "The Caro-Kann answers 1.e4, White's pawn to e4, with 1...c6, your c-pawn one step forward, and then ...d5. The c-pawn backs up the d-pawn, so you keep a firm share of the centre. Unlike 1...e6, which shuts the bishop on c8 in behind a pawn, it leaves that bishop a clear road out, and the bishop comes out early. You get a solid position with few weak points for White to attack."
+  "text": "The Caro-Kann answers 1.e4, White's pawn to e4, with 1...c6, your c-pawn one step forward, and then ...d5. The c-pawn backs up the d-pawn, so you keep a firm share of the centre. Unlike 1...e6, which shuts the bishop on c8 in behind a pawn, it leaves that bishop a clear road out as soon as the d-pawn has moved, and the bishop comes out early. You get a solid position with few weak points for White to attack."
  },
  "parts": [
   {
    "title": "Bishop out before the pawns close",
    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
    "side": "black",
-   "keyIdea": "Back up ...d5 with the c-pawn, and bring the bishop on c8 out before ...e6 shuts it in.",
+   "keyIdea": "Support your centre pawn with the c-pawn, and bring the light-squared bishop out before your e-pawn shuts it in.",
    "text": "You are Black, and White opens with 1.e4. The moves you will play are known as the Classical Variation. At each move, ask what it does for your centre and your pieces, and what White is threatening.",
    "credit": {
     "source": "Lichess chess-openings",
@@ -258,7 +258,7 @@
       ]
      },
      "notes": {
-      "text": "1...c6 looks modest, but it is there to support ...d5: if White ever takes a pawn on d5, your c-pawn can take back. The bishop on c8, the one that moves on light squares, still has its diagonal open, so it can come out early."
+      "text": "1...c6 looks modest, but it is there to support ...d5: if White ever takes a pawn on d5, your c-pawn can take back. Your e-pawn stays at home, so as soon as your d-pawn moves to d5, the bishop on c8, the one that moves on light squares, has an open diagonal and can come out early."
      }
     },
     {
@@ -1347,7 +1347,7 @@
       ]
      },
      "notes": {
-      "text": "7.Nf3 eyes e5, where a white knight would attack your bishop on g6. 7...Nd7 guards e5, so a knight that lands there can be taken. Next you play ...e6, bring your other knight from g8 to f6, bring out the bishop on f8, and castle."
+      "text": "7.Nf3 aims at e5, where a white knight would attack your bishop on g6. 7...Nd7 guards e5, so a knight that lands there can be taken. Next you play ...e6, bring your other knight from g8 to f6, bring out the bishop on f8, and castle."
      }
     }
    ]

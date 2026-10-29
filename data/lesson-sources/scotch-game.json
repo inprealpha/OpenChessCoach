@@ -19,7 +19,7 @@
    "title": "Keep the knight on d4 guarded",
    "fen": "start",
    "side": "white",
-   "keyIdea": "Open the centre with d4, then guard your knight on d4 as often as Black attacks it while you develop and castle.",
+   "keyIdea": "Open the centre with a pawn at once, then guard your central knight as often as Black attacks it while you develop and castle.",
    "text": "You are White, from the first move. The first moves are the Classical Variation, as Lichess's list of openings names it. At each move, count how many black pieces attack your knight on d4 and how many of yours guard it.",
    "url": "https://github.com/lichess-org/chess-openings",
    "line": "e4 e5 Nf3 Nc6 d4 exd4 Nxd4 Bc5 Be3 Qf6 c3 Nge7 Bc4 O-O O-O",
@@ -42,7 +42,7 @@
     {
      "ply": 6,
      "san": "Nxd4",
-     "text": "4.Nxd4 takes back: your knight now stands in the centre, and your queen guards it. If Black trades knights with 4...Nxd4, take back with the queen: 5.Qxd4 puts it on a strong central square."
+     "text": "4.Nxd4 takes back: your knight now stands in the centre, and your queen guards it. If Black trades knights with 4...Nxd4, 5.Qxd4 takes back and puts the queen on a strong central square."
     },
     {
      "ply": 8,

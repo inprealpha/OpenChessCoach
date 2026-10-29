@@ -15,7 +15,7 @@
  "intro": "When your opponent captures, the natural reply is to take back at once. Sometimes there is a stronger move to play first: a check, a capture or a threat that has to be answered. This in-between move changes the position in your favour, and you take back afterwards.",
  "parts": [
   {
-   "title": "A capture with check comes first",
+   "title": "Before you take back",
    "fen": "5rk1/1p2bppp/n4n2/p1pN2B1/P3pq2/1BP4P/1P3PP1/R5K1 w - - 0 23",
    "side": "white",
    "keyIdea": "Before you take back, look for a check or a capture that wins something extra.",
@@ -36,7 +36,7 @@
    ]
   },
   {
-   "title": "A check to save your own piece",
+   "title": "Both rooks attacked",
    "fen": "8/6R1/5p1k/7r/6KP/4P3/5P2/8 b - - 0 35",
    "side": "black",
    "keyIdea": "When both sides have a piece under attack, a check first can save yours before you take theirs.",
@@ -57,11 +57,11 @@
    ]
   },
   {
-   "title": "A threat before you take back",
+   "title": "Black takes a pawn",
    "fen": "4b3/8/p1pk2P1/1p1p4/1P1K2p1/2P2B2/P7/8 w - - 0 40",
    "side": "white",
    "keyIdea": "An in-between move can be a threat: move a piece with a threat first, then take back.",
-   "text": "From a game played on Lichess. You are White. Black has just taken a pawn on g4, and your bishop can take back. Before you do, check what Black's bishop on e8 is attacking.",
+   "text": "From a game played on Lichess. You are White. Black has just taken a pawn on g4, and your bishop can take back. Before you do, look at what Black's bishop on e8 is attacking.",
    "url": "https://lichess.org/training/fY6sP",
    "line": "g7 Bf7 Bxg4",
    "notes": [

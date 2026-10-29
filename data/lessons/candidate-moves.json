@@ -121,7 +121,7 @@
    ]
   },
   {
-   "title": "A capture that opens a line",
+   "title": "Three captures to compare",
    "fen": "r2q1rk1/pb1nbppp/1p1p1n2/3Np1B1/2P1P3/3B1N2/PP3PPP/R2Q1RK1 b - - 5 11",
    "side": "black",
    "keyIdea": "For each candidate, ask what it uncovers as well as what it takes: moving one piece can let another attack.",

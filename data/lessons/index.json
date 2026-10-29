@@ -6,7 +6,7 @@
   "track": "themes",
   "level": "beginner",
   "side": "white",
-  "goal": "You can see which pieces each side attacks, take a piece that is left undefended, and save an attacked piece by moving it, guarding it, blocking or taking the attacker.",
+  "goal": "You can see which pieces each side attacks, take a piece that is left undefended, and save an attacked piece by moving it, guarding it, blocking the attack or taking the attacker.",
   "priorKnowledge": [],
   "decisions": 5
  },
@@ -163,7 +163,7 @@
   "track": "thinking",
   "level": "beginner",
   "side": "white",
-  "goal": "Before you play a move, you can check what your opponent could take, check or attack after it, and pick a safer move when the answer is bad.",
+  "goal": "Before you play a move, you can look at what your opponent could take, check or attack after it, and pick a safer move when the answer is bad.",
   "priorKnowledge": [
    "threats"
   ],
@@ -177,7 +177,7 @@
   "level": "beginner",
   "side": "white",
   "eco": "C54",
-  "goal": "As White, you can play the Italian Game: aim the bishop at f7, build a centre with c3 and d4, and castle.",
+  "goal": "As White, you can play the Italian Game: aim the bishop at f7, put pawns on c3 and d4 to build a centre, and castle.",
   "priorKnowledge": [
    "opening-principles"
   ],
@@ -255,7 +255,7 @@
   "level": "beginner",
   "side": "white",
   "eco": "D02",
-  "goal": "As White, you can set up the London System: the bishop out to f4 before e3, pawns on d4, e3 and c3, and knights on f3 and d2.",
+  "goal": "As White, you can set up the London System: the bishop out to f4 before the e-pawn moves to e3, pawns on d4, e3 and c3, and knights on f3 and d2.",
   "priorKnowledge": [
    "opening-principles"
   ],
@@ -281,7 +281,7 @@
   "track": "endgames",
   "level": "beginner",
   "side": "white",
-  "goal": "You can avoid stalemate when you are winning, aim for it when you are losing, and know the other draws: repetition and too little material to mate.",
+  "goal": "You can avoid stalemate when you are winning, aim for it when you are losing, and know the other draws: repetition and too few pieces left to mate.",
   "priorKnowledge": [
    "queen-mate"
   ],
@@ -294,7 +294,7 @@
   "track": "openings",
   "level": "beginner",
   "side": "black",
-  "eco": "C59",
+  "eco": "C58",
   "goal": "As Black against the Italian Game, you can play the Two Knights Defence and know how to meet the attack on f7.",
   "priorKnowledge": [
    "italian-game"
@@ -321,7 +321,7 @@
   "track": "themes",
   "level": "beginner",
   "side": "white",
-  "goal": "You can move one piece out of the way so that the piece behind it gives check while the moved piece attacks something valuable, and use a double check, which the king can only answer by moving.",
+  "goal": "You can move one piece out of the way so the piece behind it gives check while the moved piece attacks something else. You can also use a double check, which the king can only answer by moving.",
   "priorKnowledge": [
    "discovered-attacks"
   ],
@@ -389,7 +389,7 @@
   "level": "beginner",
   "side": "black",
   "eco": "B19",
-  "goal": "As Black against 1.e4, you can play the Caro-Kann: support d5 with c6, bring out the bishop on c8 early, and keep a solid position.",
+  "goal": "As Black against 1.e4, you can play the Caro-Kann: support d5 with the c-pawn on c6, bring out the bishop on c8 early, and keep a solid position.",
   "priorKnowledge": [
    "opening-principles"
   ],
@@ -403,7 +403,7 @@
   "level": "beginner",
   "side": "black",
   "eco": "D60",
-  "goal": "As Black against the Queen's Gambit, you can hold the centre with e6, develop, castle, and know which pieces still need to come out.",
+  "goal": "As Black against the Queen's Gambit, you can hold the centre with the e-pawn on e6, develop, castle, and know which pieces still need to come out.",
   "priorKnowledge": [
    "queens-gambit"
   ],
@@ -568,7 +568,7 @@
   "priorKnowledge": [
    "simple-plans"
   ],
-  "decisions": 10
+  "decisions": 12
  },
  {
   "id": "zwischenzug",
@@ -590,7 +590,7 @@
   "track": "openings",
   "level": "intermediate",
   "side": "white",
-  "goal": "You can spot the common opening traps on f2 and f7 and in other openings, and avoid falling into them.",
+  "goal": "You can spot common opening traps, such as attacks on f2 and f7, and avoid falling into them.",
   "priorKnowledge": [
    "scholars-mate-defence",
    "italian-game"
@@ -712,7 +712,7 @@
   "level": "intermediate",
   "side": "black",
   "eco": "C02",
-  "goal": "As Black against 1.e4, you can play the French Defence and know the plan against White's pawn chain: attack its base with c5 and its front with f6.",
+  "goal": "As Black against 1.e4, you can play the French Defence and know the plan against White's pawn chain: attack its base with ...c5 and its front with ...f6.",
   "priorKnowledge": [
    "pawn-structure"
   ],
@@ -739,7 +739,7 @@
   "track": "thinking",
   "level": "intermediate",
   "side": "white",
-  "goal": "You can put a rook on an open file, double your rooks, and use a rook on the seventh rank to attack pawns and trap the king.",
+  "goal": "You can put a rook on an open file, put your second rook on the same file, and use a rook on the seventh rank to attack pawns and trap the king.",
   "priorKnowledge": [
    "weak-squares"
   ],
@@ -770,7 +770,7 @@
   "priorKnowledge": [
    "opening-traps"
   ],
-  "decisions": 12
+  "decisions": 13
  },
  {
   "id": "good-and-bad-pieces",

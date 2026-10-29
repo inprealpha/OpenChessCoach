@@ -18,11 +18,11 @@
  },
  "parts": [
   {
-   "title": "One free square left",
+   "title": "One escape square left",
    "fen": "r6k/1p3R2/1p2p2p/7N/8/p7/6PP/7K w - - 0 38",
    "side": "white",
    "keyIdea": "Before you check, take away the king's last square: then a mate threat may have no defence at all.",
-   "text": "From a game played on Lichess. You are White. Black's king on h8 has one free square, g8, and Black's a-pawn is racing to promote. No check works yet.",
+   "text": "From a game played on Lichess. You are White. Black's king on h8 has one escape square, g8, and Black's a-pawn is racing to promote. No check works yet.",
    "credit": {
     "source": "Lichess puzzle database, puzzle JupYf",
     "url": "https://lichess.org/training/JupYf",
@@ -48,7 +48,7 @@
       "club": []
      },
      "notes": {
-      "text": "A quiet knight move. From f6 the knight covers g8, the king's only free square, and guards h7. You threaten Rh7 mate, and Black has no check, block or capture to stop it."
+      "text": "A quiet knight move. From f6 the knight covers g8, the king's only escape square, and guards h7. You threaten Rh7 mate, and Black has no check, block or capture to stop it."
      }
     },
     {

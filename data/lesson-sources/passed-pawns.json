@@ -12,10 +12,10 @@
  "priorKnowledge": [
   "king-and-pawn"
  ],
- "intro": "A passed pawn is a pawn with no enemy pawns in front of it or on the files next to it, so only pieces can stop it. In an endgame it is often the strongest thing on the board, because the enemy king has to drop everything to stop it. Here you make one from a pawn majority (more pawns than your opponent on one side of the board), use one on the far side of the board to pull the enemy king away, and stop an enemy one by putting your king in its path.",
+ "intro": "A passed pawn is a pawn with no enemy pawn in front of it, on its own file or on the files next to it, so only pieces can stop it. In an endgame it is often the strongest thing on the board, because the enemy king has to drop everything to stop it. Here you make one from a pawn majority (more pawns than your opponent on one side of the board), use one on the far side of the board to pull the enemy king away, and stop an enemy one by putting your king in its path.",
  "parts": [
   {
-   "title": "Make a passed pawn",
+   "title": "Two against one",
    "fen": "8/7p/1p4p1/1P6/P2kp3/6P1/5P2/6K1 w - - 0 39",
    "side": "white",
    "keyIdea": "Two pawns against one can make a passed pawn: push the one with no enemy pawn in front of it.",
@@ -44,7 +44,7 @@
    "title": "The outside passed pawn",
    "fen": "8/p7/5k2/3p4/1P1P2Kp/8/P7/8 b - - 1 45",
    "side": "black",
-   "keyIdea": "An outside passed pawn pulls the enemy king to the edge; while it is busy there, your king wins pawns elsewhere.",
+   "keyIdea": "An outside passed pawn keeps the enemy king busy at the edge; while it is there, your king wins pawns elsewhere.",
    "text": "From a game played on Lichess. You are Black. Your h-pawn is passed, and it stands on the other side of the board from all the other pawns: an outside passed pawn. White's king on g4 has to watch it, which keeps that king a long way from White's pawns on b4 and d4.",
    "url": "https://lichess.org/training/0Gn6F",
    "line": "h3 Kxh3 Kf5 Kg3 Ke4 b5 Kxd4",
@@ -72,7 +72,7 @@
    ]
   },
   {
-   "title": "Stop the passed pawn",
+   "title": "A pawn two steps from promoting",
    "fen": "8/8/8/p7/P1k5/3p3P/5K2/8 w - - 0 55",
    "side": "white",
    "keyIdea": "Stop a passed pawn by putting your king on its path; then your own passed pawn can pull the enemy king away.",

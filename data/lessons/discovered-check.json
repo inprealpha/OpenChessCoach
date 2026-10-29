@@ -4,7 +4,7 @@
  "kind": "theme",
  "track": "themes",
  "level": "beginner",
- "goal": "You can move one piece out of the way so that the piece behind it gives check while the moved piece attacks something valuable, and use a double check, which the king can only answer by moving.",
+ "goal": "You can move one piece out of the way so the piece behind it gives check while the moved piece attacks something else. You can also use a double check, which the king can only answer by moving.",
  "priorKnowledge": [
   "discovered-attacks"
  ],
@@ -19,7 +19,7 @@
  },
  "parts": [
   {
-   "title": "A discovered check wins material",
+   "title": "A rook in the queen's way",
    "fen": "8/5pk1/4q1r1/1p6/3RP3/2Q2PP1/2P1K1Br/8 w - - 0 46",
    "side": "white",
    "keyIdea": "Move the front piece so that the piece behind gives check, and let the piece that moves attack something valuable at the same time.",
@@ -82,10 +82,10 @@
    ]
   },
   {
-   "title": "Double check",
+   "title": "A knight in the queen's way",
    "fen": "r1b2rk1/pp3pp1/1q5p/3PP3/2BnN3/8/PP1Q2PP/R4RK1 b - - 0 15",
    "side": "black",
-   "keyIdea": "Against a double check only a king move helps, so the other attack of the piece that checks cannot be stopped.",
+   "keyIdea": "Against a double check only a king move helps, so whatever else the checking pieces attack cannot be saved.",
    "text": "From a game played on Lichess. You are Black. White has just taken your pawn on e5. Your queen on b6 aims at White's king on g1, but your knight on d4 stands on that diagonal.",
    "credit": {
     "source": "Lichess puzzle database, puzzle fHIQf",
@@ -145,10 +145,10 @@
    ]
   },
   {
-   "title": "Double check and mate",
+   "title": "Queen and knight on one diagonal",
    "fen": "8/5ppk/1r5p/3Pb3/4N1P1/3Q3P/5P1q/5K2 w - - 0 37",
    "side": "white",
-   "keyIdea": "In a double check, capturing one of the checking pieces is no defence, because the other one still gives check.",
+   "keyIdea": "When two pieces give check together, taking one of them does not help: the other one is still giving check.",
    "text": "From a game played on Lichess. You are White. Black's rook has just taken your rook on b6, and Black's queen is close to your king. Your queen on d3 and your knight on e4 stand on the same diagonal as Black's king on h7.",
    "credit": {
     "source": "Lichess puzzle database, puzzle qD0cD",

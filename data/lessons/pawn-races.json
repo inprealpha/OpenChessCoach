@@ -16,10 +16,10 @@
  },
  "parts": [
   {
-   "title": "Pawns face to face",
+   "title": "Three pawns against three",
    "fen": "8/ppp5/8/PPP5/6p1/6Pp/5k1K/8 w - - 1 53",
    "side": "white",
-   "keyIdea": "When pawns stand face to face, giving one or two of them up can open a path for another.",
+   "keyIdea": "Pawns blocked one against one can still break through: give one or two of them up to open a path for another.",
    "text": "From a game played on Lichess. Your pawns on a5, b5 and c5 face Black's on a7, b7 and c7, and none of them is a passed pawn yet. Both kings are busy on the kingside, far from these pawns. Can you get one of yours through?",
    "credit": {
     "source": "Lichess puzzle database, puzzle cQLaQ",
@@ -108,11 +108,11 @@
    ]
   },
   {
-   "title": "Give one to free another",
+   "title": "Three pawns against two",
    "fen": "8/8/5p1p/p4P1P/P1ppk1P1/8/2P1K3/8 w - - 2 41",
    "side": "white",
-   "keyIdea": "A pawn sacrifice can pull an enemy pawn out of the way and leave your neighbouring pawn with a free path.",
-   "text": "From a game played on Lichess. Black's king is active on e4, and Black's queenside pawns look dangerous. On the kingside your three pawns face two, and one pawn sacrifice is enough to free one of them.",
+   "keyIdea": "A pawn sacrifice can pull an enemy pawn out of the way and leave your neighbouring pawn with a clear path.",
+   "text": "From a game played on Lichess. Black's king is active on e4, and Black's queenside pawns look dangerous. On the kingside your three pawns face two, and one pawn sacrifice is enough to make one of them a passed pawn.",
    "credit": {
     "source": "Lichess puzzle database, puzzle ztkmq",
     "url": "https://lichess.org/training/ztkmq",
@@ -140,7 +140,7 @@
       "club": []
      },
      "notes": {
-      "text": "41.g5 offers the g-pawn. If 41...hxg5, your h-pawn is free; if 41...fxg5, your f-pawn is free."
+      "text": "41.g5 offers the g-pawn. If 41...hxg5, your h-pawn is a passed pawn; if 41...fxg5, your f-pawn is."
      }
     },
     {
@@ -167,7 +167,7 @@
       "club": []
      },
      "notes": {
-      "text": "Black took with the h-pawn, and 42.h6 pushes the free pawn at once. Black's king on e4 is too far away to catch it."
+      "text": "Black took with the h-pawn, and 42.h6 pushes the passed pawn at once. Black's king on e4 is too far away to catch it."
      }
     },
     {
@@ -292,7 +292,7 @@
    ]
   },
   {
-   "title": "Stop the check first",
+   "title": "Look at the reply first",
    "fen": "8/7P/8/1k6/8/p7/3p4/1K6 w - - 0 59",
    "side": "white",
    "keyIdea": "Before you promote, look at the reply: if the other pawn would promote with check, deal with it first.",

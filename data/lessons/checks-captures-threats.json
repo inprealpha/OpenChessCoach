@@ -16,7 +16,7 @@
  },
  "parts": [
   {
-   "title": "A check that wins a rook",
+   "title": "A king in the open",
    "fen": "1r6/p7/4b2Q/q3kp1p/4p3/8/PPP3PP/5R1K w - - 3 31",
    "side": "white",
    "keyIdea": "List every check: a check can drive the king off a line and leave the piece behind it open to capture.",
@@ -79,7 +79,7 @@
    ]
   },
   {
-   "title": "Capture the defender",
+   "title": "Two guards on h8",
    "fen": "5r1r/4knQp/1b2pp2/7B/2P5/3P2P1/7P/7K w - - 3 39",
    "side": "white",
    "keyIdea": "List the captures and ask what each piece guards: taking a defender can leave the piece it protected free.",
@@ -209,7 +209,7 @@
    "fen": "5rk1/p1N2p2/1r4pp/4b3/Q2pPP2/1P5q/P3B2P/2R2RK1 b - - 0 24",
    "side": "white",
    "keyIdea": "List your opponent's checks as well as your own: the answer to a check must also keep your other pieces safe.",
-   "text": "From a game played on Lichess. You are White. Black's bishop has just taken your knight on c7. Before you take back, list Black's forcing moves too: which checks would Black have next, and what else would they attack?",
+   "text": "From a game played on Lichess. You are White. Black's bishop has just taken your knight on c7, and you can take it back. After that, list Black's forcing moves too: which check would Black have next, and what else would it attack?",
    "credit": {
     "source": "Lichess puzzle database, puzzle 5Zb1I",
     "url": "https://lichess.org/training/5Zb1I",
@@ -248,7 +248,7 @@
       "club": []
      },
      "notes": {
-      "text": "The rook takes back on c7, and the material is level again. But Black's queen can now check from e3, where it also attacks your bishop on e2."
+      "text": "The rook takes back on c7, and you are a bishop ahead. But Black's queen can now check from e3, where it also attacks your bishop on e2."
      }
     },
     {

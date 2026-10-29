@@ -16,7 +16,7 @@
  },
  "parts": [
   {
-   "title": "Build the box",
+   "title": "King and rook in the corner",
    "fen": "8/8/8/8/4k3/8/8/RK6 w - - 0 1",
    "side": "white",
    "keyIdea": "The rook shuts the king into a box, and your king guards the rook so the box can get smaller safely.",
@@ -106,7 +106,7 @@
       "club": []
      },
      "notes": {
-      "text": "3.Ra4 puts the rook on the fourth rank, the fourth row from your side, where it controls the whole row. Black's king on d5 cannot come down the board past it. The rook is far from Black's king on a4, so it is safe there."
+      "text": "3.Ra4 puts the rook on the fourth rank, the fourth row from your side, where it controls the whole row. Black's king on d5 cannot come down the board past it. On a4 the rook is far from Black's king, so it is safe there."
      }
     },
     {
@@ -287,7 +287,7 @@
    ]
   },
   {
-   "title": "The waiting move",
+   "title": "A king on the edge",
    "fen": "4k3/8/5K2/3R4/8/8/8/8 w - - 11 90",
    "side": "white",
    "keyIdea": "When the lone king has one square left, a rook move that is not a check can hand over the turn and force it onto that square.",

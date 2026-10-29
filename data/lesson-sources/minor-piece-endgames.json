@@ -16,7 +16,7 @@
  "intro": "When only bishops, knights and pawns are left, the kind of piece you have can matter as much as the number of pawns. A bishop can strike from one side of the board to the other in a single move, so it does best on an open board with pawns on both sides; a knight is slower, but it does better when the pawns are locked and the enemy pawns stand on squares of the bishop's colour. Some of these endgames are drawn even a pawn down: bishops of opposite colours often draw, and so does a pawn on the a- or h-file (a rook pawn) when the bishop cannot control the corner square where it would promote.",
  "parts": [
   {
-   "title": "The long-range bishop",
+   "title": "Pawns on both sides",
    "fen": "6k1/7p/1p2b1p1/pp6/3P4/1PPK2NP/6P1/8 b - - 0 31",
    "side": "black",
    "keyIdea": "A bishop can cross from one side of the board to the other in one move; a knight needs several jumps, so it cannot guard both sides.",
@@ -68,7 +68,7 @@
     {
      "ply": 4,
      "san": "Nc5",
-     "text": "37.Nc5 lands on c5 and attacks the pawns on a6 and e6. Nothing defends the pawn on a6, and Black's bishop is stuck behind its own pawns with nothing to attack. Black's best try was 36...f4, giving up a pawn to free the bishop, but White would still be clearly winning."
+     "text": "37.Nc5 lands on c5 and attacks the pawns on a6 and e6. Nothing defends the pawn on a6, and Black's bishop is stuck behind its own pawns with nothing to attack. Black's best try was 36...f4, giving up a pawn to open a way out for the bishop, but White would still be clearly winning."
     }
    ]
   },

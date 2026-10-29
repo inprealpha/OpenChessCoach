@@ -4,7 +4,7 @@
  "kind": "theme",
  "track": "themes",
  "level": "beginner",
- "goal": "You can see which pieces each side attacks, take a piece that is left undefended, and save an attacked piece by moving it, guarding it, blocking or taking the attacker.",
+ "goal": "You can see which pieces each side attacks, take a piece that is left undefended, and save an attacked piece by moving it, guarding it, blocking the attack or taking the attacker.",
  "priorKnowledge": [],
  "side": "white",
  "puzzleTags": [],
@@ -16,7 +16,7 @@
  },
  "parts": [
   {
-   "title": "Take a piece nobody defends",
+   "title": "A knight takes your rook",
    "fen": "6R1/pp2n2p/3p1N1k/8/8/2P4K/PP6/8 b - - 0 43",
    "side": "white",
    "keyIdea": "A piece that is attacked and not defended can be taken for free.",
@@ -92,11 +92,11 @@
    ]
   },
   {
-   "title": "Guard it",
+   "title": "A king attacks your rook",
    "fen": "6k1/5p2/6p1/2R2Pr1/6P1/6K1/8/8 w - - 0 35",
    "side": "black",
    "keyIdea": "When an attacked piece has no safe square, defend it with another piece.",
-   "text": "From a game played on Lichess. You are Black. White's king has just stepped to f4, where it attacks your rook on g5. Check every square the rook could move to before you decide.",
+   "text": "From a game played on Lichess. You are Black. White's king has just stepped to f4, where it attacks your rook on g5. Look at every square the rook could move to before you decide.",
    "credit": {
     "source": "Lichess games database, game c9g77vz8",
     "url": "https://lichess.org/c9g77vz8#68",
@@ -139,7 +139,7 @@
    ]
   },
   {
-   "title": "Block the attack",
+   "title": "A bishop attacks your rook",
    "fen": "1r3rk1/4b1p1/7p/1p1N4/2P5/6P1/P2R1P1P/5RK1 b - - 0 25",
    "side": "white",
    "keyIdea": "A bishop, rook or queen attacks along a line, so a piece put in the way blocks the attack.",
@@ -180,13 +180,13 @@
       "club": []
      },
      "notes": {
-      "text": "f4, the pawn from f2 to f4, steps into the bishop's diagonal, so the rook on d2 is no longer attacked. The pawn is safe there, because the g3 pawn and the rook on f1 guard it. It also attacks the bishop, so Black must spend the next move saving the bishop. Moving the rook would also have saved it, but then Black would not have had to spend a move on the bishop."
+      "text": "f4, the pawn from f2 to f4, steps into the bishop's diagonal, so the rook on d2 is no longer attacked. The pawn is safe there, because the g3 pawn and the rook on f1 guard it. It also attacks the bishop, so Black must spend the next move saving the bishop. Moving the rook away would have been a mistake: Black would have had time to take your pawn on c4 with the b-pawn, and much of your advantage would be gone."
      }
     }
    ]
   },
   {
-   "title": "Take the attacker",
+   "title": "A knight attacks your knight",
    "fen": "8/1p6/p7/5N1p/2n2p2/1P3P2/P1P1K1k1/8 b - - 0 50",
    "side": "white",
    "keyIdea": "The piece that attacks yours may be undefended itself; then the best defence is to take it.",

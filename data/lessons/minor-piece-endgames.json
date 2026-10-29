@@ -19,7 +19,7 @@
  },
  "parts": [
   {
-   "title": "The long-range bishop",
+   "title": "Pawns on both sides",
    "fen": "6k1/7p/1p2b1p1/pp6/3P4/1PPK2NP/6P1/8 b - - 0 31",
    "side": "black",
    "keyIdea": "A bishop can cross from one side of the board to the other in one move; a knight needs several jumps, so it cannot guard both sides.",
@@ -226,7 +226,7 @@
       "club": []
      },
      "notes": {
-      "text": "37.Nc5 lands on c5 and attacks the pawns on a6 and e6. Nothing defends the pawn on a6, and Black's bishop is stuck behind its own pawns with nothing to attack. Black's best try was 36...f4, giving up a pawn to free the bishop, but White would still be clearly winning."
+      "text": "37.Nc5 lands on c5 and attacks the pawns on a6 and e6. Nothing defends the pawn on a6, and Black's bishop is stuck behind its own pawns with nothing to attack. Black's best try was 36...f4, giving up a pawn to open a way out for the bishop, but White would still be clearly winning."
      }
     }
    ]

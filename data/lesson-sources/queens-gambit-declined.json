@@ -9,17 +9,17 @@
  "puzzleTags": [
   "Queens_Gambit_Declined"
  ],
- "goal": "As Black against the Queen's Gambit, you can hold the centre with e6, develop, castle, and know which pieces still need to come out.",
+ "goal": "As Black against the Queen's Gambit, you can hold the centre with the e-pawn on e6, develop, castle, and know which pieces still need to come out.",
  "priorKnowledge": [
   "queens-gambit"
  ],
- "intro": "In the Queen's Gambit Declined, Black answers White's 2.c4 (the c-pawn to c4) with 2...e6 (the e-pawn to e6). The e-pawn backs up the pawn on d5, so Black keeps a pawn in the centre and the bishop on f8 can come out. The cost is the other bishop: the pawn on e6 shuts in the bishop on c8. You develop the pieces on your kingside, the half of the board where your king starts (to develop a knight or bishop is to bring it off its starting square), then castle, and then look for a way to bring that bishop into play.",
+ "intro": "In the Queen's Gambit Declined, Black answers White's 2.c4 (the c-pawn to c4) with 2...e6 (the e-pawn to e6). The e-pawn backs up the pawn on d5, so Black keeps a pawn in the centre and the bishop on f8 can come out. The cost is the other bishop: the pawn on e6 shuts in the bishop on c8. You develop the pieces on your kingside, the half of the board where your king starts. To develop a knight or bishop is to bring it off its starting square. Then you castle and look for a way to bring that bishop into play.",
  "parts": [
   {
-   "title": "Hold d5, develop, castle",
+   "title": "The Orthodox Defence",
    "fen": "start",
    "side": "black",
-   "keyIdea": "Hold d5 with pawns, develop the kingside and castle; the bishop on c8 is the piece that still needs a plan.",
+   "keyIdea": "Hold the centre with pawns, develop the kingside pieces and castle; the bishop shut in behind your pawns still needs a plan.",
    "text": "You are Black, and White opens with 1.d4. These moves reach the position that Lichess's list of openings calls the Orthodox Defence. At each move, ask what it does for your centre, your pieces and your king.",
    "url": "https://github.com/lichess-org/chess-openings",
    "line": "d4 d5 c4 e6 Nc3 Nf6 Bg5 Be7 e3 O-O Nf3 Nbd7",
@@ -52,7 +52,7 @@
     {
      "ply": 11,
      "san": "Nbd7",
-     "text": "6...Nbd7 develops your last knight. It goes to d7, not c6, so your c-pawn can still move to c6 or c5. Of your knights and bishops, only the bishop on c8 has not moved yet. One plan is ...c6, ...dxc4 and ...Nd5 to trade some pieces, then ...e5 to open its diagonal; another is ...b6 and ...Bb7."
+     "text": "6...Nbd7 develops your last knight. It goes to d7, not c6, so your c-pawn can still move to c6 or c5. Of your knights and bishops, only the bishop on c8 has not moved yet. One plan is to push the c-pawn to c6, take on c4 with the d-pawn and bring a knight to d5 to trade some pieces, then push the e-pawn to e5 to open the bishop's diagonal. Another is to push the b-pawn to b6 and put the bishop on b7."
     }
    ]
   }

@@ -12,7 +12,7 @@
  "puzzleTags": [],
  "puzzleThemes": [],
  "intro": {
-  "text": "A bishop stays on squares of one colour for the whole game. When most of its own pawns stand on the other colour, its diagonals are free and it is a good bishop; when they stand on its own colour, they get in its way and it is a bad bishop. A bad bishop can be freed by moving a blocking pawn onto the other colour, or traded for the enemy's good one. In an open position two bishops work well together, while in a locked position a knight with a safe square, one no pawn can attack, is often better than a bishop."
+  "text": "A bishop stays on squares of one colour for the whole game. When most of its own pawns stand on the other colour, its diagonals are open and it is a good bishop; when they stand on its own colour, they get in its way and it is a bad bishop. A bad bishop gets its diagonals back when a blocking pawn moves onto the other colour, or traded for the enemy's good one. In an open position two bishops work well together, while in a locked position, where the pawns block each other, a knight with a safe square, one no pawn can attack, is often better than a bishop."
  },
  "parts": [
   {
@@ -53,7 +53,7 @@
    "title": "A bishop stuck behind its pawns",
    "fen": "2r1r1k1/1p2bpp1/8/pNpp3p/P3bP2/1PP3PP/1B3P2/R3R1K1 w - - 0 26",
    "side": "white",
-   "keyIdea": "If your own pawn blocks your bishop, move it onto the other colour; the open diagonal then backs up your other pieces.",
+   "keyIdea": "If your own pawn blocks your bishop, move the pawn onto the other colour; the open diagonal then backs up your other pieces.",
    "text": "From a game played on Lichess. You are White, and the material is level: a knight and a bishop against two bishops. Your bishop on b2 moves on dark squares. Look at what stands in its way.",
    "credit": {
     "source": "Lichess games database, game qc1w9nrd",
@@ -234,7 +234,7 @@
    ]
   },
   {
-   "title": "A good knight against a bad bishop",
+   "title": "A knight attacks your queen",
    "fen": "r1bqk2r/5p2/p3p1p1/1p1pPn1p/2p2P1P/2P2NQ1/PPB2PP1/R3K2R w KQkq - 4 16",
    "side": "white",
    "keyIdea": "In a locked position, trade your bishop for a knight if it leaves your opponent a bad bishop and your knight a safe square.",

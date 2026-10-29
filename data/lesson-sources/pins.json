@@ -15,7 +15,7 @@
  "intro": "A bishop, rook or queen pins an enemy piece when it attacks that piece and, behind it on the same line, a more valuable one. If the piece behind is the king, the pinned piece is not allowed to leave that line; if it is the queen, moving away would give the queen up. Either way the pinned piece is stuck, so you can attack it again or simply take it.",
  "parts": [
   {
-   "title": "Pin a piece to the king",
+   "title": "A knight attacks your rook",
    "fen": "8/1p6/2n3R1/pk6/8/2K5/8/8 b - - 3 61",
    "side": "white",
    "keyIdea": "A piece pinned to its king cannot move away, so if nothing guards it, you win it.",
@@ -36,7 +36,7 @@
    ]
   },
   {
-   "title": "Pin the queen",
+   "title": "A queen offers a trade",
    "fen": "7k/p5p1/6bp/3q4/3P4/4Q1P1/P2R2K1/8 w - - 3 34",
    "side": "black",
    "keyIdea": "Pin the queen to the king with a guarded piece, and the queen is lost for that piece.",
@@ -57,7 +57,7 @@
    ]
   },
   {
-   "title": "Attack the pinned piece again",
+   "title": "A rook that cannot move",
    "fen": "6k1/pp1n1rpp/2p5/8/2BP4/5N2/P4PPP/6K1 w - - 0 1",
    "side": "white",
    "keyIdea": "A pinned piece cannot run away, so attack it a second time and win it.",
@@ -73,7 +73,7 @@
     {
      "ply": 2,
      "san": "Bxf7",
-     "text": "The king stepped out of the pin to f8, so next move the rook would be free to leave. But it is attacked twice and guarded once, and 2.Bxf7 takes it first. The king cannot take back, because your knight guards f7."
+     "text": "The king stepped out of the pin to f8, so next move the rook could leave. But it is attacked twice and guarded once, and 2.Bxf7 takes it first. The king cannot take back, because your knight guards f7."
     }
    ]
   }

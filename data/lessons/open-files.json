@@ -4,7 +4,7 @@
  "kind": "thinking",
  "track": "thinking",
  "level": "intermediate",
- "goal": "You can put a rook on an open file, double your rooks, and use a rook on the seventh rank to attack pawns and trap the king.",
+ "goal": "You can put a rook on an open file, put your second rook on the same file, and use a rook on the seventh rank to attack pawns and trap the king.",
  "priorKnowledge": [
   "weak-squares"
  ],
@@ -16,10 +16,10 @@
  },
  "parts": [
   {
-   "title": "Take the open file first",
+   "title": "A file with no pawns",
    "fen": "3r1rk1/p4pp1/1p1N2bp/3qP3/3P1Q2/P7/6PP/R3R1K1 w - - 1 25",
    "side": "white",
-   "keyIdea": "Put a rook on the open file before your opponent does, then double your rooks on it.",
+   "keyIdea": "Put a rook on the open file before your opponent does, then double your rooks: put the second rook on the same file.",
    "text": "From a game played on Lichess. You are White, and both sides still have their rooks. Look for a file with no pawns on it, and ask which rook can get there first.",
    "credit": {
     "source": "Lichess games database, game pLJUyEy7",
@@ -131,13 +131,13 @@
       "club": []
      },
      "notes": {
-      "text": "Black's b5 cleared the b6 square, so a rook on c6 now attacks the pawn on a6. Your front rook goes in, and the rook behind it guards it, so Black's queen cannot take it without losing the queen for a rook."
+      "text": "Black's pawn move to b5 emptied b6, so a rook on c6 now attacks the pawn on a6. Your front rook goes in, and the rook behind it guards it, so Black's queen cannot take it without losing the queen for a rook."
      }
     }
    ]
   },
   {
-   "title": "From the open file to the seventh rank",
+   "title": "A rook on the open d-file",
    "fen": "r4rk1/pb2bppp/2p1p3/4p3/2B1N3/8/PPP2PPP/3R1RK1 w - - 4 15",
    "side": "white",
    "keyIdea": "Use the open file to reach the seventh rank, where enemy pawns and pieces are attacked from the side.",
@@ -229,7 +229,7 @@
    ]
   },
   {
-   "title": "Two rooks on the seventh",
+   "title": "The second rook",
    "fen": "r4k2/pR3ppp/1p6/8/2p5/2P4P/P2r1PP1/4R1K1 w - - 1 25",
    "side": "white",
    "keyIdea": "Two rooks on the seventh rank trap the king on its back rank and sweep up the pawns there.",

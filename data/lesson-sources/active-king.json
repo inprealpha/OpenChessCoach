@@ -12,7 +12,7 @@
  "intro": "While there are still many pieces on the board, your king hides behind its pawns. Once the queens are traded, it is safe to bring the king out, and it becomes a strong piece. An active king can walk up the board to win pawns the enemy king cannot defend, and it can walk beside your own pawn to lead it to promotion. In endgames with only kings and pawns left, the side whose king gets there first usually wins.",
  "parts": [
   {
-   "title": "March to the other side",
+   "title": "Pawns on both sides",
    "fen": "3k4/pp6/2p1p2p/2P1P3/1P6/P4K2/8/8 w - - 1 34",
    "side": "white",
    "keyIdea": "Take your king to the side of the board where the enemy king is not, and win the pawns it cannot protect.",
@@ -38,10 +38,10 @@
    ]
   },
   {
-   "title": "Walk in through the gap",
+   "title": "Black's pawns have moved up",
    "fen": "8/8/p1k2p1p/P1p1p1p1/2P3P1/3KPP1P/8/8 w - - 1 37",
    "side": "white",
-   "keyIdea": "Walk your king into the enemy camp through squares no enemy pawn can attack, and hit the pawns from behind.",
+   "keyIdea": "Walk your king into the enemy's half of the board through squares no enemy pawn can attack, and hit the pawns from behind.",
    "text": "From a game played on Lichess. You are White, and only kings and pawns are left. On the queenside the pawns block each other and cannot move. Black's kingside pawns have moved forward, leaving squares behind them that no black pawn can ever guard. Find a path for your king into Black's position.",
    "url": "https://lichess.org/training/GVdTW",
    "line": "Ke4 Kd6 Kf5 Ke7 Kg6 e4 fxe4 Ke6 Kxh6",
@@ -64,7 +64,7 @@
     {
      "ply": 6,
      "san": "fxe4",
-     "text": "Black pushed the e-pawn to e4, attacking your pawn on f3. If Black had taken it, the new black pawn on f3 would have had a clear run to promotion. Your f-pawn takes first, and you are a pawn up."
+     "text": "Black pushed the e-pawn to e4, attacking your pawn on f3. If Black took it, the new black pawn on f3 would have a clear run to promotion, so your f-pawn takes first, and you are a pawn up."
     },
     {
      "ply": 8,
@@ -74,7 +74,7 @@
    ]
   },
   {
-   "title": "Lead your pawn home",
+   "title": "A pawn and its king",
    "fen": "5k2/8/7K/1p4P1/8/8/8/8 w - - 5 54",
    "side": "white",
    "keyIdea": "Put your king beside your pawn's path to promotion, so the enemy king cannot get in front of the pawn.",

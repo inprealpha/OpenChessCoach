@@ -12,14 +12,14 @@
  "puzzleTags": [],
  "puzzleThemes": [],
  "intro": {
-  "text": "Pawns only move forward, so once the pawns beside a square have moved past it or been traded, no enemy pawn can ever attack that square again. Such a square is a hole, or weak square. A hole in your opponent's half that one of your own pawns guards is an outpost: a knight standing there cannot be chased away by a pawn, so the opponent has to give up a piece to remove it. Find these squares, then plan the route that brings your knight to them."
+  "text": "A pawn can only move forward. Once the enemy pawns that could attack a square have moved past it or been traded, no enemy pawn will ever attack that square again. If such a square is in or near your opponent's half, and you can guard a piece there, usually with a pawn, it is an outpost. A knight on an outpost is hard to shift: no pawn can chase it, so your opponent has to give up a piece to get rid of it. In this Lesson you find outposts and plan the route that brings a knight to them."
  },
  "parts": [
   {
    "title": "A square for the knight",
    "fen": "rn1q1rk1/pp2bppp/3pbn2/4p3/2P1P3/3B4/PP2NPPP/RNBQ1RK1 w - - 1 9",
    "side": "white",
-   "keyIdea": "A square no enemy pawn can attack is an outpost: bring a knight there, where only a piece can remove it.",
+   "keyIdea": "Look in or near the enemy half for a square no enemy pawn can attack and your pawn guards, then bring a knight to it.",
    "text": "From a game played on Lichess. You are White, and your knight on b1 has not moved yet. Look at the squares in front of Black's pawns: is there one that no black pawn can ever attack?",
    "credit": {
     "source": "Lichess games database, game bmZt0ZH1",
@@ -82,7 +82,7 @@
    "title": "Plan the knight's route",
    "fen": "r1b1r1k1/pp1p1p1p/2p3p1/2Pn4/3P4/P3P2B/1P1N1KPP/R3R3 w - - 2 24",
    "side": "white",
-   "keyIdea": "If your knight is far from an outpost, plan its route: a couple of quiet jumps to a square where no pawn can chase it.",
+   "keyIdea": "If your knight is far from an outpost, plan its route: a couple of knight jumps to a square where no pawn can chase it.",
    "text": "From a game played on Lichess. You are White, and the queens are off the board. Look at the square in front of Black's pawn on d7. Can any black pawn ever attack it, and how can your knight on d2 get there?",
    "credit": {
     "source": "Lichess games database, game CcWDCcsy",
@@ -145,7 +145,7 @@
    "title": "Your outpost, and one that is not",
    "fen": "2rqrnk1/1b2bpp1/p3pn1p/1p1pN3/3P1P1B/P1NQP3/1P4PP/1BR2RK1 b - - 1 16",
    "side": "black",
-   "keyIdea": "An outpost is safe only if no enemy pawn can reach it; a piece that a pawn can kick is not on an outpost.",
+   "keyIdea": "A square is an outpost only if no enemy pawn can ever attack it; a piece that a pawn can chase away is not on one.",
    "text": "From a game played on Lichess. You are Black. White's pawns stand on d4, e3 and f4, and White's knight sits on e5. Look for a square in White's half that no white pawn can ever attack, close to your knight on f6.",
    "credit": {
     "source": "Lichess games database, game kWN1J7ZQ",

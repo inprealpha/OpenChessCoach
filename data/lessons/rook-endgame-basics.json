@@ -17,7 +17,7 @@
  },
  "parts": [
   {
-   "title": "An active rook hunts pawns",
+   "title": "Pawns level, rooks busy",
    "fen": "8/2k2p1p/1R4p1/8/5P2/6PK/r6P/8 w - - 4 45",
    "side": "white",
    "keyIdea": "A rook that attacks enemy pawns does more than one that guards your own. Go for pawns the enemy king is too far away to protect.",
@@ -109,7 +109,7 @@
    ]
   },
   {
-   "title": "The rook behind the passed pawn",
+   "title": "Three pawns down, one passed pawn",
    "fen": "7k/6rp/8/2R5/2P5/1p1P3P/5PP1/6K1 b - - 0 34",
    "side": "black",
    "keyIdea": "A rook behind a passed pawn gets stronger with every step the pawn takes, and still guards the promotion square at the end.",
@@ -259,7 +259,7 @@
    ]
   },
   {
-   "title": "Cut the king off",
+   "title": "A pawn down, a pawn on h6",
    "fen": "7R/p4p2/r4k1P/4pp2/8/6P1/5P2/6K1 w - - 1 38",
    "side": "white",
    "keyIdea": "Put your rook on the file between the enemy king and your passed pawn, so the king cannot come back to stop it.",

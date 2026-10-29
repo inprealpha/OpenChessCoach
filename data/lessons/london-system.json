@@ -4,7 +4,7 @@
  "kind": "opening",
  "track": "openings",
  "level": "beginner",
- "goal": "As White, you can set up the London System: the bishop out to f4 before e3, pawns on d4, e3 and c3, and knights on f3 and d2.",
+ "goal": "As White, you can set up the London System: the bishop out to f4 before the e-pawn moves to e3, pawns on d4, e3 and c3, and knights on f3 and d2.",
  "priorKnowledge": [
   "opening-principles"
  ],
@@ -25,7 +25,7 @@
    "title": "London System",
    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
    "side": "white",
-   "keyIdea": "Bishop out to f4 before e3, then pawns on d4, e3 and c3 and knights on f3 and d2, with castling to follow.",
+   "keyIdea": "Bring the bishop out before the e-pawn moves, build a pawn wall in the centre, bring out both knights, then castle.",
    "credit": {
     "source": "Lichess chess-openings",
     "url": "https://github.com/lichess-org/chess-openings",
@@ -793,7 +793,7 @@
       ]
      },
      "notes": {
-      "text": "Black's 3...e6 is solid, but it shuts in Black's own bishop on c8. 4.Nf3 develops your knight towards the centre, where it guards d4 and watches e5, and it is one step closer to castling."
+      "text": "Black's 3...e6 is solid, but it shuts in Black's own bishop on c8. 4.Nf3 develops your knight towards the centre, where it guards d4 and watches e5, and you are one step closer to castling."
      }
     },
     {

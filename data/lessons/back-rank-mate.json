@@ -14,14 +14,14 @@
   "backRankMate"
  ],
  "intro": {
-  "text": "A king tucked behind its own pawns is safe from most attacks, but those same pawns can trap it. The back rank is the row the king started on. If an enemy rook or queen gives check along it, the king has nowhere to go, and it is mate. This back-rank mate decides many games at every level. You will learn to give it, to deal with the piece that guards against it, and to give your own king a way out before it is too late."
+  "text": "A king tucked behind its own pawns is safe from most attacks, but those same pawns can trap it. The back rank is the row the king started on. If an enemy rook or queen gives check along it, the king has nowhere to go, and it is mate. This back-rank mate decides many games at every level. You will learn to give it, to deal with the piece that guards against it, and to give your own king an escape square, a square it can step to, before it is too late."
  },
  "parts": [
   {
    "title": "Mate on the back rank",
    "fen": "6k1/p4ppp/4p3/8/4K3/PR1r2P1/5r1P/8 w - - 0 32",
    "side": "white",
-   "keyIdea": "A rook or queen that checks along the back rank mates a king whose own pawns block its way out.",
+   "keyIdea": "A rook or queen that checks along the back rank mates a king whose own pawns have taken away its escape squares.",
    "text": "From a game played on Lichess. You are White. Black has just taken your rook on d3 and is now a rook and two pawns ahead. You could take back with your king, but first look at Black's back rank: both black rooks have left it, and the king on g8 is walled in by its own pawns.",
    "credit": {
     "source": "Lichess puzzle database, puzzle TIyEl",
@@ -81,7 +81,7 @@
    ]
   },
   {
-   "title": "Take the guard",
+   "title": "Your queen is attacked",
    "fen": "4r1k1/5ppp/3n4/8/8/4BQ2/5PPP/1qR3K1 b - - 2 24",
    "side": "black",
    "keyIdea": "If a single piece guards the square where you would mate, take that piece, even if it costs your queen.",
@@ -111,7 +111,7 @@
       "club": []
      },
      "notes": {
-      "text": "Your queen takes the rook on c1 with check, giving itself up. The rook was the piece guarding e1. White must answer the check: the only piece that can take back is the bishop on e3, the piece that blocks your rook, and blocking on d1 with the queen loses it to your queen, with mate."
+      "text": "Your queen takes the rook on c1 with check, giving itself up. That rook was the piece guarding e1. White must answer the check. Only the bishop on e3, the piece that blocks your rook, can take back. Blocking on d1 with the queen does not help: your queen takes it, with mate."
      }
     },
     {
@@ -144,11 +144,11 @@
    ]
   },
   {
-   "title": "One guard, two jobs",
+   "title": "Bernstein against Capablanca",
    "fen": "3r2k1/p4ppp/1q6/8/8/2R1P3/P3QPPP/6K1 b - - 0 29",
    "side": "black",
-   "keyIdea": "When one piece guards both the back rank and another piece, attack that other piece: the guard cannot do both jobs.",
-   "text": "From the game Bernstein against Capablanca, played in Moscow in 1914. You are Black. Only White's queen on e2 stops your rook from landing on d1, and White's rook on c3 has no protection at all. The game ended after your first move, when White resigned; the moves after it show why.",
+   "keyIdea": "Attack the only guard of the back rank: if it takes your attacker or leaves to save another piece, your rook mates.",
+   "text": "From the game Bernstein against Capablanca, played in Moscow in 1914. You are Black. Only White's queen on e2 stops your rook from landing on d1, and White's rook on c3 is undefended. The game ended after your first move, when White resigned (gave up the game); the moves after it show why.",
    "credit": {
     "source": "Wikipedia, Back-rank checkmate",
     "url": "https://en.wikipedia.org/wiki/Back-rank_checkmate",
@@ -265,7 +265,7 @@
    ]
   },
   {
-   "title": "Give your king air",
+   "title": "Lined up on the f-file",
    "fen": "5rk1/p4q1p/1p4p1/4Q3/8/P1P1P3/1P4PP/R5K1 w - - 1 23",
    "side": "white",
    "keyIdea": "Before the back rank becomes a trap, move a pawn in front of your king so that it has a square to escape to.",
@@ -295,7 +295,7 @@
       "club": []
      },
      "notes": {
-      "text": "h3, the h-pawn one step forward, gives your king the square h2. Black was threatening to check on f2, and after your king stepped to h1, to check again on f1: your rook would have to take the queen there, and Black's rook would take back with mate. Now the king has a way out, so that mate no longer works."
+      "text": "h3, the h-pawn one step forward, gives your king an escape square on h2. Black was threatening to check on f2. Your king would have had to go to h1, the queen would check again on f1, your rook would have to take it, and Black's rook would take back with mate. Now the king can step to h2, so that mate no longer works."
      }
     },
     {

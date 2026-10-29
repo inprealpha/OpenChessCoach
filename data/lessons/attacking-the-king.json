@@ -83,7 +83,7 @@
    ]
   },
   {
-   "title": "Breaking the king's cover",
+   "title": "Pawns close to the king",
    "fen": "r2q1rk1/1p2b1pp/p2p1p2/3npPPQ/4P2P/1P1P4/1P6/R1B2RK1 w - - 0 18",
    "side": "white",
    "keyIdea": "Push your pawns at the enemy king, then break its pawn cover, even with a sacrifice, so your pieces can get at it.",

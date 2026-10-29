@@ -14,11 +14,11 @@
   "fork"
  ],
  "intro": {
-  "text": "In a fork, one piece attacks two enemy pieces at once, and your opponent can save only one of them. Any piece can fork. A knight's fork is the hardest to see coming, because its jump cannot be blocked; a bishop, rook or queen forks along its lines; and a pawn fork is cheap, because you risk only a pawn. A fork that gives check is the strongest kind: the king has to answer the check first."
+  "text": "A fork is a double attack made by a single piece: one piece attacks two enemy pieces at once, and your opponent can save only one of them. Any piece can fork. A knight's fork is the hardest to see coming, because its jump cannot be blocked; a bishop, rook or queen forks along its lines; and a pawn fork is cheap, because you risk only a pawn. A fork that gives check is the strongest kind: the king has to answer the check first."
  },
  "parts": [
   {
-   "title": "The knight fork",
+   "title": "A king and a rook",
    "fen": "8/1k3r2/8/6p1/3PN2p/1P2K2P/2P5/8 b - - 0 44",
    "side": "white",
    "keyIdea": "A knight check that also hits another piece wins that piece: the king has to step away first, and then you take.",
@@ -94,7 +94,7 @@
    ]
   },
   {
-   "title": "The bishop fork",
+   "title": "Two points behind",
    "fen": "r7/1p3pk1/1R6/2p3B1/P3Pp2/1P1P1K2/2r5/8 b - - 0 36",
    "side": "white",
    "keyIdea": "A bishop attacks in both directions along a diagonal, so it can check the king and hit a piece on the far side at once.",
@@ -170,11 +170,11 @@
    ]
   },
   {
-   "title": "Check first, then fork",
+   "title": "A guarded square",
    "fen": "6k1/5pb1/4p2p/1p1nN3/4q1P1/1P5P/5P2/2BQ1K2 b - - 0 40",
    "side": "black",
    "keyIdea": "When the forking square is out of reach, a check first can drive the king onto it.",
-   "text": "From the game Soppe against Braga, Clarin GP Final, 1998. You are Black. Your knight could fork White's king and queen from e3, but the pawn on f2 guards that square. Find a check that drives the king somewhere better.",
+   "text": "From the game Soppe against Braga, Clarín Grand Prix final, 1998. You are Black. Your knight could fork White's king and queen from e3, but the pawn on f2 and the bishop on c1 both guard that square. Find a check that drives the king somewhere better.",
    "credit": {
     "source": "Wikipedia, Fork (chess)",
     "url": "https://en.wikipedia.org/wiki/Fork_(chess)",
@@ -202,7 +202,7 @@
       "club": []
      },
      "notes": {
-      "text": "Your queen checks from h1. It covers g1, g2 and e1, so White's king has only one square left: e2. In the game White resigned here, and the moves that follow show why."
+      "text": "Your queen checks from h1. It covers g1, g2 and e1, so White's king has only one square left: e2. In the game White resigned (gave up the game) here, and the moves that follow show why."
      }
     },
     {
@@ -262,7 +262,7 @@
    ]
   },
   {
-   "title": "The fork trick",
+   "title": "Is the e4 pawn safe?",
    "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/2N2N2/PPPP1PPP/R1BQK2R b KQkq - 5 4",
    "side": "black",
    "keyIdea": "A capture that seems to lose a piece can be safe when a pawn fork on the next move wins the piece back.",

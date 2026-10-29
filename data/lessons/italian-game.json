@@ -4,7 +4,7 @@
  "kind": "opening",
  "track": "openings",
  "level": "beginner",
- "goal": "As White, you can play the Italian Game: aim the bishop at f7, build a centre with c3 and d4, and castle.",
+ "goal": "As White, you can play the Italian Game: aim the bishop at f7, put pawns on c3 and d4 to build a centre, and castle.",
  "priorKnowledge": [
   "opening-principles"
  ],
@@ -15,14 +15,14 @@
  ],
  "puzzleThemes": [],
  "intro": {
-  "text": "The Italian Game begins 1.e4 e5 2.Nf3 Nc6 3.Bc4. White's bishop points at f7, the pawn beside Black's king that only the king defends. After 3...Bc5 you prepare d4 with c3, so that two pawns stand side by side in the centre, and you castle as soon as it is safe."
+  "text": "The Italian Game begins 1.e4 e5 2.Nf3 Nc6 3.Bc4: both sides push the pawn in front of the king two squares and bring out a knight, and then White's bishop comes out to c4. From there it points at f7, the pawn beside Black's king that only the king defends. After 3...Bc5, Black's bishop to c5, you push the c-pawn to c3 to get ready for the d-pawn to come to d4, so that two pawns stand side by side in the centre, and you castle as soon as it is safe."
  },
  "parts": [
   {
    "title": "Italian Game",
    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
    "side": "white",
-   "keyIdea": "Develop towards the centre, aim the bishop at f7, then use c3 and d4 to build a pawn centre before castling.",
+   "keyIdea": "Develop towards the centre, aim a bishop at the weak pawn beside the enemy king, then build a two-pawn centre before castling.",
    "credit": {
     "source": "Lichess chess-openings",
     "url": "https://github.com/lichess-org/chess-openings",

@@ -22,8 +22,8 @@
    "title": "Win the pawn back while you develop",
    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
    "side": "white",
-   "keyIdea": "Offer your c-pawn to pull Black's d-pawn out of the centre, then win it back with moves that develop your pieces.",
-   "text": "You are White, from the first move. These moves reach the position that Lichess's list of openings calls the Classical Defence, Main Line, of the Queen's Gambit Accepted. At each move, ask what it does for your centre, your pieces and your king.",
+   "keyIdea": "Offer a pawn to pull Black's centre pawn away, then win it back with moves that develop your pieces.",
+   "text": "You are White, from the first move. These moves reach the position that Lichess's list of openings calls the Classical Defence, Main Line, of the Queen's Gambit Accepted (accepted, because Black takes the pawn). At each move, ask what it does for your centre, your pieces and your king.",
    "credit": {
     "source": "Lichess chess-openings",
     "url": "https://github.com/lichess-org/chess-openings",

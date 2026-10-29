@@ -15,13 +15,13 @@
   "opening-principles",
   "threats"
  ],
- "intro": "Some players hunt for a very quick win by bringing the queen out early, for example with 2.Qh5, the queen to h5. Together with a bishop on c4 it can aim at f7, the pawn beside your king that only the king defends, and if nothing stops them, Qxf7 is checkmate. That is Scholar's Mate. You beat it with one habit: each time the queen moves, ask what it attacks now and cover that, then bring out your pieces with moves that hit the queen, so White keeps losing time moving it.",
+ "intro": "Some players hunt for a very quick win by bringing the queen out early, for example with 2.Qh5, the queen to h5. Together with a bishop on c4 it can aim at the pawn on f7, which at the start is guarded by your king alone, and if nothing stops them, Qxf7 is checkmate. That is Scholar's Mate. You beat it with one habit: each time the queen moves, ask what it attacks now and cover that, then bring out your pieces with moves that hit the queen, so White keeps losing time moving it.",
  "parts": [
   {
    "title": "Meeting 2.Qh5",
    "fen": "start",
    "side": "black",
-   "keyIdea": "After each queen move, check what it attacks and cover it; then develop with moves that hit the queen, so each queen move costs White time.",
+   "keyIdea": "After each queen move, look at what it attacks and cover it; then develop with moves that hit the queen, so it keeps losing time.",
    "url": "https://github.com/lichess-org/chess-openings",
    "line": "e4 e5 Qh5 Nc6 Bc4 g6 Qf3 Nf6 Ne2 Bg7 d3 d6 Nbc3 Bg4 Qg3 O-O",
    "notes": [
@@ -33,7 +33,7 @@
     {
      "ply": 3,
      "san": "Nc6",
-     "text": "2.Qh5 attacks two pawns: the one on e5, which nothing guards, and the one on f7. 2...Nc6 guards e5 and develops a knight, which means it brings it off its starting square. f7 is fine for now: one attacker, the queen, against one defender, your king."
+     "text": "2.Qh5 attacks the pawn on e5, which nothing guards, and the pawn on f7. (It also attacks h7, but your rook on h8 guards that pawn.) 2...Nc6 guards e5 and develops a knight, which means it brings it off its starting square. f7 is fine for now: one attacker, the queen, against one defender, your king."
     },
     {
      "ply": 5,

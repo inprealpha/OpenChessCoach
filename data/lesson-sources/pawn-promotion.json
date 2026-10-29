@@ -13,11 +13,11 @@
  "intro": "A pawn that reaches the far end of the board is promoted: it turns into a queen, a rook, a bishop or a knight, and nearly always you choose a queen. That is why so many endgames are a race to promote. In this Lesson you win such a race, use the square of the pawn to tell whether a king can still catch a pawn, and meet the special pawn capture called en passant.",
  "parts": [
   {
-   "title": "Win the race to promote",
+   "title": "Two pawns race",
    "fen": "8/8/1P6/4k3/2K2p1p/8/7P/8 b - - 0 48",
    "side": "white",
    "keyIdea": "Count the moves each pawn needs. Promoting first wins only if your new queen can stop the other pawn at once, for example with check.",
-   "text": "From a game played on Lichess. You are White. Only kings and pawns are left. Black's f-pawn is running down the board, and your b-pawn is running up. Count how many moves each pawn needs to reach the last rank.",
+   "text": "From a game played on Lichess. You are White. Only kings and pawns are left. Black's f-pawn is running down the board, and your b-pawn is running up. Count how many moves each pawn needs to reach the last rank, the far row where it promotes.",
    "url": "https://lichess.org/training/KM0Nq",
    "line": "f3 b7 f2 b8=Q+ Ke4 Qf8",
    "notes": [
@@ -43,7 +43,7 @@
    "fen": "8/8/8/8/8/6kp/P7/6K1 w - - 1 58",
    "side": "white",
    "keyIdea": "A king catches a pawn only if it can step into the pawn's square; if it cannot, the pawn runs through on its own.",
-   "text": "From a game played on Lichess. You are White. Your king on g1 stands in front of Black's h-pawn, so everything depends on your a-pawn. To tell whether a king can catch a pawn, picture a square on the board: one side runs from the pawn up to the square where it would promote, and the square reaches the same number of squares sideways, towards the enemy king. If the king can step inside that square on its move, it is in time to stop the pawn; if it cannot, the pawn gets through.",
+   "text": "From a game played on Lichess. You are White. Your king on g1 guards h2 and h1, the squares in front of Black's h-pawn, so the game turns on your a-pawn. Can Black's king catch it? Picture a large square drawn on the board: one side runs from the pawn to the square where it would promote, and it stretches the same number of files sideways, towards the enemy king. If the king can step inside it on its move, it can catch the pawn; if not, the pawn gets through.",
    "url": "https://lichess.org/training/Ezeci",
    "line": "a4 Kf4 a5 Ke5 a6 Kd6 a7 Kc7 a8=Q",
    "notes": [

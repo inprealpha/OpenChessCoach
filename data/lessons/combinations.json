@@ -19,7 +19,7 @@
  },
  "parts": [
   {
-   "title": "Decoy, then fork",
+   "title": "Material is level",
    "fen": "8/2p4R/1pPq2k1/6p1/3N1p2/4P1P1/5P1P/6K1 w - - 1 43",
    "side": "white",
    "keyIdea": "A sacrifice can drag the king onto a square where a knight fork is waiting.",
@@ -111,7 +111,7 @@
    ]
   },
   {
-   "title": "Decoy, then pin",
+   "title": "A pawn down",
    "fen": "r2r2k1/pq2bppp/1p2p3/4P3/3B1P2/1P4P1/P1PQ3P/3R1RK1 b - - 0 18",
    "side": "black",
    "keyIdea": "Give material to lure a piece onto a line with its own king, then pin it there.",
@@ -203,7 +203,7 @@
    ]
   },
   {
-   "title": "Deflection, then mate",
+   "title": "A piece and a pawn down",
    "fen": "4kb1B/1bq2p1p/4pQ2/2p1N3/1n2P3/1p6/2r2PPP/3R2K1 w - - 6 25",
    "side": "white",
    "keyIdea": "Force the only real defender of a square away with a check, and the square is open for mate.",
@@ -266,7 +266,7 @@
    ]
   },
   {
-   "title": "Clearance, then mate",
+   "title": "Far behind",
    "fen": "2r2Q2/1b5k/5nNP/1p1p4/6P1/q4PN1/npPQ4/1K1R3R b - - 0 27",
    "side": "black",
    "keyIdea": "Move a piece out of your queen's way with check, and the line it opens can lead to mate.",

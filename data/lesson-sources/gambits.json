@@ -9,98 +9,103 @@
  "priorKnowledge": [
   "opening-traps"
  ],
- "intro": "A gambit offers a pawn, sometimes more, in return for time: quicker development, open lines or an attack. Before you take one, weigh the pawn against the moves it will cost you to win it and keep it. Some gambits only look like gifts: in the Queen's Gambit, Black can take the pawn on c4 but cannot keep it for long. In this Lesson you take a pawn that costs little, turn down one that costs too much, and let a pawn go when holding on to it would leave your pieces at home.",
+ "intro": "A gambit gives up a pawn early in the game in the hope of getting something back: faster development, open lines or a quick attack on the king. When your opponent offers one, you have three answers. You can take the pawn and keep it, take it and give it back later when that suits you, or leave it and make your opponent pay for the gaps the gambit leaves behind. To choose, weigh the pawn against the moves it will cost you and the lines it opens. In this Lesson you meet each answer in a real game.",
  "parts": [
   {
-   "title": "The King's Gambit",
-   "fen": "rnbqkbnr/pppp1ppp/8/4p3/4PP2/8/PPPP2PP/RNBQKBNR b KQkq - 0 2",
+   "title": "A pawn offered on e4",
+   "fen": "rnbqkbnr/ppp1pppp/8/3p4/3PP3/8/PPP2PPP/RNBQKBNR b KQkq - 0 2",
    "side": "black",
-   "keyIdea": "A pawn that costs you one move and leaves the enemy king less sheltered is worth taking; then develop rather than cling to it.",
-   "text": "From a game played on Lichess. You are Black. After 1.e4 e5, White has pushed the f-pawn two squares with 2.f4, the King's Gambit, and offers it to your e-pawn. Is the pawn worth taking?",
-   "url": "https://lichess.org/K16jPKW9#3",
-   "line": "exf4 Nf3 d5 exd5 Nf6 Bc4 Nxd5",
+   "keyIdea": "Take a pawn when you can guard it with moves that develop; when it is attacked again, a trade that leaves you a pawn up is enough.",
+   "text": "From a game played on Lichess. You are Black. After 1.d4 d5, White has pushed 2.e4, the Blackmar-Diemer Gambit, and offers the e-pawn to your d-pawn. Decide whether to take it, and what to do when White tries to win it back.",
+   "url": "https://lichess.org/chTIh51M#3",
+   "line": "dxe4 f3 Nf6 Nc3 exf3 Nxf3 Bf5",
    "notes": [
     {
      "ply": 0,
-     "san": "exf4",
-     "text": "2...exf4 takes the pawn. It costs you only one move, and with White's f-pawn gone, the diagonal from a7 to g1 leads straight to White's king. The Engine prefers taking to turning the pawn down."
+     "san": "dxe4",
+     "text": "2...dxe4 takes the pawn. Your d-pawn makes the capture, so none of your pieces has lost time, and White has given up a centre pawn. The Engine prefers taking it."
     },
     {
      "ply": 2,
-     "san": "d5",
-     "text": "3.Nf3 developed a knight and stopped ...Qh4+. Instead of spending moves on keeping the f4 pawn, 3...d5 hits White's centre and opens a path for your bishop on c8. Holding the pawn with 3...g5 is also played, but it loosens your kingside pawns."
-    },
-    {
-     "ply": 4,
      "san": "Nf6",
-     "text": "4.exd5 took your d-pawn. 4...Nf6 develops a knight that attacks d5 at once, so a piece, not your queen, will win the pawn back."
+     "text": "3.f3 offered a second pawn, to open the f-file. 3...Nf6 brings out a knight that guards your pawn on e4, so White cannot simply take it back. Moving the e-pawn to e6 was also good."
+    },
+    {
+     "ply": 4,
+     "san": "exf3",
+     "text": "4.Nc3 attacked e4 a second time, so 5.fxe4 would have won it back. 4...exf3 takes the f-pawn instead. Your e4 pawn will be gone, but so are White's e-pawn and f-pawn, and you stay a pawn up."
     },
     {
      "ply": 6,
-     "san": "Nxd5",
-     "text": "5.Bc4 defended the pawn, but your knight and your queen both attack d5 and only the bishop defends it, so 5...Nxd5 takes it. You are a pawn up again, your pieces are coming out, and White's king has no f-pawn to shelter it."
+     "san": "Bf5",
+     "text": "5.Nxf3 took back, and White's pieces are coming out fast. 5...Bf5 develops your bishop before your e-pawn moves to e6, so the bishop will not be shut in behind your pawns. You are a pawn up, and the Engine prefers your position a little."
     }
    ]
   },
   {
-   "title": "The Vienna Gambit",
-   "fen": "rnbqkb1r/pppp1ppp/5n2/4p3/4PP2/2N5/PPPP2PP/R1BQKBNR b KQkq - 0 3",
+   "title": "A pawn offered on b4",
+   "fen": "r1bqk1nr/pppp1ppp/2n5/4p3/1bB1P3/2P2N2/P2P1PPP/RNBQK2R b KQkq - 0 5",
    "side": "black",
-   "keyIdea": "If taking a pawn lets your opponent chase your pieces back home, turn it down and strike in the centre instead.",
-   "text": "From a game played on Lichess. You are Black. After 1.e4 e5 2.Nc3 Nf6, White offers the f-pawn with 3.f4, the Vienna Gambit. This time, look at what taking it would cost you before you decide.",
-   "url": "https://lichess.org/OqLRRlZE#5",
-   "line": "d5 fxe5 Nxe4 Nf3 Be7",
+   "keyIdea": "A pawn you took can be given back to trade off your opponent's most dangerous piece and catch up in development.",
+   "text": "From a game played on Lichess. You are Black. After 1.e4 e5 2.Nf3 Nc6 3.Bc4 Bc5, White offered a pawn with 4.b4, the Evans Gambit, and your bishop took it. Now 5.c3 attacks the bishop and gets ready for d4, to build a big centre. Decide how much the extra pawn is worth to you.",
+   "url": "https://lichess.org/QzK7VfNB#9",
+   "line": "Be7 d4 Na5 Nxe5 Nxc4 Nxc4 d5",
    "notes": [
     {
      "ply": 0,
-     "san": "d5",
-     "text": "3...d5 turns the pawn down and strikes at the centre. After 3...exf4 White would push 4.e5, and your knight on f6 would be driven back to g8: you would have an extra pawn, but White would have the centre and a lead in development. The Engine grades 3...exf4 as an inaccuracy."
+     "san": "Be7",
+     "text": "5...Be7 takes the bishop back to a safe square near your king. 5...Ba5 was just as good."
     },
     {
      "ply": 2,
-     "san": "Nxe4",
-     "text": "4.fxe5 took your e-pawn, and 4...Nxe4 takes White's e-pawn in return. Material is level, and your knight sits on a strong central square, where it attacks White's knight on c3."
+     "san": "Na5",
+     "text": "6.d4 attacked your pawn on e5. 6...Na5 lets it go: the knight attacks White's bishop on c4, the piece aimed at f7 next to your king. Keeping the pawn with 6...exd4 was also possible, but after 7.cxd4 White has two pawns in the centre and more pieces out, and the Engine prefers 6...Na5 a little."
     },
     {
      "ply": 4,
-     "san": "Be7",
-     "text": "5.Nf3 developed. 5...Be7 brings out your bishop and gets you ready to castle. White's f-pawn has left its place in front of White's king, and you have given nothing away."
+     "san": "Nxc4",
+     "text": "7.Nxe5 won the pawn back, so the material is level. 7...Nxc4 takes the bishop: the piece that made the gambit dangerous is gone."
+    },
+    {
+     "ply": 6,
+     "san": "d5",
+     "text": "8.Nxc4 took back. 8...d5 attacks the knight on c4 and the pawn on e4 at the same time, and opens a path for your bishop on c8. The material is level, White's attacking bishop has gone, and the Engine sees the position as about equal."
     }
    ]
   },
   {
-   "title": "The Budapest Gambit",
-   "fen": "rnbqkb1r/pppp1ppp/5n2/4p3/2PP4/8/PP2PPPP/RNBQKBNR w KQkq - 0 3",
+   "title": "A pawn offered on f5",
+   "fen": "rnbqkbnr/pppp2pp/8/4pp2/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 3",
    "side": "white",
-   "keyIdea": "When your opponent is sure to win the pawn back, defend it with moves that develop, and let it go rather than spend more moves on it.",
-   "text": "From a game played on Lichess. You are White. After 1.d4 Nf6 2.c4, Black has pushed 2...e5, the Budapest Gambit, and offers the e-pawn. Decide whether to take it, and then how hard to fight to keep it.",
-   "url": "https://lichess.org/f3WBr3QB#4",
-   "line": "dxe5 Ng4 Bf4 Nc6 Nf3 Bb4+ Nbd2 Qe7 e3",
+   "keyIdea": "Against a risky gambit, take what is really free, then develop with threats and open lines while the enemy king is still in the centre.",
+   "text": "From a game played on Lichess. You are White. After 1.e4 e5 2.Nf3, Black has replied 2...f5, the Latvian Gambit, and offers the f-pawn. Look at every capture you have before you choose.",
+   "url": "https://lichess.org/cIWLKE6B#4",
+   "line": "Nxe5 Qf6 d4 d6 Nc4 fxe4 Nc3 Qg6 f3",
    "notes": [
     {
      "ply": 0,
-     "san": "dxe5",
-     "text": "3.dxe5 takes the pawn. It costs you nothing, and now Black has to spend moves winning it back. The Engine prefers taking."
+     "san": "Nxe5",
+     "text": "3.Nxe5 takes the pawn on e5, which nothing defended, and puts your knight in the centre. 2...f5 also opened the diagonal from h5 to e8, so if Black now takes on e4, 4.Qh5+ wins material. Taking on f5 was good too, but the Engine prefers the knight capture."
     },
     {
      "ply": 2,
-     "san": "Bf4",
-     "text": "3...Ng4 attacked the pawn on e5. 4.Bf4 defends it and brings a bishop into play at the same time."
+     "san": "d4",
+     "text": "3...Qf6 attacked your knight. 4.d4 guards it with a pawn and puts a second pawn in the centre. Moving the knight back to c4 at once was also good."
     },
     {
      "ply": 4,
-     "san": "Nf3",
-     "text": "4...Nc6 attacked e5 a second time, and 5.Nf3 defends it a second time while it develops another piece."
+     "san": "Nc4",
+     "text": "4...d6 attacked the knight with a pawn, so guarding it is no longer enough. 5.Nc4 steps back to a safe square, from where it can later come to e3."
     },
     {
      "ply": 6,
-     "san": "Nbd2",
-     "text": "5...Bb4+ checked your king. 6.Nbd2 blocks the check with a knight that comes into play, and your knight on f3 still guards e5."
+     "san": "Nc3",
+     "text": "5...fxe4 took a pawn back, so the material is level. 6.Nc3 brings out a knight that attacks the pawn on e4, and Black has to spend another move guarding it."
     },
     {
      "ply": 8,
-     "san": "e3",
-     "text": "6...Qe7 attacked e5 a third time, and you have only two defenders, so the pawn will go back to Black. Rather than spend more moves on it, 7.e3 opens the way for your bishop on f1 so you can castle soon. After 7...Ngxe5 8.Nxe5 Nxe5 material is level again, and the Engine prefers your position slightly."
+     "san": "f3",
+     "text": "6...Qg6 guarded e4 and aimed at g2. 7.f3 strikes at the pawn on e4 at once: if Black takes on f3, your queen takes back, and the f-file opens towards Black's king, which is still in the centre. You have more pieces out, and the Engine clearly prefers your position."
     }
    ]
   }

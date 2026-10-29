@@ -12,7 +12,7 @@
  "priorKnowledge": [
   "check"
  ],
- "intro": "Checkmate ends the game: the king is in check and there is no way out. It cannot move to a safe square, the check cannot be blocked, and the checking piece cannot be taken. If even one of those ways is open, it is only check, so look at every check you have and test each one.",
+ "intro": "Checkmate, or mate for short, ends the game: the king is in check and there is no way out. It cannot move to a safe square, the check cannot be blocked, and the checking piece cannot be taken. If even one of those ways is open, it is only check, so look at every check you have and test each one.",
  "parts": [
   {
    "title": "Check or mate?",
@@ -47,18 +47,18 @@
    ]
   },
   {
-   "title": "Six checks, one mate",
-   "fen": "1k1r4/3q4/8/7p/Q4B2/6PP/5P1K/8 b - - 2 65",
+   "title": "A king in the centre",
+   "fen": "8/8/3pkp1p/1R1P1p2/1p6/4K3/1r3P2/8 b - - 0 53",
    "side": "white",
-   "keyIdea": "When you have many checks, test each one: a check that can be blocked or captured is only check.",
-   "text": "From a game played on Lichess. You are White. Black's king has just stepped from b8 to c8. Your queen can give check in six different ways, but only one of them is mate. Test each one.",
-   "url": "https://lichess.org/training/CzEOB",
-   "line": "Kc8 Qa8#",
+   "keyIdea": "Mate can happen in the centre too, even with a pawn, when your pieces and the king's own pawns cover every square around it.",
+   "text": "From a game played on Lichess. You are White. Black's king has just stepped forward to e5, into the centre of the board. You have two ways to give check, and only one of them is mate. For each one, look at every square around the king.",
+   "url": "https://lichess.org/training/GW5Ow",
+   "line": "Ke5 f4#",
    "notes": [
     {
      "ply": 1,
-     "san": "Qa8#",
-     "text": "The queen checks the king along the back rank. The king cannot go to b8, b7 or c7, because your queen and your bishop on f4 cover them, and its own pieces fill d7 and d8. Nothing can block on b8 or take the queen, so it is mate. The other checks all leave a way out: Black takes the queen after Qc6+ or Qxd7+, and blocks Qa6+, Qc4+ or Qc2+ with the queen."
+     "san": "f4#",
+     "text": "f4, the pawn two squares forward from f2, checks the king on e5. Your king on e3 guards f4, d4 and e4, so the king cannot take the pawn or step onto those squares. Your pawn on d5 covers e6, your rook guards that pawn, and Black's own pawns fill d6, f6 and f5. A pawn's check cannot be blocked, so it is mate. The other check, Rxf5+, is only check: the king takes the rook."
     }
    ]
   },

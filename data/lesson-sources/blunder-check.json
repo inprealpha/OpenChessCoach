@@ -5,7 +5,7 @@
  "track": "thinking",
  "level": "beginner",
  "side": "white",
- "goal": "Before you play a move, you can check what your opponent could take, check or attack after it, and pick a safer move when the answer is bad.",
+ "goal": "Before you play a move, you can look at what your opponent could take, check or attack after it, and pick a safer move when the answer is bad.",
  "priorKnowledge": [
   "threats"
  ],
@@ -15,7 +15,7 @@
    "title": "Which piece takes back?",
    "fen": "r2qk2r/1pp3pp/3ppn2/p1b1p3/3nP3/P1NPBN2/1PP2PPP/R2Q1RK1 w kq - 3 10",
    "side": "white",
-   "keyIdea": "Before you capture, check what the opponent's recapture attacks: a pawn that takes back can hit two pieces at once.",
+   "keyIdea": "Before you capture, look at what the piece that takes back would attack: a pawn that takes back can hit two pieces at once.",
    "text": "From a game played on Lichess. You are White, and you can take Black's knight on d4 with your knight or with your bishop. For each capture, picture Black taking back and ask what that piece would attack.",
    "url": "https://lichess.org/l9oTgq0h#18",
    "line": "Bxd4 Bxd4 Nxd4 exd4 Ne2",

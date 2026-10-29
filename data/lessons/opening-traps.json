@@ -4,7 +4,7 @@
  "kind": "thinking",
  "track": "openings",
  "level": "intermediate",
- "goal": "You can spot the common opening traps on f2 and f7 and in other openings, and avoid falling into them.",
+ "goal": "You can spot common opening traps, such as attacks on f2 and f7, and avoid falling into them.",
  "priorKnowledge": [
   "scholars-mate-defence",
   "italian-game"
@@ -13,11 +13,11 @@
  "puzzleTags": [],
  "puzzleThemes": [],
  "intro": {
-  "text": "An opening trap is a position where a natural-looking move loses at once. Most traps catch a player who grabs material, or develops a piece, without asking what the opponent can do next. In this Lesson you spring two famous traps and step around two others. The habit to take away: before each move, ask what your opponent's last move threatens, and what your own move leaves undefended."
+  "text": "An opening trap is a position where a natural-looking move loses at once. Most traps catch a player who grabs material, or develops a piece, without asking what the opponent can do next. In this Lesson you spring two famous traps and step around two others. The habit to keep: before each move, ask what your opponent's last move threatens, and what your own move leaves undefended."
  },
  "parts": [
   {
-   "title": "Legal's Mate: a pin that does not hold",
+   "title": "A pin that does not hold",
    "fen": "rn1qkbnr/ppp2pp1/3p3p/4p3/2B1P1b1/2N2N2/PPPP1PPP/R1BQK2R w KQkq - 0 5",
    "side": "white",
    "keyIdea": "A piece pinned to the queen may still move when losing the queen leads to mate, or when the pinning piece is left undefended.",
@@ -112,7 +112,7 @@
    "title": "Legal's Mate in reverse, on f2",
    "fen": "r1bqk2r/ppp2ppp/2p2n2/2b5/4P3/3P4/PPP2PPP/RNBQKB1R w KQkq - 1 6",
    "side": "white",
-   "keyIdea": "Before you pin a piece to the queen, check whether your opponent could ignore the pin and mate you on f2.",
+   "keyIdea": "Before you pin a piece to the queen, ask whether your opponent could ignore the pin and mate you on f2.",
    "text": "From a game played on Lichess, in the Stafford Gambit. You are White and a pawn up, but Black's bishop on c5 already aims at f2, the weak square next to your king. In the game White pinned the f6 knight with 6.Bg5 and was mated three moves later. Find a safer developing move.",
    "credit": {
     "source": "Lichess games database, game NBYvGOmt",
@@ -201,11 +201,11 @@
    ]
   },
   {
-   "title": "The Elephant Trap",
+   "title": "A knight takes on d5",
    "fen": "r1bqkb1r/pppn1ppp/5n2/3N2B1/3P4/8/PP2PPPP/R2QKBNR b KQkq - 0 6",
    "side": "black",
-   "keyIdea": "A knight pinned to its queen may still move, if a check afterwards wins back more than the queen you give up.",
-   "text": "From a game played on Lichess, in the Queen's Gambit Declined: 1.d4 d5 2.c4 e6 3.Nc3 Nf6 4.Bg5 Nbd7 5.cxd5 exd5. You are Black. White has just taken your pawn with 6.Nxd5, because your knight on f6 seems pinned to your queen by the bishop on g5. Is the pawn really free?",
+   "keyIdea": "When a piece leaves a square, look at the lines it opens: a check along a newly opened line can win back more than you give.",
+   "text": "From a game played on Lichess, in the Queen's Gambit Declined: 1.d4 d5 2.c4 e6 3.Nc3 Nf6 4.Bg5 Nbd7 5.cxd5 exd5. You are Black. White's knight has just left c3 to take your pawn on d5. Look at the squares between your bishop on f8 and White's king on e1, and count what each side could take.",
    "credit": {
     "source": "Lichess games database, game 41fAPFok",
     "url": "https://lichess.org/41fAPFok#11",
@@ -235,7 +235,7 @@
       "club": []
      },
      "notes": {
-      "text": "6...Nxd5 takes the knight and leaves your queen to the bishop on g5. It looks like a blunder, but your bishop on f8 can now reach b4 with check, and White's only answer to that check will cost the queen."
+      "text": "6...Nxd5 takes the knight. Your queen on d8 is now open to the bishop on g5, but with White's knight gone from c3, your bishop on f8 can reach b4 and check White's king along the diagonal from b4 to e1."
      }
     },
     {
@@ -262,7 +262,7 @@
       "club": []
      },
      "notes": {
-      "text": "White took your queen with 7.Bxd8. 7...Bb4+ checks along the diagonal to White's king, and the only way to block it is 8.Qd2."
+      "text": "White took your queen with 7.Bxd8. 7...Bb4+ checks along that open diagonal. White's king has no square to go to, so White's only legal move is 8.Qd2, putting the queen in the way."
      }
     },
     {
@@ -289,7 +289,7 @@
       "club": []
      },
      "notes": {
-      "text": "8...Bxd2+ takes the queen with check, and White's king takes back."
+      "text": "8...Bxd2+ takes the queen, again with check, and White's king has to take back."
      }
     },
     {
@@ -316,7 +316,7 @@
       "club": []
      },
      "notes": {
-      "text": "9...Kxd8 takes the bishop. Count the captures: White took a pawn, your queen and a bishop; you took a knight, the queen and a bishop. You are a knight up for a pawn, all because White grabbed a pawn without asking what your answer could be."
+      "text": "9...Kxd8 takes the bishop on d8. Now count: White has taken a pawn, your queen and a bishop; you have taken a knight, the queen and a bishop. You are a knight up for a pawn, thanks to the diagonal White's knight opened when it left c3."
      }
     }
    ]
@@ -325,8 +325,8 @@
    "title": "Mind the pin on the e-file",
    "fen": "r1bqkbnr/pp1npppp/2p5/8/3PN3/8/PPP1QPPP/R1B1KBNR b KQkq - 2 5",
    "side": "black",
-   "keyIdea": "When a pawn in front of your king is pinned, it cannot take a checking piece: keep a square free for the king.",
-   "text": "From a game played on Lichess, in the Caro-Kann Defence. You are Black. White has just played the odd-looking 5.Qe2, putting the queen on the e-file with your king, and White's knight on e4 between them. In the game Black developed the most natural way and was mated on the next move. Find a safe developing move.",
+   "keyIdea": "When a pawn in front of your king is pinned, it cannot take a checking piece: keep a square empty for the king.",
+   "text": "From a game played on Lichess, in the Caro-Kann Defence. You are Black. White has just played the odd-looking 5.Qe2, putting the queen on the e-file with your king, and White's knight on e4 between them. In the game Black developed in the most natural way and was mated on the next move. Find a safe developing move.",
    "credit": {
     "source": "Lichess games database, game 1vreozsr",
     "url": "https://lichess.org/1vreozsr#9",
@@ -354,7 +354,7 @@
       "club": []
      },
      "notes": {
-      "text": "5...Ndf6 moves the d7 knight to f6, where it challenges the e4 knight, and d7 stays free for your king. The natural 5...Ngf6 would lose to 6.Nd6#, a smothered mate: the e7 pawn cannot take the knight because the queen on e2 pins it to your king, and your own pieces fill every square around the king. 5...Qc7, which covers d6, is also safe."
+      "text": "5...Ndf6 moves the d7 knight to f6, where it challenges the e4 knight, and d7 stays empty for your king. The natural 5...Ngf6 would lose to 6.Nd6#, a smothered mate: the e7 pawn cannot take the knight because the queen on e2 pins it to your king, and your own pieces fill every square around the king. 5...Qc7, which covers d6, is also safe."
      }
     },
     {

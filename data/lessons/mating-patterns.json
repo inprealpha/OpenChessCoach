@@ -86,7 +86,7 @@
       "club": []
      },
      "notes": {
-      "text": "36.Nh6+ gives two checks at once: one from the knight on h6, and one from your queen on d5, whose diagonal to g8 the knight has just opened. The king has to move, and h8 is the only square it can reach."
+      "text": "36.Nh6+ is a double check: one from the knight on h6, and one from your queen on d5, whose diagonal to g8 the knight has just opened. The king has to move, and h8 is the only square it can reach."
      }
     },
     {
@@ -113,7 +113,7 @@
       "club": []
      },
      "notes": {
-      "text": "37.Qg8+ is the queen sacrifice. The knight on h6 guards g8, so the king cannot take the queen, and the rook must. Now the rook fills the king's last free square."
+      "text": "37.Qg8+ is the queen sacrifice. The knight on h6 guards g8, so the king cannot take the queen, and the rook must. Now the rook fills the king's last escape square."
      }
     },
     {

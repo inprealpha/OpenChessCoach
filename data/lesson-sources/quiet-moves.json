@@ -15,18 +15,18 @@
  "intro": "When you look for a winning move, you look at checks and captures first. Sometimes none of them works yet, and the winning move is a quiet one: it takes nothing and gives no check, but leaves your opponent with no good answer. In this Lesson your quiet moves shut the enemy king in, so that the next check is mate, or make a threat that cannot be stopped.",
  "parts": [
   {
-   "title": "One free square left",
+   "title": "One escape square left",
    "fen": "r6k/1p3R2/1p2p2p/7N/8/p7/6PP/7K w - - 0 38",
    "side": "white",
    "keyIdea": "Before you check, take away the king's last square: then a mate threat may have no defence at all.",
-   "text": "From a game played on Lichess. You are White. Black's king on h8 has one free square, g8, and Black's a-pawn is racing to promote. No check works yet.",
+   "text": "From a game played on Lichess. You are White. Black's king on h8 has one escape square, g8, and Black's a-pawn is racing to promote. No check works yet.",
    "url": "https://lichess.org/training/JupYf",
    "line": "Nf6 a2 Rh7#",
    "notes": [
     {
      "ply": 0,
      "san": "Nf6",
-     "text": "A quiet knight move. From f6 the knight covers g8, the king's only free square, and guards h7. You threaten Rh7 mate, and Black has no check, block or capture to stop it."
+     "text": "A quiet knight move. From f6 the knight covers g8, the king's only escape square, and guards h7. You threaten Rh7 mate, and Black has no check, block or capture to stop it."
     },
     {
      "ply": 2,

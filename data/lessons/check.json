@@ -16,11 +16,11 @@
  },
  "parts": [
   {
-   "title": "Move the king",
+   "title": "A bishop check",
    "fen": "8/p3k3/5R1p/3r4/8/P1B3P1/n6P/5K2 w - - 1 34",
    "side": "black",
    "keyIdea": "Compare all three ways out of check; sometimes the king can step out and capture something on the way.",
-   "text": "From a game played on Lichess. You are Black, and White's bishop has just given check from b4. You could take the bishop or block its diagonal, but first look at where your king can go.",
+   "text": "From a game played on Lichess. You are Black, and White's bishop has just given check from b4. Look at all three ways out before you choose.",
    "credit": {
     "source": "Lichess games database, game e55doe3a",
     "url": "https://lichess.org/e55doe3a#66",
@@ -63,10 +63,10 @@
    ]
   },
   {
-   "title": "Block the check",
+   "title": "A queen check down the file",
    "fen": "8/5k2/8/p2q1B2/4R3/1P2PKP1/8/8 b - - 6 48",
    "side": "white",
-   "keyIdea": "Block with a piece that is guarded; the best blocks also threaten the piece that gives check.",
+   "keyIdea": "Block with a guarded piece, best of all one that attacks the checking piece; if the checker takes your blocker, take it back.",
    "text": "From a game played on Lichess. Black's queen has just taken your bishop on f5, giving check down the f-file (the column of squares marked f). Nothing can take the queen, so you must move the king or block.",
    "credit": {
     "source": "Lichess puzzle database, puzzle TDcUE",
@@ -133,13 +133,13 @@
       "club": []
      },
      "notes": {
-      "text": "Black gave up the queen for your rook, with check. This time taking the checking piece is best, and 50.exf4 takes the queen with the e-pawn. Taking it with the king or the g-pawn wins too: in each case you are left with three pawns against one, and the pawn endgame is a win."
+      "text": "Black gave up the queen for your rook, with check. This time the answer is to take the checking piece, and 50.exf4 takes the queen with the e-pawn. Taking it with the king or the g-pawn wins just as well: in each case you are left with three pawns against one, and the pawn endgame is a win."
      }
     }
    ]
   },
   {
-   "title": "Take the checking piece",
+   "title": "A knight check",
    "fen": "8/8/8/8/5n1N/1R6/5K2/r6k b - - 2 50",
    "side": "white",
    "keyIdea": "If the checking piece can be captured safely, taking it often solves everything at once.",

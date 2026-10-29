@@ -19,14 +19,14 @@
    "title": "The Dragon Variation",
    "fen": "start",
    "side": "black",
-   "keyIdea": "Trade the c-pawn for White's d-pawn, then put the bishop on g7, castle and bring out the knights.",
+   "keyIdea": "Trade a side pawn for White's centre pawn, then put your bishop on the long diagonal, castle behind it and bring out the knights.",
    "url": "https://github.com/lichess-org/chess-openings",
    "line": "e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3 g6 Be3 Bg7 f3 O-O Qd2 Nc6",
    "notes": [
     {
      "ply": 1,
      "san": "c5",
-     "text": "1...c5 controls d4 from the side instead of meeting e4 head on. About half the time White answers with 2.Nf3, often followed by 3.d4 as in this Lesson. Against 2.Bc4, which aims at f7, play ...e6 to block the bishop's diagonal; against 2.c3, which gets ready for d4 with a pawn, attack e4 at once with 2...Nf6 or 2...d5; against 2.Nc3, use the same set-up as here, with ...g6, ...Bg7, ...d6 and ...Nc6."
+     "text": "1...c5 controls d4 from the side instead of meeting e4 head on. About half the time White answers with 2.Nf3, often followed by 3.d4 as in this Lesson. Against 2.Bc4, which aims at f7, ...e6 blocks the bishop's diagonal; against 2.c3, which gets ready for d4 with a pawn, 2...Nf6 or 2...d5 attacks e4 at once; against 2.Nc3, the same set-up as here works, with ...g6, ...Bg7, ...d6 and ...Nc6. Against 2.d4, 2...cxd4 takes the pawn, and if 3.c3 follows, 3...Nf6 works as against 2.c3."
     },
     {
      "ply": 3,

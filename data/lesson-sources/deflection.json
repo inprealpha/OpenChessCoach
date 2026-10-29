@@ -15,7 +15,7 @@
  "intro": "Many defenders have one important job, such as guarding a piece, a square or the back rank, the row the king started on. Deflection means forcing that defender away from its job, usually with a check or a capture it has to answer. Once the defender has gone, you take what it was guarding.",
  "parts": [
   {
-   "title": "A check pulls the guard away",
+   "title": "One rook guards the queen",
    "fen": "r5k1/ppq1r1pp/2n1p3/8/2B2Q2/P1N5/1P4PP/5R1K w - - 2 25",
    "side": "white",
    "keyIdea": "A check that the defender has to answer by capturing drags it away from the piece it guards.",
@@ -36,7 +36,7 @@
    ]
   },
   {
-   "title": "The king is a defender too",
+   "title": "Only the king guards the queen",
    "fen": "rn5r/pp3Rp1/1kp4p/2q1p3/8/4Q3/1PP3PP/2KR4 w - - 4 23",
    "side": "white",
    "keyIdea": "A king can be deflected too: a check it must answer by capturing pulls it away from what it guards.",
@@ -57,7 +57,7 @@
    ]
   },
   {
-   "title": "Deflection that leads to mate",
+   "title": "The queen guards f7",
    "fen": "1rb1k1r1/2q2p2/4pQ2/pp5p/4P2p/P1P5/1P4N1/3R1RK1 w - - 2 31",
    "side": "white",
    "keyIdea": "Pull away the piece that guards the mating square, and the mate works.",

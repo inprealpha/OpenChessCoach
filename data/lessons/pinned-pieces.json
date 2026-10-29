@@ -16,7 +16,7 @@
  },
  "parts": [
   {
-   "title": "A pawn attacks the pinned knight",
+   "title": "The knight cannot move",
    "fen": "rn1q1rk1/pbb2ppp/2p1pn2/1p6/4P2B/2NB1N2/PP3PPP/R2QK2R w KQ - 2 13",
    "side": "white",
    "keyIdea": "Attack a pinned piece with a pawn: it cannot step away without losing what stands behind it.",
@@ -79,7 +79,7 @@
    ]
   },
   {
-   "title": "Two attackers against one defender",
+   "title": "A bishop pinned to its king",
    "fen": "r2k1r2/pp1b3p/2p2p2/6p1/2B5/4N1P1/PPP2PP1/3R2K1 w - - 0 25",
    "side": "white",
    "keyIdea": "Pile up on a pinned piece: when it has more attackers than defenders, it falls.",
@@ -142,11 +142,11 @@
    ]
   },
   {
-   "title": "A pinned pawn guards nothing",
+   "title": "Count the guards",
    "fen": "4rrk1/p4p2/5Rpp/4p3/2B3bP/1P6/P3R3/6K1 w - - 0 26",
    "side": "white",
-   "keyIdea": "A piece pinned to its king cannot capture, so whatever it seems to guard is free to take.",
-   "text": "From a game played on Lichess. You are White. Black's bishop has just taken a pawn on g4. Before you count the guards of a square, check whether any of them is pinned.",
+   "keyIdea": "A piece pinned to its king cannot leave the line of the pin, so what it seems to guard off that line is free to take.",
+   "text": "From a game played on Lichess. You are White. Black's bishop has just taken a pawn on g4. Before you count the guards of a square, find out whether any of them is pinned.",
    "credit": {
     "source": "Lichess puzzle database, puzzle m7Yrw",
     "url": "https://lichess.org/training/m7Yrw",

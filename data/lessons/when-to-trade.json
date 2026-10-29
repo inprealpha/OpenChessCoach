@@ -175,7 +175,7 @@
    "title": "Three pawns up",
    "fen": "8/p1k4p/1n4pb/8/3P4/1PPB1qP1/P4B1P/5QK1 w - - 9 38",
    "side": "white",
-   "keyIdea": "When you are ahead in material, trade pieces, the queens first: the fewer pieces your opponent keeps, the fewer chances they get.",
+   "keyIdea": "When you are ahead in material, trade pieces, the queens first: each trade takes away a piece your opponent could attack with.",
    "text": "From a game played on Lichess. You are White and three pawns up. Black's queen has just come to f3, the only black piece close to your king.",
    "credit": {
     "source": "Lichess games database, game 9g139wIt",
@@ -229,7 +229,7 @@
       "club": []
      },
      "notes": {
-      "text": "Black took, and 39.Bxe2 takes back. Two bishops and three extra pawns against a knight and a bishop is a winning endgame, and your king is now free to walk up the board and help the pawns."
+      "text": "Black took, and 39.Bxe2 takes back. Two bishops and three extra pawns against a knight and a bishop is a winning endgame, and your king can now walk up the board and help the pawns."
      }
     }
    ]

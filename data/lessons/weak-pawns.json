@@ -332,6 +332,69 @@
      }
     }
    ]
+  },
+  {
+   "title": "A knight trade on d5",
+   "fen": "rn2k2r/1bqpb1pp/pp2p3/2pNP3/8/5N2/PPP1BPPP/R1BQ1RK1 b kq - 0 11",
+   "side": "black",
+   "keyIdea": "When you can take back with a piece or a pawn, ask what each does to your pawns; keep them healthy unless the pawn capture gains more.",
+   "text": "From a game played on Lichess. You are Black. White's knight has just taken your knight on d5, and you can take back with the bishop on b7 or with the pawn on e6. Before you choose, picture your pawns after each capture.",
+   "credit": {
+    "source": "Lichess games database, game mrj6xak3",
+    "url": "https://lichess.org/mrj6xak3#21",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "b7d5",
+    "f1e1",
+    "e8g8"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "rn2k2r/1bqpb1pp/pp2p3/2pNP3/8/5N2/PPP1BPPP/R1BQ1RK1 b kq - 0 11",
+     "decision": true,
+     "main": "b7d5",
+     "mainSan": "Bxd5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "11...Bxd5 takes back with the bishop and leaves your pawns as they were. Taking with the e-pawn would have given you doubled pawns, one behind the other on d7 and d5, which cannot guard each other. The Engine prefers the bishop capture by more than a pawn."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "rn2k2r/2qpb1pp/pp2p3/2pbP3/8/5N2/PPP1BPPP/R1BQ1RK1 w kq - 0 12",
+     "decision": false,
+     "main": "f1e1",
+     "mainSan": "Re1",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "rn2k2r/2qpb1pp/pp2p3/2pbP3/8/5N2/PPP1BPPP/R1BQR1K1 b kq - 1 12",
+     "decision": true,
+     "main": "e8g8",
+     "mainSan": "O-O",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "12.Re1 developed White's rook. 12...O-O castles: your king is safe, your rook comes to f8, and your pawns have no new weaknesses."
+     }
+    }
+   ]
   }
  ]
 }

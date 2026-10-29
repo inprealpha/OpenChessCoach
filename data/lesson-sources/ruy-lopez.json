@@ -19,7 +19,7 @@
    "title": "When the pressure on e5 becomes a threat",
    "fen": "start",
    "side": "white",
-   "keyIdea": "Attacking the knight that guards e5 only wins a pawn once e4 is safe, so develop and castle first.",
+   "keyIdea": "Attacking the knight that guards Black's centre pawn only wins that pawn once your own centre pawn is safe, so develop and castle first.",
    "text": "You are White, from the first move. The first moves are the Closed Ruy Lopez, as Lichess's list of openings names it. At each move, ask what it does for your centre, your pieces and your king, and whether e5 is really under threat yet.",
    "url": "https://github.com/lichess-org/chess-openings",
    "line": "e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O Be7 Re1 b5 Bb3 d6 c3",

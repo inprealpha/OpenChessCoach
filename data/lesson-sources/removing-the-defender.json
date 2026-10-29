@@ -15,7 +15,7 @@
  "intro": "A piece is often safe only because one other piece defends it. If that defender disappears, the piece is undefended and you can take it. So when a piece you want is defended, look at the defender instead: can you capture it, drive it off with a pawn, or find that it already has a second job it cannot do at the same time?",
  "parts": [
   {
-   "title": "Capture the defender",
+   "title": "A bishop attacks your queen",
    "fen": "r2qk2r/ppp2pp1/2np1n1p/3Np2P/4P1b1/3PP3/PPP3P1/R2QKBNR w KQkq - 2 9",
    "side": "white",
    "keyIdea": "If a piece has only one defender, capture the defender and the piece is left undefended.",
@@ -36,7 +36,7 @@
    ]
   },
   {
-   "title": "Chase the defender away",
+   "title": "A guarded knight",
    "fen": "3r1rk1/p3q1pp/1p6/n2PppN1/4P3/4Q2P/P4PP1/1R2R1K1 b - - 1 24",
    "side": "black",
    "keyIdea": "Attack a defender with a pawn: when it moves away, the piece it was defending is left undefended.",
@@ -57,7 +57,7 @@
    ]
   },
   {
-   "title": "One defender, two jobs",
+   "title": "Two rooks on the back rank",
    "fen": "2rr2k1/5pp1/1p2p3/p3P1P1/P2q4/3Q4/5P2/2R2RK1 w - - 0 25",
    "side": "white",
    "keyIdea": "When one piece defends two things, take one of them; if the defender takes back, the other is left undefended.",

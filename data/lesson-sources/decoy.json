@@ -15,7 +15,7 @@
  "intro": "A decoy lures an enemy piece, usually the king or the queen, onto a bad square. You offer something it has to take, and on its new square a fork, a pin or a mate is waiting. Deflection is about the square a defender leaves; a decoy is about the square a piece lands on.",
  "parts": [
   {
-   "title": "Drag the king onto the fork square",
+   "title": "Where should the king stand?",
    "fen": "7k/pp4r1/3b1N2/8/4pP2/8/5P1P/6RK w - - 4 42",
    "side": "white",
    "keyIdea": "A capture can drag the king onto the square where your knight's fork is waiting.",
@@ -41,7 +41,7 @@
    ]
   },
   {
-   "title": "Lure the queen into a fork",
+   "title": "Where should the queen stand?",
    "fen": "5q1k/1p5p/1np2ppN/p3p2n/Pr2P1QP/5P2/4N1P1/3R3K w - - 1 32",
    "side": "white",
    "keyIdea": "Offer a piece the queen has to take, so that it lands on a square your knight can fork.",
@@ -67,7 +67,7 @@
    ]
   },
   {
-   "title": "Lure the king into a mate",
+   "title": "The long diagonal to h8",
    "fen": "4b1k1/pp2p2p/1q2P1p1/3r4/8/1PQ1P3/P5PP/5RK1 w - - 0 26",
    "side": "white",
    "keyIdea": "A sacrifice with check can drag the king onto a square where its own pieces box it in.",
@@ -88,10 +88,10 @@
    ]
   },
   {
-   "title": "Lure the queen into a pin",
+   "title": "King, queen and rook in a row",
    "fen": "6R1/8/1p1kqrR1/p6P/8/8/P4PK1/8 w - - 4 43",
    "side": "white",
-   "keyIdea": "A trade can pull the queen onto the same line as its own king, where your next move pins it.",
+   "keyIdea": "A trade can pull the queen to a square where your next move pins it to its king with a guarded piece it cannot take for free.",
    "text": "From a game played on Lichess. You are White, with two rooks against a queen and a rook. Black's rook has just come to f6 to attack your rook on g6. Black's king, queen and rook all stand on the sixth rank, side by side.",
    "url": "https://lichess.org/training/0Aq3m",
    "line": "Rxf6 Qxf6 Rg6 Qxg6+ hxg6",
@@ -99,7 +99,7 @@
     {
      "ply": 0,
      "san": "Rxf6",
-     "text": "43.Rxf6 trades rooks on f6. If Black does not take back, Black is simply a rook down, so the queen takes on f6 and lands on the same rank as its king on d6, with nothing in between."
+     "text": "43.Rxf6 trades rooks on f6. If Black does not take back, the rook on f6 pins the queen to the king and takes it next, so the queen takes on f6. There it stands next to g6, where a rook guarded by your h5 pawn can pin it to the king on d6."
     },
     {
      "ply": 2,
@@ -109,7 +109,7 @@
     {
      "ply": 4,
      "san": "hxg6",
-     "text": "Black's queen took your rook, and 45.hxg6 takes back. Only kings and pawns are left, and the Engine sees this pawn endgame as a clear win for you: three pawns against two, one of them a passed pawn on g6."
+     "text": "Black's queen took your rook, and 45.hxg6 takes back. Only kings and pawns are left, and the Engine sees this pawn endgame as a clear win for you: three pawns against two, and no black pawn is left that can stop your pawns on f2 and g6."
     }
    ]
   }

@@ -12,14 +12,14 @@
  "puzzleTags": [],
  "puzzleThemes": [],
  "intro": {
-  "text": "When nothing can be won straight away, improve your worst-placed piece. A piece in the centre usually reaches more squares than one at the edge, so it can join an attack or help in defence quickly. To compare two squares, count how many squares the piece would reach from each."
+  "text": "When nothing can be won straight away, improve your worst-placed piece. An active piece is one that can move to many squares. A piece in the centre usually has more squares than one at the edge, so it can join an attack or help in defence quickly. To compare two squares, count the squares the piece could move to from each: the empty squares it reaches, and the squares where it could take an enemy piece. Squares held by your own pieces do not count."
  },
  "parts": [
   {
    "title": "Two pieces that can do more",
    "fen": "3r2k1/4qpp1/7p/r1p5/p7/Q3PN2/4BPPP/2R3K1 w - - 2 24",
    "side": "white",
-   "keyIdea": "Count the squares a piece reaches now and from its new square, and prefer squares near the centre and the enemy king.",
+   "keyIdea": "Count the squares a piece can move to now and from its new square, and prefer squares near the centre and the enemy king.",
    "text": "From a game played on Lichess. You are White, and nothing can be won right away. Your bishop on e2 looks mostly at your own side of the board, and your queen on a3 sits at the edge: both can do more.",
    "credit": {
     "source": "Lichess games database, game l15yabjw",
@@ -46,7 +46,7 @@
       "club": []
      },
      "notes": {
-      "text": "On e2 the bishop reaches 7 squares, most of them on your own side of the board. On c4 it reaches 10, aims at the pawn on f7 next to Black's king, and stops Black's c-pawn from moving. Your rook on c1 guards it there."
+      "text": "On e2 the bishop can move to only 6 squares, most of them on your own side of the board. On c4 it can move to 10, aims at the pawn on f7 next to Black's king, and stops Black's c-pawn from moving. Your rook on c1 guards it there."
      }
     },
     {
@@ -73,7 +73,7 @@
       "club": []
      },
      "notes": {
-      "text": "Now the queen. From a3 it reaches 11 squares; from c3 it reaches 17, attacks the undefended rook on a5, and looks along the long diagonal from a1 to h8 (one of the two diagonals that run from corner to corner) to g7, next to Black's king."
+      "text": "Now the queen. From a3 it can move to 9 squares; from c3 it can move to 14, attacks the undefended rook on a5, and looks along the long diagonal from a1 to h8 (one of the two diagonals that run from corner to corner) to g7, next to Black's king."
      }
     }
    ]
@@ -82,7 +82,7 @@
    "title": "Two knights to improve",
    "fen": "r1bq1rk1/1ppn1pbp/3p2p1/p2Pp2n/2P1P3/2N1B3/PP2BPPP/R2QNRK1 b - - 3 10",
    "side": "black",
-   "keyIdea": "A knight on the edge reaches few squares; bring it towards the centre, where it can reach up to eight.",
+   "keyIdea": "A knight on the edge has few squares; bring it towards the centre, where it can have up to eight.",
    "text": "From a game played on Lichess. You are Black: your knight on h5 sits on the edge, and your knight on d7 stands behind your own pawns. Find more active squares for them, one at a time.",
    "credit": {
     "source": "Lichess games database, game 2ibkps2q",
@@ -109,7 +109,7 @@
       "club": []
      },
      "notes": {
-      "text": "On h5 the knight reaches only 4 squares. On f4 it reaches 8: it attacks the bishop on e2 and also aims at g2 and h3 near White's king. Your pawn on e5 guards it there."
+      "text": "On h5 the knight can move to only 3 squares. On f4 it can move to 7: it attacks the bishop on e2 and also aims at g2 and h3 near White's king. Your pawn on e5 guards it there."
      }
     },
     {
@@ -136,7 +136,7 @@
       "club": []
      },
      "notes": {
-      "text": "Now the other knight. On d7 it reaches 6 squares, and two of them hold your own pawn and rook; on c5 it reaches 8 and attacks the pawn on e4. Your pawn on d6 guards it."
+      "text": "Now the other knight. On d7 it can move to only 4 squares, because your own pawn on e5 and rook on f8 stand on two of the squares it reaches. On c5 it can move to 7 and attacks the pawn on e4. Your pawn on d6 guards it."
      }
     }
    ]
@@ -172,7 +172,7 @@
       "club": []
      },
      "notes": {
-      "text": "On a4 the bishop reaches 6 squares. On c6 it reaches 10 and looks down the other long diagonal, from a8 all the way to h1, where it attacks White's rook, which has no defender."
+      "text": "On a4 the bishop can move to 6 squares. On c6 it can move to 9 and looks down the other long diagonal, from a8 all the way to h1, where it attacks White's rook, which has no defender."
      }
     },
     {
@@ -199,7 +199,7 @@
       "club": []
      },
      "notes": {
-      "text": "Now the bishop moves on to the centre. On e4 it reaches 11 squares, still watches h1 and g2, and attacks the pawn on c2 together with your rook. It is safe there: no white piece or pawn attacks e4."
+      "text": "Now the bishop moves on to the centre. On e4 it can move to 10 squares, still watches h1 and g2, and attacks the pawn on c2 together with your rook. It is safe there: no white piece or pawn attacks e4."
      }
     }
    ]

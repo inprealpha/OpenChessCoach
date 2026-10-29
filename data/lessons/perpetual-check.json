@@ -17,7 +17,7 @@
  },
  "parts": [
   {
-   "title": "The queen checks for ever",
+   "title": "A rook and a pawn down",
    "fen": "r4rk1/pb3p1p/2p2Q2/8/5N2/6P1/2q2P1P/5RK1 w - - 2 19",
    "side": "white",
    "keyIdea": "When you are losing, look for a queen that can check the king from two squares, again and again.",
@@ -103,13 +103,13 @@
       "club": []
      },
      "notes": {
-      "text": "21.Qg5+: the same position is back, with Black to move. Black cannot escape the checks, so the position will come a third time and the game is a draw by repetition. That is how the game ended."
+      "text": "21.Qg5+: the same position is back, with Black to move. Black cannot escape the checks, so the position will come back a third time and the game is a draw by repetition. That is how the game ended."
      }
     }
    ]
   },
   {
-   "title": "Two rooks on the seventh",
+   "title": "A queen against two rooks",
    "fen": "4r1k1/5R1R/5p1p/p3pqp1/1p6/7P/PP4PK/8 w - - 0 43",
    "side": "white",
    "keyIdea": "Two rooks on the seventh rank can check a king back and forth for ever, even against a queen.",

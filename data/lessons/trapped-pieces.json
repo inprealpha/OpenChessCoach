@@ -14,15 +14,15 @@
   "trappedPiece"
  ],
  "intro": {
-  "text": "A piece is trapped when it is attacked and every square it could move to is unsafe. You do not need a check or a fork to win it: take away its squares first, then attack it. Pieces on the edge of the board, and queens that wander far from home to grab pawns, are caught most often. So before you send one of your own pieces somewhere, check that it can get back out."
+  "text": "A piece is trapped when it is attacked and every square it could move to is unsafe. You do not need a check or a fork to win it: take away its squares first, then attack it. Pieces on the edge of the board, and queens that wander far from home to grab pawns, are caught most often. So before you send one of your own pieces somewhere, make sure it can get back out."
  },
  "parts": [
   {
-   "title": "The king traps a knight",
+   "title": "A knight deep in your half",
    "fen": "8/p2k4/2p3pp/3p1p2/3P3P/P4P1n/1P2N3/5K2 w - - 0 34",
    "side": "white",
    "keyIdea": "A knight on the edge of the board has few squares. Cover them all, then attack it.",
-   "text": "From a game played on Lichess. You are White. Black's knight sits deep in your camp on h3. Before you chase it, count the squares it could run to.",
+   "text": "From a game played on Lichess. You are White. Black's knight sits deep in your half of the board, on h3. Before you chase it, count the squares it could run to.",
    "credit": {
     "source": "Lichess puzzle database, puzzle yahGO",
     "url": "https://lichess.org/training/yahGO",
@@ -81,11 +81,11 @@
    ]
   },
   {
-   "title": "Pawns hunt a bishop",
+   "title": "A bishop short of squares",
    "fen": "8/pppn1kpp/5pb1/2p5/2P2P1N/1P5P/P2N2P1/4K3 w - - 3 27",
    "side": "white",
    "keyIdea": "Pawns make good hunters: each push takes squares from a piece, and they cost little if the piece takes one.",
-   "text": "From a game played on Lichess. You are White, and you are a pawn down. Black's bishop on g6 is short of squares: its own king and pawn block f7 and h7, so it can only leave by h5 or along the diagonal towards b1. See whether your pawns can close those ways out.",
+   "text": "From a game played on Lichess. You are White, and you are a pawn down. Black's bishop on g6 is short of squares: its own king and pawn block f7 and h7, so it can only leave by h5 or along the diagonal towards b1. See whether you can close those ways out.",
    "credit": {
     "source": "Lichess puzzle database, puzzle 7mll4",
     "url": "https://lichess.org/training/7mll4",
@@ -173,7 +173,7 @@
    ]
   },
   {
-   "title": "The greedy queen",
+   "title": "A queen takes a2",
    "fen": "r4rk1/3n1ppp/3p1n2/p7/3NP3/3PPP2/q1PQ3P/1R3RK1 w - - 0 17",
    "side": "white",
    "keyIdea": "A queen that grabs a pawn far from home can run out of squares. Punish the grab by attacking it where it cannot hide.",
@@ -268,8 +268,8 @@
    "title": "Before you grab a pawn",
    "fen": "rn2k2r/pp2npbp/2p1b1p1/3pP3/1q3B2/P1N1PN2/1PP1BPPP/R2QK2R b KQkq - 0 10",
    "side": "black",
-   "keyIdea": "Before a piece takes a pawn deep in the enemy camp, check that it has a safe way back; if it has none, the pawn is bait.",
-   "text": "From a game played on Lichess. You are Black, and White's pawn on a3 attacks your queen on b4, so the queen has to move. The pawn on b2 has nothing guarding it, but before you take it, check whether your queen could get back out.",
+   "keyIdea": "Before a piece takes a pawn deep in the enemy camp, make sure it has a safe way back; if it has none, the pawn is bait.",
+   "text": "From a game played on Lichess. You are Black, and White's pawn on a3 attacks your queen on b4, so the queen has to move. Where should it go?",
    "credit": {
     "source": "Lichess puzzle database, puzzle XbkkA",
     "url": "https://lichess.org/training/XbkkA",
@@ -322,7 +322,7 @@
       "club": []
      },
      "notes": {
-      "text": "White castled, but the b2 pawn is still poisoned: after Qxb2, Na4 would trap the queen in just the same way. You castle too, so your king is safe and your rook comes into play."
+      "text": "White castled, but the b2 pawn is still bait: after Qxb2, Na4 would trap the queen in just the same way. You castle too, so your king is safe and your rook comes into play."
      }
     }
    ]

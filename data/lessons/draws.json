@@ -4,7 +4,7 @@
  "kind": "endgame",
  "track": "endgames",
  "level": "beginner",
- "goal": "You can avoid stalemate when you are winning, aim for it when you are losing, and know the other draws: repetition and too little material to mate.",
+ "goal": "You can avoid stalemate when you are winning, aim for it when you are losing, and know the other draws: repetition and too few pieces left to mate.",
  "priorKnowledge": [
   "queen-mate"
  ],
@@ -19,7 +19,7 @@
    "title": "Mate, not stalemate",
    "fen": "8/k7/8/1QK5/8/8/8/8 w - - 29 75",
    "side": "white",
-   "keyIdea": "Against a lone king, check before every move that it will still have a legal move, unless your move is mate.",
+   "keyIdea": "Against a lone king, make sure before every move that it will still have a legal move, unless your move is mate.",
    "text": "From a game played on Lichess. You are White, with a queen against a lone king, and Black's king is stuck near the corner. In the game, White's next queen move looked natural but left Black with no legal move, and the game was only a draw. Find the mate instead.",
    "credit": {
     "source": "Lichess games database, game uxxySEvi",
@@ -79,11 +79,11 @@
    ]
   },
   {
-   "title": "Stalemate to the rescue",
+   "title": "A rook against a queen",
    "fen": "8/8/8/8/6k1/5q2/6KR/8 w - - 24 85",
    "side": "white",
-   "keyIdea": "When your king has no legal move, a check with your last piece can force stalemate: if it is taken, you cannot move.",
-   "text": "From a game played on Lichess. You have only a rook against a queen, which is normally lost, and your king is in check. Look at how many squares your king will have after this move, and think about what that could mean.",
+   "keyIdea": "If your king cannot move, offer your last piece with check: if it is taken, you have no legal move, and that is stalemate.",
+   "text": "From a game played on Lichess. You are White. You have only a rook against a queen, which is normally lost, and your king is in check. Look at how many squares your king will have after this move, and think about what that could mean.",
    "credit": {
     "source": "Lichess games database, game lPrsxeLO",
     "url": "https://lichess.org/lPrsxeLO#168",
@@ -137,7 +137,7 @@
       "club": []
      },
      "notes": {
-      "text": "Black's last move, 85...Kg3, was a mistake: with its king kept away from your rook, the queen wins. Now the king stands next to your rook, and 86.Rh3+ checks right beside it. If Black takes the rook, with the king or with the queen, you have no legal move and you are not in check: stalemate. If the king steps away instead, the rook takes the queen. In the game Black took with the king, and it was a draw."
+      "text": "Black's last move, 85...Kg3, was a mistake: if Black had kept the king away from your rook, the queen would win. Now the king stands next to your rook, and 86.Rh3+ checks right beside it. If Black takes the rook, with the king or with the queen, you have no legal move and you are not in check: stalemate. If the king steps away instead, the rook takes the queen. In the game Black took with the king, and it was a draw."
      }
     },
     {
@@ -305,11 +305,11 @@
    ]
   },
   {
-   "title": "Too little to mate",
+   "title": "A check from a pawn",
    "fen": "8/8/8/5k2/5p2/2q5/5RK1/8 b - - 5 64",
    "side": "white",
    "keyIdea": "Mate needs enough pieces: once trades leave only the two kings, the game is drawn at once.",
-   "text": "From a game played on Lichess. Black has a queen and a pawn against your rook, and Black's pawn has just given check from f3. Black was winning, but this check is a mistake. Think about what would be left on the board after a few captures.",
+   "text": "From a game played on Lichess. You are White. Black has a queen and a pawn against your rook, and Black's pawn has just given check from f3. Black was winning, but this check is a mistake. Think about what would be left on the board after a few captures.",
    "credit": {
     "source": "Lichess puzzle database, puzzle cBvHI",
     "url": "https://lichess.org/training/cBvHI",

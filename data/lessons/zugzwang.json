@@ -77,7 +77,7 @@
       "club": []
      },
      "notes": {
-      "text": "Your king attacks the f5 pawn from the other side. White has to move again: no square the king can reach still guards f5, and 54.f6 just gives the pawn away."
+      "text": "Your king attacks the f5 pawn from the other side. White has to move again: no square the king can reach still guards f5, and pushing 54.f6 only gives the pawn up in another way. The f-pawn is lost whatever White does."
      }
     },
     {
@@ -142,7 +142,7 @@
       "club": []
      },
      "notes": {
-      "text": "A waiting move: your king stays put and Black must move. Black's a- and g-pawns are blocked and 35...c5 just loses a pawn, so Black's king has to step back. 35.a3 would not work, because Black answers with the waiting move 35...a4, and it is White who runs out of useful moves."
+      "text": "A waiting move: your king stays put and Black must move. Black's a- and g-pawns are blocked, so Black has only bad choices: 35...c5 gives a pawn away, and any king move lets your king in. In the game Black's king stepped back. 35.a3 would not work, because Black answers with the waiting move 35...a4, and it is White who runs out of useful moves."
      }
     },
     {
@@ -205,7 +205,7 @@
    "title": "Zugzwang that mates",
    "fen": "8/8/pp6/3k4/KP6/P7/8/8 b - - 1 61",
    "side": "black",
-   "keyIdea": "Take away the last free squares, and the opponent may be forced to play a move that loses at once.",
+   "keyIdea": "Take away the last escape squares, and the opponent may be forced to play a move that loses at once.",
    "text": "From a game played on Lichess. You are Black. White's king on a4 is hemmed in by your pawns on a6 and b6. Look at which moves White would still have after your next move.",
    "credit": {
     "source": "Lichess puzzle database, puzzle hqTzE",

@@ -12,7 +12,7 @@
  "puzzleTags": [],
  "puzzleThemes": [],
  "intro": {
-  "text": "Defending starts with one question: what does my opponent threaten to do next? Once you can name the threat, look for the simplest way to stop it; sometimes a single pawn move is enough. Before you settle for passive defence, check whether you have a forcing move of your own. And when the attack keeps coming, trading off the strongest attacker, or giving back some of the material you won, can take the force out of it."
+  "text": "Defending starts with one question: what does my opponent threaten to do next? Once you can name the threat, look for the simplest way to stop it; sometimes a single pawn move is enough. Before you settle for passive defence, look for a forcing move of your own. And when the attack keeps coming, trading off the strongest attacker, or giving back some of the material you won, can take the force out of it."
  },
  "parts": [
   {
@@ -73,13 +73,13 @@
       "club": []
      },
      "notes": {
-      "text": "Black's 16...h5 gets ready for ...h4, to pry the g-file open again, so keep an eye on g3. For now your king is safe, and your queen takes the pawn on d4: you are two pawns up, and the queen stands in the centre, ready to come back towards your king."
+      "text": "Black's 16...h5 plans to push the h-pawn on to h4 and attack your pawn on g3, so keep an eye on that pawn. For now your king is safe, and your queen takes the pawn on d4: you are two pawns up, and the queen stands in the centre, ready to come back towards your king."
      }
     }
    ]
   },
   {
-   "title": "Hit back",
+   "title": "Your rook is attacked",
    "fen": "r3k2r/pp2qpQp/2p5/3pn3/8/1B6/PPP2PPP/RN2R1K1 b kq - 0 14",
    "side": "black",
    "keyIdea": "When defending looks hard, look for a counter-attack: a check, which your opponent must answer first, can turn the game around.",
@@ -165,13 +165,13 @@
       "club": []
      },
      "notes": {
-      "text": "Castling queenside, the long way, takes your king out of the centre, and your rook on d8 now guards h8, so Qxh8 would be answered by Rxh8. You have won a rook for the knight."
+      "text": "Castling queenside takes your king out of the centre, and your rook on d8 now guards h8, so Qxh8 would be answered by Rxh8. You have won a rook for the knight."
      }
     }
    ]
   },
   {
-   "title": "Trade the strongest attacker",
+   "title": "The queen and knight close in",
    "fen": "3q2rk/r6n/p3p2Q/1p1p1p1N/3P1R2/P1P5/1P4PP/R5K1 b - - 0 30",
    "side": "black",
    "keyIdea": "Offer to trade the attacking queen: without it, most attacks on the king run out of force.",
@@ -263,7 +263,7 @@
    ]
   },
   {
-   "title": "Give material back",
+   "title": "The exchange up, but under attack",
    "fen": "8/5ppk/7p/3p1r2/RPpQn3/P1P3qP/6P1/4R1K1 w - - 1 36",
    "side": "white",
    "keyIdea": "If the material you won has left your king under attack, giving some of it back to break the attack is often best.",

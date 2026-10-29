@@ -12,7 +12,7 @@
  "puzzleTags": [],
  "puzzleThemes": [],
  "intro": {
-  "text": "Two rooks can mate a lone king without any help from your own king. They work in turns: one rook guards a rank so the king cannot step back, and the other gives check on the rank in front of it, which pushes the king one rank nearer the edge. Then the two rooks change jobs. Once the king is on the edge of the board, the next check is mate."
+  "text": "Two rooks can mate a lone king without any help from your own king. They work in turns: one rook guards a rank (a row of the board) so the king cannot step back, and the other gives check on the rank in front of it, which pushes the king one rank nearer the edge. Then the two rooks change jobs. Once the king is on the edge of the board, the next check is mate."
  },
  "parts": [
   {
@@ -52,7 +52,7 @@
       "club": []
      },
      "notes": {
-      "text": "Rh4+, the rook to h4, checks along the fourth rank. The king must leave that rank, and it cannot go down to the third, which the other rook guards, so it has to step up to the fifth. If it steps to g5, where it attacks the rook on h4, move that rook away along the h-file first, then carry on checking."
+      "text": "Rh4+, the rook to h4, checks along the fourth rank. The king must leave that rank, and it cannot go down to the third, which the other rook guards, so it has to step up to the fifth. If the king steps to g5, where it attacks the rook on h4, that rook first slides far away along the fourth rank, to b4 for example, so it still guards that rank; then the checks carry on."
      }
     },
     {
@@ -166,7 +166,7 @@
    ]
   },
   {
-   "title": "Keep the rooks out of reach",
+   "title": "Rooks near the king",
    "fen": "8/3k3K/1R6/R7/8/8/8/8 w - - 6 52",
    "side": "white",
    "keyIdea": "If the king can reach the square a rook needs, move that rook to the far side of the board first, then check.",

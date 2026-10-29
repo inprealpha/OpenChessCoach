@@ -13,20 +13,20 @@
  "priorKnowledge": [
   "opening-principles"
  ],
- "intro": "The Sicilian Defence, 1...c5, is the most popular answer to 1.e4. You do not copy White in the centre: your c-pawn fights for the d4 square, and when White opens the game with d4, you trade that side pawn for White's centre pawn. You get an extra centre pawn and an open road for your rooks on the c-file, while White gets more space and quicker development. In the Dragon set-up taught here, your bishop goes to g7 and your king castles behind it.",
+ "intro": "The Sicilian Defence, 1...c5, is one of the most popular answers to 1.e4, especially among strong players. You do not copy White in the centre: your c-pawn fights for the d4 square, and when White opens the game with d4, you trade that side pawn for White's centre pawn. You get an extra pawn in the middle of the board and an open road for your rooks on the c-file, while White gets more space and quicker development. In the Dragon set-up taught here, your bishop goes to g7 and your king castles behind it.",
  "parts": [
   {
    "title": "The Dragon Variation",
    "fen": "start",
    "side": "black",
-   "keyIdea": "Trade a side pawn for White's centre pawn, then put your bishop on the long diagonal, castle behind it and bring out the knights.",
+   "keyIdea": "Fight for the centre from the side, then keep your king safe and put your pieces on lines where they reach far.",
    "url": "https://github.com/lichess-org/chess-openings",
    "line": "e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3 g6 Be3 Bg7 f3 O-O Qd2 Nc6",
    "notes": [
     {
      "ply": 1,
      "san": "c5",
-     "text": "1...c5 controls d4 from the side instead of meeting e4 head on. About half the time White answers with 2.Nf3, often followed by 3.d4 as in this Lesson. Against 2.Bc4, which aims at f7, ...e6 blocks the bishop's diagonal; against 2.c3, which gets ready for d4 with a pawn, 2...Nf6 or 2...d5 attacks e4 at once; against 2.Nc3, the same set-up as here works, with ...g6, ...Bg7, ...d6 and ...Nc6. Against 2.d4, 2...cxd4 takes the pawn, and if 3.c3 follows, 3...Nf6 works as against 2.c3."
+     "text": "1...c5 controls d4 from the side instead of meeting e4 head on. In a sample of Lichess games, White answers with 2.Nf3 about half the time, often followed by 3.d4 as in this Lesson. Against 2.Bc4, which aims at f7, ...e6 blocks the bishop's diagonal; against 2.c3, which gets ready for d4 with a pawn, 2...Nf6 or 2...d5 attacks e4 at once; against 2.Nc3, the same set-up as here works, with ...g6, ...Bg7, ...d6 and ...Nc6. Against 2.d4, 2...cxd4 takes the pawn, and if 3.c3 follows, 3...Nf6 works as against 2.c3."
     },
     {
      "ply": 3,
@@ -36,7 +36,7 @@
     {
      "ply": 5,
      "san": "cxd4",
-     "text": "White opens the centre with 3.d4. 3...cxd4 takes, and this trade is the heart of the Sicilian. Your c-pawn is gone, but so is White's d-pawn, so you have two centre pawns (d6 and e7) against White's one (e4). The c-file is now half-open: none of your pawns stands on it, so your rooks can use it later."
+     "text": "White opens the centre with 3.d4. 3...cxd4 takes, and this trade is the heart of the Sicilian. Your c-pawn is gone, but so is White's d-pawn, so you have two pawns on the middle files (d6 and e7) against White's one (e4). The c-file is now half-open: none of your pawns stands on it, so your rooks can use it later."
     },
     {
      "ply": 7,
@@ -46,7 +46,7 @@
     {
      "ply": 9,
      "san": "g6",
-     "text": "5...g6 starts the Dragon Variation, one of the named ways to play the Sicilian. The pawn makes room for your bishop on g7, on the long diagonal from h8 to a1. You can play the same set-up against most of White's sixth moves."
+     "text": "5...g6 starts the Dragon Variation, one of the named ways to play the Sicilian. The pawn makes room for your bishop on g7, on the long diagonal from h8 to a1. You can play the same set-up against most of White's sixth moves. In a sample of Lichess games more people choose 5...a6 here, but the Dragon is taught because its set-up is easy to remember: pawn to g6, bishop to g7, castle. Be ready for sharp play if White castles on the other side."
     },
     {
      "ply": 11,

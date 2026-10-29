@@ -12,7 +12,7 @@
  "puzzleTags": [],
  "puzzleThemes": [],
  "intro": {
-  "text": "Pawns never move backwards, so a pawn that has lost the help of its neighbours stays weak for good: only pieces can guard it, and a piece busy guarding a pawn is not doing much else. Three kinds come up all the time. An isolated pawn has no friendly pawns on the files beside it, doubled pawns stand one behind the other on the same file, and a backward pawn has been left behind by its neighbours and cannot move forward safely. Attack these pawns when your opponent has them, and think twice before a capture or a pawn move gives you one."
+  "text": "Pawns never move backwards, so a pawn that has lost the help of its neighbours stays weak for a long time: only pieces can guard it, and a piece busy guarding a pawn is not doing much else. Three kinds come up all the time. An isolated pawn has no friendly pawns on the files beside it, doubled pawns stand one behind the other on the same file, and a backward pawn has been left behind by its neighbours and cannot move forward safely. Attack these pawns when your opponent has them, and think twice before a capture or a pawn move gives you one."
  },
  "parts": [
   {
@@ -75,7 +75,7 @@
       "club": []
      },
      "notes": {
-      "text": "The knight settles on d5, right in front of the isolated pawn. White has no c- or e-pawn, so no pawn can ever drive it away, and the d-pawn can no longer move forward."
+      "text": "The knight settles on d5, right in front of the isolated pawn. White has no c- or e-pawn, so no pawn can attack it now, and the d-pawn can no longer move forward."
      }
     },
     {

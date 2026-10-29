@@ -6,7 +6,8 @@
  "level": "beginner",
  "goal": "You can spot a fork by a knight, a bishop or a pawn, see why a fork that gives check wins the other piece, and use a check to set one up.",
  "priorKnowledge": [
-  "double-attack"
+  "double-attack",
+  "check"
  ],
  "side": "white",
  "puzzleTags": [],
@@ -14,7 +15,7 @@
   "fork"
  ],
  "intro": {
-  "text": "A fork is a double attack made by a single piece: one piece attacks two enemy pieces at once, and your opponent can save only one of them. Any piece can fork. A knight's fork is the hardest to see coming, because its jump cannot be blocked; a bishop, rook or queen forks along its lines; and a pawn fork is cheap, because you risk only a pawn. A fork that gives check is the strongest kind: the king has to answer the check first."
+  "text": "A fork is a double attack made by a single piece: one piece attacks two enemy pieces at once, and your opponent can save only one of them. Any piece can fork. A knight's fork is the hardest to see coming, because its jump cannot be blocked; a bishop, rook or queen forks along its lines; and a pawn fork is cheap, because you risk only a pawn. A fork that gives check is especially strong: the king has to answer the check first."
  },
  "parts": [
   {
@@ -256,7 +257,7 @@
       "club": []
      },
      "notes": {
-      "text": "The king stepped away to d3, and your queen takes White's queen on d1, with check. You have won the queen for nothing."
+      "text": "The king stepped away to d3, and your queen takes White's queen on d1, with check. White's king can take your knight on c3, but you have won a queen for a knight."
      }
     }
    ]

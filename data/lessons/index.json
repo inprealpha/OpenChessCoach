@@ -83,7 +83,9 @@
   "side": "white",
   "goal": "After each of your opponent's moves, you can ask what it threatens, and find a move that deals with the threat.",
   "priorKnowledge": [
-   "piece-values"
+   "piece-values",
+   "check",
+   "mate-in-one"
   ],
   "decisions": 6
  },
@@ -97,7 +99,9 @@
   "goal": "You can find a move that attacks two things at once, often with the queen, so the opponent cannot save both.",
   "priorKnowledge": [
    "attack-and-defend",
-   "piece-values"
+   "piece-values",
+   "check",
+   "mate-in-one"
   ],
   "decisions": 6
  },
@@ -110,7 +114,8 @@
   "side": "white",
   "goal": "You can spot a fork by a knight, a bishop or a pawn, see why a fork that gives check wins the other piece, and use a check to set one up.",
   "priorKnowledge": [
-   "double-attack"
+   "double-attack",
+   "check"
   ],
   "decisions": 10
  },
@@ -150,9 +155,10 @@
   "track": "themes",
   "level": "beginner",
   "side": "white",
-  "goal": "You can pin a piece to a more valuable one behind it, and win the pinned piece by attacking it again.",
+  "goal": "You can pin a piece to a more valuable one behind it, and win material because the pinned piece cannot move away.",
   "priorKnowledge": [
-   "piece-values"
+   "piece-values",
+   "check"
   ],
   "decisions": 6
  },
@@ -165,7 +171,8 @@
   "side": "white",
   "goal": "Before you play a move, you can look at what your opponent could take, check or attack after it, and pick a safer move when the answer is bad.",
   "priorKnowledge": [
-   "threats"
+   "threats",
+   "pins"
   ],
   "decisions": 6
  },
@@ -177,7 +184,7 @@
   "level": "beginner",
   "side": "white",
   "eco": "C54",
-  "goal": "As White, you can play the Italian Game: aim the bishop at f7, put pawns on c3 and d4 to build a centre, and castle.",
+  "goal": "As White, you can play the Italian Game: aim the bishop at f7, use the pawns on c3 and d4 to strike at the centre, and castle.",
   "priorKnowledge": [
    "opening-principles"
   ],
@@ -593,6 +600,7 @@
   "goal": "You can spot common opening traps, such as attacks on f2 and f7, and avoid falling into them.",
   "priorKnowledge": [
    "scholars-mate-defence",
+   "pins",
    "italian-game"
   ],
   "decisions": 11
@@ -712,11 +720,11 @@
   "level": "intermediate",
   "side": "black",
   "eco": "C02",
-  "goal": "As Black against 1.e4, you can play the French Defence and know the plan against White's pawn chain: attack its base with ...c5 and its front with ...f6.",
+  "goal": "As Black against 1.e4, you can play the French Defence and know the plan against White's pawn chain: attack its base with ...c5 and your pieces, and keep ...f6 as a second break against its front.",
   "priorKnowledge": [
    "pawn-structure"
   ],
-  "decisions": 11
+  "decisions": 10
  },
  {
   "id": "rook-endgames",
@@ -739,11 +747,11 @@
   "track": "thinking",
   "level": "intermediate",
   "side": "white",
-  "goal": "You can put a rook on an open file, put your second rook on the same file, and use a rook on the seventh rank to attack pawns and trap the king.",
+  "goal": "You can put a rook on an open file and leave room for your second rook, and use a rook on the seventh rank to attack pawns and trap the king.",
   "priorKnowledge": [
    "weak-squares"
   ],
-  "decisions": 11
+  "decisions": 9
  },
  {
   "id": "perpetual-check",
@@ -794,6 +802,7 @@
   "side": "black",
   "goal": "You can tell when a bishop beats a knight and when the reverse is true, and know two draws: bishops of opposite colours, and the wrong bishop with a rook pawn.",
   "priorKnowledge": [
+   "king-and-pawn",
    "good-and-bad-pieces"
   ],
   "decisions": 13

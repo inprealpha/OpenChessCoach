@@ -21,7 +21,7 @@
    "title": "One rook guards the queen",
    "fen": "r5k1/ppq1r1pp/2n1p3/8/2B2Q2/P1N5/1P4PP/5R1K w - - 2 25",
    "side": "white",
-   "keyIdea": "A check that the defender has to answer by capturing drags it away from the piece it guards.",
+   "keyIdea": "A check can pull a defender off its post: if it takes the checking piece, what it guarded is left undefended.",
    "text": "From a game played on Lichess. You are White. Black has just offered a queen trade on c7, and only the rook on e7 guards Black's queen. Look for a forcing move that gives that rook something else to do.",
    "credit": {
     "source": "Lichess puzzle database, puzzle hPNWj",
@@ -84,8 +84,8 @@
    "title": "Only the king guards the queen",
    "fen": "rn5r/pp3Rp1/1kp4p/2q1p3/8/4Q3/1PP3PP/2KR4 w - - 4 23",
    "side": "white",
-   "keyIdea": "A king can be deflected too: a check it must answer by capturing pulls it away from what it guards.",
-   "text": "From a game played on Lichess. You are White. Black has just put the queen on c5 to offer a trade, and only the king on b6 guards it. Can you make the king leave?",
+   "keyIdea": "A king can be deflected too: whether it takes the checking piece or steps aside, the queen it guarded is left undefended.",
+   "text": "From a game played on Lichess. You are White. Black has just put the queen on c5, attacking yours, and only the king on b6 guards it. Can you make the king leave?",
    "credit": {
     "source": "Lichess puzzle database, puzzle jZIco",
     "url": "https://lichess.org/training/jZIco",

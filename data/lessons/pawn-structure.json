@@ -12,7 +12,7 @@
  "puzzleTags": [],
  "puzzleThemes": [],
  "intro": {
-  "text": "Pawns standing on a diagonal, each one protecting the pawn in front, form a chain. The pawn at the back of the chain, its base, has no pawn to protect it, so that is where to strike, with a pawn move called a pawn break. When the pawns in the centre block each other, the position is closed: pieces cannot get through, and the play moves to the sides of the board. When the centre is open, pieces move freely, and the side whose pieces are ready to use the open lines usually does better."
+  "text": "Pawns standing on a diagonal, each one protecting the pawn in front, form a chain. The pawn at the back of the chain, its base, has no pawn to protect it, so that is where to strike, with a pawn move called a pawn break. When the pawns in the centre block each other, the position is closed: pieces cannot easily get through, and the play moves to the sides of the board. When the centre is open, pieces move freely, and the side whose pieces are ready to use the open lines usually does better."
  },
  "parts": [
   {
@@ -112,7 +112,7 @@
    "fen": "r1bqnrk1/ppp1npbp/3p2p1/3Pp3/2P1P3/2NN4/PP2BPPP/R1BQ1RK1 b - - 4 10",
    "side": "black",
    "keyIdea": "In a closed centre, attack with pawns on the side your chain points to, starting at the base of the enemy chain.",
-   "text": "From a game played on Lichess, in the King's Indian Defence. You are Black. The centre is closed: White's pawns on d5 and e4 and yours on d6 and e5 block each other, so no piece can get through. Your pawns point towards the kingside, where White's king lives. Which pawn break fits?",
+   "text": "From a game played on Lichess, in the King's Indian Defence. You are Black. The centre is closed: White's pawns on d5 and e4 and yours on d6 and e5 block each other, so pieces cannot easily get through. Your pawns point towards the kingside, where White's king lives. Which pawn break fits?",
    "credit": {
     "source": "Lichess games database, game rsX9p4Rx",
     "url": "https://lichess.org/rsX9p4Rx#19",
@@ -140,7 +140,7 @@
       "club": []
      },
      "notes": {
-      "text": "White's chain runs e4 to d5, and e4 is its base. Your f-pawn attacks it. Nothing can happen in the locked centre, so this break is where your play begins."
+      "text": "White's chain runs e4 to d5, and e4 is its base, because no pawn guards it. (The pawn on c4 also holds up d5, but your play is on the kingside.) Your f-pawn attacks it. Nothing can happen in the locked centre, so this break is where your play begins."
      }
     },
     {
@@ -167,7 +167,7 @@
       "club": []
      },
      "notes": {
-      "text": "White propped up e4 with f3. Your pawn pushes past it: f4 grabs space on the kingside, and now f3 is the base of White's chain."
+      "text": "White propped up e4 with f3. Your pawn pushes past it: f4 grabs space on the kingside, and White's chain now runs g2, f3, e4, d5."
      }
     },
     {
@@ -194,7 +194,7 @@
       "club": []
      },
      "notes": {
-      "text": "Next comes g4, to attack f3, the new base. White's play is on the queenside, yours is towards White's king, and the centre stays shut in between."
+      "text": "Next comes g4, hitting the pawn on f3 that holds up e4. White's play is on the queenside, yours is towards White's king, and the centre stays shut in between."
      }
     }
    ]
@@ -232,7 +232,7 @@
       "club": []
      },
      "notes": {
-      "text": "e5 opens the centre. The pawn hits the knight on f6 and the pawn on d6, the base of Black's chain from d6 to c5. It also clears e4 for your bishop on d3."
+      "text": "e5 opens the centre. The pawn hits the knight on f6 and the pawn on d6, the base of Black's chain from d6 to c5. It also clears e4 for your bishop on d3. If Black takes first with 12...dxe5, then 13.dxe5 hits the knight on f6 and the centre is just as open."
      }
     },
     {

@@ -324,7 +324,7 @@
       "club": []
      },
      "notes": {
-      "text": "44.Rg6: your other rook comes to g6 and pins the queen. Your rook, Black's queen and Black's king now stand on one line, so the queen cannot step off the sixth rank. Whatever Black does, the queen is lost for a rook."
+      "text": "44.Rg6: your other rook comes to g6 and pins the queen. Your rook, Black's queen and Black's king now stand on one line, so the queen cannot step off the sixth rank. Whatever Black does, the queen is lost, and the most Black can get for it is your rook."
      }
     },
     {
@@ -351,7 +351,7 @@
       "club": []
      },
      "notes": {
-      "text": "Black's queen took your rook, and 45.hxg6 takes back. Only kings and pawns are left, and the Engine sees this pawn endgame as a clear win for you: three pawns against two, and no black pawn is left that can stop your pawns on f2 and g6."
+      "text": "Black's queen took your rook, and 45.hxg6 takes back. Only kings and pawns are left, and the Engine sees this pawn endgame as a win for you: you are a pawn up and your pawn on g6 is far advanced. It still needs care: Black's king can reach that pawn quickly, so a careless push of it, such as g7 after ...Ke6, lets Black draw."
      }
     }
    ]

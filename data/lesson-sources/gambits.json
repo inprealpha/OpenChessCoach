@@ -9,7 +9,7 @@
  "priorKnowledge": [
   "opening-traps"
  ],
- "intro": "A gambit gives up a pawn early in the game in the hope of getting something back: faster development, open lines or a quick attack on the king. When your opponent offers one, you have three answers. You can take the pawn and keep it, take it and give it back later when that suits you, or leave it and make your opponent pay for the gaps the gambit leaves behind. To choose, weigh the pawn against the moves it will cost you and the lines it opens. In this Lesson you meet each answer in a real game.",
+ "intro": "A gambit gives up a pawn early in the game in the hope of getting something back: faster development, open lines or a quick attack on the king. When your opponent offers one, you have three answers. You can take the pawn and keep it, take it and give it back later when that suits you, or leave it alone, take a different pawn that is really free and make your opponent pay for the gaps the gambit leaves behind. To choose, weigh the pawn against the moves it will cost you and the lines it opens. In this Lesson you meet each answer in a real game.",
  "parts": [
   {
    "title": "A pawn offered on e4",
@@ -59,7 +59,7 @@
     {
      "ply": 2,
      "san": "Na5",
-     "text": "6.d4 attacked your pawn on e5. 6...Na5 lets it go: the knight attacks White's bishop on c4, the piece aimed at f7 next to your king. Keeping the pawn with 6...exd4 was also possible, but after 7.cxd4 White has two pawns in the centre and more pieces out, and the Engine prefers 6...Na5 a little."
+     "text": "6.d4 attacked your pawn on e5. 6...Na5 lets it go: the knight attacks White's bishop on c4, the piece aimed at f7 next to your king. Keeping the pawn with 6...exd4 was also possible, and the Engine sees the two moves as about equal. After 7.cxd4 White has two pawns in the centre and the bishop on c4 still aims at f7. 6...Na5 attacks that bishop at once, and if White grabs the pawn on e5, as in the game, the bishop is traded off."
     },
     {
      "ply": 4,

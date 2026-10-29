@@ -22,7 +22,7 @@
    "keyIdea": "Shut out one of the two pieces aimed at the pawn beside your king; a pawn given up early pays for moves that each come with a threat.",
    "text": "You are Black, from White's first move. White plays the Italian Game, and you answer with the Two Knights Defence. At each move, ask what White is threatening and what your move does for your pieces.",
    "url": "https://github.com/lichess-org/chess-openings",
-   "line": "e4 e5 Nf3 Nc6 Bc4 Nf6 Ng5 d5 exd5 Na5 Bb5+ c6 dxc6 bxc6 Ba4 h6 Nf3 e4",
+   "line": "e4 e5 Nf3 Nc6 Bc4 Nf6 Ng5 d5 exd5 Na5 Bb5+ c6 dxc6 bxc6 Be2 h6 Nf3 e4",
    "notes": [
     {
      "ply": 1,
@@ -37,7 +37,7 @@
     {
      "ply": 5,
      "san": "Nf6",
-     "text": "White's bishop on c4 aims at f7. 3...Nf6, the Two Knights Defence, develops your other knight (brings it off its starting square) and attacks the e4 pawn, which nothing defends, so White has to think about defence too. 3...Bc5 is the other main move."
+     "text": "White's bishop on c4 aims at f7. 3...Nf6, the Two Knights Defence, develops your other knight (brings it off its starting square) and attacks the e4 pawn, which nothing defends, so White has to think about defence too. 3...Bc5 is the other main move. White does not have to play 4.Ng5: after 4.d3 or 4.Nc3 you keep developing, for example with ...Bc5 or ...Be7, and then castle."
     },
     {
      "ply": 7,
@@ -62,12 +62,12 @@
     {
      "ply": 15,
      "san": "h6",
-     "text": "8.Ba4, the bishop to a4, is the move beginners on Lichess play most often; 8.Be2, the bishop back to e2, and 8.Qf3, the queen to f3, are also common. 8...h6 hits the knight on g5 with a pawn, so it has to move for the third time, and the same move works well against 8.Be2."
+     "text": "8.Be2, the bishop back to e2, is the safe square. 8.Ba4, the bishop to a4, is a mistake: after 8...h6 9.Nf3 e4 you stand clearly better. 8...h6 hits the knight on g5 with a pawn, so it has to move for the third time."
     },
     {
      "ply": 17,
      "san": "e4",
-     "text": "9.Nf3 went back, and 9...e4 hits the knight again with a pawn. Count the moves: White has played nine, yet only a knight and a bishop are out, and the knight must move once more. You are a pawn down, but your bishop on f8 and castling come next."
+     "text": "9.Nf3 went back, and 9...e4 hits the knight again with a pawn. Count the moves: White has played nine, yet only a knight and a bishop are out, and the knight must move once more. You are a pawn down, but the Engine sees the position as about equal, and your bishop on f8 and castling come next."
     }
    ]
   }

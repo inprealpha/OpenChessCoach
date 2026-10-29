@@ -85,7 +85,7 @@
    "fen": "1b6/8/P4pp1/4k3/6P1/5K2/3B4/8 w - - 3 43",
    "side": "white",
    "keyIdea": "A bishop skewers along a diagonal: check the king, and win the piece that stands behind it.",
-   "text": "From a game played on Lichess. You are White. Black's king has just come to e5, on the same diagonal as Black's bishop on b8. That bishop is also the piece that stops your pawn on a6 from promoting.",
+   "text": "From a game played on Lichess. You are White. Black's king has just come to e5, on the same diagonal as Black's bishop on b8. That bishop is also the piece that stops your pawn on a6 from promoting, which means reaching the last row and turning into a stronger piece.",
    "credit": {
     "source": "Lichess puzzle database, puzzle sLBYX",
     "url": "https://lichess.org/training/sLBYX",

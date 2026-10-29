@@ -286,7 +286,7 @@
       "club": []
      },
      "notes": {
-      "text": "9...O-O is castling: the king moves two squares towards the rook, and the rook jumps over to the king's other side. You may castle only if the king and that rook have not moved and nothing stands between them. You also cannot castle out of check, or through or onto a square the opponent attacks. Here castling takes your king off the e-file: if it stayed, the knight could take the pawn on c6 or f7, the queen behind it would give check, and the knight would attack your queen."
+      "text": "9...O-O is castling: the king moves two squares towards the rook, and the rook jumps over to the king's other side. You may castle only if the king and that rook have not moved and nothing stands between them. You also cannot castle out of check, or through or onto a square the opponent attacks. Here castling takes your king off the e-file: if it stayed, the knight could take the pawn on c6, the queen behind it would give check, and the knight would then attack your queen."
      }
     },
     {

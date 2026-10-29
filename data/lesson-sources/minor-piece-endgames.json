@@ -11,9 +11,10 @@
  ],
  "goal": "You can tell when a bishop beats a knight and when the reverse is true, and know two draws: bishops of opposite colours, and the wrong bishop with a rook pawn.",
  "priorKnowledge": [
+  "king-and-pawn",
   "good-and-bad-pieces"
  ],
- "intro": "When only bishops, knights and pawns are left, the kind of piece you have can matter as much as the number of pawns. A bishop can strike from one side of the board to the other in a single move, so it does best on an open board with pawns on both sides; a knight is slower, but it does better when the pawns are locked and the enemy pawns stand on squares of the bishop's colour. Some of these endgames are drawn even a pawn down: bishops of opposite colours often draw, and so does a pawn on the a- or h-file (a rook pawn) when the bishop cannot control the corner square where it would promote.",
+ "intro": "When only bishops, knights and pawns are left, the kind of piece you have can matter as much as the number of pawns. A bishop can strike from one side of the board to the other in a single move, so it does best on an open board with pawns on both sides; a knight is slower, but it does better when the pawns are locked and the enemy pawns stand on squares of the bishop's colour. Some of these endgames are drawn even when one side has more material: bishops of opposite colours often draw, and so does a bishop with a rook pawn (a pawn on the a- or h-file) when the bishop cannot control the corner square where the pawn would promote and the defending king can reach that corner.",
  "parts": [
   {
    "title": "Pawns on both sides",
@@ -68,7 +69,7 @@
     {
      "ply": 4,
      "san": "Nc5",
-     "text": "37.Nc5 lands on c5 and attacks the pawns on a6 and e6. Nothing defends the pawn on a6, and Black's bishop is stuck behind its own pawns with nothing to attack. Black's best try was 36...f4, giving up a pawn to open a way out for the bishop, but White would still be clearly winning."
+     "text": "37.Nc5 lands on c5 and attacks the pawns on a6 and e6. Nothing defends the pawn on a6, and Black's bishop is stuck behind its own pawns with nothing to attack. Black had no good way out: even a pawn sacrifice such as 36...f4, to free the bishop, leaves White clearly winning."
     }
    ]
   },
@@ -89,7 +90,7 @@
     {
      "ply": 2,
      "san": "Kf1",
-     "text": "Black's bishop now attacks your pawn on f2. 40.Kf1 keeps the pawn guarded and starts the king's walk towards the c-pawn."
+     "text": "Black's bishop eyes your pawn on f2, but your king already guards it. 40.Kf1 keeps f2 guarded and starts the king's walk towards the c-pawn."
     },
     {
      "ply": 4,

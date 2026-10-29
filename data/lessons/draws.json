@@ -137,7 +137,7 @@
       "club": []
      },
      "notes": {
-      "text": "Black's last move, 85...Kg3, was a mistake: if Black had kept the king away from your rook, the queen would win. Now the king stands next to your rook, and 86.Rh3+ checks right beside it. If Black takes the rook, with the king or with the queen, you have no legal move and you are not in check: stalemate. If the king steps away instead, the rook takes the queen. In the game Black took with the king, and it was a draw."
+      "text": "Black's last move, 85...Kg3, was a mistake: a careful queen move would have kept the win. Now the king stands next to your rook, and 86.Rh3+ checks right beside it. Only the king can take the rook, because the king stands between the rook and the queen. If it does, you have no legal move and you are not in check: stalemate. If the king steps to f4 or g4 instead, you take the queen, Black's king takes your rook, and only the two kings are left: also a draw. In the game Black took with the king, and it was a draw."
      }
     },
     {
@@ -191,7 +191,7 @@
       "club": []
      },
      "notes": {
-      "text": "39.Nxg6+: the knight takes the pawn on g6 with check. A knight's check cannot be blocked, and the king cannot reach the knight, so it has to go to h7, the only square your king and knight leave it. Any other move would give Black's queen time to start checking your king."
+      "text": "39.Nxg6+: the knight takes the pawn on g6 with check. A knight's check cannot be blocked, and the king cannot reach the knight, so it has to go to h7, the only square your king and knight leave it. If you did not play this check, Black's queen would have time to start checking your king."
      }
     },
     {

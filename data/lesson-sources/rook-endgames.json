@@ -12,7 +12,7 @@
  "priorKnowledge": [
   "rook-endgame-basics"
  ],
- "intro": "When each side has a rook and one side has an extra pawn, two famous positions decide a great many games. In the Lucena position the pawn wins: its king walks out from in front of the pawn, and its rook blocks the checks like a bridge. In the Philidor position the defender holds the draw: the defending rook keeps the enemy king off the third rank, counted from the defender's side, and once the pawn steps onto that rank, the rook moves as far from the enemy king as it can and checks it from behind until the attack runs out.",
+ "intro": "When each side has a rook and one side has an extra pawn, two famous positions decide a great many games. In the Lucena position the pawn wins (when it is on the b- to g-file; a rook pawn on the a- or h-file does not win this way): its king walks out from in front of the pawn, and its rook blocks the checks like a bridge. In the Philidor position the defender holds the draw: the defending rook keeps the enemy king off the third rank, counted from the defender's side, and once the pawn steps onto that rank, the rook moves as far from the enemy king as it can and checks it from behind until the attack runs out.",
  "playOut": {
   "title": "Win the Lucena position",
   "fen": "1K1k4/1P6/8/8/8/8/r7/2R5 w - - 0 1",
@@ -52,7 +52,7 @@
     {
      "ply": 8,
      "san": "Kc6",
-     "text": "5.Kc6 steps out of the check again, still beside the pawn. Each step brings your king nearer to the fourth rank, where your rook waits."
+     "text": "5.Kc6 steps out of the check again, still beside the pawn. Zig-zagging between the b- and c-files, your king is working its way down towards the fourth rank, where your rook waits."
     },
     {
      "ply": 10,

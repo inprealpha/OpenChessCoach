@@ -26,9 +26,9 @@ Patterns that win material, give mate or save a game.
 | 1 | Attack and defence (`attack-and-defend`) | Beginner | You can see which pieces each side attacks, take a piece that is left undefended, and save an attacked piece by moving it, guarding it, blocking the attack or taking the attacker. | none | New | hangingPiece |
 | 2 | Getting out of check (`check`) | Beginner | You can tell when a king is in check and find every way out: move the king, block the check, or take the checking piece. | Attack and defence | New | none |
 | 3 | Mate in one (`mate-in-one`) | Beginner | You can tell checkmate from check, and find a mate in one move when there is one. | Getting out of check | New | mateIn1 |
-| 4 | Double attacks (`double-attack`) | Beginner | You can find a move that attacks two things at once, often with the queen, so the opponent cannot save both. | Attack and defence, What the pieces are worth | New | none |
-| 5 | Forks (`forks`) | Beginner | You can spot a fork by a knight, a bishop or a pawn, see why a fork that gives check wins the other piece, and use a check to set one up. | Double attacks | Rewritten | fork |
-| 6 | Pins (`pins`) | Beginner | You can pin a piece to a more valuable one behind it, and win the pinned piece by attacking it again. | What the pieces are worth | Rewritten | pin |
+| 4 | Double attacks (`double-attack`) | Beginner | You can find a move that attacks two things at once, often with the queen, so the opponent cannot save both. | Attack and defence, What the pieces are worth, Getting out of check, Mate in one | New | none |
+| 5 | Forks (`forks`) | Beginner | You can spot a fork by a knight, a bishop or a pawn, see why a fork that gives check wins the other piece, and use a check to set one up. | Double attacks, Getting out of check | Rewritten | fork |
+| 6 | Pins (`pins`) | Beginner | You can pin a piece to a more valuable one behind it, and win material because the pinned piece cannot move away. | What the pieces are worth, Getting out of check | Rewritten | pin |
 | 7 | Back-rank mate (`back-rank-mate`) | Beginner | You can mate a king trapped behind its own pawns on the back rank, and give your own king an escape square in time. | Mate in one | Rewritten | backRankMate |
 | 8 | Skewers (`skewers`) | Beginner | You can attack a valuable piece so that, when it moves away, you win the piece behind it. | Pins | Rewritten | skewer |
 | 9 | Discovered attacks (`discovered-attacks`) | Beginner | You can move one piece out of the way so that the piece behind it attacks, and use the moving piece to attack something else too. | Double attacks | Rewritten | discoveredAttack |
@@ -64,7 +64,7 @@ Positions with few pieces left: how to mate, promote a pawn, and win or save the
 | 10 | Breakthroughs and pawn races (`pawn-races`) | Intermediate | You can break through a pawn wall with a pawn sacrifice, and count who promotes first in a race. | Passed pawns | New | none |
 | 11 | Rook endgame basics (`rook-endgame-basics`) | Intermediate | You can keep your rook active, put it behind a passed pawn, and cut the enemy king off from the pawn. | Mate with king and rook, Passed pawns | New | none |
 | 12 | Rook endgames: Lucena and Philidor (`rook-endgames`) | Intermediate | You can win the Lucena position by building a bridge, and draw the Philidor position with the defending rook on the third rank. | Rook endgame basics | Rewritten | rookEndgame |
-| 13 | Bishop and knight endgames (`minor-piece-endgames`) | Intermediate | You can tell when a bishop beats a knight and when the reverse is true, and know two draws: bishops of opposite colours, and the wrong bishop with a rook pawn. | Good and bad pieces | New | bishopEndgame, knightEndgame |
+| 13 | Bishop and knight endgames (`minor-piece-endgames`) | Intermediate | You can tell when a bishop beats a knight and when the reverse is true, and know two draws: bishops of opposite colours, and the wrong bishop with a rook pawn. | King and pawn endgames, Good and bad pieces | New | bishopEndgame, knightEndgame |
 
 ## Track 3: Openings
 
@@ -74,7 +74,7 @@ How to start a game, then openings for White and for Black. Each opening Lesson 
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Opening principles (`opening-principles`) | Beginner | In the first moves of any game, you can claim the centre with pawns, bring out knights and bishops, castle early, and avoid moving one piece again and again. | none | New | none |
 | 2 | Stopping the early queen attack (`scholars-mate-defence`) | Beginner | As Black, you can stop Scholar's Mate and other early queen attacks, and gain time by developing while you attack the queen. | Opening principles, Spot the threat | New | Scholar's Mate (opening tags) |
-| 3 | Italian Game (`italian-game`) | Beginner | As White, you can play the Italian Game: aim the bishop at f7, put pawns on c3 and d4 to build a centre, and castle. | Opening principles | Rewritten | Italian Game |
+| 3 | Italian Game (`italian-game`) | Beginner | As White, you can play the Italian Game: aim the bishop at f7, use the pawns on c3 and d4 to strike at the centre, and castle. | Opening principles | Rewritten | Italian Game |
 | 4 | London System (`london-system`) | Beginner | As White, you can set up the London System: the bishop out to f4 before the e-pawn moves to e3, pawns on d4, e3 and c3, and knights on f3 and d2. | Opening principles | Rewritten | London System |
 | 5 | Two Knights Defence (`two-knights-defence`) | Beginner | As Black against the Italian Game, you can play the Two Knights Defence and know how to meet the attack on f7. | Italian Game | Rewritten | Two Knights Defence |
 | 6 | Queen's Gambit (`queens-gambit`) | Beginner | As White, you can offer the c-pawn with the Queen's Gambit, and win it back while you develop when Black takes it. | Opening principles | Rewritten | Queen's Gambit Accepted |
@@ -82,9 +82,9 @@ How to start a game, then openings for White and for Black. Each opening Lesson 
 | 8 | Queen's Gambit Declined (`queens-gambit-declined`) | Beginner | As Black against the Queen's Gambit, you can hold the centre with the e-pawn on e6, develop, castle, and know which pieces still need to come out. | Queen's Gambit | Rewritten | Queen's Gambit Declined |
 | 9 | Ruy Lopez (`ruy-lopez`) | Intermediate | As White, you can play the main line of the Ruy Lopez, and know why the bishop attacks the knight that guards e5. | Italian Game | Rewritten | Ruy Lopez |
 | 10 | Scotch Game (`scotch-game`) | Intermediate | As White, you can open the centre at once with the Scotch Game, and develop quickly when Black takes on d4. | Italian Game | New | Scotch Game |
-| 11 | Opening traps (`opening-traps`) | Intermediate | You can spot common opening traps, such as attacks on f2 and f7, and avoid falling into them. | Stopping the early queen attack, Italian Game | New | none |
+| 11 | Opening traps (`opening-traps`) | Intermediate | You can spot common opening traps, such as attacks on f2 and f7, and avoid falling into them. | Stopping the early queen attack, Pins, Italian Game | New | none |
 | 12 | Sicilian Defence (`sicilian-defence`) | Intermediate | As Black against 1.e4, you can play the Sicilian Defence: trade your c-pawn for White's d-pawn, then build the Dragon set-up with ...g6, ...Bg7, castling and ...Nc6. | Opening principles | New | Sicilian Defence |
-| 13 | French Defence (`french-defence`) | Intermediate | As Black against 1.e4, you can play the French Defence and know the plan against White's pawn chain: attack its base with ...c5 and its front with ...f6. | Pawn chains and breaks | New | French Defence |
+| 13 | French Defence (`french-defence`) | Intermediate | As Black against 1.e4, you can play the French Defence and know the plan against White's pawn chain: attack its base with ...c5 and your pieces, and keep ...f6 as a second break against its front. | Pawn chains and breaks | New | French Defence |
 | 14 | Gambits (`gambits`) | Intermediate | You can judge when a pawn offered in the opening is worth taking, and when to give one back to finish developing. | Opening traps | New | none |
 
 ## Track 4: How to think during a game
@@ -94,8 +94,8 @@ What to check before every move, and how to make a plan. The beginner Lessons bu
 | # | Lesson | Level | Learning goal | Prior knowledge | Status | Puzzles |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | What the pieces are worth (`piece-values`) | Beginner | You can count material with the usual values (pawn 1, knight and bishop 3, rook 5, queen 9), and tell a good trade from a bad one. | Attack and defence | New | none |
-| 2 | Spot the threat (`threats`) | Beginner | After each of your opponent's moves, you can ask what it threatens, and find a move that deals with the threat. | What the pieces are worth | New | defensiveMove |
-| 3 | Blunder check (`blunder-check`) | Beginner | Before you play a move, you can look at what your opponent could take, check or attack after it, and pick a safer move when the answer is bad. | Spot the threat | New | none |
+| 2 | Spot the threat (`threats`) | Beginner | After each of your opponent's moves, you can ask what it threatens, and find a move that deals with the threat. | What the pieces are worth, Getting out of check, Mate in one | New | defensiveMove |
+| 3 | Blunder check (`blunder-check`) | Beginner | Before you play a move, you can look at what your opponent could take, check or attack after it, and pick a safer move when the answer is bad. | Spot the threat, Pins | New | none |
 | 4 | Checks, captures and threats (`checks-captures-threats`) | Beginner | You can list every check, capture and threat for both sides before choosing a move, and find the forcing move that wins. | Blunder check | New | none |
 | 5 | Active pieces and the centre (`centre-and-activity`) | Beginner | When nothing can be won at once, you can improve a piece by putting it on a square where it controls more, especially in the centre. | Opening principles | New | none |
 | 6 | Candidate moves and thinking ahead (`candidate-moves`) | Intermediate | You can list two or three candidate moves, look a few moves ahead in each, and choose with the opponent's best reply in mind. | Checks, captures and threats | New | none |
@@ -103,7 +103,7 @@ What to check before every move, and how to make a plan. The beginner Lessons bu
 | 8 | Weak pawns (`weak-pawns`) | Intermediate | You can recognise isolated, doubled and backward pawns, attack them in your opponent's position, and avoid them in yours. | Simple plans | New | none |
 | 9 | Pawn chains and breaks (`pawn-structure`) | Intermediate | You can read a pawn chain, attack it at its base with a pawn break, and tell open positions from closed ones. | Weak pawns | New | none |
 | 10 | Weak squares and outposts (`weak-squares`) | Intermediate | You can find a square that no enemy pawn can attack, and put a knight or another piece there. | Pawn chains and breaks | New | none |
-| 11 | Open files and the seventh rank (`open-files`) | Intermediate | You can put a rook on an open file, put your second rook on the same file, and use a rook on the seventh rank to attack pawns and trap the king. | Weak squares and outposts | New | none |
+| 11 | Open files and the seventh rank (`open-files`) | Intermediate | You can put a rook on an open file and leave room for your second rook, and use a rook on the seventh rank to attack pawns and trap the king. | Weak squares and outposts | New | none |
 | 12 | Good and bad pieces (`good-and-bad-pieces`) | Intermediate | You can tell a good bishop from a bad one blocked by its own pawns, use the two bishops, and decide when a knight is better than a bishop. | Pawn chains and breaks | New | none |
 | 13 | When to trade pieces (`when-to-trade`) | Intermediate | Before a trade, you can look at king safety, material and the pieces it would remove, and decide whether to trade or to keep the pieces on. | What the pieces are worth, Good and bad pieces | New | none |
 | 14 | Attacking the king (`attacking-the-king`) | Intermediate | You can attack a king with more pieces than defend it, open lines towards it, and punish a king left in the centre. | Mating patterns, Open files and the seventh rank | New | kingsideAttack, exposedKing |

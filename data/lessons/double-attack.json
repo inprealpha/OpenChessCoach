@@ -7,13 +7,15 @@
  "goal": "You can find a move that attacks two things at once, often with the queen, so the opponent cannot save both.",
  "priorKnowledge": [
   "attack-and-defend",
-  "piece-values"
+  "piece-values",
+  "check",
+  "mate-in-one"
  ],
  "side": "black",
  "puzzleTags": [],
  "puzzleThemes": [],
  "intro": {
-  "text": "A double attack is one move that attacks two things at once. Your opponent can usually save only one of them, so you win the other. When a single piece makes both attacks, the double attack is also called a fork. The queen is the best piece for it, because it moves in every direction: look for a queen move that hits an undefended piece, gives check or threatens mate, and attacks something else at the same time."
+  "text": "A double attack is one move that attacks two things at once. Your opponent can usually save only one of them, so you win the other. When a single piece makes both attacks, the double attack is also called a fork. The queen is often the easiest piece to use for it, because it moves in every direction: look for a queen move that hits an undefended piece, gives check or threatens mate, and attacks something else at the same time."
  },
  "parts": [
   {
@@ -172,7 +174,7 @@
    "title": "An undefended bishop",
    "fen": "8/6k1/4q3/6p1/1Np2p2/2P2P2/7P/2B2R1K w - - 0 46",
    "side": "black",
-   "keyIdea": "A threat of mate is the strongest attack of all: while the opponent stops the mate, you win the other piece you attacked.",
+   "keyIdea": "A threat of mate forces a reply, so you win the other piece you attacked.",
    "text": "From a game played on Lichess. You are Black. White's bishop has just moved to d2, and nothing defends it. Look for a queen move that attacks the bishop and threatens something even bigger.",
    "credit": {
     "source": "Lichess puzzle database, puzzle CCiSH",

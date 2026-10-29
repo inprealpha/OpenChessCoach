@@ -7,7 +7,8 @@
  "side": "white",
  "goal": "Before you play a move, you can look at what your opponent could take, check or attack after it, and pick a safer move when the answer is bad.",
  "priorKnowledge": [
-  "threats"
+  "threats",
+  "pins"
  ],
  "intro": "One careless move can throw away a whole game. A blunder check is a habit for the moment before you play: picture your move on the board, then look at every capture, check and attack your opponent would have after it. If one of them wins material from you (your pieces and pawns, counted in points) or lets your opponent mate, choose a different move.",
  "parts": [

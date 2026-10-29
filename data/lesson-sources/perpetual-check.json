@@ -39,7 +39,7 @@
    ]
   },
   {
-   "title": "A queen against two rooks",
+   "title": "Two rooks against a queen and a rook",
    "fen": "4r1k1/5R1R/5p1p/p3pqp1/1p6/7P/PP4PK/8 w - - 0 43",
    "side": "white",
    "keyIdea": "Two rooks on the seventh rank can check a king back and forth for ever, even against a queen.",

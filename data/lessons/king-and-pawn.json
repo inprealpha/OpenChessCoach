@@ -22,7 +22,7 @@
    "fen": "8/8/4k3/8/4K3/4P3/8/8 b - - 0 1",
    "side": "white",
    "keyIdea": "When the kings face each other and the other side must move, their king steps aside and yours walks forward.",
-   "text": "A position from Wikibooks. You are White. Your king on e4 and Black's king on e6 stand on the same file, one empty square apart, and Black is to move: you have the opposition. The key squares for your pawn on e3 are d5, e5 and f5, and Black's king guards all three until it moves.",
+   "text": "A position from Wikibooks. You are White. The kings stood face to face on e4 and e6, one empty square apart, and Black had to move: you had the opposition, so Black's king had to step aside. The key squares for your pawn on e3 are d5, e5 and f5.",
    "credit": {
     "source": "Wikibooks, Chess/The Endgame/Pawn Endings",
     "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings",

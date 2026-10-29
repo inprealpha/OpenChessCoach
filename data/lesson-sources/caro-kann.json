@@ -13,13 +13,13 @@
  "priorKnowledge": [
   "opening-principles"
  ],
- "intro": "The Caro-Kann answers 1.e4, White's pawn to e4, with 1...c6, your c-pawn one step forward, and then ...d5. The c-pawn backs up the d-pawn, so you keep a firm share of the centre. Unlike 1...e6, which shuts the bishop on c8 in behind a pawn, it leaves that bishop a clear road out as soon as the d-pawn has moved, and the bishop comes out early. You get a solid position with few weak points for White to attack.",
+ "intro": "The Caro-Kann answers 1.e4, White's pawn to e4, with 1...c6, your c-pawn one step forward, and then ...d5, your d-pawn two steps forward. The c-pawn backs up the d-pawn, so you keep a firm share of the centre. Unlike 1...e6, which shuts the bishop on c8 in behind a pawn, it leaves that bishop a clear road out as soon as the d-pawn has moved, and the bishop comes out early. You get a solid position with few weak points for White to attack.",
  "parts": [
   {
    "title": "Bishop out before the pawns close",
    "fen": "start",
    "side": "black",
-   "keyIdea": "Support your centre pawn with the c-pawn, and bring the light-squared bishop out before your e-pawn shuts it in.",
+   "keyIdea": "Support your centre pawn with the c-pawn, and bring the bishop on c8 out before your e-pawn shuts it in.",
    "text": "You are Black, and White opens with 1.e4. The moves you will play are known as the Classical Variation. At each move, ask what it does for your centre and your pieces, and what White is threatening.",
    "url": "https://github.com/lichess-org/chess-openings",
    "line": "e4 c6 d4 d5 Nc3 dxe4 Nxe4 Bf5 Ng3 Bg6 h4 h6 Nf3 Nd7",
@@ -42,7 +42,7 @@
     {
      "ply": 7,
      "san": "Bf5",
-     "text": "4...Bf5 starts the Classical Variation, one of the named ways to play this opening. It develops the bishop, which means it brings it off its starting square, before ...e6 can shut it in, and it attacks the knight on e4. 4...Nd7 and 4...Nf6 are the other main moves."
+     "text": "4...Bf5 starts the Classical Variation, one of the named ways to play this opening. It develops the bishop (brings it off its starting square) before ...e6 can shut it in, and it attacks the knight on e4. 4...Nd7 and 4...Nf6 are the other main moves."
     },
     {
      "ply": 9,

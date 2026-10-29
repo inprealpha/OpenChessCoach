@@ -20,7 +20,7 @@
  },
  "parts": [
   {
-   "title": "Two pieces on the g-file",
+   "title": "Three pieces on the g-file",
    "fen": "2r2r1k/p1q1ppR1/5n1p/2p5/2BP2QP/2P5/P2K1P2/6R1 w - - 1 24",
    "side": "white",
    "keyIdea": "When your own piece sits on the square where another piece could give mate, move it away with check.",

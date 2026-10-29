@@ -12,14 +12,14 @@
  "priorKnowledge": [
   "king-and-pawn"
  ],
- "intro": "A passed pawn is a pawn with no enemy pawn in front of it, on its own file or on the files next to it, so only pieces can stop it. In an endgame it is often the strongest thing on the board, because the enemy king has to drop everything to stop it. Here you make one from a pawn majority (more pawns than your opponent on one side of the board), use one on the far side of the board to pull the enemy king away, and stop an enemy one by putting your king in its path.",
+ "intro": "A passed pawn is a pawn with no enemy pawn in front of it, on its own file or on the files next to it, so only pieces can stop it. In an endgame it is often the strongest thing on the board, because the enemy king has to drop everything to stop it. Here you make one from a pawn majority (more pawns than your opponent on one side of the board), use an outside passed pawn, one far from all the other pawns, to pull the enemy king away, and stop an enemy one by putting your king in its path.",
  "parts": [
   {
    "title": "Two against one",
    "fen": "8/7p/1p4p1/1P6/P2kp3/6P1/5P2/6K1 w - - 0 39",
    "side": "white",
    "keyIdea": "Two pawns against one can make a passed pawn: push the one with no enemy pawn in front of it.",
-   "text": "From a game played on Lichess. On the queenside you have two pawns, on a4 and b5, against Black's one on b6: a pawn majority. Black's king is heading over, so there is no time to lose.",
+   "text": "From a game played on Lichess. You are White. On the queenside you have two pawns, on a4 and b5, against Black's one on b6: a pawn majority. Black's king is heading over, so there is no time to lose.",
    "url": "https://lichess.org/training/pgZms",
    "line": "a5 Kc5 a6 Kxb5 a7",
    "notes": [
@@ -76,7 +76,7 @@
    "fen": "8/8/8/p7/P1k5/3p3P/5K2/8 w - - 0 55",
    "side": "white",
    "keyIdea": "Stop a passed pawn by putting your king on its path; then your own passed pawn can pull the enemy king away.",
-   "text": "From a game played on Lichess. Black's d-pawn is a passed pawn two steps from promoting, with Black's king close by. Your king has to get in front of it, and only one route works.",
+   "text": "From a game played on Lichess. You are White. Black's d-pawn is a passed pawn two steps from promoting, with Black's king close by. Your king has to get in front of it, and only one route works.",
    "url": "https://lichess.org/training/HVbtU",
    "line": "Ke1 Kd4 Kd2 Ke4 h4 Kd4 h5 Ke5 Kxd3",
    "notes": [

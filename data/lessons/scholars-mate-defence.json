@@ -25,6 +25,7 @@
    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
    "side": "black",
    "keyIdea": "After each queen move, look at what it attacks and cover it; then develop with moves that hit the queen, so it keeps losing time.",
+   "text": "You are Black, from White's first move. White brings the queen out early. At each move, ask what the queen attacks now and how you can cover it while you bring out your pieces.",
    "credit": {
     "source": "Lichess chess-openings",
     "url": "https://github.com/lichess-org/chess-openings",
@@ -474,7 +475,7 @@
       ]
      },
      "notes": {
-      "text": "2.Qh5 attacks the pawn on e5, which nothing guards, and the pawn on f7. (It also attacks h7, but your rook on h8 guards that pawn.) 2...Nc6 guards e5 and develops a knight, which means it brings it off its starting square. f7 is fine for now: one attacker, the queen, against one defender, your king."
+      "text": "2.Qh5 attacks the pawn on e5, which nothing guards, and the pawn on f7. (It also attacks h7, but your rook on h8 guards that pawn.) 2...Nc6 guards e5 and develops a knight: it brings the knight off its starting square. f7 is fine for now: one attacker, the queen, against one defender, your king."
      }
     },
     {
@@ -1209,5 +1210,5 @@
    ]
   }
  ],
- "statsSource": "Lichess games database (CC0): lichess_db_standard_rated_2013-01.pgn.zst, lichess_db_standard_rated_2014-07.pgn.zst, lichess_db_standard_rated_2015-01.pgn.zst, lichess_db_standard_rated_2015-06.pgn.zst, 4,991,115 rated games"
+ "statsSource": "Lichess games database (CC0): 4,991,115 rated games from January 2013, July 2014, January 2015 and June 2015"
 }

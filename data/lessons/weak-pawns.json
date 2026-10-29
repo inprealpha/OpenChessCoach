@@ -364,7 +364,7 @@
       "club": []
      },
      "notes": {
-      "text": "11...Bxd5 takes back with the bishop and leaves your pawns as they were. Taking with the e-pawn would have given you doubled pawns, one behind the other on d7 and d5, which cannot guard each other. The Engine prefers the bishop capture by more than a pawn."
+      "text": "11...Bxd5 takes back with the bishop and leaves your pawns as they were. Taking with the e-pawn would have given you doubled pawns, one behind the other on d7 and d5, which cannot guard each other. It would also have shut in your bishop on b7 behind the d5 pawn and taken away the e6 pawn that shields your king, which White could attack at once with 12.Ng5. The Engine prefers the bishop capture by more than a pawn."
      }
     },
     {
@@ -391,7 +391,7 @@
       "club": []
      },
      "notes": {
-      "text": "12.Re1 developed White's rook. 12...O-O castles: your king is safe, your rook comes to f8, and your pawns have no new weaknesses."
+      "text": "12.Re1 brought White's rook to the e-file. 12...O-O castles: your king is safe, your rook comes to f8, and your pawns have no new weaknesses."
      }
     }
    ]

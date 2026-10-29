@@ -23,6 +23,7 @@
    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
    "side": "black",
    "keyIdea": "Against a pawn chain, attack its base first, with a pawn and then your pieces, then attack its front pawn, and use the lines that open.",
+   "text": "You are Black, from White's first move. White pushes past your centre with the Advance Variation. At each move, ask what your move does against White's chain of pawns and for your pieces.",
    "credit": {
     "source": "Lichess chess-openings",
     "url": "https://github.com/lichess-org/chess-openings",
@@ -1561,7 +1562,7 @@
       "club": []
      },
      "notes": {
-      "text": "9.Nc2 holds d4 for now, with three defenders against your three attackers. 9...f6 is the second pawn break (3...c5 was the first): with White's pieces tied to d4, the pawn now hits the front of the chain, e5."
+      "text": "9.Nc2 holds d4 for now, with three defenders against your three attackers. 9...f6 is the second pawn break, a pawn move that attacks White's pawn chain (3...c5 was the first): with White's pieces tied to d4, the pawn now hits the front of the chain, e5."
      }
     },
     {
@@ -1621,5 +1622,5 @@
    ]
   }
  ],
- "statsSource": "Lichess games database (CC0): lichess_db_standard_rated_2013-01.pgn.zst, lichess_db_standard_rated_2014-07.pgn.zst, lichess_db_standard_rated_2015-01.pgn.zst, lichess_db_standard_rated_2015-06.pgn.zst, 4,991,115 rated games"
+ "statsSource": "Lichess games database (CC0): 4,991,115 rated games from January 2013, July 2014, January 2015 and June 2015"
 }

@@ -9,7 +9,7 @@
  "priorKnowledge": [
   "pawn-structure"
  ],
- "intro": "A bishop stays on squares of one colour for the whole game. When most of its own pawns stand on the other colour, its diagonals are open and it is a good bishop; when they stand on its own colour, they get in its way and it is a bad bishop. A bad bishop gets its diagonals back when a blocking pawn moves onto the other colour, or traded for the enemy's good one. In an open position two bishops work well together, while in a locked position, where the pawns block each other, a knight with a safe square, one no pawn can attack, is often better than a bishop.",
+ "intro": "A bishop stays on squares of one colour for the whole game. When most of its own pawns stand on the other colour, its diagonals are open and it is a good bishop; when they stand on its own colour, they get in its way and it is a bad bishop. A bad bishop gets its diagonals back when a blocking pawn moves onto the other colour, or when you trade it for the enemy's good bishop. In an open position two bishops work well together, while in a locked position, where the pawns block each other, a knight with a safe square, one no pawn can attack, is often better than a bishop.",
  "parts": [
   {
    "title": "Which bishop to keep?",

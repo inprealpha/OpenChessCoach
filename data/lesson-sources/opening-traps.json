@@ -10,7 +10,7 @@
   "scholars-mate-defence",
   "italian-game"
  ],
- "intro": "An opening trap is a position where a natural-looking move loses at once. Most traps catch a player who grabs material, or develops a piece, without asking what the opponent can do next. In this Lesson you spring two famous traps and step around two others. The habit to keep: before each move, ask what your opponent's last move threatens, and what your own move leaves undefended.",
+ "intro": "An opening trap is a position where a natural-looking move loses at once. Most traps catch someone who grabs material, or develops a piece, without asking what the opponent can do next. In this Lesson you spring two traps and step around two others, all aimed at f7 or f2, the pawn next to the king that only the king guards at the start. The habit to keep: before each move, ask what your opponent's last move threatens, and what your own move leaves undefended.",
  "parts": [
   {
    "title": "A pin that does not hold",
@@ -65,59 +65,49 @@
    ]
   },
   {
-   "title": "A knight takes on d5",
-   "fen": "r1bqkb1r/pppn1ppp/5n2/3N2B1/3P4/8/PP2PPPP/R2QKBNR b KQkq - 0 6",
+   "title": "A knight taken on e7",
+   "fen": "rnb1k2r/ppppB1pp/1q6/2b5/8/2N2N2/PPP1PPPP/R2QKB1R b KQkq - 0 7",
    "side": "black",
-   "keyIdea": "When a piece leaves a square, look at the lines it opens: a check along a newly opened line can win back more than you give.",
-   "text": "From a game played on Lichess, in the Queen's Gambit Declined: 1.d4 d5 2.c4 e6 3.Nc3 Nf6 4.Bg5 Nbd7 5.cxd5 exd5. You are Black. White's knight has just left c3 to take your pawn on d5. Look at the squares between your bishop on f8 and White's king on e1, and count what each side could take.",
-   "url": "https://lichess.org/41fAPFok#11",
-   "line": "Nxd5 Bxd8 Bb4+ Qd2 Bxd2+ Kxd2 Kxd8",
+   "keyIdea": "When your opponent grabs a piece, look at your checks before you take back: a check near the king may win far more.",
+   "text": "From a game played on Lichess, in the Englund Gambit Complex: 1.d4 e5 2.dxe5 f6 3.exf6 Qxf6 4.Nf3 Bc5 5.Nc3 Ne7 6.Bg5 Qb6. You are Black. White's bishop has just taken your knight on e7, and taking it back with the king looks natural. Before you do, look at what your queen and your bishop on c5 aim at.",
+   "url": "https://lichess.org/Lha17Bph#13",
+   "line": "Bxf2+ Kd2 Qe3#",
    "notes": [
     {
      "ply": 0,
-     "san": "Nxd5",
-     "text": "6...Nxd5 takes the knight. Your queen on d8 is now open to the bishop on g5, but with White's knight gone from c3, your bishop on f8 can reach b4 and check White's king along the diagonal from b4 to e1."
+     "san": "Bxf2+",
+     "text": "7...Bxf2+ takes the pawn next to White's king with check. Your queen on b6 now guards the bishop along the diagonal the bishop has just left, so the king cannot take it, and White's own queen and bishop stand on d1 and f1. That leaves 8.Kd2 as White's only legal move."
     },
     {
      "ply": 2,
-     "san": "Bb4+",
-     "text": "White took your queen with 7.Bxd8. 7...Bb4+ checks along that open diagonal. White's king has no square to go to, so White's only legal move is 8.Qd2, putting the queen in the way."
-    },
-    {
-     "ply": 4,
-     "san": "Bxd2+",
-     "text": "8...Bxd2+ takes the queen, again with check, and White's king has to take back."
-    },
-    {
-     "ply": 6,
-     "san": "Kxd8",
-     "text": "9...Kxd8 takes the bishop on d8. Now count: White has taken a pawn, your queen and a bishop; you have taken a knight, the queen and a bishop. You are a knight up for a pawn, thanks to the diagonal White's knight opened when it left c3."
+     "san": "Qe3#",
+     "text": "8...Qe3# is mate. The queen checks along the diagonal to d2, and your bishop on f2 guards it and covers e1. White's own pieces fill c2, c3, d1 and e2, the queen covers d3, and c1 is no escape square, because the queen's diagonal runs on through it. The mate works because White's bishop has left c1, from where it guarded e3. In the game Black took the bishop on e7 with the king instead and soon lost."
     }
    ]
   },
   {
-   "title": "Mind the pin on the e-file",
-   "fen": "r1bqkbnr/pp1npppp/2p5/8/3PN3/8/PPP1QPPP/R1B1KBNR b KQkq - 2 5",
-   "side": "black",
-   "keyIdea": "When a pawn in front of your king is pinned, it cannot take a checking piece: keep a square empty for the king.",
-   "text": "From a game played on Lichess, in the Caro-Kann Defence. You are Black. White has just played the odd-looking 5.Qe2, putting the queen on the e-file with your king, and White's knight on e4 between them. In the game Black developed in the most natural way and was mated on the next move. Find a safe developing move.",
-   "url": "https://lichess.org/1vreozsr#9",
-   "line": "Ndf6 Nf3 Nxe4 Qxe4 Nf6",
+   "title": "A queen and a bishop aimed at f2",
+   "fen": "rnb1k2r/pp3ppp/1q3n2/2bp2B1/8/2N2N2/PPP2PPP/R2QKB1R w KQkq - 4 8",
+   "side": "white",
+   "keyIdea": "Before you take a piece, ask which squares near your king your own piece was guarding, and guard f2 first if it is under fire.",
+   "text": "From a game played on Lichess, in the French Defence: 1.e4 e6 2.Nf3 d5 3.exd5 exd5 4.d4 c5 5.dxc5 Bxc5 6.Nc3 Nf6 7.Bg5 Qb6. You are White. Black's queen attacks your pawn on b2, and together with the bishop on c5 it looks towards your king. In the game White took the knight on f6 and was mated two moves later. Find a safe move.",
+   "url": "https://lichess.org/8cWFum9f#14",
+   "line": "Qe2+ Be6 Bxf6 gxf6 O-O-O",
    "notes": [
     {
      "ply": 0,
-     "san": "Ndf6",
-     "text": "5...Ndf6 moves the d7 knight to f6, where it challenges the e4 knight, and d7 stays empty for your king. The natural 5...Ngf6 would lose to 6.Nd6#, a smothered mate: the e7 pawn cannot take the knight because the queen on e2 pins it to your king, and your own pieces fill every square around the king. 5...Qc7, which covers d6, is also safe."
+     "san": "Qe2+",
+     "text": "8.Qe2+ checks the king and guards f2 at the same time, so Black's bishop can no longer take there safely. In the game White played 8.Bxf6 and lost to 8...Bxf2+ 9.Ke2 Qe3#: the bishop on g5 had been the piece guarding e3, the square where the queen mated."
     },
     {
      "ply": 2,
-     "san": "Nxe4",
-     "text": "After 6.Nf3, 6...Nxe4 trades knights. White's queen has to take back, and it stands in the open where your pieces can attack it."
+     "san": "Bxf6",
+     "text": "Black blocked the check with 8...Be6. Now 9.Bxf6 is safe, because your queen guards f2. It trades your bishop for the knight that guarded d5, and Black can only take back with the g-pawn, which leaves two black pawns on the f-file."
     },
     {
      "ply": 4,
-     "san": "Nf6",
-     "text": "7...Nf6 develops with a threat to the queen on e4, so White must spend another move on it. You have side-stepped the trap and kept a sound position."
+     "san": "O-O-O",
+     "text": "10.O-O-O, castling queenside, takes your king to c1, where it also guards the b2 pawn, and brings your rook to d1. The rook and the knight on c3 both attack the d5 pawn, and only the bishop on e6 guards it. You have stepped around the trap, and the Engine clearly prefers your position."
     }
    ]
   }

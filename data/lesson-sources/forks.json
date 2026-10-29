@@ -15,11 +15,11 @@
  "intro": "A fork is a double attack made by a single piece: one piece attacks two enemy pieces at once, and your opponent can save only one of them. Any piece can fork. A knight's fork is the hardest to see coming, because its jump cannot be blocked; a bishop, rook or queen forks along its lines; and a pawn fork is cheap, because you risk only a pawn. A fork that gives check is the strongest kind: the king has to answer the check first.",
  "parts": [
   {
-   "title": "A king and a rook",
+   "title": "A knight in the centre",
    "fen": "8/1k3r2/8/6p1/3PN2p/1P2K2P/2P5/8 b - - 0 44",
    "side": "white",
    "keyIdea": "A knight check that also hits another piece wins that piece: the king has to step away first, and then you take.",
-   "text": "From a game played on Lichess. You are White. Black has just pushed the g-pawn to g4. Look at the squares your knight can jump to: does one of them reach both the king and the rook?",
+   "text": "From a game played on Lichess. You are White. Black has just pushed the g-pawn to g4. Look at the squares your knight can jump to, and at what it would attack from each.",
    "url": "https://lichess.org/training/OJkoA",
    "line": "g4 Nd6+ Kc6 Nxf7",
    "notes": [
@@ -40,7 +40,7 @@
    "fen": "r7/1p3pk1/1R6/2p3B1/P3Pp2/1P1P1K2/2r5/8 b - - 0 36",
    "side": "white",
    "keyIdea": "A bishop attacks in both directions along a diagonal, so it can check the king and hit a piece on the far side at once.",
-   "text": "From a game played on Lichess. You are White, 2 points behind: a bishop against a rook. Black's rook has just come to c3 to attack your pawns. Your bishop on g5 can move along two diagonals: is there a square from which it would attack both the king and that rook?",
+   "text": "From a game played on Lichess. You are White, 2 points behind: a bishop against a rook. Black's rook has just come to c3 to attack your pawns. Your bishop on g5 can move along two diagonals: look at what it would attack from each square it can reach.",
    "url": "https://lichess.org/training/MuxaR",
    "line": "Rc3 Bf6+ Kf8 Bxc3",
    "notes": [
@@ -61,7 +61,7 @@
    "fen": "6k1/5pb1/4p2p/1p1nN3/4q1P1/1P5P/5P2/2BQ1K2 b - - 0 40",
    "side": "black",
    "keyIdea": "When the forking square is out of reach, a check first can drive the king onto it.",
-   "text": "From the game Soppe against Braga, Clarín Grand Prix final, 1998. You are Black. Your knight could fork White's king and queen from e3, but the pawn on f2 and the bishop on c1 both guard that square. Find a check that drives the king somewhere better.",
+   "text": "From the game Soppe against Braga, Clarín Grand Prix final, 1998. You are Black. Your knight could fork White's king and queen from e3, but the pawn on f2 and the bishop on c1 both guard that square. Find a check that drives the king to a square that suits you better.",
    "url": "https://en.wikipedia.org/wiki/Fork_(chess)",
    "line": "Qh1+ Ke2 Nc3+ Kd3 Qxd1+",
    "notes": [

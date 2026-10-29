@@ -22,7 +22,7 @@
    "fen": "8/3k3q/3r4/2Q5/8/8/8/4K3 w - - 2 67",
    "side": "white",
    "keyIdea": "Check a king that has a valuable piece behind it on the same line; when the king moves, take that piece.",
-   "text": "From a game played on Lichess. Black's king has just stepped to d7. Look along the seventh rank (the row numbered 7): what stands behind the king?",
+   "text": "From a game played on Lichess. You are White. Black's king has just stepped to d7. Look along the seventh rank (the row numbered 7): what stands behind the king?",
    "credit": {
     "source": "Lichess puzzle database, puzzle 5dvpM",
     "url": "https://lichess.org/training/5dvpM",
@@ -81,11 +81,11 @@
    ]
   },
   {
-   "title": "A bishop skewer",
+   "title": "King and bishop on one diagonal",
    "fen": "1b6/8/P4pp1/4k3/6P1/5K2/3B4/8 w - - 3 43",
    "side": "white",
    "keyIdea": "A bishop skewers along a diagonal: check the king, and win the piece that stands behind it.",
-   "text": "From a game played on Lichess. Black's king has just come to e5, on the same diagonal as Black's bishop on b8. That bishop is also the piece that stops your pawn on a6 from promoting.",
+   "text": "From a game played on Lichess. You are White. Black's king has just come to e5, on the same diagonal as Black's bishop on b8. That bishop is also the piece that stops your pawn on a6 from promoting.",
    "credit": {
     "source": "Lichess puzzle database, puzzle sLBYX",
     "url": "https://lichess.org/training/sLBYX",
@@ -148,7 +148,7 @@
    "fen": "3q1rk1/5ppp/p7/1rb5/5B2/2Q5/P1P3PP/R4R1K b - - 1 23",
    "side": "black",
    "keyIdea": "A skewer does not need a check: attack the queen, and when it moves, take the rook behind it.",
-   "text": "From a game played on Lichess. White's queen has just moved to c3. Look at what stands behind it on the diagonal towards a1.",
+   "text": "From a game played on Lichess. You are Black. White's queen has just moved to c3. Look at what stands behind it on the diagonal towards a1.",
    "credit": {
     "source": "Lichess puzzle database, puzzle LQKHl",
     "url": "https://lichess.org/training/LQKHl",

@@ -31,8 +31,8 @@
    "title": "A queen check down the file",
    "fen": "8/5k2/8/p2q1B2/4R3/1P2PKP1/8/8 b - - 6 48",
    "side": "white",
-   "keyIdea": "Block with a guarded piece, best of all one that attacks the checking piece; if the checker takes your blocker, take it back.",
-   "text": "From a game played on Lichess. Black's queen has just taken your bishop on f5, giving check down the f-file (the column of squares marked f). Nothing can take the queen, so you must move the king or block.",
+   "keyIdea": "Block with a guarded piece, best of all one that attacks the checking piece; if the checking piece takes your blocker, take it back.",
+   "text": "From a game played on Lichess. You are White. Black's queen has just taken your bishop on f5, giving check down the f-file (the column of squares marked f). Nothing can take the queen, so you must move the king or block.",
    "url": "https://lichess.org/training/TDcUE",
    "line": "Qxf5+ Rf4 Qxf4+ exf4",
    "notes": [
@@ -44,7 +44,7 @@
     {
      "ply": 3,
      "san": "exf4",
-     "text": "Black gave up the queen for your rook, with check. This time the answer is to take the checking piece, and 50.exf4 takes the queen with the e-pawn. Taking it with the king or the g-pawn wins just as well: in each case you are left with three pawns against one, and the pawn endgame is a win."
+     "text": "Black gave up the queen for your rook, with check. This time the answer is to take the checking piece, and 50.exf4 takes the queen with the e-pawn. Taking it with the king or the g-pawn also wins: in each case you are left with three pawns against one, and the pawn endgame is a win."
     }
    ]
   },
@@ -53,7 +53,7 @@
    "fen": "8/8/8/8/5n1N/1R6/5K2/r6k b - - 2 50",
    "side": "white",
    "keyIdea": "If the checking piece can be captured safely, taking it often solves everything at once.",
-   "text": "From a game played on Lichess. Black's knight has just jumped to h3 with check. A knight's check cannot be blocked, so you must move the king or take the knight.",
+   "text": "From a game played on Lichess. You are White. Black's knight has just jumped to h3 with check. A knight's check cannot be blocked, so you must move the king or take the knight.",
    "url": "https://lichess.org/training/6iq4u",
    "line": "Nh3+ Rxh3#",
    "notes": [

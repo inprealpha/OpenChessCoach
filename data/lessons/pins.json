@@ -22,7 +22,7 @@
    "fen": "8/1p6/2n3R1/pk6/8/2K5/8/8 b - - 3 61",
    "side": "white",
    "keyIdea": "A piece pinned to its king cannot move away, so if nothing guards it, you win it.",
-   "text": "From a game played on Lichess. Black's knight has just jumped to e5, attacking your rook on g6. The black king stands on b5, on the same rank (row) as the knight. Can your rook use that?",
+   "text": "From a game played on Lichess. You are White. Black's knight has just jumped to e5, attacking your rook on g6. The black king stands on b5, on the same rank (row) as the knight. Can your rook use that?",
    "credit": {
     "source": "Lichess puzzle database, puzzle F1Ury",
     "url": "https://lichess.org/training/F1Ury",
@@ -174,7 +174,7 @@
    "fen": "6k1/pp1n1rpp/2p5/8/2BP4/5N2/P4PPP/6K1 w - - 0 1",
    "side": "white",
    "keyIdea": "A pinned piece cannot run away, so attack it a second time and win it.",
-   "text": "A position from Wikibooks. Black's rook on f7 is stuck: if it moved, your bishop on c4 would give check to the king on g8. Taking the rook at once with the bishop lets the king take back. Can you win it for free?",
+   "text": "A position from Wikibooks. You are White. Black's rook on f7 is stuck: if it moved, your bishop on c4 would give check to the king on g8. Taking the rook at once with the bishop lets the king take back. Can you win it for free?",
    "credit": {
     "source": "Wikibooks, Chess/Tactics",
     "url": "https://en.wikibooks.org/wiki/Chess/Tactics",

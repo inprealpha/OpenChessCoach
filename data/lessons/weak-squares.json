@@ -12,7 +12,7 @@
  "puzzleTags": [],
  "puzzleThemes": [],
  "intro": {
-  "text": "A pawn can only move forward. Once the enemy pawns that could attack a square have moved past it or been traded, no enemy pawn will ever attack that square again. If such a square is in or near your opponent's half, and you can guard a piece there, usually with a pawn, it is an outpost. A knight on an outpost is hard to shift: no pawn can chase it, so your opponent has to give up a piece to get rid of it. In this Lesson you find outposts and plan the route that brings a knight to them."
+  "text": "A pawn can only move forward. Once the enemy pawns that could attack a square have moved past it or been traded, no enemy pawn will ever attack that square again. If such a square is in or near your opponent's half, and you can guard a piece there, usually with a pawn, it is an outpost. A knight on an outpost is hard to shift: no pawn can chase it, so the only way to remove it is to trade a piece for it. In this Lesson you find outposts and plan the route that brings a knight to them."
  },
  "parts": [
   {
@@ -73,7 +73,7 @@
       "club": []
      },
      "notes": {
-      "text": "10.Nd5: the knight lands on d5 and attacks the bishop on e7 and the knight on f6. No pawn can drive it away: to get rid of it, Black has to give up a piece."
+      "text": "10.Nd5: the knight lands on d5 and attacks the bishop on e7 and the knight on f6. No pawn can drive it away: Black can only remove it by trading a piece for it."
      }
     }
    ]
@@ -201,7 +201,7 @@
       "club": []
      },
      "notes": {
-      "text": "17...Qxe7 takes back. Your knight on e4 stays where it is: White can only remove it by giving up a piece for it."
+      "text": "17...Qxe7 takes back. Your knight on e4 stays where it is: White can only remove it by trading a piece for it."
      }
     },
     {

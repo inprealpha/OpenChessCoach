@@ -14,7 +14,7 @@
   "mateIn1"
  ],
  "intro": {
-  "text": "Checkmate, or mate for short, ends the game: the king is in check and there is no way out. It cannot move to a safe square, the check cannot be blocked, and the checking piece cannot be taken. If even one of those ways is open, it is only check, so look at every check you have and test each one."
+  "text": "Checkmate, or mate for short, ends the game: the king is in check and there is no way out. It has no escape square (a safe square to move to), the check cannot be blocked, and the checking piece cannot be taken. If even one of those ways is open, it is only check, so look at every check you have and test each one."
  },
  "parts": [
   {
@@ -65,7 +65,7 @@
    ]
   },
   {
-   "title": "The queen and a helper",
+   "title": "A pawn taken on c4",
    "fen": "5r1k/p5p1/8/6Q1/2P5/7P/6RK/2q5 b - - 0 41",
    "side": "white",
    "keyIdea": "The queen can mate right next to the king when another piece guards it.",
@@ -115,8 +115,8 @@
    "title": "A king in the centre",
    "fen": "8/8/3pkp1p/1R1P1p2/1p6/4K3/1r3P2/8 b - - 0 53",
    "side": "white",
-   "keyIdea": "Mate can happen in the centre too, even with a pawn, when your pieces and the king's own pawns cover every square around it.",
-   "text": "From a game played on Lichess. You are White. Black's king has just stepped forward to e5, into the centre of the board. You have two ways to give check, and only one of them is mate. For each one, look at every square around the king.",
+   "keyIdea": "Mate can happen in the centre too, even with a pawn, when your pieces cover every square around the king that its own pawns do not fill.",
+   "text": "From a game played on Lichess. You are White. Black's king has just stepped forward to e5, into the centre of the board. Find the mate: look at every check you have, and at every square around the king.",
    "credit": {
     "source": "Lichess puzzle database, puzzle GW5Ow",
     "url": "https://lichess.org/training/GW5Ow",
@@ -153,7 +153,7 @@
       "club": []
      },
      "notes": {
-      "text": "f4, the pawn two squares forward from f2, checks the king on e5. Your king on e3 guards f4, d4 and e4, so the king cannot take the pawn or step onto those squares. Your pawn on d5 covers e6, your rook guards that pawn, and Black's own pawns fill d6, f6 and f5. A pawn's check cannot be blocked, so it is mate. The other check, Rxf5+, is only check: the king takes the rook."
+      "text": "f4, the pawn two squares forward from f2, checks the king on e5. Your king on e3 guards f4, d4 and e4, so the king cannot take the pawn or step onto those squares. Your pawn on d5 covers e6, your rook guards that pawn, and Black's own pawns fill d6, f6 and f5. A pawn's check cannot be blocked, so it is mate. Your rook cannot check from f5, because your own pawn on d5 stands in its way."
      }
     }
    ]

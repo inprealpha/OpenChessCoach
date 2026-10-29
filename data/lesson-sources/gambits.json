@@ -28,12 +28,12 @@
     {
      "ply": 2,
      "san": "Nf6",
-     "text": "3.f3 offered a second pawn, to open the f-file. 3...Nf6 brings out a knight that guards your pawn on e4, so White cannot simply take it back. Moving the e-pawn to e6 was also good."
+     "text": "3.f3 offered a second pawn, to open the f-file. 3...Nf6 brings out a knight that guards your pawn on e4, so White cannot simply take it back. 3...e6, the pawn from e7 to e6, was also good."
     },
     {
      "ply": 4,
      "san": "exf3",
-     "text": "4.Nc3 attacked e4 a second time, so 5.fxe4 would have won it back. 4...exf3 takes the f-pawn instead. Your e4 pawn will be gone, but so are White's e-pawn and f-pawn, and you stay a pawn up."
+     "text": "4.Nc3 attacked e4 a second time, so 5.fxe4 would have won it back. 4...exf3 takes the f-pawn instead. White will take back on f3, but White's e-pawn and f-pawn are both gone, and you stay a pawn up."
     },
     {
      "ply": 6,
@@ -105,7 +105,7 @@
     {
      "ply": 8,
      "san": "f3",
-     "text": "6...Qg6 guarded e4 and aimed at g2. 7.f3 strikes at the pawn on e4 at once: if Black takes on f3, your queen takes back, and the f-file opens towards Black's king, which is still in the centre. You have more pieces out, and the Engine clearly prefers your position."
+     "text": "6...Qg6 guarded e4 and aimed at g2. 7.f3 strikes at the pawn on e4 at once: if Black takes on f3, your queen takes back, and the f-file opens next to Black's king, towards f7, while the king is still in the centre. You have more pieces out, and the Engine clearly prefers your position."
     }
    ]
   }

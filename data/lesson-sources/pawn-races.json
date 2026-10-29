@@ -16,7 +16,7 @@
    "fen": "8/ppp5/8/PPP5/6p1/6Pp/5k1K/8 w - - 1 53",
    "side": "white",
    "keyIdea": "Pawns blocked one against one can still break through: give one or two of them up to open a path for another.",
-   "text": "From a game played on Lichess. Your pawns on a5, b5 and c5 face Black's on a7, b7 and c7, and none of them is a passed pawn yet. Both kings are busy on the kingside, far from these pawns. Can you get one of yours through?",
+   "text": "From a game played on Lichess. You are White. Your pawns on a5, b5 and c5 face Black's on a7, b7 and c7, and none of them is a passed pawn yet. Both kings are busy on the kingside, far from these pawns. Can you get one of yours through?",
    "url": "https://lichess.org/training/cQLaQ",
    "line": "b6 axb6 c6 bxc6 a6",
    "notes": [
@@ -42,7 +42,7 @@
    "fen": "8/8/5p1p/p4P1P/P1ppk1P1/8/2P1K3/8 w - - 2 41",
    "side": "white",
    "keyIdea": "A pawn sacrifice can pull an enemy pawn out of the way and leave your neighbouring pawn with a clear path.",
-   "text": "From a game played on Lichess. Black's king is active on e4, and Black's queenside pawns look dangerous. On the kingside your three pawns face two, and one pawn sacrifice is enough to make one of them a passed pawn.",
+   "text": "From a game played on Lichess. You are White. Black's king is active on e4, and Black's queenside pawns look dangerous. On the kingside your three pawns face two, and one pawn sacrifice is enough to make one of them a passed pawn.",
    "url": "https://lichess.org/training/ztkmq",
    "line": "g5 hxg5 h6 Kxf5 h7",
    "notes": [
@@ -94,7 +94,7 @@
    "fen": "8/7P/8/1k6/8/p7/3p4/1K6 w - - 0 59",
    "side": "white",
    "keyIdea": "Before you promote, look at the reply: if the other pawn would promote with check, deal with it first.",
-   "text": "From a game played on Lichess. Your h-pawn can promote right now, but Black's d-pawn is one step from promoting too. Before you promote, look at what Black would do next.",
+   "text": "From a game played on Lichess. You are White. Your h-pawn can promote right now, but Black's d-pawn is one step from promoting too. Before you promote, look at what Black would do next.",
    "url": "https://lichess.org/training/KdSE3",
    "line": "Kc2 d1=Q+ Kxd1 a2 h8=Q",
    "notes": [

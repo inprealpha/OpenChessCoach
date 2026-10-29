@@ -15,7 +15,7 @@
  ],
  "puzzleThemes": [],
  "intro": {
-  "text": "The Two Knights Defence is a reply to the Italian Game (1.e4 e5 2.Nf3 Nc6 3.Bc4): with 3...Nf6, the knight to f6, Black brings out the second knight and attacks the pawn on e4. White's sharpest try, 4.Ng5, the knight to g5, puts a knight and a bishop on the pawn on f7. Black gives up a pawn to get out of trouble, and then almost every move attacks something, so White's pieces keep running while Black's come out."
+  "text": "The Two Knights Defence is a reply to the Italian Game (1.e4 e5 2.Nf3 Nc6 3.Bc4): with 3...Nf6, the knight to f6, Black brings out the second knight and attacks the pawn on e4. White's most aggressive try, 4.Ng5, the knight to g5, aims a knight and a bishop at the pawn on f7. Black gives up a pawn to get out of trouble, and then almost every move attacks something, so White's pieces keep running while Black's come out."
  },
  "parts": [
   {
@@ -23,6 +23,7 @@
    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
    "side": "black",
    "keyIdea": "Shut out one of the two pieces aimed at the pawn beside your king; a pawn given up early pays for moves that each come with a threat.",
+   "text": "You are Black, from White's first move. White plays the Italian Game, and you answer with the Two Knights Defence. At each move, ask what White is threatening and what your move does for your pieces.",
    "credit": {
     "source": "Lichess chess-openings",
     "url": "https://github.com/lichess-org/chess-openings",
@@ -1524,7 +1525,7 @@
       ]
      },
      "notes": {
-      "text": "8.Ba4, the bishop to a4, is the move most often played in games below club level; 8.Be2 and 8.Qf3 are the other main tries. 8...h6 hits the knight on g5 with a pawn, so it has to move for the third time. Against 8.Be2 the same move works well, but against 8.Bd3 it allows 9.Ne4, and 8...Nd5 is better."
+      "text": "8.Ba4, the bishop to a4, is the move beginners on Lichess play most often; 8.Be2, the bishop back to e2, is the main other try. 8...h6 hits the knight on g5 with a pawn, so it has to move for the third time, and the same move works well against 8.Be2."
      }
     },
     {
@@ -1725,11 +1726,11 @@
       ]
      },
      "notes": {
-      "text": "9.Nf3 went back, and 9...e4 hits the knight again with a pawn. Count the moves: White has played nine, yet only a knight and a bishop are out, and the knight must move once more. You are a pawn down, but your bishop on f8 and castling come next. If the knight goes to e5, which is the most common answer, 10...Qd4 attacks it and the bishop on a4 at once."
+      "text": "9.Nf3 went back, and 9...e4 hits the knight again with a pawn. Count the moves: White has played nine, yet only a knight and a bishop are out, and the knight must move once more. You are a pawn down, but your bishop on f8 and castling come next."
      }
     }
    ]
   }
  ],
- "statsSource": "Lichess games database (CC0): lichess_db_standard_rated_2013-01.pgn.zst, lichess_db_standard_rated_2014-07.pgn.zst, lichess_db_standard_rated_2015-01.pgn.zst, lichess_db_standard_rated_2015-06.pgn.zst, 4,991,115 rated games"
+ "statsSource": "Lichess games database (CC0): 4,991,115 rated games from January 2013, July 2014, January 2015 and June 2015"
 }

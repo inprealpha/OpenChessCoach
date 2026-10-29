@@ -268,7 +268,7 @@
    "title": "King, queen and rook in a row",
    "fen": "6R1/8/1p1kqrR1/p6P/8/8/P4PK1/8 w - - 4 43",
    "side": "white",
-   "keyIdea": "A trade can pull the queen to a square where your next move pins it to its king with a guarded piece it cannot take for free.",
+   "keyIdea": "A trade can pull the queen to a square where your next move pins it to its king with a guarded piece.",
    "text": "From a game played on Lichess. You are White, with two rooks against a queen and a rook. Black's rook has just come to f6 to attack your rook on g6. Black's king, queen and rook all stand on the sixth rank, side by side.",
    "credit": {
     "source": "Lichess puzzle database, puzzle 0Aq3m",

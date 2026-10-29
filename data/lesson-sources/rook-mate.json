@@ -59,7 +59,7 @@
    "fen": "8/6k1/4R3/3K4/8/8/8/8 w - - 9 10",
    "side": "white",
    "keyIdea": "If moving the rook in would let the enemy king take it, walk your own king up to guard that square first.",
-   "text": "The same Wikibooks example, a few moves later. The rook on e6 keeps Black's king in the top two rows, on the f-, g- and h-files. The rook would like to go to f6, but Black's king on g7 would simply take it there.",
+   "text": "The same Wikibooks example, a few moves later. You are White. The rook on e6 keeps Black's king in the top two rows, on the f-, g- and h-files. The rook would like to go to f6, but Black's king on g7 would simply take it there.",
    "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
    "line": "Ke5 Kf7 Kf5 Kg7 Rf6 Kh7 Rg6",
    "notes": [

@@ -10,7 +10,7 @@
  "priorKnowledge": [
   "mate-in-one"
  ],
- "intro": "A king and a queen against a lone king is a win, as long as you finish it the right way. The queen can guard a whole rank (a row) or file (a column) by itself, so the lone king cannot cross it, but it cannot give mate alone: your king has to come and guard the square where the queen mates. Stalemate is the danger all the way: if the lone king is not in check and has no legal move, the game is a draw.",
+ "intro": "A king and a queen against a lone king is a win, as long as you finish it the right way. The queen can guard a whole rank (a row) or file (a column) by itself, so the lone king cannot cross it, but it cannot give mate alone: your king has to come and help, most often by guarding the square where the queen mates. Stalemate is the danger all the way: if the lone king is not in check and has no legal move, the game is a draw.",
  "playOut": {
   "title": "Mate the lone king yourself",
   "fen": "7Q/8/8/3k4/8/8/8/5K2 w - - 1 70",
@@ -76,7 +76,7 @@
     {
      "ply": 4,
      "san": "Kf4",
-     "text": "Black's king went down to h4, towards your king, which only brings the end closer. Your king on f4 guards g3, g4 and g5, and the queen covers h3, so Black's king has one escape square left, h5. It can still move, so this is not stalemate."
+     "text": "Black's king went down to h4, towards your king. Your king on f4 guards g3, g4 and g5, and the queen covers h3, so Black's king has one escape square left, h5. It can still move, so this is not stalemate."
     },
     {
      "ply": 6,

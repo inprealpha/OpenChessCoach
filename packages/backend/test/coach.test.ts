@@ -546,11 +546,49 @@ describe('the Coach port', () => {
     const lesson = { lessonId: 'italian-game', opening: 'Italian Game', notes: '', popularity: [{ san: 'e4', percent: 60 }], finalTurn: false };
     const ask: CoachRequest = { ...whyAsk(), job: 'lesson-turn', lesson };
     const { popularity: _missing, ...noPopularity } = lesson;
-    for (const bad of [noPopularity, { ...lesson, popularity: [{ san: 'e4' }] }, { ...lesson, notes: 3 }, 'Italian Game']) {
+    for (const bad of [noPopularity, { ...lesson, popularity: [{ san: 'e4' }] }, { ...lesson, notes: 3 }, { ...lesson, isLessonMove: 'no' }, 'Italian Game']) {
       await expect(c.request('coach.ask', { ...ask, lesson: bad as never })).rejects.toMatchObject({ code: 'bad-request' });
     }
     expect(rows(app, 'SELECT * FROM coach_calls')).toHaveLength(0);
     await expect(c.request('coach.ask', ask)).resolves.toMatchObject({ stripped: expect.any(Number) });
+  });
+
+  it('keeps the answer back in a Lesson turn whose move isn’t the Lesson’s, so the Coach can’t give it away', async () => {
+    const app = await instance();
+    const c = await client(app);
+    const lessonFocus = { lesson: 'Italian Game', learningGoal: 'Play the first moves of the Italian Game.', keyIdea: 'Take the centre with a pawn.' };
+    const lesson = { lessonId: 'italian-game', opening: 'Italian Game', notes: 'e4 takes the centre and frees the bishop.', popularity: [{ san: 'e4', percent: 60 }, { san: 'a3', percent: 1 }], finalTurn: false };
+    // 1. a3, where the Lesson teaches 1. e4.
+    const ask: CoachRequest = { job: 'lesson-turn', fen: START, recentMoves: [], playerSide: 'white', moveUci: 'a2a3', lesson: { ...lesson, isLessonMove: false }, lessonFocus };
+    const reply = await c.request('coach.ask', ask);
+    const brief = app.coach.lastBrief as Brief;
+    // None of the Engine's moves for White, no notes, and only a3's own popularity; the move, the
+    // replies to it and the Lesson's focus stay.
+    expect(brief.candidates).toEqual([]);
+    expect(brief.lesson).toEqual({ opening: 'Italian Game', notes: '', popularity: 'a3 1%', isLessonMove: false });
+    expect(brief.move?.san).toBe('a3');
+    expect(brief.replies?.length).toBeGreaterThan(0);
+    expect(brief.focus).toEqual({ learningGoal: lessonFocus.learningGoal, keyIdea: lessonFocus.keyIdea });
+    // The fake Coach explains a3 and the reply, offers both ways on, and names no other move for White.
+    expect(reply.text).toMatch(/^You chose a3, graded (Best|Good|Inaccuracy|Mistake|Blunder)/);
+    expect(reply.text).toContain('Try another move, or continue with the Lesson’s move.');
+    expect(reply.text).not.toMatch(/\be4\b|top choice/);
+    expect(reply.arrows.map((a) => a.brush)).not.toContain('green');
+    // A Coach that shows the answer anyway has it stripped before it reaches the client.
+    app.coach.script({ kind: 'reply', reply: { text: 'Play e4 instead.', moves: ['e2e4'], arrows: [{ uci: 'e2e4', brush: 'green' }] } });
+    const forged = await c.request('coach.ask', ask);
+    expect(forged).toMatchObject({ moves: [], arrows: [], stripped: 2 });
+    // The Lesson's own move, or a client that doesn't say, gets the brief as before.
+    await c.request('coach.ask', { ...ask, moveUci: 'e2e4', lesson: { ...lesson, isLessonMove: true } });
+    expect(app.coach.lastBrief?.candidates.length).toBeGreaterThan(0);
+    expect(app.coach.lastBrief?.lesson).toEqual({ opening: 'Italian Game', notes: lesson.notes, popularity: 'e4 60%, a3 1%' });
+    await c.request('coach.ask', { ...ask, lesson });
+    expect(app.coach.lastBrief?.candidates.length).toBeGreaterThan(0);
+    // The prompt tells the Coach why the brief has no candidates, and what to say instead.
+    const rule = SYSTEM_PROMPT.split('\n- ').find((r) => r.startsWith('When lesson.isLessonMove is false')) ?? '';
+    expect(rule).toMatch(/leaves out the Lesson's move and the Engine's best move/);
+    expect(rule).toMatch(/Never name, draw or hint at any other move/);
+    expect(rule).toMatch(/not the one this Lesson is teaching/);
   });
 
   it('carries a Lesson’s focus from the request into the brief of a Lesson turn, a Hint and a Why Question', async () => {

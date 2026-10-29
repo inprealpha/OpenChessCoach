@@ -88,7 +88,13 @@ export interface Brief {
    * that threat (`ignored`), and it is played from the position after the move (see `threatFen`).
    */
   threat?: { by: Side; san: string; uci: string; line: string; ignored?: true };
-  lesson?: { opening: string; notes: string; popularity: string };
+  /**
+   * A Lesson turn's context. `isLessonMove: false` marks a move that isn't the one the Lesson
+   * teaches, while the Player may try again: the brief then keeps back the Lesson's move and the
+   * Engine's best move (no candidates, no notes, only the move's own popularity), so the Coach
+   * explains the move played and what it allows without giving the answer away.
+   */
+  lesson?: { opening: string; notes: string; popularity: string; isLessonMove?: false };
   /**
    * During a Lesson, on every Coach call: the Lesson, its learning goal and the current part's key
    * idea, so the Coach stays on the Lesson's point (ADR 0012). The Lesson's aim, never an Engine fact,
@@ -133,20 +139,25 @@ export interface BriefInput {
 export function buildBrief({ ask, profile, summary }: BriefInput): Brief {
   const hideMoves = ask.job === 'hint';
   const cheap = CHEAP_JOBS.includes(ask.job);
+  // A move that isn't the Lesson's, which the Player may try again: like a Hint, the brief keeps
+  // the answer back, so it has none of the Engine's moves in the position, only the move and the replies to it.
+  const keepBack = ask.lesson?.isLessonMove === false;
   // The move's own candidate line can differ from the line after the move: the move's facts come from the latter.
-  const candidates = briefCandidates(ask.fen, ask.candidates, MAX_CANDIDATES, (c, i) =>
-    c.uci === ask.move?.uci || (cheap && i > 0) ? {} : explained(ask.fen, c.uci, c.pv.slice(1), c.score, hideMoves),
-  );
+  const candidates = keepBack
+    ? []
+    : briefCandidates(ask.fen, ask.candidates, MAX_CANDIDATES, (c, i) =>
+        c.uci === ask.move?.uci || (cheap && i > 0) ? {} : explained(ask.fen, c.uci, c.pv.slice(1), c.score, hideMoves),
+      );
   // The moves the Player's question names: marked among the candidates, or added after them,
   // graded against the Engine's best move as the candidates are.
-  const asked = ask.asked ?? [];
+  const asked = keepBack ? [] : (ask.asked ?? []);
   for (const c of candidates) if (asked.some((a) => a.uci === c.uci)) c.asked = true;
   const others = asked.filter((a) => !candidates.some((c) => c.uci === a.uci));
   const extra = briefCandidates(ask.fen, others, others.length, (a) => explained(ask.fen, a.uci, a.pv.slice(1), a.score, hideMoves), ask.candidates[0]);
   candidates.push(...extra.map((c) => ({ ...c, asked: true as const })));
   // The tempting moves (ADR 0011): marked among the candidates and on the move, the rest listed
   // apart, graded against the Engine's best move as the candidates are.
-  const tempting = ask.tempting ?? [];
+  const tempting = keepBack ? [] : (ask.tempting ?? []);
   for (const c of candidates) if (tempting.some((t) => t.uci === c.uci)) c.tempting = true;
   const unlisted = tempting.filter((t) => t.uci !== ask.move?.uci && !candidates.some((c) => c.uci === t.uci));
   const temptingOthers = briefCandidates(ask.fen, unlisted, unlisted.length, (t) => explained(ask.fen, t.uci, t.pv.slice(1), t.score, hideMoves), ask.candidates[0]);
@@ -188,14 +199,17 @@ export function buildBrief({ ask, profile, summary }: BriefInput): Brief {
   const threat = threatOf(ask);
   if (threat) brief.threat = threat;
   if (ask.lesson) {
+    // Kept back, the notes and the other moves' popularity would name the Lesson's move.
+    const popular = keepBack ? ask.lesson.popularity.filter((p) => p.san === brief.move?.san) : ask.lesson.popularity;
     brief.lesson = {
       opening: clip(ask.lesson.opening, MAX_LESSON_NAME),
-      notes: clip(ask.lesson.notes, MAX_NOTES),
-      popularity: ask.lesson.popularity
+      notes: keepBack ? '' : clip(ask.lesson.notes, MAX_NOTES),
+      popularity: popular
         .slice(0, 5)
         // A move in SAN is at most 7 characters (exd8=Q+); a longer name from the client is clipped.
         .map((p) => `${clip(p.san, 8)} ${Math.round(p.percent)}%`)
         .join(', '),
+      ...(keepBack ? { isLessonMove: false as const } : {}),
     };
   }
   const focus = ask.lessonFocus;

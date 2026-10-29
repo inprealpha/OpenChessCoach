@@ -4,15 +4,16 @@
   // next Lesson only says where to go next. With about sixty Lessons, links at the top jump to a track.
   import { SIDE_NAMES } from '@chess-coach/shared/chess';
   import { LEVEL_NAMES, suggestNext, TRACK_NAMES, type CatalogueItem, type Suggestion } from '@chess-coach/shared/content/course';
-  import { COURSE_LEVELS, TRACKS, type Track } from '@chess-coach/shared/content/lessons';
+  import { bandFor, COURSE_LEVELS, TRACKS, type Track } from '@chess-coach/shared/content/lessons';
   import { lessonCatalogue } from '../lib/content.ts';
   import { lessonProgress, lessonStatus } from '../lib/lesson-progress.svelte.ts';
   import { profile } from '../lib/profile.svelte.ts';
   import { router } from '../lib/router.svelte.ts';
 
   const progress = lessonProgress();
-  const level = $derived(profile.profile?.level ?? 'beginner');
-  const suggestion = $derived(suggestNext(lessonCatalogue, progress.list, level));
+  /** The Player's band: their level, or the band of their linked rating (ADR 0012). */
+  const band = $derived(bandFor(profile.player.level, profile.player.rating));
+  const suggestion = $derived(suggestNext(lessonCatalogue, progress.list, profile.player));
 
   const tracks = TRACKS.map((track) => {
     const items = lessonCatalogue.filter((l) => l.track === track);
@@ -27,10 +28,14 @@
   const status = (l: CatalogueItem) => lessonStatus(progress.list, l.id, l.decisions);
   const completeIn = (items: CatalogueItem[]) => items.filter((l) => progress.list.some((p) => p.lessonId === l.id && p.completed)).length;
 
-  /** "Opening code C54 · as White · 7 decisions": an opening's code and colour, then how many choices the Lesson asks for. */
+  /**
+   * "Opening code C54 · as White · 7 decisions": an opening's code and colour, then how many choices
+   * the Lesson asks for, unless the Player has started it and the status says "2 of 7 decisions".
+   */
   function about(l: CatalogueItem): string {
     const opening = l.kind === 'opening' ? [l.eco && `Opening code ${l.eco}`, `as ${SIDE_NAMES[l.side]}`].filter(Boolean) : [];
-    return [...opening, `${l.decisions} decisions`].join(' · ');
+    const started = progress.list.some((p) => p.lessonId === l.id && !p.completed);
+    return [...opening, ...(started ? [] : [`${l.decisions} decisions`])].join(' · ');
   }
 
   /** One line on why this Lesson comes next. */
@@ -40,7 +45,7 @@
       const p = progress.list.find((x) => x.lessonId === l.id);
       return `You started this Lesson and have made ${p?.step ?? 0} of its ${l.decisions} decisions.`;
     }
-    if (s.why === 'first') return level !== 'beginner' && l.level !== 'beginner' ? 'Start here. At your level you can skip the beginner Lessons.' : 'Start here.';
+    if (s.why === 'first') return band !== 'beginner' && l.level !== 'beginner' ? 'Start here. At your level you can skip the beginner Lessons.' : 'Start here.';
     if (s.why === 'ready') return 'You have done the Lessons it builds on.';
     return 'It comes next in the order of the Lessons.';
   }

@@ -4,7 +4,7 @@ import { INITIAL_FEN, makeFen, parseFen } from 'chessops/fen';
 import { makeSan, parseSan } from 'chessops/san';
 import type { Setup } from 'chessops/setup';
 import { SquareSet } from 'chessops/squareSet';
-import { makeSquare, makeUci, parseSquare, parseUci } from 'chessops/util';
+import { makeSquare, makeUci, opposite, parseSquare, parseUci } from 'chessops/util';
 import { COLORS, type Color, type Role, type Square } from 'chessops/types';
 
 export { INITIAL_FEN };
@@ -216,6 +216,31 @@ export function outcomeOfLine(startFen: string, moves: readonly { fenAfter: stri
 
 export function isCheck(fen: string): boolean {
   return positionFromFen(fen).isCheck();
+}
+
+/**
+ * Why a move the Player tried isn't legal, in the words a beginner needs, when the reason is about
+ * their own king: the king would be in check on its new square, the king is in check and the move
+ * doesn't get it out, or the piece is pinned to the king. Undefined for a legal move and for any
+ * other reason, such as a piece that doesn't move that way.
+ */
+export function illegalReason(fen: string, from: string, to: string): string | undefined {
+  const pos = positionFromFen(fen);
+  const f = parseSquare(from);
+  const t = parseSquare(to);
+  if (f === undefined || t === undefined) return undefined;
+  const piece = pos.board.get(f);
+  const ctx = pos.ctx();
+  if (!piece || piece.color !== pos.turn || ctx.king === undefined || pos.dests(f, ctx).has(t)) return undefined;
+  // Where the piece could go if its king didn't matter: any other square breaks how the piece moves.
+  if (!pos.dests(f, { ...ctx, king: undefined }).has(t)) return undefined;
+  if (piece.role === 'king') return `Your king can’t go to ${to}: it would be in check there.`;
+  if (ctx.checkers.nonEmpty()) return 'Your king is in check, and that move doesn’t get it out of check.';
+  // Not in check, so the move uncovers an attack on the king: the piece behind it is the pinner.
+  const pinner = pos.kingAttackers(ctx.king, opposite(pos.turn), pos.board.occupied.without(f).with(t)).without(t).first();
+  const by = pinner === undefined ? undefined : pos.board.get(pinner);
+  if (pinner === undefined || !by) return undefined;
+  return `Your ${piece.role} on ${from} is pinned to your king by the ${by.role} on ${makeSquare(pinner)}: moving it would put your king in check.`;
 }
 
 /** FEN without the move counters, used as a key for positions reached by any move order. */

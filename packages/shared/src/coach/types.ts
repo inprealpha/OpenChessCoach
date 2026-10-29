@@ -100,6 +100,13 @@ export interface CoachAsk {
     notes: string;
     popularity: { san: string; percent: number }[];
     finalTurn: boolean;
+    /**
+     * Whether the move is the one the Lesson teaches at this decision. When it is not, the Player
+     * may try again, so the brief keeps back the Lesson's move and the Engine's best move, as a
+     * Hint keeps back every move: no candidates, no notes, and only the move's own popularity.
+     * A client that doesn't send it gets the brief as before.
+     */
+    isLessonMove?: boolean;
   };
   /**
    * During a Lesson, on every Coach call (a Lesson turn, a Hint, a Why Question): the Lesson's name,

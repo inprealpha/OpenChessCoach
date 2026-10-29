@@ -555,6 +555,44 @@ test('an illegal move is refused on the board', async ({ paired, app }) => {
   await expect(paired.getByRole('list', { name: 'Moves' }).getByRole('button')).toHaveCount(0);
 });
 
+test('an illegal move says why when the reason is the Player’s own king: in check, moving into check, or pinned', async ({ paired, app }) => {
+  const at = async (fen: string) => {
+    await paired.goto(`${app.url}/#/learn`);
+    await paired.goto(`${app.url}/#/board?fen=${encodeURIComponent(fen)}`);
+    await expect(board(paired, 'Chess board')).toHaveAttribute('data-fen', fen);
+  };
+  const status = paired.getByRole('status').filter({ hasText: /king|legal/ });
+  // Black's rook on e8 checks the white king: a pawn move doesn't get it out, and e2 is still in check.
+  await at('4r1k1/8/8/8/8/8/P7/4K3 w - - 0 1');
+  await play(paired, 'a2a3');
+  await expect(status).toHaveText('Your king is in check, and that move doesn’t get it out of check.');
+  await play(paired, 'e1e2');
+  await expect(status).toHaveText('Your king can’t go to e2: it would be in check there.');
+  // The knight on e2 shields its king from the rook, so it can't move off the file.
+  await at('4r1k1/8/8/8/8/8/4N3/4K3 w - - 0 1');
+  await play(paired, 'e2c3');
+  await expect(status).toHaveText('Your knight on e2 is pinned to your king by the rook on e8: moving it would put your king in check.');
+  // Any other reason is about how the piece moves: the plain line.
+  await play(paired, 'e2e4');
+  await expect(status).toHaveText('That move isn’t legal.');
+  await expect(paired.getByRole('list', { name: 'Moves' }).getByRole('button')).toHaveCount(0);
+});
+
+test('the king castles when the Player clicks it and then its own rook, as on Lichess', async ({ paired, app }) => {
+  const fen = 'r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R w KQkq - 0 1';
+  await paired.goto(`${app.url}/#/board?fen=${encodeURIComponent(fen)}`);
+  await expect(board(paired, 'Chess board')).toHaveAttribute('data-fen', fen);
+  await play(paired, 'e1h1');
+  const moves = paired.getByRole('list', { name: 'Moves' }).getByRole('button');
+  await expect(moves).toHaveCount(1);
+  await expect(moves.nth(0)).toHaveAccessibleName(/ O-O(, \w+)?$/);
+  await expect(board(paired, 'Chess board')).toHaveAttribute('data-fen', playUci(fen, 'e1g1')!.fenAfter);
+  // Black's king to its rook on a8: castles queenside.
+  await play(paired, 'e8a8');
+  await expect(board(paired, 'Chess board')).toHaveAttribute('data-fen', playUci(playUci(fen, 'e1g1')!.fenAfter, 'e8c8')!.fenAfter);
+  await expect(moves.nth(1)).toHaveAccessibleName(/ O-O-O(, \w+)?$/);
+});
+
 test('a click on the other side’s piece names the side to move, capitalised', async ({ paired, app }) => {
   await paired.goto(`${app.url}/#/board`);
   await square(paired, 'e7').click();

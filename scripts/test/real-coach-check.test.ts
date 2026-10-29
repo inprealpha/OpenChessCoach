@@ -111,6 +111,18 @@ describe('the real-Coach check', () => {
     ]);
   });
 
+  it('fails a reply that gives away the Lesson’s move the brief keeps back, in its text, moves or arrows', () => {
+    // 2. Nf3 was not the Lesson's move, 2. exd5 was: the brief keeps exd5 back.
+    const keptBack: Partial<Brief> = { job: 'lesson-turn', candidates: [], lesson: { opening: 'Scandinavian', notes: '', popularity: '', isLessonMove: false } };
+    const hidden = [{ uci: 'e4d5', san: 'exd5' }];
+    const reply = (r: Partial<CoachReply>) => checkCall({ job: 'lesson-turn', brief: { ...brief, ...keptBack }, raw }, { ...good, moves: [], arrows: [], ...r }, terms, hidden);
+    expect(reply({ text: 'Nf3 leaves the e4 pawn hanging: dxe4 takes it. Try another move.', moves: ['d5e4'] }).problems).toEqual([]);
+    const gives = 'the reply gives away exd5, which the brief keeps back';
+    expect(reply({ text: 'Nf3 leaves the pawn hanging.', arrows: [{ from: 'e4', to: 'd5', brush: 'green' }] }).problems).toContain(gives);
+    expect(reply({ text: 'Nf3 leaves the pawn hanging.', moves: ['e4d5'] }).problems).toContain(gives);
+    expect(reply({ text: 'Take back first with exd5.' }).problems).toEqual(['the text names exd5, which is not in the brief', gives]);
+  });
+
   it('passes a run whose calls only have warnings, and counts them in the posted status', () => {
     const call = (warnings: string[], problems: string[] = []): CallVerdict => ({ job: 'why', words: 30, maxWords: 150, problems, warnings });
     expect(summarize([call([]), call([])])).toEqual({ ok: true, description: '2 Coach calls passed the structural checks' });

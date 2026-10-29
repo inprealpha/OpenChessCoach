@@ -43,6 +43,13 @@ Rules you must follow:
   it their Goal. Neither is a fact about this position: the Engine's facts still decide what is true.
   When a move doesn't fit the key idea, explain it from its facts, and never stretch a fact to fit
   the key idea. A Hint may point to the key idea, but still names no move.
+- When lesson.isLessonMove is false, the Player's move is not the move this Lesson teaches, and they
+  may try another move: the brief leaves out the Lesson's move and the Engine's best move on purpose,
+  so there are no candidates and no Lesson notes. Never name, draw or hint at any other move the
+  Player could play in fen. With a Move Grade of Inaccuracy or worse, say why the move fails: what it does and
+  what it allows, from its "does" and "result", the replies and the threat. With Best or Good, say
+  plainly that it is a sound move but not the one this Lesson is teaching, and you may say why it is
+  fine. End by inviting them to try another move or to continue with the Lesson's move.
 - A move with tempting: true, and each move in tempting, is a move many players at the Player's
   level would reach for in fen. The Engine graded each one like its candidates, with a line, "does"
   and "result"; those it didn't list are in tempting. Call it a move many players would reach for
@@ -122,7 +129,7 @@ const JOB_INSTRUCTIONS: Record<CoachJob, string> = {
   'review-moment':
     'This is one key moment of a Review of the Player\'s finished game. Say what the Player\'s move did wrong, what the Engine\'s better options were, and why they are better.',
   'lesson-turn':
-    'This is one decision in a Lesson: an opening, a Theme such as a fork or a pin, a basic endgame, or a way of thinking during a game, such as a blunder check, a plan or the opening principles (lesson.opening names it). The Player chose "move" (and may have typed their reasoning as "question"). Say why the move is good or bad, mention how often players at their level choose each option (the popularity list, when there is one), what the opponent\'s options are next (the replies), and what complications it creates. Outside an opening Lesson, name the idea the position shows. Use the Lesson notes. End by inviting them to continue, or to retry if the Move Grade is Inaccuracy or worse.',
+    'This is one decision in a Lesson: an opening, a Theme such as a fork or a pin, a basic endgame, or a way of thinking during a game, such as a blunder check, a plan or the opening principles (lesson.opening names it). The Player chose "move" (and may have typed their reasoning as "question"). Say why the move is good or bad, mention how often players at their level choose each option (the popularity list, when there is one), what the opponent\'s options are next (the replies), and what complications it creates. Outside an opening Lesson, name the idea the position shows. Use the Lesson notes. End by inviting them to continue, or to retry if the Move Grade is Inaccuracy or worse; when lesson.isLessonMove is false, follow its rule instead.',
   hint: 'Give a Hint: point the Player towards the idea behind the Engine\'s best move without naming or showing any move. If a tempting move is graded Mistake or Blunder, you may warn about that trap in words, still without naming or hinting at the move.',
   live: 'This is Live Coaching during an Engine Game. The Player\'s move was graded Mistake or Blunder. In one or two short sentences, say what it allows and what the Engine preferred.',
 };

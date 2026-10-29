@@ -20,7 +20,7 @@
   ];
 
   const progress = lessonProgress();
-  const suggestion = $derived(suggestNext(lessonCatalogue, progress.list, profile.profile?.level ?? 'beginner'));
+  const suggestion = $derived(suggestNext(lessonCatalogue, progress.list, profile.player));
 </script>
 
 <section class="screen learn">

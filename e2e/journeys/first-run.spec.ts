@@ -11,7 +11,7 @@ const SYMBOL = { Best: '★', Good: '✓', Inaccuracy: '?!', Mistake: '?', Blund
 
 const lessonIndex = JSON.parse(readFileSync(new URL('../../data/lessons/index.json', import.meta.url), 'utf8')) as CatalogueItem[];
 /** The first Lesson the app suggests to a new Player at this level. */
-const firstLesson = (level: 'beginner' | 'casual' | 'club') => suggestNext(lessonIndex, [], level)?.lesson.name;
+const firstLesson = (level: 'beginner' | 'casual' | 'club') => suggestNext(lessonIndex, [], { level, rating: null })?.lesson.name;
 
 test.describe('a fresh install', () => {
   test.use({ seed: 'empty' });

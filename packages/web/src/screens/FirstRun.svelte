@@ -6,6 +6,7 @@
   // starts at the second step.
   import { tick } from 'svelte';
   import { suggestNext } from '@chess-coach/shared/content/course';
+  import { BANDS } from '@chess-coach/shared/content/lessons';
   import { PLAYER_LEVELS, type PlayerLevel, type RatingSite } from '@chess-coach/shared/protocol';
   import PhonePairing from '../components/PhonePairing.svelte';
   import { api, ApiError } from '../lib/api.svelte.ts';
@@ -23,8 +24,11 @@
   const SUGGESTED = ['Learn the Italian Game', 'Learn the Caro-Kann Defence', 'Stop blundering pieces'];
 
   let level = $state<PlayerLevel>(profile.profile?.level ?? 'beginner');
-  /** Where the Lessons start for the level chosen above: a casual or club Player skips the beginner ones. */
-  const firstLesson = $derived(suggestNext(lessonCatalogue, profile.profile?.lessons ?? [], level)?.lesson);
+  /**
+   * Where the Lessons start for the level chosen above: a casual or club Player skips the beginner
+   * ones, unless a rating linked before says otherwise (ADR 0012).
+   */
+  const firstLesson = $derived(suggestNext(lessonCatalogue, profile.profile?.lessons ?? [], { level, rating: profile.profile?.rating ?? null })?.lesson);
   let site = $state<RatingSite | ''>('');
   let username = $state('');
   let goals = $state<string[]>(profile.profile?.goals.length ? [...profile.profile.goals] : ['']);
@@ -162,7 +166,8 @@
       {#each PLAYER_LEVELS as l (l)}
         <label class="option">
           <input type="radio" name="level" value={l} bind:group={level} />
-          {LEVEL_TEXT[l]}
+          <!-- The band each level stands for, so a Player who plays online can place themselves. -->
+          <span>{LEVEL_TEXT[l]} <span class="muted">Online: rated {BANDS[l].label}.</span></span>
         </label>
       {/each}
     </fieldset>

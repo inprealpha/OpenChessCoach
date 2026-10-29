@@ -11,10 +11,12 @@ in the top right of every screen.
 ## Sub-features
 
 - Welcome screen ("Welcome to your chess Coach"): on a desktop with no phone paired, first the
-  phone (`phone.md`), then ("Step 2 of 2") level, optional site username, Goals. "Where to
-  begin" names the first Lesson for the level picked ("At your level, the first Lesson is Attack
-  and defence." for a beginner, "Candidate moves and thinking ahead" for casual or club), from
-  `suggestNext` in `packages/shared/src/content/course.ts`.
+  phone (`phone.md`), then ("Step 2 of 2") level, optional site username, Goals. Each level names
+  the online band it stands for ("Online: rated under 1400.", "1400 to 1799", "1800 and above").
+  "Where to begin" names the first Lesson for the level picked ("At your level, the first Lesson
+  is Attack and defence." for a beginner, "Candidate moves and thinking ahead" for casual or club),
+  from `suggestNext` in `packages/shared/src/content/course.ts`, which goes by the Player's band: a
+  linked rating's band wins over the level picked.
 - `Start with the Lessons` (opens the Lessons, `#/lessons`) or `Skip to the main menu`.
 - An unknown username (or a site that is limiting requests) shows its error inside the group `Your
   online account (optional)`, under the `Username` box, which takes the focus with

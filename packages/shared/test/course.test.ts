@@ -25,8 +25,10 @@ const CATALOGUE = [
 
 const done = (lessonId: string, updatedAt = '2026-10-01T10:00:00.000Z'): LessonProgress => ({ lessonId, step: 5, completed: true, updatedAt });
 const started = (lessonId: string, step: number, updatedAt = '2026-10-01T10:00:00.000Z'): LessonProgress => ({ lessonId, step, completed: false, updatedAt });
-const suggest = (progress: LessonProgress[], level: PlayerLevel = 'beginner') => {
-  const s = suggestNext(CATALOGUE, progress, level);
+/** A Player with no rating linked, at this level. */
+const at = (level: PlayerLevel, rating: number | null = null) => ({ level, rating });
+const suggest = (progress: LessonProgress[], level: PlayerLevel = 'beginner', rating: number | null = null) => {
+  const s = suggestNext(CATALOGUE, progress, at(level, rating));
   return s && { id: s.lesson.id, why: s.why };
 };
 
@@ -79,6 +81,14 @@ describe('suggestNext', () => {
     }
   });
 
+  it('goes by the band of a linked rating, not the level chosen: a casual Player rated under 1400 starts with the beginner Lessons', () => {
+    expect(suggest([], 'casual', 1250)).toEqual({ id: 'forks', why: 'first' });
+    expect(suggest([], 'club', 1399)).toEqual({ id: 'forks', why: 'first' });
+    // And a beginner whose linked rating is 1400 or more skips them.
+    expect(suggest([], 'beginner', 1400)).toEqual({ id: 'double-attack', why: 'first' });
+    expect(suggest([], 'casual', 1650)).toEqual({ id: 'double-attack', why: 'first' });
+  });
+
   it('does not call a Lesson ready when some of what it builds on is only known from the Player’s level', () => {
     // A casual Player who has done a beginner Lesson by choice: Double attack builds on Forks, which they have not done.
     expect(suggest([done('mate')], 'casual')).toEqual({ id: 'double-attack', why: 'next' });
@@ -87,12 +97,12 @@ describe('suggestNext', () => {
   it('counts a beginner Lesson in the prior knowledge as known for a casual Player, so the Lesson built on it comes first', () => {
     // iA builds on iB, which builds only on a beginner Lesson: iB is ready, iA is not.
     const catalogue = [lesson('b1', 'beginner'), lesson('iA', 'intermediate', ['iB']), lesson('iB', 'intermediate', ['b1'])];
-    expect(suggestNext(catalogue, [], 'casual')).toMatchObject({ lesson: { id: 'iB' }, why: 'first' });
+    expect(suggestNext(catalogue, [], at('casual'))).toMatchObject({ lesson: { id: 'iB' }, why: 'first' });
   });
 
   it('when no Lesson at a casual Player’s level is ready, still suggests one at their level, not a beginner one', () => {
     const circle = [lesson('b1', 'beginner'), lesson('i1', 'intermediate', ['i2']), lesson('i2', 'intermediate', ['i1'])];
-    expect(suggestNext(circle, [], 'casual')).toMatchObject({ lesson: { id: 'i1' }, why: 'first' });
+    expect(suggestNext(circle, [], at('casual'))).toMatchObject({ lesson: { id: 'i1' }, why: 'first' });
   });
 
   it('once a casual Player has finished the intermediate Lessons, suggests the beginner ones they skipped', () => {
@@ -102,15 +112,15 @@ describe('suggestNext', () => {
   it('when no Lesson has its prior knowledge finished, still suggests the first one not finished', () => {
     // Prior knowledge going round in a circle: the data check refuses it, and the suggestion still offers a Lesson.
     const circle = [lesson('a', 'beginner', ['b']), lesson('b', 'beginner', ['a'])];
-    expect(suggestNext(circle, [], 'beginner')).toMatchObject({ lesson: { id: 'a' }, why: 'first' });
+    expect(suggestNext(circle, [], at('beginner'))).toMatchObject({ lesson: { id: 'a' }, why: 'first' });
   });
 
   it('treats prior knowledge that names no Lesson in the catalogue as known', () => {
     const catalogue = [lesson('a', 'beginner'), lesson('b', 'beginner', ['removed']), lesson('c', 'beginner')];
-    expect(suggestNext(catalogue, [done('a')], 'beginner')).toMatchObject({ lesson: { id: 'b' }, why: 'next' });
+    expect(suggestNext(catalogue, [done('a')], at('beginner'))).toMatchObject({ lesson: { id: 'b' }, why: 'next' });
   });
 
   it('suggests nothing from an empty catalogue', () => {
-    expect(suggestNext([], [started('forks', 2)], 'beginner')).toBeUndefined();
+    expect(suggestNext([], [started('forks', 2)], at('beginner'))).toBeUndefined();
   });
 });

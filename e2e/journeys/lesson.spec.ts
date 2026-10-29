@@ -9,16 +9,17 @@
 // or Good). Goals and key ideas are read from the data, never written here.
 import { readFileSync } from 'node:fs';
 import type { Page } from '@playwright/test';
-import { legalMoves, piecesOf } from '../../packages/shared/src/chess.ts';
+import { legalMoves, piecesOf, playUci, sanLine } from '../../packages/shared/src/chess.ts';
+import type { Brief } from '../../packages/shared/src/coach/brief.ts';
 import { LEVEL_NAMES, suggestNext, TRACK_NAMES, type CatalogueItem } from '../../packages/shared/src/content/course.ts';
-import { decisions, TRACKS, type LessonData } from '../../packages/shared/src/content/lessons.ts';
+import { BANDS, decisions, TRACKS, type LessonData } from '../../packages/shared/src/content/lessons.ts';
 import type { LessonProgress } from '../../packages/shared/src/protocol.ts';
 import { coachIdle, coachPanel, connection, expect, fenOf, play, test } from '../fixtures/app.ts';
 
 const index = JSON.parse(readFileSync(new URL('../../data/lessons/index.json', import.meta.url), 'utf8')) as CatalogueItem[];
 const readLesson = (id: string) => JSON.parse(readFileSync(new URL(`../../data/lessons/${id}.json`, import.meta.url), 'utf8')) as LessonData;
-/** The seed's Player is at casual level. */
-const SEED_LEVEL = 'casual';
+/** The seed's Player is at casual level, with no rating linked. */
+const SEED_PLAYER = { level: 'casual', rating: null } as const;
 const finished = (lessonId: string): LessonProgress => ({ lessonId, step: 1, completed: true, updatedAt: '2026-10-01T10:00:00.000Z' });
 
 /** Saves a Lesson's progress straight into the desktop's database, as if played on another device. */
@@ -35,6 +36,7 @@ interface CoachAskFrame {
   type: string;
   job: string;
   moveUci?: string;
+  lesson?: { isLessonMove?: boolean };
   lessonFocus?: unknown;
 }
 
@@ -137,8 +139,15 @@ for (const id of ['caro-kann', 'pins', 'queen-mate']) {
     // What the Lesson taught, part by part, once it is over.
     for (const part of lesson.parts) await expect(done.getByRole('list', { name: 'What you learned' })).toContainText(part.keyIdea);
     // The next Lesson is the one the app suggests now this one is complete, not the next in its track.
-    const next = suggestNext(index, [finished(id)], SEED_LEVEL)!.lesson;
-    await expect(done.getByRole('link', { name: `Next Lesson: ${next.name}` })).toHaveAttribute('href', `#/lesson/${next.id}`);
+    const next = suggestNext(index, [finished(id)], SEED_PLAYER)!.lesson;
+    await expect(done.getByRole('link', { name: `Your next Lesson: ${next.name}` })).toHaveAttribute('href', `#/lesson/${next.id}`);
+    // And the next Lesson in its own track, when that is another one.
+    const inTrack = index.slice(index.findIndex((l) => l.id === id) + 1).find((l) => l.track === lesson.track);
+    const trackLink = done.getByRole('link', { name: /^Next in / });
+    if (inTrack && inTrack.id !== next.id) await expect(trackLink).toHaveAccessibleName(`Next in ${TRACK_NAMES[lesson.track].name}: ${inTrack.name}`);
+    else await expect(trackLink).toHaveCount(0);
+    // The finished board keeps no arrow from the last decision.
+    await expect(paired.getByRole('group', { name: boardName }).getByRole('img', { name: /^Arrow / })).toHaveCount(0);
     await expect.poll(async () => (await app.rows<{ step: number; completed: number }>('lesson_progress'))[0]).toMatchObject({
       step: steps.length,
       completed: 1,
@@ -238,20 +247,38 @@ test('a double click on Start the Lesson shows the first prompt once', async ({ 
   await expect(paired.getByLabel('Coach conversation').getByText('What are your options here?')).toHaveCount(1);
 });
 
-test('Show the move adds the Engine’s move to the Coach log once per decision', async ({ paired, app }) => {
+test('Show the move names the Lesson’s move in the Coach log once per decision, and the summary counts it apart', async ({ paired, app }) => {
+  const lesson = readLesson('italian-game');
+  const { node } = decisions(lesson)[0]!;
   await paired.goto(`${app.url}/#/lesson/italian-game`);
   await paired.getByRole('button', { name: 'Start the Lesson' }).click();
   await paired.getByRole('button', { name: 'Hint' }).click();
   await coachIdle(paired);
-  const engineMove = paired.getByLabel('Coach conversation').getByText(/The Engine’s move here is/);
+  // The Lesson's move, never another the Engine likes as well: the Player would be told it isn't the Lesson's.
+  const shown = paired.getByLabel('Coach conversation').getByText(`The Lesson’s move here is ${node.mainSan}.`);
   await paired.getByRole('button', { name: 'Show the move' }).click();
-  await expect(engineMove).toHaveCount(1);
+  await expect(shown).toHaveCount(1);
   await paired.getByRole('button', { name: 'Show the move' }).click();
   await paired.getByRole('button', { name: 'Show the move' }).dblclick();
-  // Long enough for another analysis from the desktop to have come back.
-  await paired.waitForTimeout(1000);
-  await expect(engineMove).toHaveCount(1);
-  await expect(paired.getByRole('img', { name: /^Arrow \w\d to \w\d \(green\)$/ })).toHaveCount(1);
+  await paired.waitForTimeout(500);
+  await expect(shown).toHaveCount(1);
+  await expect(paired.getByRole('img', { name: `Arrow ${node.main.slice(0, 2)} to ${node.main.slice(2, 4)} (green)` })).toHaveCount(1);
+});
+
+test('a move played after Show the move is counted apart from the Player’s own first tries', async ({ paired, app }) => {
+  const lesson = readLesson('skewers');
+  const steps = decisions(lesson);
+  const last = steps.length - 1;
+  saveProgress(app, 'skewers', last, false);
+  await paired.goto(`${app.url}/#/lesson/skewers`);
+  await paired.getByRole('button', { name: 'Resume the Lesson' }).click();
+  await paired.getByRole('button', { name: 'Hint' }).click();
+  await coachIdle(paired);
+  await paired.getByRole('button', { name: 'Show the move' }).click();
+  await play(paired, steps[last]!.node.main, `${lesson.name} Lesson board`);
+  await coachIdle(paired);
+  await paired.getByRole('button', { name: 'Continue', exact: true }).click();
+  await expect(paired.getByRole('region', { name: 'Lesson complete' })).toContainText('Your first try at the one decision you played this time: 1 after Show the move.');
 });
 
 test('an endgame Lesson ends with a position to play out against the Engine', async ({ paired, app }) => {
@@ -263,7 +290,8 @@ test('an endgame Lesson ends with a position to play out against the Engine', as
   await expect(paired.getByRole('group', { name: boardName })).toHaveAttribute('data-fen', playOut.fen);
   await expect(paired.getByRole('region', { name: 'Play it out' })).toContainText('Checkmate the black king.');
   await expect(paired.getByRole('meter', { name: /^Winning Chances bar/ })).toHaveCount(0);
-  await play(paired, 'b1b5', boardName);
+  // Any move of the Player's: the position comes from the data.
+  await play(paired, legalMoves(playOut.fen)[0]!, boardName);
   // The Engine answers for Black; the count is the Player's own moves.
   await expect(paired.getByText('1 move played')).toBeVisible();
   await paired.getByRole('button', { name: 'Start again' }).click();
@@ -323,8 +351,11 @@ test('on a phone, a Theme Lesson keeps the Move Grade and Continue under the boa
 
 test('on a 375px phone, each Lesson’s example in the thinking box shows whole', async ({ paired, app }) => {
   await paired.setViewportSize({ width: 375, height: 812 });
-  // One Lesson for each example: every Theme and endgame with its own, and one opening and one endgame without.
-  const ids = ['forks', 'pins', 'skewers', 'discovered-attacks', 'back-rank-mate', 'removing-the-defender', 'king-and-pawn', 'rook-endgames', 'italian-game', 'queen-mate'];
+  // One Lesson for each example: every Lesson with its own, and an opening, an endgame and a Theme without.
+  const ids = [
+    ...['forks', 'pins', 'pinned-pieces', 'skewers', 'discovered-attacks', 'back-rank-mate', 'mating-patterns', 'removing-the-defender', 'king-and-pawn', 'rook-endgames'],
+    ...['candidate-moves', 'simple-plans', 'italian-game', 'queen-mate', 'double-attack'],
+  ];
   for (const id of ids) {
     await paired.goto(`${app.url}/#/lesson/${id}`);
     await paired.getByRole('button', { name: 'Start the Lesson' }).click();
@@ -349,7 +380,7 @@ test('on a 375px phone, each Lesson’s example in the thinking box shows whole'
 });
 
 test('the catalogue shows the four tracks and the Player’s next Lesson; finishing it moves the next Lesson on', async ({ paired, app }) => {
-  const first = suggestNext(index, [], SEED_LEVEL)!.lesson;
+  const first = suggestNext(index, [], SEED_PLAYER)!.lesson;
   await paired.goto(`${app.url}/#/lessons`);
   const suggested = paired.getByRole('region', { name: 'Your next Lesson' });
   await expect(suggested.getByRole('heading', { name: first.name })).toBeVisible();
@@ -397,9 +428,9 @@ test('the catalogue shows the four tracks and the Player’s next Lesson; finish
   await paired.getByRole('button', { name: /^Continue/ }).click();
 
   // Finished: the Lesson complete region and the catalogue both move on to the same next Lesson.
-  const then = suggestNext(index, [finished(first.id)], SEED_LEVEL)!.lesson;
+  const then = suggestNext(index, [finished(first.id)], SEED_PLAYER)!.lesson;
   expect(then.id).not.toBe(first.id);
-  await expect(paired.getByRole('region', { name: 'Lesson complete' }).getByRole('link', { name: `Next Lesson: ${then.name}` })).toHaveAttribute(
+  await expect(paired.getByRole('region', { name: 'Lesson complete' }).getByRole('link', { name: `Your next Lesson: ${then.name}` })).toHaveAttribute(
     'href',
     `#/lesson/${then.id}`,
   );
@@ -409,7 +440,7 @@ test('the catalogue shows the four tracks and the Player’s next Lesson; finish
     .toBe(1);
   await paired.goto(`${app.url}/#/lessons`);
   await expect(suggested.getByRole('heading', { name: then.name })).toBeVisible();
-  const why = suggestNext(index, [finished(first.id)], SEED_LEVEL)!.why;
+  const why = suggestNext(index, [finished(first.id)], SEED_PLAYER)!.why;
   expect(why === 'ready' || why === 'next').toBe(true);
   await expect(suggested).toContainText(why === 'ready' ? 'You have done the Lessons it builds on.' : 'It comes next in the order of the Lessons.');
   await expect(paired.getByRole('link', { name: `${first.name}: Complete` })).toBeVisible();
@@ -434,11 +465,13 @@ test('the Lesson intro says what the Player will learn and links the Lessons it 
   await expect(about.getByRole('heading', { name: 'What you will learn' })).toBeVisible();
   await expect(about).toContainText(lesson.goal);
 
-  const builtOn = about.getByRole('list', { name: 'It builds on' });
+  const builtOn = about.getByRole('list', { name: 'It builds on these Lessons' });
   const prior = index.find((l) => l.id === lesson.priorKnowledge[0])!;
   const item = builtOn.getByRole('listitem').filter({ has: paired.getByRole('link', { name: prior.name, exact: true }) });
   await expect(item.getByRole('link')).toHaveAttribute('href', `#/lesson/${prior.id}`);
-  await expect(item).toContainText('Not started');
+  // The seed's Player is casual: a beginner Lesson counts as known for them (ADR 0012), so it is optional, not one to do first.
+  await expect(item).toContainText(prior.level === 'beginner' ? 'Optional at your level' : 'Not started');
+  await expect(about).not.toContainText('do those first');
   // Never a gate: the Lesson starts whether or not the Player has done what it builds on.
   await expect(about.getByRole('button', { name: 'Start the Lesson' })).toBeEnabled();
   saveProgress(app, prior.id, prior.decisions, true);
@@ -523,7 +556,7 @@ test('on a phone, the catalogue and a Lesson intro fit the screen, with the next
   await expect(cards).toHaveCount(index.length);
   expect(await cards.evaluateAll((links) => links.filter((a) => a.getBoundingClientRect().right > innerWidth).length)).toBe(0);
 
-  const first = suggestNext(index, [], SEED_LEVEL)!.lesson;
+  const first = suggestNext(index, [], SEED_PLAYER)!.lesson;
   await suggested.getByRole('link', { name: `Start ${first.name}` }).click();
   await expect(paired.getByRole('region', { name: 'About this Lesson' })).toBeVisible();
   expect(await paired.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
@@ -553,6 +586,194 @@ test('How moves are written explains the notation, closed until the Player opens
   await expect(takes).toBeHidden();
   await help.click();
   await expect(takes).toBeVisible();
+});
+
+/** The Lesson turns' briefs, as the desktop sent them to the Coach. */
+async function lessonBriefs(app: { rows<T>(table: string): Promise<T[]> }): Promise<Brief[]> {
+  return (await app.rows<{ job: string; brief: string }>('coach_calls')).filter((c) => c.job === 'lesson-turn').map((c) => JSON.parse(c.brief) as Brief);
+}
+
+test('a poor move that isn’t the Lesson’s keeps the answer back, and Continue with the Lesson’s move then shows it with its note', async ({ paired, app }) => {
+  const lesson = readLesson('italian-game');
+  const steps = decisions(lesson);
+  const { node } = steps[0]!;
+  const boardName = `${lesson.name} Lesson board`;
+  await paired.goto(`${app.url}/#/lesson/${lesson.id}`);
+  const sent = await watchCoachAsks(paired);
+  await play(paired, 'g2g4', boardName);
+  await coachIdle(paired);
+  const choice = paired.getByRole('region', { name: 'Your choice' });
+  await expect(choice).toContainText('You played g4');
+  await expect(choice.getByTitle(/^Move Grade: (Inaccuracy|Mistake|Blunder)$/)).toBeVisible();
+  // Nothing on the screen gives the answer away: no popularity table, which would list it, no green
+  // arrow, no Lesson note, and no Why Question until the Player chooses how to go on.
+  await expect(choice.getByRole('table')).toHaveCount(0);
+  await expect(paired.getByRole('group', { name: boardName }).getByRole('img', { name: /\(green\)$/ })).toHaveCount(0);
+  if (node.notes) await expect(paired.getByText(node.notes.text)).toHaveCount(0);
+  await expect(paired.getByLabel('Your Why Question')).toHaveCount(0);
+  await expect(choice).not.toContainText('Key idea:');
+  await expect(paired.getByLabel('Coach conversation')).toContainText('Try another move, or continue with the Lesson’s move.');
+  // The page says the move isn't the Lesson's, and the desktop's brief keeps the answer back.
+  expect(sent.filter((f) => f.job === 'lesson-turn').map((f) => f.lesson?.isLessonMove)).toEqual([false]);
+  const [brief] = await lessonBriefs(app);
+  expect(brief?.candidates).toEqual([]);
+  expect(brief?.lesson).toMatchObject({ notes: '', isLessonMove: false });
+  await expect(choice.getByRole('button', { name: 'Try another move' })).toBeVisible();
+
+  // Continue with the Lesson's move shows the move, its note and how often players choose it, before moving on.
+  await choice.getByRole('button', { name: 'Continue with the Lesson’s move' }).click();
+  const shown = paired.getByRole('region', { name: 'The Lesson’s move' });
+  await expect(shown).toContainText(`The Lesson continues with ${node.mainSan}, the move it teaches.`);
+  if (node.notes) await expect(shown).toContainText(node.notes.text);
+  if (node.popular.casual.length) await expect(shown.getByRole('table', { name: 'Move popularity at your level' })).toBeVisible();
+  await expect(paired.getByRole('group', { name: boardName })).toHaveAttribute('data-fen', playUci(node.fen, node.main)!.fenAfter);
+  await expect(paired.getByRole('group', { name: boardName }).getByRole('img', { name: /^(Best|Inaccuracy|Mistake|Blunder) on / })).toHaveCount(0);
+  await expect(paired.getByLabel('Your Why Question')).toBeVisible();
+  const go = shown.getByRole('button', { name: 'Continue', exact: true });
+  await expect(go).toBeFocused();
+  await go.click();
+  await expect(paired.getByText(`Decision 2 of ${steps.length}`)).toBeVisible();
+  await expect(paired.getByRole('group', { name: boardName })).toHaveAttribute('data-fen', steps[1]!.node.fen);
+  // Showing the Lesson's move costs no Coach call.
+  expect(await lessonBriefs(app)).toHaveLength(1);
+});
+
+test('a sound move that isn’t the Lesson’s says so plainly, and the Player can try another', async ({ paired, app }) => {
+  const lesson = readLesson('italian-game');
+  const { node } = decisions(lesson)[0]!;
+  const boardName = `${lesson.name} Lesson board`;
+  const other = node.popular.casual.find((p) => p.uci !== node.main)!;
+  await paired.goto(`${app.url}/#/lesson/${lesson.id}`);
+  await paired.getByRole('button', { name: 'Start the Lesson' }).click();
+  await play(paired, other.uci, boardName);
+  await coachIdle(paired);
+  const choice = paired.getByRole('region', { name: 'Your choice' });
+  await expect(choice).toContainText(`You played ${other.san}`);
+  await expect(choice.getByTitle(/^Move Grade: (Best|Good)$/)).toBeVisible();
+  await expect(choice).toContainText('A sound move, but not the one this Lesson is teaching.');
+  // How often players at the Player's level choose this move, but not the table, which would show the Lesson's.
+  await expect(choice).toContainText(`${other.percent}% of players rated ${BANDS.casual.label} play ${other.san} here.`);
+  await expect(choice.getByRole('table')).toHaveCount(0);
+  await expect(paired.getByLabel('Coach conversation')).toContainText('a sound move, but not the one this Lesson is teaching');
+  expect((await lessonBriefs(app))[0]?.candidates).toEqual([]);
+  await expect(choice.getByRole('button', { name: 'Continue with the Lesson’s move' })).toBeVisible();
+
+  // Try another move: the keyboard carries on from the board.
+  await choice.getByRole('button', { name: 'Try another move' }).click();
+  await expect(paired.getByRole('group', { name: boardName })).toBeFocused();
+  await play(paired, node.main, boardName);
+  await coachIdle(paired);
+  await expect(choice).toContainText(`You played ${node.mainSan}`);
+  await expect(choice.getByRole('table', { name: 'Move popularity at your level' })).toBeVisible();
+  await expect(choice.getByRole('button', { name: 'Continue', exact: true })).toBeVisible();
+  await expect(choice.getByRole('button', { name: 'Try another move' })).toHaveCount(0);
+  // The Lesson's own move gets the whole brief, notes and all.
+  const [, lessonMove] = await lessonBriefs(app);
+  expect(lessonMove?.candidates.length).toBeGreaterThan(0);
+  expect(lessonMove?.lesson).not.toHaveProperty('isLessonMove');
+  if (node.notes) expect(lessonMove?.lesson?.notes).toBe(node.notes.text);
+});
+
+test('after a part’s first decision, its text folds away as how the part began, and the Position says what the opponent replied', async ({ paired, app }) => {
+  const lesson = readLesson('piece-values');
+  const steps = decisions(lesson);
+  const boardName = `${lesson.name} Lesson board`;
+  // A decision after the first of its part, and the part's first decision before it.
+  const later = steps.findIndex((s, i) => i > 0 && steps[i - 1]!.partIndex === s.partIndex);
+  const { part, node } = steps[later]!;
+  expect(part.text).toBeTruthy();
+  saveProgress(app, lesson.id, later - 1, false);
+  await paired.goto(`${app.url}/#/lesson/${lesson.id}`);
+  await paired.getByRole('button', { name: /^(Resume|Start) the Lesson$/ }).click();
+  const position = paired.getByRole('region', { name: 'Position' });
+  await expect(position.getByText(part.text!)).toBeVisible();
+  await expect(position.getByText('How this part began')).toHaveCount(0);
+  await play(paired, steps[later - 1]!.node.main, boardName);
+  await coachIdle(paired);
+  await paired.getByRole('button', { name: 'Continue', exact: true }).click();
+
+  await expect(paired.getByText(`Decision ${later + 1} of ${steps.length}`)).toBeVisible();
+  await expect(position).toContainText(part.title);
+  const replied = sanLine(part.fen, part.mainLine.slice(0, node.ply)).at(-1)!;
+  await expect(position).toContainText(`${part.side === 'white' ? 'Black' : 'White'} replied ${replied}.`);
+  // The text describes the position the part started from: folded away until the Player opens it.
+  await expect(position.getByText(part.text!)).toBeHidden();
+  await position.getByText('How this part began').click();
+  await expect(position.getByText(part.text!)).toBeVisible();
+
+  // A part where the Player changes sides says so.
+  const turned = steps.findIndex((s) => s.partIndex > 0 && lesson.parts[s.partIndex - 1]!.side !== s.part.side && steps.find((x) => x.partIndex === s.partIndex) === s);
+  if (turned >= 0) {
+    saveProgress(app, lesson.id, turned, false);
+    await paired.goto(`${app.url}/#/learn`);
+    await paired.goto(`${app.url}/#/lesson/${lesson.id}`);
+    await paired.getByRole('button', { name: /^(Resume|Start) the Lesson$/ }).click();
+    await expect(position).toContainText(`You play ${steps[turned]!.part.side === 'white' ? 'White' : 'Black'} in this part.`);
+  }
+});
+
+test('a Lesson and its play-out link back to the Lessons, on the intro and while playing', async ({ paired, app }) => {
+  await paired.goto(`${app.url}/#/lesson/queen-mate`);
+  const back = paired.getByRole('link', { name: 'Back to the Lessons' });
+  await expect(back).toHaveAttribute('href', '#/lessons');
+  await paired.getByRole('button', { name: 'Start the Lesson' }).click();
+  await expect(paired.getByText('Decision 1 of')).toBeVisible();
+  await expect(back).toBeVisible();
+  await back.click();
+  await expect(paired.getByRole('heading', { name: 'Lessons', level: 1 })).toBeVisible();
+  await paired.goto(`${app.url}/#/play-out/queen-mate`);
+  await paired.getByRole('link', { name: 'Back to the Lessons' }).click();
+  await expect(paired.getByRole('heading', { name: 'Lessons', level: 1 })).toBeVisible();
+});
+
+test('on a phone with Safari’s bars (390×664), the Hint and Continue need no scrolling, even with the popularity table', async ({ paired, app }) => {
+  const lesson = readLesson('italian-game');
+  const { node } = decisions(lesson)[0]!;
+  const boardName = `${lesson.name} Lesson board`;
+  await paired.setViewportSize({ width: 390, height: 664 });
+  await paired.goto(`${app.url}/#/lesson/${lesson.id}`);
+  await paired.getByRole('button', { name: 'Start the Lesson' }).click();
+  // While choosing, the Hint sits under the board, and the arrow Show the move draws is in view with it.
+  await expect(paired.getByRole('button', { name: 'Hint' })).toBeInViewport({ ratio: 1 });
+  await paired.getByRole('button', { name: 'Hint' }).click();
+  await coachIdle(paired);
+  await paired.getByRole('button', { name: 'Show the move' }).click();
+  await expect(paired.getByRole('group', { name: boardName })).toBeInViewport({ ratio: 0.9 });
+  await expect(paired.getByRole('img', { name: `Arrow ${node.main.slice(0, 2)} to ${node.main.slice(2, 4)} (green)` })).toHaveCount(1);
+  // After the choice, Continue comes before the popularity table.
+  await play(paired, node.main, boardName);
+  await coachIdle(paired);
+  await expect(paired.getByRole('table', { name: 'Move popularity at your level' })).toBeVisible();
+  const atTop = () => paired.evaluate(() => scrollTo(0, 0));
+  await atTop();
+  await expect(paired.getByRole('button', { name: 'Continue', exact: true })).toBeInViewport({ ratio: 1 });
+  await paired.getByRole('button', { name: 'Continue', exact: true }).click();
+  // And after a sound move that isn't the Lesson's, with the most to say, both ways on.
+  const second = decisions(lesson)[1]!.node;
+  await play(paired, second.popular.casual.find((p) => p.uci !== second.main)!.uci, boardName);
+  await coachIdle(paired);
+  await expect(paired.getByRole('region', { name: 'Your choice' })).toContainText('A sound move, but not the one this Lesson is teaching.');
+  await atTop();
+  await expect(paired.getByRole('button', { name: 'Try another move' })).toBeInViewport({ ratio: 1 });
+  await expect(paired.getByRole('button', { name: 'Continue with the Lesson’s move' })).toBeInViewport({ ratio: 1 });
+  // Then the Lesson's move, its note and Continue.
+  await paired.getByRole('button', { name: 'Continue with the Lesson’s move' }).click();
+  await atTop();
+  await expect(paired.getByRole('region', { name: 'The Lesson’s move' }).getByRole('button', { name: 'Continue', exact: true })).toBeInViewport({ ratio: 1 });
+  expect(await paired.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+});
+
+test('a casual Player whose linked rating is under 1400 is suggested the beginner Lessons first', async ({ paired, app }) => {
+  app.app.db.prepare(`UPDATE profile SET rating = 1250, rating_site = 'lichess', rating_username = 'CoachVerify' WHERE id = 1`).run();
+  const first = suggestNext(index, [], { level: 'casual', rating: 1250 })!.lesson;
+  expect(first.level).toBe('beginner');
+  await paired.goto(`${app.url}/#/lessons`);
+  // The page read the Player Profile when it paired, before the rating was linked.
+  await paired.reload();
+  const suggested = paired.getByRole('region', { name: 'Your next Lesson' });
+  await expect(suggested.getByRole('heading', { name: first.name })).toBeVisible();
+  await expect(suggested).toContainText('Start here.');
+  await expect(suggested).not.toContainText('skip the beginner Lessons');
 });
 
 /** How many king moves apart two squares are. */

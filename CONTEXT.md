@@ -82,7 +82,7 @@ _Avoid_: Prerequisite, requirement
 
 **Key idea**:
 The one idea a part of a Lesson shows, in a line. Outside the opening Lessons it never names the move the Player has to find.
-_Avoid_: Takeaway, summary
+_Avoid_: Takeaway, moral
 
 **Theme**:
 A recurring pattern that wins material, gives mate or saves a game, such as a fork, a pin, a back-rank mate or a perpetual check, taught in a Lesson and practised in Puzzles. The Themes Track starts with the basics every Theme builds on: attack and defence, check, and mate.

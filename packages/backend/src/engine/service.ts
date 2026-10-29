@@ -51,6 +51,7 @@ function lessonOf(value: unknown): NonNullable<CoachAsk['lesson']> {
     typeof value.opening !== 'string' ||
     typeof value.notes !== 'string' ||
     typeof value.finalTurn !== 'boolean' ||
+    (value.isLessonMove !== undefined && typeof value.isLessonMove !== 'boolean') ||
     !Array.isArray(value.popularity) ||
     !value.popularity.every(isEntry)
   ) {
@@ -58,7 +59,15 @@ function lessonOf(value: unknown): NonNullable<CoachAsk['lesson']> {
   }
   // A share of games is 0 to 100.
   const popularity = (value.popularity as { san: string; percent: number }[]).map(({ san, percent }) => ({ san: plainText(san), percent: Math.min(100, Math.max(0, percent)) }));
-  return { lessonId: value.lessonId, opening: plainText(value.opening), notes: plainText(value.notes), popularity, finalTurn: value.finalTurn };
+  return {
+    lessonId: value.lessonId,
+    opening: plainText(value.opening),
+    notes: plainText(value.notes),
+    popularity,
+    finalTurn: value.finalTurn,
+    // Whether the move is the Lesson's: when it isn't, the brief keeps the answer back.
+    ...(typeof value.isLessonMove === 'boolean' ? { isLessonMove: value.isLessonMove } : {}),
+  };
 }
 
 /**

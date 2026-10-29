@@ -145,7 +145,21 @@ export function templateReply(brief: Brief): CoachRawReply {
     case 'lesson-turn': {
       const popular = brief.lesson?.popularity ? ` Players at your level play: ${brief.lesson.popularity}.` : '';
       const grade = brief.move?.grade ?? 'Good';
-      const verdict = grade === 'Best' || grade === 'Good' ? 'a sound choice' : 'not the best idea here';
+      const sound = grade === 'Best' || grade === 'Good';
+      if (brief.lesson?.isLessonMove === false) {
+        // Not the Lesson's move: what it does and what it allows, and never the answer, which the
+        // brief keeps back.
+        text = `You chose ${brief.move?.san ?? 'a move'}, graded ${grade}: ${sound ? 'a sound move, but not the one this Lesson is teaching' : 'not the best idea here'}.${popular}`;
+        if (brief.move?.does) text += ` It ${brief.move.does}.`;
+        if (reply) text += ` Your opponent's main option next is ${reply.san}${reply.does ? `, which ${reply.does}` : ''}.`;
+        const idea = brief.focus?.keyIdea;
+        if (idea) text += ` Key idea: ${idea}${/[.!?…]$/.test(idea) ? '' : '.'}`;
+        text += ' Try another move, or continue with the Lesson’s move.';
+        if (brief.move) add(brief.move, sound ? 'blue' : 'red');
+        add(reply, 'yellow');
+        break;
+      }
+      const verdict = sound ? 'a sound choice' : 'not the best idea here';
       text = `What are your options here? You chose ${brief.move?.san ?? 'a move'}, graded ${grade}, which is ${verdict}.${chances(brief)} The Engine's top choice is ${best?.san ?? 'unclear'}.${popular}`;
       if (reply) text += ` Your opponent's main option next is ${reply.san}.`;
       // The Lesson's key idea, so journeys see the focus reached the Coach (ADR 0012).

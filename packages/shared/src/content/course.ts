@@ -1,8 +1,8 @@
 // The course across the four tracks (ADR 0012): the catalogue entry of each Lesson, and which
 // Lesson the app suggests next. Nothing is locked; the suggestion only orders what to do first.
 import type { Side } from '../chess.ts';
-import type { LessonProgress, PlayerLevel } from '../protocol.ts';
-import type { CourseLevel, LessonKind, Track } from './lessons.ts';
+import type { LessonProgress, PlayerLevel, PlayerProfile } from '../protocol.ts';
+import { bandFor, type CourseLevel, type LessonKind, type Track } from './lessons.ts';
 
 /** One Lesson in `data/lessons/index.json`, which lists them in the course's suggested order. */
 export interface CatalogueItem {
@@ -29,9 +29,9 @@ export const TRACK_NAMES: Record<Track, { name: string; text: string }> = {
 
 export const LEVEL_NAMES: Record<CourseLevel, string> = { beginner: 'Beginner', intermediate: 'Intermediate' };
 
-/** Course levels a Player at this level already knows: a casual or club Player skips the beginner Lessons. */
-function knownLevels(level: PlayerLevel): readonly CourseLevel[] {
-  return level === 'beginner' ? [] : ['beginner'];
+/** Course levels a Player in this band already knows: a casual or club Player skips the beginner Lessons. */
+export function knownLevels(band: PlayerLevel): readonly CourseLevel[] {
+  return band === 'beginner' ? [] : ['beginner'];
 }
 
 export interface Suggestion {
@@ -53,10 +53,17 @@ export interface Suggestion {
  *    level, and whose prior knowledge is all finished (or below the Player's level);
  * 3. otherwise the first Lesson not finished and not below the Player's level;
  * 4. otherwise the first Lesson not finished. Undefined when every Lesson is finished.
- * Prior knowledge that names no Lesson in the catalogue counts as known: nothing is locked, and a
- * Lesson must not drop out of the suggestions because one it built on was taken out.
+ * The Player's level is their band, as the popularity tables use it (`bandFor`): the level in the
+ * Player Profile, or the band of their linked rating, so a casual Player rated under 1400 starts
+ * with the beginner Lessons. Prior knowledge that names no Lesson in the catalogue counts as known:
+ * nothing is locked, and a Lesson must not drop out of the suggestions because one it built on was
+ * taken out.
  */
-export function suggestNext(catalogue: readonly CatalogueItem[], progress: readonly LessonProgress[], level: PlayerLevel): Suggestion | undefined {
+export function suggestNext(
+  catalogue: readonly CatalogueItem[],
+  progress: readonly LessonProgress[],
+  player: Pick<PlayerProfile, 'level' | 'rating'>,
+): Suggestion | undefined {
   const levelOf = new Map(catalogue.map((l) => [l.id, l.level]));
   const finished = new Set(progress.filter((p) => p.completed && levelOf.has(p.lessonId)).map((p) => p.lessonId));
   const unfinished = progress
@@ -64,7 +71,7 @@ export function suggestNext(catalogue: readonly CatalogueItem[], progress: reado
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0];
   const started = unfinished && catalogue.find((l) => l.id === unfinished.lessonId);
   if (started) return { lesson: started, why: 'unfinished' };
-  const known = knownLevels(level);
+  const known = knownLevels(bandFor(player.level, player.rating));
   const met = (id: string) => {
     const at = levelOf.get(id);
     return finished.has(id) || at === undefined || known.includes(at);

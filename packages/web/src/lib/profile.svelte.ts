@@ -19,6 +19,11 @@ class ProfileState {
     this.loaded = true;
   }
 
+  /** The Player's level and linked rating: their band (`bandFor`) picks the next Lesson and the popularity tables. */
+  get player(): Pick<PlayerProfile, 'level' | 'rating'> {
+    return { level: this.profile?.level ?? 'beginner', rating: this.profile?.rating ?? null };
+  }
+
   set(p: PlayerProfile): void {
     this.profile = p;
     void store.set('profile', p);

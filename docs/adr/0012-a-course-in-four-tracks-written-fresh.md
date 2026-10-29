@@ -10,6 +10,8 @@ Each Lesson has a learning goal: one or two plain sentences saying what the Play
 
 Every Lesson can be opened at any time. The app suggests one next Lesson: the one the Player started and has not finished, or else the first Lesson in the course order whose prior knowledge the Player has finished. A Player who chose casual or club level in the Player Profile is not sent through the beginner Lessons first: for them, beginner Lessons count as known, also as prior knowledge. Locking would stop a Player who already knows a topic, and the suggestion is enough to guide a Player who doesn't.
 
+The level the suggestion goes by is the Player's band, as for the popularity tables (changed 2026-10-29, the owner's call): the Player Profile's level, or, once a rating is linked, the band the rating falls in (under 1400, 1400 to 1799, 1800 and above). A Player who chose casual but is rated under 1400 starts with the beginner Lessons, which are the habits such a Player most often lacks.
+
 ## Books guide what to teach, never the text
 
 The owner keeps chess books in a private folder outside the repository: the Steps Method trainer manuals, Levy Rozman's two books, and Yasser Seirawan's three books. They are used only to decide which topics to teach, in what order, and what each Lesson should achieve. They are never copied into the repository. Their explanations, notes and examples are never copied or closely paraphrased, and the course does not follow any one book section by section. The repository is public, and the books are not ours to publish.

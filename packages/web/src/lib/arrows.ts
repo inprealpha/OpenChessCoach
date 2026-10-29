@@ -1,8 +1,8 @@
 // Arrows the Board draws besides the Coach's: each with its own color and accessible name.
 import type { GradedMove } from '@chess-coach/shared/analysis';
-import { piecesOf, SIDE_NAMES, type Side } from '@chess-coach/shared/chess';
+import { legalMoves, piecesOf, SIDE_NAMES, turnOf, type Side } from '@chess-coach/shared/chess';
 import type { Arrow } from '@chess-coach/shared/coach/types';
-import type { Threat } from '@chess-coach/shared/threat';
+import { nullMoveFen, type Threat } from '@chess-coach/shared/threat';
 import { GRADE_LOOK } from './grades.ts';
 
 /** An arrow on the board: one of the Coach's (named by its brush), or one with its own color and name. */
@@ -53,4 +53,18 @@ export function reviewArrows(move: GradedMove | undefined): BoardArrow[] {
 export function lessonArrows<A extends { from: string; to: string }>(arrows: readonly A[], fen: string, played: string | undefined, player: Side): A[] {
   const theirs = new Set(piecesOf(fen).filter((p) => p.color !== player).map((p) => p.square));
   return arrows.filter((a) => `${a.from}${a.to}` === played?.slice(0, 4) || theirs.has(a.from));
+}
+
+/**
+ * A Lesson's Coach highlights, filtered like its arrows (`lessonArrows`): the squares of the move on
+ * the board stay, and no square any move of the Player's could go to, which may be where the Lesson's
+ * next move goes. When the Player can't be given the move (the opponent is in check), only the
+ * move's own squares stay.
+ */
+export function lessonHighlights(squares: readonly string[], fen: string, played: string | undefined, player: Side): string[] {
+  const own = new Set(played ? [played.slice(0, 2), played.slice(2, 4)] : []);
+  const playerToMove = turnOf(fen) === player ? fen : nullMoveFen(fen);
+  if (!playerToMove) return squares.filter((sq) => own.has(sq));
+  const reached = new Set(legalMoves(playerToMove).map((uci) => uci.slice(2, 4)));
+  return squares.filter((sq) => own.has(sq) || !reached.has(sq));
 }

@@ -1,10 +1,13 @@
 // Feature map: Offline mode. With the desktop unreachable, the app still opens from its cache,
-// an Engine Game can be played, and the finished game is saved once the desktop is back.
-import { mkdtempSync, rmSync } from 'node:fs';
+// an Engine Game can be played, and the finished game is saved once the desktop is back. A Lesson
+// finished offline shows as complete in the Lessons, and its progress is sent when the desktop is back.
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { startVerifyInstance, type VerifyInstance } from '../../packages/backend/src/verify/instance.ts';
 import type { Page } from '@playwright/test';
+import { suggestNext, type CatalogueItem } from '../../packages/shared/src/content/course.ts';
+import { decisions, type LessonData } from '../../packages/shared/src/content/lessons.ts';
 import { board, coachPanel, connection, engineGate, expect, fenOf, play, resign, storedOnDevice, test } from '../fixtures/app.ts';
 
 /** Keeps the app's WebSockets within reach, so a journey can drop the connection as a Wi-Fi blip would. */
@@ -463,4 +466,55 @@ test('a browser without AbortSignal.timeout (Safari 15) still connects to the de
   });
   await page.goto(`${app.url}/#pair=${app.code}`);
   await expect(connection(page)).toHaveText(/Desktop connected/);
+});
+
+test('a Lesson finished offline shows as complete in the Lessons, and its progress reaches the desktop once it is back', async ({ page }) => {
+  const index = JSON.parse(readFileSync(new URL('../../data/lessons/index.json', import.meta.url), 'utf8')) as CatalogueItem[];
+  // The seed's Player is at casual level, with no rating linked.
+  const player = { level: 'casual', rating: null } as const;
+  const first = suggestNext(index, [], player)!.lesson;
+  const then = suggestNext(index, [{ lessonId: first.id, step: first.decisions, completed: true, updatedAt: '' }], player)!.lesson;
+  const steps = decisions(JSON.parse(readFileSync(new URL(`../../data/lessons/${first.id}.json`, import.meta.url), 'utf8')) as LessonData);
+  const dataDir = mkdtempSync(join(tmpdir(), 'chess-coach-offline-'));
+  let app: VerifyInstance = await startVerifyInstance({ dataDir });
+  const port = app.app.port;
+  const completed = () => app.app.db.prepare('SELECT completed FROM lesson_progress WHERE lesson_id = ?').get(first.id) as { completed: number } | undefined;
+  try {
+    await page.goto(`${app.url}/#pair=${app.code}`);
+    await expect(connection(page)).toHaveText(/Desktop connected/);
+    await page.evaluate(() => navigator.serviceWorker.ready);
+    await page.reload();
+    await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true);
+
+    // One decision from the end, then the desktop goes away while the Lesson is open.
+    app.app.db
+      .prepare('INSERT INTO lesson_progress (lesson_id, step, completed, updated_at) VALUES (?, ?, 0, ?)')
+      .run(first.id, steps.length - 1, '2026-10-01T10:00:00.000Z');
+    await page.goto(`${app.url}/#/lessons`);
+    await expect(page.getByRole('link', { name: `${first.name}: ${steps.length - 1} of ${first.decisions} decisions` })).toBeVisible();
+    await page.goto(`${app.url}/#/lesson/${first.id}`);
+    await expect(page.getByRole('button', { name: 'Resume the Lesson' })).toBeVisible();
+    await app.stop({ keepData: true });
+    await expect(connection(page)).toHaveText(/Desktop offline/);
+    await page.getByRole('button', { name: 'Resume the Lesson' }).click();
+    await play(page, steps[steps.length - 1]!.node.main, `${first.name} Lesson board`);
+    await page.getByRole('button', { name: /^Continue/ }).click();
+    await expect(page.getByRole('region', { name: 'Lesson complete' })).toBeVisible();
+
+    // The Lessons count it complete and move the next Lesson on, though the desktop hasn't heard.
+    await page.goto(`${app.url}/#/lessons`);
+    await expect(connection(page)).toHaveText(/Desktop offline/);
+    await expect(page.getByRole('link', { name: `${first.name}: Complete` })).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Your next Lesson' }).getByRole('heading', { name: then.name })).toBeVisible();
+
+    // Back: the progress is sent with no Lesson opened.
+    app = await startVerifyInstance({ dataDir, port });
+    await expect(connection(page)).toHaveText(/Desktop connected/, { timeout: 30_000 });
+    await expect.poll(() => completed()?.completed).toBe(1);
+    await expect.poll(() => storedOnDevice(page, 'lessonProgressUnsent')).toEqual([]);
+    await expect(page.getByRole('link', { name: `${first.name}: Complete` })).toBeVisible();
+  } finally {
+    await app.stop({ keepData: true });
+    rmSync(dataDir, { recursive: true, force: true });
+  }
 });

@@ -32,13 +32,13 @@
   import CoachPanel from '../components/CoachPanel.svelte';
   import GradeBadge from '../components/GradeBadge.svelte';
   import { api } from '../lib/api.svelte.ts';
-  import { lessonArrows } from '../lib/arrows.ts';
+  import { lessonArrows, lessonHighlights } from '../lib/arrows.ts';
   import { CoachThread } from '../lib/coach.svelte.ts';
   import { lessonCatalogue, loadLesson } from '../lib/content.ts';
   import { gradeForCoach } from '../lib/engine/engine.svelte.ts';
   import { Line } from '../lib/game.svelte.ts';
   import { gradeCount, gradeMark } from '../lib/grades.ts';
-  import { lessonProgress, lessonStatus } from '../lib/lesson-progress.svelte.ts';
+  import { lessonProgress, lessonStatus, saveLessonProgress } from '../lib/lesson-progress.svelte.ts';
   import { profile } from '../lib/profile.svelte.ts';
   import { store } from '../lib/storage.ts';
 
@@ -254,15 +254,10 @@
     else coach.say(`${SIDE_NAMES[d.part.side]} to move. What are your options here? Play the move you would choose.`);
   }
 
+  /** Keeps the step to resume from on this device, and saves the progress on the desktop or, while it can't be reached, until it is back. */
   async function saveProgress(s: number, completed: boolean): Promise<void> {
     await store.set(`lesson:${lessonId}`, completed ? 0 : s);
-    if (api.state === 'online') {
-      try {
-        await api.request('lessons.update', { lessonId, step: s, completed });
-      } catch {
-        // progress is kept locally and sent next time
-      }
-    }
+    await saveLessonProgress(lessonId, s, completed);
   }
 
   async function onmove(uci: string): Promise<void> {
@@ -456,12 +451,15 @@
     }
   }
 
+  /** The side the Player plays in this part. */
+  const playerSide = $derived(part?.side ?? lesson?.side ?? 'white');
   /** The Coach's arrows, less any other move for the Player (`lessonArrows`), then Show the move's. */
   const arrows = $derived.by(() => {
-    const side = part?.side ?? lesson?.side ?? 'white';
-    const shown = lessonArrows(coach.arrows, line.fen, line.lastMove?.uci, side);
+    const shown = lessonArrows(coach.arrows, line.fen, line.lastMove?.uci, playerSide);
     return hintArrow ? [...shown, hintArrow] : shown;
   });
+  /** The Coach's highlights, less any square a move of the Player's could go to (`lessonHighlights`). */
+  const highlights = $derived(lessonHighlights(coach.highlights, line.fen, line.lastMove?.uci, playerSide));
 </script>
 
 <section class="screen">
@@ -582,7 +580,7 @@
             movable={phase === 'decide' && !grading && !coach.busy ? part.side : 'none'}
             lastMove={line.lastMove ? { from: line.lastMove.uci.slice(0, 2), to: line.lastMove.uci.slice(2, 4) } : undefined}
             {arrows}
-            highlights={coach.highlights}
+            {highlights}
             gradeMark={phase === 'feedback' && result ? gradeMark(line.lastMove, result.grade) : undefined}
             {onmove}
             label={`${lesson.name} Lesson board`}

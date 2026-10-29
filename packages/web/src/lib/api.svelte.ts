@@ -320,6 +320,7 @@ export const api = new Api();
 /** Reads the code from a pairing link (#pair=CODE) and takes it out of the address bar. */
 function takePairCode(): string | null {
   const code = new URLSearchParams(location.hash.replace(/^#/, '')).get('pair');
-  if (code) history.replaceState(null, '', `${location.pathname}#/`);
+  // The step keeps its state: the router knows the step by it (lib/router.svelte.ts).
+  if (code) history.replaceState(history.state, '', `${location.pathname}#/`);
   return code;
 }

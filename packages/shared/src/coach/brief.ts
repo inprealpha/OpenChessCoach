@@ -1,6 +1,6 @@
 // Builds the compact, fresh brief every Coach call starts from (ADR 0004).
 import type { Candidate } from '../analysis.ts';
-import { playUci, turnOf, type Side } from '../chess.ts';
+import { outcomeOf, playUci, turnOf, type Side } from '../chess.ts';
 import type { Score } from '../engine.ts';
 import { formatScore, gradeMove, type MoveGrade } from '../grader.ts';
 import { finishedScore, type PositionScore } from '../position-score.ts';
@@ -310,7 +310,7 @@ export function briefCandidates(
       san: played.san,
       uci: played.uci,
       evaluation: formatScore(c.score),
-      grade: gradeMove({ best: best.score, played: c.score, isTopMove: c.uci === best.uci }).grade,
+      grade: gradeMove({ best: best.score, played: c.score, isTopMove: c.uci === best.uci, givesMate: outcomeOf(played.fenAfter)?.reason === 'checkmate' }).grade,
       line,
       ...explain(c, i),
     });

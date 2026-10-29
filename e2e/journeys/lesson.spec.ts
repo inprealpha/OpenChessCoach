@@ -794,6 +794,31 @@ test('a Lesson and its play-out link back to the Lessons, on the intro and while
   await expect(paired.getByRole('heading', { name: 'Lessons', level: 1 })).toBeVisible();
 });
 
+test('the browser’s Back from a Lesson returns to the place in the Lessons the Player had scrolled to', async ({ paired, app }) => {
+  // The last Lesson in the list, far down the Lessons; its intro is much shorter than that.
+  const last = index.at(-1)!;
+  await paired.goto(`${app.url}/#/lessons`);
+  // The router puts the place back itself. With the browser's own restoring off, as on a browser that
+  // puts it back on the screen still showing (and cuts it short there), it still comes back.
+  await paired.evaluate(() => (history.scrollRestoration = 'manual'));
+  const link = paired.locator(`a.item[href="#/lesson/${last.id}"]`);
+  await link.scrollIntoViewIfNeeded();
+  const y = await paired.evaluate(() => scrollY);
+  expect(y).toBeGreaterThan(1000);
+  await link.click();
+  await expect(paired.getByRole('heading', { name: last.name, level: 1 })).toBeVisible();
+  // A new step opens at the top of its screen.
+  expect(await paired.evaluate(() => scrollY)).toBe(0);
+  await paired.goBack();
+  await expect(paired.getByRole('heading', { name: 'Lessons', level: 1 })).toBeAttached();
+  await expect.poll(() => paired.evaluate(() => scrollY)).toBe(y);
+  await expect(link).toBeInViewport();
+  // Forward returns to the Lesson at its top.
+  await paired.goForward();
+  await expect(paired.getByRole('heading', { name: last.name, level: 1 })).toBeVisible();
+  expect(await paired.evaluate(() => scrollY)).toBe(0);
+});
+
 test('on a phone with Safari’s bars (390×664), the Hint and Continue need no scrolling, even with the popularity table', async ({ paired, app }) => {
   const lesson = readLesson('italian-game');
   const { node } = decisions(lesson)[0]!;

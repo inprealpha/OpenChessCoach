@@ -8,7 +8,8 @@ A PR gets many pushes while its author works, and a judge on every push would sp
 - **Marking a PR ready for review starts it**, and only after CI (Checks and Player journeys) passes on that commit: a red PR has nothing to judge.
 - **A push voids the verdict but starts no run.** The new commit gets a pending `Verdict` from the cheap labelling workflow, so it can't merge, and a new run starts only when someone with write access comments `/verdict` or runs the workflow by hand.
 - **Docs, tests and process files need no judge.** A PR that changes only the files in `.github/no-verdict-paths.txt` passes at once. Any other file needs a verdict, so a new kind of file is judged until someone lists it.
-- **Runs are limited**: one at a time per PR, at most 3 judge runs per PR and 10 per day (counted by their Verdict comments), and the owner gets a Telegram notice when one starts.
+- **Runs are limited**: one at a time per commit (a second trigger while one is judging does nothing), at most 3 judge runs per PR and 10 per day (counted by their Verdict comments), at most $5 per run at API prices (`--max-budget-usd`), and the owner gets a Telegram notice when the judge starts.
+- **Nothing is spent on a PR that can't be judged.** A PR with merge conflicts gets no CI, so the gate says so at once instead of waiting. A PR that gets a new commit, closes or goes back to draft while the gate waits for CI is not judged. A failed real-Coach check is a `FAIL` already, so Opus doesn't run.
 
 ## Considered options
 

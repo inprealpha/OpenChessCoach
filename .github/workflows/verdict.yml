@@ -40,6 +40,8 @@ env:
   # Limits on Claude usage: judge runs (counted by their Verdict comments), per PR and per UTC day.
   MAX_RUNS_PER_PR: 3
   MAX_RUNS_PER_DAY: 10
+  # The most one judge run may spend, at API prices; Claude Code stops the run there.
+  JUDGE_BUDGET_USD: 5
   CLAUDE_CODE_VERSION: 2.1.310
   PR: ${{ github.event.pull_request.number || github.event.issue.number || inputs.pr }}
   REPO: ${{ github.repository }}
@@ -80,7 +82,16 @@ jobs:
 
       - name: Find the PR and decide whether it needs a judge
         id: pr
+        env:
+          COMMENT: ${{ github.event.comment.body }}
         run: |
+          if [ "$GITHUB_EVENT_NAME" = issue_comment ]; then
+            # The comment's first word must be /verdict itself, not /verdicts or /verdict-please.
+            line=${COMMENT%%$'\n'*}
+            line=${line%$'\r'}
+            word=${line%%[[:space:]]*}
+            if [ "$word" != /verdict ]; then echo "The comment doesn't start with /verdict."; exit 0; fi
+          fi
           mkdir -p "$IN"
           gh api "repos/$REPO/pulls/$PR" > "$IN/pull.json"
           sha=$(jq -r .head.sha "$IN/pull.json")
@@ -92,9 +103,25 @@ jobs:
             node scripts/verdict.ts --status error --sha "$sha" --description "PRs from forks aren't judged here: the owner checks them by hand"
             exit 0
           fi
-          current=$(gh api "repos/$REPO/commits/$sha/status" --jq '[.statuses[] | select(.context == "Verdict")][0].state // ""')
+          status=$(gh api "repos/$REPO/commits/$sha/status" \
+            --jq '([.statuses[] | select(.context == "Verdict")][0] // {}) | "\(.state // "")|\(.updated_at // "")|\(.description // "")"')
+          current=${status%%|*}
+          rest=${status#*|}
+          updated=${rest%%|*}
+          description=${rest#*|}
           if [ "$GITHUB_EVENT_NAME" = pull_request_target ] && { [ "$current" = success ] || [ "$current" = failure ]; }; then
             echo "Commit $sha already has a verdict ($current); comment /verdict to judge it again."; exit 0
+          fi
+          # One run per commit at a time: a run that is judging posted "Judging…". A run takes at
+          # most about 2.5 hours (the three jobs' time limits), so an older "Judging…" is stale.
+          if [ "$current" = pending ] && [ "${description#Judging}" != "$description" ] \
+            && [ $(( $(date -u +%s) - $(date -u -d "$updated" +%s) )) -lt 10800 ]; then
+            echo "A run has been judging $sha since $updated: not starting another."; exit 0
+          fi
+          # GitHub runs no CI on a PR with merge conflicts, so waiting for it would wait the full 40 minutes.
+          if [ "$(jq -r .mergeable "$IN/pull.json")" = false ]; then
+            node scripts/verdict.ts --status error --sha "$sha" --description "This PR has merge conflicts, so CI can't run: resolve them, then comment /verdict"
+            exit 0
           fi
           gh api "repos/$REPO/pulls/$PR/files" --paginate --jq '.[] | .filename, (.previous_filename // empty)' | sort -u > "$IN/changed.txt"
           node scripts/protected-paths.ts --needs-verdict < "$IN/changed.txt" > "$IN/judged.txt"
@@ -123,20 +150,12 @@ jobs:
             echo "coach=yes" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Tell the owner a run started
+      - name: Mark the commit as being judged
         if: steps.pr.outputs.go == 'yes'
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           SHA: ${{ steps.pr.outputs.sha }}
         run: |
           node scripts/verdict.ts --status pending --sha "$SHA" --description "Judging this commit: waiting for CI, then the judge drives the app"
-          if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ]; then
-            title=$(jq -r .title "$IN/pull.json")
-            curl -fsS -o /dev/null "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
-              --data-urlencode "chat_id=$TELEGRAM_CHAT_ID" \
-              --data-urlencode "text=OpenChessCoach: a Verdict run started for PR #$PR ($title). $RUN_URL" || echo "Telegram notice failed."
-          fi
 
       - name: Wait for CI to pass on this commit
         id: ci
@@ -163,6 +182,19 @@ jobs:
             sleep 30
           done
           node scripts/verdict.ts --status error --sha "$SHA" --description "CI didn't finish within 40 minutes: comment /verdict to try again"
+
+      - name: Tell the owner the judge is starting
+        if: steps.ci.outputs.green == 'yes'
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ]; then
+            title=$(jq -r .title "$IN/pull.json")
+            curl -fsS -o /dev/null "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
+              --data-urlencode "chat_id=$TELEGRAM_CHAT_ID" \
+              --data-urlencode "text=OpenChessCoach: the judge is starting on PR #$PR ($title). $RUN_URL" || echo "Telegram notice failed."
+          fi
 
   judge:
     name: Judge
@@ -204,11 +236,22 @@ jobs:
           node-version: 22
 
       - name: Gather what the judge reads
+        id: gather
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p "$IN" "$OUT/evidence"
           gh api "repos/$REPO/pulls/$PR" > "$IN/pull.json"
+          # The gate may have waited up to 40 minutes for CI: judge only if the PR is still what it saw.
+          if [ "$(jq -r .head.sha "$IN/pull.json")" != "$SHA" ]; then
+            echo "The PR got a new commit before the judge started: comment /verdict to judge the new one" > "$OUT/skipped"
+          elif [ "$(jq -r .state "$IN/pull.json")" != open ]; then
+            echo "The PR was closed before the judge started" > "$OUT/skipped"
+          elif [ "$(jq -r .draft "$IN/pull.json")" = true ]; then
+            echo "The PR went back to draft before the judge started: mark it ready again" > "$OUT/skipped"
+          fi
+          if [ -s "$OUT/skipped" ]; then cat "$OUT/skipped"; exit 0; fi
+          echo "fresh=yes" >> "$GITHUB_OUTPUT"
           git -C pr diff --name-only "origin/$BASE...$SHA" > "$IN/changed.txt"
           git -C pr diff "origin/$BASE...$SHA" > "$IN/diff.patch"
           jq --rawfile changed "$IN/changed.txt" \
@@ -220,20 +263,28 @@ jobs:
           done
 
       - name: Install the app, the browser and Claude Code
+        if: steps.gather.outputs.fresh == 'yes'
         working-directory: pr
         run: |
           npm ci
           npx playwright install --with-deps chromium
           npm run build -w @chess-coach/web
+          # A ready copy of the base branch, for the judge's before-and-after comparison.
+          git worktree add --detach ../base "origin/$BASE"
+          (cd ../base && npm ci && npx playwright install chromium && npm run build -w @chess-coach/web)
           npm install -g "@anthropic-ai/claude-code@$CLAUDE_CODE_VERSION"
           claude --version
 
       - name: Real-Coach check, for a PR that touches the Coach
         # The same check the desktop runs (.claude/skills/real-coach-check/), on the owner's token.
         # Once more if it couldn't run (exit 2, such as a Think deeper timeout). The post job posts it.
-        if: needs.gate.outputs.coach == 'yes'
+        # Running out of time here mustn't stop the judge, so the step can fail without failing the job.
+        # A failed check (exit 1) is a FAIL already, so the judge doesn't run.
+        id: coach
+        if: steps.gather.outputs.fresh == 'yes' && needs.gate.outputs.coach == 'yes'
         working-directory: pr
         timeout-minutes: 25
+        continue-on-error: true
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
         run: |
@@ -245,20 +296,30 @@ jobs:
             [ "$code" != 2 ] && break
           done
           echo "$code" > "$OUT/real-coach/exit"
+          echo "exit=$code" >> "$GITHUB_OUTPUT"
           tail -n 5 "$OUT/real-coach/log.txt"
           { jq '{ok, description, calls: [.calls[] | select((.problems | length) > 0 or (.warnings | length) > 0)]}' "$OUT/real-coach/result.json" 2>/dev/null \
             || cat "$OUT/real-coach/log.txt"; } > "$IN/real-coach.txt"
+          if [ "$code" = 1 ]; then
+            jq -n --arg d "$(jq -r '.description // ""' "$OUT/real-coach/result.json")" \
+              '{verdict: "FAIL", summary: ("The real-Coach check failed, so the judge didn'"'"'t run: " + $d)}' > "$OUT/verdict.json"
+            { printf '### Problems\n\nThe real-Coach check failed on this commit, so the judge did not run. The calls with problems or warnings:\n\n```json\n'
+              cat "$IN/real-coach.txt"; printf '\n```\n'; } > "$OUT/verdict.md"
+          fi
 
       - name: The judge
+        if: steps.gather.outputs.fresh == 'yes' && steps.coach.outputs.exit != '1'
         working-directory: pr
         timeout-minutes: 55
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
         run: |
-          prompt=$(sed -e "s|{{PR}}|$PR|g" -e "s|{{SHA}}|$SHA|g" -e "s|{{BASE}}|$BASE|g" -e "s|{{IN}}|$IN|g" -e "s|{{OUT}}|$OUT|g" ../trusted/.github/verdict-prompt.md)
+          prompt=$(sed -e "s|{{PR}}|$PR|g" -e "s|{{SHA}}|$SHA|g" -e "s|{{BASE}}|$BASE|g" -e "s|{{IN}}|$IN|g" -e "s|{{OUT}}|$OUT|g" \
+            -e "s|{{BASE_DIR}}|$GITHUB_WORKSPACE/base|g" ../trusted/.github/verdict-prompt.md)
           # Marks a run that used Claude, so it counts toward the limits.
           touch "$OUT/started"
-          claude -p "$prompt" --model "$JUDGE_MODEL" --dangerously-skip-permissions --output-format json < /dev/null > "$OUT/claude.json" \
+          claude -p "$prompt" --model "$JUDGE_MODEL" --max-budget-usd "$JUDGE_BUDGET_USD" \
+            --dangerously-skip-permissions --output-format json < /dev/null > "$OUT/claude.json" \
             || echo "Claude Code exited with $?"
           jq '{subtype, num_turns, duration_ms, total_cost_usd, is_error}' "$OUT/claude.json" || true
 

@@ -165,7 +165,9 @@ Open the PR as a draft (`gh pr create --draft`) and keep fixing on it until your
 skill's evidence and CI are all done. Then mark it ready (`gh pr ready`): that starts the Verdict
 (ADR 0013), a judge that didn't write the PR and checks it in its own copy of the app. It costs the
 owner's Claude limits, so mark the PR ready once, on the final commit. A push afterwards leaves the
-new commit without a Verdict; when you've fixed what a `FAIL` found, comment `/verdict` once.
+new commit without a Verdict; when you've fixed what a `FAIL` found, comment `/verdict` once. A PR
+opened as ready rather than as a draft never starts the judge by itself: comment `/verdict` once,
+on the final commit.
 
 ## 5. Cleanup
 

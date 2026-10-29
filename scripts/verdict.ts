@@ -5,7 +5,8 @@
 // reads as a pass.
 //
 //   node scripts/verdict.ts --post <dir> --pr <n> --sha <sha> --run-url <url>
-//       read <dir>/verdict.json and <dir>/verdict.md, post the status and comment on the PR
+//       read <dir>/verdict.json and <dir>/verdict.md, post the status and comment on the PR; if the
+//       judge job wrote <dir>/skipped instead, post that reason as an error and no comment
 //   node scripts/verdict.ts --status <state> --sha <sha> --description <text> [--context <name>]
 //       post a status the workflow decides on its own (pending, an error, a pass for docs only),
 //       on "Verdict" unless --context names another (the workflow posts "real Coach" this way)
@@ -50,8 +51,13 @@ export function clip(text: string, max = MAX_DESCRIPTION): string {
 /** The status a verdict posts: PASS and PASS+NOTES pass, FAIL fails, no verdict is an error. */
 export function statusFor(verdict: JudgeVerdict | undefined, started = true): { state: StatusState; description: string } {
   if (!verdict && !started) return { state: 'error', description: "The judge didn't start (setting up the app failed): comment /verdict to try again" };
-  if (!verdict) return { state: 'error', description: 'The judge gave no verdict (it crashed or ran out of time): comment /verdict to run it again' };
+  if (!verdict) return { state: 'error', description: 'The judge gave no verdict (it crashed, ran out of time or hit its spending limit): comment /verdict to run it again' };
   return { state: verdict.verdict === 'FAIL' ? 'failure' : 'success', description: clip(`${verdict.verdict}: ${verdict.summary}`) };
+}
+
+/** A judge job that stopped because the PR changed posts its reason as an error, and no comment. */
+export function skippedStatus(reason: string | undefined): { state: StatusState; description: string } | undefined {
+  return reason?.trim() ? { state: 'error', description: clip(reason) } : undefined;
 }
 
 /**
@@ -99,6 +105,13 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
     if (process.argv.includes('--post')) {
       const dir = arg('--post');
       const sha = arg('--sha');
+      // The judge job stopped before judging because the PR changed while the gate waited for CI.
+      const skipped = skippedStatus(read(join(dir, 'skipped')));
+      if (skipped) {
+        postStatus(sha, skipped.state, skipped.description);
+        process.stdout.write(`${skipped.state}: ${skipped.description}\n`);
+        process.exit(0);
+      }
       const verdict = parseVerdict(read(join(dir, 'verdict.json')));
       const started = existsSync(join(dir, 'started'));
       const comment = commentFor(verdict, read(join(dir, 'verdict.md')), sha, arg('--run-url'), started);

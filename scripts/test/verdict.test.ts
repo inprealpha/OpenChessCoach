@@ -1,7 +1,7 @@
 // The Verdict's status and comment (ADR 0013): only a well-formed PASS passes, and a judge that
 // gave no verdict posts an error, never a pass.
 import { describe, expect, it } from 'vitest';
-import { clip, COMMENT_MARKER, commentFor, parseVerdict, statusFor } from '../verdict.ts';
+import { clip, COMMENT_MARKER, commentFor, parseVerdict, skippedStatus, statusFor } from '../verdict.ts';
 
 const SHA = 'a'.repeat(40);
 const RUN = 'https://github.com/inprealpha/OpenChessCoach/actions/runs/1';
@@ -51,5 +51,13 @@ describe('a run that never started the judge', () => {
     expect(comment).not.toContain(COMMENT_MARKER);
     expect(comment).toContain('## Verdict: none');
     expect(comment).toContain("The judge didn't start");
+  });
+});
+
+describe('a run skipped because the PR changed while the gate waited', () => {
+  it('posts its reason as an error, never a pass', () => {
+    expect(skippedStatus('The PR was closed before the judge started\n')).toEqual({ state: 'error', description: 'The PR was closed before the judge started' });
+    expect(skippedStatus(undefined)).toBeUndefined();
+    expect(skippedStatus('  ')).toBeUndefined();
   });
 });

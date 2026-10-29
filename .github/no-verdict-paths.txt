@@ -18,3 +18,7 @@ e2e/
 # CI, PR process and agent skills (protected paths: the owner reviews them)
 .github/
 .claude/
+scripts/verdict.ts
+scripts/protected-paths.ts
+scripts/before-after.ts
+scripts/glossary-lint.ts

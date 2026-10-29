@@ -27,3 +27,6 @@ A PR with nothing here gets the no-evidence label.
 
 <!-- Anything the owner should look at: protected paths touched, Coach changes (they need the
 real-Coach check from the desktop), deviations from the ticket, follow-ups. -->
+
+<!-- New or changed Lesson text (data/lesson-sources/): say who compared it with the owner's books
+and found no copied or closely followed wording, examples or order (ADR 0012). -->

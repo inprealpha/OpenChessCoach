@@ -22,6 +22,10 @@ THIRD_PARTY_NOTICES.md
 data/lessons/
 data/lesson-sources/
 data/open-texts.json
+data/lesson-stats.json
+data/puzzles.json
+data/theme-puzzles.json
+docs/course-outline.md
 data-prep/
 
 # CI and the checks that judge PRs

@@ -4,12 +4,13 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { COURSE } from '../../../data-prep/course.ts';
+import type { CatalogueItem } from '../src/content/course.ts';
 import { COURSE_LEVELS, decisions, keptOpenText, priorKnowledgeCycles, TRACKS, validateLesson, type LessonData, type OpenText } from '../src/content/lessons.ts';
 import { pickPuzzles, validatePuzzles, type PuzzleFile } from '../src/content/puzzles.ts';
 
 const dataDir = new URL('../../../data/', import.meta.url);
 const read = <T>(path: string): T => JSON.parse(readFileSync(new URL(path, dataDir), 'utf8')) as T;
-const index = read<{ id: string; kind: string; decisions: number }[]>('lessons/index.json');
+const index = read<CatalogueItem[]>('lessons/index.json');
 const lessons = index.map((l) => read<LessonData>(`lessons/${l.id}.json`));
 const byId = (id: string) => lessons.find((l) => l.id === id) as LessonData;
 const puzzles = read<PuzzleFile>('puzzles.json');
@@ -51,8 +52,23 @@ describe('Lesson data', () => {
     expect(late).toEqual([]);
   });
 
-  it('counts the decisions the catalogue shows', () => {
-    for (const item of index) expect(decisions(byId(item.id)).length, item.id).toBe(item.decisions);
+  it('shows each Lesson in the catalogue as it is built', () => {
+    for (const item of index) {
+      const l = byId(item.id);
+      expect(item, item.id).toEqual({
+        id: l.id,
+        name: l.name,
+        kind: l.kind,
+        track: l.track,
+        level: l.level,
+        side: l.side,
+        ...(l.eco ? { eco: l.eco } : {}),
+        goal: l.goal,
+        priorKnowledge: l.priorKnowledge,
+        decisions: decisions(l).length,
+        ...(l.playOut ? { playOut: true } : {}),
+      });
+    }
   });
 
   it('keeps the words the glossary avoids out of every text the Player reads', () => {
@@ -64,7 +80,7 @@ describe('Lesson data', () => {
       .filter(Boolean);
     const found: string[] = [];
     for (const l of lessons) {
-      const texts = [l.intro.text, ...l.parts.flatMap((p) => [p.title, p.text ?? '', ...p.nodes.map((n) => n.notes?.text ?? '')])];
+      const texts = [l.name, l.goal, l.intro.text, ...l.parts.flatMap((p) => [p.title, p.keyIdea, p.text ?? '', ...p.nodes.map((n) => n.notes?.text ?? '')])];
       for (const text of texts) {
         for (const term of avoided) if (new RegExp(`(?<![\\w-])${term}(?![\\w-])`, 'i').test(text)) found.push(`${l.id}: "${term}" in ${text.slice(0, 60)}`);
       }
@@ -86,6 +102,25 @@ describe('Lesson data', () => {
     expect(keptOpenText(broken, openTexts).join('\n')).toMatch(/italian-game: part 1 ply \d+'s note keeps wording from https:\/\/en\.wikibooks\.org\//);
     node.notes = { text: kept.text, credit: { source: 'Wikibooks', url: kept.url, licence: '', licenceUrl: '', authors: 'x' } };
     expect(validateLesson(broken).join('\n')).toMatch(/the note's credit is not a Wikibooks or Wikipedia credit/);
+  });
+
+  it('fails on a key idea that names a move the Player has to find, outside the openings', () => {
+    const broken = copy(byId('forks'));
+    const part = broken.parts[0] as LessonData['parts'][number];
+    const san = (part.nodes.find((n) => n.decision) as LessonData['parts'][number]['nodes'][number]).mainSan.replace(/[+#]$/, '');
+    part.keyIdea = `Look for ${san} here.`;
+    expect(validateLesson(broken).join('\n')).toMatch(new RegExp(`forks part 1: the key idea names a move the Player has to find \\(${san.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\)`));
+  });
+
+  it('fails on a kept text whose punctuation was changed, or kept in a title, key idea or goal', () => {
+    const kept = openTexts.find((t) => t.text.split(' ').length > 20 && !/\d/.test(t.text)) as OpenText;
+    const words = kept.text.split(' ').slice(0, 10);
+    const broken = copy(byId('pins'));
+    broken.goal = words.join('. ');
+    expect(keptOpenText(broken, openTexts).join('\n')).toMatch(/pins: the name and goal keeps wording from/);
+    broken.goal = 'You can pin a piece.';
+    (broken.parts[0] as { keyIdea: string }).keyIdea = words.join('-');
+    expect(keptOpenText(broken, openTexts).join('\n')).toMatch(/pins: part 1's title and key idea keeps wording from/);
   });
 
   it('fails on a Lesson without its goal, with unknown prior knowledge, or a part without its key idea', () => {

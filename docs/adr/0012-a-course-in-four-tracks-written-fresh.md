@@ -8,13 +8,13 @@ Each Lesson has a learning goal: one or two plain sentences saying what the Play
 
 ## Nothing is locked
 
-Every Lesson can be opened at any time. The app suggests one next Lesson: the one the Player started and has not finished, or else the first Lesson in the course order whose prior knowledge the Player has finished. A Player who chose casual or club level in the Player Profile is not sent through the beginner Lessons first. Locking would stop a Player who already knows a topic, and the suggestion is enough to guide a Player who doesn't.
+Every Lesson can be opened at any time. The app suggests one next Lesson: the one the Player started and has not finished, or else the first Lesson in the course order whose prior knowledge the Player has finished. A Player who chose casual or club level in the Player Profile is not sent through the beginner Lessons first: for them, beginner Lessons count as known, also as prior knowledge. Locking would stop a Player who already knows a topic, and the suggestion is enough to guide a Player who doesn't.
 
 ## Books guide what to teach, never the text
 
 The owner keeps chess books in a private folder outside the repository: the Steps Method trainer manuals, Levy Rozman's two books, and Yasser Seirawan's three books. They are used only to decide which topics to teach, in what order, and what each Lesson should achieve. They are never copied into the repository. Their explanations, notes and examples are never copied or closely paraphrased, and the course does not follow any one book section by section. The repository is public, and the books are not ours to publish.
 
-Every position and line comes from open data: Lichess's puzzle database, games database and chess-openings list (all CC0), or a famous game as a Wikipedia or Wikibooks page gives it. Every explanation is written fresh for OpenChessCoach. A text kept from the earlier Wikibooks and Wikipedia Lessons keeps its CC BY-SA 4.0 credit, shown on screen; a test compares every uncredited text with those earlier texts, so a kept text cannot lose its credit by accident.
+Every position and line comes from open data: Lichess's puzzle database, games database and chess-openings list (all CC0), a famous game as a Wikipedia or Wikibooks page gives it, or a position kept from the earlier Wikibooks and Wikipedia Lessons. Every explanation is written fresh for OpenChessCoach. A text kept from the earlier Wikibooks and Wikipedia Lessons keeps its CC BY-SA 4.0 credit, shown on screen; a test compares every uncredited text with those earlier texts, so a kept text cannot lose its credit by accident.
 
 This supersedes the parts of ADR 0005 and ADR 0008 that said Lesson text is adapted or translated from Wikibooks and Wikipedia. Their rules on open positions, credits and the Engine check still apply.
 
@@ -25,7 +25,9 @@ Every move a Lesson asks the Player to find must be graded Best or Good by the E
 ## Consequences
 
 - A Lesson has a track, a level, a goal and prior knowledge, and each part has a key idea. The Lesson data check fails when one is missing, too long, or names a Lesson that does not exist, and when prior knowledge goes round in a circle.
-- A fourth kind of Lesson, `thinking`, teaches a way of thinking during a game. The opening principles are one, in the openings track.
+- A fourth kind of Lesson, `thinking`, teaches a way of thinking during a game from several positions. Besides its own track, the openings track has three: the opening principles, opening traps and gambits.
+- A key idea names an idea, never the move the Player has to find: the Coach sees it during a Hint, which must not give the move away. The data check fails when a key idea names one of its part's moves.
 - Each Lesson has its own source file, `data/lesson-sources/<id>.json`, and `data-prep/course.ts` gives the course order. `data-prep/lesson-tools.ts` helps find positions in the puzzle database and check lines with the Engine.
 - The Learn screens show the four tracks and their levels, and the suggested next Lesson.
-- The books' wording, examples and order are kept out by review: before a Lesson is merged, a reviewer compares it with the books.
+- The books' wording, examples and order are kept out by review: before a Lesson is merged, a reviewer with access to the books compares it with them, and the PR says who did. The books are not in the repository, so no test can do it.
+- ADR 0011 gives Lesson turns no tempting moves because they show how often players at the Player's level choose each move. That holds for the opening Lessons only; in the other Lessons the notes name the tempting wrong moves, and the Hints and Why Questions still get tempting moves. Adding tempting moves to their Lesson turns is future work.

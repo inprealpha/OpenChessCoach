@@ -14,6 +14,10 @@
 /data/lessons/ @inprealpha
 /data/lesson-sources/ @inprealpha
 /data/open-texts.json @inprealpha
+/data/lesson-stats.json @inprealpha
+/data/puzzles.json @inprealpha
+/data/theme-puzzles.json @inprealpha
+/docs/course-outline.md @inprealpha
 /data-prep/ @inprealpha
 /.github/ @inprealpha
 /scripts/protected-paths.ts @inprealpha

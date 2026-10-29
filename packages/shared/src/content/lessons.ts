@@ -237,6 +237,12 @@ function validatePart(lesson: LessonData, part: LessonPart, index: number): stri
   if (!part.keyIdea?.trim()) problems.push(`${name}: a part has no key idea`);
   else if (/\n/.test(part.keyIdea)) problems.push(`${name}: the key idea must be one line`);
   else if (part.keyIdea.length > MAX_KEY_IDEA) problems.push(`${name}: the key idea is longer than ${MAX_KEY_IDEA} characters`);
+  else if (lesson.kind !== 'opening') {
+    // The Coach sees the key idea during a Hint, which must not give the move away (ADR 0012). An
+    // opening's key idea is its plan, which names its moves as its goal does.
+    const named = part.nodes.filter((n) => n.decision).map((n) => n.mainSan.replace(/[+#]$/, '')).filter((san) => new RegExp(`(?<![\\w-])${san.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\w-])`).test(part.keyIdea));
+    if (named.length) problems.push(`${name}: the key idea names a move the Player has to find (${named.join(', ')})`);
+  }
   let fen = part.fen;
   part.mainLine.forEach((uci, ply) => {
     const played = playUci(fen, uci);
@@ -283,7 +289,7 @@ export function checkTextCredit(credit: Credit | undefined): boolean {
 }
 
 /** Lichess's open data under CC0: a puzzle, a game from the games database, or the chess-openings list. */
-const LICHESS_SOURCE = /^https:\/\/(lichess\.org\/training\/[A-Za-z0-9]{5}|lichess\.org\/[A-Za-z0-9]{8}(#\d+)?|github\.com\/lichess-org\/chess-openings)$/;
+const LICHESS_SOURCE = /^https:\/\/(lichess\.org\/training\/[A-Za-z0-9]{5}|lichess\.org\/(?!training$|analysis$|[a-z]+$)[A-Za-z0-9]{8}(#\d+)?|github\.com\/lichess-org\/chess-openings)$/;
 
 /** A position comes from a Wikibooks or Wikipedia page (a famous game, say), or from Lichess's open data. */
 export function checkPositionCredit(credit: Credit | undefined): boolean {
@@ -311,9 +317,12 @@ function wordRuns(text: string): Set<string> {
   const words = text
     .toLowerCase()
     .replace(/[’']/g, '')
-    .split(/[^a-z0-9.+#=-]+/)
-    // Moves and move numbers ("3.Bc4", "Nxe5+", "O-O") are facts, not wording: leave them out.
-    .filter((w) => w && !/\d/.test(w) && !/^(o-o(-o)?|[kqrbn]?x?[a-h]?[1-8]?)$/.test(w));
+    .split(/\s+/)
+    // Moves and move numbers ("3.Bc4", "Nxe5+", "O-O") are facts, not wording: leave them out. Then
+    // only letters count, so changing the punctuation doesn't hide a kept run of words.
+    .filter((w) => !/\d/.test(w) && !/^\(?o-o(-o)?[+#]?\W*$/.test(w))
+    .flatMap((w) => w.split(/[^a-z]+/))
+    .filter(Boolean);
   const runs = new Set<string>();
   for (let i = 0; i + KEPT_WORDS <= words.length; i++) runs.add(words.slice(i, i + KEPT_WORDS).join(' '));
   return runs;
@@ -326,10 +335,12 @@ function wordRuns(text: string): Set<string> {
  */
 export function keptOpenText(lesson: LessonData, openTexts: readonly OpenText[]): string[] {
   const open = openTexts.map((t) => ({ url: t.url, runs: wordRuns(t.text) }));
-  const uncredited: { where: string; text: string }[] = [];
+  // The name, the goal, the titles and the key ideas are always written for OpenChessCoach.
+  const uncredited: { where: string; text: string }[] = [{ where: 'the name and goal', text: `${lesson.name}. ${lesson.goal}` }];
   if (!lesson.intro.credit) uncredited.push({ where: 'the intro', text: lesson.intro.text });
   lesson.parts.forEach((part, i) => {
     const name = `part ${i + 1}`;
+    uncredited.push({ where: `${name}'s title and key idea`, text: `${part.title}. ${part.keyIdea}` });
     if (part.text && !part.textCredit) uncredited.push({ where: `${name}'s text`, text: part.text });
     for (const n of part.nodes) if (n.notes && !n.notes.credit) uncredited.push({ where: `${name} ply ${n.ply}'s note`, text: n.notes.text });
   });

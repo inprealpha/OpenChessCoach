@@ -1,5 +1,5 @@
-// The real-Coach check (ADR 0006). It runs on the owner's desktop, where Claude Code is logged
-// in, because the real Coach can't run in cloud CI (ADR 0001). It starts a verify-mode instance with
+// The real-Coach check (ADR 0006). It needs the owner's Claude login (ADR 0001): the Verdict job
+// runs it with the owner's token (ADR 0013), and the owner's desktop can run it too. It starts a verify-mode instance with
 // the real Coach in place of the fake one, makes one call of every Coach job through the protocol,
 // and Lesson calls that carry a Lesson's focus as the Lesson screen sends them (ADR 0012: a Lesson
 // turn in an opening and in a Theme, a Lesson turn on a move that isn't the Lesson's, and a Hint in

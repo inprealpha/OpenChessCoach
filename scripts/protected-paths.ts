@@ -1,8 +1,10 @@
 // Path lists for PR review rules. `.github/protected-paths.txt` generates CODEOWNERS and
-// labels PRs that need the owner's review; `.github/coach-paths.txt` labels PRs that touch the Coach.
+// labels PRs that need the owner's review; `.github/coach-paths.txt` labels PRs that touch the Coach;
+// `.github/no-verdict-paths.txt` lists the files a PR may change without needing a Verdict (ADR 0013).
 //   node scripts/protected-paths.ts                     rewrite .github/CODEOWNERS
 //   node scripts/protected-paths.ts --check             fail if CODEOWNERS is out of date
 //   node scripts/protected-paths.ts --match protected|coach <files...>   print the files that match
+//   node scripts/protected-paths.ts --needs-verdict <files...>          print the files that need a Verdict
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
@@ -16,18 +18,23 @@ export function readList(text: string): string[] {
     .filter((l) => l && !l.startsWith('#'));
 }
 
-/** Whether a repo-relative file path falls under a list entry. */
+/** Whether a repo-relative file path falls under a list entry. A `*` matches within one folder name. */
 export function matches(file: string, entry: string): boolean {
-  if (entry.endsWith('/')) return file.startsWith(entry);
   if (entry.includes('*')) {
-    const re = new RegExp(`^${entry.split('*').map((p) => p.replace(/[.+?^${}()|[\]\\]/g, '\\$&')).join('[^/]*')}$`);
-    return re.test(file);
+    const pattern = entry.split('*').map((p) => p.replace(/[.+?^${}()|[\]\\]/g, '\\$&')).join('[^/]*');
+    return new RegExp(`^${pattern}${entry.endsWith('/') ? '' : '$'}`).test(file);
   }
+  if (entry.endsWith('/')) return file.startsWith(entry);
   return file === entry;
 }
 
 export function matching(files: readonly string[], list: readonly string[]): string[] {
   return files.filter((f) => list.some((e) => matches(f, e)));
+}
+
+/** The files that need a Verdict: every file the no-Verdict list doesn't cover, so a new kind of file needs one. */
+export function needingVerdict(files: readonly string[], noVerdictList: readonly string[]): string[] {
+  return files.filter((f) => !noVerdictList.some((e) => matches(f, e)));
 }
 
 export function codeowners(list: readonly string[]): string {
@@ -42,6 +49,7 @@ export function codeowners(list: readonly string[]): string {
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const protectedList = readList(readFileSync(new URL('.github/protected-paths.txt', root), 'utf8'));
   const coachList = readList(readFileSync(new URL('.github/coach-paths.txt', root), 'utf8'));
+  const noVerdictList = readList(readFileSync(new URL('.github/no-verdict-paths.txt', root), 'utf8'));
   const args = process.argv.slice(2);
   const target = new URL('.github/CODEOWNERS', root);
   if (args[0] === '--check') {
@@ -60,6 +68,9 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
     const list = args[1] === 'coach' ? coachList : protectedList;
     const files = args.length > 2 ? args.slice(2) : readFileSync(0, 'utf8').split('\n').filter(Boolean);
     for (const f of matching(files, list)) process.stdout.write(`${f}\n`);
+  } else if (args[0] === '--needs-verdict') {
+    const files = args.length > 1 ? args.slice(1) : readFileSync(0, 'utf8').split('\n').filter(Boolean);
+    for (const f of needingVerdict(files, noVerdictList)) process.stdout.write(`${f}\n`);
   } else {
     writeFileSync(target, codeowners(protectedList));
     process.stdout.write(`Wrote .github/CODEOWNERS with ${protectedList.length} paths.\n`);

@@ -1,10 +1,13 @@
 # Labels a PR for the reviews it needs (ADR 0006), from lists read off the base branch so
 # a PR can't exempt itself by editing them:
 #   protected-path  touches a path in .github/protected-paths.txt: the owner reviews it before merging
-#   touches-coach   touches a path in .github/coach-paths.txt: the "real Coach" status stays pending
-#                   until a desktop session runs scripts/real-coach-check.ts --post on the head commit
+#   touches-coach   touches a path in .github/coach-paths.txt: the "real Coach" status stays pending until the
+#                   Verdict job (verdict.yml) or a desktop session runs scripts/real-coach-check.ts --post
 #   no-evidence     the PR description's Evidence section is empty
 # PRs that don't touch the Coach get a passing "real Coach" status, so it can be a required check.
+# It also keeps the "Verdict" status (ADR 0013): a commit with no verdict yet gets a pending one, so a
+# push always voids the last verdict; PRs that change only docs, tests or process files pass at once.
+# The judge itself runs in verdict.yml.
 # pull_request_target, so a PR from a fork gets its labels and status too: the job runs the base
 # branch's workflow and code with a token that can write them, and never checks out the PR's code.
 # Keep it that way: only the PR's file list and description, read through the API, come from the PR.
@@ -46,6 +49,7 @@ jobs:
         run: |
           if git cat-file -e "origin/$BASE:scripts/protected-paths.ts" 2>/dev/null; then
             git checkout "origin/$BASE" -- scripts/protected-paths.ts .github/protected-paths.txt .github/coach-paths.txt
+            git checkout "origin/$BASE" -- scripts/verdict.ts .github/no-verdict-paths.txt 2>/dev/null || true
           else
             echo "The base branch has no path lists yet; using the PR's own."
           fi
@@ -80,5 +84,29 @@ jobs:
             echo "The desktop already posted a verdict for $SHA: $current"
           else
             gh api "repos/$REPO/statuses/$SHA" -f state=pending -f context="real Coach" \
-              -f description="Touches the Coach: run scripts/real-coach-check.ts --post on the desktop"
+              -f description="Touches the Coach: the Verdict job runs the real-Coach check, or run it on the desktop"
+          fi
+      - name: Set the Verdict status
+        if: ${{ hashFiles('scripts/verdict.ts') != '' }}
+        env:
+          GH_REPO: ${{ github.repository }}
+          DRAFT: ${{ github.event.pull_request.draft }}
+          ACTION: ${{ github.event.action }}
+        run: |
+          node scripts/protected-paths.ts --needs-verdict < changed.txt > judged.txt
+          current=$(gh api "repos/$REPO/commits/$SHA/status" --jq '([.statuses[] | select(.context == "Verdict")][0] // {}) | "\(.state // "")|\(.description // "")"')
+          state=${current%%|*}
+          description=${current#*|}
+          if [ ! -s judged.txt ]; then
+            node scripts/verdict.ts --status success --sha "$SHA" --description "Changes only docs, tests or process files: no Verdict needed"
+          elif [ "$state" = success ] || [ "$state" = failure ] || [ "$state" = error ]; then
+            echo "Commit $SHA already has a Verdict status: $state ($description)"
+          elif [ "$state" = pending ] && [ "${description#Judging}" != "$description" ]; then
+            echo "The judge is running on $SHA."
+          elif [ "$DRAFT" = true ]; then
+            node scripts/verdict.ts --status pending --sha "$SHA" --description "Draft: mark the PR ready for review to start the judge"
+          elif [ "$ACTION" = ready_for_review ]; then
+            node scripts/verdict.ts --status pending --sha "$SHA" --description "Waiting for the judge to start"
+          else
+            node scripts/verdict.ts --status pending --sha "$SHA" --description "No Verdict for this commit: comment /verdict to start the judge"
           fi

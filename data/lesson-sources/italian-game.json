@@ -26,52 +26,52 @@
     {
      "ply": 0,
      "san": "e4",
-     "text": "1.e4 puts a pawn in the centre and attacks d5 and f5. It also opens lines for your queen and for the bishop on f1, which is heading for c4."
+     "text": "1.e4, the pawn in front of your king moving two squares to e4, puts a pawn in the centre and attacks d5 and f5. It also opens lines for your queen and for the bishop on f1, which is heading for c4."
     },
     {
      "ply": 2,
      "san": "Nf3",
-     "text": "Black answered with 1...e5. 2.Nf3 develops a knight towards the centre and attacks the e5 pawn, which nothing defends yet, so Black usually spends the next move on it."
+     "text": "Black answered with 1...e5. 2.Nf3 develops a knight, which means it brings the knight off its starting square, here towards the centre. It also attacks the e5 pawn, which nothing defends yet, so Black usually spends the next move on it."
     },
     {
      "ply": 4,
      "san": "Bc4",
-     "text": "2...Nc6 guards e5. 3.Bc4 brings the bishop to an open diagonal aimed at f7, the weakest point near Black's king. With the knight and bishop gone, nothing stands between your king and the rook on h1."
+     "text": "2...Nc6 guards e5. 3.Bc4 brings the bishop to an open diagonal aimed at f7, the weakest point near Black's king. Now that the knight and bishop have moved out, nothing stands between your king and the rook on h1."
     },
     {
      "ply": 6,
      "san": "c3",
-     "text": "3...Bc5 points Black's bishop at your f2 pawn and at d4. 4.c3 gets ready for d4: with the c-pawn behind it, a pawn on d4 can stay there. 4.d3 followed by castling is a quieter plan."
+     "text": "3...Bc5 points Black's bishop at your f2 pawn and at d4. 4.c3 gets ready for d4: with a pawn on c3 to guard it, a pawn on d4 can stay there. 4.d3 followed by castling is a quieter plan."
     },
     {
      "ply": 8,
      "san": "d4",
-     "text": "4...Nf6 attacks your e4 pawn. Instead of defending it, strike with 5.d4: the pawn attacks the bishop on c5 and the pawn on e5 at once. Black nearly always takes with 5...exd4."
+     "text": "4...Nf6 attacks your e4 pawn. 5.d4 strikes back instead of defending it: the pawn attacks the bishop on c5 and the pawn on e5 at once. Black nearly always takes with 5...exd4."
     },
     {
      "ply": 10,
      "san": "cxd4",
-     "text": "Take back with 6.cxd4. Now you have the centre you aimed for, pawns on d4 and e4 side by side, and the d4 pawn attacks the bishop, so Black must move it."
+     "text": "6.cxd4 takes back. Now you have the centre you aimed for, pawns on d4 and e4 side by side, and the d4 pawn attacks the bishop, so Black must move it."
     },
     {
      "ply": 12,
      "san": "Bd2",
-     "text": "6...Bb4+ checks your king. Block with 7.Bd2, which brings another piece out and offers a trade of bishops. Stepping aside with the king would cost you the right to castle."
+     "text": "6...Bb4+ checks your king. 7.Bd2 blocks the check, brings another piece out and offers a trade of bishops. Stepping aside with the king would cost you the right to castle."
     },
     {
      "ply": 14,
      "san": "Nbxd2",
-     "text": "Black traded with 7...Bxd2+. Take back with your knight: 8.Nbxd2 develops it, and from d2 it guards your e4 pawn. 8.Qxd2 would allow 8...Nxe4, winning the pawn with an attack on your queen."
+     "text": "Black traded with 7...Bxd2+. 8.Nbxd2 takes back with the knight, which develops it, and from d2 it guards your e4 pawn. 8.Qxd2 would allow 8...Nxe4, winning the pawn with an attack on your queen."
     },
     {
      "ply": 16,
      "san": "exd5",
-     "text": "8...d5 attacks your bishop and your e4 pawn at once. Take with 9.exd5. After 9...Nxd5 your d4 pawn stands alone in the centre, but your pieces are out and your king is ready to castle."
+     "text": "8...d5 attacks your bishop and your e4 pawn at once. 9.exd5 takes the pawn. After 9...Nxd5 your d4 pawn stands alone in the centre, but your pieces are out and your king is ready to castle."
     },
     {
      "ply": 18,
      "san": "O-O",
-     "text": "Castle with 10.O-O. Your king is safe on g1, and your rook comes towards the centre. Every knight and bishop you have left is in play, so next your rooks can use the e- and c-files, where your own pawns no longer block them, for example with Re1 or Rc1."
+     "text": "10.O-O castles kingside, towards the h-file. Your king is safe on g1, and your rook comes towards the centre. All the knights and bishops you have left are out. Next, a rook can go to the e-file or the c-file, where your own pawns no longer block it: Re1 or Rc1."
     }
    ]
   }

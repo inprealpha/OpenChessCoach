@@ -8,18 +8,18 @@
  "puzzleThemes": [
   "fork"
  ],
- "goal": "You can spot a fork by a knight, a pawn or another piece, and use a check to win the piece the fork also attacks.",
+ "goal": "You can spot a fork by a knight, a bishop or a pawn, see why a fork that gives check wins the other piece, and use a check to set one up.",
  "priorKnowledge": [
   "double-attack"
  ],
- "intro": "In a fork, one of your pieces attacks two enemy pieces at the same time, and your opponent can save only one. The knight is the best forking piece, because its jump cannot be blocked, and a pawn fork is cheap: you risk only a pawn to win a bigger piece. When the fork comes with check, your opponent has no time to save anything.",
+ "intro": "In a fork, one piece attacks two enemy pieces at once, and your opponent can save only one of them. Any piece can fork. A knight's fork is the hardest to see coming, because its jump cannot be blocked; a bishop, rook or queen forks along its lines; and a pawn fork is cheap, because you risk only a pawn. A fork that gives check is the strongest kind: the king has to answer the check first.",
  "parts": [
   {
    "title": "The knight fork",
    "fen": "8/1k3r2/8/6p1/3PN2p/1P2K2P/2P5/8 b - - 0 44",
    "side": "white",
-   "keyIdea": "A knight can check the king and attack another piece at once; the king must move, and the other piece falls.",
-   "text": "From a game played on Lichess. Black has just pushed the g-pawn to g4. Look at the squares your knight can jump to: does one of them reach both the king and the rook?",
+   "keyIdea": "A knight check that also hits another piece wins that piece: the king has to step away first, and then you take.",
+   "text": "From a game played on Lichess. You are White. Black has just pushed the g-pawn to g4. Look at the squares your knight can jump to: does one of them reach both the king and the rook?",
    "url": "https://lichess.org/training/OJkoA",
    "line": "g4 Nd6+ Kc6 Nxf7",
    "notes": [
@@ -31,28 +31,28 @@
     {
      "ply": 3,
      "san": "Nxf7",
-     "text": "The king has moved, and the rook is still attacked. Take it: you have won a whole rook."
+     "text": "The king has moved, so the knight takes the rook on f7. You have won a whole rook."
     }
    ]
   },
   {
-   "title": "The pawn fork",
-   "fen": "8/8/5pp1/5rkp/1R6/6K1/5P2/8 b - - 1 44",
+   "title": "The bishop fork",
+   "fen": "r7/1p3pk1/1R6/2p3B1/P3Pp2/1P1P1K2/2r5/8 b - - 0 36",
    "side": "white",
-   "keyIdea": "A pawn attacks the two squares diagonally ahead of it; push it between two enemy pieces and it forks them.",
-   "text": "From a game played on Lichess. Black has just moved the rook from f5 to e5. Black's king on g5 and rook on e5 have one empty square between them. Which of your pieces could attack both?",
-   "url": "https://lichess.org/training/CknV2",
-   "line": "Re5 f4+ Kf5 fxe5",
+   "keyIdea": "A bishop attacks in both directions along a diagonal, so it can check the king and hit a piece on the far side at once.",
+   "text": "From a game played on Lichess. You are White, 2 points behind: a bishop against a rook. Black's rook has just come to c3 to attack your pawns. Your bishop on g5 can move along two diagonals: is there a square from which it would attack both the king and that rook?",
+   "url": "https://lichess.org/training/MuxaR",
+   "line": "Rc3 Bf6+ Kf8 Bxc3",
    "notes": [
     {
      "ply": 1,
-     "san": "f4+",
-     "text": "The pawn jumps two squares to f4 and attacks both g5 and e5: it checks the king and hits the rook. It is safe there, because your king guards f4, so the black king cannot take it."
+     "san": "Bf6+",
+     "text": "The bishop goes to f6, on the long diagonal from a1 to h8. Looking one way, it checks the king on g7; looking the other way, it attacks the rook on c3. The king cannot take the bishop, because your rook on b6 guards f6."
     },
     {
      "ply": 3,
-     "san": "fxe5",
-     "text": "The king had to move, so the pawn takes the rook. You have won a rook for a pawn."
+     "san": "Bxc3",
+     "text": "The king has stepped out of check, so the bishop takes the rook on c3. You were 2 points behind and are now 3 ahead."
     }
    ]
   },
@@ -61,33 +61,33 @@
    "fen": "6k1/5pb1/4p2p/1p1nN3/4q1P1/1P5P/5P2/2BQ1K2 b - - 0 40",
    "side": "black",
    "keyIdea": "When the forking square is out of reach, a check first can drive the king onto it.",
-   "text": "From the game Soppe against Braga, played in Buenos Aires. You are Black. Your knight could fork White's king and queen from e3, but the pawn on f2 guards that square. Find a check that drives the king somewhere better.",
+   "text": "From the game Soppe against Braga, Clarin GP Final, 1998. You are Black. Your knight could fork White's king and queen from e3, but the pawn on f2 guards that square. Find a check that drives the king somewhere better.",
    "url": "https://en.wikipedia.org/wiki/Fork_(chess)",
-   "line": "Qh1+ Ke2 Nc3+ Kd2 Qxd1+",
+   "line": "Qh1+ Ke2 Nc3+ Kd3 Qxd1+",
    "notes": [
     {
      "ply": 0,
      "san": "Qh1+",
-     "text": "Your queen checks from h1. White's king has nowhere to go but e2, because g1, g2 and e1 are all covered. Once it stands on e2, a knight on c3 would attack both the king and the queen on d1."
+     "text": "Your queen checks from h1. It covers g1, g2 and e1, so White's king has only one square left: e2. In the game White resigned here, and the moves that follow show why."
     },
     {
      "ply": 2,
      "san": "Nc3+",
-     "text": "The knight jumps to c3, giving check and attacking the queen at the same time. Nothing can take the knight, so the king has to move and the queen is lost."
+     "text": "The knight jumps to c3, where it checks the king on e2 and attacks the queen on d1. Nothing can take the knight, and a knight's check cannot be blocked, so the king has to move and the queen is lost."
     },
     {
      "ply": 4,
      "san": "Qxd1+",
-     "text": "The king stepped to d2, so take the queen on d1, with check. Your knight on c3 guards your queen, so the king cannot take it."
+     "text": "The king stepped away to d3, and your queen takes White's queen on d1, with check. You have won the queen for nothing."
     }
    ]
   },
   {
-   "title": "A pawn fork in the opening",
+   "title": "The fork trick",
    "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/2N2N2/PPPP1PPP/R1BQK2R b KQkq - 5 4",
    "side": "black",
-   "keyIdea": "A pawn fork can win back a piece you gave up a move earlier, so count the fork before you capture.",
-   "text": "After 1.e4 e5 2.Nf3 Nc6 3.Bc4 Nf6 4.Nc3. You are Black. White's knight on c3 guards the e4 pawn, yet you can take it: a capture that seems to lose a piece, then a pawn move that attacks two pieces.",
+   "keyIdea": "A capture that seems to lose a piece can be safe when a pawn fork on the next move wins the piece back.",
+   "text": "This position comes after a common opening, 1.e4 e5 2.Nf3 Nc6 3.Bc4 Nf6 4.Nc3: both sides have pushed the e-pawn two squares and brought out knights, and White's bishop stands on c4. You are Black. White's knight on c3 guards the pawn on e4. Is that pawn really safe? Count two moves ahead.",
    "url": "https://en.wikipedia.org/wiki/Fork_(chess)",
    "line": "Nxe4 Nxe4 d5 Bd3 dxe4",
    "notes": [

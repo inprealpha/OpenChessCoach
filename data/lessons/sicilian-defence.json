@@ -1079,9 +1079,102 @@
      "main": "c1e3",
      "mainSan": "Be3",
      "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
+      "beginner": [
+       {
+        "uci": "c1e3",
+        "san": "Be3",
+        "percent": 27,
+        "games": 57
+       },
+       {
+        "uci": "c1g5",
+        "san": "Bg5",
+        "percent": 18,
+        "games": 38
+       },
+       {
+        "uci": "f1c4",
+        "san": "Bc4",
+        "percent": 16.1,
+        "games": 34
+       },
+       {
+        "uci": "f1d3",
+        "san": "Bd3",
+        "percent": 10,
+        "games": 21
+       },
+       {
+        "uci": "f1b5",
+        "san": "Bb5+",
+        "percent": 7.1,
+        "games": 15
+       }
+      ],
+      "casual": [
+       {
+        "uci": "c1e3",
+        "san": "Be3",
+        "percent": 32.2,
+        "games": 812
+       },
+       {
+        "uci": "f1c4",
+        "san": "Bc4",
+        "percent": 15.5,
+        "games": 390
+       },
+       {
+        "uci": "c1g5",
+        "san": "Bg5",
+        "percent": 12.8,
+        "games": 322
+       },
+       {
+        "uci": "f2f3",
+        "san": "f3",
+        "percent": 10,
+        "games": 253
+       },
+       {
+        "uci": "f1e2",
+        "san": "Be2",
+        "percent": 10,
+        "games": 251
+       }
+      ],
+      "club": [
+       {
+        "uci": "c1e3",
+        "san": "Be3",
+        "percent": 45.9,
+        "games": 945
+       },
+       {
+        "uci": "f1e2",
+        "san": "Be2",
+        "percent": 12.7,
+        "games": 262
+       },
+       {
+        "uci": "f1c4",
+        "san": "Bc4",
+        "percent": 11.4,
+        "games": 235
+       },
+       {
+        "uci": "f2f3",
+        "san": "f3",
+        "percent": 9,
+        "games": 186
+       },
+       {
+        "uci": "f2f4",
+        "san": "f4",
+        "percent": 6.2,
+        "games": 128
+       }
+      ]
      }
     },
     {
@@ -1091,9 +1184,66 @@
      "main": "f8g7",
      "mainSan": "Bg7",
      "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
+      "beginner": [
+       {
+        "uci": "f8g7",
+        "san": "Bg7",
+        "percent": 98.5,
+        "games": 64
+       },
+       {
+        "uci": "b8c6",
+        "san": "Nc6",
+        "percent": 1.5,
+        "games": 1
+       }
+      ],
+      "casual": [
+       {
+        "uci": "f8g7",
+        "san": "Bg7",
+        "percent": 96,
+        "games": 841
+       },
+       {
+        "uci": "a7a6",
+        "san": "a6",
+        "percent": 1.8,
+        "games": 16
+       },
+       {
+        "uci": "f6g4",
+        "san": "Ng4",
+        "percent": 1.1,
+        "games": 10
+       },
+       {
+        "uci": "b8c6",
+        "san": "Nc6",
+        "percent": 0.9,
+        "games": 8
+       }
+      ],
+      "club": [
+       {
+        "uci": "f8g7",
+        "san": "Bg7",
+        "percent": 91.8,
+        "games": 800
+       },
+       {
+        "uci": "a7a6",
+        "san": "a6",
+        "percent": 6.5,
+        "games": 57
+       },
+       {
+        "uci": "f6g4",
+        "san": "Ng4",
+        "percent": 0.8,
+        "games": 7
+       }
+      ]
      },
      "notes": {
       "text": "6.Be3 brings out White's bishop. 6...Bg7 puts yours on the long diagonal. Once your knight on f6 moves out of the way, the bishop will press on d4 and, further along, on White's queenside. It also clears the way for castling."
@@ -1106,9 +1256,102 @@
      "main": "f2f3",
      "mainSan": "f3",
      "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
+      "beginner": [
+       {
+        "uci": "d1d2",
+        "san": "Qd2",
+        "percent": 30.9,
+        "games": 17
+       },
+       {
+        "uci": "f2f3",
+        "san": "f3",
+        "percent": 27.3,
+        "games": 15
+       },
+       {
+        "uci": "f1e2",
+        "san": "Be2",
+        "percent": 10.9,
+        "games": 6
+       },
+       {
+        "uci": "f1b5",
+        "san": "Bb5+",
+        "percent": 7.3,
+        "games": 4
+       },
+       {
+        "uci": "f1c4",
+        "san": "Bc4",
+        "percent": 5.5,
+        "games": 3
+       }
+      ],
+      "casual": [
+       {
+        "uci": "f2f3",
+        "san": "f3",
+        "percent": 48,
+        "games": 373
+       },
+       {
+        "uci": "d1d2",
+        "san": "Qd2",
+        "percent": 21.4,
+        "games": 166
+       },
+       {
+        "uci": "f1e2",
+        "san": "Be2",
+        "percent": 11.1,
+        "games": 86
+       },
+       {
+        "uci": "f1c4",
+        "san": "Bc4",
+        "percent": 10.6,
+        "games": 82
+       },
+       {
+        "uci": "f1d3",
+        "san": "Bd3",
+        "percent": 3.6,
+        "games": 28
+       }
+      ],
+      "club": [
+       {
+        "uci": "f2f3",
+        "san": "f3",
+        "percent": 70.6,
+        "games": 616
+       },
+       {
+        "uci": "f1c4",
+        "san": "Bc4",
+        "percent": 10.3,
+        "games": 90
+       },
+       {
+        "uci": "d1d2",
+        "san": "Qd2",
+        "percent": 8.4,
+        "games": 73
+       },
+       {
+        "uci": "f1e2",
+        "san": "Be2",
+        "percent": 8.2,
+        "games": 72
+       },
+       {
+        "uci": "h2h3",
+        "san": "h3",
+        "percent": 0.8,
+        "games": 7
+       }
+      ]
      }
     },
     {
@@ -1118,9 +1361,96 @@
      "main": "e8g8",
      "mainSan": "O-O",
      "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
+      "beginner": [
+       {
+        "uci": "e8g8",
+        "san": "O-O",
+        "percent": 66.7,
+        "games": 14
+       },
+       {
+        "uci": "b8d7",
+        "san": "Nbd7",
+        "percent": 9.5,
+        "games": 2
+       },
+       {
+        "uci": "b8c6",
+        "san": "Nc6",
+        "percent": 9.5,
+        "games": 2
+       },
+       {
+        "uci": "e7e5",
+        "san": "e5",
+        "percent": 4.8,
+        "games": 1
+       },
+       {
+        "uci": "a7a6",
+        "san": "a6",
+        "percent": 4.8,
+        "games": 1
+       }
+      ],
+      "casual": [
+       {
+        "uci": "e8g8",
+        "san": "O-O",
+        "percent": 72.6,
+        "games": 328
+       },
+       {
+        "uci": "b8c6",
+        "san": "Nc6",
+        "percent": 18.4,
+        "games": 83
+       },
+       {
+        "uci": "a7a6",
+        "san": "a6",
+        "percent": 5.5,
+        "games": 25
+       },
+       {
+        "uci": "c8d7",
+        "san": "Bd7",
+        "percent": 1.5,
+        "games": 7
+       },
+       {
+        "uci": "h7h5",
+        "san": "h5",
+        "percent": 0.9,
+        "games": 4
+       }
+      ],
+      "club": [
+       {
+        "uci": "e8g8",
+        "san": "O-O",
+        "percent": 70.6,
+        "games": 375
+       },
+       {
+        "uci": "b8c6",
+        "san": "Nc6",
+        "percent": 24.3,
+        "games": 129
+       },
+       {
+        "uci": "a7a6",
+        "san": "a6",
+        "percent": 3.4,
+        "games": 18
+       },
+       {
+        "uci": "c8d7",
+        "san": "Bd7",
+        "percent": 1.1,
+        "games": 6
+       }
+      ]
      },
      "notes": {
       "text": "7.f3 guards e4 and keeps your knight off g4, where it would attack the bishop on e3. 7...O-O makes your king safe, tucked behind its pawns and the bishop on g7."
@@ -1134,8 +1464,58 @@
      "mainSan": "Qd2",
      "popular": {
       "beginner": [],
-      "casual": [],
-      "club": []
+      "casual": [
+       {
+        "uci": "d1d2",
+        "san": "Qd2",
+        "percent": 80.7,
+        "games": 221
+       },
+       {
+        "uci": "f1c4",
+        "san": "Bc4",
+        "percent": 14.6,
+        "games": 40
+       },
+       {
+        "uci": "g2g4",
+        "san": "g4",
+        "percent": 1.8,
+        "games": 5
+       },
+       {
+        "uci": "h2h4",
+        "san": "h4",
+        "percent": 1.1,
+        "games": 3
+       },
+       {
+        "uci": "f1e2",
+        "san": "Be2",
+        "percent": 1.1,
+        "games": 3
+       }
+      ],
+      "club": [
+       {
+        "uci": "d1d2",
+        "san": "Qd2",
+        "percent": 78.7,
+        "games": 340
+       },
+       {
+        "uci": "f1c4",
+        "san": "Bc4",
+        "percent": 18.8,
+        "games": 81
+       },
+       {
+        "uci": "g2g4",
+        "san": "g4",
+        "percent": 1.2,
+        "games": 5
+       }
+      ]
      }
     },
     {
@@ -1146,8 +1526,70 @@
      "mainSan": "Nc6",
      "popular": {
       "beginner": [],
-      "casual": [],
-      "club": []
+      "casual": [
+       {
+        "uci": "b8c6",
+        "san": "Nc6",
+        "percent": 80.9,
+        "games": 212
+       },
+       {
+        "uci": "c8d7",
+        "san": "Bd7",
+        "percent": 5,
+        "games": 13
+       },
+       {
+        "uci": "a7a6",
+        "san": "a6",
+        "percent": 4.2,
+        "games": 11
+       },
+       {
+        "uci": "f8e8",
+        "san": "Re8",
+        "percent": 4.2,
+        "games": 11
+       },
+       {
+        "uci": "e7e5",
+        "san": "e5",
+        "percent": 1.5,
+        "games": 4
+       }
+      ],
+      "club": [
+       {
+        "uci": "b8c6",
+        "san": "Nc6",
+        "percent": 93.9,
+        "games": 278
+       },
+       {
+        "uci": "a7a6",
+        "san": "a6",
+        "percent": 2.4,
+        "games": 7
+       },
+       {
+        "uci": "f8e8",
+        "san": "Re8",
+        "percent": 1.4,
+        "games": 4
+       },
+       {
+        "uci": "c8d7",
+        "san": "Bd7",
+        "percent": 1,
+        "games": 3
+       },
+       {
+        "uci": "b8d7",
+        "san": "Nbd7",
+        "percent": 0.7,
+        "games": 2
+       }
+      ]
      },
      "notes": {
       "text": "8.Qd2 lines the queen up with the bishop on e3, ready for Bh6 to trade off your bishop on g7, which guards your king. 8...Nc6 develops your last knight and adds pressure on d4. White often castles queenside next and pushes the kingside pawns at your king, so you fight back on the queenside: a bishop to d7 or e6, a rook to c8 on the half-open c-file, and ...Ne5 or ...d5 to hit the centre."

@@ -21,7 +21,7 @@
    "title": "A capture with check comes first",
    "fen": "5rk1/1p2bppp/n4n2/p1pN2B1/P3pq2/1BP4P/1P3PP1/R5K1 w - - 0 23",
    "side": "white",
-   "keyIdea": "Before you take back, look for a check or a capture that wins something more first.",
+   "keyIdea": "Before you take back, look for a check or a capture that wins something extra.",
    "text": "From a game played on Lichess. You are White. Black has just taken your queen on f4. Before you take it back, look for a move that Black has to answer first.",
    "credit": {
     "source": "Lichess puzzle database, puzzle 2nVzC",
@@ -75,7 +75,7 @@
       "club": []
      },
      "notes": {
-      "text": "Now take back the queen. Taking it straight away would have let Black's knight take yours on d5, and the material would have stayed level. With the check first, you have won a bishop."
+      "text": "The bishop takes back the queen. Taking it straight away would only have traded: queen for queen, then knight for knight on d5. With the check first, you have won a bishop as well."
      }
     }
    ]
@@ -85,7 +85,7 @@
    "fen": "8/6R1/5p1k/7r/6KP/4P3/5P2/8 b - - 0 35",
    "side": "black",
    "keyIdea": "When both sides have a piece under attack, a check first can save yours before you take theirs.",
-   "text": "From a game played on Lichess. You are Black. White's rook has just taken a pawn on g7, where your king attacks it. But White's king attacks your rook on h5. The side that moves first decides who wins a rook.",
+   "text": "From a game played on Lichess. You are Black. White's rook has just taken a pawn on g7. Your king guards your rook on h5 and attacks White's rook on g7, but if it takes on g7 now, it stops guarding h5, and White's king takes your rook. Look for a move to play first.",
    "credit": {
     "source": "Lichess puzzle database, puzzle hXUzs",
     "url": "https://lichess.org/training/hXUzs",
@@ -111,7 +111,7 @@
       "club": []
      },
      "notes": {
-      "text": "The pawn checks the king on g4, so White has no time to take your rook. The king cannot take the pawn on f5, because your rook guards it, and it cannot take the rook on h5, because your king guards h5. So it has to step back."
+      "text": "The pawn checks the king on g4. The king cannot take the pawn, because your rook on h5 guards f5, and it cannot take the rook, because your king guards h5. So it has to step back, away from your rook."
      }
     },
     {
@@ -138,7 +138,7 @@
       "club": []
      },
      "notes": {
-      "text": "White's king no longer attacks your rook, so now you take the rook on g7. Taking it first would have let White take your rook on h5."
+      "text": "White's king no longer attacks your rook, so now your king takes the rook on g7. Taking it first would have let White's king take your rook on h5."
      }
     }
    ]
@@ -174,7 +174,7 @@
       "club": []
      },
      "notes": {
-      "text": "The pawn steps away from the bishop's attack and threatens to become a queen on g8. Black has to stop it, and only the bishop can, by going to f7."
+      "text": "The pawn steps away from the bishop's attack and threatens to promote to a queen on g8. Black has to stop it, and only the bishop can, by going to f7."
      }
     },
     {
@@ -201,7 +201,7 @@
       "club": []
      },
      "notes": {
-      "text": "Now take back the pawn. Your pawn on g7 is safe, and Black's bishop has to keep guarding g8. If you had taken on g4 straight away, Black's bishop would have taken your pawn on g6."
+      "text": "The bishop takes back the pawn on g4. Your pawn on g7 is safe, and Black's bishop has to keep guarding g8. If you had taken on g4 straight away, Black's bishop would have taken your pawn on g6."
      }
     }
    ]

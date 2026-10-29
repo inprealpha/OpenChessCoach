@@ -6729,24 +6729,6 @@
    "gameUrl": "https://lichess.org/R6jII8x3#15"
   },
   {
-   "id": "CzEOB",
-   "fen": "1k1r4/3q4/8/7p/Q4B2/6PP/5P1K/8 b - - 2 65",
-   "moves": [
-    "b8c8",
-    "a4a8"
-   ],
-   "rating": 775,
-   "themes": [
-    "endgame",
-    "mate",
-    "mateIn1",
-    "oneMove"
-   ],
-   "lessonId": "mate-in-one",
-   "openingTags": [],
-   "gameUrl": "https://lichess.org/FW9VQurw/black#130"
-  },
-  {
    "id": "2RYR1",
    "fen": "r2qk2r/pp1nbpp1/2p1pn1p/8/3PN2B/2PB1Q2/PP4PP/R4RK1 b kq - 3 12",
    "moves": [

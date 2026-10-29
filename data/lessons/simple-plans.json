@@ -13,15 +13,15 @@
  "puzzleTags": [],
  "puzzleThemes": [],
  "intro": {
-  "text": "Most of the time nothing can be won straight away, and that is when you need a plan. It does not have to be big. Ask three questions: which of my pieces is doing the least, which enemy pawn is hardest to defend, and is there a file with no pawns for my rooks? A small plan, carried out move by move, beats moves made without a reason."
+  "text": "Most of the time nothing can be won straight away, and that is when you need a plan. A small one is enough. Look for a piece of yours that stands badly and a better square for it, an enemy pawn that is hard to defend, or a file with no pawns where a rook could get in. Then carry the plan out one move at a time: moves made for a reason beat moves made without one."
  },
  "parts": [
   {
    "title": "Improve your worst piece",
    "fen": "5rk1/2p2pp1/p1p1b3/1r2P1p1/5p2/1PP4P/P4PPN/R3R1K1 w - - 2 23",
    "side": "white",
-   "keyIdea": "When nothing can be won at once, find your worst piece and move it to a square where it does more.",
-   "text": "From a game played on Lichess. You are White, and material is level. Nothing can be won at once, so look at your pieces one by one. Which one is doing the least, and where could it do more?",
+   "keyIdea": "When nothing can be won at once, find your worst-placed piece and move it to a square where it does more.",
+   "text": "From a game played on Lichess. You are White, and material is level. Nothing can be won at once, so look at your pieces one by one. Which one stands worst, and where would it be more useful?",
    "credit": {
     "source": "Lichess games database, game T2ZQwZVy",
     "url": "https://lichess.org/T2ZQwZVy#44",
@@ -51,7 +51,7 @@
       "club": []
      },
      "notes": {
-      "text": "Your knight on h2 sits at the edge of the board and does almost nothing. On f3 it attacks the pawn on g5 and gets ready to jump to d4, in the middle of the board."
+      "text": "Your knight on h2 sits at the edge of the board and does almost nothing. On f3 it attacks the pawn on g5 and gets ready to jump to d4, in the centre."
      }
     },
     {
@@ -105,7 +105,7 @@
       "club": []
      },
      "notes": {
-      "text": "Trade the knight for Black's bishop. The bishop was the only piece guarding the pawn on g4, and after 25...fxe6 that pawn is left alone."
+      "text": "The knight takes Black's bishop on e6, trading itself for it. The bishop was the only defender of the pawn on g4, and after 25...fxe6 that pawn has no defender left."
      }
     },
     {
@@ -132,7 +132,7 @@
       "club": []
      },
      "notes": {
-      "text": "Take the pawn that lost its guard. You are now a pawn ahead. A few moves ago your knight was your worst piece; it found a better square, traded itself for the bishop and helped win a pawn."
+      "text": "The pawn takes on g4, and you are now a pawn ahead. A few moves ago your knight was your worst piece; it found a better square, traded itself for the bishop and helped win a pawn."
      }
     }
    ]
@@ -170,7 +170,7 @@
       "club": []
      },
      "notes": {
-      "text": "The knight has to move, so send it where it does a job. On c6 it attacks the pawn on d4, which no white pawn can ever protect."
+      "text": "The knight had to move, and on c6 it has a job: it attacks the pawn on d4, which no white pawn can ever defend."
      }
     },
     {
@@ -197,7 +197,7 @@
       "club": []
      },
      "notes": {
-      "text": "Add a second attacker: your bishop on f6 looks down the diagonal at d4. Only White's bishop on e3 defends the pawn."
+      "text": "The bishop on f6 adds a second attacker, aimed down the diagonal at d4. Only White's bishop on e3 defends the pawn."
      }
     },
     {
@@ -224,7 +224,7 @@
       "club": []
      },
      "notes": {
-      "text": "Bring a rook to the file of the weak pawn. Now your knight, bishop and rook all attack d4, against one defender, and White will struggle to keep the pawn."
+      "text": "A rook comes to the d-file, the file of the weak pawn. Now your knight, bishop and rook all attack d4, against one defender, and White will struggle to keep the pawn."
      }
     }
    ]
@@ -233,7 +233,7 @@
    "title": "Take the open file",
    "fen": "r4rk1/1p3pp1/p1p2n1p/3p1b2/3P4/P1N5/1PP1BPPP/2R2RK1 b - - 2 17",
    "side": "black",
-   "keyIdea": "Rooks need open files: put a rook on a file with no pawns before your opponent does, then double your rooks there.",
+   "keyIdea": "Rooks need open files: put a rook on a file with no pawns before your opponent does, then bring your second rook to the same file.",
    "text": "From a game played on Lichess. You are Black. The position is calm and neither side can win anything right now. Look at the files: which one has no pawns on it, and who will use it first?",
    "credit": {
     "source": "Lichess games database, game E6Wy0byf",
@@ -289,7 +289,7 @@
       "club": []
      },
      "notes": {
-      "text": "Make room behind the rook. From e7 it still holds the file, and your other rook can come to e8."
+      "text": "The rook steps up to e7 and makes room behind it. From e7 it still holds the file, and your other rook can come to e8."
      }
     },
     {

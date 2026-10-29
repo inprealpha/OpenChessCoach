@@ -15,7 +15,7 @@
   "mateIn2"
  ],
  "intro": {
-  "text": "In a mate in two, your first move prepares the mate and your second move gives it. The first move is often a check that drives the king where you want it, or a sacrifice that drags it there. Sometimes it is a quiet move that takes away the king's last free squares. Before you play it, look at every reply your opponent has and make sure each one still allows mate."
+  "text": "A mate in two takes two of your moves: the first gets everything ready, and the second gives mate. The first move is often a check that pushes the king onto a bad square, or a sacrifice (giving up a piece on purpose) that forces the king to take it. When you have no good check, a quiet move, one that is neither a check nor a capture, can shut the king in and threaten a mate that cannot be stopped. Whatever your first move, look at every reply your opponent has and make sure you can mate after each one."
  },
  "parts": [
   {
@@ -23,7 +23,7 @@
    "fen": "7k/p3R2p/r3B3/4b1K1/5p2/8/8/8 w - - 0 38",
    "side": "white",
    "keyIdea": "A check can drive the king onto the one square where your next move mates it.",
-   "text": "From a game played on Lichess. Black's king in the corner has very few squares, and your king, rook and bishop are all close to it.",
+   "text": "From a game played on Lichess. You are White. Black's king in the corner has very few squares, and your king, rook and bishop are all close to it.",
    "credit": {
     "source": "Lichess puzzle database, puzzle Viebs",
     "url": "https://lichess.org/training/Viebs",
@@ -49,7 +49,7 @@
       "club": []
      },
      "notes": {
-      "text": "Your rook checks along the back rank. Black cannot block it, and your bishop on e6 covers g8, so the king's only move is 38...Kg7."
+      "text": "Your rook checks along Black's back rank, the row where Black's king started. Black cannot block it, and your bishop on e6 covers g8, so the king's only move is to g7."
      }
     },
     {
@@ -86,7 +86,7 @@
    "fen": "6rk/1pp5/p4q2/4p2p/4B2r/P1PP4/1P2QP1P/R3R2K b - - 2 31",
    "side": "black",
    "keyIdea": "A sacrifice with check can force the king onto a square where it can be mated.",
-   "text": "From a game played on Lichess. White's king has just stepped into the corner. Your rook on g8 controls the open g-file, and your queen and other rook are close by.",
+   "text": "From a game played on Lichess. You are Black. White's king has just stepped into the corner. Your rook on g8 controls the whole g-file, which has no pawns on it, and your queen and other rook are close by.",
    "credit": {
     "source": "Lichess puzzle database, puzzle ZIGSD",
     "url": "https://lichess.org/training/ZIGSD",
@@ -112,7 +112,7 @@
       "club": []
      },
      "notes": {
-      "text": "Your rook takes the pawn on h2 with check. The king cannot go to g1, because your rook on g8 covers the whole g-file, so White has to take: 32.Kxh2."
+      "text": "Your rook takes the pawn on h2 with check. It is a sacrifice, because the king can take the rook, but the king cannot go to g1, which your rook on g8 covers, so taking on h2 is White's only move."
      }
     },
     {
@@ -145,11 +145,11 @@
    ]
   },
   {
-   "title": "A quiet move takes the last squares",
+   "title": "No check, but no escape",
    "fen": "7r/8/p3p2p/Pn1pPp2/2pP1Pk1/2P3P1/4NK2/2R5 w - - 7 41",
    "side": "white",
-   "keyIdea": "A move that is not a check can still mate: take away the king's last free squares and threaten a mate that cannot be stopped.",
-   "text": "From a game played on Lichess. Black's king has wandered up to g4, in among your pawns. Count its free squares: there are very few, but right now you have no check at all.",
+   "keyIdea": "No check? Look for a move that seals the king's last exits and leaves a mate threat your opponent cannot meet.",
+   "text": "From a game played on Lichess. You are White. Black's king has wandered up to g4, in among your pawns. Count its free squares: there are very few, but right now you have no check at all.",
    "credit": {
     "source": "Lichess puzzle database, puzzle CdV36",
     "url": "https://lichess.org/training/CdV36",
@@ -175,7 +175,7 @@
       "club": []
      },
      "notes": {
-      "text": "This is not a check, but it decides the game. Your rook takes the h-file, so the king cannot use h3, h4 or h5, and you threaten 42.Rh4 mate. Black has no way to stop it."
+      "text": "This is not a check, but it decides the game. Your rook now controls the h-file, so the king cannot use h3, h4 or h5, and you threaten to give mate with the rook on h4. Black has no way to stop it."
      }
     },
     {

@@ -16,7 +16,7 @@
    "fen": "rn1q1rk1/pbb2ppp/2p1pn2/1p6/4P2B/2NB1N2/PP3PPP/R2QK2R w KQ - 2 13",
    "side": "white",
    "keyIdea": "Attack a pinned piece with a pawn: it cannot step away without losing what stands behind it.",
-   "text": "From a game played on Lichess. You are White. Black's queen has just gone back to d8, so your bishop on h4 now pins the knight on f6 to the queen. Find the cheapest way to attack that knight.",
+   "text": "From a game played on Lichess. You are White. Black's queen has just gone back to d8, so your bishop on h4 now pins the knight on f6 to the queen. The knight cannot move without giving up the queen: what could you attack it with?",
    "url": "https://lichess.org/training/s9v1Z",
    "line": "e5 Nbd7 exf6",
    "notes": [
@@ -28,7 +28,7 @@
     {
      "ply": 2,
      "san": "exf6",
-     "text": "Take the knight. Black can take back on f6 with the other knight, but you have won a knight for a pawn."
+     "text": "The pawn takes the knight. Black can take back on f6, but you have won a knight for a pawn."
     }
    ]
   },
@@ -49,7 +49,7 @@
     {
      "ply": 2,
      "san": "Bxd7",
-     "text": "Take the bishop. The king on e7 cannot take back, because your rook on d1 guards d7. You have won a bishop for nothing."
+     "text": "Your bishop takes Black's bishop. The king on e7 cannot take back, because your rook on d1 guards d7. You have won a bishop for nothing."
     }
    ]
   },

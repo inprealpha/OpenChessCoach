@@ -21,7 +21,7 @@
   "priorKnowledge": [
    "attack-and-defend"
   ],
-  "decisions": 7
+  "decisions": 8
  },
  {
   "id": "mate-in-one",
@@ -34,7 +34,7 @@
   "priorKnowledge": [
    "check"
   ],
-  "decisions": 5
+  "decisions": 4
  },
  {
   "id": "piece-values",
@@ -47,7 +47,7 @@
   "priorKnowledge": [
    "attack-and-defend"
   ],
-  "decisions": 6
+  "decisions": 5
  },
  {
   "id": "opening-principles",
@@ -58,7 +58,7 @@
   "side": "white",
   "goal": "In the first moves of any game, you can claim the centre with pawns, bring out knights and bishops, castle early, and avoid moving one piece again and again.",
   "priorKnowledge": [],
-  "decisions": 11
+  "decisions": 12
  },
  {
   "id": "queen-mate",
@@ -71,12 +71,12 @@
   "priorKnowledge": [
    "mate-in-one"
   ],
-  "decisions": 10,
+  "decisions": 12,
   "playOut": true
  },
  {
   "id": "threats",
-  "name": "What does my opponent want?",
+  "name": "Spot the threat",
   "kind": "thinking",
   "track": "thinking",
   "level": "beginner",
@@ -93,7 +93,7 @@
   "kind": "theme",
   "track": "themes",
   "level": "beginner",
-  "side": "white",
+  "side": "black",
   "goal": "You can find a move that attacks two things at once, often with the queen, so the opponent cannot save both.",
   "priorKnowledge": [
    "attack-and-defend",
@@ -108,7 +108,7 @@
   "track": "themes",
   "level": "beginner",
   "side": "white",
-  "goal": "You can spot a fork by a knight, a pawn or another piece, and use a check to win the piece the fork also attacks.",
+  "goal": "You can spot a fork by a knight, a bishop or a pawn, see why a fork that gives check wins the other piece, and use a check to set one up.",
   "priorKnowledge": [
    "double-attack"
   ],
@@ -167,7 +167,7 @@
   "priorKnowledge": [
    "threats"
   ],
-  "decisions": 7
+  "decisions": 6
  },
  {
   "id": "italian-game",
@@ -245,7 +245,7 @@
   "priorKnowledge": [
    "blunder-check"
   ],
-  "decisions": 6
+  "decisions": 8
  },
  {
   "id": "london-system",
@@ -255,7 +255,7 @@
   "level": "beginner",
   "side": "white",
   "eco": "D02",
-  "goal": "As White, you can set up the London System against almost any reply: d4, Bf4, e3, Nf3, c3 and Nbd2.",
+  "goal": "As White, you can set up the London System: the bishop out to f4 before e3, pawns on d4, e3 and c3, and knights on f3 and d2.",
   "priorKnowledge": [
    "opening-principles"
   ],
@@ -285,7 +285,7 @@
   "priorKnowledge": [
    "queen-mate"
   ],
-  "decisions": 6
+  "decisions": 11
  },
  {
   "id": "two-knights-defence",
@@ -294,7 +294,7 @@
   "track": "openings",
   "level": "beginner",
   "side": "black",
-  "eco": "C58",
+  "eco": "C59",
   "goal": "As Black against the Italian Game, you can play the Two Knights Defence and know how to meet the attack on f7.",
   "priorKnowledge": [
    "italian-game"
@@ -321,7 +321,7 @@
   "track": "themes",
   "level": "beginner",
   "side": "white",
-  "goal": "You can uncover a check with one piece while the other piece wins material, and use a double check, which the king can only answer by moving.",
+  "goal": "You can move one piece out of the way so that the piece behind it gives check while the moved piece attacks something valuable, and use a double check, which the king can only answer by moving.",
   "priorKnowledge": [
    "discovered-attacks"
   ],
@@ -334,11 +334,11 @@
   "track": "endgames",
   "level": "beginner",
   "side": "white",
-  "goal": "Once the queens are off, you can bring your king into the game to attack pawns and support your own.",
+  "goal": "Once the queens have been traded, you can bring your king into the game to attack pawns and support your own.",
   "priorKnowledge": [
    "pawn-promotion"
   ],
-  "decisions": 10
+  "decisions": 12
  },
  {
   "id": "queens-gambit",
@@ -389,7 +389,7 @@
   "level": "beginner",
   "side": "black",
   "eco": "B19",
-  "goal": "As Black against 1.e4, you can play the Caro-Kann: support d5 with c6, develop the light-squared bishop early, and keep a solid position.",
+  "goal": "As Black against 1.e4, you can play the Caro-Kann: support d5 with c6, bring out the bishop on c8 early, and keep a solid position.",
   "priorKnowledge": [
    "opening-principles"
   ],
@@ -487,7 +487,7 @@
   "priorKnowledge": [
    "deflection"
   ],
-  "decisions": 8
+  "decisions": 11
  },
  {
   "id": "zugzwang",
@@ -595,7 +595,7 @@
    "scholars-mate-defence",
    "italian-game"
   ],
-  "decisions": 12
+  "decisions": 13
  },
  {
   "id": "trapped-pieces",
@@ -608,7 +608,7 @@
   "priorKnowledge": [
    "blunder-check"
   ],
-  "decisions": 8
+  "decisions": 10
  },
  {
   "id": "pawn-races",
@@ -657,8 +657,8 @@
   "track": "openings",
   "level": "intermediate",
   "side": "black",
-  "eco": "B92",
-  "goal": "As Black against 1.e4, you can play the Sicilian Defence: trade the c-pawn for White's d-pawn and fight back on the queenside.",
+  "eco": "B76",
+  "goal": "As Black against 1.e4, you can play the Sicilian Defence: trade your c-pawn for White's d-pawn, then build the Dragon set-up with ...g6, ...Bg7, castling and ...Nc6.",
   "priorKnowledge": [
    "opening-principles"
   ],
@@ -711,12 +711,12 @@
   "track": "openings",
   "level": "intermediate",
   "side": "black",
-  "eco": "C06",
+  "eco": "C02",
   "goal": "As Black against 1.e4, you can play the French Defence and know the plan against White's pawn chain: attack its base with c5 and its front with f6.",
   "priorKnowledge": [
    "pawn-structure"
   ],
-  "decisions": 10
+  "decisions": 11
  },
  {
   "id": "rook-endgames",
@@ -743,7 +743,7 @@
   "priorKnowledge": [
    "weak-squares"
   ],
-  "decisions": 10
+  "decisions": 11
  },
  {
   "id": "perpetual-check",
@@ -770,7 +770,7 @@
   "priorKnowledge": [
    "opening-traps"
   ],
-  "decisions": 11
+  "decisions": 12
  },
  {
   "id": "good-and-bad-pieces",
@@ -783,7 +783,7 @@
   "priorKnowledge": [
    "pawn-structure"
   ],
-  "decisions": 6
+  "decisions": 9
  },
  {
   "id": "minor-piece-endgames",
@@ -791,12 +791,12 @@
   "kind": "endgame",
   "track": "endgames",
   "level": "intermediate",
-  "side": "white",
+  "side": "black",
   "goal": "You can tell when a bishop beats a knight and when the reverse is true, and know two draws: bishops of opposite colours, and the wrong bishop with a rook pawn.",
   "priorKnowledge": [
    "good-and-bad-pieces"
   ],
-  "decisions": 12
+  "decisions": 13
  },
  {
   "id": "combinations",
@@ -819,7 +819,7 @@
   "track": "thinking",
   "level": "intermediate",
   "side": "white",
-  "goal": "You can decide when to trade: when you are ahead in material, to remove a strong enemy piece, or to escape an attack, and when to keep pieces on.",
+  "goal": "Before a trade, you can look at king safety, material and the pieces it would remove, and decide whether to trade or to keep the pieces on.",
   "priorKnowledge": [
    "piece-values",
    "good-and-bad-pieces"
@@ -847,7 +847,7 @@
   "track": "thinking",
   "level": "intermediate",
   "side": "white",
-  "goal": "When you are under attack, you can bring defenders, trade off the strongest attacker, give material back, or hit back somewhere else.",
+  "goal": "When your king is under attack, you can name the threat and stop it, look for a forcing move of your own, trade off the strongest attacker, or give back material to break the attack.",
   "priorKnowledge": [
    "attacking-the-king"
   ],

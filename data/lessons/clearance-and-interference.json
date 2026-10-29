@@ -24,7 +24,7 @@
    "fen": "2r2r1k/p1q1ppR1/5n1p/2p5/2BP2QP/2P5/P2K1P2/6R1 w - - 1 24",
    "side": "white",
    "keyIdea": "When your own piece sits on the square where another piece could give mate, move it away with check.",
-   "text": "From a game played on Lichess. White to move. Your queen and your rook on g1 both point up the g-file at g7, but your other rook already sits on g7.",
+   "text": "From a game played on Lichess. You are White. Your queen on g4 and your rook on g1 stand on the g-file, the rook behind the queen, but your other rook already sits on g7.",
    "credit": {
     "source": "Lichess puzzle database, puzzle qIzvt",
     "url": "https://lichess.org/training/qIzvt",
@@ -87,7 +87,7 @@
    "fen": "6k1/p2r1qpp/1p6/4Q3/8/5P1P/P5P1/4R2K w - - 1 30",
    "side": "white",
    "keyIdea": "Move the front piece off a line with check, and the piece behind it gets the open line before the opponent can react.",
-   "text": "From a game played on Lichess. White to move, with equal material. Your rook on e1 would like the e-file, but your own queen on e5 stands in front of it.",
+   "text": "From a game played on Lichess. You are White, and the material is level. Your rook on e1 would like the e-file, but your own queen on e5 stands in front of it.",
    "credit": {
     "source": "Lichess puzzle database, puzzle 7czFj",
     "url": "https://lichess.org/training/7czFj",
@@ -150,7 +150,7 @@
    "fen": "3rr1k1/3b1ppp/3q1b2/1p2p3/1n6/1P2BN2/3N1PPP/2RQR1K1 w - - 0 27",
    "side": "white",
    "keyIdea": "Put a piece between a defender and what it guards. If that piece also makes a threat, the defender has no time to fix it.",
-   "text": "From a game played on Lichess. White to move, a pawn down. Black's knight on b4 has one guard: the queen on d6, along the diagonal.",
+   "text": "From a game played on Lichess. You are White, and you are a pawn down. Black's knight on b4 has one guard: the queen on d6, along the diagonal.",
    "credit": {
     "source": "Lichess puzzle database, puzzle 807ML",
     "url": "https://lichess.org/training/807ML",
@@ -176,7 +176,7 @@
       "club": []
      },
      "notes": {
-      "text": "The bishop steps onto the diagonal between Black's queen and the knight, and attacks the queen. Your rook on c1 guards the bishop. The queen must move, and from no safe square can it still guard b4."
+      "text": "The bishop steps onto the diagonal between Black's queen and the knight, and attacks the queen. Your rook on c1 guards the bishop. The queen must move, and no safe square lets it keep guarding b4."
      }
     },
     {
@@ -203,7 +203,7 @@
       "club": []
      },
      "notes": {
-      "text": "The knight has lost its guard, so take it. You have won a knight."
+      "text": "The knight has lost its guard, so the bishop takes it. You have won a knight."
      }
     }
    ]
@@ -212,8 +212,8 @@
    "title": "A pawn cuts the guard",
    "fen": "r2r2k1/p3qpbp/6p1/2nPPp2/5P2/3PB3/1R2Q1PP/1R4K1 w - - 5 26",
    "side": "white",
-   "keyIdea": "Even a pawn can block a defending line, and a pawn that attacks a bigger piece forces it to move at once.",
-   "text": "From a game played on Lichess. White to move, two pawns down. Your bishop on e3 attacks the knight on c5, but Black's queen on e7 guards it along the diagonal.",
+   "keyIdea": "A pawn can step between a defender and the piece it guards; if the pawn also attacks the defender, there is no time to fix the line.",
+   "text": "From a game played on Lichess. You are White, 2 points behind: a knight down for a pawn. Your bishop on e3 attacks the knight on c5, but Black's queen on e7 guards it along the diagonal.",
    "credit": {
     "source": "Lichess puzzle database, puzzle mPefF",
     "url": "https://lichess.org/training/mPefF",
@@ -239,7 +239,7 @@
       "club": []
      },
      "notes": {
-      "text": "The pawn steps onto the diagonal between the queen and the knight, and attacks the queen. The pawn on e5 guards it. The queen must move, and from no safe square can it still guard the knight on c5."
+      "text": "The pawn steps onto the diagonal between the queen and the knight, and attacks the queen. The pawn on e5 guards it. The queen must move, and no safe square lets it keep guarding the knight on c5."
      }
     },
     {
@@ -266,7 +266,7 @@
       "club": []
      },
      "notes": {
-      "text": "Take the knight. Nothing guards it any more, and you have won back more than the two pawns."
+      "text": "The bishop takes the knight, which nothing guards any more. You were 2 points behind, and now you are a pawn ahead."
      }
     }
    ]

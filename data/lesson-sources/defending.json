@@ -5,30 +5,56 @@
  "track": "thinking",
  "level": "intermediate",
  "side": "white",
- "goal": "When you are under attack, you can bring defenders, trade off the strongest attacker, give material back, or hit back somewhere else.",
+ "goal": "When your king is under attack, you can name the threat and stop it, look for a forcing move of your own, trade off the strongest attacker, or give back material to break the attack.",
  "priorKnowledge": [
   "attacking-the-king"
  ],
- "intro": "When your opponent attacks your king, look for the move that takes the most force out of the attack. Bring a defender closer, offer to trade the strongest attacking piece, or give back material you won earlier if that breaks the attack. And sometimes the best defence is to hit back: a check or a threat that makes the attacker stop and answer you.",
+ "intro": "Defending starts with one question: what does my opponent threaten to do next? Once you can name the threat, look for the simplest way to stop it; sometimes a single pawn move is enough. Before you settle for passive defence, check whether you have a forcing move of your own. And when the attack keeps coming, trading off the strongest attacker, or giving back some of the material you won, can take the force out of it.",
  "parts": [
   {
-   "title": "Bring a defender",
-   "fen": "5r1k/1p4pp/p2p4/4p1r1/2B2n2/2P2QPq/PP3P1P/R2R2K1 w - - 7 25",
+   "title": "Find the threat first",
+   "fen": "r3k1r1/pp5p/2p1p1qp/2Q5/3pP3/3P4/PPP2PPP/R4RK1 w q - 1 16",
    "side": "white",
-   "keyIdea": "Bring a piece back to guard the squares around your king, best of all one that makes a threat as it arrives.",
-   "text": "From a game played on Lichess. You are White. Black's queen on h3, knight on f4 and rook on g5 have all come close to your king.",
-   "url": "https://lichess.org/ao3tvw3o#48",
-   "line": "Bf1 Qh6 Qxb7",
+   "keyIdea": "Name the threat before anything else: one move that blocks the attacking line, even a pawn move, can stop a mating attack.",
+   "text": "From a game played on Lichess. You are White, and you are a pawn up. Black's queen on g6 and rook on g8 both stand on the g-file, aimed at the pawn in front of your king. What does Black threaten, and how can you stop it?",
+   "url": "https://lichess.org/ysyzjjls#30",
+   "line": "g3 h5 Qxd4",
    "notes": [
     {
      "ply": 0,
-     "san": "Bf1",
-     "text": "Bring the bishop home. On f1 it guards g2 and attacks Black's queen, so Black has to stop and move the queen. After a slow move instead, Black would play ...Rh5, lining up rook and queen against your pawn on h2."
+     "san": "g3",
+     "text": "Black threatened ...Qxg2, mate, because the rook on g8 backs up the queen. 16.g3 puts a pawn in the way, so the queen no longer reaches g2, and the pawns on f2 and h2 guard g3. It is the only good move: any other move loses your queen or allows mate."
     },
     {
      "ply": 2,
-     "san": "Qxb7",
-     "text": "Black's queen has been pushed back and your king is safe again, so your own queen can take the undefended pawn on b7."
+     "san": "Qxd4",
+     "text": "Black's 16...h5 gets ready for ...h4, to pry the g-file open again, so keep an eye on g3. For now your king is safe, and your queen takes the pawn on d4: you are two pawns up, and the queen stands in the centre, ready to come back towards your king."
+    }
+   ]
+  },
+  {
+   "title": "Hit back",
+   "fen": "r3k2r/pp2qpQp/2p5/3pn3/8/1B6/PPP2PPP/RN2R1K1 b kq - 0 14",
+   "side": "black",
+   "keyIdea": "When defending looks hard, look for a counter-attack: a check, which your opponent must answer first, can turn the game around.",
+   "text": "From a game played on Lichess. You are Black. White's queen has just taken on g7 and now attacks your rook on h8. Before you defend the rook, list your own checks.",
+   "url": "https://lichess.org/training/HMXJB",
+   "line": "Nf3+ gxf3 Qxe1+ Kg2 O-O-O",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Nf3+",
+     "text": "The knight hits back with check. It leaves e5, so your queen on e7 now attacks White's rook on e1, and White has to answer the check first."
+    },
+    {
+     "ply": 2,
+     "san": "Qxe1+",
+     "text": "Your queen takes the rook on e1, with check."
+    },
+    {
+     "ply": 4,
+     "san": "O-O-O",
+     "text": "Castling queenside, the long way, takes your king out of the centre, and your rook on d8 now guards h8, so Qxh8 would be answered by Rxh8. You have won a rook for the knight."
     }
    ]
   },
@@ -37,24 +63,24 @@
    "fen": "3q2rk/r6n/p3p2Q/1p1p1p1N/3P1R2/P1P5/1P4PP/R5K1 b - - 0 30",
    "side": "black",
    "keyIdea": "Offer to trade the attacking queen: without it, most attacks on the king run out of force.",
-   "text": "From a game played on Lichess. You are Black. White's queen on h6 and knight on h5 are right next to your king, and the queen also eyes your pawn on e6.",
+   "text": "From a game played on Lichess. You are Black. White's queen on h6 and knight on h5 are close to your king, and the queen also attacks your pawn on e6.",
    "url": "https://lichess.org/MCdeeZ23#59",
    "line": "Qg5 Qxg5 Nxg5 Rff1 Ne4",
    "notes": [
     {
      "ply": 0,
      "san": "Qg5",
-     "text": "Offer the queen trade on g5, a square guarded by your rook on g8 and your knight on h7. Either the queens come off, or White's queen has to leave your king."
+     "text": "Your queen offers a trade on g5, a square that your rook on g8 and your knight on h7 guard. Either the queens come off, or White's queen has to leave your king."
     },
     {
      "ply": 2,
      "san": "Nxg5",
-     "text": "Take back with the knight. White's attack has lost its queen, and your knight leaves the edge of the board."
+     "text": "The knight takes back on g5. White's attack has lost its queen, and your knight has left the edge of the board."
     },
     {
      "ply": 4,
      "san": "Ne4",
-     "text": "Put the knight on e4, a central square that no white pawn can attack. Pushing the a-pawn was also a good move."
+     "text": "The knight goes to e4, a central square that no white pawn can attack. Pushing the a-pawn was also a good move."
     }
    ]
   },
@@ -70,43 +96,17 @@
     {
      "ply": 0,
      "san": "Rxe4",
-     "text": "Your rook on e1 is attacked by Black's queen, and nothing defends it. If Black takes it with check, the attack becomes a mating attack. Give the exchange back instead: take the knight on e4 with the rook."
+     "text": "Your rook on e1 was attacked by Black's queen, with nothing to defend it, and after ...Qxe1+ Black's attack would have been close to winning. So the rook gives the exchange back: it takes the knight on e4, one of the attackers."
     },
     {
      "ply": 2,
      "san": "Qxe4",
-     "text": "Take the pawn. The knight has gone, you are still a pawn up, and your queen attacks the rook on f5."
+     "text": "The queen takes the pawn on e4. You are now a pawn up, and your queen attacks the rook on f5."
     },
     {
      "ply": 4,
      "san": "Ra5",
-     "text": "Black defended the rook with g6. Attack it a second time along the fifth rank: now Black is the one who has to defend."
-    }
-   ]
-  },
-  {
-   "title": "Hit back",
-   "fen": "r3k2r/pp2qpQp/2p5/3pn3/8/1B6/PPP2PPP/RN2R1K1 b kq - 0 14",
-   "side": "black",
-   "keyIdea": "When defending looks hard, look for a counter-attack: a check that wins time or material can turn the game around.",
-   "text": "A Lichess Puzzle. You are Black. White's queen has just taken on g7 and now attacks your rook on h8. Before you defend it, look at the e-file.",
-   "url": "https://lichess.org/training/HMXJB",
-   "line": "Nf3+ gxf3 Qxe1+ Kg2 O-O-O",
-   "notes": [
-    {
-     "ply": 0,
-     "san": "Nf3+",
-     "text": "Hit back with check. The knight leaves e5, so your queen on e7 now attacks White's rook on e1, and White has to answer the check first."
-    },
-    {
-     "ply": 2,
-     "san": "Qxe1+",
-     "text": "Take the rook, with check."
-    },
-    {
-     "ply": 4,
-     "san": "O-O-O",
-     "text": "Castle long. Your king leaves the centre, and your rook on d8 now guards h8, so Qxh8 is answered by Rxh8. You have won a rook for the knight."
+     "text": "Black defended the rook with ...g6, and 38.Ra5 offers a trade of rooks. The rook on f5 is the last piece helping Black's queen against your king; once it goes, the attack is over, and the game is level even after Black wins a pawn back. Taking on c4 with the queen instead would lose to 38...Qe1+ and ...Rf1."
     }
    ]
   }

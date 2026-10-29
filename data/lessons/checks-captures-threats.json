@@ -12,15 +12,15 @@
  "puzzleTags": [],
  "puzzleThemes": [],
  "intro": {
-  "text": "Checks, captures and threats are forcing moves: your opponent has to answer them. Before each move, list every check, capture and threat you have, and the ones your opponent has too. Then follow each forcing move one reply ahead. This is how you find the moves that win material, and the ones that only seem to."
+  "text": "A check, a capture or a threat leaves the other side little choice, because it usually has to be answered. Moves like these are called forcing moves, and they are the first ones to look at, for you and for your opponent. Before each move, list them for both sides and follow each one a move ahead. This is how you find the moves that win material (pieces and pawns, counted in points) and spot the ones that only seem to."
  },
  "parts": [
   {
    "title": "A check that wins a rook",
    "fen": "1r6/p7/4b2Q/q3kp1p/4p3/8/PPP3PP/5R1K w - - 3 31",
    "side": "white",
-   "keyIdea": "List every check: a check can force the king off a line and leave the piece behind it unguarded.",
-   "text": "A Lichess Puzzle. You are White and 2 points behind. Black's king stands in the open on e5: list all your checks and follow each one a move ahead.",
+   "keyIdea": "List every check: a check can drive the king off a line and leave the piece behind it open to capture.",
+   "text": "From a game played on Lichess. You are White, and you are 2 points behind. Black's king stands in the open on e5: list all your checks and follow each one a move ahead.",
    "credit": {
     "source": "Lichess puzzle database, puzzle EGGQS",
     "url": "https://lichess.org/training/EGGQS",
@@ -46,7 +46,7 @@
       "club": []
      },
      "notes": {
-      "text": "Of your checks, 31.Qf4+ is the one that wins. The king cannot take the queen, because your rook on f1 guards f4, and once the king steps off the diagonal your queen sees the rook on b8. 31.Qxe6+ would only lose the queen to 31...Kxe6."
+      "text": "Of your checks, 31.Qf4+ (the queen to f4, with check) is the one that wins. The king cannot take the queen, because your rook on f1 guards f4, and the king must step off the diagonal from f4 to b8, so your queen can then take the rook on b8. 31.Qxe6+ would only lose the queen to 31...Kxe6."
      }
     },
     {
@@ -73,7 +73,7 @@
       "club": []
      },
      "notes": {
-      "text": "Take the rook. You were 2 points behind, and now you are 3 ahead."
+      "text": "The queen takes the rook. You were 2 points behind, and now you are 3 ahead."
      }
     }
    ]
@@ -83,7 +83,7 @@
    "fen": "5r1r/4knQp/1b2pp2/7B/2P5/3P2P1/7P/7K w - - 3 39",
    "side": "white",
    "keyIdea": "List the captures and ask what each piece guards: taking a defender can leave the piece it protected free.",
-   "text": "A Lichess Puzzle. You are White and 3 points behind; your queen attacks the rook on h8, but the knight on f7 and the rook on f8 both guard it. Each of your checks gives away the queen, so look at your other captures.",
+   "text": "From a game played on Lichess. You are White, and you are 3 points behind. Your queen attacks the rook on h8, but the knight on f7 and the rook on f8 both guard it, and each of your checks gives away the queen. List your captures, and for each one ask what Black could take back.",
    "credit": {
     "source": "Lichess puzzle database, puzzle vlCI2",
     "url": "https://lichess.org/training/vlCI2",
@@ -109,7 +109,7 @@
       "club": []
      },
      "notes": {
-      "text": "39.Qxh8 would give your queen for a rook. 39.Bxf7 instead takes one of the two guards of the rook on h8, and if the rook on f8 takes back, the other guard has gone too."
+      "text": "39.Qxh8 would give your queen for a rook. 39.Bxf7 instead takes the knight, one of the two guards of the rook on h8. If Black's rook on f8 takes back on f7, it no longer guards h8 either."
      }
     },
     {
@@ -136,17 +136,17 @@
       "club": []
      },
      "notes": {
-      "text": "Nothing guards the rook on h8 now, so take it. You gave your bishop for a knight and a rook: you were 3 points behind and are now 2 ahead."
+      "text": "Nothing guards the rook on h8 now, so the queen takes it. You gave your bishop for a knight and a rook: you were 3 points behind and are now 2 ahead."
      }
     }
    ]
   },
   {
-   "title": "A pawn makes two threats",
+   "title": "No checks, no good captures",
    "fen": "2r2rk1/1pqb1p1p/2n1p1p1/3pP3/5P1P/2NBQ3/PP4PK/R4R2 b - - 1 19",
    "side": "black",
-   "keyIdea": "A quiet move that attacks two pieces at once can win as surely as a check or a capture.",
-   "text": "A Lichess Puzzle. You are Black, and the material is level. You have no checks, and both of your captures lose material, so look at the moves that make a threat.",
+   "keyIdea": "A move that is not a check or a capture, but attacks two pieces at once, can win as surely as either.",
+   "text": "From a game played on Lichess. You are Black, and the material is level. You have no checks, and both of your captures lose material. What is left on your list?",
    "credit": {
     "source": "Lichess puzzle database, puzzle 1WT0R",
     "url": "https://lichess.org/training/1WT0R",
@@ -199,7 +199,83 @@
       "club": []
      },
      "notes": {
-      "text": "Take the knight. Even if White takes your pawn back, you have won a knight for a pawn, 3 points for 1."
+      "text": "The pawn takes the knight. Even if White takes your pawn back, you have won a knight for a pawn, 3 points for 1."
+     }
+    }
+   ]
+  },
+  {
+   "title": "Your opponent's checks",
+   "fen": "5rk1/p1N2p2/1r4pp/4b3/Q2pPP2/1P5q/P3B2P/2R2RK1 b - - 0 24",
+   "side": "white",
+   "keyIdea": "List your opponent's checks as well as your own: the answer to a check must also keep your other pieces safe.",
+   "text": "From a game played on Lichess. You are White. Black's bishop has just taken your knight on c7. Before you take back, list Black's forcing moves too: which checks would Black have next, and what else would they attack?",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle 5Zb1I",
+    "url": "https://lichess.org/training/5Zb1I",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "e5c7",
+    "c1c7",
+    "h3e3",
+    "f1f2"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "5rk1/p1N2p2/1r4pp/4b3/Q2pPP2/1P5q/P3B2P/2R2RK1 b - - 0 24",
+     "decision": false,
+     "main": "e5c7",
+     "mainSan": "Bxc7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "5rk1/p1b2p2/1r4pp/8/Q2pPP2/1P5q/P3B2P/2R2RK1 w - - 0 25",
+     "decision": true,
+     "main": "c1c7",
+     "mainSan": "Rxc7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The rook takes back on c7, and the material is level again. But Black's queen can now check from e3, where it also attacks your bishop on e2."
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "5rk1/p1R2p2/1r4pp/8/Q2pPP2/1P5q/P3B2P/5RK1 b - - 0 25",
+     "decision": false,
+     "main": "h3e3",
+     "mainSan": "Qe3+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "5rk1/p1R2p2/1r4pp/8/Q2pPP2/1P2q3/P3B2P/5RK1 w - - 1 26",
+     "decision": true,
+     "main": "f1f2",
+     "mainSan": "Rf2",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The rook blocks the check on f2, and from there it also guards the bishop on e2. Moving the king to h1 or g2 would also get out of check, but then Black's queen would take the bishop."
      }
     }
    ]

@@ -1426,9 +1426,102 @@
      "main": "h7h6",
      "mainSan": "h6",
      "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
+      "beginner": [
+       {
+        "uci": "h7h6",
+        "san": "h6",
+        "percent": 60.6,
+        "games": 40
+       },
+       {
+        "uci": "f8c5",
+        "san": "Bc5",
+        "percent": 15.2,
+        "games": 10
+       },
+       {
+        "uci": "f8e7",
+        "san": "Be7",
+        "percent": 12.1,
+        "games": 8
+       },
+       {
+        "uci": "f6d5",
+        "san": "Nd5",
+        "percent": 6.1,
+        "games": 4
+       },
+       {
+        "uci": "f6e4",
+        "san": "Ne4",
+        "percent": 3,
+        "games": 2
+       }
+      ],
+      "casual": [
+       {
+        "uci": "h7h6",
+        "san": "h6",
+        "percent": 68.3,
+        "games": 357
+       },
+       {
+        "uci": "f8c5",
+        "san": "Bc5",
+        "percent": 12.6,
+        "games": 66
+       },
+       {
+        "uci": "f6d5",
+        "san": "Nd5",
+        "percent": 7.1,
+        "games": 37
+       },
+       {
+        "uci": "f8e7",
+        "san": "Be7",
+        "percent": 5.9,
+        "games": 31
+       },
+       {
+        "uci": "f8d6",
+        "san": "Bd6",
+        "percent": 3.8,
+        "games": 20
+       }
+      ],
+      "club": [
+       {
+        "uci": "h7h6",
+        "san": "h6",
+        "percent": 84.6,
+        "games": 219
+       },
+       {
+        "uci": "f8c5",
+        "san": "Bc5",
+        "percent": 5.4,
+        "games": 14
+       },
+       {
+        "uci": "f8e7",
+        "san": "Be7",
+        "percent": 4.2,
+        "games": 11
+       },
+       {
+        "uci": "f8d6",
+        "san": "Bd6",
+        "percent": 3.5,
+        "games": 9
+       },
+       {
+        "uci": "e5e4",
+        "san": "e4",
+        "percent": 1.2,
+        "games": 3
+       }
+      ]
      },
      "notes": {
       "text": "8.Be2 is the main line, though beginners play 8.Ba4 even more often. 8...h6 attacks the knight on g5 with a pawn, so it has to move yet again. Against 8.Ba4 or 8.Bd3, 8...h6 is a good answer too."
@@ -1441,9 +1534,66 @@
      "main": "g5f3",
      "mainSan": "Nf3",
      "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
+      "beginner": [
+       {
+        "uci": "g5f3",
+        "san": "Nf3",
+        "percent": 82.6,
+        "games": 19
+       },
+       {
+        "uci": "g5h3",
+        "san": "Nh3",
+        "percent": 13,
+        "games": 3
+       },
+       {
+        "uci": "g5e4",
+        "san": "Ne4",
+        "percent": 4.3,
+        "games": 1
+       }
+      ],
+      "casual": [
+       {
+        "uci": "g5f3",
+        "san": "Nf3",
+        "percent": 90.6,
+        "games": 365
+       },
+       {
+        "uci": "g5h3",
+        "san": "Nh3",
+        "percent": 6.7,
+        "games": 27
+       },
+       {
+        "uci": "g5f7",
+        "san": "Nxf7",
+        "percent": 2.7,
+        "games": 11
+       }
+      ],
+      "club": [
+       {
+        "uci": "g5f3",
+        "san": "Nf3",
+        "percent": 84.7,
+        "games": 161
+       },
+       {
+        "uci": "g5h3",
+        "san": "Nh3",
+        "percent": 14.7,
+        "games": 28
+       },
+       {
+        "uci": "g5f7",
+        "san": "Nxf7",
+        "percent": 0.5,
+        "games": 1
+       }
+      ]
      }
     },
     {
@@ -1453,9 +1603,78 @@
      "main": "e5e4",
      "mainSan": "e4",
      "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
+      "beginner": [
+       {
+        "uci": "e5e4",
+        "san": "e4",
+        "percent": 81.1,
+        "games": 30
+       },
+       {
+        "uci": "f8d6",
+        "san": "Bd6",
+        "percent": 10.8,
+        "games": 4
+       },
+       {
+        "uci": "f8c5",
+        "san": "Bc5",
+        "percent": 2.7,
+        "games": 1
+       },
+       {
+        "uci": "c8g4",
+        "san": "Bg4",
+        "percent": 2.7,
+        "games": 1
+       },
+       {
+        "uci": "f8e7",
+        "san": "Be7",
+        "percent": 2.7,
+        "games": 1
+       }
+      ],
+      "casual": [
+       {
+        "uci": "e5e4",
+        "san": "e4",
+        "percent": 87.5,
+        "games": 274
+       },
+       {
+        "uci": "f8d6",
+        "san": "Bd6",
+        "percent": 8.3,
+        "games": 26
+       },
+       {
+        "uci": "f8c5",
+        "san": "Bc5",
+        "percent": 2.9,
+        "games": 9
+       }
+      ],
+      "club": [
+       {
+        "uci": "e5e4",
+        "san": "e4",
+        "percent": 93.8,
+        "games": 182
+       },
+       {
+        "uci": "f8d6",
+        "san": "Bd6",
+        "percent": 5.2,
+        "games": 10
+       },
+       {
+        "uci": "f8c5",
+        "san": "Bc5",
+        "percent": 1,
+        "games": 2
+       }
+      ]
      },
      "notes": {
       "text": "9.Nf3 went back, and 9...e4 chases the knight once more. It has to move for the fourth time, and White's bishop has already moved three times, while your pieces are ready to come out. Next you bring out the bishop from f8 and castle, and your active pieces make up for the pawn."

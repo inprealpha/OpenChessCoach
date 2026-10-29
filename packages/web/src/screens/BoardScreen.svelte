@@ -297,6 +297,7 @@
         <StepButtons onfirst={() => line.goTo(0)} onprevious={() => line.back()} onnext={() => line.forward()} onlast={() => line.goTo(line.moves.length)} />
         <button type="button" class="secondary" onclick={flip}>Flip board</button>
         <button type="button" class="secondary" onclick={newBoard}>New board</button>
+        <button type="button" class="secondary" onclick={() => {}}>Copy position</button>
         <button type="button" class="secondary" aria-expanded={settingUp} onclick={openSetUp} bind:this={setupButton}>Set up a position</button>
         <ThreatButton />
       </div>

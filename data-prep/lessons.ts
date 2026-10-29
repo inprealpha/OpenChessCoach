@@ -63,6 +63,19 @@ function credit(url: string): Credit {
   };
 }
 
+/**
+ * The months of the games, "January 2013, July 2014 and June 2015", from the names of the Lichess
+ * database files they came from (lichess_db_standard_rated_2013-01.pgn.zst).
+ */
+function months(files: string): string {
+  const names = files.split(', ').map((file) => {
+    const month = file.match(/_(\d{4})-(\d{2})\.pgn/);
+    if (!month) throw new Error(`No month in the games file name ${file}`);
+    return new Date(Date.UTC(Number(month[1]), Number(month[2]) - 1)).toLocaleString('en', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+  });
+  return names.length > 1 ? `${names.slice(0, -1).join(', ')} and ${names.at(-1)}` : (names[0] ?? '');
+}
+
 const MIN_GAMES = 20;
 
 function popular(fen: string, level: PlayerLevel): MoveStat[] {
@@ -141,7 +154,7 @@ function build(src: Source): LessonData {
     intro: { text: src.intro, ...(src.introUrl ? { credit: credit(src.introUrl) } : {}) },
     parts,
     ...(src.playOut ? { playOut: src.playOut } : {}),
-    ...(src.kind === 'opening' ? { statsSource: `Lichess games database (CC0): ${stats.source}, ${stats.games.toLocaleString('en')} rated games` } : {}),
+    ...(src.kind === 'opening' ? { statsSource: `Lichess games database (CC0): ${stats.games.toLocaleString('en')} rated games from ${months(stats.source)}` } : {}),
   };
 }
 

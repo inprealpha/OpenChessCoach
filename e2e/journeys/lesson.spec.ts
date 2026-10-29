@@ -730,6 +730,18 @@ test('Try another move waits for the Coach’s answer, and starts the next try w
   expect((await lessonBriefs(app)).map((b) => b.question)).toEqual(['I want to bring a piece out.', undefined]);
 });
 
+test('a part whose line starts with the opponent’s move says at its first decision what the opponent played', async ({ paired, app }) => {
+  const lesson = readLesson('mate-in-one');
+  const { part, node } = decisions(lesson)[0]!;
+  // The board shows the position after the opponent's move.
+  expect(node.ply).toBe(1);
+  await paired.goto(`${app.url}/#/lesson/${lesson.id}`);
+  await paired.getByRole('button', { name: 'Start the Lesson' }).click();
+  await expect(paired.getByRole('group', { name: `${lesson.name} Lesson board` })).toHaveAttribute('data-fen', node.fen);
+  const played = sanLine(part.fen, part.mainLine.slice(0, 1))[0]!;
+  await expect(paired.getByRole('region', { name: 'Position' })).toContainText(`${part.side === 'white' ? 'Black' : 'White'} played ${played}.`);
+});
+
 test('after a part’s first decision, its text folds away as how the part began, and the Position says what the opponent replied', async ({ paired, app }) => {
   const lesson = readLesson('piece-values');
   const steps = decisions(lesson);

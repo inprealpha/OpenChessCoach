@@ -604,6 +604,10 @@
               {#if firstOfPart}
                 {#if sideChanged}<p><strong>You play {SIDE_NAMES[part.side]} in this part.</strong></p>{/if}
                 {#if part.text}<p>{part.text}</p>{/if}
+                <!-- A part whose line starts with the opponent's move: the board already shows it. -->
+                {#if lastReply}
+                  <p>{SIDE_NAMES[otherSide(part.side)]} played {lastReply.san}. {#if node && isCheck(node.fen)}Your king is in check.{/if}</p>
+                {/if}
               {:else}
                 <!-- The part's text describes the position it started from: after its first decision, it is folded away. -->
                 {#if lastReply}

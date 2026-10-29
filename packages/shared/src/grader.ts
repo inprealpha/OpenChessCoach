@@ -57,7 +57,9 @@ export interface GradeResult {
 
 export function gradeMove(input: GradeInput): GradeResult {
   const winLoss = Math.max(0, winningChances(input.best) - winningChances(input.played));
-  if (input.isTopMove) return { grade: 'Best', winLoss: 0 };
+  // A move that gives checkmate (a mate in one, from before it) ends the game: nothing is better,
+  // whichever mate the Engine lists first.
+  if (input.isTopMove || input.played.mate === 1) return { grade: 'Best', winLoss: 0 };
   if (winLoss >= GRADE_THRESHOLDS.Blunder) return { grade: 'Blunder', winLoss };
   if (winLoss >= GRADE_THRESHOLDS.Mistake) return { grade: 'Mistake', winLoss };
   const stillMates = input.played.mate !== undefined && input.played.mate > 0;

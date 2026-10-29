@@ -184,11 +184,13 @@
 
   /**
    * The king's castling square when the Player moves the king onto its own rook, as Lichess allows:
-   * g1 for the rook on h1, c1 for the one on a1. Undefined unless that castling is legal.
+   * g1 for the rook on h1, c1 for the one on a1. Undefined unless the king stands on e1 (e8 for
+   * Black), where castling starts, and that castling is legal: from f1, g1 is a plain king move.
    */
   function castlingTo(from: string, to: string): string | undefined {
     const [king, rook] = [pieces.get(from), pieces.get(to)];
-    if (king?.role !== 'king' || rook?.role !== 'rook' || rook.color !== king.color || from[1] !== to[1]) return undefined;
+    if (king?.role !== 'king' || rook?.role !== 'rook' || rook.color !== king.color) return undefined;
+    if (from !== (king.color === 'white' ? 'e1' : 'e8') || from[1] !== to[1]) return undefined;
     const square = `${to > from ? 'g' : 'c'}${from[1]}`;
     return (dests.get(from) ?? []).includes(square) ? square : undefined;
   }

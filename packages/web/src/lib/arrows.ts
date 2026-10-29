@@ -48,7 +48,7 @@ export function reviewArrows(move: GradedMove | undefined): BoardArrow[] {
 /**
  * A Lesson's Coach arrows: the move on the board (`played`) and the opponent's moves, never another
  * move for the Player, who plays `player`. Even the Engine's top choice may be the answer to the
- * Lesson's next decision.
+ * Lesson's next decision. Only the arrows: the Coach's words may still name other moves (ADR 0012).
  */
 export function lessonArrows<A extends { from: string; to: string }>(arrows: readonly A[], fen: string, played: string | undefined, player: Side): A[] {
   const theirs = new Set(piecesOf(fen).filter((p) => p.color !== player).map((p) => p.square));

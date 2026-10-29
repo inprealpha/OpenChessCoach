@@ -40,7 +40,8 @@
     question = '';
     await onwhy(asked);
     // The button was disabled while the Coach answered, which drops the focus: the box takes it back.
-    if (document.activeElement === document.body) whyInput?.focus();
+    // Not on a touch screen, where a focused box opens the on-screen keyboard over the board.
+    if (document.activeElement === document.body && !matchMedia('(pointer: coarse)').matches) whyInput?.focus();
     // Not answered (the desktop refused it, or the Coach couldn't be reached): give it back to edit.
     if (asked && thread.calls > calls && thread.failed && !question) question = asked;
   }

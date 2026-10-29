@@ -165,8 +165,9 @@ export function templateReply(brief: Brief): CoachRawReply {
       const idea = brief.focus?.keyIdea;
       if (idea) text += ` Key idea: ${idea}${/[.!?…]$/.test(idea) ? '' : '.'}`;
       text += grade === 'Best' || grade === 'Good' ? ' Let\'s continue the Lesson.' : ' Try another move.';
-      // Arrows for the move and the reply only: another move for the Player may be the answer to
-      // the Lesson's next decision.
+      // Arrows for the move and the reply only: an arrow for another move for the Player would stay
+      // on the board, and may point at the answer to the Lesson's next decision. The words above
+      // may still name the Engine's top choice (ADR 0012).
       if (brief.move) add(brief.move, sound ? 'green' : 'red');
       add(reply, 'yellow');
       break;

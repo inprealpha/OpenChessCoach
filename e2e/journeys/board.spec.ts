@@ -591,6 +591,15 @@ test('the king castles when the Player clicks it and then its own rook, as on Li
   await play(paired, 'e8a8');
   await expect(board(paired, 'Chess board')).toHaveAttribute('data-fen', playUci(playUci(fen, 'e1g1')!.fenAfter, 'e8c8')!.fenAfter);
   await expect(moves.nth(1)).toHaveAccessibleName(/ O-O-O(, \w+)?$/);
+  // A king off its starting square doesn't castle: a click on its rook picks the rook up instead.
+  const offHome = '4k3/8/8/8/8/8/8/5K1R w - - 0 1';
+  await paired.goto(`${app.url}/#/learn`);
+  await paired.goto(`${app.url}/#/board?fen=${encodeURIComponent(offHome)}`);
+  await expect(board(paired, 'Chess board')).toHaveAttribute('data-fen', offHome);
+  await square(paired, 'f1').click();
+  await square(paired, 'h1').click();
+  await square(paired, 'h5').click();
+  await expect(board(paired, 'Chess board')).toHaveAttribute('data-fen', playUci(offHome, 'h1h5')!.fenAfter);
 });
 
 test('a click on the other side’s piece names the side to move, capitalised', async ({ paired, app }) => {
@@ -653,6 +662,49 @@ test('a Why Question is answered with Engine moves only, and the brief is record
   // Every arrow on the board comes from the Engine's candidates or the move itself.
   const arrows = paired.getByRole('img', { name: /^Arrow / });
   await expect(arrows.first()).toBeVisible();
+});
+
+test('a Why Question still on its way when the Player starts a New board is dropped, and the next one is answered', async ({ paired, app }) => {
+  // Hold the Coach's answer back, as the real Coach, which is slow, would.
+  let holding = true;
+  const held: (() => void)[] = [];
+  await paired.routeWebSocket(/\/ws\b/, (ws) => {
+    const server = ws.connectToServer();
+    const asks = new Set<string>();
+    ws.onMessage((m) => {
+      const msg = JSON.parse(String(m)) as { id: string; type: string };
+      if (msg.type === 'coach.ask') asks.add(msg.id);
+      server.send(m);
+    });
+    server.onMessage((m) => {
+      const msg = JSON.parse(String(m)) as { id?: string };
+      if (holding && msg.id && asks.has(msg.id)) held.push(() => ws.send(m));
+      else ws.send(m);
+    });
+  });
+  const errors: Error[] = [];
+  paired.on('pageerror', (err) => errors.push(err));
+  await paired.goto(`${app.url}/#/board`);
+  // A fresh connection, through the route.
+  await paired.reload();
+  await expect(connection(paired)).toHaveText(/Desktop connected/);
+  await play(paired, 'e2e4');
+  await paired.getByLabel('Your Why Question').fill('Why the centre pawn?');
+  await paired.getByRole('button', { name: 'Ask the Coach why' }).click();
+  await expect.poll(() => held.length).toBeGreaterThan(0);
+  await paired.getByRole('button', { name: 'New board' }).click();
+  holding = false;
+  for (const send of held.splice(0)) send();
+  // The late answer was about the board before: it never shows in the new conversation.
+  await play(paired, 'd2d4');
+  await paired.getByLabel('Your Why Question').fill('Why this pawn?');
+  await paired.getByRole('button', { name: 'Ask the Coach why' }).click();
+  await coachIdle(paired);
+  const log = paired.getByLabel('Coach conversation');
+  await expect(log.locator('.entry')).toHaveCount(2);
+  await expect(log.locator('.entry.player')).toHaveText('You: Why this pawn?');
+  await expect(log).not.toContainText('Why the centre pawn?');
+  expect(errors).toEqual([]);
 });
 
 test('a Why Question about a move the Engine didn’t list gets that move graded, explained and drawn', async ({ paired, app }) => {

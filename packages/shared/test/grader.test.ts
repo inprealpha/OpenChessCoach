@@ -38,6 +38,21 @@ describe('Move Grade thresholds', () => {
   });
 });
 
+describe('a move that gives checkmate', () => {
+  it('is Best, though the Engine lists another mate first', () => {
+    expect(gradeMove({ best: { mate: 1 }, played: { mate: 1 }, isTopMove: false })).toEqual({ grade: 'Best', winLoss: 0 });
+  });
+
+  it('is Best when the Engine’s line mates in more moves, or it never listed the move', () => {
+    // King and queen against king: Qg7# and Qd8# both mate at once; the Engine lists Qg7# alone.
+    const fen = '6k1/8/5QK1/8/8/8/8/8 w - - 0 1';
+    const before: Analysis = { fen, depth: 10, lines: [{ depth: 10, score: { mate: 1 }, pv: ['f6g7'] }] };
+    expect(gradeFromAnalyses(1, 'f6g7', before, undefined).grade).toBe('Best');
+    expect(gradeFromAnalyses(1, 'f6d8', before, undefined).grade).toBe('Best');
+    expect(gradeMove({ best: { mate: 2 }, played: { mate: 1 }, isTopMove: false }).grade).toBe('Best');
+  });
+});
+
 describe('the material floor', () => {
   it('grades hanging a piece a queen down at least Mistake, though the winning chance barely moves', () => {
     // Ba6 a queen down: the best move keeps it at -9, Ba6 drops a bishop on top.

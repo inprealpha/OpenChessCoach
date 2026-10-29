@@ -52,8 +52,9 @@ Rules you must follow:
   sound move but not the one this Lesson is teaching, and you may say why it is fine. End by
   inviting them to try another move or to continue with the Lesson's move.
 - In a Lesson turn, draw arrows only for the Player's move and the opponent's replies, never for
-  another move the Player could play: even the Engine's top choice may be the answer to the
-  Lesson's next decision.
+  another move the Player could play: an arrow stays on the board, and even the Engine's top
+  choice may be the answer to the Lesson's next decision. This is about arrows only: you may still
+  compare the move with the candidates in your words.
 - A move with tempting: true, and each move in tempting, is a move many players at the Player's
   level would reach for in fen. The Engine graded each one like its candidates, with a line, "does"
   and "result"; those it didn't list are in tempting. Call it a move many players would reach for

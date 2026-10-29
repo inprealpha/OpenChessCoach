@@ -69,7 +69,13 @@ export class CoachThread {
     if (said) this.entries = [...this.entries, said];
     const entry: Entry = { id: nextEntry++, from: 'coach', text: '', streaming: true };
     this.entries = [...this.entries, entry];
-    const index = this.entries.length - 1;
+    // The reply goes to its own entry wherever it stands by then: a failed call before it takes its
+    // Player entry out, and a reset clears the thread, which drops the reply.
+    const update = (change: (current: Entry) => Entry): void => {
+      const index = this.entries.findIndex((e) => e.id === entry.id);
+      const current = this.entries[index];
+      if (current) this.entries[index] = change(current);
+    };
     const call = ++this.calls;
     const annotating = ++this.annotating;
     this.pending++;
@@ -77,13 +83,11 @@ export class CoachThread {
     this.failed = false;
     try {
       const reply = await api.request('coach.ask', { ...ask, threadId: this.threadId }, (text, _part, status) => {
-        const current = this.entries[index];
-        if (!current) return;
         // The answer's text replaces any status; a status shows only while no text has come.
-        if (status !== undefined) this.entries[index] = { ...current, status };
-        if (text) this.entries[index] = { ...current, text: current.text + text, status: '' };
+        if (status !== undefined) update((current) => ({ ...current, status }));
+        if (text) update((current) => ({ ...current, text: current.text + text, status: '' }));
       });
-      this.entries[index] = { ...entry, text: reply.text, streaming: false, note: reply.note, engineQuestions: reply.engineQuestions };
+      update(() => ({ ...entry, text: reply.text, streaming: false, note: reply.note, engineQuestions: reply.engineQuestions }));
       if (annotating === this.annotating) {
         this.arrows = reply.arrows;
         this.highlights = reply.highlights;
@@ -91,7 +95,7 @@ export class CoachThread {
       return reply;
     } catch (err) {
       const message = err instanceof ApiError ? err.message : 'The Coach couldn’t answer.';
-      this.entries[index] = { ...entry, text: message, streaming: false, error: true };
+      update(() => ({ ...entry, text: message, streaming: false, error: true }));
       if (said) this.entries = this.entries.filter((e) => e.id !== said.id);
       if (call === this.calls) this.failed = true;
       return undefined;

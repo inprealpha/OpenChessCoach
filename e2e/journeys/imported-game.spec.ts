@@ -412,17 +412,32 @@ test.describe('a Review’s overview', () => {
 
   test('opens the Review, streamed before the key moments; each move it names jumps the board there; it reopens with no Coach call', async ({ paired, app }) => {
     await paired.goto(`${app.url}/#/review/1`);
+    // Every change to the card of the Review being made, as it happens: what its first line says,
+    // and what the Coach has written so far, the overview first. Read after the Review, so a slow
+    // or fast machine sees the same order.
+    await paired.evaluate(() => {
+      const seen: string[] = [];
+      (window as unknown as { madeSeen: string[] }).madeSeen = seen;
+      new MutationObserver(() => {
+        const card = document.querySelector('.card[role="status"][aria-live="polite"]');
+        if (!card) return;
+        const parts = [...card.querySelectorAll('p.stream')].map((p) => (p.getAttribute('data-testid') === 'overview-stream' ? 'overview' : 'moment'));
+        const entry = `${card.querySelector('p')?.textContent ?? ''} | ${[...new Set(parts)].join(', ')}`;
+        if (seen.at(-1) !== entry) seen.push(entry);
+      }).observe(document.body, { subtree: true, childList: true, characterData: true });
+    });
     await paired.getByRole('button', { name: 'Start the Review' }).click();
-    // The overview streams first, before any key moment.
-    const stream = paired.getByTestId('overview-stream');
-    await expect(stream).toContainText('Your opening went well', { timeout: 90_000 });
-    const making = paired.getByRole('status').filter({ has: stream });
-    await expect(making).toContainText('The Coach is writing an overview of the game…');
-    // Then the key moments, under the overview written so far.
-    await expect(making).toContainText('The Coach is explaining the key moments…');
-    await expect(making.locator('p.stream').first()).toHaveAttribute('data-testid', 'overview-stream');
     const overview = paired.getByRole('region', { name: 'Overview' });
     await expect(overview).toBeVisible({ timeout: 90_000 });
+    // The overview streamed first, with the card saying so; then the key moments, under it.
+    const seen = await paired.evaluate(() => (window as unknown as { madeSeen: string[] }).madeSeen);
+    const writing = 'The Coach is writing an overview of the game…';
+    const explaining = 'The Coach is explaining the key moments…';
+    expect(seen[0]).toMatch(new RegExp(`^${writing} \\| `));
+    expect(seen).toContain(`${writing} | overview`);
+    expect(seen).toContain(`${explaining} | overview, moment`);
+    expect(seen.findIndex((e) => e.startsWith(explaining))).toBeGreaterThan(seen.indexOf(`${writing} | overview`));
+    expect(seen.filter((e) => e.includes('moment')).every((e) => e.startsWith(explaining))).toBe(true);
     // The recorded reply for game 1 (verify/recordings/coach.json), above the key moments.
     await expect(overview).toContainText('Your opening went well, and your opponent had to find 9… d5 there');
     const keyMoments = paired.getByRole('region', { name: 'Key moments' });

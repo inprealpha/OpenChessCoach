@@ -64,9 +64,10 @@ export class ReviewRun {
             this.streaming = next;
           },
           // The desktop reports positions analysed; a move is graded once the position after it is.
+          // The Coach's part begins with the desktop's first word on it (the overview's, or a key
+          // moment's), so the card never says one thing comes next and then another.
           (done, total) => {
             this.progress = { done: Math.max(0, done - 1), total: total - 1 };
-            if (done === total) this.phase = 'explaining';
           },
         );
       } catch (err) {

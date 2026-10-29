@@ -10,7 +10,9 @@
  ],
  "goal": "After each of your opponent's moves, you can ask what it threatens, and find a move that deals with the threat.",
  "priorKnowledge": [
-  "piece-values"
+  "piece-values",
+  "check",
+  "mate-in-one"
  ],
  "intro": "Your opponent's last move usually has a purpose. Before you look for a move of your own, find out what that move threatens: does it attack one of your pieces, attack two at once, or aim at your king? Once you have seen the threat, you can deal with it by moving the piece that is attacked, guarding it, or blocking the line.",
  "parts": [

@@ -24,7 +24,7 @@
     {
      "ply": 1,
      "san": "Nxg8+",
-     "text": "Nxg8+: your knight on f6 takes the knight on g8 (x means a capture, + a check). No black piece guards g8, so nothing can take back, and the capture even gives check to the king on h6."
+     "text": "Nxg8+: your knight on f6 takes the knight on g8 (x means a capture, + a check). No black piece guards g8, so nothing can take back, and the capture even gives check to the king on h6. You lost a rook on g8, but you win a knight back at once and lose nothing more."
     },
     {
      "ply": 3,

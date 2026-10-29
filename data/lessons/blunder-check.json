@@ -6,7 +6,8 @@
  "level": "beginner",
  "goal": "Before you play a move, you can look at what your opponent could take, check or attack after it, and pick a safer move when the answer is bad.",
  "priorKnowledge": [
-  "threats"
+  "threats",
+  "pins"
  ],
  "side": "white",
  "puzzleTags": [],

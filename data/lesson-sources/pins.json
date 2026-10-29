@@ -8,9 +8,10 @@
  "puzzleThemes": [
   "pin"
  ],
- "goal": "You can pin a piece to a more valuable one behind it, and win the pinned piece by attacking it again.",
+ "goal": "You can pin a piece to a more valuable one behind it, and win material because the pinned piece cannot move away.",
  "priorKnowledge": [
-  "piece-values"
+  "piece-values",
+  "check"
  ],
  "intro": "A bishop, rook or queen pins an enemy piece when it attacks that piece and, behind it on the same line, a more valuable one. If the piece behind is the king, the pinned piece is not allowed to leave that line; if it is the queen, moving away would give the queen up. Either way the pinned piece is stuck, so you can attack it again or simply take it.",
  "parts": [
@@ -47,7 +48,7 @@
     {
      "ply": 1,
      "san": "Be4",
-     "text": "34...Be4: the bishop steps to e4, between the two queens, where your queen guards it. It attacks White's queen, and the queen cannot move away, because the king on g2 stands behind it on the same diagonal. White will lose the queen for your bishop."
+     "text": "34...Be4: the bishop steps to e4, between the two queens, where your queen guards it. It attacks White's queen, and the queen is pinned: it cannot leave the diagonal, because the king on g2 stands behind it on the same line. Its only move is to take the bishop, and then your queen takes it back. White will lose the queen for your bishop."
     },
     {
      "ply": 3,

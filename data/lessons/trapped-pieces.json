@@ -14,14 +14,14 @@
   "trappedPiece"
  ],
  "intro": {
-  "text": "A piece is trapped when it is attacked and every square it could move to is unsafe. You do not need a check or a fork to win it: take away its squares first, then attack it. Pieces on the edge of the board, and queens that wander far from home to grab pawns, are caught most often. So before you send one of your own pieces somewhere, make sure it can get back out."
+  "text": "A piece is trapped when it is attacked and every square it could move to is unsafe. You do not need a check or a fork to win it: take away its squares and attack it, often with a single move. Pieces on the edge of the board, and queens that wander far from home to grab pawns, are often caught. So before you send one of your own pieces somewhere, make sure it can get back out."
  },
  "parts": [
   {
    "title": "A knight deep in your half",
    "fen": "8/p2k4/2p3pp/3p1p2/3P3P/P4P1n/1P2N3/5K2 w - - 0 34",
    "side": "white",
-   "keyIdea": "A knight on the edge of the board has few squares. Cover them all, then attack it.",
+   "keyIdea": "A knight on the edge of the board has few squares. Cover them and attack it.",
    "text": "From a game played on Lichess. You are White. Black's knight sits deep in your half of the board, on h3. Before you chase it, count the squares it could run to.",
    "credit": {
     "source": "Lichess puzzle database, puzzle yahGO",
@@ -269,13 +269,13 @@
    "fen": "rn2k2r/pp2npbp/2p1b1p1/3pP3/1q3B2/P1N1PN2/1PP1BPPP/R2QK2R b KQkq - 0 10",
    "side": "black",
    "keyIdea": "Before a piece takes a pawn deep in the enemy camp, make sure it has a safe way back; if it has none, the pawn is bait.",
-   "text": "From a game played on Lichess. You are Black, and White's pawn on a3 attacks your queen on b4, so the queen has to move. Where should it go?",
+   "text": "From a game played on Lichess. You are Black, and White's pawn on a3 attacks your queen on b4, so the queen has to move. Where can it go safely?",
    "credit": {
-    "source": "Lichess puzzle database, puzzle XbkkA",
-    "url": "https://lichess.org/training/XbkkA",
+    "source": "Lichess games database, game fHFSmpEm",
+    "url": "https://lichess.org/fHFSmpEm#19",
     "licence": "CC0 1.0",
     "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
-    "authors": "Lichess; the position is from a game played there"
+    "authors": "Lichess; the players of the game"
    },
    "mainLine": [
     "b4b6",
@@ -295,7 +295,7 @@
       "club": []
      },
      "notes": {
-      "text": "Qb6, the queen back to b6, puts it on a safe square. Taking on b2 would have been a mistake: Na4 attacks the queen there, and every square it could run to is covered by White's pawns and pieces, so it would be lost for a rook. In the game Black took the pawn and lost the queen this way."
+      "text": "Qb6, the queen back to b6, puts it on a safe square (Qa5 is safe too). Taking on b2 would have been a mistake: Na4 attacks the queen there, and every square it could run to is covered by White's pawns and pieces, so it would be lost for a rook. In the game Black took the pawn and lost the queen this way."
      }
     },
     {

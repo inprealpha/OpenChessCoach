@@ -61,7 +61,7 @@
    "fen": "2rr2k1/5pp1/1p2p3/p3P1P1/P2q4/3Q4/5P2/2R2RK1 w - - 0 25",
    "side": "white",
    "keyIdea": "When one piece defends two things, take one of them; if the defender takes back, the other is left undefended.",
-   "text": "From a game played on Lichess. You are White. Black's queen has just come to d4, offering a trade of queens. Look at Black's rook on d8: how many pieces is it defending?",
+   "text": "From a game played on Lichess. You are White. Black's queen has just come to d4, attacking your queen. Look at Black's rook on d8: how many pieces is it defending?",
    "url": "https://lichess.org/training/OtXkV",
    "line": "Qxd4 Rxd4 Rxc8+",
    "notes": [

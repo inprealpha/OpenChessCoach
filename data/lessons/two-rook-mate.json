@@ -12,7 +12,7 @@
  "puzzleTags": [],
  "puzzleThemes": [],
  "intro": {
-  "text": "Two rooks can mate a lone king without any help from your own king. They work in turns: one rook guards a rank (a row of the board) so the king cannot step back, and the other gives check on the rank in front of it, which pushes the king one rank nearer the edge. Then the two rooks change jobs. Once the king is on the edge of the board, the next check is mate."
+  "text": "Two rooks can mate a lone king without any help from your own king. They work in turns: one rook guards a rank (a row of the board) so the king cannot step back, and the other gives check on the rank in front of it, which pushes the king one rank nearer the edge. Then the two rooks change jobs. Once the king is on the edge of the board, the next check is mate. The last example shows that a queen can take the place of one of the rooks."
  },
  "parts": [
   {
@@ -106,7 +106,7 @@
       "club": []
      },
      "notes": {
-      "text": "The same again on the sixth rank. Both rooks stay on the edge files, far from Black's king, so it cannot come close enough to take either of them."
+      "text": "The same again on the sixth rank. Both rooks stay on the edge files, far from Black's king, so it cannot attack them yet."
      }
     },
     {

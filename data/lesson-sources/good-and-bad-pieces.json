@@ -9,13 +9,13 @@
  "priorKnowledge": [
   "pawn-structure"
  ],
- "intro": "A bishop stays on squares of one colour for the whole game. When most of its own pawns stand on the other colour, its diagonals are open and it is a good bishop; when they stand on its own colour, they get in its way and it is a bad bishop. A bad bishop gets its diagonals back when a blocking pawn moves onto the other colour, or when you trade it for the enemy's good bishop. In an open position two bishops work well together, while in a locked position, where the pawns block each other, a knight with a safe square, one no pawn can attack, is often better than a bishop.",
+ "intro": "A bishop stays on squares of one colour for the whole game. When most of its own pawns stand on the other colour, its diagonals are open and it is a good bishop; when they stand on its own colour, they get in its way and it is a bad bishop. A bad bishop gets its diagonals back when a blocking pawn moves onto the other colour. Another cure is to trade it for the enemy's good bishop. In an open position two bishops work well together, while in a locked position, where the pawns block each other, a knight with a safe square, one no pawn can attack, is often better than a bishop.",
  "parts": [
   {
    "title": "Which bishop to keep?",
    "fen": "r1bq1rk1/1p1nb1pp/p1p1p3/2Pp1pB1/PP1Pn2P/2NBPN2/5PP1/R2Q1RK1 w - - 3 14",
    "side": "white",
-   "keyIdea": "If your bishop is blocked by your own pawns, trade it for your opponent's good bishop.",
+   "keyIdea": "If most of your pawns stand on your bishop's colour, trading it for your opponent's good bishop is often right.",
    "text": "From a game played on Lichess. You are White, and Black's knight on e4 and bishop on e7 both attack your bishop on g5. Before you move it, look at which colour of squares your pawns stand on.",
    "url": "https://lichess.org/5j5bnrhJ#26",
    "line": "Bxe7",
@@ -23,7 +23,7 @@
     {
      "ply": 0,
      "san": "Bxe7",
-     "text": "Six of your pawns stand on dark squares (b4, c5, d4, e3, f2 and h4), so your dark-squared bishop is the bad one. Black's pawns stand mostly on light squares, so the bishop on e7 is Black's good one. 14.Bxe7 trades them: you keep your good bishop on d3, and Black is left with the bishop on c8, shut in by Black's own pawns."
+     "text": "Six of your pawns stand on dark squares (b4, c5, d4, e3, f2 and h4), so your dark-squared bishop is the bad one. Black's pawns stand mostly on light squares, so the bishop on e7 is Black's good one. 14.Bxe7 trades them: you keep your good bishop on d3, and Black is left with the bishop on c8, shut in by Black's own pawns. Your bishop on g5 is already outside your pawns, so the point here is to trade it for Black's good bishop, not to free it."
     }
    ]
   },
@@ -75,7 +75,7 @@
     {
      "ply": 4,
      "san": "d5",
-     "text": "The pawn push opens the centre. The pawn attacks e6, and the fewer pawns there are in the centre, the further your bishops can reach across the board."
+     "text": "The pawn gains space and attacks e6. It also takes the c6 square away from Black's knight on e7, so Black's knights have fewer squares while your bishop on b4 still presses on e7."
     }
    ]
   },
@@ -96,7 +96,7 @@
     {
      "ply": 2,
      "san": "Nd4",
-     "text": "The knight goes to d4, a square no black pawn can ever attack: Black's c-pawn has already gone past it, and there is no e-pawn left. From d4 it hits the pawns on b5 and f5. Castling first was also a good move."
+     "text": "The knight goes to d4, a square no black pawn can attack: Black's c-pawn has already gone past it, and there is no e-pawn left (a black pawn could only reach c5 or e5 by capturing, and you would take it back). From d4 it hits the pawns on b5 and f5. Castling first was also a good move."
     }
    ]
   }

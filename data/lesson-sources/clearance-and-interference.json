@@ -54,7 +54,7 @@
     {
      "ply": 2,
      "san": "Re8",
-     "text": "Now the rook uses the open file. It pins Black's queen on f8 to the king, and your queen on b8 guards the rook. Black's queen is lost for a rook."
+     "text": "Now the rook uses the open file. It pins Black's queen on f8 to the king, and your queen on b8 guards the rook. Black's queen is lost, and the most Black can get for it is your rook."
     }
    ]
   },

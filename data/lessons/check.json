@@ -12,7 +12,7 @@
  "puzzleTags": [],
  "puzzleThemes": [],
  "intro": {
-  "text": "A king is in check when an enemy piece attacks it, and you have to deal with that at once. There are only three ways: step the king onto a square no enemy piece attacks, put one of your pieces in the way, or capture the piece that gives check. A check from a knight or a pawn cannot be blocked, because there is no square in between. Before you choose, look at all three ways."
+  "text": "A king is in check when an enemy piece attacks it, and you have to deal with that at once. There are only three ways: step the king onto a square no enemy piece attacks, put one of your pieces in the way, or capture the piece that gives check. A check from a knight cannot be blocked, because a knight jumps over everything. A check from a pawn, or from a piece standing right next to the king, cannot be blocked either, because there is no square in between. Before you choose, look at all three ways."
  },
  "parts": [
   {
@@ -57,7 +57,7 @@
       "club": []
      },
      "notes": {
-      "text": "Kxf6: your king takes the rook on f6. It steps off the bishop's diagonal and wins a rook that nothing defends. Taking the bishop with the knight also stops the check, but it wins far less, because White's rook gets away. Blocking with your rook on c5 or d6 lets the bishop take it."
+      "text": "Kxf6: your king takes the rook on f6. It steps off the bishop's diagonal and wins a rook that nothing defends. Taking the bishop with the knight also stops the check, but it wins far less, because White's rook gets away. Blocking with your rook on c5 or d6 loses that rook, and White's rook on f6 stays safe."
      }
     }
    ]
@@ -180,7 +180,7 @@
       "club": []
      },
      "notes": {
-      "text": "Rxh3#: your rook slides along the third rank (the row numbered 3) and takes the knight. That ends the check, and now the rook gives check to the king on h1. The king cannot escape: your king covers g1 and g2, and the rook covers h2. It is checkmate."
+      "text": "Rxh3# (the # sign means checkmate): your rook slides along the third rank (the row numbered 3) and takes the knight. That ends the check, and now the rook gives check to the king on h1. The king cannot escape: your king covers g1 and g2, and the rook covers h2. It is checkmate."
      }
     }
    ]
@@ -190,7 +190,7 @@
    "fen": "8/1PKR4/4r3/2k5/8/8/8/8 b - - 0 65",
    "side": "white",
    "keyIdea": "Each new check can need a different answer, so look at all three ways out every time.",
-   "text": "From a game played on Lichess. You are White, with a rook and a pawn against a rook, and your pawn on b7 is one step from promoting. Black's rook has just given check from c6, and it will keep checking while it can. Each time, look at all three ways out.",
+   "text": "From a game played on Lichess. You are White, with a rook and a pawn against a rook. Your pawn on b7 is one step from the last row, where a pawn promotes: it turns into a queen or another piece. Black's rook has just given check from c6, and it will keep checking while it can. Each time, look at all three ways out.",
    "credit": {
     "source": "Lichess games database, game ulngg149",
     "url": "https://lichess.org/ulngg149#129",
@@ -233,7 +233,7 @@
       "club": []
      },
      "notes": {
-      "text": "The rook stands right next to your king, so nothing can block it, and Black's king guards it, so your king cannot take it. 66.Kd8 moves the king out of check. With the king off c7, your rook on d7 now guards the pawn on b7 along the seventh rank. On b8 the king would stand in front of its own pawn."
+      "text": "The rook stands right next to your king, so nothing can block it, and Black's king guards it, so your king cannot take it. 66.Kd8 moves the king out of check. With the king off c7, your rook on d7 now guards the pawn on b7 along the seventh rank (row). Kb8 would also leave the check and still win, but it stands on the square where the pawn must promote; Kd8 keeps that square free."
      }
     },
     {

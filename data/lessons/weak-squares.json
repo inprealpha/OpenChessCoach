@@ -12,7 +12,7 @@
  "puzzleTags": [],
  "puzzleThemes": [],
  "intro": {
-  "text": "A pawn can only move forward. Once the enemy pawns that could attack a square have moved past it or been traded, no enemy pawn will ever attack that square again. If such a square is in or near your opponent's half, and you can guard a piece there, usually with a pawn, it is an outpost. A knight on an outpost is hard to shift: no pawn can chase it, so the only way to remove it is to trade a piece for it. In this Lesson you find outposts and plan the route that brings a knight to them."
+  "text": "A pawn can only move forward. Once the enemy pawns that could attack a square have moved past it or been traded, no enemy pawn can attack that square again, unless one first captures its way onto a neighbouring file. If such a square is in or near your opponent's half, and you can guard a piece there, usually with a pawn, it is an outpost. A knight on an outpost is hard to shift: no pawn can chase it, so the only way to remove it is to trade a piece for it. In this Lesson you find outposts and plan the route that brings a knight to them."
  },
  "parts": [
   {
@@ -46,7 +46,7 @@
       "club": []
      },
      "notes": {
-      "text": "Black has no c-pawn, and the pawn on e5 can never go back to e6, so no black pawn can ever attack d5, and your pawns on c4 and e4 guard it. 9.Nbc3 brings the knight from b1 to c3, one jump from d5."
+      "text": "Black has no c-pawn, and the pawn on e5 can never go back to e6, so no black pawn attacks d5, and one could only do so after capturing onto the c- or e-file. Your pawns on c4 and e4 guard it. 9.Nbc3 brings the knight from b1 to c3, one jump from d5."
      }
     },
     {
@@ -109,7 +109,7 @@
       "club": []
      },
      "notes": {
-      "text": "The square d6 is a hole: Black's c-pawn has moved past it and there is no e-pawn. Your pawn on c5 guards it. The knight needs two jumps to get there, and 24.Nc4 is the first."
+      "text": "The square d6 is a hole, a square no black pawn can attack: Black's c-pawn has moved past it and there is no e-pawn. Your pawn on c5 guards it. The knight needs two jumps to get there, and 24.Nc4 is the first."
      }
     },
     {
@@ -145,7 +145,7 @@
    "title": "Your outpost, and one that is not",
    "fen": "2rqrnk1/1b2bpp1/p3pn1p/1p1pN3/3P1P1B/P1NQP3/1P4PP/1BR2RK1 b - - 1 16",
    "side": "black",
-   "keyIdea": "A square is an outpost only if no enemy pawn can ever attack it; a piece that a pawn can chase away is not on one.",
+   "keyIdea": "An outpost is a square no enemy pawn can attack or easily reach; a piece that a pawn can chase away is not on one.",
    "text": "From a game played on Lichess. You are Black. White's pawns stand on d4, e3 and f4, and White's knight sits on e5. Look for a square in White's half that no white pawn can ever attack, close to your knight on f6.",
    "credit": {
     "source": "Lichess games database, game kWN1J7ZQ",
@@ -174,7 +174,7 @@
       "club": []
      },
      "notes": {
-      "text": "White's d-pawn and f-pawn have both moved past e4, so no white pawn can attack it, and your pawn on d5 guards it. 16...Ne4 puts the knight there: it attacks the knight on c3 and opens the way for your bishop on e7 to meet White's bishop on h4."
+      "text": "White's d-pawn and f-pawn have both moved past e4, so no white pawn can attack it now (only a capture on f3 could change that), and your pawn on d5 guards it. 16...Ne4 puts the knight there: it attacks the knight on c3 and opens the way for your bishop on e7 to meet White's bishop on h4."
      }
     },
     {
@@ -228,7 +228,7 @@
       "club": []
      },
      "notes": {
-      "text": "Now look at White's knight on e5. It looks strong, but e5 is not an outpost: your f-pawn can attack it, and 18...f6 drives it away. Your own knight on e4 can never be chased by a pawn."
+      "text": "Now look at White's knight on e5. It looks strong, but e5 is not an outpost: your f-pawn can attack it, and 18...f6 drives it away. Your own knight on e4 cannot be chased by a pawn; only a capture such as g2xf3 could bring a white pawn into range."
      }
     }
    ]

@@ -9,7 +9,7 @@
  "priorKnowledge": [
   "checks-captures-threats"
  ],
- "intro": "Strong players rarely play the first move that looks good. They list two or three candidate moves, the moves worth a closer look, then follow each one a few moves ahead and ask: what is my opponent's best answer? Often a move that seems to win something fails to one reply, while a quieter-looking choice works because it takes that reply away. In each position here, several captures are possible, and only one of them holds up.",
+ "intro": "Strong players rarely play the first move that looks good. They list two or three candidate moves, the moves worth a closer look, then follow each one a few moves ahead and ask: what is my opponent's best answer? Often a move that seems to win something fails to one reply, while a quieter-looking choice works because it takes that reply away. In each position here, several captures are possible, and only one of them wins material. Quiet moves can be candidates too, and the same habit works for them.",
  "parts": [
   {
    "title": "Which capture comes first?",

@@ -6,7 +6,9 @@
  "level": "beginner",
  "goal": "After each of your opponent's moves, you can ask what it threatens, and find a move that deals with the threat.",
  "priorKnowledge": [
-  "piece-values"
+  "piece-values",
+  "check",
+  "mate-in-one"
  ],
  "side": "white",
  "puzzleTags": [],

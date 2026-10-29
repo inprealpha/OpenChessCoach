@@ -682,7 +682,7 @@
       ]
      },
      "notes": {
-      "text": "3.Bc4 brings a second attacker to f7, and your king is still its only defender, so White threatens Qxf7, checkmate. 3...g6 puts a pawn between the queen and f7, and the pawn attacks the queen too."
+      "text": "3.Bc4 brings a second attacker to f7, and your king is still its only defender, so White threatens Qxf7, checkmate. 3...g6 puts a pawn between the queen and f7, and the pawn attacks the queen too. Do not play 3...Nf6 here: 4.Qxf7 would be checkmate, because the bishop on c4 guards the queen, so your king cannot take it, and the king has no square to go to."
      }
     },
     {

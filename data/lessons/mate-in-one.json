@@ -153,7 +153,7 @@
       "club": []
      },
      "notes": {
-      "text": "f4, the pawn two squares forward from f2, checks the king on e5. Your king on e3 guards f4, d4 and e4, so the king cannot take the pawn or step onto those squares. Your pawn on d5 covers e6, your rook guards that pawn, and Black's own pawns fill d6, f6 and f5. A pawn's check cannot be blocked, so it is mate. Your rook cannot check from f5, because your own pawn on d5 stands in its way."
+      "text": "f4, the pawn two squares forward from f2, checks the king on e5. Your king on e3 guards f4, d4 and e4, so the king cannot take the pawn or step onto those squares. Your pawn on d5 covers e6, your rook guards that pawn, and Black's own pawns fill d6, f6 and f5. A pawn's check cannot be blocked, so it is mate. Your rook on b5 does not give check along the fifth rank (row), because your own pawn on d5 stands in its way."
      }
     }
    ]

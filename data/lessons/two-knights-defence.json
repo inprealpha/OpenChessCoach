@@ -46,7 +46,7 @@
     "c7c6",
     "d5c6",
     "b7c6",
-    "b5a4",
+    "b5e2",
     "h7h6",
     "g5f3",
     "e5e4"
@@ -688,7 +688,7 @@
       ]
      },
      "notes": {
-      "text": "White's bishop on c4 aims at f7. 3...Nf6, the Two Knights Defence, develops your other knight (brings it off its starting square) and attacks the e4 pawn, which nothing defends, so White has to think about defence too. 3...Bc5 is the other main move."
+      "text": "White's bishop on c4 aims at f7. 3...Nf6, the Two Knights Defence, develops your other knight (brings it off its starting square) and attacks the e4 pawn, which nothing defends, so White has to think about defence too. 3...Bc5 is the other main move. White does not have to play 4.Ng5: after 4.d3 or 4.Nc3 you keep developing, for example with ...Bc5 or ...Be7, and then castle."
      }
     },
     {
@@ -1319,8 +1319,8 @@
      "ply": 14,
      "fen": "r1bqkb1r/p4ppp/2p2n2/nB2p1N1/8/8/PPPP1PPP/RNBQK2R w KQkq - 0 8",
      "decision": false,
-     "main": "b5a4",
-     "mainSan": "Ba4",
+     "main": "b5e2",
+     "mainSan": "Be2",
      "popular": {
       "beginner": [
        {
@@ -1422,311 +1422,44 @@
     },
     {
      "ply": 15,
-     "fen": "r1bqkb1r/p4ppp/2p2n2/n3p1N1/B7/8/PPPP1PPP/RNBQK2R b KQkq - 1 8",
+     "fen": "r1bqkb1r/p4ppp/2p2n2/n3p1N1/8/8/PPPPBPPP/RNBQK2R b KQkq - 1 8",
      "decision": true,
      "main": "h7h6",
      "mainSan": "h6",
      "popular": {
-      "beginner": [
-       {
-        "uci": "h7h6",
-        "san": "h6",
-        "percent": 51.3,
-        "games": 61
-       },
-       {
-        "uci": "f8c5",
-        "san": "Bc5",
-        "percent": 10.1,
-        "games": 12
-       },
-       {
-        "uci": "f6d5",
-        "san": "Nd5",
-        "percent": 6.7,
-        "games": 8
-       },
-       {
-        "uci": "c8a6",
-        "san": "Ba6",
-        "percent": 6.7,
-        "games": 8
-       },
-       {
-        "uci": "f8e7",
-        "san": "Be7",
-        "percent": 5,
-        "games": 6
-       }
-      ],
-      "casual": [
-       {
-        "uci": "h7h6",
-        "san": "h6",
-        "percent": 58.6,
-        "games": 319
-       },
-       {
-        "uci": "f8c5",
-        "san": "Bc5",
-        "percent": 11.2,
-        "games": 61
-       },
-       {
-        "uci": "f6d5",
-        "san": "Nd5",
-        "percent": 4.8,
-        "games": 26
-       },
-       {
-        "uci": "c8d7",
-        "san": "Bd7",
-        "percent": 4.8,
-        "games": 26
-       },
-       {
-        "uci": "f8e7",
-        "san": "Be7",
-        "percent": 4.6,
-        "games": 25
-       }
-      ],
-      "club": [
-       {
-        "uci": "h7h6",
-        "san": "h6",
-        "percent": 74.7,
-        "games": 109
-       },
-       {
-        "uci": "f8c5",
-        "san": "Bc5",
-        "percent": 12.3,
-        "games": 18
-       },
-       {
-        "uci": "f8d6",
-        "san": "Bd6",
-        "percent": 3.4,
-        "games": 5
-       },
-       {
-        "uci": "c8d7",
-        "san": "Bd7",
-        "percent": 2.7,
-        "games": 4
-       },
-       {
-        "uci": "d8d4",
-        "san": "Qd4",
-        "percent": 2.1,
-        "games": 3
-       }
-      ]
+      "beginner": [],
+      "casual": [],
+      "club": []
      },
      "notes": {
-      "text": "8.Ba4, the bishop to a4, is the move beginners on Lichess play most often; 8.Be2, the bishop back to e2, and 8.Qf3, the queen to f3, are also common. 8...h6 hits the knight on g5 with a pawn, so it has to move for the third time, and the same move works well against 8.Be2."
+      "text": "8.Be2, the bishop back to e2, is the safe square. 8.Ba4, the bishop to a4, is a mistake: after 8...h6 9.Nf3 e4 you stand clearly better. 8...h6 hits the knight on g5 with a pawn, so it has to move for the third time."
      }
     },
     {
      "ply": 16,
-     "fen": "r1bqkb1r/p4pp1/2p2n1p/n3p1N1/B7/8/PPPP1PPP/RNBQK2R w KQkq - 0 9",
+     "fen": "r1bqkb1r/p4pp1/2p2n1p/n3p1N1/8/8/PPPPBPPP/RNBQK2R w KQkq - 0 9",
      "decision": false,
      "main": "g5f3",
      "mainSan": "Nf3",
      "popular": {
-      "beginner": [
-       {
-        "uci": "g5f3",
-        "san": "Nf3",
-        "percent": 81.2,
-        "games": 56
-       },
-       {
-        "uci": "b2b4",
-        "san": "b4",
-        "percent": 7.2,
-        "games": 5
-       },
-       {
-        "uci": "g5h3",
-        "san": "Nh3",
-        "percent": 5.8,
-        "games": 4
-       },
-       {
-        "uci": "d1f3",
-        "san": "Qf3",
-        "percent": 4.3,
-        "games": 3
-       },
-       {
-        "uci": "g5f7",
-        "san": "Nxf7",
-        "percent": 1.4,
-        "games": 1
-       }
-      ],
-      "casual": [
-       {
-        "uci": "g5f3",
-        "san": "Nf3",
-        "percent": 81.2,
-        "games": 298
-       },
-       {
-        "uci": "d1f3",
-        "san": "Qf3",
-        "percent": 4.6,
-        "games": 17
-       },
-       {
-        "uci": "g5f7",
-        "san": "Nxf7",
-        "percent": 4.1,
-        "games": 15
-       },
-       {
-        "uci": "b2b4",
-        "san": "b4",
-        "percent": 4.1,
-        "games": 15
-       },
-       {
-        "uci": "g5h3",
-        "san": "Nh3",
-        "percent": 3.5,
-        "games": 13
-       }
-      ],
-      "club": [
-       {
-        "uci": "g5f3",
-        "san": "Nf3",
-        "percent": 83,
-        "games": 44
-       },
-       {
-        "uci": "g5h3",
-        "san": "Nh3",
-        "percent": 13.2,
-        "games": 7
-       },
-       {
-        "uci": "d1f3",
-        "san": "Qf3",
-        "percent": 3.8,
-        "games": 2
-       }
-      ]
+      "beginner": [],
+      "casual": [],
+      "club": []
      }
     },
     {
      "ply": 17,
-     "fen": "r1bqkb1r/p4pp1/2p2n1p/n3p3/B7/5N2/PPPP1PPP/RNBQK2R b KQkq - 1 9",
+     "fen": "r1bqkb1r/p4pp1/2p2n1p/n3p3/8/5N2/PPPPBPPP/RNBQK2R b KQkq - 1 9",
      "decision": true,
      "main": "e5e4",
      "mainSan": "e4",
      "popular": {
-      "beginner": [
-       {
-        "uci": "e5e4",
-        "san": "e4",
-        "percent": 76,
-        "games": 38
-       },
-       {
-        "uci": "f8c5",
-        "san": "Bc5",
-        "percent": 8,
-        "games": 4
-       },
-       {
-        "uci": "c8a6",
-        "san": "Ba6",
-        "percent": 6,
-        "games": 3
-       },
-       {
-        "uci": "f8d6",
-        "san": "Bd6",
-        "percent": 6,
-        "games": 3
-       },
-       {
-        "uci": "d8c7",
-        "san": "Qc7",
-        "percent": 2,
-        "games": 1
-       }
-      ],
-      "casual": [
-       {
-        "uci": "e5e4",
-        "san": "e4",
-        "percent": 86.4,
-        "games": 223
-       },
-       {
-        "uci": "f8d6",
-        "san": "Bd6",
-        "percent": 4.3,
-        "games": 11
-       },
-       {
-        "uci": "c8g4",
-        "san": "Bg4",
-        "percent": 3.5,
-        "games": 9
-       },
-       {
-        "uci": "f8c5",
-        "san": "Bc5",
-        "percent": 2.3,
-        "games": 6
-       },
-       {
-        "uci": "c8a6",
-        "san": "Ba6",
-        "percent": 1.6,
-        "games": 4
-       }
-      ],
-      "club": [
-       {
-        "uci": "e5e4",
-        "san": "e4",
-        "percent": 93.3,
-        "games": 84
-       },
-       {
-        "uci": "c8g4",
-        "san": "Bg4",
-        "percent": 2.2,
-        "games": 2
-       },
-       {
-        "uci": "f8d6",
-        "san": "Bd6",
-        "percent": 2.2,
-        "games": 2
-       },
-       {
-        "uci": "d8c7",
-        "san": "Qc7",
-        "percent": 1.1,
-        "games": 1
-       },
-       {
-        "uci": "f8c5",
-        "san": "Bc5",
-        "percent": 1.1,
-        "games": 1
-       }
-      ]
+      "beginner": [],
+      "casual": [],
+      "club": []
      },
      "notes": {
-      "text": "9.Nf3 went back, and 9...e4 hits the knight again with a pawn. Count the moves: White has played nine, yet only a knight and a bishop are out, and the knight must move once more. You are a pawn down, but your bishop on f8 and castling come next."
+      "text": "9.Nf3 went back, and 9...e4 hits the knight again with a pawn. Count the moves: White has played nine, yet only a knight and a bishop are out, and the knight must move once more. You are a pawn down, but the Engine sees the position as about equal, and your bishop on f8 and castling come next."
      }
     }
    ]

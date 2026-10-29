@@ -90,7 +90,7 @@
    "fen": "7k/8/4Q3/5K2/8/8/8/8 w - - 27 91",
    "side": "white",
    "keyIdea": "Near the corner, count the lone king's escape squares before every move: only the mating move may take away the last one.",
-   "text": "From another game played on Lichess. You are White. Your king has come close, and Black's king is in the corner on h8, with escape squares on g7 and h7. Here a careless move is a draw: Qg6, Qf7 or Kg6 would take both squares without giving check. That is stalemate.",
+   "text": "From another game played on Lichess. You are White. Your king has come close, and Black's king is in the corner on h8, with escape squares on g7 and h7. Here a careless move is a draw: Qg6 or Qf7 would take both squares without giving check. That is stalemate.",
    "url": "https://lichess.org/19FKEkIY#180",
    "line": "Qe7 Kg8 Kg6 Kh8 Qg7#",
    "notes": [

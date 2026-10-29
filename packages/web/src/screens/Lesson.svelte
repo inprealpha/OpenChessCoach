@@ -389,7 +389,7 @@
   }
 
   async function hint(): Promise<void> {
-    if (!node || phase !== 'decide' || hinting) return;
+    if (!node || phase !== 'decide' || hinting || grading) return;
     // Show the move once per decision: another click (after Try another move, say) brings the
     // arrow back, with no new line.
     if (shownMove?.fen === node.fen) {
@@ -596,7 +596,7 @@
           <!-- Straight under the board, so on a phone the Hint and the arrow Show the move draws are both in view. -->
           {#if phase === 'decide'}
             <div class="toolbar">
-              <button type="button" class="secondary" bind:this={hintButton} onclick={hint} disabled={coach.busy}>{hintLevel === 0 ? 'Hint' : 'Show the move'}</button>
+              <button type="button" class="secondary" bind:this={hintButton} onclick={hint} disabled={coach.busy || grading}>{hintLevel === 0 ? 'Hint' : 'Show the move'}</button>
             </div>
           {/if}
           <p class="muted center progress" aria-live="polite">

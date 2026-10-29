@@ -26,11 +26,41 @@ Code, logged in: see [What you need](#what-you-need).
 
 ## What you need
 
-- **Node.js 22.18 or later** (`node --version`).
+- **Node.js 22.18 or later** (`node --version`). Node.js brings `npm` and `npx` with it, so
+  you install nothing else. If `node --version` says the command is not found, or shows a
+  version older than 22.18, see [Installing Node.js](#installing-nodejs).
 - **Claude Code, logged in** with a paid Claude plan (Pro or Max): install it from
   <https://claude.com/claude-code>, run `claude` once and log in. The Coach uses that login; the
   app never sees your password or token.
 - A desktop running macOS, Windows or Linux. Phones and tablets connect to it.
+
+### Installing Node.js
+
+Open a terminal (on Windows, PowerShell; on macOS, the Terminal app) and run the command for your
+system.
+
+On Windows:
+
+```powershell
+winget install OpenJS.NodeJS.LTS
+```
+
+Then close PowerShell and open a new one, so it finds `node`.
+
+On macOS or Linux:
+
+```bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+```
+
+Then close the terminal, open a new one, and run:
+
+```bash
+nvm install --lts
+```
+
+Check that it worked with `node --version`. If you prefer an installer you click through, download
+the LTS version from <https://nodejs.org/en/download>.
 
 ## Start
 

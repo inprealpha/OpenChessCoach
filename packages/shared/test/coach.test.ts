@@ -184,13 +184,15 @@ describe('the Coach brief', () => {
     const other = buildBrief({ ask: { ...ask, lesson: { ...lesson, isLessonMove: false } }, profile });
     expect(other.candidates).toEqual([]);
     expect(other.lesson).toEqual({ opening: 'Italian Game', notes: '', popularity: `${m.san} 12%`, isLessonMove: false });
-    // The move, what it allows and the Lesson's focus stay: that is what the Coach explains from.
+    // The move, what it allows and the Lesson's learning goal stay: that is what the Coach explains
+    // from. The key idea goes: it can all but name the Lesson's move.
     // Nothing of the lines past the replies does: the Lesson's move is often still the best one there.
     expect(other.move).toEqual(lessonMove.move);
     expect(other.replies?.map((r) => r.san)).toEqual(lessonMove.replies?.map((r) => r.san));
     expect(lessonMove.replies?.every((r) => r.line)).toBe(true);
     expect(other.replies?.every((r) => r.line === '')).toBe(true);
-    expect(other.focus).toEqual(lessonMove.focus);
+    expect(lessonMove.focus).toEqual({ learningGoal: 'Play the first moves of the Italian Game.', keyIdea: 'Aim the bishop at f7.' });
+    expect(other.focus).toEqual({ learningGoal: 'Play the first moves of the Italian Game.' });
     expect(other.hideMoves).toBe(false);
     // Neither the Engine's best move nor any other of its moves in the position is allowed: a reply
     // that shows one has it stripped, while the move and the replies may still be drawn.
@@ -209,11 +211,13 @@ describe('the Coach brief', () => {
     expect(guarded.stripped).toHaveLength(2);
   });
 
-  it('keeps a Lesson turn that keeps the answer back within its budget, with its focus whole', () => {
+  it('keeps a Lesson turn that keeps the answer back within its budget, with its learning goal whole and no key idea', () => {
     const lessonFocus = { lesson: 'Italian Game', learningGoal: 'g'.repeat(MAX_LEARNING_GOAL), keyIdea: 'k'.repeat(MAX_KEY_IDEA) };
     for (const { where, brief } of largestLessonBriefs(lessonFocus, false)) {
       expect(briefSize(brief), where).toBeLessThanOrEqual(BRIEF_BUDGET);
-      expect(brief.focus, where).toMatchObject({ learningGoal: lessonFocus.learningGoal, keyIdea: lessonFocus.keyIdea });
+      // A Hint and a Why Question keep the key idea; only the Lesson turn keeps it back.
+      if (brief.job === 'lesson-turn') expect(brief.focus, where).toEqual({ learningGoal: lessonFocus.learningGoal });
+      else expect(brief.focus, where).toMatchObject({ learningGoal: lessonFocus.learningGoal, keyIdea: lessonFocus.keyIdea });
     }
   });
 

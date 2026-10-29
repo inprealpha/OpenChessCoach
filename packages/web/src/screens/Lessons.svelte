@@ -4,7 +4,7 @@
   // next Lesson only says where to go next. With about sixty Lessons, links at the top jump to a track.
   import { SIDE_NAMES } from '@chess-coach/shared/chess';
   import { LEVEL_NAMES, suggestNext, TRACK_NAMES, type CatalogueItem, type Suggestion } from '@chess-coach/shared/content/course';
-  import { bandFor, COURSE_LEVELS, TRACKS, type Track } from '@chess-coach/shared/content/lessons';
+  import { bandFor, BANDS, COURSE_LEVELS, TRACKS, type Track } from '@chess-coach/shared/content/lessons';
   import { lessonCatalogue } from '../lib/content.ts';
   import { lessonProgress, lessonStatus } from '../lib/lesson-progress.svelte.ts';
   import { profile } from '../lib/profile.svelte.ts';
@@ -14,6 +14,10 @@
   /** The Player's band: their level, or the band of their linked rating (ADR 0012). */
   const band = $derived(bandFor(profile.player.level, profile.player.rating));
   const suggestion = $derived(suggestNext(lessonCatalogue, progress.list, profile.player));
+  /** A Player who chose a higher level but whose linked rating is under 1400: the beginner Lessons come first for them. */
+  const ratedBeginner = $derived(band === 'beginner' && profile.player.level !== 'beginner' && profile.player.rating !== null);
+  const SITE_NAME = { lichess: 'Lichess', chesscom: 'chess.com' };
+  const ratedOn = $derived(profile.profile?.ratingSource ? SITE_NAME[profile.profile.ratingSource.site] : 'the site you linked');
 
   const tracks = TRACKS.map((track) => {
     const items = lessonCatalogue.filter((l) => l.track === track);
@@ -80,6 +84,9 @@
         <p class="muted small">{TRACK_NAMES[s.track].name} · {LEVEL_NAMES[s.level]}{s.kind === 'opening' ? ` · ${about(s)}` : ''}</p>
         {#if s.goal}<p>{s.goal}</p>{/if}
         <p class="why">{because(suggestion)}</p>
+        {#if ratedBeginner && s.level === 'beginner' && suggestion.why !== 'unfinished'}
+          <p class="small">Your rating on {ratedOn} is {BANDS.beginner.label}, so the beginner Lessons come first.</p>
+        {/if}
         <a class="button" href={`#/lesson/${s.id}`}>{suggestion.why === 'unfinished' ? 'Resume' : 'Start'} {s.name}</a>
       {:else}
         <p>You have done every Lesson. Go over any of them again, or practise with <a href="#/puzzles">Puzzles</a>.</p>

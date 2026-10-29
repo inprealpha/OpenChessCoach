@@ -2,6 +2,7 @@
 // to do first. Each rule of suggestNext, on a small made-up catalogue in course order.
 import { describe, expect, it } from 'vitest';
 import { suggestNext, type CatalogueItem } from '../src/content/course.ts';
+import { decisionAfter } from '../src/content/lessons.ts';
 import type { LessonProgress, PlayerLevel } from '../src/protocol.ts';
 
 /** A catalogue entry with only what the suggestion reads set. */
@@ -122,5 +123,18 @@ describe('suggestNext', () => {
 
   it('suggests nothing from an empty catalogue', () => {
     expect(suggestNext([], [started('forks', 2)], at('beginner'))).toBeUndefined();
+  });
+});
+
+describe('the decision after a move in a Lesson', () => {
+  // Three parts: two decisions, then three, then one.
+  const list = [0, 0, 1, 1, 1, 2].map((partIndex) => ({ partIndex }));
+
+  it('is the next one', () => {
+    expect([0, 1, 2, 3, 4, 5].map((s) => decisionAfter(list, s, false))).toEqual([1, 2, 3, 4, 5, 6]);
+  });
+
+  it('is the next part’s first after a checkmate, which makes the rest of its part needless, and the end after the last part', () => {
+    expect([0, 1, 2, 3, 4, 5].map((s) => decisionAfter(list, s, true))).toEqual([2, 2, 5, 5, 5, 6]);
   });
 });

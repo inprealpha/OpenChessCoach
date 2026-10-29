@@ -6,7 +6,9 @@
   // only), and the Coach explains. One Coach call per decision. Every Coach call carries the Lesson's
   // learning goal and the part's key idea; the Player sees a key idea only once its part is played.
   // A move that isn't the Lesson's keeps the answer back: the Player may try another move, or
-  // continue with the Lesson's move, which then shows with its note before the Lesson moves on.
+  // continue with the Lesson's move, which then shows with its note before the Lesson moves on. A
+  // move that gives checkmate counts as the Lesson's move, and ends its part. The Coach's arrows show
+  // no move for the Player but the one on the board: another may be the next decision's answer.
   // "How moves are written" explains the move notation the Lesson's texts use, for a beginner.
   import { tick } from 'svelte';
   import type { GradedMove } from '@chess-coach/shared/analysis';
@@ -16,6 +18,7 @@
   import {
     bandFor,
     BANDS,
+    decisionAfter,
     decisions,
     type Credit,
     type Decision,
@@ -29,6 +32,7 @@
   import CoachPanel from '../components/CoachPanel.svelte';
   import GradeBadge from '../components/GradeBadge.svelte';
   import { api } from '../lib/api.svelte.ts';
+  import { lessonArrows } from '../lib/arrows.ts';
   import { CoachThread } from '../lib/coach.svelte.ts';
   import { lessonCatalogue, loadLesson } from '../lib/content.ts';
   import { gradeForCoach } from '../lib/engine/engine.svelte.ts';
@@ -54,6 +58,8 @@
   let advancing = $state(false);
   let board = $state<ReturnType<typeof Board>>();
   let shownContinue = $state<HTMLButtonElement>();
+  let hintButton = $state<HTMLButtonElement>();
+  let doneCard = $state<HTMLElement>();
   /** The Lesson's move once shown, so Show the move says it once per decision. */
   let shownMove: { fen: string; arrow: { from: string; to: string; brush: 'green' } } | null = null;
   /** A Hint in flight: a second click while it is answered does nothing. */
@@ -62,6 +68,8 @@
   let firstGrades = $state<Record<number, MoveGrade>>({});
   /** The decisions where Show the move came before the Player's first try: the summary counts them apart. */
   let shownFirst = $state<Record<number, true>>({});
+  /** The decisions a checkmate made needless: the rest of its part. The summary counts them as covered. */
+  let skipped = $state<Record<number, true>>({});
   const line = new Line();
   const coach = new CoachThread();
   const progress = lessonProgress();
@@ -98,8 +106,10 @@
   const isOpening = $derived(lesson?.kind === 'opening');
   /** Popularity at the Player's band, when the games database has enough games for this position. */
   const popular = $derived(node ? node.popular[band] : []);
-  /** Whether the Player's move is the one the Lesson teaches here. */
-  const lessonMove = $derived(result !== null && node !== undefined && result.uci === node.main);
+  /** Whether the Player's move gives checkmate: like the Lesson's move, it is correct, and it ends its part. */
+  const mates = $derived(result !== null && givesMate(result));
+  /** Whether the Player's move is the one the Lesson teaches here, or a checkmate, which is as good. */
+  const lessonMove = $derived(result !== null && node !== undefined && (result.uci === node.main || mates));
   /** A move that isn't the Lesson's: the answer stays hidden while the Player may try again. */
   const otherMove = $derived(phase === 'feedback' && result !== null && !lessonMove);
   const sound = $derived(result !== null && (result.grade === 'Best' || result.grade === 'Good'));
@@ -128,6 +138,8 @@
   );
   /** Whether the decision on screen is the last of its part, so the part's key idea can show once it is played well. */
   const lastOfPart = $derived(current !== undefined && decisionList[step + 1]?.partIndex !== current.partIndex);
+  /** Whether the move on the board ends its part: the part's last decision, or a checkmate before it. */
+  const endsPart = $derived(lastOfPart || (phase === 'feedback' && mates));
   /** Whether it is the first of its part: the part's text describes the position it starts from. */
   const firstOfPart = $derived(current !== undefined && decisionList[step - 1]?.partIndex !== current.partIndex);
   /** The opponent's move that led to this decision. */
@@ -150,7 +162,7 @@
   /** What the tally covers: every decision, or only those played since the Player resumed. */
   const tallyLead = $derived.by(() => {
     const n = Object.keys(firstGrades).length;
-    if (n === decisionList.length) return 'Your first tries';
+    if (n + Object.keys(skipped).length === decisionList.length) return 'Your first tries';
     return n === 1 ? 'Your first try at the one decision you played this time' : `Your first tries at the ${n} decisions you played this time`;
   });
   /** The Player's progress with this Lesson counted complete, for what comes after it. */
@@ -175,6 +187,10 @@
   function lessonFocus(p: LessonPart | undefined = part): Pick<CoachRequest, 'lessonFocus'> {
     if (!lesson || !p) return {};
     return { lessonFocus: { lesson: lesson.name, learningGoal: lesson.goal, keyIdea: p.keyIdea } };
+  }
+
+  function givesMate(move: Pick<GradedMove, 'fenAfter'>): boolean {
+    return outcomeOf(move.fenAfter)?.reason === 'checkmate';
   }
 
   /** What the Player hears about a move that isn't the Lesson's: its Move Grade, never the answer. */
@@ -217,6 +233,7 @@
     if (phase !== 'intro') return;
     firstGrades = {};
     shownFirst = {};
+    skipped = {};
     showDecision(s);
   }
 
@@ -269,12 +286,15 @@
     result = g;
     if (!(step in firstGrades)) firstGrades[step] = g.grade;
     phase = 'feedback';
-    const isLessonMove = g.uci === node.main;
+    // Any checkmate is as good as the Lesson's move. The notes explain the Lesson's own move only.
+    const mated = givesMate(g);
+    const isLessonMove = g.uci === node.main || mated;
+    const notes = g.uci === node.main ? (node.notes?.text ?? '') : '';
     const popularity = popular.map((p) => ({ san: p.san, percent: p.percent }));
     const side = current?.part.side ?? lesson.side;
     if (!api.coachReady) {
       // The Lesson's notes explain the Lesson's move; for another move they would give the answer away.
-      coach.say(isLessonMove ? `${played.san} is graded ${g.grade}. ${node.notes?.text ?? ''}` : otherMoveText(played.san, g.grade));
+      coach.say(isLessonMove ? `${played.san} is graded ${g.grade}. ${notes}`.trim() : otherMoveText(played.san, g.grade));
       return;
     }
     await coach.ask(
@@ -289,9 +309,9 @@
         lesson: {
           lessonId: lesson.id,
           opening: lesson.name,
-          notes: node.notes?.text ?? '',
+          notes,
           popularity,
-          finalTurn: step === decisionList.length - 1,
+          finalTurn: decisionAfter(decisionList, step, mated) >= decisionList.length,
           isLessonMove,
         },
         ...lessonFocus(current?.part),
@@ -334,19 +354,30 @@
     if (!node || !lesson || advancing || !(phase === 'shown' || (phase === 'feedback' && lessonMove))) return;
     advancing = true;
     const from = step;
+    // A checkmate ends its part: the decisions left in it are needless.
+    const mated = phase === 'feedback' && mates;
+    const to = decisionAfter(decisionList, from, mated);
+    for (let s = from + 1; s < to; s++) skipped[s] = true;
     try {
-      if (from >= decisionList.length - 1) {
+      if (to >= decisionList.length) {
         const last = decisionList[from]?.part;
-        if (last) line.reset(last.fen, last.mainLine);
+        // The Player's own checkmate stays on the board.
+        if (last && !mated) line.reset(last.fen, last.mainLine);
         // The finished board keeps no arrow or highlight from the last decision.
         coach.clearAnnotations();
         hintArrow = null;
         phase = 'done';
+        // On a phone the card is under the board: bring it into view, so the next Lesson shows
+        // without scrolling, and give it the focus, so the keyboard carries on from there.
+        await tick();
+        const box = doneCard?.getBoundingClientRect();
+        if (box && (box.top < 0 || box.bottom > innerHeight)) doneCard?.scrollIntoView({ block: 'start' });
+        doneCard?.focus({ preventScroll: true });
         await saveProgress(decisionList.length, true);
         return;
       }
-      await saveProgress(from + 1, false);
-      showDecision(from + 1);
+      await saveProgress(to, false);
+      showDecision(to);
       await tick();
       board?.focus();
     } finally {
@@ -368,6 +399,9 @@
       if (hintLevel === 1) {
         if (api.coachReady) {
           await coach.ask({ job: 'hint', fen: node.fen, recentMoves: line.sansUntilCursor(), ...(part ? { playerSide: part.side } : {}), ...lessonFocus() }, 'Hint, please.');
+          // The button was disabled while the Coach answered, which drops the focus: it is Show the move now.
+          await tick();
+          if (document.activeElement === document.body) hintButton?.focus();
         } else {
           coach.say('Hints need the Coach, which is unavailable. Press Hint again to see the Lesson’s move.');
         }
@@ -422,7 +456,12 @@
     }
   }
 
-  const arrows = $derived(hintArrow ? [...coach.arrows, hintArrow] : coach.arrows);
+  /** The Coach's arrows, less any other move for the Player (`lessonArrows`), then Show the move's. */
+  const arrows = $derived.by(() => {
+    const side = part?.side ?? lesson?.side ?? 'white';
+    const shown = lessonArrows(coach.arrows, line.fen, line.lastMove?.uci, side);
+    return hintArrow ? [...shown, hintArrow] : shown;
+  });
 </script>
 
 <section class="screen">
@@ -551,7 +590,7 @@
           <!-- Straight under the board, so on a phone the Hint and the arrow Show the move draws are both in view. -->
           {#if phase === 'decide'}
             <div class="toolbar">
-              <button type="button" class="secondary" onclick={hint} disabled={coach.busy}>{hintLevel === 0 ? 'Hint' : 'Show the move'}</button>
+              <button type="button" class="secondary" bind:this={hintButton} onclick={hint} disabled={coach.busy}>{hintLevel === 0 ? 'Hint' : 'Show the move'}</button>
             </div>
           {/if}
           <p class="muted center progress" aria-live="polite">
@@ -596,11 +635,14 @@
           {/if}
           {#if phase === 'feedback' && result && node}
             <section class="card choice" aria-label="Your choice">
-              <p>You played <strong>{result.san}</strong> <GradeBadge grade={result.grade} /> {#if ending}<strong>{ending}</strong>{/if}</p>
+              <!-- Why a sound move doesn't go on, in the same paragraph: on a phone it then shows with the buttons. -->
+              <p>
+                You played <strong>{result.san}</strong> <GradeBadge grade={result.grade} /> {#if ending}<strong>{ending}</strong>{/if}
+                {#if sound && !lessonMove}<span class="sound">A sound move, but not the one this Lesson is teaching.</span>{/if}
+              </p>
               {#if lessonMove}
                 {#if popular.length}{@render popularity(result.uci)}{/if}
               {:else}
-                {#if sound}<p>A sound move, but not the one this Lesson is teaching.</p>{/if}
                 <!-- Only the Player's own move: the table would show the Lesson's move. -->
                 {#if mine}<p class="muted small">{mine.percent}% of players rated {BANDS[band].label} play {result.san} here.</p>{/if}
               {/if}
@@ -613,7 +655,7 @@
                 {/if}
               </div>
               <!-- After Continue, so on a phone the summing-up line never pushes the button off the screen. -->
-              {#if lastOfPart && lessonMove}
+              {#if endsPart && lessonMove}
                 <p class="key-idea"><strong>Key idea:</strong> {part.keyIdea}</p>
               {/if}
             </section>
@@ -632,7 +674,7 @@
             </section>
           {/if}
           {#if phase === 'done'}
-            <section class="card" aria-label="Lesson complete">
+            <section class="card done" aria-label="Lesson complete" tabindex="-1" bind:this={doneCard}>
               <p><strong>Lesson complete.</strong> It is marked complete in your Player Profile.</p>
               {#if tally}
                 <p>{tallyLead}: {tally}.</p>
@@ -690,6 +732,9 @@
   .built-on li { margin: 0.15rem 0; }
   .built-on .complete { color: var(--accent); font-weight: 600; }
   .key-idea { margin: 0.6rem 0 0; }
+  /* Focused when the Lesson ends, so the keyboard carries on from it: no ring after a click. */
+  .done { scroll-margin-top: 0.5rem; }
+  .done:focus:not(:focus-visible) { outline: none; }
   /* How moves are written: one quiet line until opened, then a short two-column list. */
   .notation { font-size: 0.85rem; max-width: 42rem; }
   .notation summary, .began summary { cursor: pointer; color: var(--muted); }
@@ -740,6 +785,9 @@
     .choice > :global(*) { margin: 0; order: 2; }
     .choice > :global(:first-child) { order: 0; }
     .choice > .row { order: 1; }
+    /* Try another move and Continue with the Lesson’s move side by side, so both show at 390×664. */
+    .choice > .row:has(> :nth-child(2)) { display: grid; grid-template-columns: 1fr 1fr; }
+    .choice > .row:has(> :nth-child(2)) > button { padding: 0.4rem 0.5rem; line-height: 1.25; }
     .choice > :global(.popular) { order: 3; }
     .popular h2 { margin-top: 0; }
   }

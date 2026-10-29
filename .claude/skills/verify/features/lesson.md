@@ -28,7 +28,9 @@ the order. `#/lessons?track=<track>` opens the catalogue at a track. Play it out
     counts them as known (`course.test.ts`). The band is `bandFor(level, rating)`, as for the
     popularity tables: a linked rating's band wins over the Player Profile level, so a casual Player
     rated under 1400 starts with the beginner Lessons (`lesson.spec.ts`, "a casual Player whose
-    linked rating is under 1400 …").
+    linked rating is under 1400 …"), and the card says why: "Your rating on Lichess is under
+    1400, so the beginner Lessons come first." Like every screen, the catalogue opens at its top
+    when reached from another one (first run's `Start with the Lessons`, `first-run.spec.ts`).
   - The navigation `Tracks`: a link per track ("Themes", "2 of 6 complete") that scrolls to the
     track and moves the focus to its heading.
   - Each track: a heading, a line on what it covers, then a list per level named like
@@ -37,7 +39,8 @@ the order. `#/lessons?track=<track>` opens the catalogue at a track. Play it out
     the name, the goal cut to two lines, "Opening code C54 · as White · 7 decisions" (openings) or
     "6 decisions", and the status; once started, the status alone counts decisions ("2 of 7
     decisions").
-- `Back to the Lessons` above the heading, on the intro, while playing and on Play it out.
+- `Back to the Lessons` beside the heading (under it on a phone), the same on the intro, while
+  playing and on Play it out.
 - The intro (region `About this Lesson`): "<Track> · <Level>", `What you will learn` with the goal,
   the list `It builds on these Lessons` with a link per prior-knowledge Lesson and its status (a
   beginner Lesson the Player hasn't started reads "Optional at your level" for a casual or club
@@ -52,7 +55,7 @@ the order. `#/lessons?track=<track>` opens the catalogue at a track. Play it out
 - `Start the Lesson` / `Resume the Lesson`; progress saved per decision. However fast it is
   clicked, the first prompt ("What are your options here?") shows once.
 - `Hint` then `Show the move`, in a toolbar straight under the board, so on a phone the arrow is in
-  view with it. Show the move gives the Lesson's move ("The Lesson’s move here is X." with a green
+  view with it. After a Hint the focus stays on the button, now Show the move. Show the move gives the Lesson's move ("The Lesson’s move here is X." with a green
   arrow), never another move the Engine likes as well; it is said once per decision: another click
   only brings the arrow back. After a Hint, on a phone the Coach panel comes under the board too.
   A move played after Show the move counts apart in the summary ("1 after Show the move").
@@ -61,15 +64,20 @@ the order. `#/lessons?track=<track>` opens the catalogue at a track. Play it out
   depends on the move:
   - The Lesson's move: the table of how often players at the Player's level choose each move
     (openings, where the games database has enough games), `Continue`, and the key idea when the
-    part ends. The Coach gets the Lesson's notes.
+    part ends. The Coach gets the Lesson's notes. A move that gives checkmate counts as the
+    Lesson's move (`lesson.isLessonMove: true`, no notes when it is another mate) and ends its
+    part: `Continue` goes to the next part, or to Lesson complete with the Player's checkmate left
+    on the board (`decisionAfter`). The Coach's arrows show only the move played and the
+    opponent's replies (`lessonArrows` in `lib/arrows.ts`, and a prompt rule): another move for
+    the Player, even the Engine's top choice, may be the next decision's answer.
   - Another move: the answer is kept back while the Player may try again. A Move Grade of Best or
-    Good adds "A sound move, but not the one this Lesson is teaching."; only the move's own share
+    Good adds "A sound move, but not the one this Lesson is teaching." on the same line; only the move's own share
     shows ("24.3% of players rated 1400 to 1799 play d4 here."), never the table, no green arrow, no
     note, no key idea and no Why Question box. The buttons are `Try another move` and `Continue with
-    the Lesson’s move`, both disabled while the Coach answers; `Try another move` clears the arrows
+    the Lesson’s move`, side by side on a phone, both disabled while the Coach answers; `Try another move` clears the arrows
     and the typed reasoning. The Lesson turn sends `lesson.isLessonMove: false`, and the desktop's
-    brief then has no candidates, no notes and only the move's own popularity
-    (`lesson: { …, isLessonMove: false }`), and nothing of the Engine's lines past the replies: each
+    brief then has no candidates, no notes, only the move's own popularity
+    (`lesson: { …, isLessonMove: false }`), a `focus` with no `keyIdea`, and nothing of the Engine's lines past the replies: each
     reply's `line` and the threat's are empty, and `move.result` names no move; the prompt tells the
     Coach to explain the move and what it allows, never another move for the Player. Without the Coach, the Coach panel says only the
     Move Grade ("… a sound move, but not the one this Lesson is teaching.").
@@ -78,7 +86,8 @@ the order. `#/lessons?track=<track>` opens the catalogue at a track. Play it out
     idea when the part ends and `Continue` (focused). No Coach call; a Why Question asks about it.
   On a phone (below 820px) the card and the Coach come straight under the board, before the region
   `Position`, and the buttons come before the popularity table, so `Continue` shows without
-  scrolling even at 390×664 (Safari with its bars).
+  scrolling even at 390×664 (Safari with its bars), and so do the "sound move" sentence and both
+  buttons after another move.
 - While choosing, the one place to type is `Explain your thinking (optional)` (sent with the move;
   its example fits the Lesson, e.g. a pin in Pins, else its kind), a two-line box that wraps so the example shows
   whole on any phone; the Coach's Why Question box appears once the move is graded.
@@ -95,12 +104,13 @@ the order. `#/lessons?track=<track>` opens the catalogue at a track. Play it out
   play Black in this part."
 - The screen never shows a part's key idea before the Player's decision: it shows in `Your choice`
   as "Key idea: …" once the part's last decision is played well, and every part's key idea is in
-  the list `What you learned` when the Lesson is complete. The Coach's replies may use it after a
-  move (the fake Coach ends each Lesson turn with "Key idea: …").
+  the list `What you learned` when the Lesson is complete. The Coach's replies may use it after the
+  Lesson's move (the fake Coach ends each such Lesson turn with "Key idea: …"), never after another
+  move, whose brief leaves it out.
 - Every Coach call in a Lesson (the Lesson turn, a Hint, a Why Question) sends `lessonFocus`
   (`{ lesson, learningGoal, keyIdea }`, the current part's key idea); the desktop puts it in the
   brief as `focus`, the same fields, without `lesson` in a Lesson turn, whose `lesson.opening`
-  already names it.
+  already names it, and without `keyIdea` in a Lesson turn whose move isn't the Lesson's.
 - `Continue` to the next decision (one decision per Continue, however fast it is clicked); after
   it and after `Try another move` the focus goes to the board. An opening's prompt says whose move
   it is ("Move 4, Black to play. What are your options here?").
@@ -110,7 +120,8 @@ the order. `#/lessons?track=<track>` opens the catalogue at a track. Play it out
   when it is another Lesson, `Next in <Track>: <name>` (the next unfinished Lesson in this one's
   track, in the course order), both as buttons; "You have done every Lesson." when none is left;
   `Practise with <Lesson> Puzzles` (for an opening, or a Lesson with Puzzle themes) and, for
-  endgames, `Play it out against the Engine: …`. The board keeps no Coach arrow.
+  endgames, `Play it out against the Engine: …`. The board keeps no Coach arrow. The card takes the
+  focus and, on a phone, scrolls into view, so `Your next Lesson` shows without scrolling.
 - Play it out (`#/play-out/<id>`): the region `Play it out` says the goal ("Checkmate the black
   king." or "Promote your pawn."); the Engine answers at full strength; `Start again` resets it;
   reaching the goal says "Well played!"; losing the pawn says "Your pawn is gone, so it can no
@@ -138,7 +149,8 @@ decision (`data/lessons/<id>.json` lists them as `parts[].mainLine`) → `Contin
   the `Your next Lesson` region has moved on to the Lesson complete card's `Your next Lesson`.
 - `coach_calls` has one `lesson-turn` call per decision, and each Lesson brief (`lesson-turn`,
   `hint`, `why`) has `focus: { lesson, learningGoal, keyIdea }` (no `lesson` in a `lesson-turn`)
-  with the key idea of the part on screen.
+  with the key idea of the part on screen; a `lesson-turn` with `isLessonMove: false` has no
+  `keyIdea`.
 - `lesson.spec.ts` covers the catalogue's tracks and next Lesson, which moves on when a Lesson is
   finished, the intro's goal, `It builds on` links and `How moves are written`, `lessonFocus` on
   every Coach call through a whole `thinking` Lesson (the Why Question after the end has no move),
@@ -146,7 +158,10 @@ decision (`data/lessons/<id>.json` lists them as `parts[].mainLine`) → `Contin
   move that isn't the Lesson's, poor (Italian Game 1.g4) and sound (1.d4), with the brief that
   keeps the answer back and `Continue with the Lesson’s move`; the part text folded after the
   part's first decision (What the pieces are worth); `Back to the Lessons`; Hint and Continue in
-  view at 390×664; and a casual Player rated under 1400 sent to the beginner Lessons.
+  view at 390×664, and the "sound move" sentence and both buttons too; a casual Player rated
+  under 1400 sent to the beginner Lessons, with the line that says why; another checkmate in Mate
+  with king and queen counted as the Lesson's move, then Lesson complete in view at 390×664; and a
+  Coach arrow for another move for the Player left off the board after the Lesson's move.
 - In the Italian Game, 1.g4 shows one symbol on g4 (Inaccuracy or worse) and 1.e4 shows
   `Best on e4`.
 

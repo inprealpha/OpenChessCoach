@@ -100,9 +100,10 @@ export interface Brief {
    * During a Lesson, on every Coach call: the Lesson, its learning goal and the current part's key
    * idea, so the Coach stays on the Lesson's point (ADR 0012). The Lesson's aim, never an Engine fact,
    * and not the Player's Goals (`profile.goals`). A Lesson turn leaves the name out: `lesson.opening`
-   * already gives it.
+   * already gives it. A Lesson turn that keeps the answer back leaves the key idea out too: it can
+   * all but name the Lesson's move, and a Hint is the place for a nudge.
    */
-  focus?: { lesson?: string; learningGoal: string; keyIdea: string };
+  focus?: { lesson?: string; learningGoal: string; keyIdea?: string };
   profile?: { goals: string[]; weaknesses: string[]; notes: string[] };
   question?: string;
   summary?: string;
@@ -219,12 +220,14 @@ export function buildBrief({ ask, profile, summary }: BriefInput): Brief {
     };
   }
   const focus = ask.lessonFocus;
-  if (focus && (focus.learningGoal.trim() || focus.keyIdea.trim())) {
+  // Kept back, the key idea goes too: it is often one step from the Lesson's move.
+  const keyIdea = keepBack ? '' : (focus?.keyIdea.trim() ?? '');
+  if (focus && (focus.learningGoal.trim() || keyIdea)) {
     const name = clip(focus.lesson.trim(), MAX_LESSON_NAME);
     brief.focus = {
       ...(brief.lesson?.opening === name ? {} : { lesson: name }),
       learningGoal: clip(focus.learningGoal.trim(), MAX_LEARNING_GOAL),
-      keyIdea: clip(focus.keyIdea.trim(), MAX_KEY_IDEA),
+      ...(keepBack ? {} : { keyIdea: clip(keyIdea, MAX_KEY_IDEA) }),
     };
   }
   const slice = profileSlice(profile, ask.opening ?? ask.lesson?.opening);

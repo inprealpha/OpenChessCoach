@@ -7,7 +7,11 @@ class Router {
   route = $state<Route>(parseRoute(location.hash));
   constructor() {
     window.addEventListener('hashchange', () => {
-      this.route = parseRoute(location.hash);
+      const next = parseRoute(location.hash);
+      // Another screen opens at its top, not at the scroll position of the one before. A screen
+      // that keeps its own place, such as the game list, scrolls there once it has loaded.
+      if (next.name !== this.route.name || next.params.join('/') !== this.route.params.join('/')) scrollTo(0, 0);
+      this.route = next;
     });
   }
   go(path: string): void {

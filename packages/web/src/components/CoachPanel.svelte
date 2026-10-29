@@ -20,6 +20,7 @@
 
   let question = $state('');
   let log: HTMLDivElement | undefined = $state();
+  let whyInput: HTMLInputElement | undefined = $state();
   const available = $derived(api.coachReady);
   /** The count shows only near the limit, so a short question isn't cluttered with it. */
   const charsLeft = $derived(MAX_QUESTION_LENGTH - question.length);
@@ -38,6 +39,8 @@
     const calls = thread.calls;
     question = '';
     await onwhy(asked);
+    // The button was disabled while the Coach answered, which drops the focus: the box takes it back.
+    if (document.activeElement === document.body) whyInput?.focus();
     // Not answered (the desktop refused it, or the Coach couldn't be reached): give it back to edit.
     if (asked && thread.calls > calls && thread.failed && !question) question = asked;
   }
@@ -74,6 +77,7 @@
       <label class="visually-hidden" for="why-input">Your Why Question</label>
       <input
         id="why-input"
+        bind:this={whyInput}
         bind:value={question}
         {placeholder}
         disabled={!available}

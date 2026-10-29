@@ -152,8 +152,7 @@ export function templateReply(brief: Brief): CoachRawReply {
         text = `You chose ${brief.move?.san ?? 'a move'}, graded ${grade}: ${sound ? 'a sound move, but not the one this Lesson is teaching' : 'not the best idea here'}.${popular}`;
         if (brief.move?.does) text += ` It ${brief.move.does}.`;
         if (reply) text += ` Your opponent's main option next is ${reply.san}${reply.does ? `, which ${reply.does}` : ''}.`;
-        const idea = brief.focus?.keyIdea;
-        if (idea) text += ` Key idea: ${idea}${/[.!?…]$/.test(idea) ? '' : '.'}`;
+        // No key idea: the brief leaves it out, as it can all but name the answer.
         text += ' Try another move, or continue with the Lesson’s move.';
         if (brief.move) add(brief.move, sound ? 'blue' : 'red');
         add(reply, 'yellow');
@@ -166,8 +165,9 @@ export function templateReply(brief: Brief): CoachRawReply {
       const idea = brief.focus?.keyIdea;
       if (idea) text += ` Key idea: ${idea}${/[.!?…]$/.test(idea) ? '' : '.'}`;
       text += grade === 'Best' || grade === 'Good' ? ' Let\'s continue the Lesson.' : ' Try another move.';
-      add(best, 'green');
-      if (brief.move && brief.move.uci !== best?.uci) add(brief.move, grade === 'Best' || grade === 'Good' ? 'blue' : 'red');
+      // Arrows for the move and the reply only: another move for the Player may be the answer to
+      // the Lesson's next decision.
+      if (brief.move) add(brief.move, sound ? 'green' : 'red');
       add(reply, 'yellow');
       break;
     }

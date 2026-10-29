@@ -17,7 +17,7 @@ in the top right of every screen.
   is Attack and defence." for a beginner, "Candidate moves and thinking ahead" for casual or club),
   from `suggestNext` in `packages/shared/src/content/course.ts`, which goes by the Player's band: a
   linked rating's band wins over the level picked.
-- `Start with the Lessons` (opens the Lessons, `#/lessons`) or `Skip to the main menu`.
+- `Start with the Lessons` (opens the Lessons, `#/lessons`, at their top) or `Skip to the main menu`.
 - An unknown username (or a site that is limiting requests) shows its error inside the group `Your
   online account (optional)`, under the `Username` box, which takes the focus with
   `aria-invalid="true"`; the error says the Player can set Site to None instead. Onboarding waits.

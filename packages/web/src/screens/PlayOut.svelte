@@ -107,8 +107,11 @@
   {:else if !lesson || !playOut}
     <p class="muted">Loading…</p>
   {:else}
-    <p class="back"><a href="#/lessons"><span aria-hidden="true">←</span> Back to the Lessons</a></p>
-    <h1>{lesson.name}: play it out</h1>
+    <!-- As on the Lesson screens: the way back first, then the name, on one line where both fit. -->
+    <div class="title">
+      <a class="back" href="#/lessons"><span aria-hidden="true">←</span> Back to the Lessons</a>
+      <h1>{lesson.name}: play it out</h1>
+    </div>
     <div class="board-layout">
       <div>
         <Board
@@ -142,8 +145,9 @@
 </section>
 
 <style>
-  .back { margin: 0 0 0.2rem; font-size: 0.9rem; }
-  .back + h1 { margin-top: 0; }
+  .title { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.2rem 1rem; margin-bottom: 0.8rem; }
+  .title h1 { margin: 0; }
+  .back { order: 1; font-size: 0.9rem; }
   h2 { font-size: 1rem; margin: 0 0 0.4rem; }
   .center { text-align: center; }
   .row { display: flex; gap: 0.5rem; flex-wrap: wrap; }

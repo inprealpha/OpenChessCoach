@@ -1,6 +1,6 @@
 // Arrows the Board draws besides the Coach's: each with its own color and accessible name.
 import type { GradedMove } from '@chess-coach/shared/analysis';
-import { SIDE_NAMES } from '@chess-coach/shared/chess';
+import { piecesOf, SIDE_NAMES, type Side } from '@chess-coach/shared/chess';
 import type { Arrow } from '@chess-coach/shared/coach/types';
 import type { Threat } from '@chess-coach/shared/threat';
 import { GRADE_LOOK } from './grades.ts';
@@ -43,4 +43,14 @@ export function reviewArrows(move: GradedMove | undefined): BoardArrow[] {
     { from, to, color: GRADE_LOOK[move.grade].dark, label: `Move played: ${move.san}, ${move.grade}` },
     { from: best.uci.slice(0, 2), to: best.uci.slice(2, 4), color: BEST_COLOR, label: `Engine’s best: ${best.san}` },
   ];
+}
+
+/**
+ * A Lesson's Coach arrows: the move on the board (`played`) and the opponent's moves, never another
+ * move for the Player, who plays `player`. Even the Engine's top choice may be the answer to the
+ * Lesson's next decision.
+ */
+export function lessonArrows<A extends { from: string; to: string }>(arrows: readonly A[], fen: string, played: string | undefined, player: Side): A[] {
+  const theirs = new Set(piecesOf(fen).filter((p) => p.color !== player).map((p) => p.square));
+  return arrows.filter((a) => `${a.from}${a.to}` === played?.slice(0, 4) || theirs.has(a.from));
 }

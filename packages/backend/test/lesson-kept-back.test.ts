@@ -64,6 +64,8 @@ describe('a Lesson turn that keeps the answer back', () => {
         });
         grades.push(ask.move?.grade ?? 'Best');
         const brief = buildBrief({ ask, profile });
+        // The key idea is kept back too: it can all but name the Lesson's move.
+        if (brief.focus?.keyIdea !== undefined) leaks.push(`the key idea after ${playUci(node.fen, uci)?.san}`);
         if (names(answerable(brief), node.mainSan, node.main)) leaks.push(`${node.mainSan} after ${playUci(node.fen, uci)?.san}: ${answerable(brief)}`);
       }
     }

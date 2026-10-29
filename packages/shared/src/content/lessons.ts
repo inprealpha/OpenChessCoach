@@ -146,6 +146,18 @@ export function decisions(lesson: LessonData): Decision[] {
 }
 
 /**
+ * The decision that comes after decision `step` once the Player has played: the next one, or, when
+ * the Player's move gave checkmate, the first of the next part, since the rest of its part is
+ * needless. `list.length` once the Lesson is over.
+ */
+export function decisionAfter(list: readonly Pick<Decision, 'partIndex'>[], step: number, mated: boolean): number {
+  if (!mated) return step + 1;
+  const at = list[step]?.partIndex;
+  const next = list.findIndex((d, i) => i > step && d.partIndex !== at);
+  return next < 0 ? list.length : next;
+}
+
+/**
  * The ADR 0008 Engine check: every move the Player is asked to find is graded Best or Good at
  * `depth`, so a Player who plays the book move is never told it was a Mistake. Returns the moves
  * graded worse.

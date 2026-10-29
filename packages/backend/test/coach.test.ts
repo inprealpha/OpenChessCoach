@@ -562,15 +562,17 @@ describe('the Coach port', () => {
     const ask: CoachRequest = { job: 'lesson-turn', fen: START, recentMoves: [], playerSide: 'white', moveUci: 'a2a3', lesson: { ...lesson, isLessonMove: false }, lessonFocus };
     const reply = await c.request('coach.ask', ask);
     const brief = app.coach.lastBrief as Brief;
-    // None of the Engine's moves for White, no notes, and only a3's own popularity; the move, the
-    // replies to it and the Lesson's focus stay.
+    // None of the Engine's moves for White, no notes, only a3's own popularity and no key idea,
+    // which can all but name the answer; the move, the replies to it and the learning goal stay.
     expect(brief.candidates).toEqual([]);
     expect(brief.lesson).toEqual({ opening: 'Italian Game', notes: '', popularity: 'a3 1%', isLessonMove: false });
     expect(brief.move?.san).toBe('a3');
     expect(brief.replies?.length).toBeGreaterThan(0);
-    expect(brief.focus).toEqual({ learningGoal: lessonFocus.learningGoal, keyIdea: lessonFocus.keyIdea });
-    // The fake Coach explains a3 and the reply, offers both ways on, and names no other move for White.
+    expect(brief.focus).toEqual({ learningGoal: lessonFocus.learningGoal });
+    // The fake Coach explains a3 and the reply, offers both ways on, and names no other move for
+    // White, nor the key idea.
     expect(reply.text).toMatch(/^You chose a3, graded (Best|Good|Inaccuracy|Mistake|Blunder)/);
+    expect(reply.text).not.toContain('Key idea');
     expect(reply.text).toContain('Try another move, or continue with the Lesson’s move.');
     expect(reply.text).not.toMatch(/\be4\b|top choice/);
     expect(reply.arrows.map((a) => a.brush)).not.toContain('green');
@@ -579,8 +581,11 @@ describe('the Coach port', () => {
     const forged = await c.request('coach.ask', ask);
     expect(forged).toMatchObject({ moves: [], arrows: [], stripped: 2 });
     // The Lesson's own move, or a client that doesn't say, gets the brief as before.
-    await c.request('coach.ask', { ...ask, moveUci: 'e2e4', lesson: { ...lesson, isLessonMove: true } });
+    const lessonMove = await c.request('coach.ask', { ...ask, moveUci: 'e2e4', lesson: { ...lesson, isLessonMove: true } });
     expect(app.coach.lastBrief?.candidates.length).toBeGreaterThan(0);
+    expect(app.coach.lastBrief?.focus).toEqual({ learningGoal: lessonFocus.learningGoal, keyIdea: lessonFocus.keyIdea });
+    // Its arrows are the move and the reply: another move for White may be the next decision's answer.
+    expect(lessonMove.arrows.filter((a) => a.from[1] === '2' || a.from[1] === '1').map((a) => `${a.from}${a.to}`)).toEqual(['e2e4']);
     expect(app.coach.lastBrief?.lesson).toEqual({ opening: 'Italian Game', notes: lesson.notes, popularity: 'e4 60%, a3 1%' });
     await c.request('coach.ask', { ...ask, lesson });
     expect(app.coach.lastBrief?.candidates.length).toBeGreaterThan(0);
@@ -589,6 +594,9 @@ describe('the Coach port', () => {
     expect(rule).toMatch(/leaves out the Lesson's move and the Engine's best move/);
     expect(rule).toMatch(/Never name, draw or hint at any other move/);
     expect(rule).toMatch(/not the one this Lesson is teaching/);
+    expect(rule).toMatch(/no focus\.keyIdea/);
+    const arrows = SYSTEM_PROMPT.split('\n- ').find((r) => r.startsWith('In a Lesson turn, draw arrows')) ?? '';
+    expect(arrows).toMatch(/only for the Player's move and the opponent's replies/);
   });
 
   it('carries a Lesson’s focus from the request into the brief of a Lesson turn, a Hint and a Why Question', async () => {

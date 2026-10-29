@@ -29,9 +29,15 @@ test.describe('a fresh install', () => {
     await page.getByLabel('Site').selectOption('lichess');
     await page.getByLabel('Username').fill('CoachVerify');
     await page.getByLabel('Goal 1').fill('Learn the Caro-Kann');
-    await page.getByRole('button', { name: 'Start with the Lessons' }).click();
-    // The suggested start opens the Lessons themselves, not the Learn screen above them.
-    await expect(page.getByRole('heading', { name: 'Lessons', exact: true })).toBeVisible();
+    // On a phone the button is far down the form.
+    await page.setViewportSize({ width: 390, height: 844 });
+    const start = page.getByRole('button', { name: 'Start with the Lessons' });
+    await start.scrollIntoViewIfNeeded();
+    expect(await page.evaluate(() => scrollY)).toBeGreaterThan(0);
+    await start.click();
+    // The suggested start opens the Lessons themselves, not the Learn screen above them, at their top.
+    await expect(page.getByRole('heading', { name: 'Lessons', exact: true })).toBeInViewport();
+    expect(await page.evaluate(() => scrollY)).toBe(0);
 
     const [profile] = await app.rows<{ onboarded: number; level: string; rating: number; rating_site: string; goals: string }>('profile');
     expect(profile).toMatchObject({ onboarded: 1, level: 'club', rating: 1612, rating_site: 'lichess' });

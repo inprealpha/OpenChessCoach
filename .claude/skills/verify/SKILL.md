@@ -156,8 +156,16 @@ on GitHub, so a link to a folder or a page doesn't count.
    Put the phone pictures in one `<details>` block after the desktop ones.
 
 If you touched a path in `.github/coach-paths.txt`, the fake Coach is not enough: the PR also needs
-the real-Coach check from the owner's desktop (`.claude/skills/real-coach-check/SKILL.md`). Say so
-in the PR.
+the real-Coach check. The Verdict job runs it when the PR is marked ready for review, and the desktop
+can run it too (`.claude/skills/real-coach-check/SKILL.md`). Say so in the PR.
+
+### Draft first, then the Verdict
+
+Open the PR as a draft (`gh pr create --draft`) and keep fixing on it until your own review, this
+skill's evidence and CI are all done. Then mark it ready (`gh pr ready`): that starts the Verdict
+(ADR 0013), a judge that didn't write the PR and checks it in its own copy of the app. It costs the
+owner's Claude limits, so mark the PR ready once, on the final commit. A push afterwards leaves the
+new commit without a Verdict; when you've fixed what a `FAIL` found, comment `/verdict` once.
 
 ## 5. Cleanup
 

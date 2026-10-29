@@ -127,6 +127,22 @@ describe('Lesson data', () => {
     expect(validateLesson(opening).join('\n')).toMatch(/italian-game: the key idea names a move the Player has to find \(Bc4\)/);
   });
 
+  it('fails on a key idea that writes the move without its capture sign, or castles with zeros', () => {
+    const named = (lesson: LessonData, keyIdea: string) => {
+      const broken = copy(lesson);
+      (broken.parts[0] as { keyIdea: string }).keyIdea = keyIdea;
+      return validateLesson(broken).join('\n');
+    };
+    const decisionWith = (re: RegExp) => {
+      const lesson = lessons.find((l) => l.parts[0]!.nodes.some((n) => n.decision && re.test(n.mainSan)))!;
+      return { lesson, san: lesson.parts[0]!.nodes.find((n) => n.decision && re.test(n.mainSan))!.mainSan.replace(/[+#]$/, '') };
+    };
+    const capture = decisionWith(/^[KQRBN]x/);
+    expect(named(capture.lesson, `Look for ${capture.san.replace('x', '')} here.`)).toContain(`the key idea names a move the Player has to find (${capture.san})`);
+    const castling = decisionWith(/^O-O/);
+    expect(named(castling.lesson, `Castle with ${castling.san.replace(/O/g, '0')} early.`)).toContain(`the key idea names a move the Player has to find (${castling.san})`);
+  });
+
   it('fails on a kept text whose punctuation was changed, or kept in a title, key idea or goal', () => {
     const kept = openTexts.find((t) => t.text.split(' ').length > 20 && !/\d/.test(t.text)) as OpenText;
     const words = kept.text.split(' ').slice(0, 10);

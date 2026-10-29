@@ -43,6 +43,13 @@ describe('a Lesson’s Coach highlights', () => {
     expect(lessonHighlights(['g7', 'd8', 'g8', 'b1'], fen, undefined, 'white')).toEqual(['g8', 'b1']);
   });
 
+  it('after a move that isn’t the Lesson’s, drop every square the Player could go to when trying again', () => {
+    // The Lesson's move is Nxe5; the Player played Ng5 instead and tries again from the position before it.
+    const node = '4k3/8/8/4p3/8/5N2/8/4K3 w - - 0 1';
+    const after = playUci(node, 'f3g5')!.fenAfter;
+    expect(lessonHighlights(['e5', 'g5', 'f3', 'a8'], after, 'f3g5', 'white', node)).toEqual(['g5', 'f3', 'a8']);
+  });
+
   it('keep only the move’s own squares after a check, when the Player’s next move can’t be known', () => {
     const after = playUci('6k1/8/5QK1/8/8/8/8/8 w - - 0 1', 'f6f7')!.fenAfter;
     expect(lessonHighlights(['f7', 'f6', 'h8', 'a1'], after, 'f6f7', 'white')).toEqual(['f7', 'f6']);

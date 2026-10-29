@@ -251,7 +251,12 @@ function validatePart(lesson: LessonData, part: LessonPart, index: number): stri
   else {
     // The screen hides the key idea until the part is played, and the Coach sees it during a Hint
     // and after a move that isn't the Lesson's, which must not give the move away (ADR 0012).
-    const named = part.nodes.filter((n) => n.decision).map((n) => n.mainSan.replace(/[+#]$/, '')).filter((san) => new RegExp(`(?<![\\w-])${san.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\w-])`).test(part.keyIdea));
+    // Also written another way: without its capture sign (Nf7 for Nxf7), or castling with zeros (0-0).
+    const names = (written: string) => new RegExp(`(?<![\\w-])${written.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\w-])`).test(part.keyIdea);
+    const named = part.nodes
+      .filter((n) => n.decision)
+      .map((n) => n.mainSan.replace(/[+#]$/, ''))
+      .filter((san) => [san, san.replace('x', ''), san.replace(/O/g, '0')].some(names));
     if (named.length) problems.push(`${name}: the key idea names a move the Player has to find (${named.join(', ')})`);
   }
   let fen = part.fen;

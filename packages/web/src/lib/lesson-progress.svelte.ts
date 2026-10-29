@@ -25,11 +25,12 @@ export async function saveLessonProgress(lessonId: string, step: number, complet
   await loaded;
   // A Lesson finished while the desktop was away stays finished.
   const done = completed || unsent.some((p) => p.lessonId === lessonId && p.completed);
-  const others = unsent.filter((p) => p.lessonId !== lessonId);
+  // Read after the request: a sync may have sent and dropped other entries meanwhile.
+  const others = () => unsent.filter((p) => p.lessonId !== lessonId);
   if (api.state === 'online') {
     try {
       await api.request('lessons.update', { lessonId, step, completed: done });
-      await keepUnsent(others);
+      await keepUnsent(others());
       return;
     } catch {
       // kept on this device below
@@ -38,7 +39,7 @@ export async function saveLessonProgress(lessonId: string, step: number, complet
   // A timestamp, never changed: nothing reactive.
   // eslint-disable-next-line svelte/prefer-svelte-reactivity
   const updatedAt = new Date().toISOString();
-  await keepUnsent([...others, { lessonId, step, completed: done, updatedAt }]);
+  await keepUnsent([...others(), { lessonId, step, completed: done, updatedAt }]);
 }
 
 let syncing: Promise<void> | undefined;

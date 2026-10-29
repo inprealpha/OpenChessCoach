@@ -58,12 +58,13 @@ export function lessonArrows<A extends { from: string; to: string }>(arrows: rea
 /**
  * A Lesson's Coach highlights, filtered like its arrows (`lessonArrows`): the squares of the move on
  * the board stay, and no square any move of the Player's could go to, which may be where the Lesson's
- * next move goes. When the Player can't be given the move (the opponent is in check), only the
- * move's own squares stay.
+ * next move goes. After a move that isn't the Lesson's, the Player tries again from `retry`, the
+ * position before it, so the squares come from there. When the Player can't be given the move (the
+ * opponent is in check), only the move's own squares stay.
  */
-export function lessonHighlights(squares: readonly string[], fen: string, played: string | undefined, player: Side): string[] {
+export function lessonHighlights(squares: readonly string[], fen: string, played: string | undefined, player: Side, retry?: string): string[] {
   const own = new Set(played ? [played.slice(0, 2), played.slice(2, 4)] : []);
-  const playerToMove = turnOf(fen) === player ? fen : nullMoveFen(fen);
+  const playerToMove = retry ?? (turnOf(fen) === player ? fen : nullMoveFen(fen));
   if (!playerToMove) return squares.filter((sq) => own.has(sq));
   const reached = new Set(legalMoves(playerToMove).map((uci) => uci.slice(2, 4)));
   return squares.filter((sq) => own.has(sq) || !reached.has(sq));

@@ -12,6 +12,7 @@
   import { pendingGames } from '../lib/offline.ts';
   import { profile } from '../lib/profile.svelte.ts';
   import { keepGames, keptGames } from '../lib/kept-games.ts';
+  import { router } from '../lib/router.svelte.ts';
 
   /** Opened from the main menu's Import your games or Import more (#/games/import): start at the username. */
   let { startImport = false }: { startImport?: boolean } = $props();
@@ -124,6 +125,11 @@
     void api.reconnects;
     void api.state;
     void refresh();
+  });
+  // Back or Forward to the list puts back the Player's place once the list has loaded.
+  const contentShown = router.loadsLater();
+  $effect(() => {
+    if (listFrom) contentShown();
   });
 
   /** The Player changed what to import, so the message about the last import, and its side question, no longer apply. */

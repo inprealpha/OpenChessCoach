@@ -40,6 +40,7 @@
   import { gradeCount, gradeMark } from '../lib/grades.ts';
   import { lessonProgress, lessonStatus, saveLessonProgress } from '../lib/lesson-progress.svelte.ts';
   import { profile } from '../lib/profile.svelte.ts';
+  import { router } from '../lib/router.svelte.ts';
   import { store } from '../lib/storage.ts';
 
   let { lessonId }: { lessonId: string } = $props();
@@ -201,6 +202,11 @@
 
   $effect(() => {
     void load(lessonId);
+  });
+  // Back or Forward to the Lesson puts back the Player's place once the Lesson has rendered.
+  const contentShown = router.loadsLater();
+  $effect(() => {
+    if (lesson || missing) contentShown();
   });
 
   async function load(id: string): Promise<void> {
@@ -459,7 +465,7 @@
     return hintArrow ? [...shown, hintArrow] : shown;
   });
   /** The Coach's highlights, less any square a move of the Player's could go to (`lessonHighlights`). */
-  const highlights = $derived(lessonHighlights(coach.highlights, line.fen, line.lastMove?.uci, playerSide));
+  const highlights = $derived(lessonHighlights(coach.highlights, line.fen, line.lastMove?.uci, playerSide, otherMove ? node?.fen : undefined));
 </script>
 
 <section class="screen">

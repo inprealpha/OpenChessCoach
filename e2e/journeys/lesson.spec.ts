@@ -794,30 +794,64 @@ test('a Lesson and its play-out link back to the Lessons, on the intro and while
   await expect(paired.getByRole('heading', { name: 'Lessons', level: 1 })).toBeVisible();
 });
 
-test('the browser’s Back from a Lesson returns to the place in the Lessons the Player had scrolled to', async ({ paired, app }) => {
-  // The last Lesson in the list, far down the Lessons; its intro is much shorter than that.
-  const last = index.at(-1)!;
-  await paired.goto(`${app.url}/#/lessons`);
-  // The router puts the place back itself. With the browser's own restoring off, as on a browser that
-  // puts it back on the screen still showing (and cuts it short there), it still comes back.
-  await paired.evaluate(() => (history.scrollRestoration = 'manual'));
-  const link = paired.locator(`a.item[href="#/lesson/${last.id}"]`);
-  await link.scrollIntoViewIfNeeded();
-  const y = await paired.evaluate(() => scrollY);
-  expect(y).toBeGreaterThan(1000);
-  await link.click();
-  await expect(paired.getByRole('heading', { name: last.name, level: 1 })).toBeVisible();
-  // A new step opens at the top of its screen.
-  expect(await paired.evaluate(() => scrollY)).toBe(0);
-  await paired.goBack();
-  await expect(paired.getByRole('heading', { name: 'Lessons', level: 1 })).toBeAttached();
-  await expect.poll(() => paired.evaluate(() => scrollY)).toBe(y);
-  await expect(link).toBeInViewport();
-  // Forward returns to the Lesson at its top.
-  await paired.goForward();
-  await expect(paired.getByRole('heading', { name: last.name, level: 1 })).toBeVisible();
-  expect(await paired.evaluate(() => scrollY)).toBe(0);
-});
+// The router puts the place back itself, with the browser's own restoring on or off: off as on a
+// browser that puts it back on the screen still showing, and cuts it short there.
+for (const restoring of ['auto', 'manual'] as const) {
+  test(`the browser’s Back from a Lesson returns to the place in the Lessons the Player had scrolled to (browser’s restoring ${restoring})`, async ({ paired, app }) => {
+    // The last Lesson in the list, far down the Lessons; its intro is much shorter than that.
+    const last = index.at(-1)!;
+    await paired.goto(`${app.url}/#/lessons`);
+    await paired.evaluate((r) => (history.scrollRestoration = r), restoring);
+    const link = paired.locator(`a.item[href="#/lesson/${last.id}"]`);
+    await link.scrollIntoViewIfNeeded();
+    const y = await paired.evaluate(() => scrollY);
+    expect(y).toBeGreaterThan(1000);
+    await link.click();
+    await expect(paired.getByRole('heading', { name: last.name, level: 1 })).toBeVisible();
+    // A new step opens at the top of its screen.
+    expect(await paired.evaluate(() => scrollY)).toBe(0);
+    await paired.goBack();
+    await expect(paired.getByRole('heading', { name: 'Lessons', level: 1 })).toBeAttached();
+    await expect.poll(() => paired.evaluate(() => scrollY)).toBe(y);
+    await expect(link).toBeInViewport();
+    // Forward returns to the Lesson at its top.
+    await paired.goForward();
+    await expect(paired.getByRole('heading', { name: last.name, level: 1 })).toBeVisible();
+    expect(await paired.evaluate(() => scrollY)).toBe(0);
+  });
+
+  test(`Back to a Lesson, which loads after the step changes, returns to its place, also after a reload (browser’s restoring ${restoring})`, async ({ paired, app }) => {
+    const lesson = index.at(-1)!;
+    const heading = paired.getByRole('heading', { name: lesson.name, level: 1 });
+    // A small phone, where the Lesson's intro is several screens long.
+    await paired.setViewportSize({ width: 320, height: 400 });
+    await paired.goto(`${app.url}/#/lesson/${lesson.id}`);
+    await expect(heading).toBeVisible();
+    // Scrolled to the end of the intro, and off to the Lessons straight away, within a few frames.
+    const y = await paired.evaluate(async () => {
+      scrollTo(0, document.documentElement.scrollHeight);
+      await new Promise(requestAnimationFrame);
+      await new Promise(requestAnimationFrame);
+      const at = scrollY;
+      location.hash = '#/lessons';
+      return at;
+    });
+    expect(y).toBeGreaterThan(200);
+    await expect(paired.getByRole('heading', { name: 'Lessons', level: 1 })).toBeVisible();
+    await paired.reload();
+    await expect(paired.getByRole('heading', { name: 'Lessons', level: 1 })).toBeVisible();
+    await paired.evaluate((r) => (history.scrollRestoration = r), restoring);
+    await paired.goBack();
+    await expect(heading).toBeVisible();
+    await expect.poll(() => paired.evaluate(() => scrollY)).toBe(y);
+    // The place wasn't cut short while the Lesson loaded: the next Back to it returns there too.
+    await paired.goForward();
+    await expect(paired.getByRole('heading', { name: 'Lessons', level: 1 })).toBeVisible();
+    await paired.goBack();
+    await expect(heading).toBeVisible();
+    await expect.poll(() => paired.evaluate(() => scrollY)).toBe(y);
+  });
+}
 
 test('on a phone with Safari’s bars (390×664), the Hint and Continue need no scrolling, even with the popularity table', async ({ paired, app }) => {
   const lesson = readLesson('italian-game');

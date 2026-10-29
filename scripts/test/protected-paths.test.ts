@@ -25,8 +25,8 @@ describe('the no-Verdict list (ADR 0013)', () => {
   const noVerdictList = readList(readFileSync(new URL('../../.github/no-verdict-paths.txt', import.meta.url), 'utf8'));
 
   it('lets docs, tests and process files through, and judges everything else', () => {
-    const files = ['docs/adr/0013-the-verdict-runs-once-per-finished-pr.md', 'README.md', 'packages/shared/test/grader.test.ts', 'packages/backend/test/coach.test.ts', 'e2e/journeys/review.spec.ts', '.github/workflows/verdict.yml', '.claude/skills/verify/SKILL.md', 'packages/web/src/App.svelte', 'packages/shared/src/grader.ts', 'data/lessons/italian-game.json', 'package-lock.json', 'scripts/verdict.ts', 'site/index.html'];
-    expect(needingVerdict(files, noVerdictList)).toEqual(files.slice(7));
+    const files = ['docs/adr/0013-the-verdict-runs-once-per-finished-pr.md', 'README.md', 'packages/shared/test/grader.test.ts', 'packages/backend/test/coach.test.ts', 'e2e/journeys/review.spec.ts', '.github/workflows/verdict.yml', '.claude/skills/verify/SKILL.md', 'scripts/verdict.ts', 'scripts/glossary-lint.ts', 'packages/web/src/App.svelte', 'packages/shared/src/grader.ts', 'data/lessons/italian-game.json', 'package-lock.json', 'scripts/real-coach-check.ts', 'scripts/test-helper.ts', 'site/index.html'];
+    expect(needingVerdict(files, noVerdictList)).toEqual(files.slice(9));
   });
 
   it('matches a * within one folder name only', () => {

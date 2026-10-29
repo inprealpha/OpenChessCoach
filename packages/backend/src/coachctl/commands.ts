@@ -357,7 +357,10 @@ async function settings(flags: Flags): Promise<Result> {
   const t = target(flags);
   const deeper = str(flags, 'think-deeper');
   if (deeper !== undefined && deeper !== 'on' && deeper !== 'off') throw new CtlError('--think-deeper is on or off.', 'Pass --think-deeper on or --think-deeper off.');
-  const out = await withClient(t, (c) => (deeper ? c.request('settings.update', { thinkDeeper: deeper === 'on' }) : c.request('settings.get', {})));
+  const overview = str(flags, 'review-overview');
+  if (overview !== undefined && overview !== 'on' && overview !== 'off') throw new CtlError('--review-overview is on or off.', 'Pass --review-overview on or --review-overview off.');
+  const patch = { ...(deeper ? { thinkDeeper: deeper === 'on' } : {}), ...(overview ? { reviewOverview: overview === 'on' } : {}) };
+  const out = await withClient(t, (c) => (Object.keys(patch).length ? c.request('settings.update', patch) : c.request('settings.get', {})));
   return { ok: true, settings: out };
 }
 
@@ -570,9 +573,9 @@ ${TARGET_HELP}`,
     run: askWhy,
   },
   settings: {
-    help: `Usage: coachctl settings [--think-deeper on|off]
+    help: `Usage: coachctl settings [--think-deeper on|off] [--review-overview on|off]
 
-Prints the settings, after turning Think deeper on or off when asked (ADR 0010).
+Prints the settings, after turning Think deeper (ADR 0010) or a Review's overview on or off when asked.
 ${TARGET_HELP}`,
     run: settings,
   },

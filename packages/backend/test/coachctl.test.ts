@@ -60,6 +60,8 @@ describe('coachctl', () => {
     expect((await ctl('settings', ...target)).json).toMatchObject({ ok: true, settings: { thinkDeeper: false } });
     expect((await ctl('settings', '--think-deeper', 'on', ...target)).json).toMatchObject({ ok: true, settings: { thinkDeeper: true } });
     expect((await ctl('settings', '--think-deeper', 'maybe', ...target)).json).toMatchObject({ ok: false, fix: 'Pass --think-deeper on or --think-deeper off.' });
+    expect((await ctl('settings', '--review-overview', 'off', ...target)).json).toMatchObject({ ok: true, settings: { thinkDeeper: true, reviewOverview: false } });
+    expect((await ctl('settings', '--review-overview', 'maybe', ...target)).json).toMatchObject({ ok: false, fix: 'Pass --review-overview on or --review-overview off.' });
   });
 
   it('every command has --help, and errors name the fix', async () => {

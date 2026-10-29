@@ -123,8 +123,8 @@ $C screenshot --route "#/review/1" --wait 3000
 ```
 
 Browser, after the Review: `Go to move 9… d5, Best` in the region `Overview`; `Move 11. Bxf7+,
-Mistake` in the list `Moves`, then `Next move`. To see a Review without the overview:
-`$C db get settings` after unticking it in Settings, or `settings.update { reviewOverview: false }`.
+Mistake` in the list `Moves`, then `Next move`. A Review without the overview:
+`$C settings --review-overview off`, then `$C review --game 1` (`overview: null`, `coachCalls: 4`).
 
 ## Proof
 

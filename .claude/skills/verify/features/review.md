@@ -1,8 +1,9 @@
 # Review
 
-Every move of a game graded by the desktop's Engine (ADR 0007), then the key moments (the worst
-few of the Player's moves) explained by the Coach, one call per moment. A saved Review reopens
-with no Coach call.
+Every move of a game graded by the desktop's Engine (ADR 0007), then the Coach's overview of the
+whole game (one call, unless Settings turn it off), then the key moments (the worst few of the
+Player's moves) explained by the Coach, one call per moment. A saved Review reopens with no Coach
+call.
 
 **Reached from:** Main menu → `Review your games` (`#/games`) → `Review: …`, the end of an Engine Game (`Review this game`), or
 `#/review/<gameId>`.
@@ -10,7 +11,8 @@ with no Coach call.
 ## Sub-features
 
 - `Start the Review`: grading progress as the desktop reports each position analysed, then the
-  region `Key moments` streams in. The button is disabled from the first click, and a second
+  overview streams ("The Coach is writing an overview of the game…"), then the key moments
+  ("The Coach is explaining the key moments…"), and the region `Key moments` shows. The button is disabled from the first click, and a second
   `review.start` for a game whose Review is being made waits for that one, so a double click
   makes one Review with no error.
 - A Review being made goes on while the Player is on another screen: coming back (inside the
@@ -46,6 +48,23 @@ with no Coach call.
   on a screen at least 800px tall, so a key moment picked low on the page shows on a whole board.
 - The move list numbers moves from the game's start position, so a game set up from a position
   (`[SetUp "1"]`, `[FEN …]`) reads `40… Kd3`, `41. Ra3+`, as the key moments and the graph do.
+- The overview, the region `Overview` above `Key moments`: how the Player played, where it went
+  wrong, how the opponent played and the moves that stood out on both sides. Its brief (job
+  `review-overview`, on the Review moments' model) holds each side's Move Grade counts, the key
+  moments with the Engine's best move instead, and up to eight standout moves
+  (`pickStandouts` in `packages/shared/src/key-moments.ts`): both sides' Mistakes and Blunders, and
+  Best moves where every other move the Engine listed was a Mistake's worth worse (`only: true`),
+  never a recapture or a move once the game was decided. There is no Move Grade above Best. The
+  guard lets it name only those moves and the key moments' better moves, and draw nothing. Each
+  game move it names is a button `Go to move <N. SAN>, <Move Grade>`, inline in its text, that
+  puts the board on the position after that move, as the move list does; a named move its text
+  doesn't write with its number is listed after the text. The overview may add the Review's one
+  Player Profile note; when it adds none, the last key moment still may. Saved with the Review
+  (`reviews.overview`, JSON), it reopens with no Coach call; a Review saved before there were
+  overviews, or made with the overview off, has none (`overview: null`).
+- Settings → `Reviews` → `Open each Review with the Coach’s overview of the whole game` (on by
+  default). Off, a Review is its key moments only and makes no `review-overview` call; turning it
+  on later doesn't give a saved Review an overview.
 - Each key moment: a button `Show moment: move N. <SAN>, <Move Grade>`, a Move Grade badge, the
   Player's Winning Chances before and after their move with the evaluation beside them
   ("Before: White’s winning chances: 48% -0.20", "After 11. Bxf7+: White’s winning chances: 35%
@@ -97,19 +116,43 @@ with no Coach call.
 ## Drive
 
 ```bash
-$C review --game 1        # positionsGraded: 49, coachCalls: 4, moments: Bxf7+ and Bg5 (Mistake), d5 and Bxc5 (Inaccuracy)
-$C review --game 1        # reopened: true, coachCalls: 0
+$C review --game 1        # positionsGraded: 49, coachCalls: 5, overview, moments: Bxf7+ and Bg5 (Mistake), d5 and Bxc5 (Inaccuracy)
+$C review --game 1        # reopened: true, coachCalls: 0, the same overview
 $C db get reviews
 $C screenshot --route "#/review/1" --wait 3000
 ```
 
-Browser, after the Review: `Move 11. Bxf7+, Mistake` in the list `Moves`, then `Next move`.
+Browser, after the Review: `Go to move 9… d5, Best` in the region `Overview`; `Move 11. Bxf7+,
+Mistake` in the list `Moves`, then `Next move`. To see a Review without the overview:
+`$C db get settings` after unticking it in Settings, or `settings.update { reviewOverview: false }`.
 
 ## Proof
 
-- `review --game 1` on the default seed reports `positionsGraded: 49` (the start and every move)
-  and lists exactly those four key moments.
-- `reviews` has one row for the game; reopening adds no `review-moment` rows to `coach_calls`.
+- `review --game 1` on the default seed reports `positionsGraded: 49` (the start and every move),
+  `coachCalls: 5` and lists exactly those four key moments.
+- The overview of game 1 is the fake Coach's recorded reply (`packages/backend/src/verify/recordings/coach.json`),
+  starting "Your opening went well, and your opponent had to find 9… d5 there", and names
+  `9… d5 (Best)`, `11. Bxf7+ (Mistake)`, `12. Bg5 (Mistake)`, `18. d5 (Inaccuracy)` and
+  `24. Bxc5 (Inaccuracy)`. Its `coach_calls` row comes first, job `review-overview`, model
+  `sonnet`, its brief within the 3,500-character budget with `game.standouts` =
+  `[9… d5, Black, Best, only]`, and `stripped: []` (`games.test.ts`, "opens with the Coach’s
+  overview …"). `coach_notes` has the overview's note, and no key moment's brief allows one.
+- In the browser the overview streams before the key moments; `Go to move 9… d5, Best` shows
+  `Best on d5` and the graph at `9… d5`; `Go to move 12. Bg5, Mistake` shows `Mistake on g5` and
+  `Current position: 12. Bg5: White’s winning chances: 19%`; after a reload the region `Overview`
+  has the same text and five buttons, with no new `coach_calls` row (`imported-game.spec.ts`,
+  "a Review’s overview › opens the Review, …").
+- With the overview off in Settings (`settings` row `reviewOverview: false`), `#/review/1` shows
+  four key moments and no region `Overview`, and `coach_calls` has four `review-moment` rows and
+  nothing else; ticked again, the saved Review still has none (`imported-game.spec.ts`,
+  "a Review’s overview › turned off in Settings, …"; `games.test.ts`).
+- A move the overview names that its brief doesn't list is stripped (`games.test.ts`, "strips any
+  move the overview names …"); a client can't ask for the `review-overview` job (`coach.test.ts`).
+- Standout moves on real games, and their size budget with the most moves and longest names:
+  `packages/shared/test/key-moments.test.ts`, `packages/shared/test/coach.test.ts` ("a Review
+  overview’s brief"); the inline links: `packages/shared/test/overview.test.ts`.
+- `reviews` has one row for the game; reopening adds no `review-overview` or `review-moment` rows to
+  `coach_calls`.
 - After a double click on `Start the Review`: no alert, one `reviews` row, and `grade_counts`
   counted once.
 - `grade_counts` has rows for Italian Game.
@@ -157,10 +200,10 @@ Browser, after the Review: `Move 11. Bxf7+, Mistake` in the list `Moves`, then `
   `Start the Review` once the desktop is back (`offline.spec.ts`).
 - Reloading mid-Review, with the desktop's Engine held, reopens on "Grading move N of 48…" (N above
   0), never `Start the Review`; it finishes there with its first key moment open, two
-  `review.start` frames (the second joined the first), one `reviews` row and four `review-moment`
-  rows in `coach_calls` (`imported-game.spec.ts`, "a Review being made › goes on through a
-  reload …"). A connection dropped with the desktop up gets progress on the new connection and
-  finishes with no alert and one Review (`offline.spec.ts`, "… rides out a blip with the desktop
+  `review.start` frames (the second joined the first), one `reviews` row, and one
+  `review-overview` and four `review-moment` rows in `coach_calls` (`imported-game.spec.ts`,
+  "a Review being made › goes on through a reload …"). A connection dropped with the desktop up
+  gets progress on the new connection and finishes with no alert and one Review (`offline.spec.ts`, "… rides out a blip with the desktop
   still up …"). On the protocol: `games.test.ts`, "asked again on a new connection after a drop
   …", "finishes and saves a Review nobody is waiting for …" and "stops a Review when the desktop
   app closes".

@@ -1,6 +1,7 @@
 // The Coach move guard (ADR 0002): before a Coach reply reaches any client, every move and
 // arrow is checked against the Engine's candidates in that call's brief, and the answers the
-// desktop's Engine gave the Coach's questions in that call (ADR 0010). Anything else is stripped.
+// desktop's Engine gave the Coach's questions in that call (ADR 0010), or, for a Review's overview,
+// against the graded moves of the game its brief lists. Anything else is stripped.
 import { playSan, playUci, positionKey } from '../chess.ts';
 import { threatFen, type Brief } from './brief.ts';
 import type { EngineMove } from './engine-tool.ts';
@@ -20,9 +21,25 @@ export interface GuardResult {
   stripped: string[];
 }
 
+/**
+ * The moves a Review overview's brief lists: the key moments, the Engine's better move at each and
+ * the standout moves. The desktop took each from the game its Engine graded, legal where it was
+ * played or would have been.
+ */
+export function gameMoves(brief: Brief): Set<string> {
+  const out = new Set<string>();
+  for (const m of [...(brief.game?.moments ?? []), ...(brief.game?.standouts ?? [])]) {
+    out.add(m.uci);
+    if (m.betterUci) out.add(m.betterUci);
+  }
+  return out;
+}
+
 /** The moves the Engine produced for this brief, each legal in the position it belongs to. */
 export function allowedMoves(brief: Brief): Set<string> {
   const allowed = new Set<string>();
+  // A Review's overview names moves from all over the game, not from one position.
+  if (brief.game) return gameMoves(brief);
   // The tempting moves are Engine output too: the Engine graded each one in `fen` (ADR 0011).
   for (const c of [...brief.candidates, ...(brief.tempting ?? [])]) if (playUci(brief.fen, c.uci)) allowed.add(c.uci);
   // The opponent's threat, legal where it would be played: after the move, or in `fen` after a pass.
@@ -96,6 +113,11 @@ export function guardReply(brief: Brief, raw: CoachRawReply, answered: readonly 
 
   const arrows: Arrow[] = [];
   for (const a of raw.arrows) {
+    // An overview has no board of its own to draw on: its moves are played all over the game.
+    if (brief.game) {
+      stripped.push(`arrow ${a.uci}: an overview draws no arrows`);
+      continue;
+    }
     if (!allowed.has(a.uci)) {
       stripped.push(`arrow ${a.uci} is not in the Engine's output`);
       continue;
@@ -104,7 +126,7 @@ export function guardReply(brief: Brief, raw: CoachRawReply, answered: readonly 
     arrows.push({ from: a.uci.slice(0, 2), to: a.uci.slice(2, 4), brush: a.brush });
   }
 
-  const highlights = brief.hideMoves
+  const highlights = brief.hideMoves || brief.game
     ? []
     : [...new Set(raw.highlights.filter((s) => SQUARE.test(s)))].slice(0, MAX_HIGHLIGHTS);
 

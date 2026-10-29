@@ -13,7 +13,8 @@ In Windows PowerShell, type `npx.cmd` instead of `npx`. You need Node.js 22.18 o
 Code, logged in: see [What you need](#what-you-need).
 
 - **Review your own games** from Lichess, chess.com or a PGN: every move gets a Move Grade, a graph
-  shows where the game turned, and the Coach walks you through the key moments.
+  shows where the game turned, and the Coach sums up the whole game, then walks you through the
+  key moments.
 - **Play the Engine** at your strength, with Live Coaching and Hints.
 - **Learn** from your first moves to the end of intermediate level: 64 Lessons on Themes such as
   forks and pins, endgames, openings, and how to think during a game, with the next Lesson
@@ -89,12 +90,14 @@ Two ways to reach your desktop from outside your Wi-Fi:
 Settings → Coach quality picks how much of your Claude limits the Coach uses:
 
 - **Thrifty**: Haiku for every job.
-- **Balanced** (the default): Sonnet for Reviews, Why Questions and Lessons; Haiku for Hints and
-  Live Coaching.
-- **Best**: Opus for Reviews, Why Questions and Lessons; Haiku for Hints and Live Coaching, which
-  must stay quick.
+- **Balanced** (the default): Sonnet for Reviews (the overview and the key moments), Why Questions
+  and Lessons; Haiku for Hints and Live Coaching.
+- **Best**: Opus for Reviews (the overview and the key moments), Why Questions and Lessons; Haiku
+  for Hints and Live Coaching, which must stay quick.
 
 Under **Advanced** you can choose the model for each job yourself; the choice then shows as Custom.
+A Review's overview uses the model chosen for Reviews. Settings → Reviews turns the overview off,
+which saves one Coach call per Review.
 The models are named by family (`haiku`, `sonnet`, `opus`), and the Claude Agent SDK maps each to
 the newest model of that family it knows, so updating the app keeps the Coach on the latest models.
 

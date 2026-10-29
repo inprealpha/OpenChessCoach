@@ -5,6 +5,7 @@ import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node
 import { tmpdir } from 'node:os';
 import { basename, join, resolve } from 'node:path';
 import { INITIAL_FEN, outcomeOf, outcomeOfLine, playSan, playUci, turnOf, type PlayedMove, type Side } from '@chess-coach/shared/chess';
+import type { ReviewOverview, ReviewPart } from '@chess-coach/shared/protocol';
 import type { EngineConfig } from '../server.ts';
 import { CoachClient, pairDevice, ProtocolError } from '../client.ts';
 import { defaultDataDir } from '../paths.ts';
@@ -318,12 +319,17 @@ async function review(flags: Flags): Promise<Result> {
   if (!gameId) throw new CtlError('No game given.', 'Pass --game <id>. List games with: coachctl db get games');
   return withClient(t, async (c) => {
     const existing = (await c.request('review.get', { gameId })).review;
-    if (existing) return { ok: true, reopened: true, coachCalls: 0, moments: summarise(existing.moments) };
-    const parts = new Set<number>();
+    if (existing) return { ok: true, reopened: true, coachCalls: 0, overview: overviewOf(existing.overview), moments: summarise(existing.moments) };
+    const parts = new Set<ReviewPart>();
     let graded = 0;
     const r = await c.request('review.start', { gameId }, (_text, part) => parts.add(part ?? 0), (done) => (graded = done));
-    return { ok: true, reopened: false, positionsGraded: graded, coachCalls: parts.size, moments: summarise(r.moments) };
+    return { ok: true, reopened: false, positionsGraded: graded, coachCalls: parts.size, overview: overviewOf(r.overview), moments: summarise(r.moments) };
   });
+}
+
+/** The overview's text and the moves it names, or null when the Review has none. */
+function overviewOf(overview: ReviewOverview | null) {
+  return overview && { text: overview.text, moves: overview.moves.map((m) => `${m.label} (${m.grade})`) };
 }
 
 function summarise(moments: { ply: number; san: string; grade: string; betterOptions: { san: string; score: string }[]; explanation: string }[]) {

@@ -32,12 +32,13 @@ whatever model each job uses in the app. The owner's rule: tests run on the late
    ```
 
    It starts a verify-mode instance with the real Coach in place of the fake one, makes one call of
-   every Coach job (Why Question, Live Coaching, Hint, Lesson turn, and each Review key moment of
-   the seeded game) through the same protocol the web app uses: each request carries only the
-   position and the moves, and the instance's own Engine works out the facts (ADR 0007). It checks
-   structure only:
+   every Coach job (Why Question, Live Coaching, Hint, Lesson turn, and a Review of the seeded game:
+   its overview and each key moment) through the same protocol the web app uses: each request
+   carries only the position and the moves, and the instance's own Engine works out the facts
+   (ADR 0007). It checks structure only:
 
-   - every move or arrow a reply shows is legal and came from the Engine;
+   - every move or arrow a reply shows is legal and came from the Engine; a Review's overview
+     names only the game moves its brief lists;
    - every piece move named in the text appears in the brief (the Engine's output, the game or the
      Lesson notes), and a Hint names no move at all;
    - a Lesson turn on a move that isn't the Lesson's (the Forks Lesson's first decision) neither

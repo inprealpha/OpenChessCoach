@@ -4,7 +4,7 @@ import { assertBriefWithinBudget, BriefTooLargeError, buildBrief, type Brief } f
 import { ENGINE_TOOL_JOBS } from '@chess-coach/shared/coach/engine-tool';
 import { guardReply } from '@chess-coach/shared/coach/guard';
 import type { CoachAsk, CoachReply } from '@chess-coach/shared/coach/types';
-import type { CoachStatus } from '@chess-coach/shared/protocol';
+import { modelJobOf, type CoachStatus } from '@chess-coach/shared/protocol';
 import { type Clock, iso } from '../clock.ts';
 import type { Db } from '../db.ts';
 import { AppError } from '../errors.ts';
@@ -83,7 +83,7 @@ export class CoachService {
 
     const brief = this.brief(ask);
     const settings = getSettings(this.db);
-    const model = settings.models[ask.job];
+    const model = settings.models[modelJobOf(ask.job)];
     const { engine, signal } = options;
     // The tool's Engine searches end with the call: when the client cancels, and once the Coach is done or stopped.
     const stop = new AbortController();

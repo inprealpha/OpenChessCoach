@@ -7,6 +7,7 @@ import {
   type RequestBody,
   type RequestType,
   type ResponseBody,
+  type ReviewPart,
   type ServerEvent,
   type ServerMessage,
 } from '@chess-coach/shared/protocol';
@@ -25,7 +26,7 @@ export class ProtocolError extends Error {
 interface Pending {
   resolve: (data: unknown) => void;
   reject: (err: Error) => void;
-  onDelta?: (text: string, part?: number, status?: string) => void;
+  onDelta?: (text: string, part?: ReviewPart, status?: string) => void;
   onProgress?: (done: number, total: number) => void;
 }
 
@@ -83,7 +84,7 @@ export class CoachClient {
   request<K extends RequestType>(
     type: K,
     body: RequestBody<K>,
-    onDelta?: (text: string, part?: number, status?: string) => void,
+    onDelta?: (text: string, part?: ReviewPart, status?: string) => void,
     onProgress?: (done: number, total: number) => void,
   ): Promise<ResponseBody<K>> {
     const id = String(this.nextId++);

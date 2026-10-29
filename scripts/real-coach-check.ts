@@ -1,6 +1,7 @@
 // The real-Coach check (ADR 0006). It runs on the owner's desktop, where Claude Code is logged
 // in, because the real Coach can't run in cloud CI (ADR 0001). It starts a verify-mode instance with
-// the real Coach in place of the fake one, makes one call of every Coach job through the protocol,
+// the real Coach in place of the fake one, makes one call of every Coach job through the protocol
+// (a Review's overview and key moments through a Review of the seeded game),
 // and Lesson calls that carry a Lesson's focus as the Lesson screen sends them (ADR 0012: a Lesson
 // turn in an opening and in a Theme, a Lesson turn on a move that isn't the Lesson's, and a Hint in
 // a way-of-thinking Lesson). It checks only structure, so the verdict doesn't flip when the Coach
@@ -93,6 +94,11 @@ export function checkCall(record: CoachCallRecord, reply: CoachReply, terms: rea
   // So may a move deeper in a line in the Engine's answers.
   const named = brief.hideMoves ? new Set<string>() : new Set([...askedLineMoves(brief), ...fromAnswers.named]);
   for (const uci of [...reply.moves.filter((m) => !named.has(m)), ...reply.arrows.map((a) => `${a.from}${a.to}`)]) {
+    // A Review's overview names moves from all over the game: each must be one its brief lists.
+    if (brief.game) {
+      if (!allowed.has(uci)) problems.push(`the overview shows ${uci}, which its brief doesn't list`);
+      continue;
+    }
     // Legal in the position, after the move, or, for the briefed threat, where the guard plays it.
     const threatFrom = uci === brief.threat?.uci ? threatFen(brief) : undefined;
     const legal =
@@ -285,10 +291,14 @@ async function driveEveryJob(client: CoachClient, root: URL): Promise<Received[]
     }),
   });
 
-  // Review: the seeded Imported Game, graded on the instance. Each key moment is one review-moment call.
+  // Review: the seeded Imported Game, graded on the instance. The overview is one review-overview
+  // call, made first, and each key moment one review-moment call.
   const [game] = (await client.request('games.list', {})).games;
   if (!game) throw new Error('The seed has no game to review.');
   const review = await client.request('review.start', { gameId: game.id });
+  if (review.overview) {
+    out.push({ job: 'review-overview', reply: { text: review.overview.text, moves: [], arrows: [], highlights: [], note: null, stripped: 0, model: '', engineQuestions: 0 } });
+  }
   for (const m of review.moments) {
     out.push({ job: 'review-moment', reply: { text: m.explanation, moves: [], arrows: [], highlights: [], note: null, stripped: 0, model: '', engineQuestions: 0 } });
   }
@@ -351,11 +361,12 @@ async function run(fake: boolean): Promise<Verdict> {
   }
 
   const terms = avoidedTerms(readFileSync(new URL('CONTEXT.md', root), 'utf8'));
-  // Review moments reach the client inside the Review, in the order the Coach was called.
-  const reviewReplies = received.filter((r) => r.job === 'review-moment');
-  const others = received.filter((r) => r.job !== 'review-moment');
+  // A Review's overview and key moments reach the client inside the Review, in the order the Coach was called.
+  const inReview = (job: CoachJob) => job === 'review-overview' || job === 'review-moment';
+  const reviewReplies = received.filter((r) => inReview(r.job));
+  const others = received.filter((r) => !inReview(r.job));
   const calls = coach.calls.map((record) => {
-    const reply = record.job === 'review-moment' ? reviewReplies.shift() : others.shift();
+    const reply = inReview(record.job) ? reviewReplies.shift() : others.shift();
     if (!reply) return { job: record.job, words: 0, maxWords: MAX_WORDS[record.job], problems: ['no reply reached the client'], warnings: [] };
     return checkCall(record, reply.reply, terms, reply.keptBack);
   });

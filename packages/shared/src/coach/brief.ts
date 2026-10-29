@@ -1,19 +1,20 @@
 // Builds the compact, fresh brief every Coach call starts from (ADR 0004).
 import type { Candidate } from '../analysis.ts';
-import { outcomeOf, playUci, turnOf, type Side } from '../chess.ts';
+import { otherSide, outcomeOf, playUci, turnOf, type Side } from '../chess.ts';
 import type { Score } from '../engine.ts';
-import { formatScore, gradeMove, type MoveGrade } from '../grader.ts';
+import { formatScore, gradeMove, MOVE_GRADES, type MoveGrade } from '../grader.ts';
 import { finishedScore, type PositionScore } from '../position-score.ts';
-import type { CoachJob, PlayerLevel, PlayerProfile } from '../protocol.ts';
+import type { CoachJob, GradeCounts, PlayerLevel, PlayerProfile } from '../protocol.ts';
 import { isForcing, nullMoveFen } from '../threat.ts';
 import { winningChancesFor } from '../winning-chances.ts';
 import { describeFact, describeOutcome, lineOutcome, moveFacts, readLine, worthSaying, type MoveFact } from './explain.ts';
-import type { CoachAsk } from './types.ts';
+import type { CoachAsk, GameFacts } from './types.ts';
 
 /** Hard ceiling on the serialised brief, in characters. */
 export const BRIEF_BUDGET = 3500;
 
 export const MAX_WORDS: Record<CoachJob, number> = {
+  'review-overview': 90,
   'review-moment': 110,
   why: 150,
   'lesson-turn': 130,
@@ -112,6 +113,35 @@ export interface Brief {
   allowNote: boolean;
   /** Hints: explain the idea without naming or showing any move. */
   hideMoves: boolean;
+  /**
+   * A Review's overview: the whole game rather than one position, so `fen` is the final position
+   * and there are no candidates. Every move in it was graded by the desktop's Engine; `move` is
+   * each one as a scoresheet writes it, the way the Coach names it so the screen can link it.
+   */
+  game?: {
+    opening: string;
+    result: string;
+    /** Each side's Move Grade counts, as "Best 12, Good 20, Inaccuracy 3, Mistake 2, Blunder 0". */
+    grades: { player: string; opponent: string };
+    /** The Player's moves the Review's key moments walk through, each with the Engine's best move instead. */
+    moments: BriefGameMove[];
+    /** Either side's other Mistakes and Blunders, and Best moves where every other move was much worse (`only`). */
+    standouts: BriefGameMove[];
+  };
+}
+
+/** A move of the game in a Review overview's brief. */
+export interface BriefGameMove {
+  /** As a scoresheet writes it: "11. Bxf7+", "24… Nxf2". */
+  move: string;
+  uci: string;
+  by: Side;
+  grade: MoveGrade;
+  /** Graded Best, and every other move the Engine listed would have given up at least a Mistake's worth. */
+  only?: true;
+  /** A key moment's better move: the Engine's best move in its place, in SAN and UCI. */
+  better?: string;
+  betterUci?: string;
 }
 
 export function briefSize(brief: Brief): number {
@@ -230,6 +260,7 @@ export function buildBrief({ ask, profile, summary }: BriefInput): Brief {
       ...(keepBack ? {} : { keyIdea: clip(keyIdea, MAX_KEY_IDEA) }),
     };
   }
+  if (ask.game) brief.game = gameBrief(ask.game, ask.playerSide ?? 'white');
   const slice = profileSlice(profile, ask.opening ?? ask.lesson?.opening);
   if (slice) brief.profile = slice;
   if (ask.question?.trim()) brief.question = clip(ask.question.trim(), MAX_QUESTION);
@@ -246,7 +277,8 @@ export function buildBrief({ ask, profile, summary }: BriefInput): Brief {
  * it doesn't give the answer away (a Hint, a Lesson, a Puzzle), the brief leaves them out too.
  */
 function winningChancesOf(ask: CoachAsk): Brief['winningChances'] {
-  if (ask.job === 'hint' || ask.job === 'lesson-turn' || ask.hideWinningChances) return undefined;
+  // An overview is about the whole game, not the final position.
+  if (ask.job === 'hint' || ask.job === 'lesson-turn' || ask.job === 'review-overview' || ask.hideWinningChances) return undefined;
   const side = ask.playerSide ?? turnOf(ask.fen);
   const before = ask.positionBefore ?? bestLineScore(ask.fen, ask.candidates);
   if (!before) return undefined;
@@ -255,6 +287,28 @@ function winningChancesOf(ask: CoachAsk): Brief['winningChances'] {
   return {
     before: winningChancesFor(before.score, before.pov, side).text,
     ...(after ? { after: winningChancesFor(after.score, after.pov, side).text } : {}),
+  };
+}
+
+/** A side's Move Grade counts in words, every grade named, so a count of 0 says so too. */
+function countsText(counts: GradeCounts): string {
+  return MOVE_GRADES.map((g) => `${g} ${counts[g] ?? 0}`).join(', ');
+}
+
+/** The overview's facts about the whole game, for the Player on `playerSide`. */
+function gameBrief(game: GameFacts, playerSide: Side): NonNullable<Brief['game']> {
+  return {
+    opening: clip(game.opening, MAX_LESSON_NAME),
+    result: clip(game.result, 8),
+    grades: { player: countsText(game.grades[playerSide]), opponent: countsText(game.grades[otherSide(playerSide)]) },
+    moments: game.moments.map((m) => ({
+      move: m.label,
+      uci: m.uci,
+      by: m.side,
+      grade: m.grade,
+      ...(m.better ? { better: m.better.san, betterUci: m.better.uci } : {}),
+    })),
+    standouts: game.standouts.map((m) => ({ move: m.label, uci: m.uci, by: m.side, grade: m.grade, ...(m.only ? { only: true as const } : {}) })),
   };
 }
 

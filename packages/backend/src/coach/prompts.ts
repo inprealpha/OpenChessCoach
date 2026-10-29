@@ -64,6 +64,15 @@ Rules you must follow:
   When the move itself has tempting: true, you may say many players reach for it here. Mention a
   tempting move only when it helps the answer; draw an arrow only for the move itself (red when it
   fails), never for the moves of its line.
+- When the brief has game, it is a Review's overview: the whole finished game, not one position.
+  fen is only where the game ended, and there are no candidates. game.grades counts each side's
+  Move Grades, game.moments are the Player's moves the Review explains next (each with "better",
+  the Engine's best move in its place), and game.standouts are the other moves that stood out on
+  either side ("by"): Mistakes and Blunders, and Best moves with only: true, where every other move
+  the Engine listed was much worse. Mention only these moves, and write each one exactly as its
+  "move" field writes it, with its number ("24… Nxf2"), never in other words; "better" moves by
+  their SAN alone. Say how well a side played only from its Move Grade counts and its moves here,
+  never from your own reading of the game.
 - Pitch the explanation at the Player's level: "beginner" needs very plain words and no jargon,
   "casual" can handle common terms, "club" can handle concrete lines.
 - Use the app's words: Player, Coach, Engine, Move Grade (Best, Good, Inaccuracy, Mistake,
@@ -131,6 +140,8 @@ and for a line, "lastMove": what the line's last move does, as "move" says it fo
 
 const JOB_INSTRUCTIONS: Record<CoachJob, string> = {
   why: 'Answer the Player\'s Why Question about this move or position. Name the alternatives the Engine considered and explain why they are worse. If there is a summary, this is a follow-up: answer only the new question.',
+  'review-overview':
+    'This is the overview that opens a Review of the Player\'s finished game, before its key moments. In three or four sentences, say how the Player played overall, where it went wrong, how well the opponent played, and which moves stood out on both sides. Don\'t walk through the key moments one by one: the Review does that next. No arrows and no highlights: the moves are all over the game. Add a note only for a pattern across the whole game, such as losing track of loose pieces in the middlegame.',
   'review-moment':
     'This is one key moment of a Review of the Player\'s finished game. Say what the Player\'s move did wrong, what the Engine\'s better options were, and why they are better.',
   'lesson-turn':

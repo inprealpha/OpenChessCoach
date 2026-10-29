@@ -1,16 +1,19 @@
-// Reviews: the desktop Engine's grades for every move (ADR 0007), the 3 to 5 key moments, and
-// the Coach's explanation of each. A saved Review is reread with no Coach call.
+// Reviews: the desktop Engine's grades for every move (ADR 0007), the 3 to 5 key moments, the
+// Coach's overview of the whole game (unless Settings turn it off) and the Coach's explanation of
+// each key moment. A saved Review is reread with no Coach call.
 import type { GradedMove } from '@chess-coach/shared/analysis';
 import { formatScore, type MoveGrade } from '@chess-coach/shared/grader';
 import { pickKeyMoments } from '@chess-coach/shared/key-moments';
 import type { CoachAsk } from '@chess-coach/shared/coach/types';
+import { gameFacts, namedMoves } from '@chess-coach/shared/overview';
 import { scoreAfterPly } from '@chess-coach/shared/position-score';
-import type { KeyMoment, Review } from '@chess-coach/shared/protocol';
+import type { KeyMoment, Review, ReviewOverview, ReviewPart } from '@chess-coach/shared/protocol';
 import { type Clock, iso } from './clock.ts';
 import { all, one, transaction, type Db } from './db.ts';
 import { getGame } from './games.ts';
 import { THINK_DEEPER_DEADLINE_MS } from './coach/real.ts';
 import { addGradeCounts, removeGradeCounts } from './profile.ts';
+import { getSettings } from './settings.ts';
 import { guessTempting, withTempting } from './tempting-moves/ask.ts';
 import { playerMaiaRating } from './tempting-moves/rating.ts';
 import type { TemptingMovesService } from './tempting-moves/service.ts';
@@ -18,12 +21,18 @@ import type { CoachService } from './coach/service.ts';
 import type { EngineService } from './engine/service.ts';
 
 export function getReview(db: Db, gameId: number): Review | null {
-  const row = one<{ created_at: string; moments: string }>(db, 'SELECT * FROM reviews WHERE game_id = ?', gameId);
+  const row = one<{ created_at: string; overview: string | null; moments: string }>(db, 'SELECT * FROM reviews WHERE game_id = ?', gameId);
   if (!row) return null;
   const moves = all<{ data: string }>(db, 'SELECT data FROM graded_moves WHERE game_id = ? ORDER BY ply', gameId).map(
     (r) => JSON.parse(r.data) as GradedMove,
   );
-  return { gameId, createdAt: row.created_at, moments: JSON.parse(row.moments) as KeyMoment[], moves };
+  return {
+    gameId,
+    createdAt: row.created_at,
+    overview: row.overview ? (JSON.parse(row.overview) as ReviewOverview) : null,
+    moments: JSON.parse(row.moments) as KeyMoment[],
+    moves,
+  };
 }
 
 /** The scores a Review shows either side of the move at `ply`, so the Coach quotes them. */
@@ -61,9 +70,9 @@ export interface ReviewDeps {
   tempting?: TemptingMovesService;
 }
 
-/** Hears a Review being made: its progress, and the Coach's explanations as they are written. */
+/** Hears a Review being made: its progress, and the Coach's overview and explanations as they are written. */
 interface Listener {
-  delta: (text: string, part: number) => void;
+  delta: (text: string, part: ReviewPart) => void;
   progress: (done: number, total: number) => void;
 }
 
@@ -72,7 +81,8 @@ interface Making {
   made: Promise<Review>;
   listeners: Set<Listener>;
   progress: [done: number, total: number] | undefined;
-  texts: string[];
+  /** What the Coach has written so far, per part, in the order it wrote them: the overview first. */
+  texts: Map<ReviewPart, string>;
 }
 
 /** Reviews being made right now, per database and game, so a second request joins the first. */
@@ -110,7 +120,7 @@ export function dropReview(db: Db, gameId: number): void {
 export async function startReview(
   deps: ReviewDeps,
   gameId: number,
-  delta: (text: string, part: number) => void,
+  delta: (text: string, part: ReviewPart) => void,
   progress: (done: number, total: number) => void,
   signal?: AbortSignal,
 ): Promise<Review> {
@@ -127,12 +137,12 @@ export async function startReview(
     const m: Making = {
       listeners: new Set(),
       progress: undefined,
-      texts: [],
+      texts: new Map(),
       made: makeReview(
         deps,
         gameId,
         (text, part) => {
-          m.texts[part] = (m.texts[part] ?? '') + text;
+          m.texts.set(part, (m.texts.get(part) ?? '') + text);
           for (const l of m.listeners) l.delta(text, part);
         },
         (done, total) => {
@@ -156,7 +166,7 @@ export async function startReview(
 async function makeReview(
   { db, clock, coach, engine, tempting }: ReviewDeps,
   gameId: number,
-  delta: (text: string, part: number) => void,
+  delta: (text: string, part: ReviewPart) => void,
   progress: (done: number, total: number) => void,
   signal?: AbortSignal,
 ): Promise<Review> {
@@ -167,6 +177,29 @@ async function makeReview(
   const moments = pickKeyMoments(graded, game.playerSide);
   // The sample game isn't the Player's: its Review never feeds the Player Profile.
   const counts = game.source !== 'sample';
+  // The overview first, so it streams before the key moments. It may add the Review's one note to
+  // the Player Profile (ADR 0004); when it adds none, the last key moment still may.
+  let overview: ReviewOverview | null = null;
+  let noted = false;
+  if (getSettings(db).reviewOverview) {
+    const facts = gameFacts(game, graded, moments);
+    const reply = await coach.ask(
+      {
+        job: 'review-overview',
+        fen: graded.at(-1)?.fenAfter ?? game.startFen,
+        recentMoves: graded.map((g) => g.san),
+        playerSide: game.playerSide,
+        candidates: [],
+        opening: game.opening,
+        allowNote: counts,
+        game: facts,
+      },
+      (text) => delta(text, 'overview'),
+      signal ? { signal } : {},
+    );
+    overview = { text: reply.text, moves: namedMoves(facts, reply.text, reply.moves) };
+    noted = reply.note !== null;
+  }
   const out: KeyMoment[] = [];
   const started = clock.now().getTime();
   const rating = playerMaiaRating(db);
@@ -190,7 +223,7 @@ async function makeReview(
         replies: graded[m.ply]?.candidates ?? [],
         ...(threat ? { threat } : {}),
         opening: game.opening,
-        allowNote: counts && index === moments.length - 1,
+        allowNote: counts && !noted && index === moments.length - 1,
       },
       guess,
       engine,
@@ -222,7 +255,12 @@ async function makeReview(
       'INSERT INTO graded_moves (game_id, ply, side, uci, san, grade, win_loss, data) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
     );
     for (const m of graded) put.run(gameId, m.ply, m.side, m.uci, m.san, m.grade, m.winLoss, JSON.stringify(m));
-    db.prepare('INSERT INTO reviews (game_id, created_at, moments) VALUES (?, ?, ?)').run(gameId, iso(clock), JSON.stringify(out));
+    db.prepare('INSERT INTO reviews (game_id, created_at, overview, moments) VALUES (?, ?, ?, ?)').run(
+      gameId,
+      iso(clock),
+      overview ? JSON.stringify(overview) : null,
+      JSON.stringify(out),
+    );
   });
   if (counts) {
     addGradeCounts(

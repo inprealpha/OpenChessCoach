@@ -406,6 +406,77 @@ test('a Review lists key moments with Move Grades, and reopening it makes no Coa
   expect((await app.rows<{ job: string }>('coach_calls')).filter((c) => c.job === 'why')).toHaveLength(1);
 });
 
+test.describe('a Review’s overview', () => {
+  // Slow enough to see the overview stream before the key moments.
+  test.use({ appOptions: { chunkDelayMs: 40 } });
+
+  test('opens the Review, streamed before the key moments; each move it names jumps the board there; it reopens with no Coach call', async ({ paired, app }) => {
+    await paired.goto(`${app.url}/#/review/1`);
+    await paired.getByRole('button', { name: 'Start the Review' }).click();
+    // The overview streams first, before any key moment.
+    const stream = paired.getByTestId('overview-stream');
+    await expect(stream).toContainText('Your opening went well', { timeout: 90_000 });
+    const making = paired.getByRole('status').filter({ has: stream });
+    await expect(making).toContainText('The Coach is writing an overview of the game…');
+    // Then the key moments, under the overview written so far.
+    await expect(making).toContainText('The Coach is explaining the key moments…');
+    await expect(making.locator('p.stream').first()).toHaveAttribute('data-testid', 'overview-stream');
+    const overview = paired.getByRole('region', { name: 'Overview' });
+    await expect(overview).toBeVisible({ timeout: 90_000 });
+    // The recorded reply for game 1 (verify/recordings/coach.json), above the key moments.
+    await expect(overview).toContainText('Your opening went well, and your opponent had to find 9… d5 there');
+    const keyMoments = paired.getByRole('region', { name: 'Key moments' });
+    expect((await overview.boundingBox())!.y).toBeLessThan((await keyMoments.boundingBox())!.y);
+    const calls = await app.rows<{ job: string }>('coach_calls');
+    expect(calls.map((c) => c.job)).toEqual(['review-overview', 'review-moment', 'review-moment', 'review-moment', 'review-moment']);
+
+    // Every move the overview names is a link to its place in the game, the opponent's too.
+    const links = overview.getByRole('button');
+    await expect(links).toHaveText(['9… d5', '11. Bxf7+', '12. Bg5', '18. d5', '24. Bxc5']);
+    const board = paired.getByRole('group', { name: 'Review board' });
+    const current = paired.getByRole('figure', { name: 'Winning Chances graph' }).getByRole('img', { name: /^Current position: / });
+    await overview.getByRole('button', { name: 'Go to move 9… d5, Best' }).click();
+    await expect(board.getByRole('img', { name: 'Best on d5' })).toBeVisible();
+    await expect(current).toHaveAccessibleName(/^Current position: 9… d5: /);
+    await expect(paired.getByRole('listitem').filter({ has: paired.getByRole('button', { name: 'Move 9… d5, Best', exact: true }) })).toHaveClass(/current/);
+    await overview.getByRole('button', { name: 'Go to move 12. Bg5, Mistake' }).click();
+    await expect(board.getByRole('img', { name: 'Mistake on g5' })).toBeVisible();
+    await expect(current).toHaveAccessibleName('Current position: 12. Bg5: White’s winning chances: 19%');
+
+    // Reopened, the saved overview is there, links and all, with no Coach call.
+    const text = await overview.textContent();
+    await paired.reload();
+    await expect(paired.getByRole('region', { name: 'Overview' })).toHaveText(text ?? '');
+    await expect(paired.getByRole('region', { name: 'Overview' }).getByRole('button')).toHaveCount(5);
+    expect(await app.rows('coach_calls')).toHaveLength(calls.length);
+  });
+
+  test('turned off in Settings, a Review is its key moments only, with no overview call, and stays so when turned on again', async ({ paired, app }) => {
+    await paired.goto(`${app.url}/#/settings`);
+    const toggle = paired.getByRole('checkbox', { name: 'Open each Review with the Coach’s overview of the whole game' });
+    await expect(toggle).toBeChecked();
+    await toggle.uncheck();
+    await expect(paired.getByRole('region', { name: 'Reviews' }).getByRole('status')).toHaveText('Saved.');
+    expect(await app.rows<{ key: string; value: string }>('settings')).toContainEqual({ key: 'reviewOverview', value: 'false' });
+
+    await paired.goto(`${app.url}/#/review/1`);
+    await paired.getByRole('button', { name: 'Start the Review' }).click();
+    await expect(paired.getByRole('region', { name: 'Key moments' }).getByRole('listitem')).toHaveCount(4, { timeout: 90_000 });
+    await expect(paired.getByRole('region', { name: 'Overview' })).toHaveCount(0);
+    // The Coach call log: the four key moments, and no overview.
+    expect((await app.rows<{ job: string }>('coach_calls')).map((c) => c.job)).toEqual(['review-moment', 'review-moment', 'review-moment', 'review-moment']);
+
+    // Turned on again, the Review saved without one keeps no overview.
+    await paired.goto(`${app.url}/#/settings`);
+    await toggle.check();
+    await expect(paired.getByRole('region', { name: 'Reviews' }).getByRole('status')).toHaveText('Saved.');
+    await paired.goto(`${app.url}/#/review/1`);
+    await expect(paired.getByRole('region', { name: 'Key moments' }).getByRole('listitem')).toHaveCount(4);
+    await expect(paired.getByRole('region', { name: 'Overview' })).toHaveCount(0);
+    expect(await app.rows('coach_calls')).toHaveLength(4);
+  });
+});
+
 test('in a Review, the arrow keys step through the game as on Lichess', async ({ paired, app }) => {
   await paired.goto(`${app.url}/#/review/1`);
   const board = paired.getByRole('group', { name: 'Review board' });
@@ -736,6 +807,8 @@ test.describe('a Review being made', () => {
     expect(starts).toHaveLength(2);
     expect(await app.rows('reviews')).toHaveLength(1);
     expect(await app.rows<{ job: string }>('coach_calls').then((r) => r.filter((c) => c.job === 'review-moment'))).toHaveLength(4);
+    // The overview was written once too, by the Review the reload joined.
+    expect(await app.rows<{ job: string }>('coach_calls').then((r) => r.filter((c) => c.job === 'review-overview'))).toHaveLength(1);
   });
 });
 

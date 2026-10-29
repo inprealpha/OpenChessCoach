@@ -4,7 +4,7 @@
 // desktop's Engine one question, or the scripted ones (ADR 0010). It names a tempting move that
 // fails, as the real Coach is told to (ADR 0011). The backend records every brief it receives in
 // the coach_calls table.
-import type { Brief, BriefCandidate } from '@chess-coach/shared/coach/brief';
+import type { Brief, BriefCandidate, BriefGameMove } from '@chess-coach/shared/coach/brief';
 import type { EngineAnswer, EngineQuestion } from '@chess-coach/shared/coach/engine-tool';
 import type { CoachRawReply } from '@chess-coach/shared/coach/types';
 import type { CoachStatus } from '@chess-coach/shared/protocol';
@@ -131,6 +131,8 @@ export function templateReply(brief: Brief): CoachRawReply {
   };
   let text: string;
   switch (brief.job) {
+    case 'review-overview':
+      return overviewReply(brief);
     case 'hint':
       text = brief.threat
         ? 'First see what your opponent threatens, and find the move that deals with it while keeping your pieces working.'
@@ -231,4 +233,23 @@ function chances(brief: Brief): string {
   const c = brief.winningChances;
   if (!c) return '';
   return c.after ? ` Before it, ${c.before}. After it, ${c.after}.` : ` ${c.before}.`;
+}
+
+/**
+ * A Review's overview from its brief alone: each side's Move Grade counts, where the Player's game
+ * went wrong, and the moves that stood out on both sides, each named as the brief writes it.
+ */
+function overviewReply(brief: Brief): CoachRawReply {
+  const game = brief.game;
+  if (!game) return { text: 'This Review has no game to give an overview of.', moves: [], arrows: [], highlights: [], note: null };
+  const named = (ms: readonly BriefGameMove[]) => ms.map((m) => `${m.move} (${m.grade})`).join(', ');
+  const yours = game.standouts.filter((m) => m.by === brief.playerSide);
+  const theirs = game.standouts.filter((m) => m.by !== brief.playerSide);
+  let text = `Your Move Grades: ${game.grades.player}. Your opponent's: ${game.grades.opponent}.`;
+  if (game.moments.length) text += ` Your game went wrong at ${named(game.moments)}.`;
+  else text += ' None of your moves was a key moment.';
+  if (yours.length) text += ` Your moves that stood out: ${named(yours)}.`;
+  if (theirs.length) text += ` Your opponent's moves that stood out: ${named(theirs)}.`;
+  const moves = [...game.moments, ...game.standouts].map((m) => m.uci);
+  return { text, moves: [...new Set(moves)].slice(0, 8), arrows: [], highlights: [], note: brief.allowNote ? 'Worked on a Review.' : null };
 }

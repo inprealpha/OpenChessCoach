@@ -101,12 +101,12 @@ jobs:
             node scripts/verdict.ts --status success --sha "$SHA" --description "Changes only docs, tests or process files: no Verdict needed"
           elif [ "$state" = success ] || [ "$state" = failure ] || [ "$state" = error ]; then
             echo "Commit $SHA already has a Verdict status: $state ($description)"
+          elif [ "$ACTION" = ready_for_review ]; then
+            echo "Marked ready for review: the Verdict workflow sets the status from here."
           elif [ "$state" = pending ] && [ "${description#Judging}" != "$description" ]; then
             echo "The judge is running on $SHA."
           elif [ "$DRAFT" = true ]; then
             node scripts/verdict.ts --status pending --sha "$SHA" --description "Draft: mark the PR ready for review to start the judge"
-          elif [ "$ACTION" = ready_for_review ]; then
-            node scripts/verdict.ts --status pending --sha "$SHA" --description "Waiting for the judge to start"
           else
             node scripts/verdict.ts --status pending --sha "$SHA" --description "No Verdict for this commit: comment /verdict to start the judge"
           fi

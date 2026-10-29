@@ -43,3 +43,13 @@ describe('the Verdict comment', () => {
     expect(comment).not.toContain('trust me');
   });
 });
+
+describe('a run that never started the judge', () => {
+  it('says setup failed, and its comment carries no marker, so it uses none of the limits', () => {
+    expect(statusFor(undefined, false)).toEqual({ state: 'error', description: "The judge didn't start (setting up the app failed): comment /verdict to try again" });
+    const comment = commentFor(undefined, undefined, SHA, RUN, false);
+    expect(comment).not.toContain(COMMENT_MARKER);
+    expect(comment).toContain('## Verdict: none');
+    expect(comment).toContain("The judge didn't start");
+  });
+});

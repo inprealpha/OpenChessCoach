@@ -62,7 +62,7 @@
     {
      "ply": 15,
      "san": "h6",
-     "text": "8.Ba4, the bishop to a4, is the move beginners on Lichess play most often; 8.Be2, the bishop back to e2, is the main other try. 8...h6 hits the knight on g5 with a pawn, so it has to move for the third time, and the same move works well against 8.Be2."
+     "text": "8.Ba4, the bishop to a4, is the move beginners on Lichess play most often; 8.Be2, the bishop back to e2, and 8.Qf3, the queen to f3, are also common. 8...h6 hits the knight on g5 with a pawn, so it has to move for the third time, and the same move works well against 8.Be2."
     },
     {
      "ply": 17,

@@ -83,7 +83,7 @@
    "fen": "8/8/8/8/6k1/5q2/6KR/8 w - - 24 85",
    "side": "white",
    "keyIdea": "If your king cannot move, offer your last piece with check: if it is taken, you have no legal move, and that is stalemate.",
-   "text": "From a game played on Lichess. You are White. You have only a rook against a queen, which is normally lost, and your king is in check. Your king must step out of check: for each square it could go to, count the moves it would have left there, and think about what that could mean.",
+   "text": "From a game played on Lichess. You are White. You have only a rook against a queen, which is normally lost, and your king is in check. Your king must step out of check. Find the one square it can go to, count the moves you would have left after that, and think about what that could mean.",
    "credit": {
     "source": "Lichess games database, game lPrsxeLO",
     "url": "https://lichess.org/lPrsxeLO#168",

@@ -231,7 +231,7 @@
       "club": []
      },
      "notes": {
-      "text": "7...Bxf2+ takes the pawn next to White's king with check. Your queen on b6 now guards the bishop along the diagonal the bishop has just left, so the king cannot take it, and White's own queen and bishop stand on d1 and f1. That leaves 8.Kd2 as White's only legal move."
+      "text": "7...Bxf2+ takes the pawn next to White's king with check. Now that the bishop has moved out of the way from c5, your queen on b6 guards f2, so the king cannot take the bishop. White's own queen on d1, bishop on f1 and pawn on e2 block the king's other squares. That leaves 8.Kd2 as White's only legal move."
      }
     },
     {
@@ -258,7 +258,7 @@
       "club": []
      },
      "notes": {
-      "text": "8...Qe3# is mate. The queen checks along the diagonal to d2, and your bishop on f2 guards it and covers e1. White's own pieces fill c2, c3, d1 and e2, the queen covers d3, and c1 is no escape square, because the queen's diagonal runs on through it. The mate works because White's bishop has left c1, from where it guarded e3. In the game Black took the bishop on e7 with the king instead and soon lost."
+      "text": "8...Qe3# is mate. The queen checks along the diagonal to d2, and your bishop on f2 guards it and covers e1. White's own pieces and pawns fill c2, c3, d1 and e2, the queen covers d3, and c1 is no escape square, because the queen's diagonal runs on through it. The mate works because White's bishop, which guarded e3 from g5, has just left to take on e7. In the game Black took back with 8...Kxe7, missed the mate, and lost after 9.Nd5+."
      }
     }
    ]

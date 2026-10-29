@@ -66,8 +66,21 @@ export function commentFor(verdict: JudgeVerdict | undefined, body: string | und
   return `${parts.join('\n\n')}\n`;
 }
 
+/** Runs gh, up to three times: one failed call (GitHub answered once with an empty body) mustn't leave a stale status. */
+function gh(args: string[], input?: string): void {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      execFileSync('gh', args, { input, stdio: [input === undefined ? 'ignore' : 'pipe', 'ignore', 'inherit'] });
+      return;
+    } catch (err) {
+      if (attempt === 3) throw err;
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, attempt * 5000);
+    }
+  }
+}
+
 function postStatus(sha: string, state: StatusState, description: string, context = VERDICT_CONTEXT): void {
-  execFileSync('gh', ['api', `repos/{owner}/{repo}/statuses/${sha}`, '-f', `state=${state}`, '-f', `context=${context}`, '-f', `description=${clip(description)}`], { stdio: ['ignore', 'ignore', 'inherit'] });
+  gh(['api', `repos/{owner}/{repo}/statuses/${sha}`, '-f', `state=${state}`, '-f', `context=${context}`, '-f', `description=${clip(description)}`]);
 }
 
 function arg(name: string): string {
@@ -93,7 +106,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
       const { state, description } = statusFor(verdict, started);
       postStatus(sha, state, description);
       process.stdout.write(`${state}: ${description}\n`);
-      execFileSync('gh', ['pr', 'comment', arg('--pr'), '--body-file', '-'], { input: comment, stdio: ['pipe', 'ignore', 'inherit'] });
+      gh(['pr', 'comment', arg('--pr'), '--body-file', '-'], comment);
     } else if (process.argv.includes('--status')) {
       const state = arg('--status') as StatusState;
       if (!['success', 'failure', 'error', 'pending'].includes(state)) throw new Error(`Unknown state ${state}.`);

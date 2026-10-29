@@ -146,7 +146,9 @@ jobs:
         run: |
           for _ in $(seq 1 80); do
             state=$(gh api "repos/$REPO/commits/$SHA/check-runs?per_page=100" --jq '
-              [.check_runs[] | select(.name == "Checks" or .name == "Player journeys")]
+              # The CI run a branch push starts skips these jobs (ci.yml checks branches through their
+              # PR), so its copies are left out.
+              [.check_runs[] | select((.name == "Checks" or .name == "Player journeys") and .conclusion != "skipped")]
               | group_by(.name) | map(max_by(.id))
               | if length < 2 then "waiting"
                 elif any(.status != "completed") then "waiting"

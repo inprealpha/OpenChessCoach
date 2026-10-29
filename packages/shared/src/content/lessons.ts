@@ -236,9 +236,9 @@ function validatePart(lesson: LessonData, part: LessonPart, index: number): stri
   if (!part.keyIdea?.trim()) problems.push(`${name}: a part has no key idea`);
   else if (/\n/.test(part.keyIdea)) problems.push(`${name}: the key idea must be one line`);
   else if (part.keyIdea.length > MAX_KEY_IDEA) problems.push(`${name}: the key idea is longer than ${MAX_KEY_IDEA} characters`);
-  else if (lesson.kind !== 'opening') {
-    // The Coach sees the key idea during a Hint, which must not give the move away (ADR 0012). An
-    // opening's key idea is its plan, which names its moves as its goal does.
+  else {
+    // The screen hides the key idea until the part is played, and the Coach sees it during a Hint
+    // and after a move that isn't the Lesson's, which must not give the move away (ADR 0012).
     const named = part.nodes.filter((n) => n.decision).map((n) => n.mainSan.replace(/[+#]$/, '')).filter((san) => new RegExp(`(?<![\\w-])${san.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\w-])`).test(part.keyIdea));
     if (named.length) problems.push(`${name}: the key idea names a move the Player has to find (${named.join(', ')})`);
   }

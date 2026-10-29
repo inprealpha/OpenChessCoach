@@ -249,7 +249,8 @@
   }
 
   async function onmove(uci: string): Promise<void> {
-    if (phase !== 'decide' || !node || !lesson || grading) return;
+    // One Coach call at a time: a move played while a Hint is still on its way waits for it.
+    if (phase !== 'decide' || !node || !lesson || grading || coach.busy) return;
     const played = playUci(node.fen, uci);
     if (!played) return;
     line.play(uci);
@@ -300,11 +301,15 @@
     );
   }
 
-  /** Try another move: the keyboard carries on from the board. */
+  /**
+   * Try another move, once the Coach has answered: its arrows are about the move taken back. The
+   * reasoning typed for that move goes too. The keyboard carries on from the board.
+   */
   async function retry(): Promise<void> {
-    if (!node || phase !== 'feedback') return;
+    if (!node || phase !== 'feedback' || coach.busy) return;
     line.takeBack();
     result = null;
+    typed = '';
     phase = 'decide';
     coach.clearAnnotations();
     coach.say('Try another move.');
@@ -535,7 +540,7 @@
             bind:this={board}
             fen={line.fen}
             orientation={part.side}
-            movable={phase === 'decide' && !grading ? part.side : 'none'}
+            movable={phase === 'decide' && !grading && !coach.busy ? part.side : 'none'}
             lastMove={line.lastMove ? { from: line.lastMove.uci.slice(0, 2), to: line.lastMove.uci.slice(2, 4) } : undefined}
             {arrows}
             highlights={coach.highlights}
@@ -603,7 +608,7 @@
                 {#if lessonMove}
                   <button type="button" onclick={next} disabled={coach.busy || advancing}>Continue</button>
                 {:else}
-                  <button type="button" onclick={retry}>Try another move</button>
+                  <button type="button" onclick={retry} disabled={coach.busy}>Try another move</button>
                   <button type="button" class="secondary" onclick={showLessonMove} disabled={coach.busy}>Continue with the Lesson’s move</button>
                 {/if}
               </div>

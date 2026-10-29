@@ -116,12 +116,15 @@ describe('Lesson data', () => {
     expect(validateLesson(broken).join('\n')).toMatch(/the note's credit is not a Wikibooks or Wikipedia credit/);
   });
 
-  it('fails on a key idea that names a move the Player has to find, outside the openings', () => {
+  it('fails on a key idea that names a move the Player has to find, in an opening too', () => {
     const broken = copy(byId('forks'));
     const part = broken.parts[0] as LessonData['parts'][number];
     const san = (part.nodes.find((n) => n.decision) as LessonData['parts'][number]['nodes'][number]).mainSan.replace(/[+#]$/, '');
     part.keyIdea = `Look for ${san} here.`;
     expect(validateLesson(broken).join('\n')).toMatch(new RegExp(`forks part 1: the key idea names a move the Player has to find \\(${san.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\)`));
+    const opening = copy(byId('italian-game'));
+    (opening.parts[0] as { keyIdea: string }).keyIdea = 'Bring the bishop to c4 with Bc4.';
+    expect(validateLesson(opening).join('\n')).toMatch(/italian-game: the key idea names a move the Player has to find \(Bc4\)/);
   });
 
   it('fails on a kept text whose punctuation was changed, or kept in a title, key idea or goal', () => {

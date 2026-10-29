@@ -8,7 +8,7 @@ Each Lesson has a learning goal: one or two plain sentences saying what the Play
 
 ## The Lesson's move is never given away
 
-A Lesson asks the Player to find a move. When the Player plays a different one, the screen gives its Move Grade, says so when it is sound but not the move the Lesson teaches, and offers to try again or to continue with the Lesson's move. The Coach's brief for that turn carries no candidates and no Lesson note, so the Coach explains what the Player's move does and allows without naming or drawing the Lesson's move. A Hint never names a move either. So outside the opening Lessons a key idea names an idea, never a move its part asks for. An opening's key idea is its plan, which names its moves, as its learning goal does.
+A Lesson asks the Player to find a move. When the Player plays a different one, the screen gives its Move Grade, says so when it is sound but not the move the Lesson teaches, and offers to try again or to continue with the Lesson's move. The Coach's brief for that turn carries no candidates, no Lesson note and nothing of the Engine's lines past the replies to the Player's move, where the Lesson's move is often still the best one, so the Coach explains what the Player's move does and allows without naming or drawing the Lesson's move. A Hint never names a move either. So a key idea names an idea, never a move its part asks for, in the opening Lessons too: the screen keeps it back until the part is played, and the Coach sees it during a Hint. An opening's learning goal may still name its moves, since the screen shows it before the Lesson starts.
 
 ## Nothing is locked
 
@@ -30,7 +30,7 @@ Every move a Lesson asks the Player to find must be graded Best or Good by the E
 
 ## Consequences
 
-- A Lesson has a Track, a level, a learning goal and prior knowledge, and each part has a key idea. The Lesson data check fails when one is missing, too long, or names a Lesson that does not exist, when prior knowledge goes round in a circle, and when a key idea outside the openings names a move its part asks for.
+- A Lesson has a Track, a level, a learning goal and prior knowledge, and each part has a key idea. The Lesson data check fails when one is missing, too long, or names a Lesson that does not exist, when prior knowledge goes round in a circle, and when a key idea names a move its part asks for, in any kind of Lesson.
 - A fourth kind of Lesson, `thinking`, teaches a way of thinking from several positions. Most are in the how-to-think Track; three are in the openings Track: Opening principles, Opening traps and Gambits.
 - Each Lesson has its own source file, `data/lesson-sources/<id>.json`, and `data-prep/course.ts` gives the Course order. `data-prep/lesson-tools.ts` helps find positions in the puzzle database and check lines with the Engine.
 - The Learn screens show the four Tracks and their levels, and the Player's next Lesson.

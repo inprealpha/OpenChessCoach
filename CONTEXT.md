@@ -81,7 +81,7 @@ The Lessons a Player should know before a Lesson. It decides the order of the su
 _Avoid_: Prerequisite, requirement
 
 **Key idea**:
-The one idea a part of a Lesson shows, in a line. Outside the opening Lessons it never names the move the Player has to find.
+The one idea a part of a Lesson shows, in a line. It never names a move the Player has to find, in the opening Lessons too.
 _Avoid_: Takeaway, moral
 
 **Theme**:

@@ -674,6 +674,57 @@ test('a sound move that isn’t the Lesson’s says so plainly, and the Player c
   if (node.notes) expect(lessonMove?.lesson?.notes).toBe(node.notes.text);
 });
 
+test('Try another move waits for the Coach’s answer, and starts the next try with no arrows and no reasoning', async ({ paired, app }) => {
+  const lesson = readLesson('italian-game');
+  const { node } = decisions(lesson)[0]!;
+  const boardName = `${lesson.name} Lesson board`;
+  const other = node.popular.casual.find((p) => p.uci !== node.main)!;
+  // Hold the Coach's answer back, as the real Coach, which is slow, would.
+  let holding = true;
+  const held: (() => void)[] = [];
+  await paired.routeWebSocket(/\/ws\b/, (ws) => {
+    const server = ws.connectToServer();
+    const asks = new Set<string>();
+    ws.onMessage((m) => {
+      const msg = JSON.parse(String(m)) as { id: string; type: string };
+      if (msg.type === 'coach.ask') asks.add(msg.id);
+      server.send(m);
+    });
+    server.onMessage((m) => {
+      const msg = JSON.parse(String(m)) as { id?: string };
+      if (holding && msg.id && asks.has(msg.id)) held.push(() => ws.send(m));
+      else ws.send(m);
+    });
+  });
+  await paired.goto(`${app.url}/#/lesson/${lesson.id}`);
+  // A fresh connection, through the route.
+  await paired.reload();
+  await expect(connection(paired)).toHaveText(/Desktop connected/);
+  await paired.getByRole('button', { name: 'Start the Lesson' }).click();
+  await expect(coachPanel(paired).getByText('Coach ready', { exact: true })).toBeVisible();
+  await paired.getByLabel('Explain your thinking (optional)').fill('I want to bring a piece out.');
+  await play(paired, other.uci, boardName);
+  await expect.poll(() => held.length).toBeGreaterThan(0);
+  const choice = paired.getByRole('region', { name: 'Your choice' });
+  await expect(choice).toContainText(`You played ${other.san}`);
+  // While the Coach answers, the Player can't move on: its arrows would land on the next try.
+  await expect(choice.getByRole('button', { name: 'Try another move' })).toBeDisabled();
+  await expect(choice.getByRole('button', { name: 'Continue with the Lesson’s move' })).toBeDisabled();
+  holding = false;
+  for (const send of held.splice(0)) send();
+  await coachIdle(paired);
+  const board = paired.getByRole('group', { name: boardName });
+  await expect(board.getByRole('img', { name: /\((blue|red|yellow)\)$/ })).not.toHaveCount(0);
+  await choice.getByRole('button', { name: 'Try another move' }).click();
+  // The arrows were about the move taken back, and so was the reasoning.
+  await expect(board.getByRole('img', { name: /\((blue|red|yellow|green)\)$/ })).toHaveCount(0);
+  await expect(paired.getByLabel('Explain your thinking (optional)')).toHaveValue('');
+  await play(paired, node.main, boardName);
+  await coachIdle(paired);
+  await expect(choice).toContainText(`You played ${node.mainSan}`);
+  expect((await lessonBriefs(app)).map((b) => b.question)).toEqual(['I want to bring a piece out.', undefined]);
+});
+
 test('after a part’s first decision, its text folds away as how the part began, and the Position says what the opponent replied', async ({ paired, app }) => {
   const lesson = readLesson('piece-values');
   const steps = decisions(lesson);

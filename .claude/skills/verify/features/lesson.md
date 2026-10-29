@@ -66,10 +66,12 @@ the order. `#/lessons?track=<track>` opens the catalogue at a track. Play it out
     Good adds "A sound move, but not the one this Lesson is teaching."; only the move's own share
     shows ("24.3% of players rated 1400 to 1799 play d4 here."), never the table, no green arrow, no
     note, no key idea and no Why Question box. The buttons are `Try another move` and `Continue with
-    the Lesson’s move`. The Lesson turn sends `lesson.isLessonMove: false`, and the desktop's brief
-    then has no candidates, no notes and only the move's own popularity
-    (`lesson: { …, isLessonMove: false }`); the prompt tells the Coach to explain the move and what
-    it allows, never another move for the Player. Without the Coach, the Coach panel says only the
+    the Lesson’s move`, both disabled while the Coach answers; `Try another move` clears the arrows
+    and the typed reasoning. The Lesson turn sends `lesson.isLessonMove: false`, and the desktop's
+    brief then has no candidates, no notes and only the move's own popularity
+    (`lesson: { …, isLessonMove: false }`), and nothing of the Engine's lines past the replies: each
+    reply's `line` and the threat's are empty, and `move.result` names no move; the prompt tells the
+    Coach to explain the move and what it allows, never another move for the Player. Without the Coach, the Coach panel says only the
     Move Grade ("… a sound move, but not the one this Lesson is teaching.").
   - `Continue with the Lesson’s move` plays it on the board: the region `The Lesson’s move` says "The
     Lesson continues with X, the move it teaches.", with its note, the popularity table, the key

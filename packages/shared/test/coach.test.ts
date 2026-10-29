@@ -185,8 +185,11 @@ describe('the Coach brief', () => {
     expect(other.candidates).toEqual([]);
     expect(other.lesson).toEqual({ opening: 'Italian Game', notes: '', popularity: `${m.san} 12%`, isLessonMove: false });
     // The move, what it allows and the Lesson's focus stay: that is what the Coach explains from.
+    // Nothing of the lines past the replies does: the Lesson's move is often still the best one there.
     expect(other.move).toEqual(lessonMove.move);
-    expect(other.replies).toEqual(lessonMove.replies);
+    expect(other.replies?.map((r) => r.san)).toEqual(lessonMove.replies?.map((r) => r.san));
+    expect(lessonMove.replies?.every((r) => r.line)).toBe(true);
+    expect(other.replies?.every((r) => r.line === '')).toBe(true);
     expect(other.focus).toEqual(lessonMove.focus);
     expect(other.hideMoves).toBe(false);
     // Neither the Engine's best move nor any other of its moves in the position is allowed: a reply

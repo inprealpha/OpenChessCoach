@@ -4,6 +4,7 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { playSan, playUci } from '../src/chess.ts';
+import { explained } from '../src/coach/brief.ts';
 import { describeFact, describeOutcome, lineOutcome, loosePieces, moveFacts, readLine, worthSaying, type MoveFact } from '../src/coach/explain.ts';
 import { golden } from './golden.ts';
 
@@ -111,6 +112,22 @@ describe('what a line leads to', () => {
     // A mate in one is one event: the move itself, or the very next move.
     expect(describeOutcome(lineOutcome('white', [], { mate: -1 }))).toBe("Black's next move is checkmate");
     expect(describeOutcome(lineOutcome('black', [], { mate: 1 }))).toBe('it is checkmate');
+  });
+
+  it('leaves out what a brief withholds: the moves, where a mate ends, and what the next move does', () => {
+    // Puzzle K1mbr: Rxb8 allows Qc8+ Rxc8 Rxc8#.
+    const p = puzzle('K1mbr');
+    const [rxb8, qc8, ...rest] = p.moves as [string, string, ...string[]];
+    const facts = (withheld = {}) => explained(p.fen, rxb8, [qc8, ...rest], { mate: -2 }, withheld).result;
+    expect(facts()).toBe("White mates in 2 (Rxb8 Qc8+ Rxc8 Rxc8#); at the end, Black's own pawns on f7, g7 and h7 block its king in");
+    // A Hint names no move.
+    expect(facts({ moves: true })).toBe("White mates in 2; at the end, Black's own pawns on f7, g7 and h7 block its king in");
+    // A Lesson turn that keeps the answer back doesn't say where a mate ends either.
+    expect(facts({ moves: true, mateDetails: true })).toBe('White mates in 2');
+    // Nor, after a reply, what the Player's next move in the line does: here, take the queen.
+    const after = (playUci(p.fen, rxb8) as { fenAfter: string }).fenAfter;
+    expect(explained(after, qc8, rest).does).toBe("gives check; puts the queen on c8, where Black's rook on b8 can take it");
+    expect(explained(after, qc8, rest, undefined, { nextMove: true }).does).toBe('gives check');
   });
 });
 

@@ -28,17 +28,24 @@ export class CoachThread {
   /** Whether the latest call failed, so a Why Question it carried was never answered. */
   failed = $state(false);
   threadId = randomId();
+  /** The calls still on their way: the thread is busy until the last of them ends. */
+  private pending = 0;
+  /**
+   * Counts what the board was annotated for. A new call or a cleared board moves it on, so a reply
+   * still on its way, about an earlier move or position, never draws on the board as it is now.
+   */
+  private annotating = 0;
 
   reset(): void {
     this.entries = [];
-    this.arrows = [];
-    this.highlights = [];
+    this.clearAnnotations();
     this.threadId = randomId();
   }
 
   clearAnnotations(): void {
     this.arrows = [];
     this.highlights = [];
+    this.annotating++;
   }
 
   /** Shows a line from the app itself in the conversation, with no Coach call. */
@@ -63,9 +70,11 @@ export class CoachThread {
     const entry: Entry = { id: nextEntry++, from: 'coach', text: '', streaming: true };
     this.entries = [...this.entries, entry];
     const index = this.entries.length - 1;
+    const call = ++this.calls;
+    const annotating = ++this.annotating;
+    this.pending++;
     this.busy = true;
     this.failed = false;
-    this.calls++;
     try {
       const reply = await api.request('coach.ask', { ...ask, threadId: this.threadId }, (text, _part, status) => {
         const current = this.entries[index];
@@ -75,17 +84,20 @@ export class CoachThread {
         if (text) this.entries[index] = { ...current, text: current.text + text, status: '' };
       });
       this.entries[index] = { ...entry, text: reply.text, streaming: false, note: reply.note, engineQuestions: reply.engineQuestions };
-      this.arrows = reply.arrows;
-      this.highlights = reply.highlights;
+      if (annotating === this.annotating) {
+        this.arrows = reply.arrows;
+        this.highlights = reply.highlights;
+      }
       return reply;
     } catch (err) {
       const message = err instanceof ApiError ? err.message : 'The Coach couldn’t answer.';
       this.entries[index] = { ...entry, text: message, streaming: false, error: true };
       if (said) this.entries = this.entries.filter((e) => e.id !== said.id);
-      this.failed = true;
+      if (call === this.calls) this.failed = true;
       return undefined;
     } finally {
-      this.busy = false;
+      this.pending--;
+      this.busy = this.pending > 0;
     }
   }
 }

@@ -27,8 +27,9 @@ export interface FakeCoachOptions {
   chunkDelayMs?: number;
 }
 
+/** A recorded reply's key: the job, the position, the move and the Player's side, which a Review's overview is written for. */
 export function recordingKey(brief: Brief): string {
-  return `${brief.job}|${positionKey(brief.fen)}|${brief.move?.uci ?? ''}`;
+  return `${brief.job}|${positionKey(brief.fen)}|${brief.move?.uci ?? ''}|${brief.playerSide ?? ''}`;
 }
 
 export class FakeCoach implements CoachPort {

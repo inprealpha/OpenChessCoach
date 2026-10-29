@@ -14,9 +14,12 @@ function escaped(text: string): string {
   return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-/** The move's SAN as a word of its own, its check or mate sign optional: the Coach may leave it off. */
+/**
+ * The move's SAN as a word of its own, its check or mate sign optional: the Coach may leave it off.
+ * Nothing may follow that would make it a longer move: O-O is not the start of O-O-O.
+ */
 function sanPattern(san: string): string {
-  return `${escaped(san.replace(/[+#]$/, ''))}[+#]?(?![\\w+#=])`;
+  return `${escaped(san.replace(/[+#]$/, ''))}[+#]?(?![\\w+#=-])`;
 }
 
 /** The move with its number, as a scoresheet writes it, with or without the space: "11. Bxf7+", "24… Nxf2", "24...Nxf2". */
@@ -28,9 +31,9 @@ function numberedPattern(move: OverviewMove): RegExp {
 }
 
 /**
- * Splits an overview's text at the moves of the game it names. A move is found by its number and
- * SAN ("24… Nxf2", also "24...Nxf2"); one it names by SAN alone is found only when no other of
- * `moves` has that SAN, and then only its first time.
+ * Splits an overview's text at the moves of the game it names, each found by its number and SAN
+ * ("24… Nxf2", also "24...Nxf2"). A SAN alone is never linked: it may be a key moment's better
+ * move, which the game didn't play, or the same SAN played at another point of the game.
  */
 export function overviewSegments(text: string, moves: readonly OverviewMove[]): OverviewSegment[] {
   const found: { start: number; end: number; move: OverviewMove }[] = [];
@@ -38,16 +41,6 @@ export function overviewSegments(text: string, moves: readonly OverviewMove[]): 
   for (const move of moves) {
     for (const m of text.matchAll(numberedPattern(move))) {
       if (!overlaps(m.index, m.index + m[0].length)) found.push({ start: m.index, end: m.index + m[0].length, move });
-    }
-  }
-  for (const move of moves) {
-    if (found.some((f) => f.move === move)) continue;
-    const bare = move.san.replace(/[+#]$/, '');
-    if (moves.some((o) => o !== move && o.san.replace(/[+#]$/, '') === bare)) continue;
-    for (const m of text.matchAll(new RegExp(`(?<![\\w.…])${sanPattern(move.san)}`, 'g'))) {
-      if (overlaps(m.index, m.index + m[0].length)) continue;
-      found.push({ start: m.index, end: m.index + m[0].length, move });
-      break;
     }
   }
   found.sort((a, b) => a.start - b.start);

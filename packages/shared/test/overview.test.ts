@@ -40,10 +40,18 @@ describe('the moves an overview’s text names', () => {
     expect(linked('Not 9. d5, and not 18… d5.')).toEqual([]);
   });
 
-  it('finds a move named by SAN alone only when no other move named has that SAN, and only once', () => {
-    expect(linked('Bg5 was the second Mistake, and Bg5 again.')).toEqual(['Bg5=23']);
-    // Black's 9… d5 and White's 18. d5: "d5" alone could be either.
-    expect(linked('The push d5 mattered.')).toEqual([]);
+  it('never links a SAN alone: it may be a better move the game didn’t play, or the same SAN at another move', () => {
+    expect(linked('Bg5 was the second Mistake.')).toEqual([]);
+    // 11. Bxf7+ had axb4 as its better move; the game played 14. axb4 later.
+    const axb4: OverviewMove = { ply: 27, side: 'white', san: 'axb4', grade: 'Best', label: '14. axb4' };
+    expect(linked('At 11. Bxf7+, axb4 would have held; 14. axb4 came too late.', [BXF7, axb4])).toEqual(['11. Bxf7+=21', '14. axb4=27']);
+  });
+
+  it('never takes long castling for short castling, or the other way round', () => {
+    const short: OverviewMove = { ply: 15, side: 'white', san: 'O-O', grade: 'Best', label: '8. O-O' };
+    const long: OverviewMove = { ply: 16, side: 'black', san: 'O-O-O', grade: 'Mistake', label: '8… O-O-O' };
+    expect(linked('After 8. O-O-O the king was safe.', [short])).toEqual([]);
+    expect(linked('8. O-O, then 8… O-O-O walked into it.', [short, long])).toEqual(['8. O-O=15', '8… O-O-O=16']);
   });
 
   it('counts the moves of a game set up from a position by that position’s own move numbers', () => {

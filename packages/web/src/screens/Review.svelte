@@ -158,7 +158,6 @@
 
   /** A move the overview names: the board goes to the position after it, as the move list does. */
   function showMove(m: OverviewMove): void {
-    coach.clearAnnotations();
     goto(m.ply);
     showBoard();
   }

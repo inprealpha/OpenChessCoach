@@ -625,6 +625,18 @@ describe('Reviews', () => {
     expect(rows(app, 'SELECT * FROM coach_calls')).toHaveLength(5);
   });
 
+  it('gives game 1 reviewed as Black an overview for Black: the recording is White’s alone', async () => {
+    const app = await instance();
+    const c = await client(app);
+    await c.request('games.setSide', { gameId: 1, playerSide: 'black' });
+    const review = await c.request('review.start', { gameId: 1 });
+    // The fake Coach's template, from the brief for Black: Black's Move Grades are the Player's.
+    expect(review.overview?.text).toMatch(/^Your Move Grades: Best 14, Good 9, Inaccuracy 1, Mistake 0, Blunder 0\./);
+    expect(review.overview?.moves.map((m) => m.label)).toEqual(['9… d5', '11. Bxf7+', '12. Bg5', '16… Nc6']);
+    const [call] = rows<{ stripped: string }>(app, "SELECT stripped FROM coach_calls WHERE job = 'review-overview'");
+    expect(JSON.parse(call?.stripped as string)).toEqual([]);
+  });
+
   it('runs the overview on the model set for Review moments, whatever it is', async () => {
     const app = await instance();
     const c = await client(app);

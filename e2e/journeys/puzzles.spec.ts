@@ -2,11 +2,16 @@
 import { readFileSync } from 'node:fs';
 import type { Page } from '@playwright/test';
 import { legalMoves, moveLabel, outcomeOf, piecesOf, playLine, playUci, turnOf, type PlayedMove } from '../../packages/shared/src/chess.ts';
+import type { CatalogueItem } from '../../packages/shared/src/content/course.ts';
+import { TRACKS } from '../../packages/shared/src/content/lessons.ts';
 import type { PuzzleFile } from '../../packages/shared/src/content/puzzles.ts';
 import { coachIdle, expect, fenOf, play, storedOnDevice, test } from '../fixtures/app.ts';
 
 const load = (file: string) => (JSON.parse(readFileSync(new URL(`../../data/${file}`, import.meta.url), 'utf8')) as PuzzleFile).puzzles;
 const puzzles = [...load('puzzles.json'), ...load('theme-puzzles.json')];
+const lessons = JSON.parse(readFileSync(new URL('../../data/lessons/index.json', import.meta.url), 'utf8')) as CatalogueItem[];
+/** The first Lesson offered after Mixed: the sets come by track, in the Lessons' order. */
+const firstSet = TRACKS.flatMap((t) => lessons.filter((l) => l.track === t)).find((l) => puzzles.some((p) => p.lessonId === l.id))!;
 const BOARD = 'Puzzle board';
 
 async function current(page: Page, previous?: string) {
@@ -229,20 +234,20 @@ test('arrow keys never change the set; following one gives focus back to the cho
   await paired.keyboard.press('Tab');
   await expect(sets.getByRole('link', { name: /^Mixed/ })).toBeFocused();
   await paired.keyboard.press('Tab');
-  const italian = sets.getByRole('link', { name: /^Italian Game/ });
-  await expect(italian).toBeFocused();
+  const set = sets.getByRole('link', { name: new RegExp(`^${firstSet.name}`) });
+  await expect(set).toBeFocused();
   await paired.keyboard.press('ArrowDown');
   // Nothing to wait for if it holds: give a wrong change of set the time to happen.
   await paired.waitForTimeout(500);
   await expect(paired).toHaveURL(/#\/puzzles$/);
   await expect(paired.getByRole('region', { name: 'Puzzle', exact: true })).toHaveAttribute('data-puzzle-id', first.id);
-  await expect(italian).toBeFocused();
+  await expect(set).toBeFocused();
 
   // Enter follows the set; its screen gives focus back to the choice, so the next key works.
   await paired.keyboard.press('Enter');
-  await expect(paired).toHaveURL(/#\/puzzles\/italian-game$/);
-  await expect(paired.getByRole('heading', { name: 'Italian Game Puzzles' })).toBeVisible();
-  expect((await current(paired)).lessonId).toBe('italian-game');
+  await expect(paired).toHaveURL(new RegExp(`#/puzzles/${firstSet.id}$`));
+  await expect(paired.getByRole('heading', { name: `${firstSet.name} Puzzles` })).toBeVisible();
+  expect((await current(paired)).lessonId).toBe(firstSet.id);
   await expect(choice).toBeFocused();
   await paired.keyboard.press('Enter');
   await paired.keyboard.press('Tab');

@@ -34,6 +34,8 @@ export interface CoachRequest {
   question?: string;
   /** Lesson context: bundled notes and how often players at the Player's level choose each move. */
   lesson?: CoachAsk['lesson'];
+  /** Sent with every Coach call during a Lesson (ADR 0012). */
+  lessonFocus?: CoachAsk['lessonFocus'];
   /** Opening or theme, used to pick the relevant slice of the Player Profile. */
   opening?: string;
   /**
@@ -98,7 +100,20 @@ export interface CoachAsk {
     notes: string;
     popularity: { san: string; percent: number }[];
     finalTurn: boolean;
+    /**
+     * Whether the move is the one the Lesson teaches at this decision. When it is not, the Player
+     * may try again, so the brief keeps back the Lesson's move and the Engine's best move, as a
+     * Hint keeps back every move: no candidates, no notes, and only the move's own popularity.
+     * A client that doesn't send it gets the brief as before.
+     */
+    isLessonMove?: boolean;
   };
+  /**
+   * During a Lesson, on every Coach call (a Lesson turn, a Hint, a Why Question): the Lesson's name,
+   * its learning goal and the current part's key idea, so the Coach stays on the Lesson's point
+   * (ADR 0012). The brief's `focus` uses the same names.
+   */
+  lessonFocus?: { lesson: string; learningGoal: string; keyIdea: string };
   /** Opening or theme, used to pick the relevant slice of the Player Profile. */
   opening?: string;
   /** For Reviews: the last moment may carry a profile note. */

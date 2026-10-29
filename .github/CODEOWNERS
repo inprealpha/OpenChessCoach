@@ -12,8 +12,12 @@
 /LICENSE @inprealpha
 /THIRD_PARTY_NOTICES.md @inprealpha
 /data/lessons/ @inprealpha
-/data/lesson-notes.json @inprealpha
-/data/lesson-topics.json @inprealpha
+/data/lesson-sources/ @inprealpha
+/data/open-texts.json @inprealpha
+/data/lesson-stats.json @inprealpha
+/data/puzzles.json @inprealpha
+/data/theme-puzzles.json @inprealpha
+/docs/course-outline.md @inprealpha
 /data-prep/ @inprealpha
 /.github/ @inprealpha
 /scripts/protected-paths.ts @inprealpha

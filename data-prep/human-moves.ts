@@ -23,7 +23,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { createInterface } from 'node:readline';
 import { parsePgnGames } from '@chess-coach/shared/pgn';
-import { isCheck, legalMoves, piecesOf, playSan, playUci, sanLine, turnOf, uciToSan } from '@chess-coach/shared/chess';
+import { isCheck, legalMoves, outcomeOf, piecesOf, playSan, playUci, sanLine, turnOf, uciToSan } from '@chess-coach/shared/chess';
 import { checkClaude, isWindowsShim } from '../packages/backend/src/claude-check.ts';
 import { createNodeEngine } from '../packages/backend/src/engine/node-engine.ts';
 import type { Engine } from '@chess-coach/shared/engine';
@@ -231,7 +231,7 @@ async function gradePlayed(sf: Engine, fen: string, uci: string, fenAfter: strin
   const best = (await sf.analyse(fen, { multiPv: 1, depth: 12 })).lines[0];
   const after = (await sf.analyse(fenAfter, { multiPv: 1, depth: 12 })).lines[0];
   if (!best || !after) return undefined;
-  return gradeMove({ best: best.score, played: negateScore(after.score), isTopMove: best.pv[0] === uci });
+  return gradeMove({ best: best.score, played: negateScore(after.score), isTopMove: best.pv[0] === uci, givesMate: outcomeOf(fenAfter)?.reason === 'checkmate' });
 }
 
 function sanLineFrom(startFen: string, ucis: readonly string[]): string[] | undefined {

@@ -1,0 +1,128 @@
+{
+ "id": "minor-piece-endgames",
+ "name": "Bishop and knight endgames",
+ "kind": "endgame",
+ "track": "endgames",
+ "level": "intermediate",
+ "side": "black",
+ "puzzleThemes": [
+  "bishopEndgame",
+  "knightEndgame"
+ ],
+ "goal": "You can tell when a bishop beats a knight and when the reverse is true, and know two draws: bishops of opposite colours, and the wrong bishop with a rook pawn.",
+ "priorKnowledge": [
+  "good-and-bad-pieces"
+ ],
+ "intro": "When only bishops, knights and pawns are left, the kind of piece you have can matter as much as the number of pawns. A bishop can strike from one side of the board to the other in a single move, so it does best on an open board with pawns on both sides; a knight is slower, but it does better when the pawns are locked and the enemy pawns stand on squares of the bishop's colour. Some of these endgames are drawn even a pawn down: bishops of opposite colours often draw, and so does a pawn on the a- or h-file (a rook pawn) when the bishop cannot control the corner square where it would promote.",
+ "parts": [
+  {
+   "title": "Pawns on both sides",
+   "fen": "6k1/7p/1p2b1p1/pp6/3P4/1PPK2NP/6P1/8 b - - 0 31",
+   "side": "black",
+   "keyIdea": "A bishop can cross from one side of the board to the other in one move; a knight needs several jumps, so it cannot guard both sides.",
+   "text": "From a game played on Lichess. You are Black. The pawns are level, and there are pawns on both sides of the board. White's pawns are spread out, and White's knight can only be on one side at a time. Find the move that makes the most of your bishop's long reach.",
+   "url": "https://lichess.org/x6wc72x2#61",
+   "line": "Bxb3 Ne4 Bc4+ Kc2 Bf1 g3 Bxh3",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Bxb3",
+     "text": "31...Bxb3 takes the pawn on b3, which nothing guarded. White's knight on g3 is on the other side of the board and could not help it."
+    },
+    {
+     "ply": 2,
+     "san": "Bc4+",
+     "text": "32.Ne4 brings White's knight towards the centre. 32...Bc4+ checks the king and drives it back, and from c4 the bishop already looks along the diagonal towards f1, on the kingside."
+    },
+    {
+     "ply": 4,
+     "san": "Bf1",
+     "text": "33.Kc2 steps out of the check. In one move, 33...Bf1 crosses to the kingside, where it attacks the pawn on g2, with the pawn on h3 behind it. White can save one of those pawns, but not both."
+    },
+    {
+     "ply": 6,
+     "san": "Bxh3",
+     "text": "34.g3 saved one pawn, and 34...Bxh3 takes the other. In four moves your bishop has taken a pawn on each side of the board, and you are two pawns up. A knight could never switch sides that fast."
+    }
+   ]
+  },
+  {
+   "title": "The knight against a bad bishop",
+   "fen": "8/1b2k3/p3p3/Pp1p1p1p/1P1P3P/4P3/4KP2/3N4 w - - 0 35",
+   "side": "white",
+   "keyIdea": "When the pawns are locked on the bishop's colour, the bishop has nothing to attack, and a knight can settle on a square no pawn can reach.",
+   "text": "From a game played on Lichess. You are White. Every black pawn stands on a light square, the same colour as Black's bishop, and most of the pawns are locked against each other. Your knight on d1 is doing very little: find it a better square.",
+   "url": "https://lichess.org/ox3swmPw",
+   "line": "Nb2 Bc6 Nd3 Be8 Nc5",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Nb2",
+     "text": "35.Nb2 sets off for c5. The knight cannot get there in one jump from d1, so it goes round by b2 and d3. On c5 no black pawn will ever be able to attack it, because Black's b- and d-pawns have already gone past."
+    },
+    {
+     "ply": 2,
+     "san": "Nd3",
+     "text": "36.Nd3 is one more step. From d3 the knight can jump to c5 or e5, and Black's bishop can never cover either square, because both are dark."
+    },
+    {
+     "ply": 4,
+     "san": "Nc5",
+     "text": "37.Nc5 lands on c5 and attacks the pawns on a6 and e6. Nothing defends the pawn on a6, and Black's bishop is stuck behind its own pawns with nothing to attack. Black's best try was 36...f4, giving up a pawn to open a way out for the bishop, but White would still be clearly winning."
+    }
+   ]
+  },
+  {
+   "title": "Bishops of opposite colours",
+   "fen": "6k1/5pb1/4p1pp/1B6/P7/2p4P/5PP1/6K1 w - - 0 39",
+   "side": "white",
+   "keyIdea": "With bishops of opposite colours, stop the enemy pawn on a square of your bishop's colour: the other bishop can never attack that square.",
+   "text": "From a game played on Lichess. You are White, and you are a pawn down. Your bishop moves on light squares and Black's on dark ones. Black's pawn on c3 is only two steps from promoting.",
+   "url": "https://lichess.org/QC73U5kV",
+   "line": "Bd3 Bd4 Kf1 Kf8 Ke2",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Bd3",
+     "text": "39.Bd3 guards c2, the next square on the pawn's path. That square is light, so Black's bishop can never attack your bishop there or help the pawn forward. It is the only move that holds: anything slower lets the pawn promote."
+    },
+    {
+     "ply": 2,
+     "san": "Kf1",
+     "text": "Black's bishop now attacks your pawn on f2. 40.Kf1 keeps the pawn guarded and starts the king's walk towards the c-pawn."
+    },
+    {
+     "ply": 4,
+     "san": "Ke2",
+     "text": "41.Ke2 still guards f2 and comes closer to the c-pawn. With the pawn stuck on c3, Black's extra pawn cannot get through, and the Engine sees the position as about level."
+    }
+   ]
+  },
+  {
+   "title": "The wrong bishop",
+   "fen": "8/8/p3b3/k7/4K3/8/8/8 w - - 0 51",
+   "side": "white",
+   "keyIdea": "With a rook pawn and a bishop that cannot control the promotion square, the defending king draws once it reaches the corner.",
+   "text": "From a game played on Lichess. You are White, and you only have your king left. Black has a bishop and a pawn on the a-file, but the bishop moves on light squares, and the pawn would promote on a1, a dark square. Can your king get to that corner in time?",
+   "url": "https://lichess.org/DbQYGyEW",
+   "line": "Kd3 Kb4 Kc2 Ka3 Kb1",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Kd3",
+     "text": "51.Kd3 heads for the corner. From d3 the king reaches c2 next, and Black's king and bishop cannot keep it out of the corner from there. Any other move here loses."
+    },
+    {
+     "ply": 2,
+     "san": "Kc2",
+     "text": "52.Kc2 keeps going. Your king is now two steps from a1."
+    },
+    {
+     "ply": 4,
+     "san": "Kb1",
+     "text": "53.Kb1 is the only move that holds, because Black's king now controls b2. Black's bishop can check your king on b1, but the king simply steps into the corner, and a1 is a dark square, so the bishop can never drive it out."
+    }
+   ]
+  }
+ ]
+}

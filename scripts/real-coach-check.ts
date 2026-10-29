@@ -1,12 +1,16 @@
 // The real-Coach check (ADR 0006). It runs on the owner's desktop, where Claude Code is logged
 // in, because the real Coach can't run in cloud CI (ADR 0001). It starts a verify-mode instance with
 // the real Coach in place of the fake one, makes one call of every Coach job through the protocol,
-// and checks only structure, so the verdict doesn't flip when the Coach words something differently:
+// and Lesson calls that carry a Lesson's focus as the Lesson screen sends them (ADR 0012: a Lesson
+// turn in an opening and in a Theme, a Lesson turn on a move that isn't the Lesson's, and a Hint in
+// a way-of-thinking Lesson). It checks only structure, so the verdict doesn't flip when the Coach
+// words something differently:
 //   - every move a reply shows is legal and came from the Engine (the move guard, ADR 0002), the
 //     briefed threat included, where the guard plays it, and with Think deeper on the Engine's
 //     answers to the Coach's questions (ADR 0010);
 //   - every piece move named in the text appears in the brief or those answers, so it came from
 //     the Engine, the game or the bundled Lesson notes;
+//   - a Lesson turn on a move that isn't the Lesson's neither names nor shows the Lesson's move;
 //   - each reply stays within its length budget (with 25% slack; over the budget alone is a warning);
 //   - replies avoid the terms CONTEXT.md says to avoid (a stray one is a warning: the wording is
 //     the model's, and the reply has already streamed to the Player), except the ones that
@@ -21,11 +25,12 @@
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { playSan, playUci, sansIn } from '@chess-coach/shared/chess';
+import { legalMoves, playSan, playUci, sanLine, sansIn } from '@chess-coach/shared/chess';
 import { allowedMoves, answeredMoves, askedLineMoves, guardReply } from '@chess-coach/shared/coach/guard';
 import { answerMoves, type EngineAnswer, type EngineQuestion } from '@chess-coach/shared/coach/engine-tool';
 import { MAX_WORDS, threatFen, type Brief } from '@chess-coach/shared/coach/brief';
 import type { CoachRequest, CoachRawReply, CoachReply } from '@chess-coach/shared/coach/types';
+import type { LessonData, LessonPart } from '@chess-coach/shared/content/lessons';
 import type { CoachJob } from '@chess-coach/shared/protocol';
 import { CoachClient } from '../packages/backend/src/client.ts';
 import type { CoachCall, CoachEngine, CoachPort } from '../packages/backend/src/coach/port.ts';
@@ -59,8 +64,24 @@ export interface CallVerdict {
   warnings: string[];
 }
 
-/** The structural checks for one Coach call: the brief it got, its raw reply and what the client received. */
-export function checkCall(record: CoachCallRecord, reply: CoachReply, terms: readonly string[]): CallVerdict {
+/** A move a reply must not give away: the Lesson's move, when the Player played another (UCI and SAN). */
+export interface KeptBack {
+  uci: string;
+  san: string;
+}
+
+/** A reply as the client received it, with the moves it must not give away. */
+interface Received {
+  job: CoachJob;
+  reply: CoachReply;
+  keptBack?: KeptBack[];
+}
+
+/**
+ * The structural checks for one Coach call: the brief it got, its raw reply and what the client
+ * received, and the moves the reply must not give away.
+ */
+export function checkCall(record: CoachCallRecord, reply: CoachReply, terms: readonly string[], keptBack: readonly KeptBack[] = []): CallVerdict {
   const problems: string[] = [];
   const warnings: string[] = [];
   const { brief } = record;
@@ -88,6 +109,16 @@ export function checkCall(record: CoachCallRecord, reply: CoachReply, terms: rea
   for (const san of new Set(sansIn(reply.text))) {
     if (brief.hideMoves) problems.push(`the Hint names the move ${san}`);
     else if (!briefText.includes(san)) problems.push(`the text names ${san}, which is not in the brief`);
+  }
+
+  // The brief keeps the Lesson's move back while the Player may try again: neither in the text nor on the board.
+  for (const k of keptBack) {
+    const shown = [...reply.moves, ...reply.arrows.map((a) => `${a.from}${a.to}`)].includes(k.uci);
+    // As a word of its own, not inside "Nxe4". A pawn push such as "e4" reads like a square, so only
+    // its arrow or its place in the reply's moves gives it away.
+    const san = k.san.replace(/[+#]$/, '');
+    const said = !/^[a-h][1-8]/.test(san) && new RegExp(`(?<![\\w-])${san.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\w-])`).test(reply.text);
+    if (shown || said) problems.push(`the reply gives away ${k.san}, which the brief keeps back`);
   }
 
   const words = reply.text.split(/\s+/).filter(Boolean).length;
@@ -154,8 +185,8 @@ const ITALIAN_AFTER_ND4 = 'r1bqkbnr/pppp1ppp/8/4p3/2BnP3/5N2/PPPP1PPP/RNBQK2R w 
  * One call of every Coach job, the way the web app makes them: the position and the move only.
  * The instance's own Engine works out the facts (ADR 0007).
  */
-async function driveEveryJob(client: CoachClient, root: URL): Promise<{ job: CoachJob; reply: CoachReply }[]> {
-  const out: { job: CoachJob; reply: CoachReply }[] = [];
+async function driveEveryJob(client: CoachClient, root: URL): Promise<Received[]> {
+  const out: Received[] = [];
   const uciOf = (fen: string, san: string): string => {
     const played = playSan(fen, san);
     if (!played) throw new Error(`${san} is not legal in ${fen}`);
@@ -188,12 +219,18 @@ async function driveEveryJob(client: CoachClient, root: URL): Promise<{ job: Coa
     }),
   });
 
-  // Lesson turn: the Italian Game's 3.Bc4, with its bundled notes.
-  const lesson = JSON.parse(readFileSync(new URL('data/lessons/italian-game.json', root), 'utf8')) as {
-    id: string;
-    name: string;
-    parts: { nodes: { ply: number; notes?: { text: string }; popular: Record<string, { san: string; percent: number }[]> }[] }[];
+  // Lesson turns, each with its Lesson's learning goal and the part's key idea, as every Coach call
+  // in a Lesson carries them (ADR 0012). First the Italian Game's 3.Bc4, with its bundled notes.
+  const readLesson = (id: string) => JSON.parse(readFileSync(new URL(`data/lessons/${id}.json`, root), 'utf8')) as LessonData;
+  const focusOf = (lesson: LessonData, part: LessonPart | undefined) => ({ lesson: lesson.name, learningGoal: lesson.goal, keyIdea: part?.keyIdea ?? '' });
+  /** A part's first decision, and the moves played before it from the part's position, as the Lesson screen sends them. */
+  const firstDecision = (lesson: LessonData) => {
+    const part = lesson.parts[0];
+    const node = part?.nodes.find((n) => n.decision);
+    if (!part || !node) throw new Error(`The ${lesson.name} Lesson has no decision.`);
+    return { part, node, recentMoves: sanLine(part.fen, part.mainLine.slice(0, node.ply)) };
   };
+  const lesson = readLesson('italian-game');
   const node = lesson.parts[0]?.nodes.find((n) => n.ply === 4);
   out.push({
     job: 'lesson-turn',
@@ -204,7 +241,47 @@ async function driveEveryJob(client: CoachClient, root: URL): Promise<{ job: Coa
       playerSide: 'white',
       moveUci: uciOf(ITALIAN_BEFORE_BC4, 'Bc4'),
       lesson: { lessonId: lesson.id, opening: lesson.name, notes: node?.notes?.text ?? '', popularity: (node?.popular.casual ?? []).map((p) => ({ san: p.san, percent: p.percent })), finalTurn: false },
+      lessonFocus: focusOf(lesson, lesson.parts[0]),
       opening: lesson.name,
+    }),
+  });
+
+  // Then a Theme: the Forks Lesson's first decision, where the Coach has to explain the key idea
+  // from the Engine's facts. The part starts with the opponent's move, which the screen sends too.
+  const forks = readLesson('forks');
+  const fork = firstDecision(forks);
+  const forkTurn: CoachRequest = {
+    job: 'lesson-turn',
+    fen: fork.node.fen,
+    recentMoves: fork.recentMoves,
+    playerSide: fork.part.side,
+    moveUci: fork.node.main,
+    lesson: { lessonId: forks.id, opening: forks.name, notes: fork.node.notes?.text ?? '', popularity: [], finalTurn: false, isLessonMove: true },
+    lessonFocus: focusOf(forks, fork.part),
+  };
+  out.push({ job: 'lesson-turn', reply: await client.request('coach.ask', forkTurn) });
+
+  // The same decision with a move that isn't the Lesson's: the Player may try again, so the brief
+  // keeps the Lesson's move back and the reply must not give it away.
+  const other = legalMoves(fork.node.fen).find((uci) => uci !== fork.node.main);
+  if (!other || !forkTurn.lesson) throw new Error('The Forks Lesson’s first decision has no other move.');
+  out.push({
+    job: 'lesson-turn',
+    keptBack: [{ uci: fork.node.main, san: fork.node.mainSan }],
+    reply: await client.request('coach.ask', { ...forkTurn, moveUci: other, lesson: { ...forkTurn.lesson, isLessonMove: false } }),
+  });
+
+  // A Hint in a way-of-thinking Lesson: it may point to the key idea, but still names no move.
+  const blunderCheck = readLesson('blunder-check');
+  const check = firstDecision(blunderCheck);
+  out.push({
+    job: 'hint',
+    reply: await client.request('coach.ask', {
+      job: 'hint',
+      fen: check.node.fen,
+      recentMoves: check.recentMoves,
+      playerSide: check.part.side,
+      lessonFocus: focusOf(blunderCheck, check.part),
     }),
   });
 
@@ -261,7 +338,7 @@ async function run(fake: boolean): Promise<Verdict> {
   if (status.state !== 'ready') throw new Error(`The real Coach is not ready: ${'reason' in status ? status.reason : status.state}. Log in to Claude Code first.`);
 
   const instance = await startVerifyInstance({ coachPort: coach, seed: 'default' });
-  let received: { job: CoachJob; reply: CoachReply }[];
+  let received: Received[];
   try {
     const client = await CoachClient.connect(instance.url, instance.token);
     try {
@@ -280,7 +357,7 @@ async function run(fake: boolean): Promise<Verdict> {
   const calls = coach.calls.map((record) => {
     const reply = record.job === 'review-moment' ? reviewReplies.shift() : others.shift();
     if (!reply) return { job: record.job, words: 0, maxWords: MAX_WORDS[record.job], problems: ['no reply reached the client'], warnings: [] };
-    return checkCall(record, reply.reply, terms);
+    return checkCall(record, reply.reply, terms, reply.keptBack);
   });
   const jobs = new Set(calls.map((c) => c.job));
   const missing = (Object.keys(MAX_WORDS) as CoachJob[]).filter((j) => !jobs.has(j));

@@ -1,0 +1,99 @@
+{
+ "id": "simple-plans",
+ "name": "Simple plans",
+ "kind": "thinking",
+ "track": "thinking",
+ "level": "intermediate",
+ "side": "white",
+ "goal": "You can make a small plan from the position: improve your worst piece, attack a weak pawn, or bring a rook to an open file.",
+ "priorKnowledge": [
+  "candidate-moves",
+  "centre-and-activity"
+ ],
+ "intro": "Most of the time nothing can be won straight away, and that is when you need a plan. A small one is enough. Look for a piece of yours that stands badly and a better square for it, an enemy pawn that is hard to defend, or a file with no pawns where a rook could get in. Then carry the plan out one move at a time: moves made for a reason beat moves made without one.",
+ "parts": [
+  {
+   "title": "Nothing to win at once",
+   "fen": "5rk1/2p2pp1/p1p1b3/1r2P1p1/5p2/1PP4P/P4PPN/R3R1K1 w - - 2 23",
+   "side": "white",
+   "keyIdea": "When nothing can be won at once, find your worst-placed piece and move it to a square where it does more.",
+   "text": "From a game played on Lichess. You are White, and material is level. Nothing can be won at once, so look at your pieces one by one. Which one stands worst, and where would it be more useful?",
+   "url": "https://lichess.org/T2ZQwZVy#44",
+   "line": "Nf3 g4 Nd4 Ra5 Nxe6 fxe6 hxg4",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Nf3",
+     "text": "Your knight on h2 sits at the edge of the board and does almost nothing. On f3 it attacks the pawn on g5 and gets ready to jump to d4, in the centre."
+    },
+    {
+     "ply": 2,
+     "san": "Nd4",
+     "text": "Black's pawn chased the knight from f3, so it jumps to d4. From there it attacks the rook on b5, the bishop on e6 and the pawn on c6 all at once."
+    },
+    {
+     "ply": 4,
+     "san": "Nxe6",
+     "text": "The knight takes Black's bishop on e6, trading itself for it. The bishop was the only defender of the pawn on g4, and after 25...fxe6 that pawn has no defender left."
+    },
+    {
+     "ply": 6,
+     "san": "hxg4",
+     "text": "The pawn takes on g4, and you are now a pawn ahead. A few moves ago your knight was your worst piece; it found a better square, traded itself for the bishop and helped win a pawn."
+    }
+   ]
+  },
+  {
+   "title": "The pawn on d4",
+   "fen": "2r2rk1/1p2bppp/p3p3/n7/1P1P4/P3BP2/4BP1P/2R2RK1 b - - 0 19",
+   "side": "black",
+   "keyIdea": "Attacking a pawn that no pawn can defend is a good plan: aim more pieces at it than your opponent can defend it with.",
+   "text": "From a game played on Lichess. You are Black. White has no pawns on the c- or e-file, so the pawn on d4 can only be defended by pieces. Your knight on a5 is attacked by the pawn on b4. Where should it go, and what comes next?",
+   "url": "https://lichess.org/9sphxwk7#37",
+   "line": "Nc6 Rc3 Bf6 Rfc1 Rcd8",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Nc6",
+     "text": "The knight had to move, and on c6 it has a job: it attacks the pawn on d4, which no white pawn defends."
+    },
+    {
+     "ply": 2,
+     "san": "Bf6",
+     "text": "The bishop on f6 adds a second attacker, aimed down the diagonal at d4. Only White's bishop on e3 defends the pawn."
+    },
+    {
+     "ply": 4,
+     "san": "Rcd8",
+     "text": "A rook comes to the d-file, the file of the weak pawn. Now your knight, bishop and rook all attack d4, against one defender, and White will struggle to keep the pawn."
+    }
+   ]
+  },
+  {
+   "title": "A calm position",
+   "fen": "r4rk1/1p3pp1/p1p2n1p/3p1b2/3P4/P1N5/1PP1BPPP/2R2RK1 b - - 2 17",
+   "side": "black",
+   "keyIdea": "Rooks need open files: put a rook on a file with no pawns before your opponent does, then bring your second rook to the same file.",
+   "text": "From a game played on Lichess. You are Black. The position is calm and neither side can win anything right now. Look at the files: which one has no pawns on it, and who will use it first?",
+   "url": "https://lichess.org/E6Wy0byf#33",
+   "line": "Rfe8 f3 Re7 Rfe1 Rae8",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Rfe8",
+     "text": "The e-file is the only file with no pawns on it. Your rook takes it first and lines up against White's bishop on e2."
+    },
+    {
+     "ply": 2,
+     "san": "Re7",
+     "text": "The rook steps up to e7 and makes room behind it. From e7 it still holds the file, and your other rook can come to e8."
+    },
+    {
+     "ply": 4,
+     "san": "Rae8",
+     "text": "Two rooks on the open file back each other up. The rook from a8, which was doing nothing, has joined the game, and White's rook on e1 now faces both of yours."
+    }
+   ]
+  }
+ ]
+}

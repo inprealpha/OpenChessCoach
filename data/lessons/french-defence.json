@@ -1,0 +1,1626 @@
+{
+ "id": "french-defence",
+ "name": "French Defence",
+ "kind": "opening",
+ "track": "openings",
+ "level": "intermediate",
+ "goal": "As Black against 1.e4, you can play the French Defence and know the plan against White's pawn chain: attack its base with ...c5 and its front with ...f6.",
+ "priorKnowledge": [
+  "pawn-structure"
+ ],
+ "side": "black",
+ "eco": "C02",
+ "puzzleTags": [
+  "French_Defense"
+ ],
+ "puzzleThemes": [],
+ "intro": {
+  "text": "In the French Defence, 1...e6 and 2...d5, you let White build a big centre and then attack it. In the Advance Variation, White pushes a pawn to e5, making a chain of pawns on d4 and e5 that takes space on the kingside. Your plan is the same in almost every line: hit the base of the chain, its back pawn on d4, with ...c5 and your pieces, then hit its front, e5, with ...f6, until White's centre gives way and your pieces get room. The price is the bishop on c8, which stays shut in behind the e6 pawn for a while."
+ },
+ "parts": [
+  {
+   "title": "The Advance Variation",
+   "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+   "side": "black",
+   "keyIdea": "Against a pawn chain, attack its base first, with a pawn and then your pieces, then attack its front pawn, and use the lines that open.",
+   "text": "You are Black, from White's first move. White pushes the e-pawn on to e5, the Advance Variation, and builds a chain of pawns whose front pawn stands in your half of the board. At each move, ask what your move does against White's chain of pawns and for your pieces.",
+   "credit": {
+    "source": "Lichess chess-openings",
+    "url": "https://github.com/lichess-org/chess-openings",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess contributors"
+   },
+   "mainLine": [
+    "e2e4",
+    "e7e6",
+    "d2d4",
+    "d7d5",
+    "e4e5",
+    "c7c5",
+    "c2c3",
+    "b8c6",
+    "g1f3",
+    "d8b6",
+    "f1e2",
+    "c5d4",
+    "c3d4",
+    "g8e7",
+    "b1a3",
+    "e7f5",
+    "a3c2",
+    "f7f6",
+    "e1g1",
+    "f6e5",
+    "d4e5",
+    "f8e7"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+     "decision": false,
+     "main": "e2e4",
+     "mainSan": "e4",
+     "popular": {
+      "beginner": [
+       {
+        "uci": "e2e4",
+        "san": "e4",
+        "percent": 62.9,
+        "games": 430422
+       },
+       {
+        "uci": "d2d4",
+        "san": "d4",
+        "percent": 21.1,
+        "games": 143991
+       },
+       {
+        "uci": "e2e3",
+        "san": "e3",
+        "percent": 4,
+        "games": 27408
+       },
+       {
+        "uci": "g1f3",
+        "san": "Nf3",
+        "percent": 2.7,
+        "games": 18283
+       },
+       {
+        "uci": "c2c4",
+        "san": "c4",
+        "percent": 2.2,
+        "games": 15041
+       }
+      ],
+      "casual": [
+       {
+        "uci": "e2e4",
+        "san": "e4",
+        "percent": 63,
+        "games": 1301896
+       },
+       {
+        "uci": "d2d4",
+        "san": "d4",
+        "percent": 24.3,
+        "games": 502914
+       },
+       {
+        "uci": "c2c4",
+        "san": "c4",
+        "percent": 3.1,
+        "games": 64057
+       },
+       {
+        "uci": "g1f3",
+        "san": "Nf3",
+        "percent": 2.3,
+        "games": 47511
+       },
+       {
+        "uci": "e2e3",
+        "san": "e3",
+        "percent": 1.8,
+        "games": 37237
+       }
+      ],
+      "club": [
+       {
+        "uci": "e2e4",
+        "san": "e4",
+        "percent": 57.1,
+        "games": 336533
+       },
+       {
+        "uci": "d2d4",
+        "san": "d4",
+        "percent": 28.8,
+        "games": 169618
+       },
+       {
+        "uci": "c2c4",
+        "san": "c4",
+        "percent": 4.5,
+        "games": 26454
+       },
+       {
+        "uci": "g1f3",
+        "san": "Nf3",
+        "percent": 4.4,
+        "games": 25901
+       },
+       {
+        "uci": "f2f4",
+        "san": "f4",
+        "percent": 1.1,
+        "games": 6547
+       }
+      ]
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
+     "decision": true,
+     "main": "e7e6",
+     "mainSan": "e6",
+     "popular": {
+      "beginner": [
+       {
+        "uci": "e7e5",
+        "san": "e5",
+        "percent": 55.6,
+        "games": 253915
+       },
+       {
+        "uci": "c7c5",
+        "san": "c5",
+        "percent": 10.6,
+        "games": 48392
+       },
+       {
+        "uci": "d7d5",
+        "san": "d5",
+        "percent": 9.7,
+        "games": 44480
+       },
+       {
+        "uci": "e7e6",
+        "san": "e6",
+        "percent": 9.3,
+        "games": 42676
+       },
+       {
+        "uci": "d7d6",
+        "san": "d6",
+        "percent": 2.8,
+        "games": 12713
+       }
+      ],
+      "casual": [
+       {
+        "uci": "e7e5",
+        "san": "e5",
+        "percent": 44.7,
+        "games": 569367
+       },
+       {
+        "uci": "c7c5",
+        "san": "c5",
+        "percent": 20,
+        "games": 255303
+       },
+       {
+        "uci": "e7e6",
+        "san": "e6",
+        "percent": 11.6,
+        "games": 148419
+       },
+       {
+        "uci": "d7d5",
+        "san": "d5",
+        "percent": 6.9,
+        "games": 88308
+       },
+       {
+        "uci": "c7c6",
+        "san": "c6",
+        "percent": 4.3,
+        "games": 55052
+       }
+      ],
+      "club": [
+       {
+        "uci": "c7c5",
+        "san": "c5",
+        "percent": 30.2,
+        "games": 99278
+       },
+       {
+        "uci": "e7e5",
+        "san": "e5",
+        "percent": 28.6,
+        "games": 93861
+       },
+       {
+        "uci": "e7e6",
+        "san": "e6",
+        "percent": 13.3,
+        "games": 43690
+       },
+       {
+        "uci": "c7c6",
+        "san": "c6",
+        "percent": 8.1,
+        "games": 26660
+       },
+       {
+        "uci": "d7d5",
+        "san": "d5",
+        "percent": 6.6,
+        "games": 21849
+       }
+      ]
+     },
+     "notes": {
+      "text": "1...e6 gets ready for ...d5, with the e6 pawn ready to take back if White ever captures on d5. Your centre stays solid. The cost is that the bishop on c8 is shut in behind the e6 pawn for now."
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "rnbqkbnr/pppp1ppp/4p3/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+     "decision": false,
+     "main": "d2d4",
+     "mainSan": "d4",
+     "popular": {
+      "beginner": [
+       {
+        "uci": "d2d4",
+        "san": "d4",
+        "percent": 33.2,
+        "games": 12951
+       },
+       {
+        "uci": "g1f3",
+        "san": "Nf3",
+        "percent": 28.4,
+        "games": 11075
+       },
+       {
+        "uci": "e4e5",
+        "san": "e5",
+        "percent": 8.8,
+        "games": 3412
+       },
+       {
+        "uci": "b1c3",
+        "san": "Nc3",
+        "percent": 6,
+        "games": 2337
+       },
+       {
+        "uci": "f1c4",
+        "san": "Bc4",
+        "percent": 6,
+        "games": 2330
+       }
+      ],
+      "casual": [
+       {
+        "uci": "d2d4",
+        "san": "d4",
+        "percent": 46.1,
+        "games": 69680
+       },
+       {
+        "uci": "g1f3",
+        "san": "Nf3",
+        "percent": 26.5,
+        "games": 40040
+       },
+       {
+        "uci": "f2f4",
+        "san": "f4",
+        "percent": 6.5,
+        "games": 9797
+       },
+       {
+        "uci": "f1c4",
+        "san": "Bc4",
+        "percent": 4.5,
+        "games": 6788
+       },
+       {
+        "uci": "e4e5",
+        "san": "e5",
+        "percent": 3.9,
+        "games": 5870
+       }
+      ],
+      "club": [
+       {
+        "uci": "d2d4",
+        "san": "d4",
+        "percent": 62.6,
+        "games": 27310
+       },
+       {
+        "uci": "g1f3",
+        "san": "Nf3",
+        "percent": 16.2,
+        "games": 7086
+       },
+       {
+        "uci": "f2f4",
+        "san": "f4",
+        "percent": 5.6,
+        "games": 2451
+       },
+       {
+        "uci": "b1c3",
+        "san": "Nc3",
+        "percent": 3.7,
+        "games": 1597
+       },
+       {
+        "uci": "d2d3",
+        "san": "d3",
+        "percent": 3.6,
+        "games": 1576
+       }
+      ]
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "rnbqkbnr/pppp1ppp/4p3/8/3PP3/8/PPP2PPP/RNBQKBNR b KQkq - 0 2",
+     "decision": true,
+     "main": "d7d5",
+     "mainSan": "d5",
+     "popular": {
+      "beginner": [
+       {
+        "uci": "d7d5",
+        "san": "d5",
+        "percent": 39.7,
+        "games": 6510
+       },
+       {
+        "uci": "d7d6",
+        "san": "d6",
+        "percent": 9.1,
+        "games": 1498
+       },
+       {
+        "uci": "c7c6",
+        "san": "c6",
+        "percent": 8.5,
+        "games": 1396
+       },
+       {
+        "uci": "c7c5",
+        "san": "c5",
+        "percent": 7.7,
+        "games": 1260
+       },
+       {
+        "uci": "b7b6",
+        "san": "b6",
+        "percent": 6.2,
+        "games": 1019
+       }
+      ],
+      "casual": [
+       {
+        "uci": "d7d5",
+        "san": "d5",
+        "percent": 60.2,
+        "games": 41287
+       },
+       {
+        "uci": "c7c5",
+        "san": "c5",
+        "percent": 7.8,
+        "games": 5376
+       },
+       {
+        "uci": "d7d6",
+        "san": "d6",
+        "percent": 7.1,
+        "games": 4871
+       },
+       {
+        "uci": "b7b6",
+        "san": "b6",
+        "percent": 6.1,
+        "games": 4216
+       },
+       {
+        "uci": "c7c6",
+        "san": "c6",
+        "percent": 5.6,
+        "games": 3823
+       }
+      ],
+      "club": [
+       {
+        "uci": "d7d5",
+        "san": "d5",
+        "percent": 83.2,
+        "games": 20572
+       },
+       {
+        "uci": "c7c5",
+        "san": "c5",
+        "percent": 4,
+        "games": 982
+       },
+       {
+        "uci": "b7b6",
+        "san": "b6",
+        "percent": 3.3,
+        "games": 817
+       },
+       {
+        "uci": "c7c6",
+        "san": "c6",
+        "percent": 3.3,
+        "games": 814
+       },
+       {
+        "uci": "d7d6",
+        "san": "d6",
+        "percent": 2.9,
+        "games": 729
+       }
+      ]
+     },
+     "notes": {
+      "text": "2...d5 attacks the pawn on e4. White can defend it (3.Nc3 or 3.Nd2), trade with 3.exd5, which leaves a calm position with the same pawns for both sides, or push past with 3.e5, the Advance Variation."
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "rnbqkbnr/ppp2ppp/4p3/3p4/3PP3/8/PPP2PPP/RNBQKBNR w KQkq - 0 3",
+     "decision": false,
+     "main": "e4e5",
+     "mainSan": "e5",
+     "popular": {
+      "beginner": [
+       {
+        "uci": "e4e5",
+        "san": "e5",
+        "percent": 52.3,
+        "games": 3200
+       },
+       {
+        "uci": "e4d5",
+        "san": "exd5",
+        "percent": 23.4,
+        "games": 1431
+       },
+       {
+        "uci": "b1c3",
+        "san": "Nc3",
+        "percent": 15.5,
+        "games": 950
+       },
+       {
+        "uci": "b1d2",
+        "san": "Nd2",
+        "percent": 2,
+        "games": 122
+       },
+       {
+        "uci": "f1d3",
+        "san": "Bd3",
+        "percent": 1.8,
+        "games": 112
+       }
+      ],
+      "casual": [
+       {
+        "uci": "e4e5",
+        "san": "e5",
+        "percent": 40.6,
+        "games": 16992
+       },
+       {
+        "uci": "e4d5",
+        "san": "exd5",
+        "percent": 30.8,
+        "games": 12878
+       },
+       {
+        "uci": "b1c3",
+        "san": "Nc3",
+        "percent": 18,
+        "games": 7549
+       },
+       {
+        "uci": "b1d2",
+        "san": "Nd2",
+        "percent": 8,
+        "games": 3340
+       },
+       {
+        "uci": "f1d3",
+        "san": "Bd3",
+        "percent": 1.2,
+        "games": 490
+       }
+      ],
+      "club": [
+       {
+        "uci": "b1c3",
+        "san": "Nc3",
+        "percent": 32.2,
+        "games": 6544
+       },
+       {
+        "uci": "e4e5",
+        "san": "e5",
+        "percent": 23.8,
+        "games": 4832
+       },
+       {
+        "uci": "e4d5",
+        "san": "exd5",
+        "percent": 22.8,
+        "games": 4645
+       },
+       {
+        "uci": "b1d2",
+        "san": "Nd2",
+        "percent": 18,
+        "games": 3654
+       },
+       {
+        "uci": "f1d3",
+        "san": "Bd3",
+        "percent": 1.8,
+        "games": 366
+       }
+      ]
+     }
+    },
+    {
+     "ply": 5,
+     "fen": "rnbqkbnr/ppp2ppp/4p3/3pP3/3P4/8/PPP2PPP/RNBQKBNR b KQkq - 0 3",
+     "decision": true,
+     "main": "c7c5",
+     "mainSan": "c5",
+     "popular": {
+      "beginner": [
+       {
+        "uci": "c7c5",
+        "san": "c5",
+        "percent": 61.2,
+        "games": 1877
+       },
+       {
+        "uci": "b8c6",
+        "san": "Nc6",
+        "percent": 13.1,
+        "games": 403
+       },
+       {
+        "uci": "f7f6",
+        "san": "f6",
+        "percent": 7.6,
+        "games": 234
+       },
+       {
+        "uci": "a7a6",
+        "san": "a6",
+        "percent": 3.5,
+        "games": 106
+       },
+       {
+        "uci": "f8b4",
+        "san": "Bb4+",
+        "percent": 2.3,
+        "games": 69
+       }
+      ],
+      "casual": [
+       {
+        "uci": "c7c5",
+        "san": "c5",
+        "percent": 86.3,
+        "games": 14163
+       },
+       {
+        "uci": "b8c6",
+        "san": "Nc6",
+        "percent": 3,
+        "games": 489
+       },
+       {
+        "uci": "a7a6",
+        "san": "a6",
+        "percent": 2.2,
+        "games": 366
+       },
+       {
+        "uci": "f7f6",
+        "san": "f6",
+        "percent": 1.8,
+        "games": 302
+       },
+       {
+        "uci": "g8e7",
+        "san": "Ne7",
+        "percent": 1.5,
+        "games": 247
+       }
+      ],
+      "club": [
+       {
+        "uci": "c7c5",
+        "san": "c5",
+        "percent": 96,
+        "games": 5314
+       },
+       {
+        "uci": "b7b6",
+        "san": "b6",
+        "percent": 0.8,
+        "games": 46
+       },
+       {
+        "uci": "g8e7",
+        "san": "Ne7",
+        "percent": 0.7,
+        "games": 37
+       },
+       {
+        "uci": "b8c6",
+        "san": "Nc6",
+        "percent": 0.5,
+        "games": 29
+       }
+      ]
+     },
+     "notes": {
+      "text": "3.e5 makes a chain: the d4 pawn holds up e5, and e5 takes space and the f6 square from your knight. 3...c5 hits the base of the chain, the d4 pawn. If that pawn goes, nothing holds up e5."
+     }
+    },
+    {
+     "ply": 6,
+     "fen": "rnbqkbnr/pp3ppp/4p3/2ppP3/3P4/8/PPP2PPP/RNBQKBNR w KQkq - 0 4",
+     "decision": false,
+     "main": "c2c3",
+     "mainSan": "c3",
+     "popular": {
+      "beginner": [
+       {
+        "uci": "c2c3",
+        "san": "c3",
+        "percent": 47.6,
+        "games": 1112
+       },
+       {
+        "uci": "g1f3",
+        "san": "Nf3",
+        "percent": 28.5,
+        "games": 665
+       },
+       {
+        "uci": "d4c5",
+        "san": "dxc5",
+        "percent": 6.7,
+        "games": 156
+       },
+       {
+        "uci": "c1e3",
+        "san": "Be3",
+        "percent": 4.8,
+        "games": 112
+       },
+       {
+        "uci": "f1b5",
+        "san": "Bb5+",
+        "percent": 4.4,
+        "games": 102
+       }
+      ],
+      "casual": [
+       {
+        "uci": "c2c3",
+        "san": "c3",
+        "percent": 64.8,
+        "games": 9380
+       },
+       {
+        "uci": "g1f3",
+        "san": "Nf3",
+        "percent": 18.8,
+        "games": 2720
+       },
+       {
+        "uci": "c1e3",
+        "san": "Be3",
+        "percent": 3.9,
+        "games": 566
+       },
+       {
+        "uci": "f1b5",
+        "san": "Bb5+",
+        "percent": 3.6,
+        "games": 527
+       },
+       {
+        "uci": "d4c5",
+        "san": "dxc5",
+        "percent": 3.2,
+        "games": 459
+       }
+      ],
+      "club": [
+       {
+        "uci": "c2c3",
+        "san": "c3",
+        "percent": 85.1,
+        "games": 3851
+       },
+       {
+        "uci": "g1f3",
+        "san": "Nf3",
+        "percent": 6.8,
+        "games": 307
+       },
+       {
+        "uci": "d4c5",
+        "san": "dxc5",
+        "percent": 2,
+        "games": 90
+       },
+       {
+        "uci": "d1g4",
+        "san": "Qg4",
+        "percent": 1.8,
+        "games": 83
+       },
+       {
+        "uci": "f1b5",
+        "san": "Bb5+",
+        "percent": 1.4,
+        "games": 62
+       }
+      ]
+     }
+    },
+    {
+     "ply": 7,
+     "fen": "rnbqkbnr/pp3ppp/4p3/2ppP3/3P4/2P5/PP3PPP/RNBQKBNR b KQkq - 0 4",
+     "decision": true,
+     "main": "b8c6",
+     "mainSan": "Nc6",
+     "popular": {
+      "beginner": [
+       {
+        "uci": "b8c6",
+        "san": "Nc6",
+        "percent": 54.6,
+        "games": 571
+       },
+       {
+        "uci": "c5d4",
+        "san": "cxd4",
+        "percent": 14.9,
+        "games": 156
+       },
+       {
+        "uci": "d8b6",
+        "san": "Qb6",
+        "percent": 12.4,
+        "games": 130
+       },
+       {
+        "uci": "c5c4",
+        "san": "c4",
+        "percent": 7.6,
+        "games": 79
+       },
+       {
+        "uci": "c8d7",
+        "san": "Bd7",
+        "percent": 2.2,
+        "games": 23
+       }
+      ],
+      "casual": [
+       {
+        "uci": "b8c6",
+        "san": "Nc6",
+        "percent": 64.8,
+        "games": 5948
+       },
+       {
+        "uci": "d8b6",
+        "san": "Qb6",
+        "percent": 16,
+        "games": 1470
+       },
+       {
+        "uci": "c5d4",
+        "san": "cxd4",
+        "percent": 7.8,
+        "games": 716
+       },
+       {
+        "uci": "c8d7",
+        "san": "Bd7",
+        "percent": 2.8,
+        "games": 253
+       },
+       {
+        "uci": "c5c4",
+        "san": "c4",
+        "percent": 2.6,
+        "games": 236
+       }
+      ],
+      "club": [
+       {
+        "uci": "b8c6",
+        "san": "Nc6",
+        "percent": 76.1,
+        "games": 3127
+       },
+       {
+        "uci": "d8b6",
+        "san": "Qb6",
+        "percent": 13.6,
+        "games": 559
+       },
+       {
+        "uci": "c5d4",
+        "san": "cxd4",
+        "percent": 4.3,
+        "games": 178
+       },
+       {
+        "uci": "c8d7",
+        "san": "Bd7",
+        "percent": 3.2,
+        "games": 132
+       },
+       {
+        "uci": "g8e7",
+        "san": "Ne7",
+        "percent": 0.7,
+        "games": 30
+       }
+      ]
+     },
+     "notes": {
+      "text": "4.c3 backs up d4 with another pawn. 4...Nc6 brings a second attacker to d4, the knight joining the c5 pawn, and develops a piece."
+     }
+    },
+    {
+     "ply": 8,
+     "fen": "r1bqkbnr/pp3ppp/2n1p3/2ppP3/3P4/2P5/PP3PPP/RNBQKBNR w KQkq - 1 5",
+     "decision": false,
+     "main": "g1f3",
+     "mainSan": "Nf3",
+     "popular": {
+      "beginner": [
+       {
+        "uci": "g1f3",
+        "san": "Nf3",
+        "percent": 56.2,
+        "games": 386
+       },
+       {
+        "uci": "f1b5",
+        "san": "Bb5",
+        "percent": 18.2,
+        "games": 125
+       },
+       {
+        "uci": "c1e3",
+        "san": "Be3",
+        "percent": 9.8,
+        "games": 67
+       },
+       {
+        "uci": "f2f4",
+        "san": "f4",
+        "percent": 4.4,
+        "games": 30
+       },
+       {
+        "uci": "d4c5",
+        "san": "dxc5",
+        "percent": 2.3,
+        "games": 16
+       }
+      ],
+      "casual": [
+       {
+        "uci": "g1f3",
+        "san": "Nf3",
+        "percent": 61.4,
+        "games": 3736
+       },
+       {
+        "uci": "f1b5",
+        "san": "Bb5",
+        "percent": 18.3,
+        "games": 1116
+       },
+       {
+        "uci": "c1e3",
+        "san": "Be3",
+        "percent": 8.1,
+        "games": 496
+       },
+       {
+        "uci": "f2f4",
+        "san": "f4",
+        "percent": 5.2,
+        "games": 318
+       },
+       {
+        "uci": "a2a3",
+        "san": "a3",
+        "percent": 3.3,
+        "games": 201
+       }
+      ],
+      "club": [
+       {
+        "uci": "g1f3",
+        "san": "Nf3",
+        "percent": 76.4,
+        "games": 2189
+       },
+       {
+        "uci": "f1b5",
+        "san": "Bb5",
+        "percent": 7.4,
+        "games": 213
+       },
+       {
+        "uci": "c1e3",
+        "san": "Be3",
+        "percent": 6.7,
+        "games": 193
+       },
+       {
+        "uci": "f2f4",
+        "san": "f4",
+        "percent": 4.4,
+        "games": 126
+       },
+       {
+        "uci": "a2a3",
+        "san": "a3",
+        "percent": 2.7,
+        "games": 78
+       }
+      ]
+     }
+    },
+    {
+     "ply": 9,
+     "fen": "r1bqkbnr/pp3ppp/2n1p3/2ppP3/3P4/2P2N2/PP3PPP/RNBQKB1R b KQkq - 2 5",
+     "decision": true,
+     "main": "d8b6",
+     "mainSan": "Qb6",
+     "popular": {
+      "beginner": [
+       {
+        "uci": "d8b6",
+        "san": "Qb6",
+        "percent": 51.7,
+        "games": 170
+       },
+       {
+        "uci": "g8e7",
+        "san": "Nge7",
+        "percent": 12.5,
+        "games": 41
+       },
+       {
+        "uci": "c8d7",
+        "san": "Bd7",
+        "percent": 7.3,
+        "games": 24
+       },
+       {
+        "uci": "f7f6",
+        "san": "f6",
+        "percent": 5.8,
+        "games": 19
+       },
+       {
+        "uci": "c5d4",
+        "san": "cxd4",
+        "percent": 5.5,
+        "games": 18
+       }
+      ],
+      "casual": [
+       {
+        "uci": "d8b6",
+        "san": "Qb6",
+        "percent": 57,
+        "games": 2119
+       },
+       {
+        "uci": "c8d7",
+        "san": "Bd7",
+        "percent": 15.8,
+        "games": 587
+       },
+       {
+        "uci": "g8e7",
+        "san": "Nge7",
+        "percent": 9.9,
+        "games": 370
+       },
+       {
+        "uci": "c5d4",
+        "san": "cxd4",
+        "percent": 8.6,
+        "games": 319
+       },
+       {
+        "uci": "a7a6",
+        "san": "a6",
+        "percent": 1.9,
+        "games": 70
+       }
+      ],
+      "club": [
+       {
+        "uci": "d8b6",
+        "san": "Qb6",
+        "percent": 54.8,
+        "games": 1238
+       },
+       {
+        "uci": "c8d7",
+        "san": "Bd7",
+        "percent": 23.6,
+        "games": 534
+       },
+       {
+        "uci": "c5d4",
+        "san": "cxd4",
+        "percent": 8,
+        "games": 181
+       },
+       {
+        "uci": "g8e7",
+        "san": "Nge7",
+        "percent": 6.2,
+        "games": 139
+       },
+       {
+        "uci": "a7a6",
+        "san": "a6",
+        "percent": 1.5,
+        "games": 35
+       }
+      ]
+     },
+     "notes": {
+      "text": "5.Nf3 defends d4 again. 5...Qb6 lines up behind the c5 pawn, so once that pawn has taken on d4, the queen attacks d4 too. It also hits the pawn on b2, which only the bishop on c1 defends."
+     }
+    },
+    {
+     "ply": 10,
+     "fen": "r1b1kbnr/pp3ppp/1qn1p3/2ppP3/3P4/2P2N2/PP3PPP/RNBQKB1R w KQkq - 3 6",
+     "decision": false,
+     "main": "f1e2",
+     "mainSan": "Be2",
+     "popular": {
+      "beginner": [
+       {
+        "uci": "c1e3",
+        "san": "Be3",
+        "percent": 18.6,
+        "games": 41
+       },
+       {
+        "uci": "f1d3",
+        "san": "Bd3",
+        "percent": 15.9,
+        "games": 35
+       },
+       {
+        "uci": "f1e2",
+        "san": "Be2",
+        "percent": 15.9,
+        "games": 35
+       },
+       {
+        "uci": "b2b3",
+        "san": "b3",
+        "percent": 11.8,
+        "games": 26
+       },
+       {
+        "uci": "a2a3",
+        "san": "a3",
+        "percent": 10.9,
+        "games": 24
+       }
+      ],
+      "casual": [
+       {
+        "uci": "f1d3",
+        "san": "Bd3",
+        "percent": 23.7,
+        "games": 501
+       },
+       {
+        "uci": "f1e2",
+        "san": "Be2",
+        "percent": 21,
+        "games": 445
+       },
+       {
+        "uci": "a2a3",
+        "san": "a3",
+        "percent": 19.3,
+        "games": 409
+       },
+       {
+        "uci": "b2b3",
+        "san": "b3",
+        "percent": 9.7,
+        "games": 205
+       },
+       {
+        "uci": "d1b3",
+        "san": "Qb3",
+        "percent": 6,
+        "games": 127
+       }
+      ],
+      "club": [
+       {
+        "uci": "a2a3",
+        "san": "a3",
+        "percent": 39.8,
+        "games": 471
+       },
+       {
+        "uci": "f1d3",
+        "san": "Bd3",
+        "percent": 33.6,
+        "games": 398
+       },
+       {
+        "uci": "f1e2",
+        "san": "Be2",
+        "percent": 16.7,
+        "games": 198
+       },
+       {
+        "uci": "d4c5",
+        "san": "dxc5",
+        "percent": 2.5,
+        "games": 29
+       },
+       {
+        "uci": "b2b3",
+        "san": "b3",
+        "percent": 2.4,
+        "games": 28
+       }
+      ]
+     }
+    },
+    {
+     "ply": 11,
+     "fen": "r1b1kbnr/pp3ppp/1qn1p3/2ppP3/3P4/2P2N2/PP2BPPP/RNBQK2R b KQkq - 4 6",
+     "decision": true,
+     "main": "c5d4",
+     "mainSan": "cxd4",
+     "popular": {
+      "beginner": [
+       {
+        "uci": "c5d4",
+        "san": "cxd4",
+        "percent": 35.3,
+        "games": 12
+       },
+       {
+        "uci": "g8h6",
+        "san": "Nh6",
+        "percent": 23.5,
+        "games": 8
+       },
+       {
+        "uci": "g8e7",
+        "san": "Nge7",
+        "percent": 17.6,
+        "games": 6
+       },
+       {
+        "uci": "c8d7",
+        "san": "Bd7",
+        "percent": 14.7,
+        "games": 5
+       },
+       {
+        "uci": "a7a5",
+        "san": "a5",
+        "percent": 5.9,
+        "games": 2
+       }
+      ],
+      "casual": [
+       {
+        "uci": "c5d4",
+        "san": "cxd4",
+        "percent": 34.6,
+        "games": 152
+       },
+       {
+        "uci": "g8e7",
+        "san": "Nge7",
+        "percent": 27.3,
+        "games": 120
+       },
+       {
+        "uci": "c8d7",
+        "san": "Bd7",
+        "percent": 19.1,
+        "games": 84
+       },
+       {
+        "uci": "g8h6",
+        "san": "Nh6",
+        "percent": 14.6,
+        "games": 64
+       },
+       {
+        "uci": "f8e7",
+        "san": "Be7",
+        "percent": 1.8,
+        "games": 8
+       }
+      ],
+      "club": [
+       {
+        "uci": "c5d4",
+        "san": "cxd4",
+        "percent": 38,
+        "games": 78
+       },
+       {
+        "uci": "c8d7",
+        "san": "Bd7",
+        "percent": 27.8,
+        "games": 57
+       },
+       {
+        "uci": "g8e7",
+        "san": "Nge7",
+        "percent": 18,
+        "games": 37
+       },
+       {
+        "uci": "g8h6",
+        "san": "Nh6",
+        "percent": 11.7,
+        "games": 24
+       },
+       {
+        "uci": "f7f6",
+        "san": "f6",
+        "percent": 2.4,
+        "games": 5
+       }
+      ]
+     },
+     "notes": {
+      "text": "6.Be2 gets ready to castle. 6...cxd4 trades pawns on d4, and after 7.cxd4 White's c-pawn has gone, so from now on only pieces can defend d4. The c-file is also open for your rook later."
+     }
+    },
+    {
+     "ply": 12,
+     "fen": "r1b1kbnr/pp3ppp/1qn1p3/3pP3/3p4/2P2N2/PP2BPPP/RNBQK2R w KQkq - 0 7",
+     "decision": false,
+     "main": "c3d4",
+     "mainSan": "cxd4",
+     "popular": {
+      "beginner": [],
+      "casual": [
+       {
+        "uci": "c3d4",
+        "san": "cxd4",
+        "percent": 93.1,
+        "games": 149
+       },
+       {
+        "uci": "f3d4",
+        "san": "Nxd4",
+        "percent": 5.6,
+        "games": 9
+       },
+       {
+        "uci": "e1g1",
+        "san": "O-O",
+        "percent": 1.3,
+        "games": 2
+       }
+      ],
+      "club": [
+       {
+        "uci": "c3d4",
+        "san": "cxd4",
+        "percent": 98.6,
+        "games": 72
+       },
+       {
+        "uci": "f3d4",
+        "san": "Nxd4",
+        "percent": 1.4,
+        "games": 1
+       }
+      ]
+     }
+    },
+    {
+     "ply": 13,
+     "fen": "r1b1kbnr/pp3ppp/1qn1p3/3pP3/3P4/5N2/PP2BPPP/RNBQK2R b KQkq - 0 7",
+     "decision": true,
+     "main": "g8e7",
+     "mainSan": "Nge7",
+     "popular": {
+      "beginner": [],
+      "casual": [
+       {
+        "uci": "g8e7",
+        "san": "Nge7",
+        "percent": 41.5,
+        "games": 59
+       },
+       {
+        "uci": "f8b4",
+        "san": "Bb4+",
+        "percent": 38.7,
+        "games": 55
+       },
+       {
+        "uci": "g8h6",
+        "san": "Nh6",
+        "percent": 11.3,
+        "games": 16
+       },
+       {
+        "uci": "c8d7",
+        "san": "Bd7",
+        "percent": 7.7,
+        "games": 11
+       },
+       {
+        "uci": "c6b4",
+        "san": "Nb4",
+        "percent": 0.7,
+        "games": 1
+       }
+      ],
+      "club": [
+       {
+        "uci": "g8e7",
+        "san": "Nge7",
+        "percent": 37.7,
+        "games": 29
+       },
+       {
+        "uci": "g8h6",
+        "san": "Nh6",
+        "percent": 26,
+        "games": 20
+       },
+       {
+        "uci": "f8b4",
+        "san": "Bb4+",
+        "percent": 24.7,
+        "games": 19
+       },
+       {
+        "uci": "c8d7",
+        "san": "Bd7",
+        "percent": 9.1,
+        "games": 7
+       },
+       {
+        "uci": "f7f6",
+        "san": "f6",
+        "percent": 2.6,
+        "games": 2
+       }
+      ]
+     },
+     "notes": {
+      "text": "7...Nge7 brings the other knight out. It cannot use f6, which the e5 pawn covers, so it heads for f5, where it will be one more piece aimed at d4."
+     }
+    },
+    {
+     "ply": 14,
+     "fen": "r1b1kb1r/pp2nppp/1qn1p3/3pP3/3P4/5N2/PP2BPPP/RNBQK2R w KQkq - 1 8",
+     "decision": false,
+     "main": "b1a3",
+     "mainSan": "Na3",
+     "popular": {
+      "beginner": [],
+      "casual": [
+       {
+        "uci": "e1g1",
+        "san": "O-O",
+        "percent": 57.8,
+        "games": 37
+       },
+       {
+        "uci": "b1c3",
+        "san": "Nc3",
+        "percent": 21.9,
+        "games": 14
+       },
+       {
+        "uci": "b2b3",
+        "san": "b3",
+        "percent": 9.4,
+        "games": 6
+       },
+       {
+        "uci": "b1a3",
+        "san": "Na3",
+        "percent": 6.3,
+        "games": 4
+       },
+       {
+        "uci": "c1g5",
+        "san": "Bg5",
+        "percent": 1.6,
+        "games": 1
+       }
+      ],
+      "club": [
+       {
+        "uci": "b1a3",
+        "san": "Na3",
+        "percent": 41.7,
+        "games": 10
+       },
+       {
+        "uci": "b1c3",
+        "san": "Nc3",
+        "percent": 29.2,
+        "games": 7
+       },
+       {
+        "uci": "e1g1",
+        "san": "O-O",
+        "percent": 12.5,
+        "games": 3
+       },
+       {
+        "uci": "b2b3",
+        "san": "b3",
+        "percent": 12.5,
+        "games": 3
+       },
+       {
+        "uci": "e2d3",
+        "san": "Bd3",
+        "percent": 4.2,
+        "games": 1
+       }
+      ]
+     }
+    },
+    {
+     "ply": 15,
+     "fen": "r1b1kb1r/pp2nppp/1qn1p3/3pP3/3P4/N4N2/PP2BPPP/R1BQK2R b KQkq - 2 8",
+     "decision": true,
+     "main": "e7f5",
+     "mainSan": "Nf5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "8.Na3 is on its way to c2 to help d4. 8...Nf5: now three of your pieces attack d4 (both knights and the queen) and only two defend it (the knight on f3 and the queen), so White has to find another defender at once."
+     }
+    },
+    {
+     "ply": 16,
+     "fen": "r1b1kb1r/pp3ppp/1qn1p3/3pPn2/3P4/N4N2/PP2BPPP/R1BQK2R w KQkq - 3 9",
+     "decision": false,
+     "main": "a3c2",
+     "mainSan": "Nc2",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 17,
+     "fen": "r1b1kb1r/pp3ppp/1qn1p3/3pPn2/3P4/5N2/PPN1BPPP/R1BQK2R b KQkq - 4 9",
+     "decision": true,
+     "main": "f7f6",
+     "mainSan": "f6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "9.Nc2 holds d4 for now, with three defenders against your three attackers. 9...f6 is the second pawn break, a pawn move that attacks White's pawn chain (3...c5 was the first): with White's pieces tied to d4, the pawn now hits the front of the chain, e5."
+     }
+    },
+    {
+     "ply": 18,
+     "fen": "r1b1kb1r/pp4pp/1qn1pp2/3pPn2/3P4/5N2/PPN1BPPP/R1BQK2R w KQkq - 0 10",
+     "decision": false,
+     "main": "e1g1",
+     "mainSan": "O-O",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 19,
+     "fen": "r1b1kb1r/pp4pp/1qn1pp2/3pPn2/3P4/5N2/PPN1BPPP/R1BQ1RK1 b kq - 1 10",
+     "decision": true,
+     "main": "f6e5",
+     "mainSan": "fxe5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "10.O-O puts White's king in safety. 10...fxe5 takes the front pawn, and after 11.dxe5 the chain is gone: White's pawn on e5 stands alone, with no pawn guarding it."
+     }
+    },
+    {
+     "ply": 20,
+     "fen": "r1b1kb1r/pp4pp/1qn1p3/3ppn2/3P4/5N2/PPN1BPPP/R1BQ1RK1 w kq - 0 11",
+     "decision": false,
+     "main": "d4e5",
+     "mainSan": "dxe5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 21,
+     "fen": "r1b1kb1r/pp4pp/1qn1p3/3pPn2/8/5N2/PPN1BPPP/R1BQ1RK1 b kq - 0 11",
+     "decision": true,
+     "main": "f8e7",
+     "mainSan": "Be7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "11...Be7 develops the bishop and gets you ready to castle. Next comes ...O-O, with your rook on the f-file, which has no black pawn on it, and your knights can use d4, a square no white pawn can attack any more. The price is your e6 pawn, which no pawn can ever guard again, and the bishop on c8 still has to find a way out."
+     }
+    }
+   ]
+  }
+ ],
+ "statsSource": "Lichess games database (CC0): 4,991,115 rated games from January 2013, July 2014, January 2015 and June 2015"
+}

@@ -2,14 +2,16 @@
 import { readFileSync } from 'node:fs';
 import { CoachClient } from '../../packages/backend/src/client.ts';
 import { recordedFetch } from '../../packages/backend/src/verify/recorded-sites.ts';
+import { suggestNext, type CatalogueItem } from '../../packages/shared/src/content/course.ts';
 import { MOVE_GRADES } from '../../packages/shared/src/grader.ts';
 import { connection, expect, phoneLater, storedOnDevice, test } from '../fixtures/app.ts';
 
 /** Each Move Grade's symbol, as the board draws it. */
 const SYMBOL = { Best: '★', Good: '✓', Inaccuracy: '?!', Mistake: '?', Blunder: '??' };
 
-const lessonIndex = JSON.parse(readFileSync(new URL('../../data/lessons/index.json', import.meta.url), 'utf8')) as { kind: string }[];
-const OPENINGS = lessonIndex.filter((l) => l.kind === 'opening').length;
+const lessonIndex = JSON.parse(readFileSync(new URL('../../data/lessons/index.json', import.meta.url), 'utf8')) as CatalogueItem[];
+/** The first Lesson the app suggests to a new Player at this level. */
+const firstLesson = (level: 'beginner' | 'casual' | 'club') => suggestNext(lessonIndex, [], { level, rating: null })?.lesson.name;
 
 test.describe('a fresh install', () => {
   test.use({ seed: 'empty' });
@@ -20,15 +22,22 @@ test.describe('a fresh install', () => {
     await expect(page.getByRole('heading', { name: 'Welcome to your chess Coach' })).toBeVisible();
     // First the phone (phone.spec.ts), then the Player.
     await phoneLater(page);
-    // The suggestion counts the opening Lessons the app has, not a number written by hand.
-    await expect(page.getByText(`the Opening Lessons teach ${OPENINGS} beginner openings`)).toBeVisible();
+    // Where to begin names the first Lesson for the level chosen, from the Lessons the app has.
+    await expect(page.getByText(`At your level, the first Lesson is ${firstLesson('beginner')}.`)).toBeVisible();
     await page.getByRole('radio', { name: /Club/ }).check();
+    await expect(page.getByText(`At your level, the first Lesson is ${firstLesson('club')}.`)).toBeVisible();
     await page.getByLabel('Site').selectOption('lichess');
     await page.getByLabel('Username').fill('CoachVerify');
     await page.getByLabel('Goal 1').fill('Learn the Caro-Kann');
-    await page.getByRole('button', { name: 'Start with the Opening Lessons' }).click();
-    // The suggested start opens the Lessons themselves, not the Learn screen above them.
-    await expect(page.getByRole('heading', { name: 'Lessons', exact: true })).toBeVisible();
+    // On a phone the button is far down the form.
+    await page.setViewportSize({ width: 390, height: 844 });
+    const start = page.getByRole('button', { name: 'Start with the Lessons' });
+    await start.scrollIntoViewIfNeeded();
+    expect(await page.evaluate(() => scrollY)).toBeGreaterThan(0);
+    await start.click();
+    // The suggested start opens the Lessons themselves, not the Learn screen above them, at their top.
+    await expect(page.getByRole('heading', { name: 'Lessons', exact: true })).toBeInViewport();
+    expect(await page.evaluate(() => scrollY)).toBe(0);
 
     const [profile] = await app.rows<{ onboarded: number; level: string; rating: number; rating_site: string; goals: string }>('profile');
     expect(profile).toMatchObject({ onboarded: 1, level: 'club', rating: 1612, rating_site: 'lichess' });

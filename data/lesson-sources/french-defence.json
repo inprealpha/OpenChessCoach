@@ -1,0 +1,85 @@
+{
+ "id": "french-defence",
+ "name": "French Defence",
+ "kind": "opening",
+ "track": "openings",
+ "level": "intermediate",
+ "side": "black",
+ "eco": "C02",
+ "puzzleTags": [
+  "French_Defense"
+ ],
+ "goal": "As Black against 1.e4, you can play the French Defence and know the plan against White's pawn chain: attack its base with ...c5 and its front with ...f6.",
+ "priorKnowledge": [
+  "pawn-structure"
+ ],
+ "intro": "In the French Defence, 1...e6 and 2...d5, you let White build a big centre and then attack it. In the Advance Variation, White pushes a pawn to e5, making a chain of pawns on d4 and e5 that takes space on the kingside. Your plan is the same in almost every line: hit the base of the chain, its back pawn on d4, with ...c5 and your pieces, then hit its front, e5, with ...f6, until White's centre gives way and your pieces get room. The price is the bishop on c8, which stays shut in behind the e6 pawn for a while.",
+ "parts": [
+  {
+   "title": "The Advance Variation",
+   "fen": "start",
+   "side": "black",
+   "keyIdea": "Against a pawn chain, attack its base first, with a pawn and then your pieces, then attack its front pawn, and use the lines that open.",
+   "text": "You are Black, from White's first move. White pushes the e-pawn on to e5, the Advance Variation, and builds a chain of pawns whose front pawn stands in your half of the board. At each move, ask what your move does against White's chain of pawns and for your pieces.",
+   "url": "https://github.com/lichess-org/chess-openings",
+   "line": "e4 e6 d4 d5 e5 c5 c3 Nc6 Nf3 Qb6 Be2 cxd4 cxd4 Nge7 Na3 Nf5 Nc2 f6 O-O fxe5 dxe5 Be7",
+   "notes": [
+    {
+     "ply": 1,
+     "san": "e6",
+     "text": "1...e6 gets ready for ...d5, with the e6 pawn ready to take back if White ever captures on d5. Your centre stays solid. The cost is that the bishop on c8 is shut in behind the e6 pawn for now."
+    },
+    {
+     "ply": 3,
+     "san": "d5",
+     "text": "2...d5 attacks the pawn on e4. White can defend it (3.Nc3 or 3.Nd2), trade with 3.exd5, which leaves a calm position with the same pawns for both sides, or push past with 3.e5, the Advance Variation."
+    },
+    {
+     "ply": 5,
+     "san": "c5",
+     "text": "3.e5 makes a chain: the d4 pawn holds up e5, and e5 takes space and the f6 square from your knight. 3...c5 hits the base of the chain, the d4 pawn. If that pawn goes, nothing holds up e5."
+    },
+    {
+     "ply": 7,
+     "san": "Nc6",
+     "text": "4.c3 backs up d4 with another pawn. 4...Nc6 brings a second attacker to d4, the knight joining the c5 pawn, and develops a piece."
+    },
+    {
+     "ply": 9,
+     "san": "Qb6",
+     "text": "5.Nf3 defends d4 again. 5...Qb6 lines up behind the c5 pawn, so once that pawn has taken on d4, the queen attacks d4 too. It also hits the pawn on b2, which only the bishop on c1 defends."
+    },
+    {
+     "ply": 11,
+     "san": "cxd4",
+     "text": "6.Be2 gets ready to castle. 6...cxd4 trades pawns on d4, and after 7.cxd4 White's c-pawn has gone, so from now on only pieces can defend d4. The c-file is also open for your rook later."
+    },
+    {
+     "ply": 13,
+     "san": "Nge7",
+     "text": "7...Nge7 brings the other knight out. It cannot use f6, which the e5 pawn covers, so it heads for f5, where it will be one more piece aimed at d4."
+    },
+    {
+     "ply": 15,
+     "san": "Nf5",
+     "text": "8.Na3 is on its way to c2 to help d4. 8...Nf5: now three of your pieces attack d4 (both knights and the queen) and only two defend it (the knight on f3 and the queen), so White has to find another defender at once."
+    },
+    {
+     "ply": 17,
+     "san": "f6",
+     "text": "9.Nc2 holds d4 for now, with three defenders against your three attackers. 9...f6 is the second pawn break, a pawn move that attacks White's pawn chain (3...c5 was the first): with White's pieces tied to d4, the pawn now hits the front of the chain, e5."
+    },
+    {
+     "ply": 19,
+     "san": "fxe5",
+     "text": "10.O-O puts White's king in safety. 10...fxe5 takes the front pawn, and after 11.dxe5 the chain is gone: White's pawn on e5 stands alone, with no pawn guarding it."
+    },
+    {
+     "ply": 21,
+     "san": "Be7",
+     "text": "11...Be7 develops the bishop and gets you ready to castle. Next comes ...O-O, with your rook on the f-file, which has no black pawn on it, and your knights can use d4, a square no white pawn can attack any more. The price is your e6 pawn, which no pawn can ever guard again, and the bishop on c8 still has to find a way out."
+    }
+   ]
+  }
+ ]
+}

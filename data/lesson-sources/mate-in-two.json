@@ -1,0 +1,82 @@
+{
+ "id": "mate-in-two",
+ "name": "Mate in two",
+ "kind": "theme",
+ "track": "themes",
+ "level": "beginner",
+ "side": "white",
+ "puzzleThemes": [
+  "mateIn2"
+ ],
+ "goal": "You can find a mate in two moves by first taking away the king's escape squares or forcing it where you want it.",
+ "priorKnowledge": [
+  "mate-in-one",
+  "checks-captures-threats"
+ ],
+ "intro": "A mate in two takes two of your moves: the first gets everything ready, and the second gives mate. The first move is often a check that pushes the king onto a bad square, or a sacrifice (giving up a piece on purpose) that forces the king to take it. When you have no good check, a quiet move, one that takes nothing and gives no check, can shut the king in and threaten a mate that cannot be stopped. Whatever your first move, look at every reply your opponent has and make sure you can mate after each one.",
+ "parts": [
+  {
+   "title": "Rook, bishop and king close by",
+   "fen": "7k/p3R2p/r3B3/4b1K1/5p2/8/8/8 w - - 0 38",
+   "side": "white",
+   "keyIdea": "A check can drive the king onto the one square where your next move mates it.",
+   "text": "From a game played on Lichess. You are White. Black's king in the corner has very few squares, and your king, rook and bishop are all close to it.",
+   "url": "https://lichess.org/training/Viebs",
+   "line": "Re8+ Kg7 Rg8#",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Re8+",
+     "text": "Your rook checks along Black's back rank, the row where Black's king started. Black cannot block it, and your bishop on e6 covers g8, so the king's only move is to g7."
+    },
+    {
+     "ply": 2,
+     "san": "Rg8#",
+     "text": "The rook checks again from g8, where the bishop protects it. Your king covers f6, g6 and h6, the bishop covers f7, and the rook covers f8 and h8: mate."
+    }
+   ]
+  },
+  {
+   "title": "A king in the corner",
+   "fen": "6rk/1pp5/p4q2/4p2p/4B2r/P1PP4/1P2QP1P/R3R2K b - - 2 31",
+   "side": "black",
+   "keyIdea": "A sacrifice with check can force the king onto a square where it can be mated.",
+   "text": "From a game played on Lichess. You are Black. White's king has just stepped into the corner. Your rook on g8 controls the whole g-file, which has no pawns on it, and your queen and other rook are close by.",
+   "url": "https://lichess.org/training/ZIGSD",
+   "line": "Rxh2+ Kxh2 Qh4#",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Rxh2+",
+     "text": "Your rook takes the pawn on h2 with check. It is a sacrifice, because the king can take the rook, but the king cannot go to g1, which your rook on g8 covers, so taking on h2 is White's only move."
+    },
+    {
+     "ply": 2,
+     "san": "Qh4#",
+     "text": "Your queen checks down the h-file, so the king cannot use h1 or h3. Your rook on g8 covers g1, g2 and g3, and nothing can block on h3: mate."
+    }
+   ]
+  },
+  {
+   "title": "A king among the pawns",
+   "fen": "7r/8/p3p2p/Pn1pPp2/2pP1Pk1/2P3P1/4NK2/2R5 w - - 7 41",
+   "side": "white",
+   "keyIdea": "No check? Look for a move that takes the king's last escape squares and leaves a mate threat your opponent cannot meet.",
+   "text": "From a game played on Lichess. You are White. Black's king has wandered up to g4, in among your pawns. Count the squares it can move to: there are very few, but right now you have no check at all.",
+   "url": "https://lichess.org/training/CdV36",
+   "line": "Rh1 h5 Rh4#",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Rh1",
+     "text": "This is not a check, but it decides the game. Your rook now controls the h-file, so the king cannot use h3, h4 or h5, and you threaten to give mate with the rook on h4. Black has no way to stop it."
+    },
+    {
+     "ply": 2,
+     "san": "Rh4#",
+     "text": "The rook checks from h4, protected by your pawn on g3, which also guards f4. Your king guards f3 and g3, the rook covers h3, the pawn on f4 guards g5, and Black's own pawns block f5 and h5: mate."
+    }
+   ]
+  }
+ ]
+}

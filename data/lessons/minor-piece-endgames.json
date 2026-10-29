@@ -1,0 +1,419 @@
+{
+ "id": "minor-piece-endgames",
+ "name": "Bishop and knight endgames",
+ "kind": "endgame",
+ "track": "endgames",
+ "level": "intermediate",
+ "goal": "You can tell when a bishop beats a knight and when the reverse is true, and know two draws: bishops of opposite colours, and the wrong bishop with a rook pawn.",
+ "priorKnowledge": [
+  "good-and-bad-pieces"
+ ],
+ "side": "black",
+ "puzzleTags": [],
+ "puzzleThemes": [
+  "bishopEndgame",
+  "knightEndgame"
+ ],
+ "intro": {
+  "text": "When only bishops, knights and pawns are left, the kind of piece you have can matter as much as the number of pawns. A bishop can strike from one side of the board to the other in a single move, so it does best on an open board with pawns on both sides; a knight is slower, but it does better when the pawns are locked and the enemy pawns stand on squares of the bishop's colour. Some of these endgames are drawn even a pawn down: bishops of opposite colours often draw, and so does a pawn on the a- or h-file (a rook pawn) when the bishop cannot control the corner square where it would promote."
+ },
+ "parts": [
+  {
+   "title": "Pawns on both sides",
+   "fen": "6k1/7p/1p2b1p1/pp6/3P4/1PPK2NP/6P1/8 b - - 0 31",
+   "side": "black",
+   "keyIdea": "A bishop can cross from one side of the board to the other in one move; a knight needs several jumps, so it cannot guard both sides.",
+   "text": "From a game played on Lichess. You are Black. The pawns are level, and there are pawns on both sides of the board. White's pawns are spread out, and White's knight can only be on one side at a time. Find the move that makes the most of your bishop's long reach.",
+   "credit": {
+    "source": "Lichess games database, game x6wc72x2",
+    "url": "https://lichess.org/x6wc72x2#61",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "e6b3",
+    "g3e4",
+    "b3c4",
+    "d3c2",
+    "c4f1",
+    "g2g3",
+    "f1h3"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "6k1/7p/1p2b1p1/pp6/3P4/1PPK2NP/6P1/8 b - - 0 31",
+     "decision": true,
+     "main": "e6b3",
+     "mainSan": "Bxb3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "31...Bxb3 takes the pawn on b3, which nothing guarded. White's knight on g3 is on the other side of the board and could not help it."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "6k1/7p/1p4p1/pp6/3P4/1bPK2NP/6P1/8 w - - 0 32",
+     "decision": false,
+     "main": "g3e4",
+     "mainSan": "Ne4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "6k1/7p/1p4p1/pp6/3PN3/1bPK3P/6P1/8 b - - 1 32",
+     "decision": true,
+     "main": "b3c4",
+     "mainSan": "Bc4+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "32.Ne4 brings White's knight towards the centre. 32...Bc4+ checks the king and drives it back, and from c4 the bishop already looks along the diagonal towards f1, on the kingside."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "6k1/7p/1p4p1/pp6/2bPN3/2PK3P/6P1/8 w - - 2 33",
+     "decision": false,
+     "main": "d3c2",
+     "mainSan": "Kc2",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "6k1/7p/1p4p1/pp6/2bPN3/2P4P/2K3P1/8 b - - 3 33",
+     "decision": true,
+     "main": "c4f1",
+     "mainSan": "Bf1",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "33.Kc2 steps out of the check. In one move, 33...Bf1 crosses to the kingside, where it attacks the pawn on g2, with the pawn on h3 behind it. White can save one of those pawns, but not both."
+     }
+    },
+    {
+     "ply": 5,
+     "fen": "6k1/7p/1p4p1/pp6/3PN3/2P4P/2K3P1/5b2 w - - 4 34",
+     "decision": false,
+     "main": "g2g3",
+     "mainSan": "g3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 6,
+     "fen": "6k1/7p/1p4p1/pp6/3PN3/2P3PP/2K5/5b2 b - - 0 34",
+     "decision": true,
+     "main": "f1h3",
+     "mainSan": "Bxh3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "34.g3 saved one pawn, and 34...Bxh3 takes the other. In four moves your bishop has taken a pawn on each side of the board, and you are two pawns up. A knight could never switch sides that fast."
+     }
+    }
+   ]
+  },
+  {
+   "title": "The knight against a bad bishop",
+   "fen": "8/1b2k3/p3p3/Pp1p1p1p/1P1P3P/4P3/4KP2/3N4 w - - 0 35",
+   "side": "white",
+   "keyIdea": "When the pawns are locked on the bishop's colour, the bishop has nothing to attack, and a knight can settle on a square no pawn can reach.",
+   "text": "From a game played on Lichess. You are White. Every black pawn stands on a light square, the same colour as Black's bishop, and most of the pawns are locked against each other. Your knight on d1 is doing very little: find it a better square.",
+   "credit": {
+    "source": "Lichess games database, game ox3swmPw",
+    "url": "https://lichess.org/ox3swmPw",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "d1b2",
+    "b7c6",
+    "b2d3",
+    "c6e8",
+    "d3c5"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "8/1b2k3/p3p3/Pp1p1p1p/1P1P3P/4P3/4KP2/3N4 w - - 0 35",
+     "decision": true,
+     "main": "d1b2",
+     "mainSan": "Nb2",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "35.Nb2 sets off for c5. The knight cannot get there in one jump from d1, so it goes round by b2 and d3. On c5 no black pawn will ever be able to attack it, because Black's b- and d-pawns have already gone past."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "8/1b2k3/p3p3/Pp1p1p1p/1P1P3P/4P3/1N2KP2/8 b - - 1 35",
+     "decision": false,
+     "main": "b7c6",
+     "mainSan": "Bc6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "8/4k3/p1b1p3/Pp1p1p1p/1P1P3P/4P3/1N2KP2/8 w - - 2 36",
+     "decision": true,
+     "main": "b2d3",
+     "mainSan": "Nd3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "36.Nd3 is one more step. From d3 the knight can jump to c5 or e5, and Black's bishop can never cover either square, because both are dark."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "8/4k3/p1b1p3/Pp1p1p1p/1P1P3P/3NP3/4KP2/8 b - - 3 36",
+     "decision": false,
+     "main": "c6e8",
+     "mainSan": "Be8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "4b3/4k3/p3p3/Pp1p1p1p/1P1P3P/3NP3/4KP2/8 w - - 4 37",
+     "decision": true,
+     "main": "d3c5",
+     "mainSan": "Nc5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "37.Nc5 lands on c5 and attacks the pawns on a6 and e6. Nothing defends the pawn on a6, and Black's bishop is stuck behind its own pawns with nothing to attack. Black's best try was 36...f4, giving up a pawn to open a way out for the bishop, but White would still be clearly winning."
+     }
+    }
+   ]
+  },
+  {
+   "title": "Bishops of opposite colours",
+   "fen": "6k1/5pb1/4p1pp/1B6/P7/2p4P/5PP1/6K1 w - - 0 39",
+   "side": "white",
+   "keyIdea": "With bishops of opposite colours, stop the enemy pawn on a square of your bishop's colour: the other bishop can never attack that square.",
+   "text": "From a game played on Lichess. You are White, and you are a pawn down. Your bishop moves on light squares and Black's on dark ones. Black's pawn on c3 is only two steps from promoting.",
+   "credit": {
+    "source": "Lichess games database, game QC73U5kV",
+    "url": "https://lichess.org/QC73U5kV",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "b5d3",
+    "g7d4",
+    "g1f1",
+    "g8f8",
+    "f1e2"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "6k1/5pb1/4p1pp/1B6/P7/2p4P/5PP1/6K1 w - - 0 39",
+     "decision": true,
+     "main": "b5d3",
+     "mainSan": "Bd3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "39.Bd3 guards c2, the next square on the pawn's path. That square is light, so Black's bishop can never attack your bishop there or help the pawn forward. It is the only move that holds: anything slower lets the pawn promote."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "6k1/5pb1/4p1pp/8/P7/2pB3P/5PP1/6K1 b - - 1 39",
+     "decision": false,
+     "main": "g7d4",
+     "mainSan": "Bd4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "6k1/5p2/4p1pp/8/P2b4/2pB3P/5PP1/6K1 w - - 2 40",
+     "decision": true,
+     "main": "g1f1",
+     "mainSan": "Kf1",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Black's bishop now attacks your pawn on f2. 40.Kf1 keeps the pawn guarded and starts the king's walk towards the c-pawn."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "6k1/5p2/4p1pp/8/P2b4/2pB3P/5PP1/5K2 b - - 3 40",
+     "decision": false,
+     "main": "g8f8",
+     "mainSan": "Kf8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "5k2/5p2/4p1pp/8/P2b4/2pB3P/5PP1/5K2 w - - 4 41",
+     "decision": true,
+     "main": "f1e2",
+     "mainSan": "Ke2",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "41.Ke2 still guards f2 and comes closer to the c-pawn. With the pawn stuck on c3, Black's extra pawn cannot get through, and the Engine sees the position as about level."
+     }
+    }
+   ]
+  },
+  {
+   "title": "The wrong bishop",
+   "fen": "8/8/p3b3/k7/4K3/8/8/8 w - - 0 51",
+   "side": "white",
+   "keyIdea": "With a rook pawn and a bishop that cannot control the promotion square, the defending king draws once it reaches the corner.",
+   "text": "From a game played on Lichess. You are White, and you only have your king left. Black has a bishop and a pawn on the a-file, but the bishop moves on light squares, and the pawn would promote on a1, a dark square. Can your king get to that corner in time?",
+   "credit": {
+    "source": "Lichess games database, game DbQYGyEW",
+    "url": "https://lichess.org/DbQYGyEW",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "e4d3",
+    "a5b4",
+    "d3c2",
+    "b4a3",
+    "c2b1"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "8/8/p3b3/k7/4K3/8/8/8 w - - 0 51",
+     "decision": true,
+     "main": "e4d3",
+     "mainSan": "Kd3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "51.Kd3 heads for the corner. From d3 the king reaches c2 next, and Black's king and bishop cannot keep it out of the corner from there. Any other move here loses."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "8/8/p3b3/k7/8/3K4/8/8 b - - 1 51",
+     "decision": false,
+     "main": "a5b4",
+     "mainSan": "Kb4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "8/8/p3b3/8/1k6/3K4/8/8 w - - 2 52",
+     "decision": true,
+     "main": "d3c2",
+     "mainSan": "Kc2",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "52.Kc2 keeps going. Your king is now two steps from a1."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "8/8/p3b3/8/1k6/8/2K5/8 b - - 3 52",
+     "decision": false,
+     "main": "b4a3",
+     "mainSan": "Ka3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "8/8/p3b3/8/8/k7/2K5/8 w - - 4 53",
+     "decision": true,
+     "main": "c2b1",
+     "mainSan": "Kb1",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "53.Kb1 is the only move that holds, because Black's king now controls b2. Black's bishop can check your king on b1, but the king simply steps into the corner, and a1 is a dark square, so the bishop can never drive it out."
+     }
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,113 @@
+{
+ "id": "gambits",
+ "name": "Gambits",
+ "kind": "thinking",
+ "track": "openings",
+ "level": "intermediate",
+ "side": "black",
+ "goal": "You can judge when a pawn offered in the opening is worth taking, and when to give one back to finish developing.",
+ "priorKnowledge": [
+  "opening-traps"
+ ],
+ "intro": "A gambit gives up a pawn early in the game in the hope of getting something back: faster development, open lines or a quick attack on the king. When your opponent offers one, you have three answers. You can take the pawn and keep it, take it and give it back later when that suits you, or leave it and make your opponent pay for the gaps the gambit leaves behind. To choose, weigh the pawn against the moves it will cost you and the lines it opens. In this Lesson you meet each answer in a real game.",
+ "parts": [
+  {
+   "title": "A pawn offered on e4",
+   "fen": "rnbqkbnr/ppp1pppp/8/3p4/3PP3/8/PPP2PPP/RNBQKBNR b KQkq - 0 2",
+   "side": "black",
+   "keyIdea": "Take a pawn when you can guard it with moves that develop; when it is attacked again, a trade that leaves you a pawn up is enough.",
+   "text": "From a game played on Lichess. You are Black. After 1.d4 d5, White has pushed 2.e4, the Blackmar-Diemer Gambit, and offers the e-pawn to your d-pawn. Decide whether to take it, and what to do when White tries to win it back.",
+   "url": "https://lichess.org/chTIh51M#3",
+   "line": "dxe4 f3 Nf6 Nc3 exf3 Nxf3 Bf5",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "dxe4",
+     "text": "2...dxe4 takes the pawn. Your d-pawn makes the capture, so none of your pieces has lost time, and White has given up a centre pawn. The Engine prefers taking it."
+    },
+    {
+     "ply": 2,
+     "san": "Nf6",
+     "text": "3.f3 offered a second pawn, to open the f-file. 3...Nf6 brings out a knight that guards your pawn on e4, so White cannot simply take it back. 3...e6, the pawn from e7 to e6, was also good."
+    },
+    {
+     "ply": 4,
+     "san": "exf3",
+     "text": "4.Nc3 attacked e4 a second time, so 5.fxe4 would have won it back. 4...exf3 takes the f-pawn instead. White will take back on f3, but White's e-pawn and f-pawn are both gone, and you stay a pawn up."
+    },
+    {
+     "ply": 6,
+     "san": "Bf5",
+     "text": "5.Nxf3 took back, and White's pieces are coming out fast. 5...Bf5 develops your bishop before your e-pawn moves to e6, so the bishop will not be shut in behind your pawns. You are a pawn up, and the Engine prefers your position a little."
+    }
+   ]
+  },
+  {
+   "title": "A pawn offered on b4",
+   "fen": "r1bqk1nr/pppp1ppp/2n5/4p3/1bB1P3/2P2N2/P2P1PPP/RNBQK2R b KQkq - 0 5",
+   "side": "black",
+   "keyIdea": "A pawn you took can be given back to trade off your opponent's most dangerous piece and catch up in development.",
+   "text": "From a game played on Lichess. You are Black. After 1.e4 e5 2.Nf3 Nc6 3.Bc4 Bc5, White offered a pawn with 4.b4, the Evans Gambit, and your bishop took it. Now 5.c3 attacks the bishop and gets ready for d4, to build a big centre. Decide how much the extra pawn is worth to you.",
+   "url": "https://lichess.org/QzK7VfNB#9",
+   "line": "Be7 d4 Na5 Nxe5 Nxc4 Nxc4 d5",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Be7",
+     "text": "5...Be7 takes the bishop back to a safe square near your king. 5...Ba5 was just as good."
+    },
+    {
+     "ply": 2,
+     "san": "Na5",
+     "text": "6.d4 attacked your pawn on e5. 6...Na5 lets it go: the knight attacks White's bishop on c4, the piece aimed at f7 next to your king. Keeping the pawn with 6...exd4 was also possible, but after 7.cxd4 White has two pawns in the centre and more pieces out, and the Engine prefers 6...Na5 a little."
+    },
+    {
+     "ply": 4,
+     "san": "Nxc4",
+     "text": "7.Nxe5 won the pawn back, so the material is level. 7...Nxc4 takes the bishop: the piece that made the gambit dangerous is gone."
+    },
+    {
+     "ply": 6,
+     "san": "d5",
+     "text": "8.Nxc4 took back. 8...d5 attacks the knight on c4 and the pawn on e4 at the same time, and opens a path for your bishop on c8. The material is level, White's attacking bishop has gone, and the Engine sees the position as about equal."
+    }
+   ]
+  },
+  {
+   "title": "A pawn offered on f5",
+   "fen": "rnbqkbnr/pppp2pp/8/4pp2/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 3",
+   "side": "white",
+   "keyIdea": "Against a risky gambit, take what is really free, then develop with threats and open lines while the enemy king is still in the centre.",
+   "text": "From a game played on Lichess. You are White. After 1.e4 e5 2.Nf3, Black has replied 2...f5, the Latvian Gambit, and offers the f-pawn. Look at every capture you have before you choose.",
+   "url": "https://lichess.org/cIWLKE6B#4",
+   "line": "Nxe5 Qf6 d4 d6 Nc4 fxe4 Nc3 Qg6 f3",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Nxe5",
+     "text": "3.Nxe5 takes the pawn on e5, which nothing defended, and puts your knight in the centre. 2...f5 also opened the diagonal from h5 to e8, so if Black now takes on e4, 4.Qh5+ wins material. Taking on f5 was good too, but the Engine prefers the knight capture."
+    },
+    {
+     "ply": 2,
+     "san": "d4",
+     "text": "3...Qf6 attacked your knight. 4.d4 guards it with a pawn and puts a second pawn in the centre. Moving the knight back to c4 at once was also good."
+    },
+    {
+     "ply": 4,
+     "san": "Nc4",
+     "text": "4...d6 attacked the knight with a pawn, so guarding it is no longer enough. 5.Nc4 steps back to a safe square, from where it can later come to e3."
+    },
+    {
+     "ply": 6,
+     "san": "Nc3",
+     "text": "5...fxe4 took a pawn back, so the material is level. 6.Nc3 brings out a knight that attacks the pawn on e4, and Black has to spend another move guarding it."
+    },
+    {
+     "ply": 8,
+     "san": "f3",
+     "text": "6...Qg6 guarded e4 and aimed at g2. 7.f3 strikes at the pawn on e4 at once: if Black takes on f3, your queen takes back, and the f-file opens next to Black's king, towards f7, while the king is still in the centre. You have more pieces out, and the Engine clearly prefers your position."
+    }
+   ]
+  }
+ ]
+}

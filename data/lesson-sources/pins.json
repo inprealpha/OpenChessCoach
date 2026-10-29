@@ -1,0 +1,81 @@
+{
+ "id": "pins",
+ "name": "Pins",
+ "kind": "theme",
+ "track": "themes",
+ "level": "beginner",
+ "side": "white",
+ "puzzleThemes": [
+  "pin"
+ ],
+ "goal": "You can pin a piece to a more valuable one behind it, and win the pinned piece by attacking it again.",
+ "priorKnowledge": [
+  "piece-values"
+ ],
+ "intro": "A bishop, rook or queen pins an enemy piece when it attacks that piece and, behind it on the same line, a more valuable one. If the piece behind is the king, the pinned piece is not allowed to leave that line; if it is the queen, moving away would give the queen up. Either way the pinned piece is stuck, so you can attack it again or simply take it.",
+ "parts": [
+  {
+   "title": "A knight attacks your rook",
+   "fen": "8/1p6/2n3R1/pk6/8/2K5/8/8 b - - 3 61",
+   "side": "white",
+   "keyIdea": "A piece pinned to its king cannot move away, so if nothing guards it, you win it.",
+   "text": "From a game played on Lichess. You are White. Black's knight has just jumped to e5, attacking your rook on g6. The black king stands on b5, on the same rank (row) as the knight. Can your rook use that?",
+   "url": "https://lichess.org/training/F1Ury",
+   "line": "Ne5 Rg5 Kc6 Rxe5",
+   "notes": [
+    {
+     "ply": 1,
+     "san": "Rg5",
+     "text": "62.Rg5: your rook steps out of the knight's reach to g5, on the same row as the knight and the king behind it. The knight is pinned: moving it would leave the king in check, which is not allowed. Nothing defends it, and Black cannot bring a defender in one move."
+    },
+    {
+     "ply": 3,
+     "san": "Rxe5",
+     "text": "Black's king has stepped off the row, but it is too late: the knight is still attacked and still undefended, and 63.Rxe5 takes it."
+    }
+   ]
+  },
+  {
+   "title": "A queen offers a trade",
+   "fen": "7k/p5p1/6bp/3q4/3P4/4Q1P1/P2R2K1/8 w - - 3 34",
+   "side": "black",
+   "keyIdea": "Pin the queen to the king with a guarded piece, and the queen is lost for that piece.",
+   "text": "From a game played on Lichess. You are Black. White's queen has just moved to f3, offering a trade of queens. Look at White's queen and king: which line do they share?",
+   "url": "https://lichess.org/training/pnMc2",
+   "line": "Qf3 Be4 Qxe4 Qxe4+",
+   "notes": [
+    {
+     "ply": 1,
+     "san": "Be4",
+     "text": "34...Be4: the bishop steps to e4, between the two queens, where your queen guards it. It attacks White's queen, and the queen cannot move away, because the king on g2 stands behind it on the same diagonal. White will lose the queen for your bishop."
+    },
+    {
+     "ply": 3,
+     "san": "Qxe4+",
+     "text": "White took the bishop, and 35...Qxe4+ takes the queen back with check. You have traded a bishop for a queen."
+    }
+   ]
+  },
+  {
+   "title": "A rook that cannot move",
+   "fen": "6k1/pp1n1rpp/2p5/8/2BP4/5N2/P4PPP/6K1 w - - 0 1",
+   "side": "white",
+   "keyIdea": "A pinned piece cannot run away, so attack it a second time and win it.",
+   "text": "A position from Wikibooks. You are White. Black's rook on f7 is stuck: if it moved, your bishop on c4 would give check to the king on g8. Taking the rook at once with the bishop lets the king take back. Can you win it for free?",
+   "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
+   "line": "Ng5 Kf8 Bxf7",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Ng5",
+     "text": "1.Ng5: the knight jumps to g5 and attacks the pinned rook a second time. The rook cannot move away, and the king is its only defender, so Black cannot save it."
+    },
+    {
+     "ply": 2,
+     "san": "Bxf7",
+     "text": "The king stepped out of the pin to f8, so next move the rook could leave. But it is attacked twice and guarded once, and 2.Bxf7 takes it first. The king cannot take back, because your knight guards f7."
+    }
+   ]
+  }
+ ]
+}

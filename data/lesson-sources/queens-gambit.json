@@ -1,0 +1,60 @@
+{
+ "id": "queens-gambit",
+ "name": "Queen's Gambit",
+ "kind": "opening",
+ "track": "openings",
+ "level": "beginner",
+ "side": "white",
+ "eco": "D27",
+ "puzzleTags": [
+  "Queens_Gambit_Accepted"
+ ],
+ "goal": "As White, you can offer the c-pawn with the Queen's Gambit, and win it back while you develop when Black takes it.",
+ "priorKnowledge": [
+  "opening-principles"
+ ],
+ "intro": "The Queen's Gambit starts 1.d4 d5 2.c4: both sides push the d-pawn two squares, then White pushes the c-pawn to c4. White offers that pawn, not to give it away, but to tempt Black's d-pawn away from the centre. Here Black takes it with 2...dxc4, and you win the pawn back while you develop, that is, while you bring your knights and bishops off their starting squares. Then you castle, with the bigger share of the centre.",
+ "parts": [
+  {
+   "title": "Win the pawn back while you develop",
+   "fen": "start",
+   "side": "white",
+   "keyIdea": "Offer a pawn to pull Black's centre pawn away, then win it back with moves that develop your pieces.",
+   "text": "You are White, from the first move. These moves lead to the main line of the Classical Defence of the Queen's Gambit Accepted, as Lichess's list of openings names it (accepted, because Black takes the pawn). At each move, ask what it does for your centre, your pieces and your king.",
+   "url": "https://github.com/lichess-org/chess-openings",
+   "line": "d4 d5 c4 dxc4 e3 Nf6 Bxc4 e6 Nf3 c5 O-O a6",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "d4",
+     "text": "1.d4 claims the centre with a pawn that your queen already guards, and it opens a path for the bishop on c1. The Engine judges 1.d4 and 1.e4 about equally good."
+    },
+    {
+     "ply": 2,
+     "san": "c4",
+     "text": "2.c4 is the Queen's Gambit. It attacks the d5 pawn from the side: if Black takes, the d-pawn has left the centre, and Black usually cannot keep the extra pawn for long. Black can also turn the offer down with 2...e6 or 2...c6."
+    },
+    {
+     "ply": 4,
+     "san": "e3",
+     "text": "Black has taken the pawn, so there is no longer a black pawn on d5 to fight for e4. 3.e3 opens a diagonal for the bishop on f1, which can now take back on c4. 3.Nf3 and 3.e4 are good too."
+    },
+    {
+     "ply": 6,
+     "san": "Bxc4",
+     "text": "4.Bxc4 wins the pawn back and develops a piece in one move. Black could not easily have kept the pawn: after 3...b5 4.a4 c6 5.axb5 cxb5, your queen moves to f3 and attacks the rook on a8 along the long diagonal from h1 to a8, and Black loses a piece."
+    },
+    {
+     "ply": 8,
+     "san": "Nf3",
+     "text": "Material, the pieces and pawns each side has, is level again. 5.Nf3 develops a knight: it guards d4, watches e5, and clears the way for your king to castle."
+    },
+    {
+     "ply": 10,
+     "san": "O-O",
+     "text": "5...c5 hits your d4 pawn: this is how Black fights back in the centre. 6.O-O castles kingside first, so your king is safe before lines open. Black often goes on with ...a6 and ...b5 to push your bishop back; the bishop can then step back to b3 or e2."
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,357 @@
+{
+ "id": "attacking-the-king",
+ "name": "Attacking the king",
+ "kind": "thinking",
+ "track": "thinking",
+ "level": "intermediate",
+ "goal": "You can attack a king with more pieces than defend it, open lines towards it, and punish a king left in the centre.",
+ "priorKnowledge": [
+  "mating-patterns",
+  "open-files"
+ ],
+ "side": "white",
+ "puzzleTags": [],
+ "puzzleThemes": [
+  "kingsideAttack",
+  "exposedKing"
+ ],
+ "intro": {
+  "text": "Count before you attack: if you can bring more pieces to the enemy king than your opponent can bring to defend it, the attack has a good chance. Pawns help by breaking up the wall of pawns in front of the king, sometimes at the cost of material, so that your pieces can get in. And a king that has not castled is the easiest one to reach once the centre opens."
+ },
+ "parts": [
+  {
+   "title": "Counting attackers",
+   "fen": "3rr1k1/ppq1np1p/2p1p1pQ/4P3/2BR4/P6P/1P3PP1/4R1K1 w - - 5 23",
+   "side": "white",
+   "keyIdea": "Count the attackers and defenders of a square next to the king, then bring one more attacker than there are defenders.",
+   "text": "From a game played on Lichess. You are White, and Black's knight has just gone back to e7. Your queen on h6 attacks the pawn on h7: who defends it, and what can you add?",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle wKouZ",
+    "url": "https://lichess.org/training/wKouZ",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "d4h4",
+    "e7f5",
+    "h6h7"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "3rr1k1/ppq1np1p/2p1p1pQ/4P3/2BR4/P6P/1P3PP1/4R1K1 w - - 5 23",
+     "decision": true,
+     "main": "d4h4",
+     "mainSan": "Rh4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The pawn on h7 is attacked once, by your queen, and defended once, by the king. The rook swings along the fourth rank to h4, behind the queen. Now h7 is attacked twice, and the king can no longer take back there."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "3rr1k1/ppq1np1p/2p1p1pQ/4P3/2B4R/P6P/1P3PP1/4R1K1 b - - 6 23",
+     "decision": false,
+     "main": "e7f5",
+     "mainSan": "Nf5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "3rr1k1/ppq2p1p/2p1p1pQ/4Pn2/2B4R/P6P/1P3PP1/4R1K1 w - - 7 24",
+     "decision": true,
+     "main": "h6h7",
+     "mainSan": "Qxh7+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Black's knight on f5 attacks your queen and your rook, but it is too late. Two attackers against one defender: the queen takes the pawn with check, and the king has to run to f8, the only square left."
+     }
+    }
+   ]
+  },
+  {
+   "title": "Pawns close to the king",
+   "fen": "r2q1rk1/1p2b1pp/p2p1p2/3npPPQ/4P2P/1P1P4/1P6/R1B2RK1 w - - 0 18",
+   "side": "white",
+   "keyIdea": "Push your pawns at the enemy king, then break its pawn cover, even with a sacrifice, so your pieces can get at it.",
+   "text": "From a game played on Lichess. You are White. Black has just taken your knight on d5, but your queen and your pawns are already close to Black's king.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle YEHZC",
+    "url": "https://lichess.org/training/YEHZC",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "g5g6",
+    "h7h6",
+    "c1h6",
+    "g7h6",
+    "h5h6",
+    "f8f7",
+    "g6f7"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "r2q1rk1/1p2b1pp/p2p1p2/3npPPQ/4P2P/1P1P4/1P6/R1B2RK1 w - - 0 18",
+     "decision": true,
+     "main": "g5g6",
+     "mainSan": "g6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The pawn push leaves the knight on d5 alone for now. The g-pawn hits h7 and threatens Qxh7 mate: the king could not escape to f7, because your pawn on g6 guards it."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "r2q1rk1/1p2b1pp/p2p1pP1/3npP1Q/4P2P/1P1P4/1P6/R1B2RK1 b - - 0 18",
+     "decision": false,
+     "main": "h7h6",
+     "mainSan": "h6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "r2q1rk1/1p2b1p1/p2p1pPp/3npP1Q/4P2P/1P1P4/1P6/R1B2RK1 w - - 0 19",
+     "decision": true,
+     "main": "c1h6",
+     "mainSan": "Bxh6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Black pushed the h-pawn to h6, where it blocks your queen's path to h7. The bishop takes that pawn and tears away the king's cover."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "r2q1rk1/1p2b1p1/p2p1pPB/3npP1Q/4P2P/1P1P4/1P6/R4RK1 b - - 0 19",
+     "decision": false,
+     "main": "g7h6",
+     "mainSan": "gxh6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "r2q1rk1/1p2b3/p2p1pPp/3npP1Q/4P2P/1P1P4/1P6/R4RK1 w - - 0 20",
+     "decision": true,
+     "main": "h5h6",
+     "mainSan": "Qxh6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The queen takes back. Black's g-pawn and h-pawn are gone, and Qh7 mate is threatened again."
+     }
+    },
+    {
+     "ply": 5,
+     "fen": "r2q1rk1/1p2b3/p2p1pPQ/3npP2/4P2P/1P1P4/1P6/R4RK1 b - - 0 20",
+     "decision": false,
+     "main": "f8f7",
+     "mainSan": "Rf7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 6,
+     "fen": "r2q2k1/1p2br2/p2p1pPQ/3npP2/4P2P/1P1P4/1P6/R4RK1 w - - 1 21",
+     "decision": true,
+     "main": "g6f7",
+     "mainSan": "gxf7+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Black put a rook on f7 to guard h7. The pawn takes it with check: you win the rook, and the attack goes on."
+     }
+    }
+   ]
+  },
+  {
+   "title": "The king in the centre",
+   "fen": "rn2kb1r/p3qppp/2p2n2/1p2p1B1/2B1P3/1QN5/PPP2PPP/R3K2R w KQkq - 0 10",
+   "side": "white",
+   "keyIdea": "When the enemy king is stuck in the centre, open lines towards it, even at the cost of material, and bring every piece.",
+   "text": "Paul Morphy's famous Opera Game, played in Paris in 1858: you are White, playing Morphy's moves. Black's king is still on e8, most of Black's pieces are at home, and Black has just played 9...b5 to chase your bishop.",
+   "credit": {
+    "source": "Wikipedia, Opera Game",
+    "url": "https://en.wikipedia.org/wiki/Opera_Game",
+    "licence": "CC BY-SA 4.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "authors": "Wikipedia contributors (see the page history)"
+   },
+   "mainLine": [
+    "c3b5",
+    "c6b5",
+    "c4b5",
+    "b8d7",
+    "e1c1",
+    "a8d8",
+    "d1d7",
+    "d8d7",
+    "h1d1"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "rn2kb1r/p3qppp/2p2n2/1p2p1B1/2B1P3/1QN5/PPP2PPP/R3K2R w KQkq - 0 10",
+     "decision": true,
+     "main": "c3b5",
+     "mainSan": "Nxb5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Instead of moving the bishop away, you give up the knight for pawns to tear open the lines to Black's king: after 10...cxb5 your bishop takes on b5 with check."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "rn2kb1r/p3qppp/2p2n2/1N2p1B1/2B1P3/1Q6/PPP2PPP/R3K2R b KQkq - 0 10",
+     "decision": false,
+     "main": "c6b5",
+     "mainSan": "cxb5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "rn2kb1r/p3qppp/5n2/1p2p1B1/2B1P3/1Q6/PPP2PPP/R3K2R w KQkq - 0 11",
+     "decision": true,
+     "main": "c4b5",
+     "mainSan": "Bxb5+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Check, and you have two pawns for the knight. Black's king is still in the centre, and a knight that blocks on d7 will be pinned to it."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "rn2kb1r/p3qppp/5n2/1B2p1B1/4P3/1Q6/PPP2PPP/R3K2R b KQkq - 0 11",
+     "decision": false,
+     "main": "b8d7",
+     "mainSan": "Nbd7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "r3kb1r/p2nqppp/5n2/1B2p1B1/4P3/1Q6/PPP2PPP/R3K2R w KQkq - 1 12",
+     "decision": true,
+     "main": "e1c1",
+     "mainSan": "O-O-O",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "You castle queenside: the king goes to c1 and the rook to d1. Your king is safe, and the rook lands at once on the open d-file, where it attacks the pinned knight on d7."
+     }
+    },
+    {
+     "ply": 5,
+     "fen": "r3kb1r/p2nqppp/5n2/1B2p1B1/4P3/1Q6/PPP2PPP/2KR3R b kq - 2 12",
+     "decision": false,
+     "main": "a8d8",
+     "mainSan": "Rd8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 6,
+     "fen": "3rkb1r/p2nqppp/5n2/1B2p1B1/4P3/1Q6/PPP2PPP/2KR3R w k - 3 13",
+     "decision": true,
+     "main": "d1d7",
+     "mainSan": "Rxd7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Black defended d7 with a rook. Your rook takes the knight anyway: after 13...Rxd7 the black rook on d7 is pinned too, and your other rook is ready to join."
+     }
+    },
+    {
+     "ply": 7,
+     "fen": "3rkb1r/p2Rqppp/5n2/1B2p1B1/4P3/1Q6/PPP2PPP/2K4R b k - 0 13",
+     "decision": false,
+     "main": "d8d7",
+     "mainSan": "Rxd7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 8,
+     "fen": "4kb1r/p2rqppp/5n2/1B2p1B1/4P3/1Q6/PPP2PPP/2K4R w k - 0 14",
+     "decision": true,
+     "main": "h1d1",
+     "mainSan": "Rd1",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Every white piece is now in the attack, while Black's rook on h8 and bishop on f8 have still not moved. In the game, after 14...Qe6, Morphy finished with a queen sacrifice: 15.Bxd7+ Nxd7 16.Qb8+ Nxb8 17.Rd8 mate."
+     }
+    }
+   ]
+  }
+ ]
+}

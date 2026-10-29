@@ -1,9 +1,12 @@
 <script lang="ts">
   // First run, in two steps on a desktop: first the phone, where most people play chess (its QR
   // code, which the Player can put off), then the Player's level, an optional Lichess or chess.com
-  // username for their rating, and a few Goals. It suggests the Opening Lessons, which the Player
-  // can skip. A phone or tablet, or a desktop with a phone paired, starts at the second step.
+  // username for their rating, and a few Goals. It points to the Lessons and the first one for the
+  // chosen level, which the Player can skip. A phone or tablet, or a desktop with a phone paired,
+  // starts at the second step.
   import { tick } from 'svelte';
+  import { suggestNext } from '@chess-coach/shared/content/course';
+  import { BANDS } from '@chess-coach/shared/content/lessons';
   import { PLAYER_LEVELS, type PlayerLevel, type RatingSite } from '@chess-coach/shared/protocol';
   import PhonePairing from '../components/PhonePairing.svelte';
   import { api, ApiError } from '../lib/api.svelte.ts';
@@ -19,9 +22,13 @@
     club: 'Club: I play regularly and know some opening theory.',
   };
   const SUGGESTED = ['Learn the Italian Game', 'Learn the Caro-Kann Defence', 'Stop blundering pieces'];
-  const OPENINGS = lessonCatalogue.filter((l) => l.kind === 'opening').length;
 
   let level = $state<PlayerLevel>(profile.profile?.level ?? 'beginner');
+  /**
+   * Where the Lessons start for the level chosen above: a casual or club Player skips the beginner
+   * ones, unless a rating linked before says otherwise (ADR 0012).
+   */
+  const firstLesson = $derived(suggestNext(lessonCatalogue, profile.profile?.lessons ?? [], { level, rating: profile.profile?.rating ?? null })?.lesson);
   let site = $state<RatingSite | ''>('');
   let username = $state('');
   let goals = $state<string[]>(profile.profile?.goals.length ? [...profile.profile.goals] : ['']);
@@ -159,7 +166,8 @@
       {#each PLAYER_LEVELS as l (l)}
         <label class="option">
           <input type="radio" name="level" value={l} bind:group={level} />
-          {LEVEL_TEXT[l]}
+          <!-- The band each level stands for, so a Player who plays online can place themselves. -->
+          <span>{LEVEL_TEXT[l]} <span class="muted">Online: rated {BANDS[l].label}.</span></span>
         </label>
       {/each}
     </fieldset>
@@ -219,8 +227,11 @@
     </fieldset>
 
     <div class="card suggest">
-      <p><strong>Where to begin:</strong> the Opening Lessons teach {OPENINGS} beginner openings by asking you to choose moves.</p>
-      <button type="button" onclick={() => finish('lessons')} disabled={busy || api.state !== 'online'}>Start with the Opening Lessons</button>
+      <p>
+        <strong>Where to begin:</strong> the Lessons take you from your first moves to the end of intermediate level, one choice of move at a time.
+        {#if firstLesson}At your level, the first Lesson is {firstLesson.name}.{/if}
+      </p>
+      <button type="button" onclick={() => finish('lessons')} disabled={busy || api.state !== 'online'}>Start with the Lessons</button>
       <button type="button" class="secondary" onclick={() => finish('menu')} disabled={busy || api.state !== 'online'}>Skip to the main menu</button>
     </div>
     {#if error}<p class="error" role="alert">{error}</p>{/if}

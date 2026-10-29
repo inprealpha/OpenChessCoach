@@ -1,0 +1,88 @@
+{
+ "id": "candidate-moves",
+ "name": "Candidate moves and thinking ahead",
+ "kind": "thinking",
+ "track": "thinking",
+ "level": "intermediate",
+ "side": "white",
+ "goal": "You can list two or three candidate moves, look a few moves ahead in each, and choose with the opponent's best reply in mind.",
+ "priorKnowledge": [
+  "checks-captures-threats"
+ ],
+ "intro": "Strong players rarely play the first move that looks good. They list two or three candidate moves, the moves worth a closer look, then follow each one a few moves ahead and ask: what is my opponent's best answer? Often a move that seems to win something fails to one reply, while a quieter-looking choice works because it takes that reply away. In each position here, several captures are possible, and only one of them holds up.",
+ "parts": [
+  {
+   "title": "Which capture comes first?",
+   "fen": "2rbr1k1/6p1/pq1p3p/1p1Ppp2/1P2N3/P1P1Q2P/5PP1/2R2RK1 w - - 0 22",
+   "side": "white",
+   "keyIdea": "Follow each candidate to the opponent's best reply; the right order can remove a defender before you take.",
+   "text": "From a game played on Lichess. You are White. Black's queen on b6 attacks your queen, and the pawn on f5 attacks your knight. Your candidates are Nxd6, Qxb6 and the check Nf6+. Look at Black's best answer to each one before you choose.",
+   "url": "https://lichess.org/training/3w1GU",
+   "line": "Qxb6 Bxb6 Nxd6 Red8 Nxc8 Rxc8",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Qxb6",
+     "text": "22.Qxb6 trades queens first. Black's queen was the only piece guarding d6: after Nxd6 straight away, the queen would simply take your knight. Nf6+ fails too, because the g-pawn takes it."
+    },
+    {
+     "ply": 2,
+     "san": "Nxd6",
+     "text": "With the queens gone, nothing guards d6. 23.Nxd6 takes the pawn, escapes the attack from f5, and attacks both black rooks, on c8 and e8."
+    },
+    {
+     "ply": 4,
+     "san": "Nxc8",
+     "text": "Black saved one rook, and 24.Nxc8 takes the other. After 24...Rxc8 you have won a rook and a pawn for your knight."
+    }
+   ]
+  },
+  {
+   "title": "Three captures to compare",
+   "fen": "r2q1rk1/pb1nbppp/1p1p1n2/3Np1B1/2P1P3/3B1N2/PP3PPP/R2Q1RK1 b - - 5 11",
+   "side": "black",
+   "keyIdea": "For each candidate, ask what it uncovers as well as what it takes: moving one piece can let another attack.",
+   "text": "From a game played on Lichess. You are Black. White's knight on d5 attacks your bishop on e7, and White's bishop on g5 attacks your knight on f6. Three captures are possible: Nxd5, Bxd5 and Nxe4. Follow each one a move or two ahead.",
+   "url": "https://lichess.org/training/SFYUC",
+   "line": "Nxd5 cxd5 Bxg5 Nxg5 Qxg5",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Nxd5",
+     "text": "11...Nxd5 takes with the knight and clears the diagonal between your bishop on e7 and White's bishop on g5. White cannot take back on d5 and also save the bishop. Bxd5 would only trade pieces, and Nxe4 loses a piece to 12.Bxe7."
+    },
+    {
+     "ply": 2,
+     "san": "Bxg5",
+     "text": "White took back on d5, and 12...Bxg5 takes the bishop on g5. Only the knight on f3 was guarding it."
+    },
+    {
+     "ply": 4,
+     "san": "Qxg5",
+     "text": "13...Qxg5 takes back. You have taken two knights and a bishop and lost a knight and a bishop, so you are a piece ahead."
+    }
+   ]
+  },
+  {
+   "title": "Count before you capture",
+   "fen": "r2q1rk1/pp1bbpp1/2n4p/1B1Q4/5B2/P7/1PP2PPP/3R1RK1 w - - 3 16",
+   "side": "white",
+   "keyIdea": "Before you capture, count attackers and defenders for each candidate; take where you have more.",
+   "text": "From a game played on Lichess. You are White: Black has an extra knight, and you have one extra pawn. Your queen on d5 attacks the bishop on d7 and the knight on c6. You can take with Qxd7, Bxc6 or Qxc6. Which one wins material back?",
+   "url": "https://lichess.org/training/tgRvM",
+   "line": "Qxd7 Qxd7 Rxd7",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Qxd7",
+     "text": "16.Qxd7 takes the bishop on d7, which was attacked twice, by your queen and by the rook behind it on d1, and defended only once, by Black's queen. Bxc6 would only trade bishop for knight, and you would still be a piece down; Qxc6 loses your queen to the b-pawn."
+    },
+    {
+     "ply": 2,
+     "san": "Rxd7",
+     "text": "17.Rxd7 takes the queen back with the rook. You have won the bishop and are now a pawn ahead, and your rook on d7 attacks the bishop on e7 and the pawn on b7."
+    }
+   ]
+  }
+ ]
+}

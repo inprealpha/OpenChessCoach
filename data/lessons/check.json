@@ -1,0 +1,323 @@
+{
+ "id": "check",
+ "name": "Getting out of check",
+ "kind": "theme",
+ "track": "themes",
+ "level": "beginner",
+ "goal": "You can tell when a king is in check and find every way out: move the king, block the check, or take the checking piece.",
+ "priorKnowledge": [
+  "attack-and-defend"
+ ],
+ "side": "black",
+ "puzzleTags": [],
+ "puzzleThemes": [],
+ "intro": {
+  "text": "A king is in check when an enemy piece attacks it, and you have to deal with that at once. There are only three ways: step the king onto a square no enemy piece attacks, put one of your pieces in the way, or capture the piece that gives check. A check from a knight or a pawn cannot be blocked, because there is no square in between. Before you choose, look at all three ways."
+ },
+ "parts": [
+  {
+   "title": "A bishop check",
+   "fen": "8/p3k3/5R1p/3r4/8/P1B3P1/n6P/5K2 w - - 1 34",
+   "side": "black",
+   "keyIdea": "Compare all three ways out of check; sometimes the king can step out and capture something on the way.",
+   "text": "From a game played on Lichess. You are Black, and White's bishop has just given check from b4. Look at all three ways out before you choose.",
+   "credit": {
+    "source": "Lichess games database, game e55doe3a",
+    "url": "https://lichess.org/e55doe3a#66",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "c3b4",
+    "e7f6"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "8/p3k3/5R1p/3r4/8/P1B3P1/n6P/5K2 w - - 1 34",
+     "decision": false,
+     "main": "c3b4",
+     "mainSan": "Bb4+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "8/p3k3/5R1p/3r4/1B6/P5P1/n6P/5K2 b - - 2 34",
+     "decision": true,
+     "main": "e7f6",
+     "mainSan": "Kxf6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Kxf6: your king takes the rook on f6. It steps off the bishop's diagonal and wins a rook that nothing defends. Taking the bishop with the knight also stops the check, but it wins far less, because White's rook gets away. Blocking with your rook on c5 or d6 lets the bishop take it."
+     }
+    }
+   ]
+  },
+  {
+   "title": "A queen check down the file",
+   "fen": "8/5k2/8/p2q1B2/4R3/1P2PKP1/8/8 b - - 6 48",
+   "side": "white",
+   "keyIdea": "Block with a guarded piece, best of all one that attacks the checking piece; if the checking piece takes your blocker, take it back.",
+   "text": "From a game played on Lichess. You are White. Black's queen has just taken your bishop on f5, giving check down the f-file (the column of squares marked f). Nothing can take the queen, so you must move the king or block.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle TDcUE",
+    "url": "https://lichess.org/training/TDcUE",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "d5f5",
+    "e4f4",
+    "f5f4",
+    "e3f4"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "8/5k2/8/p2q1B2/4R3/1P2PKP1/8/8 b - - 6 48",
+     "decision": false,
+     "main": "d5f5",
+     "mainSan": "Qxf5+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "8/5k2/8/p4q2/4R3/1P2PKP1/8/8 w - - 0 49",
+     "decision": true,
+     "main": "e4f4",
+     "mainSan": "Rf4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Rf4: your rook steps in between, onto f4, where your king and both pawns, on e3 and g3, guard it. The rook now attacks the queen, and the queen cannot step off the f-file: then your rook would attack Black's king on f7, and no player may leave their own king in check. A king move instead would have let the queen take your rook on e4."
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "8/5k2/8/p4q2/5R2/1P2PKP1/8/8 b - - 1 49",
+     "decision": false,
+     "main": "f5f4",
+     "mainSan": "Qxf4+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "8/5k2/8/p7/5q2/1P2PKP1/8/8 w - - 0 50",
+     "decision": true,
+     "main": "e3f4",
+     "mainSan": "exf4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Black gave up the queen for your rook, with check. This time the answer is to take the checking piece, and 50.exf4 takes the queen with the e-pawn. Taking it with the king or the g-pawn also wins: in each case you are left with three pawns against one, and the pawn endgame is a win."
+     }
+    }
+   ]
+  },
+  {
+   "title": "A knight check",
+   "fen": "8/8/8/8/5n1N/1R6/5K2/r6k b - - 2 50",
+   "side": "white",
+   "keyIdea": "If the checking piece can be captured safely, taking it often solves everything at once.",
+   "text": "From a game played on Lichess. You are White. Black's knight has just jumped to h3 with check. A knight's check cannot be blocked, so you must move the king or take the knight.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle 6iq4u",
+    "url": "https://lichess.org/training/6iq4u",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "f4h3",
+    "b3h3"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "8/8/8/8/5n1N/1R6/5K2/r6k b - - 2 50",
+     "decision": false,
+     "main": "f4h3",
+     "mainSan": "Nh3+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "8/8/8/8/7N/1R5n/5K2/r6k w - - 3 51",
+     "decision": true,
+     "main": "b3h3",
+     "mainSan": "Rxh3#",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Rxh3#: your rook slides along the third rank (the row numbered 3) and takes the knight. That ends the check, and now the rook gives check to the king on h1. The king cannot escape: your king covers g1 and g2, and the rook covers h2. It is checkmate."
+     }
+    }
+   ]
+  },
+  {
+   "title": "Check after check",
+   "fen": "8/1PKR4/4r3/2k5/8/8/8/8 b - - 0 65",
+   "side": "white",
+   "keyIdea": "Each new check can need a different answer, so look at all three ways out every time.",
+   "text": "From a game played on Lichess. You are White, with a rook and a pawn against a rook, and your pawn on b7 is one step from promoting. Black's rook has just given check from c6, and it will keep checking while it can. Each time, look at all three ways out.",
+   "credit": {
+    "source": "Lichess games database, game ulngg149",
+    "url": "https://lichess.org/ulngg149#129",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "e6c6",
+    "c7d8",
+    "c6b6",
+    "d8c8",
+    "b6c6",
+    "d7c7",
+    "c6c7",
+    "c8c7"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "8/1PKR4/4r3/2k5/8/8/8/8 b - - 0 65",
+     "decision": false,
+     "main": "e6c6",
+     "mainSan": "Rc6+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "8/1PKR4/2r5/2k5/8/8/8/8 w - - 1 66",
+     "decision": true,
+     "main": "c7d8",
+     "mainSan": "Kd8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The rook stands right next to your king, so nothing can block it, and Black's king guards it, so your king cannot take it. 66.Kd8 moves the king out of check. With the king off c7, your rook on d7 now guards the pawn on b7 along the seventh rank. On b8 the king would stand in front of its own pawn."
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "3K4/1P1R4/2r5/2k5/8/8/8/8 b - - 2 66",
+     "decision": false,
+     "main": "c6b6",
+     "mainSan": "Rb6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "3K4/1P1R4/1r6/2k5/8/8/8/8 w - - 3 67",
+     "decision": true,
+     "main": "d8c8",
+     "mainSan": "Kc8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "66...Rb6 was not a check: Black's rook attacks your pawn from behind. 67.Kc8 brings the king next to the pawn, so it is guarded twice, and the king also covers b8, the square where the pawn promotes."
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "2K5/1P1R4/1r6/2k5/8/8/8/8 b - - 4 67",
+     "decision": false,
+     "main": "b6c6",
+     "mainSan": "Rc6+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 5,
+     "fen": "2K5/1P1R4/2r5/2k5/8/8/8/8 w - - 5 68",
+     "decision": true,
+     "main": "d7c7",
+     "mainSan": "Rc7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Black checks again from c6, and this time 68.Rc7 blocks it. Your king guards the rook there, and the block offers a trade of rooks: without its rook, Black has nothing left to stop your pawn."
+     }
+    },
+    {
+     "ply": 6,
+     "fen": "2K5/1PR5/2r5/2k5/8/8/8/8 b - - 6 68",
+     "decision": false,
+     "main": "c6c7",
+     "mainSan": "Rxc7+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 7,
+     "fen": "2K5/1Pr5/8/2k5/8/8/8/8 w - - 0 69",
+     "decision": true,
+     "main": "c8c7",
+     "mainSan": "Kxc7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Black took your rook with check, and 69.Kxc7 takes back: the third way out of check, capturing the checking piece. Black's king is too far away, and your pawn promotes on b8 next move."
+     }
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,82 @@
+{
+ "id": "mate-in-one",
+ "name": "Mate in one",
+ "kind": "theme",
+ "track": "themes",
+ "level": "beginner",
+ "side": "white",
+ "puzzleThemes": [
+  "mateIn1"
+ ],
+ "goal": "You can tell checkmate from check, and find a mate in one move when there is one.",
+ "priorKnowledge": [
+  "check"
+ ],
+ "intro": "Checkmate, or mate for short, ends the game: the king is in check and there is no way out. It has no escape square (a safe square to move to), the check cannot be blocked, and the checking piece cannot be taken. If even one of those ways is open, it is only check, so look at every check you have and test each one.",
+ "parts": [
+  {
+   "title": "Check or mate?",
+   "fen": "7k/7p/8/p4Q2/8/8/5KP1/2q5 b - - 14 61",
+   "side": "white",
+   "keyIdea": "Not every check is mate: test each check for an escape square, a block and a capture.",
+   "text": "From a game played on Lichess. You are White. Black's queen has just moved to c6. Your queen can give check in several ways, but only one of them is mate. For each check, ask where the king could go and whether Black could block or capture.",
+   "url": "https://lichess.org/training/dDqjo",
+   "line": "Qc6 Qf8#",
+   "notes": [
+    {
+     "ply": 1,
+     "san": "Qf8#",
+     "text": "Qf8, the queen to f8, gives check along the back rank (the row Black's king started on). The king cannot go to g8 or g7, because the queen covers both, and h7 holds its own pawn. Black's queen cannot block on g8 or take on f8, so it is mate. Compare Qc8+, which is only check: Black's queen simply takes yours."
+    }
+   ]
+  },
+  {
+   "title": "A pawn taken on c4",
+   "fen": "5r1k/p5p1/8/6Q1/2P5/7P/6RK/2q5 b - - 0 41",
+   "side": "white",
+   "keyIdea": "The queen can mate right next to the king when another piece guards it.",
+   "text": "From a game played on Lichess. You are White. Black's queen has just taken your pawn on c4. One of your checks is mate: find it.",
+   "url": "https://lichess.org/training/BYPTm",
+   "line": "Qxc4 Qxg7#",
+   "notes": [
+    {
+     "ply": 1,
+     "san": "Qxg7#",
+     "text": "The queen takes the g7 pawn and checks the king. The king cannot take the queen, because your rook on g2 guards g7, and the king has nowhere to run: the queen covers g8 and h7. Checkmate."
+    }
+   ]
+  },
+  {
+   "title": "A king in the centre",
+   "fen": "8/8/3pkp1p/1R1P1p2/1p6/4K3/1r3P2/8 b - - 0 53",
+   "side": "white",
+   "keyIdea": "Mate can happen in the centre too, even with a pawn, when your pieces cover every square around the king that its own pawns do not fill.",
+   "text": "From a game played on Lichess. You are White. Black's king has just stepped forward to e5, into the centre of the board. Find the mate: look at every check you have, and at every square around the king.",
+   "url": "https://lichess.org/training/GW5Ow",
+   "line": "Ke5 f4#",
+   "notes": [
+    {
+     "ply": 1,
+     "san": "f4#",
+     "text": "f4, the pawn two squares forward from f2, checks the king on e5. Your king on e3 guards f4, d4 and e4, so the king cannot take the pawn or step onto those squares. Your pawn on d5 covers e6, your rook guards that pawn, and Black's own pawns fill d6, f6 and f5. A pawn's check cannot be blocked, so it is mate. Your rook cannot check from f5, because your own pawn on d5 stands in its way."
+    }
+   ]
+  },
+  {
+   "title": "A crowded king",
+   "fen": "6rk/1p4pp/6p1/p4QN1/8/6PK/7P/8 b - - 0 39",
+   "side": "white",
+   "keyIdea": "A king hemmed in by its own pieces can be mated by a lone knight, because a knight's check cannot be blocked.",
+   "text": "From a game played on Lichess. You are White. Black has just taken your queen on f5. You have only a knight left to attack with, but look at how Black's own pieces crowd the king on h8.",
+   "url": "https://lichess.org/training/B6HXQ",
+   "line": "gxf5 Nf7#",
+   "notes": [
+    {
+     "ply": 1,
+     "san": "Nf7#",
+     "text": "The knight jumps to f7 and checks the king. Every square next to the king holds a black piece, a knight's check cannot be blocked, and nothing can take the knight on f7. This is called a smothered mate."
+    }
+   ]
+  }
+ ]
+}

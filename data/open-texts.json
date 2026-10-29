@@ -1,0 +1,726 @@
+{
+ "about": "Every text the Lessons adapted from Wikibooks and Wikipedia (CC BY-SA 4.0) before ADR 0012, each with its page. The Lesson data check (keptOpenText in packages/shared/src/content/lessons.ts) uses it to make sure a Lesson text that keeps one of them carries its credit.",
+ "licence": "CC BY-SA 4.0, https://creativecommons.org/licenses/by-sa/4.0/; authors: Wikibooks and Wikipedia contributors (see each page's history)",
+ "texts": [
+  {
+   "lesson": "italian-game",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4",
+   "text": "In the Italian Game White puts the bishop on c4, where it controls d5 and eyes f7, the weakest pawn in Black's camp, and gets ready to castle early. After 3...Bc5, the Giuoco Piano or \"quiet game\", White's classical plan is to build a big pawn centre with c3 and d4."
+  },
+  {
+   "lesson": "italian-game",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory",
+   "text": "The opening is a race to develop and control the centre. 1.e4 opens lines for your queen and king's bishop, controls d5 and f5, and keeps a Black pawn off e4 so your knight can later sit safely on f3. 1.d4 is the other main choice and gives slower, more closed games; knight moves to the edge like 1.Na3 do little for the centre."
+  },
+  {
+   "lesson": "italian-game",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5",
+   "text": "Black's e5 pawn is undefended. 2.Nf3 attacks it while developing a piece, also eyes d4 and prepares castling; it is by far the most popular move. 2.f4 (King's Gambit) and 2.d4 attack with pawns instead. 2.Qh5 or 2.Qf3 hope for a quick mate, but if Black stays calm they are not dangerous."
+  },
+  {
+   "lesson": "italian-game",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6",
+   "text": "2...Nc6 defends e5. White usually develops the bishop next, keeping c3 and d4 in reserve. 3.Bc4, the Italian Game, aims it at Black's weak f7 pawn. 3.Bb5 (Spanish) pressures the knight that guards e5, and 3.d4 (Scotch) opens the centre at once. 3.Nxe5?? simply gives away a knight."
+  },
+  {
+   "lesson": "italian-game",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4/3...Bc5",
+   "text": "Black controls d4 three times to your two, so 4.c3 adds a defender and prepares d4. 4.d3 is the quieter Giuoco Pianissimo, 4.d4 at once is a gambit that is not quite sound, and 4.b4 is the Evans Gambit. Avoid 4.Bxf7+?: the Jerome Gambit comes far too early and is objectively bad for White."
+  },
+  {
+   "lesson": "italian-game",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4/3...Bc5/4._c3",
+   "text": "4...Nf6 hits e4, and with your pawn on c3 you can no longer defend it with Nc3. The quiet main line is 5.d3, but 5.d4 strikes at once, attacking the bishop and intending 6.e5 after 5...exd4 (the Greco Gambit). 5.b4!? (Bird's Attack) tries to trap the bishop. Later, Qb3 can add pressure on f7."
+  },
+  {
+   "lesson": "italian-game",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4/3...Bc5",
+   "text": "After 5...exd4, 6.cxd4 takes back and attacks the bishop on c5, though Black has the check 6...Bb4+. Many players now prefer 6.e5, hitting the f6 knight, when 6...d5 7.Bb5 Ne4 8.cxd4 Bb6 is slightly better for White. 6.b4!? (Dubov Italian) is somewhat dubious but dangerous if Black is unprepared."
+  },
+  {
+   "lesson": "italian-game",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4/3...Bc5",
+   "text": "Block the check with 7.Bd2, the modern main line. Black can trade with 7...Bxd2+ or grab 7...Nxe4, but that does not really win a pawn: 8.Bxb4 Nxb4 9.Bxf7+ Kxf7 10.Qb3+ Kf8 11.Qxb4+ Qe7 12.Qxe7+ Kxe7 wins it back, though the endgame is slightly easier for Black."
+  },
+  {
+   "lesson": "london-system",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._Bf4",
+   "text": "The London System is a set-up you can play against almost anything. The bishop goes to f4 before e3 so it is not shut in behind the pawns; then e3 and c3 support d4, Bd3 and Nd2 watch e4, and the king's knight heads for e5 via f3. It is popular at club level because the plans hardly change whatever Black does."
+  },
+  {
+   "lesson": "london-system",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory",
+   "text": "The opening is a race to develop and control the centre. 1.d4 frees your queen's bishop, stops ...e5 and controls c5. Unlike 1.e4, the pawn is already guarded by the queen, so games tend to be slower and more closed, which suits the steady London set-up. 1.e4 is the more popular, sharper choice."
+  },
+  {
+   "lesson": "london-system",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5",
+   "text": "2.Bf4, the Accelerated London, brings the bishop out before e3 so it will not be stuck behind your pawns, and gives simple plans against most Black set-ups. Keep an eye on b2, which the bishop no longer guards. 2.c4 (Queen's Gambit) is the main line; 2.e4?! (Blackmar-Diemer Gambit) gives up a pawn and is dubious."
+  },
+  {
+   "lesson": "london-system",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...Nf6/2._Bf4/2...d5",
+   "text": "3.e3 is the usual move order: it supports d4 and prepares Bd3. 3.Nf3 transposes to the regular London, while 3.Nc3 instead of c3 leads to the Rapport-Jobava London. Black's two main plans are ...c5 and ...e6."
+  },
+  {
+   "lesson": "london-system",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._Bf4",
+   "text": "Black chose the solid ...e6 set-up, usually planning ...Bd6 to castle quickly and offer a trade of your London bishop; in these lines Black's light-squared bishop often struggles to develop. 4.Nf3 continues your plan of sending the knight towards e5. 4.Nd2 is also common; most London move orders are interchangeable."
+  },
+  {
+   "lesson": "london-system",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...Nf6/2._Bf4/2...d5",
+   "text": "With ...c5 Black hits d4 and often follows with ...Qb6 to attack b2, which your bishop left undefended. Do not grab the c5 pawn: play 5.c3 instead, so that if Black exchanges on d4 you can recapture and keep two pawns in the centre."
+  },
+  {
+   "lesson": "london-system",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...Nf6/2._Bf4/2...d5/3._e3/3...e6/4._Nf3",
+   "text": "Your pawns on d4 and e3 give a solid centre. The usual plan continues with Nbd2 and Be2, followed later by an e4 break or the calmer h3 and O-O. Black's typical ways to challenge your strong f4 bishop are ...c5 and ...Nh5."
+  },
+  {
+   "lesson": "london-system",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._Bf4",
+   "text": "6...Bd6 offers to trade off your London bishop. The standard answer is to drop it back with 7.Bg3: if Black takes, hxg3 gives you the semi-open h-file for your rook in return."
+  },
+  {
+   "lesson": "queens-gambit",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._c4",
+   "text": "The Queen's Gambit offers the c-pawn to win control of the centre. In this line Black accepts with 2...dxc4, but holding the pawn is impractical: Black has given up control of e4, and White develops calmly, regains the pawn and keeps the bigger share of the centre."
+  },
+  {
+   "lesson": "queens-gambit",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory",
+   "text": "The opening is a race to develop and control the centre. 1.d4 frees your queen's bishop, stops ...e5 and controls c5. The pawn is already guarded by the queen, so play is usually slower and more positional than after 1.e4, and White often follows with c4 for more control of the centre. 1.e4 is the more popular, sharper choice."
+  },
+  {
+   "lesson": "queens-gambit",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5",
+   "text": "2.c4, the Queen's Gambit, is the main line. It offers the flank c-pawn: if Black takes it, the d-pawn is pulled away from the centre and you can win the pawn back later, so most players decline it. 2.Nf3 and 2.Bf4 (London) are calmer; 2.e4?! (Blackmar-Diemer) cannot keep a pawn on e4 and is dubious."
+  },
+  {
+   "lesson": "queens-gambit",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._c4/2...dxc4",
+   "text": "Black has taken the pawn but no longer controls e4. 3.e3 opens the way for your bishop to take back on c4. 3.Nf3 (the classical line) and the ambitious 3.e4 are also good, while 3.Nc3 looks misguided. If Black tries to hold the pawn with ...b5, a4 attacks the pawn chain at its base."
+  },
+  {
+   "lesson": "queens-gambit",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._c4/2...dxc4/3._e3",
+   "text": "Black chose to develop with 3...Nf6, so take the pawn back now with 4.Bxc4, developing your bishop at the same time. Had Black tried 3...b5? to keep the pawn, 4.a4! c6? 5.axb5 cxb5?? 6.Qf3! wins at least a minor piece, because the long diagonal to a8 cannot be defended."
+  },
+  {
+   "lesson": "queens-gambit",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._c4/2...dxc4",
+   "text": "With the pawn regained, 5.Nf3 develops and reaches the classical main line, the same position as 3.Nf3 Nf6 4.e3 e6 5.Bxc4. Black will aim for the breaks ...c5 or ...e5, and the knight helps stop ...e5. 5.Nc3 is also played and is often met by ...a6 and ...c5."
+  },
+  {
+   "lesson": "queens-gambit",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._c4/2...dxc4/3._Nf3/3...Nf6/4._e3/4...e6/5._Bxc4/5...c5",
+   "text": "Black strikes at d4 with ...c5. The main move is 6.O-O, getting your king out of the centre. 6.Qe2, the Furman Variation, is the alternative: it supports a later e4 advance and lets you capture on c5 without a queen trade."
+  },
+  {
+   "lesson": "caro-kann",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...c6",
+   "text": "The Caro-Kann prepares ...d5 with the c-pawn ready to take back, so Black keeps a share of the centre and makes f7 safer. Unlike the French (1...e6), it does not shut in the light-squared bishop, though the knight loses the c6 square. It has a reputation as a solid, defensive reply to 1.e4."
+  },
+  {
+   "lesson": "caro-kann",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4",
+   "text": "1...c6, the Caro-Kann, prepares ...d5 so a pawn can recapture there. Compared with 1...e6 (French), your light-squared bishop stays free, but c6 is taken from your knight and a later ...c5 costs a move. 1...e5 and 1...c5 fight for d4 instead, while 1...f5? weakens your kingside."
+  },
+  {
+   "lesson": "caro-kann",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...c6/2._d4",
+   "text": "White has put two pawns in the centre. Play 2...d5 as planned: it attacks e4, and if 3.exd5 cxd5 you have swapped your c-pawn for White's central e-pawn. Other moves are rare: 2...d6 transposes to a Pirc, and 2...Nf6!? invites 3.e5!, chasing the knight."
+  },
+  {
+   "lesson": "caro-kann",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...c6/2._d4/2...d5/3._Nc3",
+   "text": "White defends e4 with the knight. 3...dxe4 is the main move, denying White the two-pawn centre. 3...Nf6 invites 4.e5 and a closed game; 3...g6 lets White gain kingside space; 3...e6?! combines the drawbacks of the Caro-Kann and the French."
+  },
+  {
+   "lesson": "caro-kann",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...c6/2._d4/2...d5/3._Nc3/3...dxe4/4._Nxe4",
+   "text": "4...Bf5, the Classical Variation, develops your bishop and attacks the e4 knight; the bishop will later control the long diagonal from g6 and then h7. 4...Nf6 5.Nxf6+ leaves you with doubled pawns, and 4...Nd7 (Karpov Variation) looks slower because the knight must move again before that bishop can come out."
+  },
+  {
+   "lesson": "caro-kann",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...c6/2._d4/2...d5/3._Nc3/3...dxe4/4._Nxe4/4...Bf5/5._Ng3",
+   "text": "The knight on g3 attacks your bishop. 5...Bg6 is the only sensible retreat and almost always played. Defending it with 5...g6 is very rare and leaves you with a worse pawn structure."
+  },
+  {
+   "lesson": "caro-kann",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...c6/2._d4/2...d5/3._Nc3/3...dxe4/4._Nxe4/4...Bf5/5._Ng3/5...Bg6/6._h4",
+   "text": "6.h4 puts pressure on your bishop, so you need to look after it. 6...h6 is almost universal. 6...h5 and 6...Nd7 have been tried but are probably inferior."
+  },
+  {
+   "lesson": "caro-kann",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...c6/2._d4/2...d5/3._Nc3/3...dxe4/4._Nxe4/4...Bf5/5._Ng3/5...Bg6/6._h4/6...h6/7._Nf3",
+   "text": "White's knight would like to jump to e5, where it is usually too strong. 7...Nd7 covers e5 and stops it, and is the normal choice. 7...Nf6 and 7...e6 are other options."
+  },
+  {
+   "lesson": "queens-gambit-declined",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._c4/2...e6",
+   "text": "In the Queen's Gambit Declined Black meets 2.c4 with 2...e6, holding the d5 pawn firmly and opening a diagonal for the dark-squared bishop. The cost is that the light-squared bishop on c8 is blocked in, and finding it a good job is Black's long-term task. In the Orthodox line Black develops with ...Nf6, ...Be7, castles and adds ...Nbd7."
+  },
+  {
+   "lesson": "queens-gambit-declined",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4",
+   "text": "1...d5 is the classical answer: it controls e4 and c4, so White cannot keep a pawn on e4, stops d4-d5 and frees your queen's bishop. 1...Nf6 is a more flexible choice. 1...e5?! (Englund Gambit) is unsound, and 1...f5 (Dutch) can run into early tricks on the weak e8-h5 diagonal."
+  },
+  {
+   "lesson": "queens-gambit-declined",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._c4",
+   "text": "2.c4 offers a pawn. If White plays cxd5 you want to take back with a pawn and keep control of e4, so 2...e6 (or 2...c6, the Slav) is the usual way to decline. 2...dxc4 is playable but gives up e4. 2...Nf6 loses time after 3.cxd5 Nxd5 4.e4!, and 2...Bf5? (Baltic) is thought worse for Black."
+  },
+  {
+   "lesson": "queens-gambit-declined",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._c4/2...e6/3._Nc3",
+   "text": "3.Nc3 adds pressure on d5 and supports a future e4. 3...Nf6 develops, guards d5 and stops e4, though it allows the pin 4.Bg5. 3...c6 can be met by the sharp 4.e4!? gambit; 3...c5 (Tarrasch) usually accepts an isolated pawn for active pieces; 3...Be7 rules out Bg5."
+  },
+  {
+   "lesson": "queens-gambit-declined",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._c4/2...e6/3._Nc3/3...Nf6",
+   "text": "4.Bg5 pins your knight to the queen. The usual answer is 4...Be7, breaking the pin and getting ready to castle quickly. 4...Nbd7 is a notable alternative that often leads to the Cambridge Springs Defence after 5.e3 c6 6.Nf3 Qa5."
+  },
+  {
+   "lesson": "queens-gambit-declined",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._c4/2...e6/3._Nc3/3...Nf6/4._Bg5/4...Be7/5._e3",
+   "text": "With the bishop already out on g5, White can safely build a pawn chain on dark squares with e3. Castling with 5...O-O is the main move; 5...h6 and 5...Nbd7 are also played and keep the balance."
+  },
+  {
+   "lesson": "queens-gambit-declined",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._d4/1...d5/2._c4/2...e6/3._Nc3/3...Nf6/4._Bg5/4...Be7/5._e3/5...O-O/6._Nf3",
+   "text": "White develops normally with 6.Nf3. You now choose between 6...Nbd7, the Classical Variation, and 6...h6, which asks the bishop to move (7.Bh4) and leads to Lasker's Defence or the Tartakower Variation."
+  },
+  {
+   "lesson": "ruy-lopez",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bb5",
+   "text": "In the Ruy Lopez, or Spanish Game, White develops the bishop to b5 to put pressure on the knight that defends e5. White plays for quick development, castling and control of the centre, and would like to build a big pawn centre later with c3 and d4. The usual reply is 3...a6, the Morphy Defence, which asks the bishop to decide at once: take the knight or retreat."
+  },
+  {
+   "lesson": "ruy-lopez",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory",
+   "text": "The opening is a race to develop and control the centre. 1.e4 opens lines for your queen and king's bishop, controls d5 and f5, and keeps a Black pawn off e4 so your knight can later sit safely on f3. 1.d4 is the other main choice and gives slower, more closed games; knight moves to the edge like 1.Na3 do little for the centre."
+  },
+  {
+   "lesson": "ruy-lopez",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5",
+   "text": "Black's e5 pawn is undefended. 2.Nf3 attacks it while developing a piece, also eyes d4 and prepares castling; it is by far the most popular move. 2.f4 (King's Gambit) and 2.d4 attack with pawns instead. 2.Qh5 or 2.Qf3 hope for a quick mate, but if Black stays calm they are not dangerous."
+  },
+  {
+   "lesson": "ruy-lopez",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6",
+   "text": "2...Nc6 defends e5 and controls d4. White usually develops the bishop next and keeps c3 and d4 in reserve. 3.Bb5, the Spanish, is the most popular and most studied move: by pressing the knight that guards e5 it threatens that pawn indirectly. 3.Bc4 (Italian) aims at f7 instead, and 3.d4 (Scotch) opens the centre at once."
+  },
+  {
+   "lesson": "ruy-lopez",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bb5/3...a6",
+   "text": "3...a6 puts the question to the bishop: take or retreat, but it cannot stay. 4.Bxc6, the Exchange Variation, does not win e5 yet, because after 4...dxc6 5.Nxe5? Qd4! Black forks knight and pawn. 4.Ba4 is the main line: it keeps the bishop and the pressure on the knight. Watch out later for ...b5 and ...c4 trapping a bishop on b3."
+  },
+  {
+   "lesson": "ruy-lopez",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bb5/3...a6/4._Ba4/4...Nf6",
+   "text": "4...Nf6 develops and attacks e4. 5.O-O is the main line: castle to safety and get ready for Re1, leaving e4 to look after itself. If 5...Nxe4 (the Open Spanish), 6.d4 wins the pawn back. 5.d3 or 5.Nc3 defend e4 directly but get in the way of White's plan of c3 and d4."
+  },
+  {
+   "lesson": "ruy-lopez",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bb5/3...a6/4._Ba4/4...Nf6/5._O-O/5...Be7",
+   "text": "5...Be7, the Closed Spanish, guards the king along the e-file. Now Black really threatens ...b5 and ...Nxe4, winning the pawn. 6.Re1 defends e4 with a developing move. 6.Qe2 also holds it, but puts the queen on a file likely to open; 6.d3 and 6.Nc3 get in the way of c3 and d4."
+  },
+  {
+   "lesson": "ruy-lopez",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bb5/3...a6/4._Ba4/4...Nf6/5._O-O/5...Be7/6._Re1/6...b5",
+   "text": "6...b5 ends the pressure on Black's knight by attacking the bishop. 7.Bb3 is necessary to save it, and from b3 the bishop still looks at f7."
+  },
+  {
+   "lesson": "ruy-lopez",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bb5/3...a6/4._Ba4/4...Nf6/5._O-O/5...Be7/6._Re1/6...b5/7._Bb3/7...d6",
+   "text": "White's plan is to play d4, but 8.d4? at once is a mistake. 8.c3 prepares it, and also gives the bishop on b3 a retreat square on c2. h3 will be useful later, but 8.h3 now allows 8...Na5, swapping off the bishop."
+  },
+  {
+   "lesson": "two-knights-defence",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4/3...Nf6/4._Ng5",
+   "text": "In the Two Knights Defence Black answers the Italian Game's 3.Bc4 with 3...Nf6, developing a piece and pressing on e4. After the sharp 4.Ng5, attacking f7 with knight and bishop, Black gives up a pawn with 4...d5 and plays 5...Na5, the Polerio Defence: White may be a pawn up, but Black's pieces become active and the game is considered equal."
+  },
+  {
+   "lesson": "two-knights-defence",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4",
+   "text": "1...e5 takes space in the centre and controls d4, so White cannot easily keep pawns on both d4 and e4. It also stops e4-e5, so your knight can come to f6. 1...c5 (Sicilian) also controls d4; 1...e6 and 1...c6 prepare ...d5, and 1...d5 attacks e4 at once."
+  },
+  {
+   "lesson": "two-knights-defence",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3",
+   "text": "2.Nf3 attacks your e5 pawn. 2...Nc6 is the main line: it develops a piece, defends e5 and controls d4. 2...d6 defends with a pawn but falls behind in development, and 2...f6? weakens your king. 2...Nf6 counter-attacks e4 instead."
+  },
+  {
+   "lesson": "two-knights-defence",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4",
+   "text": "White's bishop eyes f7, your weakest pawn, but there is no immediate threat. 3...Nf6, the Two Knights, develops and attacks e4; it leads to sharp play. 3...Bc5, the Giuoco Piano, keeps the queen's control of g5 and gives a quieter game. If White defends e4 with 4.Nc3, the fork trick 4...Nxe4 5.Nxe4 d5 wins the piece back."
+  },
+  {
+   "lesson": "two-knights-defence",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4/3...Nf6/4._Ng5",
+   "text": "4.Ng5 attacks f7 with knight and bishop, and you cannot castle yet. You must defend f7: 4...h6?? loses to 5.Nxf7, forking queen and rook, and 4...Nxe4? fails to 5.Bxf7+. 4...d5 is the best defence: it blocks the bishop's diagonal at the cost of a pawn."
+  },
+  {
+   "lesson": "two-knights-defence",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4/3...Nf6/4._Ng5/4...d5/5._exd5",
+   "text": "5.exd5 wins a pawn. Recapturing with 5...Nxd5?! is common but allows 6.Nxf7, the Fried Liver attack, where your king is hunted into the centre. 5...Na5, the Polerio Defence, is the main line: it attacks the bishop and keeps your knight safe."
+  },
+  {
+   "lesson": "two-knights-defence",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4/3...Nf6/4._Ng5/4...d5/5._exd5",
+   "text": "In the Polerio line White checks with 6.Bb5+ and you block with 6...c6, attacking the d5 pawn and the bishop together. The main line runs 7.dxc6 bxc6 8.Bd3 Nd5 9.Nf3 Bd6 10.O-O."
+  },
+  {
+   "lesson": "two-knights-defence",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4/3...Nf6/4._Ng5/4...d5/5._exd5",
+   "text": "7.dxc6 takes the pawn; recapture with 7...bxc6 as in the main line. Your bishop and queen gain open lines and the bishop on b5 is attacked again. White stays a pawn ahead, but your pieces are more active."
+  },
+  {
+   "lesson": "two-knights-defence",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4/3...Nf6/4._Ng5/4...d5/5._exd5",
+   "text": "After 8.Bd3 the main line continues 8...Nd5, centralising the knight from f6 to d5 where it is safe and strong. Black is considered equal: the extra pawn is balanced by active pieces."
+  },
+  {
+   "lesson": "two-knights-defence",
+   "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bc4/3...Nf6/4._Ng5/4...d5/5._exd5",
+   "text": "9.Nf3 brings White's knight home. 9...Bd6 develops the bishop and protects e5 so you can castle next; the main line goes 10.O-O. You have given a pawn for quick, active development."
+  },
+  {
+   "lesson": "forks",
+   "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
+   "text": "A fork is one piece attacking two enemy pieces at once. Every piece can fork, even a pawn, but knights are famous for it: the forked pieces cannot block a knight's attack or hit back at it, unless one of them is a knight too. A fork that comes with check is the most powerful kind, because the king must move and the other piece is lost. Not every fork wins material, though: check how your opponent could escape before you play it."
+  },
+  {
+   "lesson": "forks",
+   "url": "https://en.wikipedia.org/wiki/Fork_(chess)",
+   "text": "Soppe against Braga, Buenos Aires: you are Black. White's queen and king are both within a knight's jump of c3. Can you force them onto the right squares?"
+  },
+  {
+   "lesson": "forks",
+   "url": "https://en.wikipedia.org/wiki/Fork_(chess)",
+   "text": "The check leaves White one legal move: 41.Ke2. Now king on e2 and queen on d1 can both be hit from c3."
+  },
+  {
+   "lesson": "forks",
+   "url": "https://en.wikipedia.org/wiki/Fork_(chess)",
+   "text": "A royal fork: the knight checks the king and attacks the queen. The king must move, and the queen falls. In the game White resigned after 40...Qh1+."
+  },
+  {
+   "lesson": "forks",
+   "url": "https://en.wikipedia.org/wiki/Fork_(chess)",
+   "text": "Tissir against Dreev, FIDE World Championship 2004: you are Black, and White's queen has just come to f4. Look for a knight check that leads to a fork."
+  },
+  {
+   "lesson": "forks",
+   "url": "https://en.wikipedia.org/wiki/Fork_(chess)",
+   "text": "The knight checks from f2 and the king has to step to g1."
+  },
+  {
+   "lesson": "forks",
+   "url": "https://en.wikipedia.org/wiki/Fork_(chess)",
+   "text": "Now the knight attacks the queen on f4 and the rook on c1 at once. After the queen moves, Black takes the rook for a knight. White resigned here."
+  },
+  {
+   "lesson": "forks",
+   "url": "https://en.wikipedia.org/wiki/Fork_(chess)",
+   "text": "Two Knights Defence after 4.Nc3: you are Black. White has defended e4 with a knight, but a pawn fork lets you take it anyway."
+  },
+  {
+   "lesson": "forks",
+   "url": "https://en.wikipedia.org/wiki/Fork_(chess)",
+   "text": "4...Nxe4! seems to give a knight for a pawn, but it relies on the fork that follows."
+  },
+  {
+   "lesson": "forks",
+   "url": "https://en.wikipedia.org/wiki/Fork_(chess)",
+   "text": "After 5.Nxe4 d5 the pawn attacks White's bishop and knight together. Whichever one moves, you win the other back and stand well in the centre."
+  },
+  {
+   "lesson": "pins",
+   "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
+   "text": "A pinned piece cannot move without exposing a more valuable piece behind it. In an absolute pin the piece behind is the king, so moving the pinned piece is illegal. In a relative pin the piece behind is a queen or rook: the pinned piece may move, but it costs material. Once you have pinned a piece, look for a way to attack it again: it cannot run away."
+  },
+  {
+   "lesson": "pins",
+   "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
+   "text": "Your bishop pins Black's rook on f7 to the king on g8. You could take the rook at once, but there is something stronger."
+  },
+  {
+   "lesson": "pins",
+   "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
+   "text": "Ng5! attacks the pinned rook a second time. It cannot move, and Black has no good way to defend it again, so Black will lose the rook. Taking on f7 at once only wins the exchange and leaves a close game. If you see a good move, look for a better one."
+  },
+  {
+   "lesson": "skewers",
+   "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
+   "text": "A skewer is a pin turned around. In a pin the less valuable piece stands in front of the more valuable one; in a skewer the more valuable piece is attacked first, and when it moves away the piece behind it is lost. Skewers through the king are the strongest, because the king must move."
+  },
+  {
+   "lesson": "skewers",
+   "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
+   "text": "Black's king has stepped onto d7, right in front of the queen on d8. How do you punish it?"
+  },
+  {
+   "lesson": "skewers",
+   "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
+   "text": "Either rook to d1 skewers king and queen. Black cannot block the check, so the king must move."
+  },
+  {
+   "lesson": "skewers",
+   "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
+   "text": "The king has moved out of the way and the queen behind it is lost."
+  },
+  {
+   "lesson": "discovered-attacks",
+   "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
+   "text": "A discovered attack happens when one piece moves out of the way and uncovers an attack by another piece behind it. Two pieces can then threaten at once. When the uncovered attack is a check it is a discovered check, and when the moving piece gives check as well it is a double check: the king must move, because two checks cannot both be blocked or captured."
+  },
+  {
+   "lesson": "discovered-attacks",
+   "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
+   "text": "Your queen would be giving mate along the second rank, but your own pawn on d2 is in the way."
+  },
+  {
+   "lesson": "discovered-attacks",
+   "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
+   "text": "The pawn steps aside and uncovers the queen's check. Black's king has no square left: discovered checkmate."
+  },
+  {
+   "lesson": "discovered-attacks",
+   "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
+   "text": "Your bishop on f4 aims at b8, but your knight on e5 blocks it. What happens when the knight moves with check?"
+  },
+  {
+   "lesson": "discovered-attacks",
+   "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
+   "text": "A double check: the knight checks from d7 and uncovers the bishop's check. The king has to move."
+  },
+  {
+   "lesson": "discovered-attacks",
+   "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
+   "text": "A sacrifice: the knight checks again and Black has to take it."
+  },
+  {
+   "lesson": "discovered-attacks",
+   "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
+   "text": "The pawn capture opens the a-file for your rook: another discovered check, and this time it is mate."
+  },
+  {
+   "lesson": "discovered-attacks",
+   "url": "https://en.wikipedia.org/wiki/Discovered_attack",
+   "text": "French Defence, Advance Variation: Black has just grabbed a pawn with 8...Qxd4. Your bishop on d3 stands between your queen and Black's queen."
+  },
+  {
+   "lesson": "discovered-attacks",
+   "url": "https://en.wikipedia.org/wiki/Discovered_attack",
+   "text": "The bishop moves with check and uncovers your queen's attack on d4. Black must deal with the check first."
+  },
+  {
+   "lesson": "discovered-attacks",
+   "url": "https://en.wikipedia.org/wiki/Discovered_attack",
+   "text": "Black's queen is lost: a whole queen won with one discovered attack."
+  },
+  {
+   "lesson": "back-rank-mate",
+   "url": "https://en.wikipedia.org/wiki/Back-rank_checkmate",
+   "text": "A back-rank mate is delivered by a rook or queen along the last rank, when the king cannot step forward because its own pawns block the way. The defending rook or queen that guards the back rank can often be lured away, exchanged or simply overloaded. To guard against it, give your king a flight square by moving one of the pawns in front of it."
+  },
+  {
+   "lesson": "back-rank-mate",
+   "url": "https://en.wikipedia.org/wiki/Back-rank_checkmate",
+   "text": "Your rooks are doubled on the d-file and Black's king has no flight square. Black's bishop on c6 is defended only by the rook on c8."
+  },
+  {
+   "lesson": "back-rank-mate",
+   "url": "https://en.wikipedia.org/wiki/Back-rank_checkmate",
+   "text": "Take the bishop. 1...Rxc6 would allow 2.Rd8+ Rxd8 3.Rxd8#, so Black is simply a piece down."
+  },
+  {
+   "lesson": "back-rank-mate",
+   "url": "https://en.wikipedia.org/wiki/Back-rank_checkmate",
+   "text": "After 1...Qa6 the back rank is still weak: 2.Qxa8! takes a rook, and 2...Rxa8 would lose to mate."
+  },
+  {
+   "lesson": "back-rank-mate",
+   "url": "https://en.wikipedia.org/wiki/Back-rank_checkmate",
+   "text": "The rook enters with check. Black can only block with the rook."
+  },
+  {
+   "lesson": "back-rank-mate",
+   "url": "https://en.wikipedia.org/wiki/Back-rank_checkmate",
+   "text": "Mate on the back rank: the pawns on f7, g7 and h7 keep their own king in."
+  },
+  {
+   "lesson": "back-rank-mate",
+   "url": "https://en.wikipedia.org/wiki/Back-rank_checkmate",
+   "text": "Bernstein against Capablanca, Moscow 1914: you are Black. White's queen guards the back rank and the rook on c3. Can you overload it?"
+  },
+  {
+   "lesson": "back-rank-mate",
+   "url": "https://en.wikipedia.org/wiki/Back-rank_checkmate",
+   "text": "29...Qb2! attacks the rook and offers the queen. 30.Qxb2 is impossible because of 30...Rd1#."
+  },
+  {
+   "lesson": "back-rank-mate",
+   "url": "https://en.wikipedia.org/wiki/Back-rank_checkmate",
+   "text": "30.Qe1 seems to defend the rook, but the rook is not really protected: take it."
+  },
+  {
+   "lesson": "back-rank-mate",
+   "url": "https://en.wikipedia.org/wiki/Back-rank_checkmate",
+   "text": "31.Qxc3 left the back rank, so the rook checks there. 32.Qe1 is the only block."
+  },
+  {
+   "lesson": "back-rank-mate",
+   "url": "https://en.wikipedia.org/wiki/Back-rank_checkmate",
+   "text": "Back-rank mate."
+  },
+  {
+   "lesson": "removing-the-defender",
+   "url": "https://en.wikipedia.org/wiki/Undermining_(chess)",
+   "text": "Removing the defender means capturing, chasing away or pinning the piece that guards something else, so that the piece it guarded is left hanging. Your opponent then has an unpleasant choice: take back, or save the piece that has lost its guard."
+  },
+  {
+   "lesson": "removing-the-defender",
+   "url": "https://en.wikipedia.org/wiki/Undermining_(chess)",
+   "text": "Linares 2004: Black's knight on a4 is defended only by the pawn on b5."
+  },
+  {
+   "lesson": "removing-the-defender",
+   "url": "https://en.wikipedia.org/wiki/Undermining_(chess)",
+   "text": "Take the defender. If 1...Rxb5, the knight on a4 is left alone; if 1...Nxb2, 2.Rb3 wins the exchange."
+  },
+  {
+   "lesson": "removing-the-defender",
+   "url": "https://en.wikipedia.org/wiki/Undermining_(chess)",
+   "text": "The knight falls, and White is a pawn up."
+  },
+  {
+   "lesson": "queen-mate",
+   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Queen_vs._King",
+   "text": "Mating with king and queen against a lone king is easy once you know the method: use the queen alone to drive the enemy king to the edge of the board, keeping the queen a knight's move away from it, with no checks needed. Then bring your own king up to help, and watch out for stalemate. It takes about ten to fifteen moves."
+  },
+  {
+   "lesson": "queen-mate",
+   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Queen_vs._King",
+   "text": "First the queen works alone. Shrink the black king's space one rank or file at a time."
+  },
+  {
+   "lesson": "queen-mate",
+   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Queen_vs._King",
+   "text": "Cut the black king off along the fifth rank."
+  },
+  {
+   "lesson": "queen-mate",
+   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Queen_vs._King",
+   "text": "Stay a knight's move away from the king. Checks like Qc6+ only give it more room."
+  },
+  {
+   "lesson": "queen-mate",
+   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Queen_vs._King",
+   "text": "The black king is now trapped on the edge, on the h-file."
+  },
+  {
+   "lesson": "queen-mate",
+   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Queen_vs._King",
+   "text": "Now that the king is stuck, your own king comes in to help finish the job."
+  },
+  {
+   "lesson": "queen-mate",
+   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Queen_vs._King",
+   "text": "Your king has walked over to e5. Beware: Qg6 here would be stalemate, which is exactly what Black hopes for."
+  },
+  {
+   "lesson": "queen-mate",
+   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Queen_vs._King",
+   "text": "Bring the king next to g7 so it can protect the queen there."
+  },
+  {
+   "lesson": "queen-mate",
+   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Queen_vs._King",
+   "text": "The queen, protected by the king, gives mate."
+  },
+  {
+   "lesson": "rook-mate",
+   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
+   "text": "Mating with king and rook takes longer than with a queen, because king and rook must work together. The usual method is to build a box with the rook, protected by your own king, and make it smaller and smaller until the enemy king is pushed into a corner. No checks are needed until the final mate."
+  },
+  {
+   "lesson": "rook-mate",
+   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
+   "text": "First improve your king, then use the rook to fence the black king into a box."
+  },
+  {
+   "lesson": "rook-mate",
+   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
+   "text": "Bring the king towards the centre before building the box."
+  },
+  {
+   "lesson": "rook-mate",
+   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
+   "text": "The box is d8-d4-h4: the black king cannot cross the d-file or the fourth rank."
+  },
+  {
+   "lesson": "rook-mate",
+   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
+   "text": "The box shrinks to e8-e4-h4."
+  },
+  {
+   "lesson": "rook-mate",
+   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
+   "text": "The box is e8-e4-h4. Black's king is keeping its distance, so the rook cannot shrink the box straight away."
+  },
+  {
+   "lesson": "rook-mate",
+   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
+   "text": "The box can't be made smaller yet, so the king creeps closer."
+  },
+  {
+   "lesson": "rook-mate",
+   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
+   "text": "Back to shrinking the box: the process repeats itself."
+  },
+  {
+   "lesson": "rook-mate",
+   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
+   "text": "After 8...Kf7 9.Re6 Kg7 the box is down to the last two ranks and files. Keep shrinking it with king and rook together; no checks are needed until the mate."
+  },
+  {
+   "lesson": "rook-mate",
+   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
+   "text": "The king follows the rook, keeping it protected."
+  },
+  {
+   "lesson": "rook-mate",
+   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
+   "text": "Black's king can only shuffle between h7 and h8. If it were your move here, you would make a waiting move with the rook along the sixth rank."
+  },
+  {
+   "lesson": "rook-mate",
+   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/King_and_Rook_vs._King",
+   "text": "Mate in the corner."
+  },
+  {
+   "lesson": "king-and-pawn",
+   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings",
+   "text": "Two ideas decide most endgames with only kings and pawns: the rule of the square, which tells you whether a king can catch a pawn, and the opposition, the stand-off between two kings with one square between them. A passed pawn far from the other pawns, an outside passed pawn, is often enough to win."
+  },
+  {
+   "lesson": "king-and-pawn",
+   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings",
+   "text": "Draw a square from the pawn to its queening square (e5-e8-b8-b5). If the enemy king can step into it, it catches the pawn; if not, the pawn queens. Black's king on a4 is outside the square."
+  },
+  {
+   "lesson": "king-and-pawn",
+   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings",
+   "text": "With White to move the black king is outside the square, so just push."
+  },
+  {
+   "lesson": "king-and-pawn",
+   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings",
+   "text": "The pawn queens. Had Black been to move, 1...Kb5 would have stepped into the square and caught it."
+  },
+  {
+   "lesson": "king-and-pawn",
+   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings",
+   "text": "The kings face each other with one square between them and it is Black to move, so you have the opposition: Black has to give way."
+  },
+  {
+   "lesson": "king-and-pawn",
+   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings",
+   "text": "Black's king stepped aside, so yours goes forward."
+  },
+  {
+   "lesson": "king-and-pawn",
+   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings",
+   "text": "Black seems to have the opposition now, but you don't have to move your king: a pawn move hands the move back to Black."
+  },
+  {
+   "lesson": "king-and-pawn",
+   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings",
+   "text": "Your king stands in front of the pawn on the sixth rank, and the pawn will get through."
+  },
+  {
+   "lesson": "king-and-pawn",
+   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings",
+   "text": "The pawn queens next move."
+  },
+  {
+   "lesson": "king-and-pawn",
+   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings",
+   "text": "Pawns are equal, but your f-pawn is far from the others. Use it as a decoy."
+  },
+  {
+   "lesson": "king-and-pawn",
+   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings",
+   "text": "Push the outside pawn so the black king has to chase it."
+  },
+  {
+   "lesson": "king-and-pawn",
+   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings",
+   "text": "While Black's king is away, yours eats the queenside pawns."
+  },
+  {
+   "lesson": "king-and-pawn",
+   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings",
+   "text": "Your king shields the a-pawn, and it will queen."
+  },
+  {
+   "lesson": "rook-endgames",
+   "url": "https://en.wikipedia.org/wiki/Lucena_position",
+   "text": "Rook and pawn against rook is the most common endgame of all, and two positions are the key to it. With the Lucena position the side with the pawn wins by building a bridge with the rook to shelter its king. With the Philidor position the defender draws by keeping the rook on the third rank and then checking from behind."
+  },
+  {
+   "lesson": "rook-endgames",
+   "url": "https://en.wikipedia.org/wiki/Lucena_position",
+   "text": "Your pawn is on the seventh rank but your own king stands in front of it, and Black's rook is ready to check."
+  },
+  {
+   "lesson": "rook-endgames",
+   "url": "https://en.wikipedia.org/wiki/Lucena_position",
+   "text": "Drive the black king away from the pawn first."
+  },
+  {
+   "lesson": "rook-endgames",
+   "url": "https://en.wikipedia.org/wiki/Lucena_position",
+   "text": "The key move: the rook goes to the fourth rank, ready to block checks later."
+  },
+  {
+   "lesson": "rook-endgames",
+   "url": "https://en.wikipedia.org/wiki/Lucena_position",
+   "text": "Now the king comes out, and Black starts checking."
+  },
+  {
+   "lesson": "rook-endgames",
+   "url": "https://en.wikipedia.org/wiki/Lucena_position",
+   "text": "The rook blocks the check: the bridge is built. Black cannot stop the pawn queening."
+  },
+  {
+   "lesson": "rook-endgames",
+   "url": "https://en.wikipedia.org/wiki/Philidor_position",
+   "text": "You defend. Your king is on the pawn's queening square and your rook on the third rank keeps Black's king out."
+  },
+  {
+   "lesson": "rook-endgames",
+   "url": "https://en.wikipedia.org/wiki/Philidor_position",
+   "text": "Keep the rook on the third rank, shuffling along it, until the pawn comes forward."
+  },
+  {
+   "lesson": "rook-endgames",
+   "url": "https://en.wikipedia.org/wiki/Philidor_position",
+   "text": "With the pawn on e3, Black's king can no longer use that square, so your rook is free to go to the far end of the board. 4.Rb4+?? would lose to 4...Kf3."
+  },
+  {
+   "lesson": "rook-endgames",
+   "url": "https://en.wikipedia.org/wiki/Philidor_position",
+   "text": "Check from behind. The king cannot escape the checks without giving up the pawn."
+  },
+  {
+   "lesson": "rook-endgames",
+   "url": "https://en.wikipedia.org/wiki/Philidor_position",
+   "text": "Black makes no progress: a draw."
+  }
+ ]
+}

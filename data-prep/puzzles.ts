@@ -10,7 +10,11 @@ import { createInterface } from 'node:readline';
 import { createZstdDecompress } from 'node:zlib';
 import { turnOf } from '@chess-coach/shared/chess';
 import { tagMatches, validatePuzzles, type PuzzleData, type PuzzleFile } from '@chess-coach/shared/content/puzzles';
-import { CATALOGUE } from './catalogue.ts';
+import { readSources } from './sources.ts';
+
+const CATALOGUE = [...readSources().values()]
+  .filter((s) => s.kind === 'opening')
+  .map((s) => ({ id: s.id, puzzleTags: s.puzzleTags ?? [] }));
 
 const MIN_RATING = 600;
 const MAX_RATING = 2000;

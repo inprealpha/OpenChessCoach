@@ -16,7 +16,7 @@ npm run build -w @chess-coach/web && npm run test:journeys
 | Board and Engine (Move Grades) | Main menu → the small Board link | `board.spec.ts` | [board-and-engine.md](board-and-engine.md) |
 | Why Question | the Coach panel beside any board | `board.spec.ts` | [why-question.md](why-question.md) |
 | First run and Player Profile | first visit after pairing; the profile icon in the header | `first-run.spec.ts` | [first-run-and-player-profile.md](first-run-and-player-profile.md) |
-| Lesson | Main menu → Learn → Lessons, or first run's suggested start → Learn | `lesson.spec.ts` | [lesson.md](lesson.md) |
+| Lesson (the four tracks, the Player's next Lesson) | Main menu → Learn → Lessons, or first run's `Start with the Lessons` | `lesson.spec.ts` | [lesson.md](lesson.md) |
 | Puzzle | Main menu → Learn → Puzzles, or the end of a Lesson | `puzzles.spec.ts` | [puzzles.md](puzzles.md) |
 | Imported Game | Main menu → Review your games, Import your games or Import more | `imported-game.spec.ts` | [imported-game.md](imported-game.md) |
 | Review | Main menu → Review your games → Review, or the end of an Engine Game | `imported-game.spec.ts`, `first-run.spec.ts` | [review.md](review.md) |

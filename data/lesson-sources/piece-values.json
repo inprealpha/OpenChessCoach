@@ -1,0 +1,73 @@
+{
+ "id": "piece-values",
+ "name": "What the pieces are worth",
+ "kind": "thinking",
+ "track": "thinking",
+ "level": "beginner",
+ "side": "white",
+ "goal": "You can count material with the usual values (pawn 1, knight and bishop 3, rook 5, queen 9), and tell a good trade from a bad one.",
+ "priorKnowledge": [
+  "attack-and-defend"
+ ],
+ "intro": "Each piece has a value in points: a pawn is worth 1, a knight or a bishop 3, a rook 5 and a queen 9. The king is never traded, so it has no points. Add up the points of each side's pieces and pawns, called material, to see who is ahead. Before any capture, count what you give and what you get back: a trade is good when you get more points than you give.",
+ "parts": [
+  {
+   "title": "After the f-pawn moves",
+   "fen": "r4rk1/p5pp/2pbb3/3p1pq1/5PP1/4Q2P/PPP1NP1K/R4R2 w - - 0 19",
+   "side": "white",
+   "keyIdea": "A piece with no defender is free: take it and you gain its full value.",
+   "text": "From a game played on Lichess. You are White. Black has two bishops (6 points), and you have a knight and an extra pawn (4 points), so Black is 2 points ahead. Black has just played 18...f5, the pawn moving from f7 to f5. Which black pieces does nothing defend now?",
+   "url": "https://lichess.org/training/B43hL",
+   "line": "Qxe6+ Rf7 Qxd6",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Qxe6+",
+     "text": "The pawn on f7 used to guard the bishop on e6, but after 18...f5 nothing does. Your queen takes it for free, and with check, so Black has to answer the check first."
+    },
+    {
+     "ply": 2,
+     "san": "Qxd6",
+     "text": "The bishop on d6 has no defender either, so your queen takes it too. You have won two bishops, 6 points, for nothing: you were 2 points behind and are now 4 ahead."
+    }
+   ]
+  },
+  {
+   "title": "A knight under attack",
+   "fen": "r3qr2/pp4pk/4bbNp/3p3Q/5P2/8/PP4PP/R3R1K1 w - - 1 24",
+   "side": "white",
+   "keyIdea": "Count both sides of a trade: giving a knight (3) for a rook (5) gains 2 points, even though your piece is taken back.",
+   "text": "From a game played on Lichess. You are White and 3 points behind, and after 23...Kh7 your knight on g6 is attacked by the king and the queen. Look at what the knight can take, and count.",
+   "url": "https://lichess.org/training/VWMyb",
+   "line": "Nxf8+ Qxf8 Rxe6",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Nxf8+",
+     "text": "The knight takes the rook on f8 with check. After 24...Qxf8 your knight is gone, but count the trade: you gave 3 points and won 5."
+    },
+    {
+     "ply": 2,
+     "san": "Rxe6",
+     "text": "The queen has left e8, and nothing guards the bishop on e6 any more. Your rook takes it for free: you started 3 points behind and are now 2 ahead."
+    }
+   ]
+  },
+  {
+   "title": "Two pawns to take",
+   "fen": "r1b1k2r/ppppqppp/2n2n2/2b1p3/2P1P3/3P1NP1/PP3PBP/RNBQK2R b KQkq - 0 6",
+   "side": "black",
+   "keyIdea": "Before you capture, count what comes back: a bishop for a pawn loses 2 points, even when the capture is a check.",
+   "text": "From a game played on Lichess. You are Black, and the material is level. Both 6...Bxf2+ (the bishop takes the f2 pawn with check) and 6...Nxe4 (the knight takes the e4 pawn) take a pawn. Count what White takes back after each one, then choose a better move.",
+   "url": "https://lichess.org/2MDaV4cl#11",
+   "line": "d6",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "d6",
+     "text": "After 6...Bxf2+ 7.Kxf2 you would have given a bishop (3) for a pawn (1), and after 6...Nxe4 7.dxe4 a knight for a pawn: 2 points lost either way. 6...d6 keeps all your pieces: it guards the pawn on e5 and opens the way for your bishop on c8. In the game Black took on f2 anyway. Black won the bishop back with 7...Qc5+, but only because White then blocked the check with 8.Be3, a mistake that allowed 8...Ng4+. After 8.Ke2, White would have kept the extra piece."
+    }
+   ]
+  }
+ ]
+}

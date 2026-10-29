@@ -1,0 +1,79 @@
+{
+ "id": "italian-game",
+ "name": "Italian Game",
+ "kind": "opening",
+ "track": "openings",
+ "level": "beginner",
+ "side": "white",
+ "eco": "C54",
+ "puzzleTags": [
+  "Italian_Game"
+ ],
+ "goal": "As White, you can play the Italian Game: aim the bishop at f7, put pawns on c3 and d4 to build a centre, and castle.",
+ "priorKnowledge": [
+  "opening-principles"
+ ],
+ "intro": "The Italian Game begins 1.e4 e5 2.Nf3 Nc6 3.Bc4: both sides push the pawn in front of the king two squares and bring out a knight, and then White's bishop comes out to c4. From there it points at f7, the pawn beside Black's king that only the king defends. After 3...Bc5, Black's bishop to c5, you push the c-pawn to c3 to get ready for the d-pawn to come to d4, so that two pawns stand side by side in the centre, and you castle as soon as it is safe.",
+ "parts": [
+  {
+   "title": "Italian Game",
+   "fen": "start",
+   "side": "white",
+   "keyIdea": "Develop towards the centre, aim a bishop at the weak pawn beside the enemy king, then build a two-pawn centre before castling.",
+   "url": "https://github.com/lichess-org/chess-openings",
+   "line": "e4 e5 Nf3 Nc6 Bc4 Bc5 c3 Nf6 d4 exd4 cxd4 Bb4+ Bd2 Bxd2+ Nbxd2 d5 exd5 Nxd5 O-O",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "e4",
+     "text": "1.e4, the pawn in front of your king moving two squares to e4, puts a pawn in the centre and attacks d5 and f5. It also opens lines for your queen and for the bishop on f1, which is heading for c4."
+    },
+    {
+     "ply": 2,
+     "san": "Nf3",
+     "text": "Black answered with 1...e5. 2.Nf3 develops a knight, which means it brings the knight off its starting square, here towards the centre. It also attacks the e5 pawn, which nothing defends yet, so Black usually spends the next move on it."
+    },
+    {
+     "ply": 4,
+     "san": "Bc4",
+     "text": "2...Nc6 guards e5. 3.Bc4 brings the bishop to an open diagonal aimed at f7, the weakest point near Black's king. Now that the knight and bishop have moved out, nothing stands between your king and the rook on h1."
+    },
+    {
+     "ply": 6,
+     "san": "c3",
+     "text": "3...Bc5 points Black's bishop at your f2 pawn and at d4. 4.c3 gets ready for d4: with a pawn on c3 to guard it, a pawn on d4 can stay there. 4.d3 followed by castling is a quieter plan."
+    },
+    {
+     "ply": 8,
+     "san": "d4",
+     "text": "4...Nf6 attacks your e4 pawn. 5.d4 strikes back instead of defending it: the pawn attacks the bishop on c5 and the pawn on e5 at once. Black nearly always takes with 5...exd4."
+    },
+    {
+     "ply": 10,
+     "san": "cxd4",
+     "text": "6.cxd4 takes back. Now you have the centre you aimed for, pawns on d4 and e4 side by side, and the d4 pawn attacks the bishop, so Black must move it."
+    },
+    {
+     "ply": 12,
+     "san": "Bd2",
+     "text": "6...Bb4+ checks your king. 7.Bd2 blocks the check, brings another piece out and offers a trade of bishops. Stepping aside with the king would cost you the right to castle."
+    },
+    {
+     "ply": 14,
+     "san": "Nbxd2",
+     "text": "Black traded with 7...Bxd2+. 8.Nbxd2 takes back with the knight, which develops it, and from d2 it guards your e4 pawn. 8.Qxd2 would allow 8...Nxe4, winning the pawn with an attack on your queen."
+    },
+    {
+     "ply": 16,
+     "san": "exd5",
+     "text": "8...d5 attacks your bishop and your e4 pawn at once. 9.exd5 takes the pawn. After 9...Nxd5 your d4 pawn stands alone in the centre, but your pieces are out and your king is ready to castle."
+    },
+    {
+     "ply": 18,
+     "san": "O-O",
+     "text": "10.O-O castles kingside, towards the h-file. Your king is safe on g1, and your rook comes towards the centre. All the knights and bishops you have left are out. Next, a rook can go to the e-file or the c-file, where your own pawns no longer block it: Re1 or Rc1."
+    }
+   ]
+  }
+ ]
+}

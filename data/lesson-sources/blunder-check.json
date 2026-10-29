@@ -1,0 +1,78 @@
+{
+ "id": "blunder-check",
+ "name": "Blunder check",
+ "kind": "thinking",
+ "track": "thinking",
+ "level": "beginner",
+ "side": "white",
+ "goal": "Before you play a move, you can look at what your opponent could take, check or attack after it, and pick a safer move when the answer is bad.",
+ "priorKnowledge": [
+  "threats"
+ ],
+ "intro": "One careless move can throw away a whole game. A blunder check is a habit for the moment before you play: picture your move on the board, then look at every capture, check and attack your opponent would have after it. If one of them wins material from you (your pieces and pawns, counted in points) or lets your opponent mate, choose a different move.",
+ "parts": [
+  {
+   "title": "Which piece takes back?",
+   "fen": "r2qk2r/1pp3pp/3ppn2/p1b1p3/3nP3/P1NPBN2/1PP2PPP/R2Q1RK1 w kq - 3 10",
+   "side": "white",
+   "keyIdea": "Before you capture, look at what the piece that takes back would attack: a pawn that takes back can hit two pieces at once.",
+   "text": "From a game played on Lichess. You are White, and you can take Black's knight on d4 with your knight or with your bishop. For each capture, picture Black taking back and ask what that piece would attack.",
+   "url": "https://lichess.org/l9oTgq0h#18",
+   "line": "Bxd4 Bxd4 Nxd4 exd4 Ne2",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Bxd4",
+     "text": "Taking with the knight, 10.Nxd4, looks natural, but after 10...exd4 (Black's e-pawn takes back on d4) the pawn attacks your knight on c3 and your bishop on e3 together, and one of them is lost. Taking with the bishop means there is no bishop left on e3 for that pawn to attack."
+    },
+    {
+     "ply": 2,
+     "san": "Nxd4",
+     "text": "Black took back with the bishop. This time the knight can take safely: after 11.Nxd4 exd4 the pawn attacks only your knight on c3, and the knight can simply move away."
+    },
+    {
+     "ply": 4,
+     "san": "Ne2",
+     "text": "The pawn on d4 attacked your knight, so the knight steps to a safe square. On e2 no black piece attacks it, and your queen guards it."
+    }
+   ]
+  },
+  {
+   "title": "Is the rook really free?",
+   "fen": "3q3k/5rpp/p7/P3pp2/1P6/5P2/Q5PP/2r2RK1 w - - 0 30",
+   "side": "white",
+   "keyIdea": "A free piece is only free if your king is still safe afterwards: look at every enemy check before you grab it.",
+   "text": "From a game played on Lichess. You are White and a rook down, and you can take a black rook with 30.Qxf7 or with 30.Rxc1. Before you take one, look at every check Black would have afterwards.",
+   "url": "https://lichess.org/cjDG0xIn#58",
+   "line": "Rxc1",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Rxc1",
+     "text": "30.Qxf7 wins a rook but loses the game. After 30...Qd4+ your rook on f1 cannot block on f2, because Black's rook on c1 pins it to your king, so the king must go to h1, and then 31...Rxf1 is mate. 30.Rxc1 removes the rook that attacks your rook on f1 along your back rank (the row your king started on), and the material is level again."
+    }
+   ]
+  },
+  {
+   "title": "Is the bishop really free?",
+   "fen": "2kr1b1r/ppp1pppp/2q5/1N1n4/5B2/8/PPP1QPPP/R4RK1 b - - 5 13",
+   "side": "black",
+   "keyIdea": "Before you take, look at your opponent's checks: one check can attack your king and your queen together.",
+   "text": "From a game played on Lichess. You are Black, and your knight on d5 can take White's bishop on f4, which nothing defends. Before you take it, look for White's checks.",
+   "url": "https://lichess.org/gcuPg8Dd#25",
+   "line": "Qe8 Bg3 a6",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Qe8",
+     "text": "13...Nxf4 wins a bishop, but 14.Nxa7+ is a check that also attacks your queen on c6, and after your king moves, the knight takes the queen. That knight check is possible right now too, so the queen steps off c6 first. On e8 it is safe, and your knight still attacks the bishop."
+    },
+    {
+     "ply": 2,
+     "san": "a6",
+     "text": "White saved the bishop. Now your pawn and your queen both attack the knight on b5, the piece that made the check possible."
+    }
+   ]
+  }
+ ]
+}

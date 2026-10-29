@@ -3,7 +3,18 @@
 import { describe, expect, it } from 'vitest';
 import type { Candidate } from '../src/analysis.ts';
 import type { Analysis } from '../src/engine.ts';
-import { assertBriefWithinBudget, BRIEF_BUDGET, BriefTooLargeError, briefSize, buildBrief, profileSlice, type Brief } from '../src/coach/brief.ts';
+import {
+  assertBriefWithinBudget,
+  BRIEF_BUDGET,
+  BriefTooLargeError,
+  briefSize,
+  buildBrief,
+  MAX_KEY_IDEA,
+  MAX_LEARNING_GOAL,
+  profileSlice,
+  TRIM_STEPS,
+  type Brief,
+} from '../src/coach/brief.ts';
 import { allowedMoves, askedLineMoves, guardReply } from '../src/coach/guard.ts';
 import type { CoachAsk, CoachRawReply } from '../src/coach/types.ts';
 import { legalMoves, playUci, turnOf } from '../src/chess.ts';
@@ -23,8 +34,8 @@ const profile = {
 };
 
 /** A Review moment late in a long real game, the largest brief the app builds. */
-function longGameAsk(at = 60): CoachAsk {
-  const g = game('fzjtms6a');
+function longGameAsk(at = 60, id = 'fzjtms6a'): CoachAsk {
+  const g = game(id);
   const m = g.moves[at];
   if (!m) throw new Error('fixture too short');
   return {
@@ -109,6 +120,178 @@ describe('the Coach brief', () => {
     // Without them the brief is the same, so asking costs the other moves nothing.
     const without = buildBrief({ ask: { ...why, asked: undefined }, profile, summary: 'y'.repeat(5000) });
     expect(brief.candidates.slice(0, without.candidates.length)).toEqual(without.candidates);
+  });
+
+  it('carries a Lesson’s focus in a Lesson turn, a Hint and a Why Question, and none outside a Lesson', () => {
+    const g = game('i425hmuv');
+    const m = g.moves[2] as (typeof g.moves)[number]; // 2. Bc4
+    const lessonFocus = {
+      lesson: 'Italian Game',
+      learningGoal: 'Play the first moves of the Italian Game and say what each one is for.',
+      keyIdea: 'Aim the bishop at f7, the square only the king defends.',
+    };
+    const ask: CoachAsk = {
+      job: 'lesson-turn',
+      fen: m.fenBefore,
+      recentMoves: ['e4', 'e5'],
+      playerSide: 'white',
+      move: { uci: m.uci, san: m.san, grade: m.grade, playedScore: m.playedScore },
+      candidates: m.candidates,
+      replies: g.moves[3]?.candidates ?? [],
+      lessonFocus,
+    };
+    const { lesson: _name, ...goalAndIdea } = lessonFocus;
+    // A Hint is asked before the move, in the position.
+    for (const job of ['hint', 'why'] as const) {
+      const brief = buildBrief({ ask: { ...ask, job, ...(job === 'hint' ? { move: undefined, replies: undefined } : {}) }, profile });
+      expect(brief.focus, job).toEqual(lessonFocus);
+    }
+    // A Lesson turn names the Lesson in lesson.opening already, so its focus doesn't repeat it.
+    const lesson = { lessonId: 'italian-game', opening: 'Italian Game', notes: '', popularity: [], finalTurn: false };
+    expect(buildBrief({ ask: { ...ask, lesson }, profile }).focus).toEqual(goalAndIdea);
+    expect(buildBrief({ ask: { ...ask, lesson: { ...lesson, opening: 'Another Lesson' } }, profile }).focus).toEqual(lessonFocus);
+    expect(buildBrief({ ask: { ...ask, lessonFocus: undefined }, profile })).not.toHaveProperty('focus');
+    // A Lesson with no goal or key idea has no point to keep the Coach on.
+    expect(buildBrief({ ask: { ...ask, lessonFocus: { lesson: 'Italian Game', learningGoal: ' ', keyIdea: '' } }, profile })).not.toHaveProperty('focus');
+  });
+
+  it('keeps the answer back from a Lesson turn whose move isn’t the Lesson’s: no candidates, no notes, only the move’s own popularity', () => {
+    const g = game('i425hmuv');
+    const m = g.moves[2] as (typeof g.moves)[number]; // 2. Bc4
+    const ask: CoachAsk = {
+      job: 'lesson-turn',
+      fen: m.fenBefore,
+      recentMoves: ['e4', 'e5'],
+      playerSide: 'white',
+      move: { uci: m.uci, san: m.san, grade: m.grade, playedScore: m.playedScore },
+      candidates: m.candidates,
+      replies: g.moves[3]?.candidates ?? [],
+      lessonFocus: { lesson: 'Italian Game', learningGoal: 'Play the first moves of the Italian Game.', keyIdea: 'Aim the bishop at f7.' },
+    };
+    const lesson = {
+      lessonId: 'italian-game',
+      opening: 'Italian Game',
+      notes: 'Nf3 attacks the pawn on e5 and gets a piece out.',
+      popularity: [{ san: 'Nf3', percent: 60 }, { san: m.san, percent: 12 }, { san: 'Nc3', percent: 9 }],
+      finalTurn: false,
+    };
+    const lessonMove = buildBrief({ ask: { ...ask, lesson: { ...lesson, isLessonMove: true } }, profile });
+    expect(lessonMove.candidates.length).toBeGreaterThan(0);
+    expect(lessonMove.lesson).toEqual({ opening: 'Italian Game', notes: lesson.notes, popularity: `Nf3 60%, ${m.san} 12%, Nc3 9%` });
+    // A client that doesn't say gets the brief as before.
+    expect(buildBrief({ ask: { ...ask, lesson }, profile })).toEqual(lessonMove);
+
+    const other = buildBrief({ ask: { ...ask, lesson: { ...lesson, isLessonMove: false } }, profile });
+    expect(other.candidates).toEqual([]);
+    expect(other.lesson).toEqual({ opening: 'Italian Game', notes: '', popularity: `${m.san} 12%`, isLessonMove: false });
+    // The move, what it allows and the Lesson's learning goal stay: that is what the Coach explains
+    // from. The key idea goes: it can all but name the Lesson's move.
+    // Nothing of the lines past the replies does: the Lesson's move is often still the best one there.
+    expect(other.move).toEqual(lessonMove.move);
+    expect(other.replies?.map((r) => r.san)).toEqual(lessonMove.replies?.map((r) => r.san));
+    expect(lessonMove.replies?.every((r) => r.line)).toBe(true);
+    expect(other.replies?.every((r) => r.line === '')).toBe(true);
+    expect(lessonMove.focus).toEqual({ learningGoal: 'Play the first moves of the Italian Game.', keyIdea: 'Aim the bishop at f7.' });
+    expect(other.focus).toEqual({ learningGoal: 'Play the first moves of the Italian Game.' });
+    expect(other.hideMoves).toBe(false);
+    // Neither the Engine's best move nor any other of its moves in the position is allowed: a reply
+    // that shows one has it stripped, while the move and the replies may still be drawn.
+    const best = m.candidates.find((c) => c.uci !== m.uci) as Candidate;
+    const reply = other.replies?.[0] as NonNullable<Brief['replies']>[number];
+    const raw: CoachRawReply = {
+      text: 'x',
+      moves: [best.uci, m.uci, reply.uci],
+      arrows: [{ uci: best.uci, brush: 'green' }, { uci: m.uci, brush: 'blue' }, { uci: reply.uci, brush: 'yellow' }],
+      highlights: [],
+      note: null,
+    };
+    const guarded = guardReply(other, raw);
+    expect(guarded.moves).toEqual([m.uci, reply.uci]);
+    expect(guarded.arrows.map((a) => `${a.from}${a.to}`)).toEqual([m.uci, reply.uci]);
+    expect(guarded.stripped).toHaveLength(2);
+  });
+
+  it('keeps a Lesson turn that keeps the answer back within its budget, with its learning goal whole and no key idea', () => {
+    const lessonFocus = { lesson: 'Italian Game', learningGoal: 'g'.repeat(MAX_LEARNING_GOAL), keyIdea: 'k'.repeat(MAX_KEY_IDEA) };
+    for (const { where, brief } of largestLessonBriefs(lessonFocus, false)) {
+      expect(briefSize(brief), where).toBeLessThanOrEqual(BRIEF_BUDGET);
+      // A Hint and a Why Question keep the key idea; only the Lesson turn keeps it back.
+      if (brief.job === 'lesson-turn') expect(brief.focus, where).toEqual({ learningGoal: lessonFocus.learningGoal });
+      else expect(brief.focus, where).toMatchObject({ learningGoal: lessonFocus.learningGoal, keyIdea: lessonFocus.keyIdea });
+    }
+  });
+
+  /**
+   * The largest brief of every Lesson job: every field the client sends at its limit, and for a Hint
+   * and a Why Question, the tempting moves they get (ADR 0011). In the long game’s late moment, and at
+   * 15... Bxe4 in game xd9vkd47, where the fully trimmed brief is largest over the golden moves (or
+   * all but tied with the largest, for a Why Question in the position).
+   */
+  function largestLessonBriefs(lessonFocus: NonNullable<CoachAsk['lessonFocus']>, isLessonMove?: boolean): { where: string; brief: Brief }[] {
+    // Every profile item matches the Lesson, each longer than the brief keeps.
+    const matching = (kind: string) => [1, 2, 3].map((i) => `Italian Game ${kind} ${i} ${'x'.repeat(150)}`);
+    const fullProfile = { ...profile, goals: matching('goal'), weaknesses: matching('weakness'), notes: matching('note').map((text, id) => ({ id, text, createdAt: '2026-01-01' })) };
+    const lesson = {
+      lessonId: 'italian-game',
+      opening: 'Italian Game',
+      notes: 'z'.repeat(2000),
+      popularity: ['Nf3', 'Bc4', 'd4', 'Nc3', 'Bb5'].map((san) => ({ san, percent: 12.5 })),
+      finalTurn: true,
+      ...(isLessonMove === undefined ? {} : { isLessonMove }),
+    };
+    const out: { where: string; brief: Brief }[] = [];
+    for (const base of [longGameAsk(), longGameAsk(29, 'xd9vkd47')]) {
+      const best = base.replies?.[0] as Candidate;
+      // Moves the Engine didn't list, each with a full line: two the Why Question names, three tempting ones.
+      const unlisted = legalMoves(base.fen)
+        .filter((uci) => uci !== base.move?.uci && !base.candidates.some((c) => c.uci === uci))
+        .slice(0, 5)
+        .map((uci) => ({ uci, san: '', score: { cp: -300 }, pv: [uci, ...someLine((playUci(base.fen, uci) as { fenAfter: string }).fenAfter, 8)] }));
+      const asked = unlisted.slice(0, 2);
+      const afterMove: CoachAsk = { ...base, lessonFocus, threat: { ...someThreat(base.fen), uci: best.uci, pv: best.pv } };
+      const inPosition: CoachAsk = { ...afterMove, move: undefined, replies: undefined, threat: someThreat(base.fen) };
+      for (const ask of [afterMove, inPosition]) {
+        for (const job of ['lesson-turn', 'hint', 'why'] as const) {
+          // A Hint keeps only the tempting moves the Engine lists; a Lesson turn gets none.
+          const extra = job === 'lesson-turn' ? { lesson } : job === 'hint' ? { tempting: base.candidates.slice(0, 3) } : { asked, tempting: unlisted.slice(2) };
+          const brief = buildBrief({ ask: { ...ask, job, ...extra }, profile: fullProfile, summary: 'y'.repeat(5000) });
+          out.push({ where: `${job} ${base.fen}${ask.move ? '' : ' (position)'}`, brief });
+        }
+      }
+    }
+    return out;
+  }
+
+  it('keeps a Lesson’s focus whole in the largest brief of every Lesson job, within its budget', () => {
+    // Longer than the Lesson check allows: the brief clips them to its limits.
+    const lessonFocus = { lesson: 'n'.repeat(200), learningGoal: 'g'.repeat(MAX_LEARNING_GOAL + 100), keyIdea: 'k'.repeat(MAX_KEY_IDEA + 100) };
+    const focus = { lesson: `${'n'.repeat(79)}…`, learningGoal: `${'g'.repeat(MAX_LEARNING_GOAL - 1)}…`, keyIdea: `${'k'.repeat(MAX_KEY_IDEA - 1)}…` };
+    for (const { where, brief } of largestLessonBriefs(lessonFocus)) {
+      expect(briefSize(brief), where).toBeLessThanOrEqual(BRIEF_BUDGET);
+      expect(brief.focus, where).toEqual(focus);
+    }
+  });
+
+  it('keeps a focus of characters JSON escapes whole too, within its budget', () => {
+    // A quote or a backslash takes two characters in JSON. (The desktop turns control characters,
+    // which take six, into spaces before the brief is built.)
+    const escaped = (n: number) => '"\\'.repeat(n).slice(0, n);
+    const lessonFocus = { lesson: escaped(80), learningGoal: escaped(MAX_LEARNING_GOAL), keyIdea: escaped(MAX_KEY_IDEA) };
+    for (const { where, brief } of largestLessonBriefs(lessonFocus)) {
+      expect(briefSize(brief), where).toBeLessThanOrEqual(BRIEF_BUDGET);
+      expect(brief.focus, where).toEqual(lessonFocus);
+    }
+  });
+
+  it('has no trimming step that touches a Lesson’s focus, however late it comes', () => {
+    // The worst case fits before the last steps run, so the test above would miss a late step that cuts the focus.
+    const lessonFocus = { lesson: 'Italian Game', learningGoal: 'g'.repeat(MAX_LEARNING_GOAL), keyIdea: 'k'.repeat(MAX_KEY_IDEA) };
+    for (const { where, brief } of largestLessonBriefs(lessonFocus)) {
+      const focus = structuredClone(brief.focus);
+      expect(focus, where).toMatchObject({ learningGoal: lessonFocus.learningGoal, keyIdea: lessonFocus.keyIdea });
+      for (const step of TRIM_STEPS) step(brief);
+      expect(brief.focus, where).toEqual(focus);
+    }
   });
 
   it('carries the opponent’s threat as the Engine found it: who threatens, the move and its line', () => {

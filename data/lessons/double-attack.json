@@ -1,0 +1,248 @@
+{
+ "id": "double-attack",
+ "name": "Double attacks",
+ "kind": "theme",
+ "track": "themes",
+ "level": "beginner",
+ "goal": "You can find a move that attacks two things at once, often with the queen, so the opponent cannot save both.",
+ "priorKnowledge": [
+  "attack-and-defend",
+  "piece-values"
+ ],
+ "side": "black",
+ "puzzleTags": [],
+ "puzzleThemes": [],
+ "intro": {
+  "text": "A double attack is one move that attacks two things at once. Your opponent can usually save only one of them, so you win the other. When a single piece makes both attacks, the double attack is also called a fork. The queen is the best piece for it, because it moves in every direction: look for a queen move that hits an undefended piece, gives check or threatens mate, and attacks something else at the same time."
+ },
+ "parts": [
+  {
+   "title": "Two undefended pieces",
+   "fen": "8/p1R3pp/4p1k1/8/8/8/P2q1PPP/R5K1 w - - 3 20",
+   "side": "black",
+   "keyIdea": "A queen in the centre can hit two undefended pieces at once along different lines.",
+   "text": "From a game played on Lichess. You are Black. White's rook has just taken your pawn on a7, so White has rooks on a7 and a1, and the a2 pawn between them means neither one guards the other. Can one queen move attack both?",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle 74sFg",
+    "url": "https://lichess.org/training/74sFg",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "c7a7",
+    "d2d4",
+    "a1e1",
+    "d4a7"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "8/p1R3pp/4p1k1/8/8/8/P2q1PPP/R5K1 w - - 3 20",
+     "decision": false,
+     "main": "c7a7",
+     "mainSan": "Rxa7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "8/R5pp/4p1k1/8/8/8/P2q1PPP/R5K1 b - - 0 20",
+     "decision": true,
+     "main": "d2d4",
+     "mainSan": "Qd4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "From d4 the queen attacks the rook on a7 along one diagonal and the rook on a1 along the other. White can save only one of them."
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "8/R5pp/4p1k1/8/3q4/8/P4PPP/R5K1 w - - 1 21",
+     "decision": false,
+     "main": "a1e1",
+     "mainSan": "Re1",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "8/R5pp/4p1k1/8/3q4/8/P4PPP/4R1K1 b - - 2 21",
+     "decision": true,
+     "main": "d4a7",
+     "mainSan": "Qxa7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "White moved the rook from a1 to safety on e1. The rook on a7 is still undefended, and the queen takes it."
+     }
+    }
+   ]
+  },
+  {
+   "title": "A rook grabs a pawn",
+   "fen": "8/7Q/3p1k1p/4n1p1/4P3/3P1r1P/4K3/8 b - - 7 35",
+   "side": "white",
+   "keyIdea": "A queen check that also hits an undefended piece wins it, because the king must answer the check first.",
+   "text": "From a game played on Lichess. You are White. Black's rook has just taken your pawn on h3, and nothing guards it there. Your queen cannot reach h3 in one move, but a check can help.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle RUP5c",
+    "url": "https://lichess.org/training/RUP5c",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "f3h3",
+    "h7f5",
+    "f6g7",
+    "f5h3"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "8/7Q/3p1k1p/4n1p1/4P3/3P1r1P/4K3/8 b - - 7 35",
+     "decision": false,
+     "main": "f3h3",
+     "mainSan": "Rxh3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "8/7Q/3p1k1p/4n1p1/4P3/3P3r/4K3/8 w - - 0 36",
+     "decision": true,
+     "main": "h7f5",
+     "mainSan": "Qf5+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "From f5 the queen checks the king on f6 and also attacks the rook on h3 along the diagonal. The e4 pawn guards the queen, so the king cannot take it, and Black has to deal with the check first."
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "8/8/3p1k1p/4nQp1/4P3/3P3r/4K3/8 b - - 1 36",
+     "decision": false,
+     "main": "f6g7",
+     "mainSan": "Kg7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "8/6k1/3p3p/4nQp1/4P3/3P3r/4K3/8 w - - 2 37",
+     "decision": true,
+     "main": "f5h3",
+     "mainSan": "Qxh3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The king has moved, and the rook is still undefended. The queen takes it, and now your queen faces only a knight and pawns."
+     }
+    }
+   ]
+  },
+  {
+   "title": "An undefended bishop",
+   "fen": "8/6k1/4q3/6p1/1Np2p2/2P2P2/7P/2B2R1K w - - 0 46",
+   "side": "black",
+   "keyIdea": "A threat of mate is the strongest attack of all: while the opponent stops the mate, you win the other piece you attacked.",
+   "text": "From a game played on Lichess. You are Black. White's bishop has just moved to d2, and nothing defends it. Look for a queen move that attacks the bishop and threatens something even bigger.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle CCiSH",
+    "url": "https://lichess.org/training/CCiSH",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "c1d2",
+    "e6e2",
+    "h1g1",
+    "e2d2"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "8/6k1/4q3/6p1/1Np2p2/2P2P2/7P/2B2R1K w - - 0 46",
+     "decision": false,
+     "main": "c1d2",
+     "mainSan": "Bd2",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "8/6k1/4q3/6p1/1Np2p2/2P2P2/3B3P/5R1K b - - 1 46",
+     "decision": true,
+     "main": "e6e2",
+     "mainSan": "Qe2",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "From e2 the queen attacks the bishop on d2 and the rook on f1. Taking the rook would be checkmate, because the king on h1 could not escape and nothing could take your queen. White has to stop the mate first, so the bishop cannot be saved."
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "8/6k1/8/6p1/1Np2p2/2P2P2/3Bq2P/5R1K w - - 2 47",
+     "decision": false,
+     "main": "h1g1",
+     "mainSan": "Kg1",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "8/6k1/8/6p1/1Np2p2/2P2P2/3Bq2P/5RK1 b - - 3 47",
+     "decision": true,
+     "main": "e2d2",
+     "mainSan": "Qxd2",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The king moved to g1 to guard the rook, so the mate threat is gone. But the bishop is still undefended, and the queen takes it."
+     }
+    }
+   ]
+  }
+ ]
+}

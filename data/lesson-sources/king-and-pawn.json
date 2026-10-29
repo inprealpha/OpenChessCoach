@@ -1,0 +1,117 @@
+{
+ "id": "king-and-pawn",
+ "name": "King and pawn endgames",
+ "kind": "endgame",
+ "track": "endgames",
+ "level": "intermediate",
+ "side": "white",
+ "puzzleThemes": [
+  "pawnEndgame"
+ ],
+ "goal": "You can tell whether king and pawn win against a lone king, using the opposition and the key squares in front of the pawn.",
+ "priorKnowledge": [
+  "active-king"
+ ],
+ "intro": "With king and pawn against a lone king, the pawn cannot promote on its own: your king has to clear the way. For a pawn still in your half of the board, the key squares are the three squares two ranks (rows) in front of it, and if your king reaches one of them while the pawn is safe, the pawn will promote whoever is to move. Pawns on the a- and h-files are the exception. When the two kings stand face to face with one square between them, the side that does not have to move has the opposition, and the other king must step aside.",
+ "playOut": {
+  "title": "Win with the extra pawn",
+  "fen": "8/8/4k3/8/4K3/4P3/8/8 b - - 0 1",
+  "side": "white",
+  "goal": "promote"
+ },
+ "parts": [
+  {
+   "title": "Face to face",
+   "fen": "8/8/4k3/8/4K3/4P3/8/8 b - - 0 1",
+   "side": "white",
+   "keyIdea": "When the kings face each other and the other side must move, their king steps aside and yours walks forward.",
+   "text": "A position from Wikibooks. You are White. The kings stood face to face on e4 and e6, one empty square apart, and Black had to move: you had the opposition, so Black's king had to step aside. The key squares for your pawn on e3 are d5, e5 and f5.",
+   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings",
+   "line": "Kd6 Kf5 Kd7 Kf6 Kd6 e4 Kd7 e5 Ke8 Ke6",
+   "notes": [
+    {
+     "ply": 1,
+     "san": "Kf5",
+     "text": "Black's king moved to d6, which opens the way on the other side. The square f5 is a key square: from here the pawn will promote, whatever Black does."
+    },
+    {
+     "ply": 3,
+     "san": "Kf6",
+     "text": "Your king stays ahead of the pawn. On f6 it keeps Black's king out of e6 and e7, the squares the pawn has to pass."
+    },
+    {
+     "ply": 5,
+     "san": "e4",
+     "text": "Now the kings face each other on f6 and d6, and it is your move, so Black has the opposition. Most king moves would let Black's king back in front of the pawn. Pushing the pawn uses up your turn without moving the king, and now Black has to give way."
+    },
+    {
+     "ply": 7,
+     "san": "e5",
+     "text": "Black's king stepped back, so the pawn follows your king up the board. On e5 it is safe, because your king guards it."
+    },
+    {
+     "ply": 9,
+     "san": "Ke6",
+     "text": "This is the winning set-up: your king on e6 with the pawn just behind it. From here the pawn promotes whatever Black does. Pushing 6.e6 first would throw the win away: after 6...Kf8 Black's king blocks the pawn and holds the draw."
+    }
+   ]
+  },
+  {
+   "title": "Pawn push or king move?",
+   "fen": "8/8/5k2/8/3KP3/8/8/8 w - - 0 62",
+   "side": "white",
+   "keyIdea": "Lead with the king: get it onto a key square in front of the pawn before you push the pawn.",
+   "text": "From a game played on Lichess. You are White. The key squares for your pawn on e4 are d6, e6 and f6, and Black's king is close to all of them. Pushing the pawn with check looks natural, but first think about where your king needs to go.",
+   "url": "https://lichess.org/ha48pwvj#122",
+   "line": "Kd5 Ke7 Ke5 Kd7 Kf6",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Kd5",
+     "text": "The king goes first, heading for d6 and e6. After 62.e5+ instead, Black's king can get in front of the pawn and hold the draw. In the game White found 62.Kd5."
+    },
+    {
+     "ply": 2,
+     "san": "Ke5",
+     "text": "Black's king on e7 guards d6, e6 and f6, so your king takes the opposition on e5: it faces Black's king with one square between, and Black must move. In the game White pushed 63.e5 here instead, and Black could have held the draw."
+    },
+    {
+     "ply": 4,
+     "san": "Kf6",
+     "text": "Black's king went left, so yours goes right, onto the key square f6. The pawn will promote: your king guards the squares in front of it, and the pawn walks up behind."
+    }
+   ]
+  },
+  {
+   "title": "Holding the draw",
+   "fen": "8/8/5p2/4k3/8/8/4K3/8 w - - 0 77",
+   "side": "white",
+   "keyIdea": "The defending king draws by staying in front of the pawn and taking the opposition every time the enemy king comes close.",
+   "text": "From a game played on Lichess. You are White, and this time you defend: Black has the pawn, and you want a draw. The key squares for Black's pawn on f6 are e4, f4 and g4, and your king must keep Black's king away from them.",
+   "url": "https://lichess.org/98g55mcw#152",
+   "line": "Ke3 Kf5 Kf3 Ke5 Ke3 f5 Kf3",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Ke3",
+     "text": "Your king faces Black's king with one square between, e3 against e5. Now Black must move and cannot step forward, because your king guards d4, e4 and f4. Any other move loses."
+    },
+    {
+     "ply": 2,
+     "san": "Kf3",
+     "text": "Black's king moved to f5, so yours moves to f3 to face it again. Now e4, f4 and g4 are all covered. Any other move would let Black's king through."
+    },
+    {
+     "ply": 4,
+     "san": "Ke3",
+     "text": "Back to e3, facing the king on e5 again. Each time Black's king moves sideways, yours does the same and keeps the opposition."
+    },
+    {
+     "ply": 6,
+     "san": "Kf3",
+     "text": "The pawn moved to f5, so its key squares moved too: now they are e3, f3 and g3. Your king sits on f3, in the pawn's path, and Black has no way past. In the game White kept the draw for a few more moves, then lost after 82.Ke1. Staying in front of the pawn with 82.Kf2 would still have drawn."
+    }
+   ]
+  }
+ ]
+}

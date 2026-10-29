@@ -47,6 +47,12 @@ export interface GradeInput {
   played: Score;
   /** Whether the played move is the Engine's top move. */
   isTopMove: boolean;
+  /**
+   * Whether the played move gives checkmate, decided from the board after it. Never from a mate
+   * count: a score of mate in one after a quiet move can be a mate the opponent still has a move
+   * to wait for.
+   */
+  givesMate: boolean;
 }
 
 export interface GradeResult {
@@ -57,7 +63,8 @@ export interface GradeResult {
 
 export function gradeMove(input: GradeInput): GradeResult {
   const winLoss = Math.max(0, winningChances(input.best) - winningChances(input.played));
-  if (input.isTopMove) return { grade: 'Best', winLoss: 0 };
+  // A move that gives checkmate ends the game: nothing is better, whichever mate the Engine lists first.
+  if (input.isTopMove || input.givesMate) return { grade: 'Best', winLoss: 0 };
   if (winLoss >= GRADE_THRESHOLDS.Blunder) return { grade: 'Blunder', winLoss };
   if (winLoss >= GRADE_THRESHOLDS.Mistake) return { grade: 'Mistake', winLoss };
   const stillMates = input.played.mate !== undefined && input.played.mate > 0;

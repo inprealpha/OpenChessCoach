@@ -7,7 +7,14 @@ ADR 0007). Move Grades use the Lichess formula (Best, Good, Inaccuracy, Mistake,
 
 ## Sub-features
 
-- Move by clicking two squares or dragging; illegal moves are refused; promotion asks for a piece.
+- Move by clicking two squares or dragging; promotion asks for a piece. The king clicked (or
+  dragged) onto its own rook castles, as on Lichess (`board.spec.ts`, "the king castles when …").
+- Illegal moves are refused, with the reason under the board when it is about the Player's own
+  king: "Your king is in check, and that move doesn’t get it out of check.", "Your king can’t go to
+  e2: it would be in check there." or "Your knight on e2 is pinned to your king by the rook on e8:
+  moving it would put your king in check."; otherwise "That move isn’t legal." (`illegalReason` in
+  `packages/shared/src/chess.ts`, `chess.test.ts`; `board.spec.ts`, "an illegal move says why …").
+  The Board is shared, so Lessons, Puzzles and Engine Games say the same.
 - When the position on the board ends the game, the status `Result` under the toolbar says how
   ("Checkmate. White wins.", a stalemate or a draw); stepping back empties it (`board.spec.ts`, "the
   Board says when the game is over, …").

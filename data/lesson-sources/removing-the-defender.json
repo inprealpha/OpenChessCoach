@@ -1,0 +1,81 @@
+{
+ "id": "removing-the-defender",
+ "name": "Removing the defender",
+ "kind": "theme",
+ "track": "themes",
+ "level": "beginner",
+ "side": "white",
+ "puzzleThemes": [
+  "capturingDefender"
+ ],
+ "goal": "You can win a piece by taking or chasing away its only defender, or by giving that defender two jobs at once.",
+ "priorKnowledge": [
+  "forks"
+ ],
+ "intro": "A piece is often safe only because one other piece defends it. If that defender disappears, the piece is undefended and you can take it. So when a piece you want is defended, look at the defender instead: can you capture it, drive it off with a pawn, or find that it already has a second job it cannot do at the same time?",
+ "parts": [
+  {
+   "title": "A bishop attacks your queen",
+   "fen": "r2qk2r/ppp2pp1/2np1n1p/3Np2P/4P1b1/3PP3/PPP3P1/R2QKBNR w KQkq - 2 9",
+   "side": "white",
+   "keyIdea": "If a piece has only one defender, capture the defender and the piece is left undefended.",
+   "text": "From a game played on Lichess. You are White. Black's bishop has just come to g4, where it attacks your queen. Before you move the queen away, look at what defends that bishop.",
+   "url": "https://lichess.org/training/GR16R",
+   "line": "Nxf6+ Qxf6 Qxg4",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Nxf6+",
+     "text": "Your knight takes the knight on f6, the only defender of the bishop on g4, and it does so with check. Whatever Black does now, the bishop has lost its defender."
+    },
+    {
+     "ply": 2,
+     "san": "Qxg4",
+     "text": "Black took back with the queen, which does not defend g4, so your queen takes the bishop. You have traded knights and won a bishop on top."
+    }
+   ]
+  },
+  {
+   "title": "A guarded knight",
+   "fen": "3r1rk1/p3q1pp/1p6/n2PppN1/4P3/4Q2P/P4PP1/1R2R1K1 b - - 1 24",
+   "side": "black",
+   "keyIdea": "Attack a defender with a pawn: when it moves away, the piece it was defending is left undefended.",
+   "text": "From a game played on Lichess. You are Black. White's knight has just jumped to g5. Your queen on e7 attacks it, but White's queen on e3 defends it.",
+   "url": "https://lichess.org/training/peMSq",
+   "line": "f4 Qf3 Qxg5",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "f4",
+     "text": "The pawn attacks White's queen, and it also stands on the line from e3 to g5. White's queen has to move, and no square it can safely go to still defends the knight."
+    },
+    {
+     "ply": 2,
+     "san": "Qxg5",
+     "text": "The queen has stepped away, and the knight on g5 has no defender left. Your queen takes it, and you are a piece ahead."
+    }
+   ]
+  },
+  {
+   "title": "Two rooks on the back rank",
+   "fen": "2rr2k1/5pp1/1p2p3/p3P1P1/P2q4/3Q4/5P2/2R2RK1 w - - 0 25",
+   "side": "white",
+   "keyIdea": "When one piece defends two things, take one of them; if the defender takes back, the other is left undefended.",
+   "text": "From a game played on Lichess. You are White. Black's queen has just come to d4, offering a trade of queens. Look at Black's rook on d8: how many pieces is it defending?",
+   "url": "https://lichess.org/training/OtXkV",
+   "line": "Qxd4 Rxd4 Rxc8+",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Qxd4",
+     "text": "Your queen takes Black's queen. Black's rook on d8 is the only piece that can take back, and it is also the only defender of the rook on c8."
+    },
+    {
+     "ply": 2,
+     "san": "Rxc8+",
+     "text": "The rook on d8 took back on d4 and left the rook on c8 undefended. Your rook takes it with check: you have won a whole rook."
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,104 @@
+{
+ "id": "good-and-bad-pieces",
+ "name": "Good and bad pieces",
+ "kind": "thinking",
+ "track": "thinking",
+ "level": "intermediate",
+ "side": "white",
+ "goal": "You can tell a good bishop from a bad one blocked by its own pawns, use the two bishops, and decide when a knight is better than a bishop.",
+ "priorKnowledge": [
+  "pawn-structure"
+ ],
+ "intro": "A bishop stays on squares of one colour for the whole game. When most of its own pawns stand on the other colour, its diagonals are open and it is a good bishop; when they stand on its own colour, they get in its way and it is a bad bishop. A bad bishop gets its diagonals back when a blocking pawn moves onto the other colour, or when you trade it for the enemy's good bishop. In an open position two bishops work well together, while in a locked position, where the pawns block each other, a knight with a safe square, one no pawn can attack, is often better than a bishop.",
+ "parts": [
+  {
+   "title": "Which bishop to keep?",
+   "fen": "r1bq1rk1/1p1nb1pp/p1p1p3/2Pp1pB1/PP1Pn2P/2NBPN2/5PP1/R2Q1RK1 w - - 3 14",
+   "side": "white",
+   "keyIdea": "If your bishop is blocked by your own pawns, trade it for your opponent's good bishop.",
+   "text": "From a game played on Lichess. You are White, and Black's knight on e4 and bishop on e7 both attack your bishop on g5. Before you move it, look at which colour of squares your pawns stand on.",
+   "url": "https://lichess.org/5j5bnrhJ#26",
+   "line": "Bxe7",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Bxe7",
+     "text": "Six of your pawns stand on dark squares (b4, c5, d4, e3, f2 and h4), so your dark-squared bishop is the bad one. Black's pawns stand mostly on light squares, so the bishop on e7 is Black's good one. 14.Bxe7 trades them: you keep your good bishop on d3, and Black is left with the bishop on c8, shut in by Black's own pawns."
+    }
+   ]
+  },
+  {
+   "title": "A bishop stuck behind its pawns",
+   "fen": "2r1r1k1/1p2bpp1/8/pNpp3p/P3bP2/1PP3PP/1B3P2/R3R1K1 w - - 0 26",
+   "side": "white",
+   "keyIdea": "If your own pawn blocks your bishop, move the pawn onto the other colour; the open diagonal then backs up your other pieces.",
+   "text": "From a game played on Lichess. You are White, and the material is level: a knight and a bishop against two bishops. Your bishop on b2 moves on dark squares. Look at what stands in its way.",
+   "url": "https://lichess.org/qc1w9nrd#50",
+   "line": "c4 Bf5 Re5 Bd7 Rxd5",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "c4",
+     "text": "Four of your pawns (c3, f2, f4 and g3) stood on dark squares, the bishop's colour, and the one on c3 was right in its way. 26.c4 puts that pawn on a light square: the long diagonal from b2 to g7 is open, and the pawn also attacks d5."
+    },
+    {
+     "ply": 2,
+     "san": "Re5",
+     "text": "Black's bishop stepped back to f5. 27.Re5 puts your rook on a dark square that the bishop now guards along the open diagonal, with the f4 pawn guarding it too. From e5 the rook attacks the bishop on f5 and the pawn on d5 at once."
+    },
+    {
+     "ply": 4,
+     "san": "Rxd5",
+     "text": "The bishop moved away, so the rook takes the pawn on d5. You are a pawn up, and the bishop on b2, which your own pawn used to block, now reaches all the way to g7."
+    }
+   ]
+  },
+  {
+   "title": "The two bishops in an open position",
+   "fen": "3r1rk1/p4ppp/1p2p3/3n1n2/3P4/5B1P/P1PB1PP1/1R1R2K1 w - - 4 20",
+   "side": "white",
+   "keyIdea": "Two bishops want open lines: take central squares away from the knights and open up the position.",
+   "text": "From a game played on Lichess. You are White, with two bishops against Black's two knights, and the centre is almost empty. Black's knight stands on d5, a strong central square.",
+   "url": "https://lichess.org/TcXKuEam#38",
+   "line": "c4 Nde7 Bb4 Rd7 d5",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "c4",
+     "text": "Knights need safe squares near the centre. The pawn chases the knight away from d5, and it cannot come back there while your pawn stands on c4."
+    },
+    {
+     "ply": 2,
+     "san": "Bb4",
+     "text": "Now a bishop takes an open diagonal: from b4 it attacks the knight on e7, with the rook on f8 standing behind it."
+    },
+    {
+     "ply": 4,
+     "san": "d5",
+     "text": "The pawn push opens the centre. The pawn attacks e6, and the fewer pawns there are in the centre, the further your bishops can reach across the board."
+    }
+   ]
+  },
+  {
+   "title": "A knight attacks your queen",
+   "fen": "r1bqk2r/5p2/p3p1p1/1p1pPn1p/2p2P1P/2P2NQ1/PPB2PP1/R3K2R w KQkq - 4 16",
+   "side": "white",
+   "keyIdea": "In a locked position, trade your bishop for a knight if it leaves your opponent a bad bishop and your knight a safe square.",
+   "text": "From a game played on Lichess. You are White, and Black's knight on f5 is attacking your queen. Look at Black's pawns: what colour are the squares they stand on?",
+   "url": "https://lichess.org/Lj8gk80W#30",
+   "line": "Bxf5 exf5 Nd4",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Bxf5",
+     "text": "All eight of Black's pawns stand on light squares, so Black's bishop on c8 is a very bad bishop. Instead of moving your queen, your bishop takes the knight: Black keeps the bad bishop, and you keep your knight."
+    },
+    {
+     "ply": 2,
+     "san": "Nd4",
+     "text": "The knight goes to d4, a square no black pawn can ever attack: Black's c-pawn has already gone past it, and there is no e-pawn left. From d4 it hits the pawns on b5 and f5. Castling first was also a good move."
+    }
+   ]
+  }
+ ]
+}

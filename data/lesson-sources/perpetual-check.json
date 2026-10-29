@@ -1,0 +1,99 @@
+{
+ "id": "perpetual-check",
+ "name": "Perpetual check",
+ "kind": "theme",
+ "track": "themes",
+ "level": "intermediate",
+ "side": "white",
+ "goal": "When you are losing, you can see when checks that never stop will save the game with a draw.",
+ "priorKnowledge": [
+  "checks-captures-threats",
+  "draws"
+ ],
+ "intro": "Perpetual check means checks that never stop: the enemy king cannot get away from them, so the same positions keep coming back. When the same position appears three times with the same player to move, the game is a draw by repetition. If you are losing, look for it, because a draw is far better than a loss. A queen near a king with few pawns left to shelter it, or two rooks on the seventh rank, can often check for ever.",
+ "parts": [
+  {
+   "title": "A rook and a pawn down",
+   "fen": "r4rk1/pb3p1p/2p2Q2/8/5N2/6P1/2q2P1P/5RK1 w - - 2 19",
+   "side": "white",
+   "keyIdea": "When you are losing, look for a queen that can check the king from two squares, again and again.",
+   "text": "From a game played on Lichess. You are White, and you are a rook and a pawn down, so a slow move would lose. But Black's king has lost its g-pawn, and your queen is already on f6.",
+   "url": "https://lichess.org/0cmr88qb#36",
+   "line": "Qg5+ Kh8 Qf6+ Kg8 Qg5+",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Qg5+",
+     "text": "19.Qg5+ checks on the open g-file. The king cannot go to f8, where its own rook stands, so it goes to h8. Blocking with the queen on g6 would just give the queen away to your knight."
+    },
+    {
+     "ply": 2,
+     "san": "Qf6+",
+     "text": "20.Qf6+ checks again, along the diagonal through g7. The king's only square is g8, where it came from."
+    },
+    {
+     "ply": 4,
+     "san": "Qg5+",
+     "text": "21.Qg5+: the same position is back, with Black to move. Black cannot escape the checks, so the position will come back a third time and the game is a draw by repetition. That is how the game ended."
+    }
+   ]
+  },
+  {
+   "title": "Two rooks against a queen and a rook",
+   "fen": "4r1k1/5R1R/5p1p/p3pqp1/1p6/7P/PP4PK/8 w - - 0 43",
+   "side": "white",
+   "keyIdea": "Two rooks on the seventh rank can check a king back and forth for ever, even against a queen.",
+   "text": "From a game played on Lichess. You are White. Black has a queen and a rook against your two rooks, and Black also has two more pawns than you. But both your rooks are on the seventh rank, right next to Black's king.",
+   "url": "https://lichess.org/2fspsy20#84",
+   "line": "Rfg7+ Kf8 Rf7+ Kg8 Rfg7+",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Rfg7+",
+     "text": "43.Rfg7+: the rook from f7 checks on g7, guarded by the other rook. The king cannot take it, and your rook on h7 covers h8, so the king goes to f8."
+    },
+    {
+     "ply": 2,
+     "san": "Rf7+",
+     "text": "44.Rf7+: the same rook goes back to f7 with check. The rook on h7 guards it, Black's own rook blocks e8, and the king has to return to g8."
+    },
+    {
+     "ply": 4,
+     "san": "Rfg7+",
+     "text": "45.Rfg7+, and round it goes again. The king can only shuttle between g8 and f8, and you can keep checking. The game was drawn by repetition."
+    }
+   ]
+  },
+  {
+   "title": "Checks against a king in the corner",
+   "fen": "3Q4/p4ppk/1p5p/4q3/8/1P6/2P2P1P/6RK b - - 0 25",
+   "side": "black",
+   "keyIdea": "A king in the corner, boxed in by its own pieces, can be checked on a diagonal and on the back rank in turn.",
+   "text": "From a game played on Lichess. You are Black. White has a rook more, you have one pawn more, and a slow move would lose. White's king sits in the corner on h1, with its rook beside it on g1.",
+   "url": "https://lichess.org/hmcxfd2n#49",
+   "line": "Qe4+ f3 Qxf3+ Rg2 Qf1+ Rg1 Qf3+",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Qe4+",
+     "text": "25...Qe4+ checks along the long diagonal towards h1. The king has no square, so White must block with the f-pawn or the rook."
+    },
+    {
+     "ply": 2,
+     "san": "Qxf3+",
+     "text": "26...Qxf3+ takes the pawn with check. Now the rook has to block on g2."
+    },
+    {
+     "ply": 4,
+     "san": "Qf1+",
+     "text": "27...Qf1+ checks along the back rank, the row White's king started on. The rook has to go back to g1 to block."
+    },
+    {
+     "ply": 6,
+     "san": "Qf3+",
+     "text": "28...Qf3+: back to f3 with check, and the position after your second check has come back. White's king can never escape, so the game ends in a draw by repetition, and you have saved a lost game."
+    }
+   ]
+  }
+ ]
+}

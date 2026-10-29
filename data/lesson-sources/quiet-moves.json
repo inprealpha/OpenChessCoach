@@ -1,0 +1,86 @@
+{
+ "id": "quiet-moves",
+ "name": "Quiet moves",
+ "kind": "theme",
+ "track": "themes",
+ "level": "intermediate",
+ "side": "white",
+ "puzzleThemes": [
+  "quietMove"
+ ],
+ "goal": "You can find a winning move that is not a check or a capture, such as one that cuts off the king or makes a threat that cannot be met.",
+ "priorKnowledge": [
+  "mating-patterns"
+ ],
+ "intro": "When you look for a winning move, you look at checks and captures first. Sometimes none of them works yet, and the winning move is a quiet one: it takes nothing and gives no check, but leaves your opponent with no good answer. In this Lesson your quiet moves shut the enemy king in, so that the next check is mate, or make a threat that cannot be stopped.",
+ "parts": [
+  {
+   "title": "One escape square left",
+   "fen": "r6k/1p3R2/1p2p2p/7N/8/p7/6PP/7K w - - 0 38",
+   "side": "white",
+   "keyIdea": "Before you check, take away the king's last square: then a mate threat may have no defence at all.",
+   "text": "From a game played on Lichess. You are White. Black's king on h8 has one escape square, g8, and Black's a-pawn is racing to promote. No check works yet.",
+   "url": "https://lichess.org/training/JupYf",
+   "line": "Nf6 a2 Rh7#",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Nf6",
+     "text": "A quiet knight move. From f6 the knight covers g8, the king's only escape square, and guards h7. You threaten Rh7 mate, and Black has no check, block or capture to stop it."
+    },
+    {
+     "ply": 2,
+     "san": "Rh7#",
+     "text": "Mate. The rook checks from h7, the knight guards it, and the king has no square. Black's pawn on a2 was one move too slow."
+    }
+   ]
+  },
+  {
+   "title": "Not yet a check",
+   "fen": "7k/4R2P/8/5K2/1p6/2p3P1/1r6/8 w - - 1 42",
+   "side": "white",
+   "keyIdea": "Your own king can make the quiet move that takes the enemy king's last squares, so the next check is mate.",
+   "text": "From a game played on Lichess. You are White. A check on e8 now would let Black's king out to g7, or let it take your pawn on h7. Bring one more piece up first.",
+   "url": "https://lichess.org/training/7a1CB",
+   "line": "Kg6 Rf2 Re8+ Rf8 Rxf8#",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Kg6",
+     "text": "A quiet king move. Your king guards the pawn on h7 and the g7 square, so Black's king cannot move at all, and you threaten Re8 mate. Black's rook heads for f8 to block, but that only delays the mate."
+    },
+    {
+     "ply": 2,
+     "san": "Re8+",
+     "text": "The check. Black's only answer is to put the rook in the way on f8."
+    },
+    {
+     "ply": 4,
+     "san": "Rxf8#",
+     "text": "Mate. The rook takes on f8 with check, and the king still has no square: your king and the h7 pawn cover the rest."
+    }
+   ]
+  },
+  {
+   "title": "A threat that cannot be met",
+   "fen": "6k1/ppp2p1p/3p1P1B/8/8/3P4/Pbr3PP/5R1K w - - 0 24",
+   "side": "white",
+   "keyIdea": "A quiet move that threatens mate can force a defence that loses material.",
+   "text": "From a game played on Lichess. You are White, and you are a pawn down. Your bishop on h6 and your pawn on f6 keep Black's king shut in on the back rank (the row the king started on).",
+   "url": "https://lichess.org/training/4WQmC",
+   "line": "Re1 Be5 d4",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Re1",
+     "text": "A quiet rook move that threatens Re8 mate: the bishop on h6 covers f8, and with the f6 pawn it covers g7. Black's best defence is to block the e-file with the bishop on e5."
+    },
+    {
+     "ply": 2,
+     "san": "d4",
+     "text": "Another quiet move: the pawn attacks the bishop. The bishop has to stay on e5 to block the e-file, or Re8 is mate, so Black loses material."
+    }
+   ]
+  }
+ ]
+}

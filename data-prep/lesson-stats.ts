@@ -9,9 +9,9 @@ import { createInterface } from 'node:readline';
 import { createZstdDecompress } from 'node:zlib';
 import { INITIAL_FEN, playSan, playUci, positionKey } from '@chess-coach/shared/chess';
 import type { PlayerLevel } from '@chess-coach/shared/protocol';
-import { CATALOGUE } from './catalogue.ts';
+import { readSources } from './sources.ts';
 
-const MAX_PLIES = 18;
+const MAX_PLIES = 24;
 const files = process.argv.slice(2);
 if (!files.length) {
   console.error('Usage: node data-prep/lesson-stats.ts <dump.pgn | dump.pgn.zst> [more dumps...]');
@@ -20,10 +20,10 @@ if (!files.length) {
 
 // Every position on a main line, keyed without move counters so transpositions count.
 const targets = new Set<string>();
-for (const lesson of CATALOGUE) {
+for (const lesson of [...readSources().values()].filter((s) => s.kind === 'opening')) {
   let fen = INITIAL_FEN;
   targets.add(positionKey(fen));
-  for (const san of lesson.mainLine.split(' ')) {
+  for (const san of lesson.parts[0]?.line.split(' ') ?? []) {
     const played = playSan(fen, san);
     if (!played) throw new Error(`${lesson.id}: illegal ${san}`);
     fen = played.fenAfter;

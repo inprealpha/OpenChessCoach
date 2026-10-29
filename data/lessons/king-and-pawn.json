@@ -2,129 +2,27 @@
  "id": "king-and-pawn",
  "name": "King and pawn endgames",
  "kind": "endgame",
+ "track": "endgames",
+ "level": "intermediate",
+ "goal": "You can tell whether king and pawn win against a lone king, using the opposition and the key squares in front of the pawn.",
+ "priorKnowledge": [
+  "active-king"
+ ],
  "side": "white",
  "puzzleTags": [],
  "puzzleThemes": [
   "pawnEndgame"
  ],
  "intro": {
-  "text": "Two ideas decide most endgames with only kings and pawns: the rule of the square, which tells you whether a king can catch a pawn, and the opposition, the stand-off between two kings with one square between them. A passed pawn far from the other pawns, an outside passed pawn, is often enough to win.",
-  "credit": {
-   "source": "Wikibooks, Chess/The Endgame/Pawn Endings",
-   "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings",
-   "licence": "CC BY-SA 4.0",
-   "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-   "authors": "Wikibooks contributors (see the page history)"
-  }
+  "text": "With king and pawn against a lone king, the pawn cannot promote on its own: your king has to clear the way. For a pawn still in your half of the board, the key squares are the three squares two ranks (rows) in front of it, and if your king reaches one of them while the pawn is safe, the pawn will promote whoever is to move. Pawns on the a- and h-files are the exception. When the two kings stand face to face with one square between them, the side that does not have to move has the opposition, and the other king must step aside."
  },
  "parts": [
   {
-   "title": "The rule of the square",
-   "fen": "8/8/8/4P3/k7/8/K7/8 w - - 0 1",
-   "side": "white",
-   "text": "Draw a square from the pawn to its queening square (e5-e8-b8-b5). If the enemy king can step into it, it catches the pawn; if not, the pawn queens. Black's king on a4 is outside the square.",
-   "credit": {
-    "source": "Wikibooks, Chess/The Endgame/Pawn Endings",
-    "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings",
-    "licence": "CC BY-SA 4.0",
-    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-    "authors": "Wikibooks contributors (see the page history)"
-   },
-   "mainLine": [
-    "e5e6",
-    "a4b5",
-    "e6e7",
-    "b5c6",
-    "e7e8q"
-   ],
-   "nodes": [
-    {
-     "ply": 0,
-     "fen": "8/8/8/4P3/k7/8/K7/8 w - - 0 1",
-     "decision": true,
-     "main": "e5e6",
-     "mainSan": "e6",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     },
-     "notes": {
-      "text": "With White to move the black king is outside the square, so just push.",
-      "credit": {
-       "source": "Wikibooks, Chess/The Endgame/Pawn Endings",
-       "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings",
-       "licence": "CC BY-SA 4.0",
-       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-       "authors": "Wikibooks contributors (see the page history)"
-      }
-     }
-    },
-    {
-     "ply": 1,
-     "fen": "8/8/4P3/8/k7/8/K7/8 b - - 0 1",
-     "decision": false,
-     "main": "a4b5",
-     "mainSan": "Kb5",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 2,
-     "fen": "8/8/4P3/1k6/8/8/K7/8 w - - 1 2",
-     "decision": true,
-     "main": "e6e7",
-     "mainSan": "e7",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 3,
-     "fen": "8/4P3/8/1k6/8/8/K7/8 b - - 0 2",
-     "decision": false,
-     "main": "b5c6",
-     "mainSan": "Kc6",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 4,
-     "fen": "8/4P3/2k5/8/8/8/K7/8 w - - 1 3",
-     "decision": true,
-     "main": "e7e8q",
-     "mainSan": "e8=Q+",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     },
-     "notes": {
-      "text": "The pawn queens. Had Black been to move, 1...Kb5 would have stepped into the square and caught it.",
-      "credit": {
-       "source": "Wikibooks, Chess/The Endgame/Pawn Endings",
-       "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings",
-       "licence": "CC BY-SA 4.0",
-       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-       "authors": "Wikibooks contributors (see the page history)"
-      }
-     }
-    }
-   ]
-  },
-  {
-   "title": "The opposition",
+   "title": "Face to face",
    "fen": "8/8/4k3/8/4K3/4P3/8/8 b - - 0 1",
    "side": "white",
-   "text": "The kings face each other with one square between them and it is Black to move, so you have the opposition: Black has to give way.",
+   "keyIdea": "When the kings face each other and the other side must move, their king steps aside and yours walks forward.",
+   "text": "A position from Wikibooks. You are White. The kings stood face to face on e4 and e6, one empty square apart, and Black had to move: you had the opposition, so Black's king had to step aside. The key squares for your pawn on e3 are d5, e5 and f5.",
    "credit": {
     "source": "Wikibooks, Chess/The Endgame/Pawn Endings",
     "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings",
@@ -142,13 +40,7 @@
     "d6d7",
     "e4e5",
     "d7e8",
-    "f6e6",
-    "e8d8",
-    "e6f7",
-    "d8d7",
-    "e5e6",
-    "d7d6",
-    "e6e7"
+    "f6e6"
    ],
    "nodes": [
     {
@@ -175,14 +67,7 @@
       "club": []
      },
      "notes": {
-      "text": "Black's king stepped aside, so yours goes forward.",
-      "credit": {
-       "source": "Wikibooks, Chess/The Endgame/Pawn Endings",
-       "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings",
-       "licence": "CC BY-SA 4.0",
-       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-       "authors": "Wikibooks contributors (see the page history)"
-      }
+      "text": "Black's king moved to d6, which opens the way on the other side. The square f5 is a key square: from here the pawn will promote, whatever Black does."
      }
     },
     {
@@ -207,6 +92,9 @@
       "beginner": [],
       "casual": [],
       "club": []
+     },
+     "notes": {
+      "text": "Your king stays ahead of the pawn. On f6 it keeps Black's king out of e6 and e7, the squares the pawn has to pass."
      }
     },
     {
@@ -233,14 +121,7 @@
       "club": []
      },
      "notes": {
-      "text": "Black seems to have the opposition now, but you don't have to move your king: a pawn move hands the move back to Black.",
-      "credit": {
-       "source": "Wikibooks, Chess/The Endgame/Pawn Endings",
-       "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings",
-       "licence": "CC BY-SA 4.0",
-       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-       "authors": "Wikibooks contributors (see the page history)"
-      }
+      "text": "Now the kings face each other on f6 and d6, and it is your move, so Black has the opposition. Most king moves would let Black's king back in front of the pawn. Pushing the pawn uses up your turn without moving the king, and now Black has to give way."
      }
     },
     {
@@ -265,6 +146,9 @@
       "beginner": [],
       "casual": [],
       "club": []
+     },
+     "notes": {
+      "text": "Black's king stepped back, so the pawn follows your king up the board. On e5 it is safe, because your king guards it."
      }
     },
     {
@@ -291,154 +175,53 @@
       "club": []
      },
      "notes": {
-      "text": "Your king stands in front of the pawn on the sixth rank, and the pawn will get through.",
-      "credit": {
-       "source": "Wikibooks, Chess/The Endgame/Pawn Endings",
-       "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings",
-       "licence": "CC BY-SA 4.0",
-       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-       "authors": "Wikibooks contributors (see the page history)"
-      }
-     }
-    },
-    {
-     "ply": 10,
-     "fen": "4k3/8/4K3/4P3/8/8/8/8 b - - 2 6",
-     "decision": false,
-     "main": "e8d8",
-     "mainSan": "Kd8",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 11,
-     "fen": "3k4/8/4K3/4P3/8/8/8/8 w - - 3 7",
-     "decision": true,
-     "main": "e6f7",
-     "mainSan": "Kf7",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 12,
-     "fen": "3k4/5K2/8/4P3/8/8/8/8 b - - 4 7",
-     "decision": false,
-     "main": "d8d7",
-     "mainSan": "Kd7",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 13,
-     "fen": "8/3k1K2/8/4P3/8/8/8/8 w - - 5 8",
-     "decision": true,
-     "main": "e5e6",
-     "mainSan": "e6+",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 14,
-     "fen": "8/3k1K2/4P3/8/8/8/8/8 b - - 0 8",
-     "decision": false,
-     "main": "d7d6",
-     "mainSan": "Kd6",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 15,
-     "fen": "8/5K2/3kP3/8/8/8/8/8 w - - 1 9",
-     "decision": true,
-     "main": "e6e7",
-     "mainSan": "e7",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     },
-     "notes": {
-      "text": "The pawn queens next move.",
-      "credit": {
-       "source": "Wikibooks, Chess/The Endgame/Pawn Endings",
-       "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings",
-       "licence": "CC BY-SA 4.0",
-       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-       "authors": "Wikibooks contributors (see the page history)"
-      }
+      "text": "This is the winning set-up: your king on e6 with the pawn just behind it. From here the pawn promotes whatever Black does. Pushing 6.e6 first would throw the win away: after 6...Kf8 Black's king blocks the pawn and holds the draw."
      }
     }
    ]
   },
   {
-   "title": "The outside passed pawn",
-   "fen": "8/8/p1k5/P1p5/2K2P2/8/8/8 w - - 0 1",
+   "title": "Pawn push or king move?",
+   "fen": "8/8/5k2/8/3KP3/8/8/8 w - - 0 62",
    "side": "white",
-   "text": "Pawns are equal, but your f-pawn is far from the others. Use it as a decoy.",
+   "keyIdea": "Lead with the king: get it onto a key square in front of the pawn before you push the pawn.",
+   "text": "From a game played on Lichess. You are White. The key squares for your pawn on e4 are d6, e6 and f6, and Black's king is close to all of them. Pushing the pawn with check looks natural, but first think about where your king needs to go.",
    "credit": {
-    "source": "Wikibooks, Chess/The Endgame/Pawn Endings",
-    "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings",
-    "licence": "CC BY-SA 4.0",
-    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-    "authors": "Wikibooks contributors (see the page history)"
+    "source": "Lichess games database, game ha48pwvj",
+    "url": "https://lichess.org/ha48pwvj#122",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
    },
    "mainLine": [
-    "f4f5",
-    "c6d6",
-    "f5f6",
-    "d6e6",
-    "c4c5",
-    "e6f6",
-    "c5b6",
-    "f6e6",
-    "b6a6",
-    "e6d7",
-    "a6b7"
+    "d4d5",
+    "f6e7",
+    "d5e5",
+    "e7d7",
+    "e5f6"
    ],
    "nodes": [
     {
      "ply": 0,
-     "fen": "8/8/p1k5/P1p5/2K2P2/8/8/8 w - - 0 1",
+     "fen": "8/8/5k2/8/3KP3/8/8/8 w - - 0 62",
      "decision": true,
-     "main": "f4f5",
-     "mainSan": "f5",
+     "main": "d4d5",
+     "mainSan": "Kd5",
      "popular": {
       "beginner": [],
       "casual": [],
       "club": []
      },
      "notes": {
-      "text": "Push the outside pawn so the black king has to chase it.",
-      "credit": {
-       "source": "Wikibooks, Chess/The Endgame/Pawn Endings",
-       "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings",
-       "licence": "CC BY-SA 4.0",
-       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-       "authors": "Wikibooks contributors (see the page history)"
-      }
+      "text": "The king goes first, heading for d6 and e6. After 62.e5+ instead, Black's king can get in front of the pawn and hold the draw. In the game White found 62.Kd5."
      }
     },
     {
      "ply": 1,
-     "fen": "8/8/p1k5/P1p2P2/2K5/8/8/8 b - - 0 1",
+     "fen": "8/8/5k2/3K4/4P3/8/8/8 b - - 1 62",
      "decision": false,
-     "main": "c6d6",
-     "mainSan": "Kd6",
+     "main": "f6e7",
+     "mainSan": "Ke7",
      "popular": {
       "beginner": [],
       "casual": [],
@@ -447,103 +230,24 @@
     },
     {
      "ply": 2,
-     "fen": "8/8/p2k4/P1p2P2/2K5/8/8/8 w - - 1 2",
+     "fen": "8/4k3/8/3K4/4P3/8/8/8 w - - 2 63",
      "decision": true,
-     "main": "f5f6",
-     "mainSan": "f6",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 3,
-     "fen": "8/8/p2k1P2/P1p5/2K5/8/8/8 b - - 0 2",
-     "decision": false,
-     "main": "d6e6",
-     "mainSan": "Ke6",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 4,
-     "fen": "8/8/p3kP2/P1p5/2K5/8/8/8 w - - 1 3",
-     "decision": true,
-     "main": "c4c5",
-     "mainSan": "Kxc5",
+     "main": "d5e5",
+     "mainSan": "Ke5",
      "popular": {
       "beginner": [],
       "casual": [],
       "club": []
      },
      "notes": {
-      "text": "While Black's king is away, yours eats the queenside pawns.",
-      "credit": {
-       "source": "Wikibooks, Chess/The Endgame/Pawn Endings",
-       "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings",
-       "licence": "CC BY-SA 4.0",
-       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-       "authors": "Wikibooks contributors (see the page history)"
-      }
+      "text": "Black's king on e7 guards d6, e6 and f6, so your king takes the opposition on e5: it faces Black's king with one square between, and Black must move. In the game White pushed 63.e5 here instead, and Black could have held the draw."
      }
     },
     {
-     "ply": 5,
-     "fen": "8/8/p3kP2/P1K5/8/8/8/8 b - - 0 3",
+     "ply": 3,
+     "fen": "8/4k3/8/4K3/4P3/8/8/8 b - - 3 63",
      "decision": false,
-     "main": "e6f6",
-     "mainSan": "Kxf6",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 6,
-     "fen": "8/8/p4k2/P1K5/8/8/8/8 w - - 0 4",
-     "decision": true,
-     "main": "c5b6",
-     "mainSan": "Kb6",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 7,
-     "fen": "8/8/pK3k2/P7/8/8/8/8 b - - 1 4",
-     "decision": false,
-     "main": "f6e6",
-     "mainSan": "Ke6",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 8,
-     "fen": "8/8/pK2k3/P7/8/8/8/8 w - - 2 5",
-     "decision": true,
-     "main": "b6a6",
-     "mainSan": "Kxa6",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 9,
-     "fen": "8/8/K3k3/P7/8/8/8/8 b - - 0 5",
-     "decision": false,
-     "main": "e6d7",
+     "main": "e7d7",
      "mainSan": "Kd7",
      "popular": {
       "beginner": [],
@@ -552,25 +256,139 @@
      }
     },
     {
-     "ply": 10,
-     "fen": "8/3k4/K7/P7/8/8/8/8 w - - 1 6",
+     "ply": 4,
+     "fen": "8/3k4/8/4K3/4P3/8/8/8 w - - 4 64",
      "decision": true,
-     "main": "a6b7",
-     "mainSan": "Kb7",
+     "main": "e5f6",
+     "mainSan": "Kf6",
      "popular": {
       "beginner": [],
       "casual": [],
       "club": []
      },
      "notes": {
-      "text": "Your king shields the a-pawn, and it will queen.",
-      "credit": {
-       "source": "Wikibooks, Chess/The Endgame/Pawn Endings",
-       "url": "https://en.wikibooks.org/wiki/Chess/The_Endgame/Pawn_Endings",
-       "licence": "CC BY-SA 4.0",
-       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-       "authors": "Wikibooks contributors (see the page history)"
-      }
+      "text": "Black's king went left, so yours goes right, onto the key square f6. The pawn will promote: your king guards the squares in front of it, and the pawn walks up behind."
+     }
+    }
+   ]
+  },
+  {
+   "title": "Holding the draw",
+   "fen": "8/8/5p2/4k3/8/8/4K3/8 w - - 0 77",
+   "side": "white",
+   "keyIdea": "The defending king draws by staying in front of the pawn and taking the opposition every time the enemy king comes close.",
+   "text": "From a game played on Lichess. You are White, and this time you defend: Black has the pawn, and you want a draw. The key squares for Black's pawn on f6 are e4, f4 and g4, and your king must keep Black's king away from them.",
+   "credit": {
+    "source": "Lichess games database, game 98g55mcw",
+    "url": "https://lichess.org/98g55mcw#152",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "e2e3",
+    "e5f5",
+    "e3f3",
+    "f5e5",
+    "f3e3",
+    "f6f5",
+    "e3f3"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "8/8/5p2/4k3/8/8/4K3/8 w - - 0 77",
+     "decision": true,
+     "main": "e2e3",
+     "mainSan": "Ke3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Your king faces Black's king with one square between, e3 against e5. Now Black must move and cannot step forward, because your king guards d4, e4 and f4. Any other move loses."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "8/8/5p2/4k3/8/4K3/8/8 b - - 1 77",
+     "decision": false,
+     "main": "e5f5",
+     "mainSan": "Kf5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "8/8/5p2/5k2/8/4K3/8/8 w - - 2 78",
+     "decision": true,
+     "main": "e3f3",
+     "mainSan": "Kf3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Black's king moved to f5, so yours moves to f3 to face it again. Now e4, f4 and g4 are all covered. Any other move would let Black's king through."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "8/8/5p2/5k2/8/5K2/8/8 b - - 3 78",
+     "decision": false,
+     "main": "f5e5",
+     "mainSan": "Ke5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "8/8/5p2/4k3/8/5K2/8/8 w - - 4 79",
+     "decision": true,
+     "main": "f3e3",
+     "mainSan": "Ke3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Back to e3, facing the king on e5 again. Each time Black's king moves sideways, yours does the same and keeps the opposition."
+     }
+    },
+    {
+     "ply": 5,
+     "fen": "8/8/5p2/4k3/8/4K3/8/8 b - - 5 79",
+     "decision": false,
+     "main": "f6f5",
+     "mainSan": "f5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 6,
+     "fen": "8/8/8/4kp2/8/4K3/8/8 w - - 0 80",
+     "decision": true,
+     "main": "e3f3",
+     "mainSan": "Kf3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The pawn moved to f5, so its key squares moved too: now they are e3, f3 and g3. Your king sits on f3, in the pawn's path, and Black has no way past. In the game White kept the draw for a few more moves, then lost after 82.Ke1. Staying in front of the pawn with 82.Kf2 would still have drawn."
      }
     }
    ]

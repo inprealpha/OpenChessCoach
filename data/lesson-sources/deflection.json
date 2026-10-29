@@ -1,0 +1,81 @@
+{
+ "id": "deflection",
+ "name": "Deflection",
+ "kind": "theme",
+ "track": "themes",
+ "level": "intermediate",
+ "side": "white",
+ "puzzleThemes": [
+  "deflection"
+ ],
+ "goal": "You can force a defending piece away from the square or piece it guards, often with a sacrifice, and then win what it guarded.",
+ "priorKnowledge": [
+  "removing-the-defender"
+ ],
+ "intro": "Many defenders have one important job, such as guarding a piece, a square or the back rank, the row the king started on. Deflection means forcing that defender away from its job, usually with a check or a capture it has to answer. Once the defender has gone, you take what it was guarding.",
+ "parts": [
+  {
+   "title": "One rook guards the queen",
+   "fen": "r5k1/ppq1r1pp/2n1p3/8/2B2Q2/P1N5/1P4PP/5R1K w - - 2 25",
+   "side": "white",
+   "keyIdea": "A check that the defender has to answer by capturing drags it away from the piece it guards.",
+   "text": "From a game played on Lichess. You are White. Black has just offered a queen trade on c7, and only the rook on e7 guards Black's queen. Look for a forcing move that gives that rook something else to do.",
+   "url": "https://lichess.org/training/hPNWj",
+   "line": "Bxe6+ Rxe6 Qxc7",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Bxe6+",
+     "text": "25.Bxe6+ takes a pawn with check. Black's best move is to take the bishop with the rook, but then the rook leaves the seventh rank and no longer guards the queen. Any other answer is even worse for Black."
+    },
+    {
+     "ply": 2,
+     "san": "Qxc7",
+     "text": "Nothing guards the queen on c7 any more, so 26.Qxc7 takes it. You gave a bishop and won a queen."
+    }
+   ]
+  },
+  {
+   "title": "Only the king guards the queen",
+   "fen": "rn5r/pp3Rp1/1kp4p/2q1p3/8/4Q3/1PP3PP/2KR4 w - - 4 23",
+   "side": "white",
+   "keyIdea": "A king can be deflected too: a check it must answer by capturing pulls it away from what it guards.",
+   "text": "From a game played on Lichess. You are White. Black has just put the queen on c5 to offer a trade, and only the king on b6 guards it. Can you make the king leave?",
+   "url": "https://lichess.org/training/jZIco",
+   "line": "Rxb7+ Kxb7 Qxc5",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Rxb7+",
+     "text": "23.Rxb7+ is a rook sacrifice with check. If the king takes the rook, it leaves the queen on c5 behind. If it steps to a6 or a5 instead, the queen is left undefended just the same."
+    },
+    {
+     "ply": 2,
+     "san": "Qxc5",
+     "text": "The king took the rook, so nothing guards the queen any more, and 24.Qxc5 takes it. You gave a rook and won a queen."
+    }
+   ]
+  },
+  {
+   "title": "The queen guards f7",
+   "fen": "1rb1k1r1/2q2p2/4pQ2/pp5p/4P2p/P1P5/1P4N1/3R1RK1 w - - 2 31",
+   "side": "white",
+   "keyIdea": "Pull away the piece that guards the mating square, and the mate works.",
+   "text": "From a game played on Lichess. You are White. Your queen on f6, with the rook on f1 behind it, aims at f7, but Black's queen on c7 guards that pawn along the seventh rank. Look for a check that gives Black's queen a different job.",
+   "url": "https://lichess.org/training/8plnM",
+   "line": "Rd8+ Qxd8 Qxf7#",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Rd8+",
+     "text": "31.Rd8+ is a rook sacrifice with check. The king cannot take, because your queen guards d8, and every square it could step to is covered. So Black's queen must take the rook, and that pulls it off the seventh rank."
+    },
+    {
+     "ply": 2,
+     "san": "Qxf7#",
+     "text": "Black's queen no longer guards f7. 32.Qxf7# takes the pawn with the rook on f1 behind it, and it is checkmate."
+    }
+   ]
+  }
+ ]
+}

@@ -32,6 +32,15 @@ Picking the instance (any command):
 Start a verify-mode instance with: npm run verify
 `;
 
+/**
+ * Exits once stdout has taken all the output: into a pipe, `process.exit` straight after a large
+ * write would cut it off at 128 KB (`coachctl db get … | jq`).
+ */
+async function exit(code: number): Promise<never> {
+  await new Promise<void>((resolve) => process.stdout.write('', () => resolve()));
+  process.exit(code);
+}
+
 const argv = process.argv.slice(2);
 const name = argv[0];
 const { flags, positional } = parseArgs(argv.slice(1), ['help', 'dry-run', 'all', 'resign', 'limit', 'unavailable', 'clear', 'ready', 'full-page', 'json']);
@@ -52,9 +61,9 @@ if (flags.help) {
 try {
   const result = await command.run(flags, positional);
   print(result);
-  process.exit(result.ok === false ? 1 : 0);
+  await exit(result.ok === false ? 1 : 0);
 } catch (err) {
   if (err instanceof CtlError) print({ ok: false, error: err.message, fix: err.fix });
   else print({ ok: false, error: err instanceof Error ? err.message : String(err), fix: 'Run coachctl doctor to check the instance.' });
-  process.exit(1);
+  await exit(1);
 }

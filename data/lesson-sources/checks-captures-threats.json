@@ -1,0 +1,99 @@
+{
+ "id": "checks-captures-threats",
+ "name": "Checks, captures and threats",
+ "kind": "thinking",
+ "track": "thinking",
+ "level": "beginner",
+ "side": "white",
+ "goal": "You can list every check, capture and threat for both sides before choosing a move, and find the forcing move that wins.",
+ "priorKnowledge": [
+  "blunder-check"
+ ],
+ "intro": "A check, a capture or a threat leaves the other side little choice, because it usually has to be answered. Moves like these are called forcing moves, and they are the first ones to look at, for you and for your opponent. Before each move, list them for both sides and follow each one a move ahead. This is how you find the moves that win material (pieces and pawns, counted in points) and spot the ones that only seem to.",
+ "parts": [
+  {
+   "title": "A king in the open",
+   "fen": "1r6/p7/4b2Q/q3kp1p/4p3/8/PPP3PP/5R1K w - - 3 31",
+   "side": "white",
+   "keyIdea": "List every check: a check can drive the king off a line and leave the piece behind it open to capture.",
+   "text": "From a game played on Lichess. You are White, and you are 2 points behind. Black's king stands in the open on e5: list all your checks and follow each one a move ahead.",
+   "url": "https://lichess.org/training/EGGQS",
+   "line": "Qf4+ Kf6 Qxb8",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Qf4+",
+     "text": "Of your checks, 31.Qf4+ (the queen to f4, with check) is the one that wins. The king cannot take the queen, because your rook on f1 guards f4, and the king must step off the diagonal from f4 to b8, so your queen can then take the rook on b8. 31.Qxe6+ would only lose the queen to 31...Kxe6."
+    },
+    {
+     "ply": 2,
+     "san": "Qxb8",
+     "text": "The queen takes the rook. You were 2 points behind, and now you are 3 ahead."
+    }
+   ]
+  },
+  {
+   "title": "Two guards on h8",
+   "fen": "5r1r/4knQp/1b2pp2/7B/2P5/3P2P1/7P/7K w - - 3 39",
+   "side": "white",
+   "keyIdea": "List the captures and ask what each piece guards: taking a defender can leave the piece it protected free.",
+   "text": "From a game played on Lichess. You are White, and you are 3 points behind. Your queen attacks the rook on h8, but the knight on f7 and the rook on f8 both guard it, and each of your checks gives away the queen. List your captures, and for each one ask what Black could take back.",
+   "url": "https://lichess.org/training/vlCI2",
+   "line": "Bxf7 Rxf7 Qxh8",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Bxf7",
+     "text": "39.Qxh8 would give your queen for a rook. 39.Bxf7 instead takes the knight, one of the two guards of the rook on h8. If Black's rook on f8 takes back on f7, it no longer guards h8 either."
+    },
+    {
+     "ply": 2,
+     "san": "Qxh8",
+     "text": "Nothing guards the rook on h8 now, so the queen takes it. You gave your bishop for a knight and a rook: you were 3 points behind and are now 2 ahead."
+    }
+   ]
+  },
+  {
+   "title": "No checks, no good captures",
+   "fen": "2r2rk1/1pqb1p1p/2n1p1p1/3pP3/5P1P/2NBQ3/PP4PK/R4R2 b - - 1 19",
+   "side": "black",
+   "keyIdea": "A move that is not a check or a capture, but attacks two pieces at once, can win as surely as either.",
+   "text": "From a game played on Lichess. You are Black, and the material is level. You have no checks, and both of your captures lose material. What is left on your list?",
+   "url": "https://lichess.org/training/1WT0R",
+   "line": "d4 Qg3 dxc3",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "d4",
+     "text": "19...d4 attacks the queen on e3 and the knight on c3 at once. The queen has to move, and then your pawn takes the knight."
+    },
+    {
+     "ply": 2,
+     "san": "dxc3",
+     "text": "The pawn takes the knight. Even if White takes your pawn back, you have won a knight for a pawn, 3 points for 1."
+    }
+   ]
+  },
+  {
+   "title": "Your opponent's checks",
+   "fen": "5rk1/p1N2p2/1r4pp/4b3/Q2pPP2/1P5q/P3B2P/2R2RK1 b - - 0 24",
+   "side": "white",
+   "keyIdea": "List your opponent's checks as well as your own: the answer to a check must also keep your other pieces safe.",
+   "text": "From a game played on Lichess. You are White. Black's bishop has just taken your knight on c7, and you can take it back. After that, list Black's forcing moves too: which check would Black have next, and what else would it attack?",
+   "url": "https://lichess.org/training/5Zb1I",
+   "line": "Bxc7 Rxc7 Qe3+ Rf2",
+   "notes": [
+    {
+     "ply": 1,
+     "san": "Rxc7",
+     "text": "The rook takes back on c7, and you are a bishop ahead. But Black's queen can now check from e3, where it also attacks your bishop on e2."
+    },
+    {
+     "ply": 3,
+     "san": "Rf2",
+     "text": "The rook blocks the check on f2, and from there it also guards the bishop on e2. Moving the king to h1 or g2 would also get out of check, but then Black's queen would take the bishop."
+    }
+   ]
+  }
+ ]
+}

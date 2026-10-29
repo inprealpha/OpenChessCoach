@@ -431,7 +431,9 @@ async function snapshot(flags: Flags): Promise<Result> {
 async function coach(flags: Flags, positional: string[]): Promise<Result> {
   const t = target(flags);
   if (positional[0] === 'status') {
-    const unavailable = str(flags, 'unavailable');
+    // `--unavailable` is also coach script's flag with no value, so `--unavailable "<reason>"` (as the
+    // help writes it) leaves the reason among the words after `status`.
+    const unavailable = str(flags, 'unavailable') ?? (flags.unavailable === true ? positional.slice(1).join(' ') || undefined : undefined);
     if (!unavailable && !flags.ready) throw new CtlError('Say which status.', 'Pass --unavailable "<reason>" or --ready.');
     const status = await verifyRoute(t, '/__verify/coach/status', { method: 'POST', body: JSON.stringify({ unavailable: flags.ready ? null : unavailable }) });
     return { ok: true, status };

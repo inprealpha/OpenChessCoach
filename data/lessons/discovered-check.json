@@ -1,0 +1,211 @@
+{
+ "id": "discovered-check",
+ "name": "Discovered check and double check",
+ "kind": "theme",
+ "track": "themes",
+ "level": "beginner",
+ "goal": "You can move one piece out of the way so the piece behind it gives check while the moved piece attacks something else. You can also use a double check, which the king can only answer by moving.",
+ "priorKnowledge": [
+  "discovered-attacks"
+ ],
+ "side": "white",
+ "puzzleTags": [],
+ "puzzleThemes": [
+  "discoveredCheck",
+  "doubleCheck"
+ ],
+ "intro": {
+  "text": "In a discovered check, you move one piece out of the way, and the piece standing behind it gives check. Your opponent must deal with the check first, so the piece you moved can make a threat of its own, even against the queen, and there is no time to answer it. When the moved piece gives check as well, the king is attacked by two pieces at once: a double check. Blocking one attacker or taking it still leaves the other check, so the king has to move."
+ },
+ "parts": [
+  {
+   "title": "A rook in the queen's way",
+   "fen": "8/5pk1/4q1r1/1p6/3RP3/2Q2PP1/2P1K1Br/8 w - - 0 46",
+   "side": "white",
+   "keyIdea": "Move the front piece so that the piece behind gives check, and let the piece that moves attack something valuable at the same time.",
+   "text": "From a game played on Lichess. You are White. Black's rook has just taken your pawn on h2. Your queen on c3 aims at Black's king on g7, but your own rook on d4 stands in the way, on the same diagonal.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle g4tHm",
+    "url": "https://lichess.org/training/g4tHm",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "d4d6",
+    "g7h7",
+    "d6e6"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "8/5pk1/4q1r1/1p6/3RP3/2Q2PP1/2P1K1Br/8 w - - 0 46",
+     "decision": true,
+     "main": "d4d6",
+     "mainSan": "Rd6+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "46.Rd6+: the rook steps off the diagonal to d6, and your queen now gives check. From d6 the rook also attacks Black's queen on e6. Whatever Black does about the check, the queen is lost."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "8/5pk1/3Rq1r1/1p6/4P3/2Q2PP1/2P1K1Br/8 b - - 1 46",
+     "decision": false,
+     "main": "g7h7",
+     "mainSan": "Kh7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "8/5p1k/3Rq1r1/1p6/4P3/2Q2PP1/2P1K1Br/8 w - - 2 47",
+     "decision": true,
+     "main": "d6e6",
+     "mainSan": "Rxe6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Black's king stepped away to h7, so 47.Rxe6 takes the queen. Black's pawn on f7 can take your rook back, but a queen is worth far more than a rook."
+     }
+    }
+   ]
+  },
+  {
+   "title": "A knight in the queen's way",
+   "fen": "r1b2rk1/pp3pp1/1q5p/3PP3/2BnN3/8/PP1Q2PP/R4RK1 b - - 0 15",
+   "side": "black",
+   "keyIdea": "Against a double check only a king move helps, so whatever else the checking pieces attack cannot be saved.",
+   "text": "From a game played on Lichess. You are Black. White has just taken your pawn on e5. Your queen on b6 aims at White's king on g1, but your knight on d4 stands on that diagonal.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle fHIQf",
+    "url": "https://lichess.org/training/fHIQf",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "d4f3",
+    "g1h1",
+    "f3d2"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "r1b2rk1/pp3pp1/1q5p/3PP3/2BnN3/8/PP1Q2PP/R4RK1 b - - 0 15",
+     "decision": true,
+     "main": "d4f3",
+     "mainSan": "Nf3+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "15...Nf3+: the knight jumps to f3 and checks, and your queen on b6 checks along the diagonal the knight has opened. That is a double check. Taking the knight or blocking the queen would still leave one check, so the king has to move, and h1 is its only square."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "r1b2rk1/pp3pp1/1q5p/3PP3/2B1N3/5n2/PP1Q2PP/R4RK1 w - - 1 16",
+     "decision": false,
+     "main": "g1h1",
+     "mainSan": "Kh1",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "r1b2rk1/pp3pp1/1q5p/3PP3/2B1N3/5n2/PP1Q2PP/R4R1K b - - 2 16",
+     "decision": true,
+     "main": "f3d2",
+     "mainSan": "Nxd2",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "From f3 the knight was also attacking White's queen on d2, and 16...Nxd2 takes it. White can take back with the knight on e4, but you have won a queen for a knight."
+     }
+    }
+   ]
+  },
+  {
+   "title": "Queen and knight on one diagonal",
+   "fen": "8/5ppk/1r5p/3Pb3/4N1P1/3Q3P/5P1q/5K2 w - - 0 37",
+   "side": "white",
+   "keyIdea": "When two pieces give check together, taking one of them does not help: the other one is still giving check.",
+   "text": "From a game played on Lichess. You are White. Black's rook has just taken your rook on b6, and Black's queen is close to your king. Your queen on d3 and your knight on e4 stand on the same diagonal as Black's king on h7.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle qD0cD",
+    "url": "https://lichess.org/training/qD0cD",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "e4f6",
+    "h7h8",
+    "d3h7"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "8/5ppk/1r5p/3Pb3/4N1P1/3Q3P/5P1q/5K2 w - - 0 37",
+     "decision": true,
+     "main": "e4f6",
+     "mainSan": "Nf6+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "37.Nf6+ gives a double check. The knight on f6 checks, and so does your queen, along the diagonal the knight has just opened. The pawn on g7 could take the knight if the knight were the only piece giving check, but here the queen's check would remain, so that capture is not allowed. The king must move, and h8 is its only square."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "8/5ppk/1r3N1p/3Pb3/6P1/3Q3P/5P1q/5K2 b - - 1 37",
+     "decision": false,
+     "main": "h7h8",
+     "mainSan": "Kh8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "7k/5pp1/1r3N1p/3Pb3/6P1/3Q3P/5P1q/5K2 w - - 2 38",
+     "decision": true,
+     "main": "d3h7",
+     "mainSan": "Qh7#",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "38.Qh7# puts your queen on h7, guarded by the knight on f6. The king on h8 cannot take it and has no square left: checkmate."
+     }
+    }
+   ]
+  }
+ ]
+}

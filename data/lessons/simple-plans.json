@@ -1,0 +1,325 @@
+{
+ "id": "simple-plans",
+ "name": "Simple plans",
+ "kind": "thinking",
+ "track": "thinking",
+ "level": "intermediate",
+ "goal": "You can make a small plan from the position: improve your worst piece, attack a weak pawn, or bring a rook to an open file.",
+ "priorKnowledge": [
+  "candidate-moves",
+  "centre-and-activity"
+ ],
+ "side": "white",
+ "puzzleTags": [],
+ "puzzleThemes": [],
+ "intro": {
+  "text": "Most of the time nothing can be won straight away, and that is when you need a plan. A small one is enough. Look for a piece of yours that stands badly and a better square for it, an enemy pawn that is hard to defend, or a file with no pawns where a rook could get in. Then carry the plan out one move at a time: moves made for a reason beat moves made without one."
+ },
+ "parts": [
+  {
+   "title": "Nothing to win at once",
+   "fen": "5rk1/2p2pp1/p1p1b3/1r2P1p1/5p2/1PP4P/P4PPN/R3R1K1 w - - 2 23",
+   "side": "white",
+   "keyIdea": "When nothing can be won at once, find your worst-placed piece and move it to a square where it does more.",
+   "text": "From a game played on Lichess. You are White, and material is level. Nothing can be won at once, so look at your pieces one by one. Which one stands worst, and where would it be more useful?",
+   "credit": {
+    "source": "Lichess games database, game T2ZQwZVy",
+    "url": "https://lichess.org/T2ZQwZVy#44",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "h2f3",
+    "g5g4",
+    "f3d4",
+    "b5a5",
+    "d4e6",
+    "f7e6",
+    "h3g4"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "5rk1/2p2pp1/p1p1b3/1r2P1p1/5p2/1PP4P/P4PPN/R3R1K1 w - - 2 23",
+     "decision": true,
+     "main": "h2f3",
+     "mainSan": "Nf3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Your knight on h2 sits at the edge of the board and does almost nothing. On f3 it attacks the pawn on g5 and gets ready to jump to d4, in the centre."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "5rk1/2p2pp1/p1p1b3/1r2P1p1/5p2/1PP2N1P/P4PP1/R3R1K1 b - - 3 23",
+     "decision": false,
+     "main": "g5g4",
+     "mainSan": "g4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "5rk1/2p2pp1/p1p1b3/1r2P3/5pp1/1PP2N1P/P4PP1/R3R1K1 w - - 0 24",
+     "decision": true,
+     "main": "f3d4",
+     "mainSan": "Nd4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Black's pawn chased the knight from f3, so it jumps to d4. From there it attacks the rook on b5, the bishop on e6 and the pawn on c6 all at once."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "5rk1/2p2pp1/p1p1b3/1r2P3/3N1pp1/1PP4P/P4PP1/R3R1K1 b - - 1 24",
+     "decision": false,
+     "main": "b5a5",
+     "mainSan": "Ra5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "5rk1/2p2pp1/p1p1b3/r3P3/3N1pp1/1PP4P/P4PP1/R3R1K1 w - - 2 25",
+     "decision": true,
+     "main": "d4e6",
+     "mainSan": "Nxe6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The knight takes Black's bishop on e6, trading itself for it. The bishop was the only defender of the pawn on g4, and after 25...fxe6 that pawn has no defender left."
+     }
+    },
+    {
+     "ply": 5,
+     "fen": "5rk1/2p2pp1/p1p1N3/r3P3/5pp1/1PP4P/P4PP1/R3R1K1 b - - 0 25",
+     "decision": false,
+     "main": "f7e6",
+     "mainSan": "fxe6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 6,
+     "fen": "5rk1/2p3p1/p1p1p3/r3P3/5pp1/1PP4P/P4PP1/R3R1K1 w - - 0 26",
+     "decision": true,
+     "main": "h3g4",
+     "mainSan": "hxg4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The pawn takes on g4, and you are now a pawn ahead. A few moves ago your knight was your worst piece; it found a better square, traded itself for the bishop and helped win a pawn."
+     }
+    }
+   ]
+  },
+  {
+   "title": "The pawn on d4",
+   "fen": "2r2rk1/1p2bppp/p3p3/n7/1P1P4/P3BP2/4BP1P/2R2RK1 b - - 0 19",
+   "side": "black",
+   "keyIdea": "Attacking a pawn that no pawn can defend is a good plan: aim more pieces at it than your opponent can defend it with.",
+   "text": "From a game played on Lichess. You are Black. White has no pawns on the c- or e-file, so the pawn on d4 can only be defended by pieces. Your knight on a5 is attacked by the pawn on b4. Where should it go, and what comes next?",
+   "credit": {
+    "source": "Lichess games database, game 9sphxwk7",
+    "url": "https://lichess.org/9sphxwk7#37",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "a5c6",
+    "c1c3",
+    "e7f6",
+    "f1c1",
+    "c8d8"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "2r2rk1/1p2bppp/p3p3/n7/1P1P4/P3BP2/4BP1P/2R2RK1 b - - 0 19",
+     "decision": true,
+     "main": "a5c6",
+     "mainSan": "Nc6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The knight had to move, and on c6 it has a job: it attacks the pawn on d4, which no white pawn defends."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "2r2rk1/1p2bppp/p1n1p3/8/1P1P4/P3BP2/4BP1P/2R2RK1 w - - 1 20",
+     "decision": false,
+     "main": "c1c3",
+     "mainSan": "Rc3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "2r2rk1/1p2bppp/p1n1p3/8/1P1P4/P1R1BP2/4BP1P/5RK1 b - - 2 20",
+     "decision": true,
+     "main": "e7f6",
+     "mainSan": "Bf6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The bishop on f6 adds a second attacker, aimed down the diagonal at d4. Only White's bishop on e3 defends the pawn."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "2r2rk1/1p3ppp/p1n1pb2/8/1P1P4/P1R1BP2/4BP1P/5RK1 w - - 3 21",
+     "decision": false,
+     "main": "f1c1",
+     "mainSan": "Rfc1",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "2r2rk1/1p3ppp/p1n1pb2/8/1P1P4/P1R1BP2/4BP1P/2R3K1 b - - 4 21",
+     "decision": true,
+     "main": "c8d8",
+     "mainSan": "Rcd8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "A rook comes to the d-file, the file of the weak pawn. Now your knight, bishop and rook all attack d4, against one defender, and White will struggle to keep the pawn."
+     }
+    }
+   ]
+  },
+  {
+   "title": "A calm position",
+   "fen": "r4rk1/1p3pp1/p1p2n1p/3p1b2/3P4/P1N5/1PP1BPPP/2R2RK1 b - - 2 17",
+   "side": "black",
+   "keyIdea": "Rooks need open files: put a rook on a file with no pawns before your opponent does, then bring your second rook to the same file.",
+   "text": "From a game played on Lichess. You are Black. The position is calm and neither side can win anything right now. Look at the files: which one has no pawns on it, and who will use it first?",
+   "credit": {
+    "source": "Lichess games database, game E6Wy0byf",
+    "url": "https://lichess.org/E6Wy0byf#33",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "f8e8",
+    "f2f3",
+    "e8e7",
+    "f1e1",
+    "a8e8"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "r4rk1/1p3pp1/p1p2n1p/3p1b2/3P4/P1N5/1PP1BPPP/2R2RK1 b - - 2 17",
+     "decision": true,
+     "main": "f8e8",
+     "mainSan": "Rfe8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The e-file is the only file with no pawns on it. Your rook takes it first and lines up against White's bishop on e2."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "r3r1k1/1p3pp1/p1p2n1p/3p1b2/3P4/P1N5/1PP1BPPP/2R2RK1 w - - 3 18",
+     "decision": false,
+     "main": "f2f3",
+     "mainSan": "f3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "r3r1k1/1p3pp1/p1p2n1p/3p1b2/3P4/P1N2P2/1PP1B1PP/2R2RK1 b - - 0 18",
+     "decision": true,
+     "main": "e8e7",
+     "mainSan": "Re7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The rook steps up to e7 and makes room behind it. From e7 it still holds the file, and your other rook can come to e8."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "r5k1/1p2rpp1/p1p2n1p/3p1b2/3P4/P1N2P2/1PP1B1PP/2R2RK1 w - - 1 19",
+     "decision": false,
+     "main": "f1e1",
+     "mainSan": "Rfe1",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "r5k1/1p2rpp1/p1p2n1p/3p1b2/3P4/P1N2P2/1PP1B1PP/2R1R1K1 b - - 2 19",
+     "decision": true,
+     "main": "a8e8",
+     "mainSan": "Rae8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Two rooks on the open file back each other up. The rook from a8, which was doing nothing, has joined the game, and White's rook on e1 now faces both of yours."
+     }
+    }
+   ]
+  }
+ ]
+}

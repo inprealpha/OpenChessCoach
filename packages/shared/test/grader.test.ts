@@ -34,28 +34,53 @@ describe('Move Grade thresholds', () => {
     [{ cp: -200 }, false, 'Blunder'],
     [{ mate: -2 }, false, 'Blunder'],
   ] as const)('%o graded against an equal position is %s', (played, isTopMove, grade) => {
-    expect(gradeMove({ best, played, isTopMove }).grade).toBe(grade);
+    expect(gradeMove({ best, played, isTopMove, givesMate: false }).grade).toBe(grade);
+  });
+});
+
+describe('a move that gives checkmate', () => {
+  it('is Best, though the Engine lists another mate first', () => {
+    expect(gradeMove({ best: { mate: 1 }, played: { mate: 1 }, isTopMove: false, givesMate: true })).toEqual({ grade: 'Best', winLoss: 0 });
+  });
+
+  it('is Best when the Engine’s line mates in more moves, or it never listed the move', () => {
+    // King and queen against king: Qg7# and Qd8# both mate at once; the Engine lists Qg7# alone.
+    const fen = '6k1/8/5QK1/8/8/8/8/8 w - - 0 1';
+    const before: Analysis = { fen, depth: 10, lines: [{ depth: 10, score: { mate: 1 }, pv: ['f6g7'] }] };
+    expect(gradeFromAnalyses(1, 'f6g7', before, undefined).grade).toBe('Best');
+    expect(gradeFromAnalyses(1, 'f6d8', before, undefined).grade).toBe('Best');
+    expect(gradeMove({ best: { mate: 2 }, played: { mate: 1 }, isTopMove: false, givesMate: true }).grade).toBe('Best');
+  });
+
+  it('is decided from the board, not from a mate in one the Engine reports after a quiet move', () => {
+    // Qe7 gives no mate: Black's only move, Kh8, walks into Qh7#. The Engine after Qe7 reports
+    // mate in one against Black, which flips to the mover's mate in one; it is still a mate in two.
+    const fen = '6k1/8/5QK1/8/8/8/8/8 w - - 0 1';
+    const before: Analysis = { fen, depth: 10, lines: [{ depth: 10, score: { mate: 1 }, pv: ['f6g7'] }] };
+    const after: Analysis = { fen: '6k1/4Q3/6K1/8/8/8/8/8 b - - 1 1', depth: 10, lines: [{ depth: 10, score: { mate: -1 }, pv: ['g8h8', 'e7h7'] }] };
+    expect(gradeFromAnalyses(1, 'f6e7', before, after).grade).toBe('Good');
+    expect(gradeMove({ best: { mate: 1 }, played: { mate: 1 }, isTopMove: false, givesMate: false }).grade).toBe('Good');
   });
 });
 
 describe('the material floor', () => {
   it('grades hanging a piece a queen down at least Mistake, though the winning chance barely moves', () => {
     // Ba6 a queen down: the best move keeps it at -9, Ba6 drops a bishop on top.
-    const input = { best: { cp: -900 }, played: { cp: -1230 }, isTopMove: false };
+    const input = { best: { cp: -900 }, played: { cp: -1230 }, isTopMove: false, givesMate: false };
     expect(gradeMove(input).winLoss).toBeLessThan(0.1);
     expect(gradeMove(input).grade).toBe('Mistake');
   });
 
   it('flags giving up three pawns of evaluation in a won position too', () => {
-    expect(gradeMove({ best: { cp: 1500 }, played: { cp: 1150 }, isTopMove: false }).grade).toBe('Mistake');
+    expect(gradeMove({ best: { cp: 1500 }, played: { cp: 1150 }, isTopMove: false, givesMate: false }).grade).toBe('Mistake');
   });
 
   it('leaves smaller losses in a decided position to the winning-chance formula', () => {
-    expect(gradeMove({ best: { cp: -900 }, played: { cp: -1150 }, isTopMove: false }).grade).toBe('Good');
+    expect(gradeMove({ best: { cp: -900 }, played: { cp: -1150 }, isTopMove: false, givesMate: false }).grade).toBe('Good');
   });
 
   it('never softens a worse grade', () => {
-    expect(gradeMove({ best: { cp: 0 }, played: { cp: -400 }, isTopMove: false }).grade).toBe('Blunder');
+    expect(gradeMove({ best: { cp: 0 }, played: { cp: -400 }, isTopMove: false, givesMate: false }).grade).toBe('Blunder');
   });
 });
 
@@ -71,7 +96,7 @@ describe('a slower mate', () => {
     const kf6 = gradeFromAnalyses(1, 'g6f6', rook, analysis('7k/8/5K2/8/8/8/8/R7 b - - 1 1', [['h8g8', { mate: -4 }]]));
     const kg5 = gradeFromAnalyses(1, 'g6g5', rook, analysis('7k/8/8/6K1/8/8/8/R7 b - - 1 1', [['h8g7', { mate: -6 }]]));
     expect([kf6.grade, kf6.winLoss, kg5.grade, kg5.winLoss]).toEqual(['Good', 0, 'Good', 0]);
-    expect(gradeMove({ best: { mate: 2 }, played: { mate: 5 }, isTopMove: false }).grade).toBe('Good');
+    expect(gradeMove({ best: { mate: 2 }, played: { mate: 5 }, isTopMove: false, givesMate: false }).grade).toBe('Good');
   });
 
   it('keeps the material floor for a move that lets the mate go', () => {
@@ -79,7 +104,7 @@ describe('a slower mate', () => {
     const queen = analysis('7k/8/6K1/8/8/8/8/1Q6 w - - 0 1', [['b1b8', { mate: 1 }], ['b1a1', { mate: 2 }], ['b1c1', { mate: 2 }], ['b1h1', { mate: 2 }], ['b1d1', { mate: 2 }]]);
     const kg5 = gradeFromAnalyses(1, 'g6g5', queen, analysis('7k/8/8/6K1/8/8/8/1Q6 b - - 1 1', [['h8g7', { cp: -1012 }]]));
     expect([kg5.grade, kg5.winLoss]).toEqual(['Mistake', 0]);
-    expect(gradeMove({ best: { mate: 3 }, played: { cp: 900 }, isTopMove: false }).grade).toBe('Mistake');
+    expect(gradeMove({ best: { mate: 3 }, played: { cp: 900 }, isTopMove: false, givesMate: false }).grade).toBe('Mistake');
   });
 });
 

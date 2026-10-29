@@ -21,6 +21,7 @@
   import EngineGame from './screens/EngineGame.svelte';
   import PlayOut from './screens/PlayOut.svelte';
   import { syncOfflineGames } from './lib/offline.ts';
+  import { syncLessonProgress } from './lib/lesson-progress.svelte.ts';
   import { engineStatus } from './lib/engine/engine.svelte.ts';
 
   $effect(() => {
@@ -28,6 +29,7 @@
     if (api.state === 'online') {
       void profile.load();
       void syncOfflineGames();
+      void syncLessonProgress();
     } else if (api.state === 'offline' && !profile.loaded) void profile.load();
   });
 

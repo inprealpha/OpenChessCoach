@@ -1,0 +1,332 @@
+{
+ "id": "combinations",
+ "name": "Combining Themes",
+ "kind": "theme",
+ "track": "themes",
+ "level": "intermediate",
+ "goal": "You can see when one forcing move, such as a decoy or a clearing sacrifice, sets up a second Theme that wins.",
+ "priorKnowledge": [
+  "decoy",
+  "clearance-and-interference"
+ ],
+ "side": "white",
+ "puzzleTags": [],
+ "puzzleThemes": [
+  "sacrifice"
+ ],
+ "intro": {
+  "text": "Many wins come from two Themes in a row. The first move forces a reply, often with a sacrifice: it lures a piece onto a bad square (a decoy), pulls a defender away (a deflection), or moves your own piece out of the way with check (a clearance). The second move is a Theme you already know: a fork, a pin or a mate. When a fork or a mate is almost there, ask which forcing move would make it work."
+ },
+ "parts": [
+  {
+   "title": "Material is level",
+   "fen": "8/2p4R/1pPq2k1/6p1/3N1p2/4P1P1/5P1P/6K1 w - - 1 43",
+   "side": "white",
+   "keyIdea": "A sacrifice can drag the king onto a square where a knight fork is waiting.",
+   "text": "From a game played on Lichess. You are White, and material is level. Black's king on g6 and queen on d6 stand on the same rank, and your knight is close by.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle 54H4F",
+    "url": "https://lichess.org/training/54H4F",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "h7h6",
+    "g6h6",
+    "d4f5",
+    "h6g6",
+    "f5d6"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "8/2p4R/1pPq2k1/6p1/3N1p2/4P1P1/5P1P/6K1 w - - 1 43",
+     "decision": true,
+     "main": "h7h6",
+     "mainSan": "Rh6+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Step one, the decoy: a rook sacrifice with check. If the king steps to f7 or g7, your rook takes the queen along the sixth rank. So Black takes the rook, and the king lands on h6."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "8/2p5/1pPq2kR/6p1/3N1p2/4P1P1/5P1P/6K1 b - - 2 43",
+     "decision": false,
+     "main": "g6h6",
+     "mainSan": "Kxh6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "8/2p5/1pPq3k/6p1/3N1p2/4P1P1/5P1P/6K1 w - - 0 44",
+     "decision": true,
+     "main": "d4f5",
+     "mainSan": "Nf5+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Step two, the fork: the knight checks the king on h6 and attacks the queen on d6. The king must move, and the queen is lost."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "8/2p5/1pPq3k/5Np1/5p2/4P1P1/5P1P/6K1 b - - 1 44",
+     "decision": false,
+     "main": "h6g6",
+     "mainSan": "Kg6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "8/2p5/1pPq2k1/5Np1/5p2/4P1P1/5P1P/6K1 w - - 2 45",
+     "decision": true,
+     "main": "f5d6",
+     "mainSan": "Nxd6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Your knight takes the queen. You gave a rook and won the queen: neither move works without the other."
+     }
+    }
+   ]
+  },
+  {
+   "title": "A pawn down",
+   "fen": "r2r2k1/pq2bppp/1p2p3/4P3/3B1P2/1P4P1/P1PQ3P/3R1RK1 b - - 0 18",
+   "side": "black",
+   "keyIdea": "Give material to lure a piece onto a line with its own king, then pin it there.",
+   "text": "From a game played on Lichess. You are Black, and you are a pawn down. Look at the diagonal that runs from c5 through d4 to White's king on g1.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle 8VTTY",
+    "url": "https://lichess.org/training/8VTTY",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "d8d4",
+    "d2d4",
+    "e7c5",
+    "d4c5",
+    "b6c5"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "r2r2k1/pq2bppp/1p2p3/4P3/3B1P2/1P4P1/P1PQ3P/3R1RK1 b - - 0 18",
+     "decision": true,
+     "main": "d8d4",
+     "mainSan": "Rxd4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Step one, the decoy: your rook takes the bishop and gives itself up. White's best move is to take back with the queen, and that puts the queen on d4, on the same diagonal as White's king."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "r5k1/pq2bppp/1p2p3/4P3/3r1P2/1P4P1/P1PQ3P/3R1RK1 w - - 0 19",
+     "decision": false,
+     "main": "d2d4",
+     "mainSan": "Qxd4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "r5k1/pq2bppp/1p2p3/4P3/3Q1P2/1P4P1/P1P4P/3R1RK1 b - - 0 19",
+     "decision": true,
+     "main": "e7c5",
+     "mainSan": "Bc5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Step two, the pin: the bishop attacks the queen, which cannot leave the diagonal because its king is behind it. It can take the bishop, step along the diagonal and be taken, or stay and be taken. The queen is lost."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "r5k1/pq3ppp/1p2p3/2b1P3/3Q1P2/1P4P1/P1P4P/3R1RK1 w - - 1 20",
+     "decision": false,
+     "main": "d4c5",
+     "mainSan": "Qxc5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "r5k1/pq3ppp/1p2p3/2Q1P3/5P2/1P4P1/P1P4P/3R1RK1 b - - 0 20",
+     "decision": true,
+     "main": "b6c5",
+     "mainSan": "bxc5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "White's queen took your bishop, and your pawn takes the queen. You gave a rook and a bishop for a bishop and the queen, so you now have a queen and a rook against two rooks."
+     }
+    }
+   ]
+  },
+  {
+   "title": "A piece and a pawn down",
+   "fen": "4kb1B/1bq2p1p/4pQ2/2p1N3/1n2P3/1p6/2r2PPP/3R2K1 w - - 6 25",
+   "side": "white",
+   "keyIdea": "Force the only real defender of a square away with a check, and the square is open for mate.",
+   "text": "From a game played on Lichess. You are White, and you are a piece and a pawn down. Your queen and knight both aim at f7. Count what guards it.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle Lnh28",
+    "url": "https://lichess.org/training/Lnh28",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "d1d8",
+    "c7d8",
+    "f6f7"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "4kb1B/1bq2p1p/4pQ2/2p1N3/1n2P3/1p6/2r2PPP/3R2K1 w - - 6 25",
+     "decision": true,
+     "main": "d1d8",
+     "mainSan": "Rd8+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Step one, the deflection: a rook sacrifice with check. The king cannot take, because your queen guards d8, so Black's queen must take. It leaves the seventh rank, where it guarded f7."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "3Rkb1B/1bq2p1p/4pQ2/2p1N3/1n2P3/1p6/2r2PPP/6K1 b - - 7 25",
+     "decision": false,
+     "main": "c7d8",
+     "mainSan": "Qxd8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "3qkb1B/1b3p1p/4pQ2/2p1N3/1n2P3/1p6/2r2PPP/6K1 w - - 0 26",
+     "decision": true,
+     "main": "f6f7",
+     "mainSan": "Qxf7#",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Step two, the mate: the knight on e5 guards your queen, Black's own queen and bishop block d8 and f8, and your queen covers the rest."
+     }
+    }
+   ]
+  },
+  {
+   "title": "Far behind",
+   "fen": "2r2Q2/1b5k/5nNP/1p1p4/6P1/q4PN1/npPQ4/1K1R3R b - - 0 27",
+   "side": "black",
+   "keyIdea": "Move a piece out of your queen's way with check, and the line it opens can lead to mate.",
+   "text": "From a game played on Lichess. You are Black and far behind: White has just promoted a pawn to a second queen. But White's king on b1 is short of squares, and your queen, knight and b2 pawn are right beside it.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle ZtntP",
+    "url": "https://lichess.org/training/ZtntP",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "a2c3",
+    "d2c3",
+    "a3a1"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "2r2Q2/1b5k/5nNP/1p1p4/6P1/q4PN1/npPQ4/1K1R3R b - - 0 27",
+     "decision": true,
+     "main": "a2c3",
+     "mainSan": "Nc3+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Step one, the clearance: the knight leaves a2 with check, so the a-file opens for your queen. White's king has no square to go to, so the queen on d2 must take the knight."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "2r2Q2/1b5k/5nNP/1p1p4/6P1/q1n2PN1/1pPQ4/1K1R3R w - - 1 28",
+     "decision": false,
+     "main": "d2c3",
+     "mainSan": "Qxc3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "2r2Q2/1b5k/5nNP/1p1p4/6P1/q1Q2PN1/1pP5/1K1R3R b - - 0 28",
+     "decision": true,
+     "main": "a3a1",
+     "mainSan": "Qa1#",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Step two, the mate: your queen lands on a1, guarded by the b2 pawn, and the king has nowhere to go. Two queens could not save White."
+     }
+    }
+   ]
+  }
+ ]
+}

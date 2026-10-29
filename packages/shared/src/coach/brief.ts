@@ -1,13 +1,13 @@
 // Builds the compact, fresh brief every Coach call starts from (ADR 0004).
 import type { Candidate } from '../analysis.ts';
-import { playUci, turnOf, type Side } from '../chess.ts';
+import { outcomeOf, playUci, turnOf, type Side } from '../chess.ts';
 import type { Score } from '../engine.ts';
 import { formatScore, gradeMove, type MoveGrade } from '../grader.ts';
 import { finishedScore, type PositionScore } from '../position-score.ts';
 import type { CoachJob, PlayerLevel, PlayerProfile } from '../protocol.ts';
 import { isForcing, nullMoveFen } from '../threat.ts';
 import { winningChancesFor } from '../winning-chances.ts';
-import { describeFact, describeOutcome, lineOutcome, moveFacts, readLine, worthSaying } from './explain.ts';
+import { describeFact, describeOutcome, lineOutcome, moveFacts, readLine, worthSaying, type MoveFact } from './explain.ts';
 import type { CoachAsk } from './types.ts';
 
 /** Hard ceiling on the serialised brief, in characters. */
@@ -29,6 +29,13 @@ const MAX_QUESTION = 400;
 const MAX_SUMMARY = 600;
 const MAX_NOTES = 700;
 const MAX_PROFILE_ITEMS = 3;
+/**
+ * Longest Lesson learning goal and key idea (ADR 0012). The Lesson data check holds the data to them,
+ * and the brief never trims them, so the largest brief still fits its budget (ADR 0004).
+ */
+export const MAX_LEARNING_GOAL = 240;
+export const MAX_KEY_IDEA = 140;
+const MAX_LESSON_NAME = 80;
 /** Jobs that must stay short: their briefs explain only the move, the Engine's best move and its best reply. */
 const CHEAP_JOBS: readonly CoachJob[] = ['live', 'hint'];
 
@@ -39,7 +46,7 @@ export interface BriefCandidate {
   evaluation: string;
   /** How the Engine grades this candidate compared with its best move. */
   grade: MoveGrade;
-  /** The Engine's line after it, in SAN. */
+  /** The Engine's line after it, in SAN. Empty for a reply on a turn that keeps the Lesson's move back. */
   line: string;
   /** What the move does on the board, read off the board and the Engine's line (see explain.ts). */
   does?: string;
@@ -81,7 +88,22 @@ export interface Brief {
    * that threat (`ignored`), and it is played from the position after the move (see `threatFen`).
    */
   threat?: { by: Side; san: string; uci: string; line: string; ignored?: true };
-  lesson?: { opening: string; notes: string; popularity: string };
+  /**
+   * A Lesson turn's context. `isLessonMove: false` marks a move that isn't the one the Lesson
+   * teaches, while the Player may try again: the brief then keeps back the Lesson's move and the
+   * Engine's best move (no candidates, no notes, only the move's own popularity, and nothing of the
+   * Engine's lines past the replies: no line after a reply or the threat, and a result with no
+   * moves), so the Coach explains the move played and what it allows without giving the answer away.
+   */
+  lesson?: { opening: string; notes: string; popularity: string; isLessonMove?: false };
+  /**
+   * During a Lesson, on every Coach call: the Lesson, its learning goal and the current part's key
+   * idea, so the Coach stays on the Lesson's point (ADR 0012). The Lesson's aim, never an Engine fact,
+   * and not the Player's Goals (`profile.goals`). A Lesson turn leaves the name out: `lesson.opening`
+   * already gives it. A Lesson turn that keeps the answer back leaves the key idea out too: it can
+   * all but name the Lesson's move, and a Hint is the place for a nudge.
+   */
+  focus?: { lesson?: string; learningGoal: string; keyIdea?: string };
   profile?: { goals: string[]; weaknesses: string[]; notes: string[] };
   question?: string;
   summary?: string;
@@ -119,23 +141,30 @@ export interface BriefInput {
 export function buildBrief({ ask, profile, summary }: BriefInput): Brief {
   const hideMoves = ask.job === 'hint';
   const cheap = CHEAP_JOBS.includes(ask.job);
+  // A move that isn't the Lesson's, which the Player may try again: like a Hint, the brief keeps
+  // the answer back, so it has none of the Engine's moves in the position, only the move and the
+  // replies to it. Nor anything of the Engine's lines past the replies: the Lesson's move is often
+  // still the Player's best move a move later, and the guard checks moves, not text.
+  const keepBack = ask.lesson?.isLessonMove === false;
   // The move's own candidate line can differ from the line after the move: the move's facts come from the latter.
-  const candidates = briefCandidates(ask.fen, ask.candidates, MAX_CANDIDATES, (c, i) =>
-    c.uci === ask.move?.uci || (cheap && i > 0) ? {} : explained(ask.fen, c.uci, c.pv.slice(1), c.score, hideMoves),
-  );
+  const candidates = keepBack
+    ? []
+    : briefCandidates(ask.fen, ask.candidates, MAX_CANDIDATES, (c, i) =>
+        c.uci === ask.move?.uci || (cheap && i > 0) ? {} : explained(ask.fen, c.uci, c.pv.slice(1), c.score, { moves: hideMoves }),
+      );
   // The moves the Player's question names: marked among the candidates, or added after them,
   // graded against the Engine's best move as the candidates are.
-  const asked = ask.asked ?? [];
+  const asked = keepBack ? [] : (ask.asked ?? []);
   for (const c of candidates) if (asked.some((a) => a.uci === c.uci)) c.asked = true;
   const others = asked.filter((a) => !candidates.some((c) => c.uci === a.uci));
-  const extra = briefCandidates(ask.fen, others, others.length, (a) => explained(ask.fen, a.uci, a.pv.slice(1), a.score, hideMoves), ask.candidates[0]);
+  const extra = briefCandidates(ask.fen, others, others.length, (a) => explained(ask.fen, a.uci, a.pv.slice(1), a.score, { moves: hideMoves }), ask.candidates[0]);
   candidates.push(...extra.map((c) => ({ ...c, asked: true as const })));
   // The tempting moves (ADR 0011): marked among the candidates and on the move, the rest listed
   // apart, graded against the Engine's best move as the candidates are.
-  const tempting = ask.tempting ?? [];
+  const tempting = keepBack ? [] : (ask.tempting ?? []);
   for (const c of candidates) if (tempting.some((t) => t.uci === c.uci)) c.tempting = true;
   const unlisted = tempting.filter((t) => t.uci !== ask.move?.uci && !candidates.some((c) => c.uci === t.uci));
-  const temptingOthers = briefCandidates(ask.fen, unlisted, unlisted.length, (t) => explained(ask.fen, t.uci, t.pv.slice(1), t.score, hideMoves), ask.candidates[0]);
+  const temptingOthers = briefCandidates(ask.fen, unlisted, unlisted.length, (t) => explained(ask.fen, t.uci, t.pv.slice(1), t.score, { moves: hideMoves }), ask.candidates[0]);
   const brief: Brief = {
     job: ask.job,
     level: profile.level,
@@ -158,29 +187,47 @@ export function buildBrief({ ask, profile, summary }: BriefInput): Brief {
         uci: played.uci,
         grade: ask.move.grade,
         evaluationAfter: formatScore(ask.move.playedScore),
-        ...explained(ask.fen, played.uci, ask.replies?.[0]?.pv ?? [], ask.move.playedScore, hideMoves),
+        ...explained(ask.fen, played.uci, ask.replies?.[0]?.pv ?? [], ask.move.playedScore, keepBack ? { moves: true, mateDetails: true } : { moves: hideMoves }),
         ...(tempting.some((t) => t.uci === played.uci) ? { tempting: true as const } : {}),
       };
       // The replies say what they do; what the line leads to is the move's result.
       if (ask.replies?.length) {
         brief.replies = briefCandidates(played.fenAfter, ask.replies, MAX_REPLIES, (r, i) =>
-          cheap && i > 0 ? {} : explained(played.fenAfter, r.uci, r.pv.slice(1)),
+          cheap && i > 0 ? {} : explained(played.fenAfter, r.uci, r.pv.slice(1), undefined, { nextMove: keepBack }),
         );
+        // Kept back, a reply is the opponent's move alone: the line after it is the Player's next moves.
+        if (keepBack) for (const r of brief.replies) r.line = '';
       }
     }
   }
   const chances = winningChancesOf(ask);
   if (chances) brief.winningChances = chances;
   const threat = threatOf(ask);
-  if (threat) brief.threat = threat;
+  // Kept back, the threat is the move's best reply and no more, as the replies are.
+  if (threat) brief.threat = keepBack ? { ...threat, line: '' } : threat;
   if (ask.lesson) {
+    // Kept back, the notes and the other moves' popularity would name the Lesson's move.
+    const popular = keepBack ? ask.lesson.popularity.filter((p) => p.san === brief.move?.san) : ask.lesson.popularity;
     brief.lesson = {
-      opening: clip(ask.lesson.opening, 80),
-      notes: clip(ask.lesson.notes, MAX_NOTES),
-      popularity: ask.lesson.popularity
+      opening: clip(ask.lesson.opening, MAX_LESSON_NAME),
+      notes: keepBack ? '' : clip(ask.lesson.notes, MAX_NOTES),
+      popularity: popular
         .slice(0, 5)
-        .map((p) => `${p.san} ${Math.round(p.percent)}%`)
+        // A move in SAN is at most 7 characters (exd8=Q+); a longer name from the client is clipped.
+        .map((p) => `${clip(p.san, 8)} ${Math.round(p.percent)}%`)
         .join(', '),
+      ...(keepBack ? { isLessonMove: false as const } : {}),
+    };
+  }
+  const focus = ask.lessonFocus;
+  // Kept back, the key idea goes too: it is often one step from the Lesson's move.
+  const keyIdea = keepBack ? '' : (focus?.keyIdea.trim() ?? '');
+  if (focus && (focus.learningGoal.trim() || keyIdea)) {
+    const name = clip(focus.lesson.trim(), MAX_LESSON_NAME);
+    brief.focus = {
+      ...(brief.lesson?.opening === name ? {} : { lesson: name }),
+      learningGoal: clip(focus.learningGoal.trim(), MAX_LEARNING_GOAL),
+      ...(keepBack ? {} : { keyIdea: clip(keyIdea, MAX_KEY_IDEA) }),
     };
   }
   const slice = profileSlice(profile, ask.opening ?? ask.lesson?.opening);
@@ -263,7 +310,7 @@ export function briefCandidates(
       san: played.san,
       uci: played.uci,
       evaluation: formatScore(c.score),
-      grade: gradeMove({ best: best.score, played: c.score, isTopMove: c.uci === best.uci }).grade,
+      grade: gradeMove({ best: best.score, played: c.score, isTopMove: c.uci === best.uci, givesMate: outcomeOf(played.fenAfter)?.reason === 'checkmate' }).grade,
       line,
       ...explain(c, i),
     });
@@ -273,17 +320,36 @@ export function briefCandidates(
 
 export type Facts = Pick<BriefCandidate, 'does' | 'result'>;
 
+/** What a move's facts leave out of the Engine's line after it. */
+export interface Withheld {
+  /** Its moves: a Hint names none, and neither does a turn that keeps the Lesson's move back. */
+  moves?: boolean;
+  /** Where a mate ends and what boxes the king in: kept back, the mate can be the Lesson's move. */
+  mateDetails?: boolean;
+  /**
+   * What the line's first move does (a square it goes to, a piece it can take). Kept back, after a
+   * reply that move is the Player's next one, which is often the Lesson's.
+   */
+  nextMove?: boolean;
+}
+
+/** The facts that say what the line's first move does, rather than what the move itself does. */
+const NEXT_MOVE_FACTS: readonly MoveFact['kind'][] = ['stops-guarding', 'leaves'];
+
 /**
  * The explainability layer's facts for a move from `fen` (see explain.ts): what it does, and, given
  * the Engine's `score` of it for its side, what the forcing moves of the line after it (`line`,
- * starting with the reply) lead to. With `hideMoves` (a Hint) the result names no moves.
+ * starting with the reply) lead to, leaving out what `withheld` says.
  */
-export function explained(fen: string, uci: string, line: readonly string[], score?: Score, hideMoves = false): Facts {
+export function explained(fen: string, uci: string, line: readonly string[], score?: Score, withheld: Withheld = {}): Facts {
   const out: Facts = {};
-  const does = moveFacts(fen, uci, line);
+  const does = moveFacts(fen, uci, line).filter((f) => !withheld.nextMove || !NEXT_MOVE_FACTS.includes(f.kind));
   if (does.length) out.does = does.map(describeFact).join('; ');
   const result = score && lineOutcome(turnOf(fen), readLine(fen, [uci, ...line]), score);
-  if (result && worthSaying(result, fen, score)) out.result = describeOutcome(result, !hideMoves);
+  if (result && worthSaying(result, fen, score)) {
+    const said = withheld.mateDetails && result.mate ? { ...result, mate: { by: result.mate.by, in: result.mate.in } } : result;
+    out.result = describeOutcome(said, !withheld.moves);
+  }
   return out;
 }
 
@@ -344,34 +410,40 @@ function keywords(text: string): string[] {
 }
 
 function clip(text: string, max: number): string {
-  return text.length <= max ? text : `${text.slice(0, max - 1)}…`;
+  // Never cut a pair of UTF-16 code units in half (an emoji, say): half a pair is not text.
+  return text.length <= max ? text : `${text.slice(0, max - 1).replace(/[\uD800-\uDBFF]$/, '')}…`;
 }
+
+/**
+ * The ways to make a brief smaller, least important first. None of them touches a Lesson's focus: it
+ * is what keeps the Coach on the Lesson's point, and the worst case fits with it whole (see the tests).
+ */
+export const TRIM_STEPS: readonly ((b: Brief) => void)[] = [
+  // The facts about the weaker alternatives go first: the best moves, the move and the moves the Player asked about matter most.
+  (b) => { b.candidates.slice(2).forEach((c) => { if (!c.asked) delete c.does; }); b.replies?.slice(1).forEach((r) => delete r.does); },
+  (b) => { b.candidates.slice(1).forEach((c) => { if (!c.asked) { delete c.does; delete c.result; } }); },
+  // The tempting moves the Engine didn't list: their lines short, then their facts but the result.
+  (b) => { b.tempting?.forEach((t) => { t.line = t.line.split(' ').slice(0, 2).join(' '); }); },
+  (b) => { b.tempting?.forEach((t) => delete t.does); },
+  (b) => { if (b.summary) b.summary = clip(b.summary, 250); },
+  (b) => { if (b.lesson) b.lesson.notes = clip(b.lesson.notes, 300); },
+  (b) => { if (b.profile) b.profile.notes = b.profile.notes.slice(-1); },
+  (b) => { b.candidates.forEach((c) => { if (!c.asked) c.line = c.line.split(' ').slice(0, 2).join(' '); }); },
+  (b) => { if (b.threat) b.threat.line = b.threat.line.split(' ').slice(0, 2).join(' '); },
+  (b) => { if (b.replies) b.replies = b.replies.slice(0, 2); },
+  (b) => { b.recentMoves = b.recentMoves.split(' ').slice(-12).join(' '); },
+  (b) => { if (b.question) b.question = clip(b.question, 200); },
+  (b) => { delete b.profile; },
+  (b) => { delete b.summary; },
+  (b) => { delete b.tempting; },
+  // Last, the facts on the key moves themselves.
+  (b) => { b.replies?.forEach((r) => delete r.does); b.candidates.forEach((c) => { delete c.does; delete c.result; }); },
+  (b) => { if (b.move) { delete b.move.does; delete b.move.result; } },
+];
 
 /** Trims the least important parts until the brief fits. */
 function fitToBudget(brief: Brief): Brief {
-  const steps: ((b: Brief) => void)[] = [
-    // The facts about the weaker alternatives go first: the best moves, the move and the moves the Player asked about matter most.
-    (b) => { b.candidates.slice(2).forEach((c) => { if (!c.asked) delete c.does; }); b.replies?.slice(1).forEach((r) => delete r.does); },
-    (b) => { b.candidates.slice(1).forEach((c) => { if (!c.asked) { delete c.does; delete c.result; } }); },
-    // The tempting moves the Engine didn't list: their lines short, then their facts but the result.
-    (b) => { b.tempting?.forEach((t) => { t.line = t.line.split(' ').slice(0, 2).join(' '); }); },
-    (b) => { b.tempting?.forEach((t) => delete t.does); },
-    (b) => { if (b.summary) b.summary = clip(b.summary, 250); },
-    (b) => { if (b.lesson) b.lesson.notes = clip(b.lesson.notes, 300); },
-    (b) => { if (b.profile) b.profile.notes = b.profile.notes.slice(-1); },
-    (b) => { b.candidates.forEach((c) => { if (!c.asked) c.line = c.line.split(' ').slice(0, 2).join(' '); }); },
-    (b) => { if (b.threat) b.threat.line = b.threat.line.split(' ').slice(0, 2).join(' '); },
-    (b) => { if (b.replies) b.replies = b.replies.slice(0, 2); },
-    (b) => { b.recentMoves = b.recentMoves.split(' ').slice(-12).join(' '); },
-    (b) => { if (b.question) b.question = clip(b.question, 200); },
-    (b) => { delete b.profile; },
-    (b) => { delete b.summary; },
-    (b) => { delete b.tempting; },
-    // Last, the facts on the key moves themselves.
-    (b) => { b.replies?.forEach((r) => delete r.does); b.candidates.forEach((c) => { delete c.does; delete c.result; }); },
-    (b) => { if (b.move) { delete b.move.does; delete b.move.result; } },
-  ];
-  for (const step of steps) {
+  for (const step of TRIM_STEPS) {
     if (briefSize(brief) <= BRIEF_BUDGET) break;
     step(brief);
   }

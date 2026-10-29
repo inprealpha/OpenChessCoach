@@ -33,9 +33,17 @@ function namedMoves(fen: string, question: string, moveUci: string | undefined, 
   return out;
 }
 
+const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null;
+
+/**
+ * A client's text for the brief: control characters become spaces, and half of a UTF-16 pair is
+ * replaced. JSON writes either as a 6-character escape, and the brief never trims a Lesson's focus,
+ * so a forged one could otherwise push a brief over its budget (ADR 0004).
+ */
+const plainText = (text: string): string => text.replace(/\p{Cc}/gu, ' ').toWellFormed();
+
 /** A client's Lesson context, checked field by field so a malformed one is refused rather than breaking the brief. */
 function lessonOf(value: unknown): NonNullable<CoachAsk['lesson']> {
-  const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null;
   const isEntry = (p: unknown) => isRecord(p) && typeof p.san === 'string' && typeof p.percent === 'number' && Number.isFinite(p.percent);
   if (
     !isRecord(value) ||
@@ -43,13 +51,34 @@ function lessonOf(value: unknown): NonNullable<CoachAsk['lesson']> {
     typeof value.opening !== 'string' ||
     typeof value.notes !== 'string' ||
     typeof value.finalTurn !== 'boolean' ||
+    (value.isLessonMove !== undefined && typeof value.isLessonMove !== 'boolean') ||
     !Array.isArray(value.popularity) ||
     !value.popularity.every(isEntry)
   ) {
     throw new AppError('bad-request', 'The Lesson context is not valid.');
   }
-  const popularity = (value.popularity as { san: string; percent: number }[]).map(({ san, percent }) => ({ san, percent }));
-  return { lessonId: value.lessonId, opening: value.opening, notes: value.notes, popularity, finalTurn: value.finalTurn };
+  // A share of games is 0 to 100.
+  const popularity = (value.popularity as { san: string; percent: number }[]).map(({ san, percent }) => ({ san: plainText(san), percent: Math.min(100, Math.max(0, percent)) }));
+  return {
+    lessonId: value.lessonId,
+    opening: plainText(value.opening),
+    notes: plainText(value.notes),
+    popularity,
+    finalTurn: value.finalTurn,
+    // Whether the move is the Lesson's: when it isn't, the brief keeps the answer back.
+    ...(typeof value.isLessonMove === 'boolean' ? { isLessonMove: value.isLessonMove } : {}),
+  };
+}
+
+/**
+ * A client's Lesson focus (ADR 0012): three strings, copied alone, which the brief clips. It is
+ * Lesson text from the client, never an Engine fact.
+ */
+function lessonFocusOf(value: unknown): NonNullable<CoachAsk['lessonFocus']> {
+  if (!isRecord(value) || typeof value.lesson !== 'string' || typeof value.learningGoal !== 'string' || typeof value.keyIdea !== 'string') {
+    throw new AppError('bad-request', 'The Lesson focus is not valid.');
+  }
+  return { lesson: plainText(value.lesson), learningGoal: plainText(value.learningGoal), keyIdea: plainText(value.keyIdea) };
 }
 
 export class EngineService {
@@ -141,6 +170,7 @@ export class EngineService {
       ...(req.playerSide === 'white' || req.playerSide === 'black' ? { playerSide: req.playerSide } : {}),
       ...(question ? { question } : {}),
       ...(req.lesson !== undefined ? { lesson: lessonOf(req.lesson) } : {}),
+      ...(req.lessonFocus !== undefined ? { lessonFocus: lessonFocusOf(req.lessonFocus) } : {}),
       ...(typeof req.opening === 'string' ? { opening: req.opening } : {}),
       ...(req.hideWinningChances === true ? { hideWinningChances: true } : {}),
     };

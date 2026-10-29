@@ -1,0 +1,210 @@
+{
+ "id": "zwischenzug",
+ "name": "In-between moves",
+ "kind": "theme",
+ "track": "themes",
+ "level": "intermediate",
+ "goal": "Before you recapture or answer a threat, you can look for a stronger move to play first, such as a check or a bigger threat.",
+ "priorKnowledge": [
+  "candidate-moves"
+ ],
+ "side": "white",
+ "puzzleTags": [],
+ "puzzleThemes": [
+  "intermezzo"
+ ],
+ "intro": {
+  "text": "When your opponent captures, the natural reply is to take back at once. Sometimes there is a stronger move to play first: a check, a capture or a threat that has to be answered. This in-between move changes the position in your favour, and you take back afterwards."
+ },
+ "parts": [
+  {
+   "title": "Before you take back",
+   "fen": "5rk1/1p2bppp/n4n2/p1pN2B1/P3pq2/1BP4P/1P3PP1/R5K1 w - - 0 23",
+   "side": "white",
+   "keyIdea": "Before you take back, look for a check or a capture that wins something extra.",
+   "text": "From a game played on Lichess. You are White. Black has just taken your queen on f4. Before you take it back, look for a move that Black has to answer first.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle 2nVzC",
+    "url": "https://lichess.org/training/2nVzC",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "d5e7",
+    "g8h8",
+    "g5f4"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "5rk1/1p2bppp/n4n2/p1pN2B1/P3pq2/1BP4P/1P3PP1/R5K1 w - - 0 23",
+     "decision": true,
+     "main": "d5e7",
+     "mainSan": "Nxe7+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The knight takes the bishop on e7 with check. Black's queen is still there to be taken, and Black has no time to save it, because the king must get out of check first."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "5rk1/1p2Nppp/n4n2/p1p3B1/P3pq2/1BP4P/1P3PP1/R5K1 b - - 0 23",
+     "decision": false,
+     "main": "g8h8",
+     "mainSan": "Kh8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "5r1k/1p2Nppp/n4n2/p1p3B1/P3pq2/1BP4P/1P3PP1/R5K1 w - - 1 24",
+     "decision": true,
+     "main": "g5f4",
+     "mainSan": "Bxf4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The bishop takes back the queen. Taking it straight away would only have traded: queen for queen, then knight for knight on d5. With the check first, you have won a bishop as well."
+     }
+    }
+   ]
+  },
+  {
+   "title": "Both rooks attacked",
+   "fen": "8/6R1/5p1k/7r/6KP/4P3/5P2/8 b - - 0 35",
+   "side": "black",
+   "keyIdea": "When both sides have a piece under attack, a check first can save yours before you take theirs.",
+   "text": "From a game played on Lichess. You are Black. White's rook has just taken a pawn on g7. Your king guards your rook on h5 and attacks White's rook on g7, but if it takes on g7 now, it stops guarding h5, and White's king takes your rook. Look for a move to play first.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle hXUzs",
+    "url": "https://lichess.org/training/hXUzs",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "f6f5",
+    "g4f4",
+    "h6g7"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "8/6R1/5p1k/7r/6KP/4P3/5P2/8 b - - 0 35",
+     "decision": true,
+     "main": "f6f5",
+     "mainSan": "f5+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The pawn checks the king on g4. The king cannot take the pawn, because your rook on h5 guards f5, and it cannot take the rook, because your king guards h5. So it has to step back, away from your rook."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "8/6R1/7k/5p1r/6KP/4P3/5P2/8 w - - 0 36",
+     "decision": false,
+     "main": "g4f4",
+     "mainSan": "Kf4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "8/6R1/7k/5p1r/5K1P/4P3/5P2/8 b - - 1 36",
+     "decision": true,
+     "main": "h6g7",
+     "mainSan": "Kxg7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "White's king no longer attacks your rook, so now your king takes the rook on g7. Taking it first would have let White's king take your rook on h5."
+     }
+    }
+   ]
+  },
+  {
+   "title": "Black takes a pawn",
+   "fen": "4b3/8/p1pk2P1/1p1p4/1P1K2p1/2P2B2/P7/8 w - - 0 40",
+   "side": "white",
+   "keyIdea": "An in-between move can be a threat: move a piece with a threat first, then take back.",
+   "text": "From a game played on Lichess. You are White. Black has just taken a pawn on g4, and your bishop can take back. Before you do, look at what Black's bishop on e8 is attacking.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle fY6sP",
+    "url": "https://lichess.org/training/fY6sP",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "g6g7",
+    "e8f7",
+    "f3g4"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "4b3/8/p1pk2P1/1p1p4/1P1K2p1/2P2B2/P7/8 w - - 0 40",
+     "decision": true,
+     "main": "g6g7",
+     "mainSan": "g7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The pawn steps away from the bishop's attack and threatens to promote to a queen on g8. Black has to stop it, and only the bishop can, by going to f7."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "4b3/6P1/p1pk4/1p1p4/1P1K2p1/2P2B2/P7/8 b - - 0 40",
+     "decision": false,
+     "main": "e8f7",
+     "mainSan": "Bf7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "8/5bP1/p1pk4/1p1p4/1P1K2p1/2P2B2/P7/8 w - - 1 41",
+     "decision": true,
+     "main": "f3g4",
+     "mainSan": "Bxg4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The bishop takes back the pawn on g4. Your pawn on g7 is safe, and Black's bishop has to keep guarding g8. If you had taken on g4 straight away, Black's bishop would have taken your pawn on g6."
+     }
+    }
+   ]
+  }
+ ]
+}

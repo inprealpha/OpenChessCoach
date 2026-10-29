@@ -1,0 +1,388 @@
+{
+ "id": "two-rook-mate",
+ "name": "Mate with two rooks",
+ "kind": "endgame",
+ "track": "endgames",
+ "level": "beginner",
+ "goal": "You can mate a lone king with two rooks, taking turns to push it rank by rank to the edge.",
+ "priorKnowledge": [
+  "queen-mate"
+ ],
+ "side": "white",
+ "puzzleTags": [],
+ "puzzleThemes": [],
+ "intro": {
+  "text": "Two rooks can mate a lone king without any help from your own king. They work in turns: one rook guards a rank (a row of the board) so the king cannot step back, and the other gives check on the rank in front of it, which pushes the king one rank nearer the edge. Then the two rooks change jobs. Once the king is on the edge of the board, the next check is mate."
+ },
+ "parts": [
+  {
+   "title": "Push the king rank by rank",
+   "fen": "8/8/8/8/5k2/R6R/6K1/8 w - - 8 61",
+   "side": "white",
+   "keyIdea": "One rook guards a rank while the other checks on the next one; then they change jobs, one rank at a time.",
+   "text": "From a game played on Lichess. You are White, with two rooks, and Black's king stands alone on f4. Your rook on a3 already guards the whole third rank, so the king cannot come down. Find the check that starts pushing it up the board.",
+   "credit": {
+    "source": "Lichess games database, game 4oh7JkMh",
+    "url": "https://lichess.org/4oh7JkMh#120",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "h3h4",
+    "f4e5",
+    "a3a5",
+    "e5d6",
+    "h4h6",
+    "d6e7",
+    "a5a7",
+    "e7f8",
+    "h6h8"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "8/8/8/8/5k2/R6R/6K1/8 w - - 8 61",
+     "decision": true,
+     "main": "h3h4",
+     "mainSan": "Rh4+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Rh4+, the rook to h4, checks along the fourth rank. The king must leave that rank, and it cannot go down to the third, which the other rook guards, so it has to step up to the fifth. If the king steps to g5, where it attacks the rook on h4, that rook first slides far away along the fourth rank, to b4 for example, so it still guards that rank; then the checks carry on."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "8/8/8/8/5k1R/R7/6K1/8 b - - 9 61",
+     "decision": false,
+     "main": "f4e5",
+     "mainSan": "Ke5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "8/8/8/4k3/7R/R7/6K1/8 w - - 10 62",
+     "decision": true,
+     "main": "a3a5",
+     "mainSan": "Ra5+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Now the other rook takes its turn: it moves up to the fifth rank and checks. The rook on h4 guards the fourth rank behind the king, so the king has to go up again."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "8/8/8/R3k3/7R/8/6K1/8 b - - 11 62",
+     "decision": false,
+     "main": "e5d6",
+     "mainSan": "Kd6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "8/8/3k4/R7/7R/8/6K1/8 w - - 12 63",
+     "decision": true,
+     "main": "h4h6",
+     "mainSan": "Rh6+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The same again on the sixth rank. Both rooks stay on the edge files, far from Black's king, so it cannot come close enough to take either of them."
+     }
+    },
+    {
+     "ply": 5,
+     "fen": "8/8/3k3R/R7/8/8/6K1/8 b - - 13 63",
+     "decision": false,
+     "main": "d6e7",
+     "mainSan": "Ke7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 6,
+     "fen": "8/4k3/7R/R7/8/8/6K1/8 w - - 14 64",
+     "decision": true,
+     "main": "a5a7",
+     "mainSan": "Ra7+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Another check, and the king is pushed up to the eighth rank, the edge of the board."
+     }
+    },
+    {
+     "ply": 7,
+     "fen": "8/R3k3/7R/8/8/8/6K1/8 b - - 15 64",
+     "decision": false,
+     "main": "e7f8",
+     "mainSan": "Kf8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 8,
+     "fen": "5k2/R7/7R/8/8/8/6K1/8 w - - 16 65",
+     "decision": true,
+     "main": "h6h8",
+     "mainSan": "Rh8#",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Mate. The rook checks along the eighth rank, and the rook on a7 guards every square of the seventh, so the king has nowhere to go."
+     }
+    }
+   ]
+  },
+  {
+   "title": "Rooks near the king",
+   "fen": "8/3k3K/1R6/R7/8/8/8/8 w - - 6 52",
+   "side": "white",
+   "keyIdea": "If the king can reach the square a rook needs, move that rook to the far side of the board first, then check.",
+   "text": "From a game played on Lichess. You are White, and Black's king has already been pushed up to the seventh rank, with your rooks on a5 and b6. Keep pushing, but before each check, ask whether the king could take the rook that gives it.",
+   "credit": {
+    "source": "Lichess games database, game ssh2gBsw",
+    "url": "https://lichess.org/ssh2gBsw#102",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "a5a7",
+    "d7c8",
+    "b6b1",
+    "c8d8",
+    "b1b8"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "8/3k3K/1R6/R7/8/8/8/8 w - - 6 52",
+     "decision": true,
+     "main": "a5a7",
+     "mainSan": "Ra7+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The rook on a5 checks along the seventh rank, and the rook on b6 guards the sixth, so the king must go up to the eighth rank."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "8/R2k3K/1R6/8/8/8/8/8 b - - 7 52",
+     "decision": false,
+     "main": "d7c8",
+     "mainSan": "Kc8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "2k5/R6K/1R6/8/8/8/8/8 w - - 8 53",
+     "decision": true,
+     "main": "b6b1",
+     "mainSan": "Rb1",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Rb8+ would not be mate: the rook would stand right next to Black's king on c8, which would simply take it. So the rook first moves to the far end of the b-file. From b1 it still guards b8 and b7, and the king cannot reach it. Black's king has only d8 left."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "2k5/R6K/8/8/8/8/8/1R6 b - - 9 53",
+     "decision": false,
+     "main": "c8d8",
+     "mainSan": "Kd8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "3k4/R6K/8/8/8/8/8/1R6 w - - 10 54",
+     "decision": true,
+     "main": "b1b8",
+     "mainSan": "Rb8#",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Now the king is on d8, too far from b8 to take the rook, and the check along the eighth rank is mate: the rook on a7 still guards the whole seventh rank."
+     }
+    }
+   ]
+  },
+  {
+   "title": "A queen and a rook take turns",
+   "fen": "8/8/4Q3/6k1/4R3/8/8/6K1 w - - 0 63",
+   "side": "white",
+   "keyIdea": "A queen and a rook can share the work: one guards a rank while the other checks on the next.",
+   "text": "From a game played on Lichess. You are White, with a queen and a rook against a lone king: they can take turns in the same way, with the queen doing one of the rooks' jobs. Black's king is on g5, and your rook on e4 already guards the fourth rank.",
+   "credit": {
+    "source": "Lichess games database, game YKLXC5Ov",
+    "url": "https://lichess.org/YKLXC5Ov#124",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "e6d5",
+    "g5f6",
+    "e4e6",
+    "f6f7",
+    "d5d7",
+    "f7f8",
+    "e6e8"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "8/8/4Q3/6k1/4R3/8/8/6K1 w - - 0 63",
+     "decision": true,
+     "main": "e6d5",
+     "mainSan": "Qd5+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Qd5+, the queen to d5, checks along the fifth rank while the rook guards the fourth, so the king must go up to the sixth. (The Engine also finds a quicker mate here that starts with Rg4+, but taking turns gets there just as surely.)"
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "8/8/8/3Q2k1/4R3/8/8/6K1 b - - 1 63",
+     "decision": false,
+     "main": "g5f6",
+     "mainSan": "Kf6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "8/8/5k2/3Q4/4R3/8/8/6K1 w - - 2 64",
+     "decision": true,
+     "main": "e4e6",
+     "mainSan": "Re6+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Now the rook checks on the sixth rank. It stands right next to Black's king, but the queen on d5 protects it, so the king cannot take it and has to go up to the seventh."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "8/8/4Rk2/3Q4/8/8/8/6K1 b - - 3 64",
+     "decision": false,
+     "main": "f6f7",
+     "mainSan": "Kf7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "8/5k2/4R3/3Q4/8/8/8/6K1 w - - 4 65",
+     "decision": true,
+     "main": "d5d7",
+     "mainSan": "Qd7+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The queen moves up and checks on the seventh rank, and the rook on e6 guards the sixth behind the king. The queen also protects the rook, so the king must go to the eighth rank."
+     }
+    },
+    {
+     "ply": 5,
+     "fen": "8/3Q1k2/4R3/8/8/8/8/6K1 b - - 5 65",
+     "decision": false,
+     "main": "f7f8",
+     "mainSan": "Kf8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 6,
+     "fen": "5k2/3Q4/4R3/8/8/8/8/6K1 w - - 6 66",
+     "decision": true,
+     "main": "e6e8",
+     "mainSan": "Re8#",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Mate. The rook checks along the eighth rank, the queen on d7 protects it, and the queen also covers every square on the seventh."
+     }
+    }
+   ]
+  }
+ ],
+ "playOut": {
+  "title": "Mate the lone king with two rooks",
+  "fen": "8/8/8/8/5k2/R6R/6K1/8 w - - 8 61",
+  "side": "white",
+  "goal": "mate"
+ }
+}

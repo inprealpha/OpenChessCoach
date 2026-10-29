@@ -10,7 +10,9 @@ by Lesson: an opening's Puzzles by the opening, a Theme's or endgame's by Liches
 
 - `Choose what to practise`, a disclosure under the heading, opens the navigation `Puzzles to
   practise`: a link per set, `Mixed: every Lesson` (the default, `#/puzzles`) then each Lesson with
-  Puzzles in the lists `Openings`, `Themes` and `Endgames` (`#/puzzles/<lessonId>`), written like
+  Puzzles in a list per track of the Lessons, in the Lessons' order (`Themes`, `Endgames`,
+  `Openings`, `How to think during a game`; a track with no Puzzles is left out)
+  (`#/puzzles/<lessonId>`), written like
   "Pins", then "25 Puzzles · 2 done (1 missed)"; the set shown is `aria-current="page"`. Missed counts only
   Puzzles that are done. Lessons without Puzzles are not offered. Beside it, this set's progress on
   the device: "Pins: 2 of 25 done (1 missed)." Only following a link changes the set (arrow keys

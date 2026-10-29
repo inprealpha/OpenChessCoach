@@ -3,7 +3,7 @@
   // drag for touch and mouse, an overlay for arrows (the Coach's, a Review's) and highlights, and the
   // last Move Grade's symbol on its own layer.
   import { untrack } from 'svelte';
-  import { isCheck, isPromotion, legalDests, piecesOf, playUci, SIDE_NAMES, turnOf, type BoardPiece, type Side } from '@chess-coach/shared/chess';
+  import { illegalReason, isCheck, isPromotion, legalDests, piecesOf, playUci, SIDE_NAMES, turnOf, type BoardPiece, type Side } from '@chess-coach/shared/chess';
   import { BEST_COLOR, type BoardArrow } from '../lib/arrows.ts';
   import type { GradeMark } from '../lib/grades.ts';
   import GradeSymbol from './GradeSymbol.svelte';
@@ -166,6 +166,11 @@
     return slides;
   }
 
+  /** Moves the keyboard focus to the board, so the next Tab reaches its squares. */
+  export function focus(): void {
+    boardEl?.focus();
+  }
+
   function squareName(sq: string): string {
     const p = pieces.get(sq);
     return p ? `${sq}, ${p.color} ${ROLE_NAME[p.role]}` : `${sq}, empty`;
@@ -177,11 +182,26 @@
     return (f + r) % 2 === 1;
   }
 
+  /**
+   * The king's castling square when the Player moves the king onto its own rook, as Lichess allows:
+   * g1 for the rook on h1, c1 for the one on a1. Undefined unless the king stands on e1 (e8 for
+   * Black), where castling starts, and that castling is legal: from f1, g1 is a plain king move.
+   */
+  function castlingTo(from: string, to: string): string | undefined {
+    const [king, rook] = [pieces.get(from), pieces.get(to)];
+    if (king?.role !== 'king' || rook?.role !== 'rook' || rook.color !== king.color) return undefined;
+    if (from !== (king.color === 'white' ? 'e1' : 'e8') || from[1] !== to[1]) return undefined;
+    const square = `${to > from ? 'g' : 'c'}${from[1]}`;
+    return (dests.get(from) ?? []).includes(square) ? square : undefined;
+  }
+
   function attempt(from: string, to: string, dragged = false): void {
     if (from === to) return;
+    to = castlingTo(from, to) ?? to;
     const targets = dests.get(from) ?? [];
     if (!targets.includes(to)) {
-      message = 'That move isn’t legal.';
+      // The reason, where it is about the Player's own king: the lesson a beginner needs.
+      message = illegalReason(fen, from, to) ?? 'That move isn’t legal.';
       selected = null;
       return;
     }
@@ -208,7 +228,8 @@
     if (drag?.moved) return;
     const p = pieces.get(sq);
     if (selected) {
-      if (p && p.color === toMove && canMove && sq !== selected) {
+      // Another of the Player's pieces is picked up instead, unless it is the king's rook to castle with.
+      if (p && p.color === toMove && canMove && sq !== selected && !castlingTo(selected, sq)) {
         selected = sq;
         return;
       }
@@ -282,7 +303,7 @@
 <svelte:window onpointermove={pointerMove} onpointerup={pointerUp} />
 
 <div class="wrap">
-  <div class="board" role="group" aria-label={label} bind:this={boardEl} data-fen={fen} data-orientation={orientation}>
+  <div class="board" role="group" aria-label={label} tabindex="-1" bind:this={boardEl} data-fen={fen} data-orientation={orientation}>
     {#each [0, 1, 2, 3, 4, 5, 6, 7] as row (row)}
       <div class="row">
         {#each squares.slice(row * 8, row * 8 + 8) as sq, col (sq)}
@@ -390,6 +411,9 @@
     touch-action: none;
     user-select: none;
   }
+  /* Focused by a screen that moves on, such as a Lesson's next decision: a ring for the keyboard only. */
+  .board:focus-visible { outline: 3px solid #1a73e8; outline-offset: 2px; }
+  .board:focus:not(:focus-visible) { outline: none; }
   .row {
     display: grid;
     grid-template-columns: repeat(8, 1fr);

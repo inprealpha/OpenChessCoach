@@ -2,110 +2,61 @@
  "id": "discovered-attacks",
  "name": "Discovered attacks",
  "kind": "theme",
+ "track": "themes",
+ "level": "beginner",
+ "goal": "You can move one piece out of the way so that the piece behind it attacks, and use the moving piece to attack something else too.",
+ "priorKnowledge": [
+  "double-attack"
+ ],
  "side": "white",
  "puzzleTags": [],
  "puzzleThemes": [
   "discoveredAttack"
  ],
  "intro": {
-  "text": "A discovered attack happens when one piece moves out of the way and uncovers an attack by another piece behind it. Two pieces can then threaten at once. When the uncovered attack is a check it is a discovered check, and when the moving piece gives check as well it is a double check: the king must move, because two checks cannot both be blocked or captured.",
-  "credit": {
-   "source": "Wikibooks, Chess/Tactics",
-   "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
-   "licence": "CC BY-SA 4.0",
-   "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-   "authors": "Wikibooks contributors (see the page history)"
-  }
+  "text": "A discovered attack works like opening a door. One of your pieces stands in front of another on a line, and when the front piece moves, the piece behind it suddenly attacks. If the piece that moves makes a threat of its own, your opponent faces two attacks from a single move and usually cannot meet both."
  },
  "parts": [
   {
-   "title": "Discovered mate",
-   "fen": "8/8/8/8/8/2R5/1Q1Pk2K/R7 w - - 0 1",
+   "title": "A blocked diagonal",
+   "fen": "rn1q1r2/4p1kp/2P3p1/p4p2/2pP4/2P2QP1/4PPKP/R2R4 w - - 0 21",
    "side": "white",
-   "text": "Your queen would be giving mate along the second rank, but your own pawn on d2 is in the way.",
+   "keyIdea": "Move the front piece with a threat of its own, and the piece behind it attacks too: two threats with one move.",
+   "text": "From a game played on Lichess. You are White. Your queen on f3 and Black's rook on a8 stand on the same long diagonal, but your pawn on c6 blocks the line between them.",
    "credit": {
-    "source": "Wikibooks, Chess/Tactics",
-    "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
-    "licence": "CC BY-SA 4.0",
-    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-    "authors": "Wikibooks contributors (see the page history)"
+    "source": "Lichess puzzle database, puzzle QolLZ",
+    "url": "https://lichess.org/training/QolLZ",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
    },
    "mainLine": [
-    "d2d4"
+    "c6c7",
+    "d8c7",
+    "f3a8"
    ],
    "nodes": [
     {
      "ply": 0,
-     "fen": "8/8/8/8/8/2R5/1Q1Pk2K/R7 w - - 0 1",
+     "fen": "rn1q1r2/4p1kp/2P3p1/p4p2/2pP4/2P2QP1/4PPKP/R2R4 w - - 0 21",
      "decision": true,
-     "main": "d2d4",
-     "mainSan": "d4#",
+     "main": "c6c7",
+     "mainSan": "c7",
      "popular": {
       "beginner": [],
       "casual": [],
       "club": []
      },
      "notes": {
-      "text": "The pawn steps aside and uncovers the queen's check. Black's king has no square left: discovered checkmate.",
-      "credit": {
-       "source": "Wikibooks, Chess/Tactics",
-       "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
-       "licence": "CC BY-SA 4.0",
-       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-       "authors": "Wikibooks contributors (see the page history)"
-      }
-     }
-    }
-   ]
-  },
-  {
-   "title": "Double check, then mate",
-   "fen": "1kr3nr/pp3ppp/8/P3N3/3P1B2/6P1/1PP2P1P/R4RK1 w - - 0 1",
-   "side": "white",
-   "text": "Your bishop on f4 aims at b8, but your knight on e5 blocks it. What happens when the knight moves with check?",
-   "credit": {
-    "source": "Wikibooks, Chess/Tactics",
-    "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
-    "licence": "CC BY-SA 4.0",
-    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-    "authors": "Wikibooks contributors (see the page history)"
-   },
-   "mainLine": [
-    "e5d7",
-    "b8a8",
-    "d7b6",
-    "a7b6",
-    "a5b6"
-   ],
-   "nodes": [
-    {
-     "ply": 0,
-     "fen": "1kr3nr/pp3ppp/8/P3N3/3P1B2/6P1/1PP2P1P/R4RK1 w - - 0 1",
-     "decision": true,
-     "main": "e5d7",
-     "mainSan": "Nd7+",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     },
-     "notes": {
-      "text": "A double check: the knight checks from d7 and uncovers the bishop's check. The king has to move.",
-      "credit": {
-       "source": "Wikibooks, Chess/Tactics",
-       "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
-       "licence": "CC BY-SA 4.0",
-       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-       "authors": "Wikibooks contributors (see the page history)"
-      }
+      "text": "c7, the pawn one step forward, attacks Black's queen on d8 and knight on b8. At the same time it opens the diagonal, so your queen now attacks the rook on a8. Black cannot deal with all of that in one move."
      }
     },
     {
      "ply": 1,
-     "fen": "1kr3nr/pp1N1ppp/8/P7/3P1B2/6P1/1PP2P1P/R4RK1 b - - 1 1",
+     "fen": "rn1q1r2/2P1p1kp/6p1/p4p2/2pP4/2P2QP1/4PPKP/R2R4 b - - 0 21",
      "decision": false,
-     "main": "b8a8",
-     "mainSan": "Ka8",
+     "main": "d8c7",
+     "mainSan": "Qxc7",
      "popular": {
       "beginner": [],
       "casual": [],
@@ -114,108 +65,61 @@
     },
     {
      "ply": 2,
-     "fen": "k1r3nr/pp1N1ppp/8/P7/3P1B2/6P1/1PP2P1P/R4RK1 w - - 2 2",
+     "fen": "rn3r2/2q1p1kp/6p1/p4p2/2pP4/2P2QP1/4PPKP/R2R4 w - - 0 22",
      "decision": true,
-     "main": "d7b6",
-     "mainSan": "Nb6+",
+     "main": "f3a8",
+     "mainSan": "Qxa8",
      "popular": {
       "beginner": [],
       "casual": [],
       "club": []
      },
      "notes": {
-      "text": "A sacrifice: the knight checks again and Black has to take it.",
-      "credit": {
-       "source": "Wikibooks, Chess/Tactics",
-       "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
-       "licence": "CC BY-SA 4.0",
-       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-       "authors": "Wikibooks contributors (see the page history)"
-      }
-     }
-    },
-    {
-     "ply": 3,
-     "fen": "k1r3nr/pp3ppp/1N6/P7/3P1B2/6P1/1PP2P1P/R4RK1 b - - 3 2",
-     "decision": false,
-     "main": "a7b6",
-     "mainSan": "axb6",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 4,
-     "fen": "k1r3nr/1p3ppp/1p6/P7/3P1B2/6P1/1PP2P1P/R4RK1 w - - 0 3",
-     "decision": true,
-     "main": "a5b6",
-     "mainSan": "axb6#",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     },
-     "notes": {
-      "text": "The pawn capture opens the a-file for your rook: another discovered check, and this time it is mate.",
-      "credit": {
-       "source": "Wikibooks, Chess/Tactics",
-       "url": "https://en.wikibooks.org/wiki/Chess/Tactics",
-       "licence": "CC BY-SA 4.0",
-       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-       "authors": "Wikibooks contributors (see the page history)"
-      }
+      "text": "Black took the pawn with the queen, but that does nothing for the rook on a8, which no black piece defends. Your queen takes it: you have won a rook for a pawn."
      }
     }
    ]
   },
   {
-   "title": "A trap in the French",
-   "fen": "r1b1kbnr/pp3ppp/4p3/3pP3/3q4/3B4/PP3PPP/RNBQK2R w KQkq - 0 9",
+   "title": "Both rooks attacked",
+   "fen": "r1b2rk1/pp3p2/3p1qpp/3P4/2P5/3n1B2/P2N1PPP/2RQR1K1 w - - 10 19",
    "side": "white",
-   "text": "French Defence, Advance Variation: Black has just grabbed a pawn with 8...Qxd4. Your bishop on d3 stands between your queen and Black's queen.",
+   "keyIdea": "Move the front piece to a square where it attacks the queen; while the queen escapes, the piece behind it captures what it attacks.",
+   "text": "From a game played on Lichess. You are White. Black's knight has just jumped to d3, where it attacks both of your rooks. Your queen on d1 would like to take it, but your own knight on d2 is in the way.",
    "credit": {
-    "source": "Wikipedia, Discovered attack",
-    "url": "https://en.wikipedia.org/wiki/Discovered_attack",
-    "licence": "CC BY-SA 4.0",
-    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-    "authors": "Wikipedia contributors (see the page history)"
+    "source": "Lichess puzzle database, puzzle v7tdT",
+    "url": "https://lichess.org/training/v7tdT",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
    },
    "mainLine": [
-    "d3b5",
-    "c8d7",
-    "d1d4"
+    "d2e4",
+    "f6g7",
+    "d1d3"
    ],
    "nodes": [
     {
      "ply": 0,
-     "fen": "r1b1kbnr/pp3ppp/4p3/3pP3/3q4/3B4/PP3PPP/RNBQK2R w KQkq - 0 9",
+     "fen": "r1b2rk1/pp3p2/3p1qpp/3P4/2P5/3n1B2/P2N1PPP/2RQR1K1 w - - 10 19",
      "decision": true,
-     "main": "d3b5",
-     "mainSan": "Bb5+",
+     "main": "d2e4",
+     "mainSan": "Ne4",
      "popular": {
       "beginner": [],
       "casual": [],
       "club": []
      },
      "notes": {
-      "text": "The bishop moves with check and uncovers your queen's attack on d4. Black must deal with the check first.",
-      "credit": {
-       "source": "Wikipedia, Discovered attack",
-       "url": "https://en.wikipedia.org/wiki/Discovered_attack",
-       "licence": "CC BY-SA 4.0",
-       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-       "authors": "Wikipedia contributors (see the page history)"
-      }
+      "text": "Ne4, the knight to e4, gets out of the way with a threat: from e4 it attacks Black's queen on f6. At the same time your queen on d1 now attacks the knight on d3. Black has to save the queen first."
      }
     },
     {
      "ply": 1,
-     "fen": "r1b1kbnr/pp3ppp/4p3/1B1pP3/3q4/8/PP3PPP/RNBQK2R b KQkq - 1 9",
+     "fen": "r1b2rk1/pp3p2/3p1qpp/3P4/2P1N3/3n1B2/P4PPP/2RQR1K1 b - - 11 19",
      "decision": false,
-     "main": "c8d7",
-     "mainSan": "Bd7",
+     "main": "f6g7",
+     "mainSan": "Qg7",
      "popular": {
       "beginner": [],
       "casual": [],
@@ -224,24 +128,80 @@
     },
     {
      "ply": 2,
-     "fen": "r3kbnr/pp1b1ppp/4p3/1B1pP3/3q4/8/PP3PPP/RNBQK2R w KQkq - 2 10",
+     "fen": "r1b2rk1/pp3pq1/3p2pp/3P4/2P1N3/3n1B2/P4PPP/2RQR1K1 w - - 12 20",
      "decision": true,
-     "main": "d1d4",
-     "mainSan": "Qxd4",
+     "main": "d1d3",
+     "mainSan": "Qxd3",
      "popular": {
       "beginner": [],
       "casual": [],
       "club": []
      },
      "notes": {
-      "text": "Black's queen is lost: a whole queen won with one discovered attack.",
-      "credit": {
-       "source": "Wikipedia, Discovered attack",
-       "url": "https://en.wikipedia.org/wiki/Discovered_attack",
-       "licence": "CC BY-SA 4.0",
-       "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-       "authors": "Wikipedia contributors (see the page history)"
-      }
+      "text": "Black's queen went to g7, and the knight on d3 still has no defender, so your queen takes it: you have won a piece, and your rooks are safe again."
+     }
+    }
+   ]
+  },
+  {
+   "title": "A bishop between two queens",
+   "fen": "1r4k1/2p2ppp/Q2b1q2/p7/8/1P5P/P4PP1/3R1RK1 b - - 1 22",
+   "side": "black",
+   "keyIdea": "When the moving piece gives check, the opponent must answer it and has no time to save what the piece behind attacks.",
+   "text": "From a game played on Lichess. You are Black. White's queen has just moved to a6. Your bishop on d6 stands between your queen on f6 and White's queen.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle aD8Ct",
+    "url": "https://lichess.org/training/aD8Ct",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "d6h2",
+    "g1h2",
+    "f6a6"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "1r4k1/2p2ppp/Q2b1q2/p7/8/1P5P/P4PP1/3R1RK1 b - - 1 22",
+     "decision": true,
+     "main": "d6h2",
+     "mainSan": "Bh2+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The bishop moves away with check, and your queen on f6 now attacks White's queen along the sixth rank. White has to answer the check first."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "1r4k1/2p2ppp/Q4q2/p7/8/1P5P/P4PPb/3R1RK1 w - - 2 23",
+     "decision": false,
+     "main": "g1h2",
+     "mainSan": "Kxh2",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "1r4k1/2p2ppp/Q4q2/p7/8/1P5P/P4PPK/3R1R2 b - - 0 23",
+     "decision": true,
+     "main": "f6a6",
+     "mainSan": "Qxa6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "White took the bishop, but the queen on a6 is lost. Giving a bishop to win a queen is a very good trade."
      }
     }
    ]

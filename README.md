@@ -15,8 +15,9 @@ Code, logged in: see [What you need](#what-you-need).
 - **Review your own games** from Lichess, chess.com or a PGN: every move gets a Move Grade, a graph
   shows where the game turned, and the Coach walks you through the key moments.
 - **Play the Engine** at your strength, with Live Coaching and Hints.
-- **Learn** openings, Themes such as forks and pins, and basic endgames in Lessons, then practise
-  them in Puzzles.
+- **Learn** from your first moves to the end of intermediate level: 64 Lessons on Themes such as
+  forks and pins, endgames, openings, and how to think during a game, with the next Lesson
+  suggested as you go, then practise them in Puzzles.
 - **Ask the Coach why** a move is good or bad, beside any board.
 - **See the verdicts at a glance**: Winning Chances as a percentage and a bar, Move Grade symbols on
   the board, and a Threat arrow for what your opponent wants next.

@@ -1,0 +1,69 @@
+{
+ "id": "sicilian-defence",
+ "name": "Sicilian Defence",
+ "kind": "opening",
+ "track": "openings",
+ "level": "intermediate",
+ "side": "black",
+ "eco": "B76",
+ "puzzleTags": [
+  "Sicilian_Defense"
+ ],
+ "goal": "As Black against 1.e4, you can play the Sicilian Defence: trade your c-pawn for White's d-pawn, then build the Dragon set-up with ...g6, ...Bg7, castling and ...Nc6.",
+ "priorKnowledge": [
+  "opening-principles"
+ ],
+ "intro": "The Sicilian Defence, 1...c5, is the most popular answer to 1.e4. You do not copy White in the centre: your c-pawn fights for the d4 square, and when White opens the game with d4, you trade that side pawn for White's centre pawn. You get an extra centre pawn and an open road for your rooks on the c-file, while White gets more space and quicker development. In the Dragon set-up taught here, your bishop goes to g7 and your king castles behind it.",
+ "parts": [
+  {
+   "title": "The Dragon Variation",
+   "fen": "start",
+   "side": "black",
+   "keyIdea": "Trade a side pawn for White's centre pawn, then put your bishop on the long diagonal, castle behind it and bring out the knights.",
+   "url": "https://github.com/lichess-org/chess-openings",
+   "line": "e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3 g6 Be3 Bg7 f3 O-O Qd2 Nc6",
+   "notes": [
+    {
+     "ply": 1,
+     "san": "c5",
+     "text": "1...c5 controls d4 from the side instead of meeting e4 head on. About half the time White answers with 2.Nf3, often followed by 3.d4 as in this Lesson. Against 2.Bc4, which aims at f7, ...e6 blocks the bishop's diagonal; against 2.c3, which gets ready for d4 with a pawn, 2...Nf6 or 2...d5 attacks e4 at once; against 2.Nc3, the same set-up as here works, with ...g6, ...Bg7, ...d6 and ...Nc6. Against 2.d4, 2...cxd4 takes the pawn, and if 3.c3 follows, 3...Nf6 works as against 2.c3."
+    },
+    {
+     "ply": 3,
+     "san": "d6",
+     "text": "2...d6 opens a path for your bishop on c8 and covers e5, so White cannot later chase a knight from f6 by pushing the e-pawn to e5. 2...Nc6 and 2...e6 are the other main moves."
+    },
+    {
+     "ply": 5,
+     "san": "cxd4",
+     "text": "White opens the centre with 3.d4. 3...cxd4 takes, and this trade is the heart of the Sicilian. Your c-pawn is gone, but so is White's d-pawn, so you have two centre pawns (d6 and e7) against White's one (e4). The c-file is now half-open: none of your pawns stands on it, so your rooks can use it later."
+    },
+    {
+     "ply": 7,
+     "san": "Nf6",
+     "text": "4...Nf6 develops with a threat: the knight attacks the pawn on e4, so White has to spend a move defending it. 5.Nc3 is the usual answer."
+    },
+    {
+     "ply": 9,
+     "san": "g6",
+     "text": "5...g6 starts the Dragon Variation, one of the named ways to play the Sicilian. The pawn makes room for your bishop on g7, on the long diagonal from h8 to a1. You can play the same set-up against most of White's sixth moves."
+    },
+    {
+     "ply": 11,
+     "san": "Bg7",
+     "text": "6.Be3 brings out White's bishop. 6...Bg7 puts yours on the long diagonal. Once your knight on f6 moves out of the way, the bishop will press on d4 and, further along, on White's queenside. It also clears the way for castling."
+    },
+    {
+     "ply": 13,
+     "san": "O-O",
+     "text": "7.f3 guards e4 and keeps your knight off g4, where it would attack the bishop on e3. 7...O-O makes your king safe, tucked behind its pawns and the bishop on g7."
+    },
+    {
+     "ply": 15,
+     "san": "Nc6",
+     "text": "8.Qd2 lines the queen up with the bishop on e3, ready for Bh6 to trade off your bishop on g7, which guards your king. 8...Nc6 develops your last knight and adds pressure on d4. White often castles queenside next and pushes the kingside pawns at your king, so you fight back on the queenside: a bishop to d7 or e6, a rook to c8 on the half-open c-file, and ...Ne5 or ...d5 to hit the centre."
+    }
+   ]
+  }
+ ]
+}

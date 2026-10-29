@@ -96,7 +96,7 @@ test.describe('a Player with no games', () => {
   test('the first-run screen’s suggested start opens the Lessons', async ({ page, app }) => {
     await page.goto(`${app.url}/#pair=${app.code}`);
     await phoneLater(page);
-    await page.getByRole('button', { name: 'Start with the Opening Lessons' }).click();
+    await page.getByRole('button', { name: 'Start with the Lessons' }).click();
     await expect(page.getByRole('heading', { name: 'Lessons', exact: true })).toBeVisible();
     await expect(page).toHaveURL(/#\/lessons$/);
   });
@@ -287,4 +287,19 @@ test.describe('on a phone', () => {
     await expect(choice(paired, 'Learn')).toBeVisible();
     expect(await paired.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
   });
+});
+
+test('on a phone, Back to Settings returns to the place the Player had scrolled to, once the settings have loaded', async ({ paired, app }) => {
+  await paired.setViewportSize({ width: 390, height: 664 });
+  await paired.goto(`${app.url}/#/settings`);
+  const about = paired.getByRole('region', { name: 'About' });
+  await expect(paired.getByRole('region', { name: 'Pairing' })).toBeVisible();
+  await about.scrollIntoViewIfNeeded();
+  const y = await paired.evaluate(() => scrollY);
+  expect(y).toBeGreaterThan(500);
+  await paired.getByRole('link', { name: 'Player Profile' }).click();
+  await expect(paired.getByRole('heading', { name: 'Player Profile', level: 1 })).toBeVisible();
+  await paired.goBack();
+  await expect(paired.getByRole('heading', { name: 'Settings', level: 1 })).toBeVisible();
+  await expect.poll(() => paired.evaluate(() => scrollY)).toBe(y);
 });

@@ -1,0 +1,70 @@
+{
+ "id": "ruy-lopez",
+ "name": "Ruy Lopez",
+ "kind": "opening",
+ "track": "openings",
+ "level": "intermediate",
+ "side": "white",
+ "eco": "C88",
+ "puzzleTags": [
+  "Ruy_Lopez"
+ ],
+ "goal": "As White, you can play the main line of the Ruy Lopez, and know why the bishop attacks the knight that guards e5.",
+ "priorKnowledge": [
+  "italian-game"
+ ],
+ "intro": "The Ruy Lopez, or Spanish Game, starts 1.e4 e5 2.Nf3 Nc6 3.Bb5. The bishop attacks the knight on c6, the piece that guards Black's e5 pawn. At first that is only pressure, not a real threat. The main line is about the moment it becomes real: you castle, guard e4 with a rook, and only then does Black have to do something about e5.",
+ "parts": [
+  {
+   "title": "When the pressure on e5 becomes a threat",
+   "fen": "start",
+   "side": "white",
+   "keyIdea": "Attacking the knight that guards Black's centre pawn only wins that pawn once your own centre pawn is safe, so develop and castle first.",
+   "text": "You are White, from the first move. The first moves are the Closed Ruy Lopez, as Lichess's list of openings names it. At each move, ask what it does for your centre, your pieces and your king, and whether e5 is really under threat yet.",
+   "url": "https://github.com/lichess-org/chess-openings",
+   "line": "e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O Be7 Re1 b5 Bb3 d6 c3",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "e4",
+     "text": "1.e4 takes space in the centre and opens lines for your queen and for the bishop on f1, which will play the main part in this opening."
+    },
+    {
+     "ply": 2,
+     "san": "Nf3",
+     "text": "2.Nf3 develops a knight and attacks the e5 pawn at once. Black usually guards it with 2...Nc6, which also brings out a piece."
+    },
+    {
+     "ply": 4,
+     "san": "Bb5",
+     "text": "3.Bb5 attacks the knight on c6, the only piece guarding e5. It is not a real threat yet: after Bxc6 dxc6 Nxe5, Black plays ...Qd4, hitting the knight and the e4 pawn, and wins the pawn back. The bishop is there for pressure that will matter later."
+    },
+    {
+     "ply": 6,
+     "san": "Ba4",
+     "text": "3...a6 attacks the bishop, so it must take the knight or step back. 4.Ba4 keeps it on the same diagonal, so the pressure on the knight is saved for later. 4.Bxc6 is also played, but it gives Black two bishops against your knight and bishop, and still does not win e5."
+    },
+    {
+     "ply": 8,
+     "san": "O-O",
+     "text": "4...Nf6 attacks your e4 pawn, but 5.O-O leaves it and castles. If 5...Nxe4, then 6.d4 opens the centre while Black's king is still in it, and you win the pawn back."
+    },
+    {
+     "ply": 10,
+     "san": "Re1",
+     "text": "5...Be7 gets Black ready to castle, and now Black really does threaten to take your e4 pawn. 6.Re1 guards it with a developing move. With e4 safe, your old idea finally works: Bxc6 and Nxe5 would win a pawn, because ...Qd4 no longer wins it back."
+    },
+    {
+     "ply": 12,
+     "san": "Bb3",
+     "text": "Black meets the threat with 6...b5, pushing your bishop away from the knight. 7.Bb3 keeps the bishop on a long diagonal aimed at f7, the pawn next to Black's king."
+    },
+    {
+     "ply": 14,
+     "san": "c3",
+     "text": "7...d6 guards e5 with a pawn. 8.c3 prepares d4 for a big centre, and gives your bishop a way back to c2 if ...Na5 attacks it. 8.d4 at once is too early: after 8...Nxd4 9.Nxd4 exd4, taking back with the queen runs into ...c5 and ...c4, which traps the bishop on b3 (the Noah's Ark Trap)."
+    }
+   ]
+  }
+ ]
+}

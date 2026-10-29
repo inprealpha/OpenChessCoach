@@ -61,6 +61,7 @@
     if (playOut.goal === 'promote' && pawns.length === 0) return finish('lost', 'Your pawn is gone, so it can no longer promote. Try again.');
     const drawn: Record<string, string> = {
       stalemate: 'Stalemate: the game is drawn. Try again.',
+      insufficient: 'Neither side has enough pieces left to give checkmate, so the game is drawn. Try again.',
       repetition: 'The same position came up three times: the game is drawn. Try again.',
     };
     if (outcome) return finish('lost', drawn[outcome.reason] ?? 'The game is drawn. Try again.');
@@ -106,7 +107,11 @@
   {:else if !lesson || !playOut}
     <p class="muted">Loading…</p>
   {:else}
-    <h1>{lesson.name}: play it out</h1>
+    <!-- As on the Lesson screens: the way back first, then the name, on one line where both fit. -->
+    <div class="title">
+      <a class="back" href="#/lessons"><span aria-hidden="true">←</span> Back to the Lessons</a>
+      <h1>{lesson.name}: play it out</h1>
+    </div>
     <div class="board-layout">
       <div>
         <Board
@@ -127,18 +132,22 @@
           <p role="status" class:won={status === 'won'}>{message}</p>
           <div class="row">
             {#if status === 'playing'}
-              <button type="button" class="secondary" onclick={hint} disabled={!playerToMove}>Show the Engine’s move</button>
+              <!-- The Engine's choice for the Player's own side, not its reply. -->
+              <button type="button" class="secondary" onclick={hint} disabled={!playerToMove}>Show the best move</button>
             {/if}
             <button type="button" class={status === 'playing' ? 'secondary' : ''} onclick={restart} disabled={thinking}>Start again</button>
           </div>
         </section>
-        <p><a href={`#/lesson/${lesson.id}`}>Back to the Lesson</a> · <a href="#/lessons">All Lessons</a></p>
+        <p><a href={`#/lesson/${lesson.id}`}>Back to the Lesson</a></p>
       </div>
     </div>
   {/if}
 </section>
 
 <style>
+  .title { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.2rem 1rem; margin-bottom: 0.8rem; }
+  .title h1 { margin: 0; }
+  .back { order: 1; font-size: 0.9rem; }
   h2 { font-size: 1rem; margin: 0 0 0.4rem; }
   .center { text-align: center; }
   .row { display: flex; gap: 0.5rem; flex-wrap: wrap; }

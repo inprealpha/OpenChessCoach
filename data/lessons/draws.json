@@ -1,0 +1,384 @@
+{
+ "id": "draws",
+ "name": "Stalemate and other draws",
+ "kind": "endgame",
+ "track": "endgames",
+ "level": "beginner",
+ "goal": "You can avoid stalemate when you are winning, aim for it when you are losing, and know the other draws: repetition and too few pieces left to mate.",
+ "priorKnowledge": [
+  "queen-mate"
+ ],
+ "side": "white",
+ "puzzleTags": [],
+ "puzzleThemes": [],
+ "intro": {
+  "text": "Not every game ends in mate. Stalemate is a draw: the player to move is not in check but has no legal move. A game is also drawn when the same position comes up three times with the same player to move, and when neither side has enough pieces left to give mate, such as king against king, or king and knight against king. When you are winning, these rules are traps to avoid; when you are losing, they can save the game."
+ },
+ "parts": [
+  {
+   "title": "Mate, not stalemate",
+   "fen": "8/k7/8/1QK5/8/8/8/8 w - - 29 75",
+   "side": "white",
+   "keyIdea": "Against a lone king, make sure before every move that it will still have a legal move, unless your move is mate.",
+   "text": "From a game played on Lichess. You are White, with a queen against a lone king, and Black's king is stuck near the corner. In the game, White's next queen move looked natural but left Black with no legal move, and the game was only a draw. Find the mate instead.",
+   "credit": {
+    "source": "Lichess games database, game uxxySEvi",
+    "url": "https://lichess.org/uxxySEvi#148",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "c5c6",
+    "a7a8",
+    "b5b7"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "8/k7/8/1QK5/8/8/8/8 w - - 29 75",
+     "decision": true,
+     "main": "c5c6",
+     "mainSan": "Kc6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "75.Kc6: your king steps from c5 to c6, so that it can protect the queen on b7 next move. Black's king still has a8 to go to, so this is not stalemate."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "8/k7/2K5/1Q6/8/8/8/8 b - - 30 75",
+     "decision": false,
+     "main": "a7a8",
+     "mainSan": "Ka8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "k7/8/2K5/1Q6/8/8/8/8 w - - 31 76",
+     "decision": true,
+     "main": "b5b7",
+     "mainSan": "Qb7#",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "76.Qb7# is mate: the queen checks from b7, and your king on c6 guards it, so Black's king cannot take it. In the game White played Qb6 here instead. That gave no check, but it took away a7, b7 and b8, so Black's king had no legal move left: stalemate, and the game was drawn."
+     }
+    }
+   ]
+  },
+  {
+   "title": "A rook against a queen",
+   "fen": "8/8/8/8/6k1/5q2/6KR/8 w - - 24 85",
+   "side": "white",
+   "keyIdea": "If your king cannot move, offer your last piece with check: if it is taken, you have no legal move, and that is stalemate.",
+   "text": "From a game played on Lichess. You are White. You have only a rook against a queen, which is normally lost, and your king is in check. Your king must step out of check. Find the one square it can go to, count the moves you would have left after that, and think about what that could mean.",
+   "credit": {
+    "source": "Lichess games database, game lPrsxeLO",
+    "url": "https://lichess.org/lPrsxeLO#168",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "g2g1",
+    "g4g3",
+    "h2h3",
+    "g3h3"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "8/8/8/8/6k1/5q2/6KR/8 w - - 24 85",
+     "decision": true,
+     "main": "g2g1",
+     "mainSan": "Kg1",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "85.Kg1 is the only legal move. Now your king has no squares at all: Black's queen covers f1, f2, g2 and h1, and your rook stands on h2. Only the rook can still move."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "8/8/8/8/6k1/5q2/7R/6K1 b - - 25 85",
+     "decision": false,
+     "main": "g4g3",
+     "mainSan": "Kg3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "8/8/8/8/8/5qk1/7R/6K1 w - - 26 86",
+     "decision": true,
+     "main": "h2h3",
+     "mainSan": "Rh3+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Black's last move, 85...Kg3, was a mistake: if Black had kept the king away from your rook, the queen would win. Now the king stands next to your rook, and 86.Rh3+ checks right beside it. If Black takes the rook, with the king or with the queen, you have no legal move and you are not in check: stalemate. If the king steps away instead, the rook takes the queen. In the game Black took with the king, and it was a draw."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "8/8/8/8/8/5qkR/8/6K1 b - - 27 86",
+     "decision": false,
+     "main": "g3h3",
+     "mainSan": "Kxh3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    }
+   ]
+  },
+  {
+   "title": "A knight against a queen",
+   "fen": "5N1k/5K2/6pp/8/q6P/6P1/8/8 w - - 2 39",
+   "side": "white",
+   "keyIdea": "A draw by repetition can save a lost game: look for moves that force the same position to come back three times.",
+   "text": "From a game played on Lichess. You are White, with only a knight against a queen, which is normally lost. But Black's king is shut in the corner, and your king on f7 covers g7 and g8. What can your knight do?",
+   "credit": {
+    "source": "Lichess games database, game lDHGn6Ex",
+    "url": "https://lichess.org/lDHGn6Ex#76",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "f8g6",
+    "h8h7",
+    "g6f8",
+    "h7h8",
+    "f8g6",
+    "h8h7",
+    "g6f8",
+    "h7h8",
+    "f8g6"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "5N1k/5K2/6pp/8/q6P/6P1/8/8 w - - 2 39",
+     "decision": true,
+     "main": "f8g6",
+     "mainSan": "Nxg6+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "39.Nxg6+: the knight takes the pawn on g6 with check. A knight's check cannot be blocked, and the king cannot reach the knight, so it has to go to h7, the only square your king and knight leave it. Any other move would give Black's queen time to start checking your king."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "7k/5K2/6Np/8/q6P/6P1/8/8 b - - 0 39",
+     "decision": false,
+     "main": "h8h7",
+     "mainSan": "Kh7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "8/5K1k/6Np/8/q6P/6P1/8/8 w - - 1 40",
+     "decision": true,
+     "main": "g6f8",
+     "mainSan": "Nf8+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "40.Nf8+: the knight jumps back to f8 and checks the king on h7. Your king covers g6, g7 and g8, so the black king's only square is h8 again."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "5N2/5K1k/7p/8/q6P/6P1/8/8 b - - 2 40",
+     "decision": false,
+     "main": "h7h8",
+     "mainSan": "Kh8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "5N1k/5K2/7p/8/q6P/6P1/8/8 w - - 3 41",
+     "decision": true,
+     "main": "f8g6",
+     "mainSan": "Ng6+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "41.Ng6+: the knight is back on g6 and the king on h8, with Black to move. This exact position, every piece on the same square, has now come up for the second time."
+     }
+    },
+    {
+     "ply": 5,
+     "fen": "7k/5K2/6Np/8/q6P/6P1/8/8 b - - 4 41",
+     "decision": false,
+     "main": "h8h7",
+     "mainSan": "Kh7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 6,
+     "fen": "8/5K1k/6Np/8/q6P/6P1/8/8 w - - 5 42",
+     "decision": true,
+     "main": "g6f8",
+     "mainSan": "Nf8+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "42.Nf8+ checks again from f8. Black's king has to go back to h8: there is nothing else it can do."
+     }
+    },
+    {
+     "ply": 7,
+     "fen": "5N2/5K1k/7p/8/q6P/6P1/8/8 b - - 6 42",
+     "decision": false,
+     "main": "h7h8",
+     "mainSan": "Kh8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 8,
+     "fen": "5N1k/5K2/7p/8/q6P/6P1/8/8 w - - 7 43",
+     "decision": true,
+     "main": "f8g6",
+     "mainSan": "Ng6+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "43.Ng6+: the same position, with Black to move, has now come up three times, so the game is a draw by repetition. The game on Lichess was drawn this way: a knight held a queen."
+     }
+    }
+   ]
+  },
+  {
+   "title": "A check from a pawn",
+   "fen": "8/8/8/5k2/5p2/2q5/5RK1/8 b - - 5 64",
+   "side": "white",
+   "keyIdea": "Mate needs enough pieces: once trades leave only the two kings, the game is drawn at once.",
+   "text": "From a game played on Lichess. You are White. Black has a queen and a pawn against your rook, and Black's pawn has just given check from f3. Black was winning, but this check is a mistake. Think about what would be left on the board after a few captures.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle cBvHI",
+    "url": "https://lichess.org/training/cBvHI",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "f4f3",
+    "f2f3",
+    "c3f3",
+    "g2f3"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "8/8/8/5k2/5p2/2q5/5RK1/8 b - - 5 64",
+     "decision": false,
+     "main": "f4f3",
+     "mainSan": "f3+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "8/8/8/5k2/8/2q2p2/5RK1/8 w - - 0 65",
+     "decision": true,
+     "main": "f2f3",
+     "mainSan": "Rxf3+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "65.Rxf3+: the rook takes the pawn with check, and from f3 it also attacks Black's queen on c3 along the third rank. If Black's king steps away, you take the queen, so Black's best move is to take your rook."
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "8/8/8/5k2/8/2q2R2/6K1/8 b - - 0 65",
+     "decision": false,
+     "main": "c3f3",
+     "mainSan": "Qxf3+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "8/8/8/5k2/8/5q2/6K1/8 w - - 0 66",
+     "decision": true,
+     "main": "g2f3",
+     "mainSan": "Kxf3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Black's queen took your rook, and 66.Kxf3 takes the queen. Only the two kings are left, so neither side can ever give mate, and the game is a draw at once."
+     }
+    }
+   ]
+  }
+ ]
+}

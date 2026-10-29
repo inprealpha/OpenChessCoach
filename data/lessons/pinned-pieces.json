@@ -1,0 +1,208 @@
+{
+ "id": "pinned-pieces",
+ "name": "Using a pin",
+ "kind": "theme",
+ "track": "themes",
+ "level": "intermediate",
+ "goal": "You can attack a pinned piece with a pawn, add attackers to it, and take advantage of a pinned piece that can no longer defend.",
+ "priorKnowledge": [
+  "pins"
+ ],
+ "side": "white",
+ "puzzleTags": [],
+ "puzzleThemes": [],
+ "intro": {
+  "text": "A pinned piece is stuck: if it moves, something more valuable behind it is lost. That makes it a good piece to attack. In this Lesson you attack a pinned piece with a pawn, aim more pieces at it than can defend it, and take things it seems to guard but cannot."
+ },
+ "parts": [
+  {
+   "title": "The knight cannot move",
+   "fen": "rn1q1rk1/pbb2ppp/2p1pn2/1p6/4P2B/2NB1N2/PP3PPP/R2QK2R w KQ - 2 13",
+   "side": "white",
+   "keyIdea": "Attack a pinned piece with a pawn: it cannot step away without losing what stands behind it.",
+   "text": "From a game played on Lichess. You are White. Black's queen has just gone back to d8, so your bishop on h4 now pins the knight on f6 to the queen. The knight cannot move without giving up the queen: what could you attack it with?",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle s9v1Z",
+    "url": "https://lichess.org/training/s9v1Z",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "e4e5",
+    "b8d7",
+    "e5f6"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "rn1q1rk1/pbb2ppp/2p1pn2/1p6/4P2B/2NB1N2/PP3PPP/R2QK2R w KQ - 2 13",
+     "decision": true,
+     "main": "e4e5",
+     "mainSan": "e5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The pawn attacks the knight on f6. The knight cannot move away, because your bishop would then take the queen on d8. Whatever Black does, a piece is lost."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "rn1q1rk1/pbb2ppp/2p1pn2/1p2P3/7B/2NB1N2/PP3PPP/R2QK2R b KQ - 0 13",
+     "decision": false,
+     "main": "b8d7",
+     "mainSan": "Nbd7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "r2q1rk1/pbbn1ppp/2p1pn2/1p2P3/7B/2NB1N2/PP3PPP/R2QK2R w KQ - 1 14",
+     "decision": true,
+     "main": "e5f6",
+     "mainSan": "exf6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The pawn takes the knight. Black can take back on f6, but you have won a knight for a pawn."
+     }
+    }
+   ]
+  },
+  {
+   "title": "A bishop pinned to its king",
+   "fen": "r2k1r2/pp1b3p/2p2p2/6p1/2B5/4N1P1/PPP2PP1/3R2K1 w - - 0 25",
+   "side": "white",
+   "keyIdea": "Pile up on a pinned piece: when it has more attackers than defenders, it falls.",
+   "text": "From a game played on Lichess. You are White. Your rook on d1 pins Black's bishop on d7 to the king on d8. Count the pieces that attack the bishop and the pieces that defend it.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle CAM9l",
+    "url": "https://lichess.org/training/CAM9l",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "c4e6",
+    "d8e7",
+    "e6d7"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "r2k1r2/pp1b3p/2p2p2/6p1/2B5/4N1P1/PPP2PP1/3R2K1 w - - 0 25",
+     "decision": true,
+     "main": "c4e6",
+     "mainSan": "Be6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Your bishop joins the rook in attacking d7. Black's bishop cannot take yours or run away, because it is pinned to its king. Now two of your pieces attack it and only the king defends it."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "r2k1r2/pp1b3p/2p1Bp2/6p1/8/4N1P1/PPP2PP1/3R2K1 b - - 1 25",
+     "decision": false,
+     "main": "d8e7",
+     "mainSan": "Ke7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "r4r2/pp1bk2p/2p1Bp2/6p1/8/4N1P1/PPP2PP1/3R2K1 w - - 2 26",
+     "decision": true,
+     "main": "e6d7",
+     "mainSan": "Bxd7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Your bishop takes Black's bishop. The king on e7 cannot take back, because your rook on d1 guards d7. You have won a bishop for nothing."
+     }
+    }
+   ]
+  },
+  {
+   "title": "Count the guards",
+   "fen": "4rrk1/p4p2/5Rpp/4p3/2B3bP/1P6/P3R3/6K1 w - - 0 26",
+   "side": "white",
+   "keyIdea": "A piece pinned to its king cannot leave the line of the pin, so what it seems to guard off that line is free to take.",
+   "text": "From a game played on Lichess. You are White. Black's bishop has just taken a pawn on g4. Before you count the guards of a square, find out whether any of them is pinned.",
+   "credit": {
+    "source": "Lichess puzzle database, puzzle m7Yrw",
+    "url": "https://lichess.org/training/m7Yrw",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the position is from a game played there"
+   },
+   "mainLine": [
+    "f6g6",
+    "g8h7",
+    "g6g4"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "4rrk1/p4p2/5Rpp/4p3/2B3bP/1P6/P3R3/6K1 w - - 0 26",
+     "decision": true,
+     "main": "f6g6",
+     "mainSan": "Rxg6+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The rook takes the pawn on g6 with check. The pawn on f7 cannot take back, because your bishop on c4 pins it to the king on g8."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "4rrk1/p4p2/6Rp/4p3/2B3bP/1P6/P3R3/6K1 b - - 0 26",
+     "decision": false,
+     "main": "g8h7",
+     "mainSan": "Kh7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "4rr2/p4p1k/6Rp/4p3/2B3bP/1P6/P3R3/6K1 w - - 1 27",
+     "decision": true,
+     "main": "g6g4",
+     "mainSan": "Rxg4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The king has stepped to h7 and attacks your rook, but the rook moves on and takes the bishop on g4, which stood on the same file. You have won a pawn and a bishop."
+     }
+    }
+   ]
+  }
+ ]
+}

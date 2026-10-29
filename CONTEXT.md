@@ -57,11 +57,35 @@ A nudge from the Coach towards a good move, offered only in Engine Games and Les
 _Avoid_: Tip, suggestion, assist
 
 **Lesson**:
-An interactive session where the Coach teaches a topic, such as an opening, a Theme or a basic endgame, by asking the Player to choose moves and explaining the consequences of their choice.
-_Avoid_: Tutorial, course, drill
+An interactive session where the Coach teaches a topic, such as an opening, a Theme, an endgame or a way of thinking during a game, by asking the Player to choose moves and explaining the consequences of their choice. It is one part of the Course, never the Course itself.
+_Avoid_: Tutorial, drill
+
+**Course**:
+All the Lessons, from complete beginner to the end of intermediate level, in four Tracks and two Lesson levels, in the order the app suggests them. Nothing in it is locked.
+_Avoid_: Curriculum, syllabus, learning path
+
+**Track**:
+One of the Course's four strands: Themes, endgames, openings, and how to think during a game.
+_Avoid_: Category, section
+
+**Lesson level**:
+Who a Lesson is for: beginner or intermediate. Not the Player's own level (beginner, casual or club), which the Player Profile records.
+_Avoid_: Difficulty, stage
+
+**Learning goal**:
+What a Lesson teaches, in one or two sentences on what the Player can do afterwards. The Lesson's aim, not a Goal, which is the Player's own.
+_Avoid_: Objective
+
+**Prior knowledge**:
+The Lessons a Player should know before a Lesson. It decides the order of the suggestions; it never locks a Lesson.
+_Avoid_: Prerequisite, requirement
+
+**Key idea**:
+The one idea a part of a Lesson shows, in a line. It never names a move the Player has to find, in the opening Lessons too.
+_Avoid_: Takeaway, moral
 
 **Theme**:
-A recurring pattern that wins material or gives mate, such as a fork, a pin or a back-rank mate, taught in a Lesson and practised in Puzzles.
+A recurring pattern that wins material, gives mate or saves a game, such as a fork, a pin, a back-rank mate or a perpetual check, taught in a Lesson and practised in Puzzles. The Themes Track starts with the basics every Theme builds on: attack and defence, check, and mate.
 _Avoid_: Tactic, motif
 
 **Puzzle**:

@@ -1,0 +1,385 @@
+{
+ "id": "opening-principles",
+ "name": "Opening principles",
+ "kind": "thinking",
+ "track": "openings",
+ "level": "beginner",
+ "goal": "In the first moves of any game, you can claim the centre with pawns, bring out knights and bishops, castle early, and avoid moving one piece again and again.",
+ "priorKnowledge": [],
+ "side": "white",
+ "puzzleTags": [],
+ "puzzleThemes": [],
+ "intro": {
+  "text": "The first ten or so moves decide how well your pieces can fight for the rest of the game. A few habits work in almost every opening: put pawns in the centre (the four squares d4, e4, d5 and e5), bring out your knights and bishops, castle early, and give each piece one good move instead of moving the same one again and again. Each part of this Lesson shows one of these habits in a position from a real game."
+ },
+ "parts": [
+  {
+   "title": "The first moves",
+   "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+   "side": "white",
+   "keyIdea": "Two pawns side by side in the centre take important squares away from the enemy pieces and open lines for your bishops and queen.",
+   "text": "From a game played on Lichess. You are White, and the game is just starting. Find moves that claim the centre and get your pieces ready to come out.",
+   "credit": {
+    "source": "Lichess games database, game NByeHwl3",
+    "url": "https://lichess.org/NByeHwl3",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "e2e4",
+    "h7h5",
+    "d2d4",
+    "e7e6",
+    "g1f3"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+     "decision": true,
+     "main": "e2e4",
+     "mainSan": "e4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The four centre squares are d4, e4, d5 and e5. 1.e4, the pawn in front of your king two squares forward, puts a pawn on one of them and attacks d5 and f5. It also opens diagonals for your queen and for the bishop on f1. 1.d4 is the other main first move."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
+     "decision": false,
+     "main": "h7h5",
+     "mainSan": "h5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "rnbqkbnr/ppppppp1/8/7p/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+     "decision": true,
+     "main": "d2d4",
+     "mainSan": "d4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Black's 1...h5 moves an edge pawn and does nothing for the centre. 2.d4 takes the chance: two pawns side by side on d4 and e4 control c5, d5, e5 and f5, so Black's pieces have fewer good squares."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "rnbqkbnr/ppppppp1/8/7p/3PP3/8/PPP2PPP/RNBQKBNR b KQkq - 0 2",
+     "decision": false,
+     "main": "e7e6",
+     "mainSan": "e6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "rnbqkbnr/pppp1pp1/4p3/7p/3PP3/8/PPP2PPP/RNBQKBNR w KQkq - 0 3",
+     "decision": true,
+     "main": "g1f3",
+     "mainSan": "Nf3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "With your centre built, 3.Nf3 brings out a piece. This is called developing: moving a knight or bishop off its starting square. On f3 the knight guards d4 and watches e5, and it is one of the two pieces that must move before you can castle kingside, on the half of the board where your king starts. A knight on the edge, on h3, would reach fewer squares."
+     }
+    }
+   ]
+  },
+  {
+   "title": "An early queen",
+   "fen": "rnb1kbnr/pppp1ppp/8/4P3/7q/8/PPP1PPPP/RNBQKBNR w KQkq - 1 3",
+   "side": "white",
+   "keyIdea": "A queen that comes out early can be chased: each developing move that attacks it wins you a move.",
+   "text": "From a game played on Lichess. You are White. After 1.d4 e5 2.dxe5 Qh4, Black has given up a pawn and brought the queen out on move two. Look for a developing move that also attacks something.",
+   "credit": {
+    "source": "Lichess games database, game 8qudzjxx",
+    "url": "https://lichess.org/8qudzjxx#4",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "g1f3",
+    "h4e4",
+    "b1c3",
+    "e4c6",
+    "c1d2",
+    "f8c5",
+    "e2e3",
+    "g8e7",
+    "f1b5"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "rnb1kbnr/pppp1ppp/8/4P3/7q/8/PPP1PPPP/RNBQKBNR w KQkq - 1 3",
+     "decision": true,
+     "main": "g1f3",
+     "mainSan": "Nf3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "3.Nf3 brings out a knight and attacks the queen on h4 at the same time. Black has to spend the next move saving the queen, so your knight came out without costing you a move."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "rnb1kbnr/pppp1ppp/8/4P3/7q/5N2/PPP1PPPP/RNBQKB1R b KQkq - 2 3",
+     "decision": false,
+     "main": "h4e4",
+     "mainSan": "Qe4",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "rnb1kbnr/pppp1ppp/8/4P3/4q3/5N2/PPP1PPPP/RNBQKB1R w KQkq - 3 4",
+     "decision": true,
+     "main": "b1c3",
+     "mainSan": "Nc3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The queen went to e4. 4.Nc3 brings out your other knight, and again it attacks the queen. You have two pieces out, while Black's last two moves were both spent on the queen."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "rnb1kbnr/pppp1ppp/8/4P3/4q3/2N2N2/PPP1PPPP/R1BQKB1R b KQkq - 4 4",
+     "decision": false,
+     "main": "e4c6",
+     "mainSan": "Qc6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "rnb1kbnr/pppp1ppp/2q5/4P3/8/2N2N2/PPP1PPPP/R1BQKB1R w KQkq - 5 5",
+     "decision": true,
+     "main": "c1d2",
+     "mainSan": "Bd2",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The queen had to move a third time, to c6. 5.Bd2 brings out a bishop. It also stands between your knight on c3 and your king, so if Black's bishop comes to b4, the knight can still move."
+     }
+    },
+    {
+     "ply": 5,
+     "fen": "rnb1kbnr/pppp1ppp/2q5/4P3/8/2N2N2/PPPBPPPP/R2QKB1R b KQkq - 6 5",
+     "decision": false,
+     "main": "f8c5",
+     "mainSan": "Bc5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 6,
+     "fen": "rnb1k1nr/pppp1ppp/2q5/2b1P3/8/2N2N2/PPPBPPPP/R2QKB1R w KQkq - 7 6",
+     "decision": true,
+     "main": "e2e3",
+     "mainSan": "e3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Black's bishop on c5 aims at f2. 6.e3 blocks that diagonal and opens a path for your other bishop, on f1."
+     }
+    },
+    {
+     "ply": 7,
+     "fen": "rnb1k1nr/pppp1ppp/2q5/2b1P3/8/2N1PN2/PPPB1PPP/R2QKB1R b KQkq - 0 6",
+     "decision": false,
+     "main": "g8e7",
+     "mainSan": "Ne7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 8,
+     "fen": "rnb1k2r/ppppnppp/2q5/2b1P3/8/2N1PN2/PPPB1PPP/R2QKB1R w KQkq - 1 7",
+     "decision": true,
+     "main": "f1b5",
+     "mainSan": "Bb5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "7.Bb5 brings out your last bishop with a new attack on the queen. Taking the bishop would cost Black the queen, because your knight on c3 guards it. You have four pieces out and can castle next, while Black's queen has to move for the fourth time, and Black is still a pawn down."
+     }
+    }
+   ]
+  },
+  {
+   "title": "A king on an open file",
+   "fen": "r1bqk2r/p1p2ppp/2pb1n2/4N3/8/8/PPPPQPPP/RNB1K2R b KQkq - 2 9",
+   "side": "black",
+   "keyIdea": "A king left in the centre can be attacked along a file with no pawns on it; castling tucks it away and brings a rook towards the centre.",
+   "text": "From a game played on Lichess. You are Black. White's queen on e2 is on the same file, the same column, as your king, and only the knight on e5 stands between them. Think about what happens if that knight jumps away.",
+   "credit": {
+    "source": "Lichess games database, game 2ZfRRVGM",
+    "url": "https://lichess.org/2ZfRRVGM#17",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "e8g8",
+    "e1g1",
+    "f8e8"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "r1bqk2r/p1p2ppp/2pb1n2/4N3/8/8/PPPPQPPP/RNB1K2R b KQkq - 2 9",
+     "decision": true,
+     "main": "e8g8",
+     "mainSan": "O-O",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "9...O-O is castling: the king moves two squares towards the rook, and the rook jumps over to the king's other side. You may castle only if the king and that rook have not moved and nothing stands between them. You also cannot castle out of check, or through or onto a square the opponent attacks. Here castling takes your king off the e-file: if it stayed, the knight could take the pawn on c6 or f7, the queen behind it would give check, and the knight would attack your queen."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "r1bq1rk1/p1p2ppp/2pb1n2/4N3/8/8/PPPPQPPP/RNB1K2R w KQ - 3 10",
+     "decision": false,
+     "main": "e1g1",
+     "mainSan": "O-O",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "r1bq1rk1/p1p2ppp/2pb1n2/4N3/8/8/PPPPQPPP/RNB2RK1 b - - 4 10",
+     "decision": true,
+     "main": "f8e8",
+     "mainSan": "Re8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "White castled too. 10...Re8 brings your rook to the e-file, which has no pawns on it. The rook and your bishop on d6 both attack the knight on e5, and only White's queen defends it, so White has to spend a move on the knight."
+     }
+    }
+   ]
+  },
+  {
+   "title": "Two knights out, two bishops at home",
+   "fen": "rnb1kb1r/ppp1qpp1/3p1n1p/3Pp3/4P3/2N2N2/PPP2PPP/R1BQKB1R w KQkq - 0 6",
+   "side": "white",
+   "keyIdea": "In the opening, bring out a new piece each move; moving a developed piece again loses time and can leave a square unguarded.",
+   "text": "From a game played on Lichess. You are White. Both your knights are out, but both bishops are still on their starting squares. The knight on c3 could jump to b5 and attack c7: is that worth a move?",
+   "credit": {
+    "source": "Lichess games database, game B1PdfTNC",
+    "url": "https://lichess.org/B1PdfTNC#10",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "f1e2",
+    "c7c6",
+    "c1e3"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "rnb1kb1r/ppp1qpp1/3p1n1p/3Pp3/4P3/2N2N2/PPP2PPP/R1BQKB1R w KQkq - 0 6",
+     "decision": true,
+     "main": "f1e2",
+     "mainSan": "Be2",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "6.Be2 brings out a new piece and gets your king ready to castle. In the game White played 6.Nb5, moving the knight a second time; c7 is guarded by Black's queen, and the knight no longer guards e4, so 6...Nxe4 wins a pawn."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "rnb1kb1r/ppp1qpp1/3p1n1p/3Pp3/4P3/2N2N2/PPP1BPPP/R1BQK2R b KQkq - 1 6",
+     "decision": false,
+     "main": "c7c6",
+     "mainSan": "c6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "rnb1kb1r/pp2qpp1/2pp1n1p/3Pp3/4P3/2N2N2/PPP1BPPP/R1BQK2R w KQkq - 0 7",
+     "decision": true,
+     "main": "c1e3",
+     "mainSan": "Be3",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Black's 6...c6 attacks your d5 pawn, but it is well defended. 7.Be3 brings out your last bishop, so all four of your knights and bishops are in play, and castling comes next."
+     }
+    }
+   ]
+  }
+ ]
+}

@@ -23,6 +23,7 @@
   import { Line } from '../lib/game.svelte.ts';
   import { keptGames } from '../lib/kept-games.ts';
   import { desktopBack, droppedConnection, runningReview, startReview, type ReviewRun } from '../lib/review-runs.svelte.ts';
+  import { router } from '../lib/router.svelte.ts';
   import { threatSetting, ThreatView } from '../lib/threat.svelte.ts';
   import { gradeMark } from '../lib/grades.ts';
   import { titleFrom } from '../lib/page-title.svelte.ts';
@@ -53,6 +54,11 @@
   $effect(() => {
     const id = gameId;
     untrack(() => void load(id));
+  });
+  // Back or Forward to the Review puts back the Player's place once the game has loaded.
+  const contentShown = router.loadsLater();
+  $effect(() => {
+    if (phase !== 'loading' || error) contentShown();
   });
 
   async function load(id: number): Promise<void> {

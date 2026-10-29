@@ -2,9 +2,11 @@
   // Puzzles from the Lessons' openings, Themes and endgames, picked near the Player's level. A wrong move is shown as wrong
   // and the Player retries; every finished Puzzle is recorded in the Player Profile. Once finished, the solution is
   // written out and can be stepped through, and the Puzzles the Player missed can be tried again. The Player picks what
-  // to practise: every Lesson mixed, or one Theme, opening or endgame, each with this device's progress.
+  // to practise: every Lesson mixed, or one Lesson's Puzzles, grouped by track, each with this device's progress.
   import { tick } from 'svelte';
   import { moveLabel, otherSide, outcomeOf, playUci, SIDE_NAMES, turnOf } from '@chess-coach/shared/chess';
+  import { TRACK_NAMES } from '@chess-coach/shared/content/course';
+  import { TRACKS } from '@chess-coach/shared/content/lessons';
   import { LEVEL_PUZZLE_RATING, pickPuzzles, type PuzzleData } from '@chess-coach/shared/content/puzzles';
   import Board from '../components/Board.svelte';
   import CoachPanel from '../components/CoachPanel.svelte';
@@ -49,18 +51,15 @@
   titleFrom(() => (opening && all.length && !lesson ? 'Puzzles' : null));
   const finished = $derived(status === 'solved' || status === 'shown');
 
-  const GROUPS = [
-    { kind: 'opening', label: 'Openings' },
-    { kind: 'theme', label: 'Themes' },
-    { kind: 'endgame', label: 'Endgames' },
-  ] as const;
   /** What the Player can practise: every Lesson mixed, then each Lesson that has Puzzles, with this device's progress on them. */
   const mixed = $derived({ id: '', name: 'Mixed: every Lesson', ...progressOn(all.map((p) => p.id)) });
   const sets = $derived(
     lessonCatalogue
-      .map((l) => ({ id: l.id, name: l.name, kind: l.kind, ...progressOn(all.filter((p) => p.lessonId === l.id).map((p) => p.id)) }))
+      .map((l) => ({ id: l.id, name: l.name, track: l.track, ...progressOn(all.filter((p) => p.lessonId === l.id).map((p) => p.id)) }))
       .filter((s) => s.count > 0),
   );
+  /** The sets by the Lessons' tracks, as the Lessons screen shows them (ADR 0012); a track with no Puzzles is left out. */
+  const groups = $derived(TRACKS.map((track) => ({ track, label: TRACK_NAMES[track].name, sets: sets.filter((s) => s.track === track) })).filter((g) => g.sets.length));
 
   /**
    * This device's progress on some Puzzles. Missed counts only Puzzles that are done: tried again, a missed Puzzle is
@@ -252,10 +251,10 @@
             </li>
           {/snippet}
           <ul class="sets">{@render item(mixed)}</ul>
-          {#each GROUPS as g (g.kind)}
+          {#each groups as g (g.track)}
             <h2>{g.label}</h2>
             <ul class="sets" aria-label={g.label}>
-              {#each sets.filter((s) => s.kind === g.kind) as s (s.id)}{@render item(s)}{/each}
+              {#each g.sets as s (s.id)}{@render item(s)}{/each}
             </ul>
           {/each}
         </nav>

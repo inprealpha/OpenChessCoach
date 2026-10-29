@@ -74,7 +74,7 @@
   const choices = [
     { href: '#/games', title: 'Review your games', text: 'The Coach walks you through the key moments of the games you played.', offline: false },
     { href: '#/engine-game', title: 'Play a game', text: 'An Engine Game at your strength, with Live Coaching and Hints.', offline: true },
-    { href: '#/learn', title: 'Learn', text: 'Lessons on openings, Themes and endgames, and Puzzles to practise them.', offline: true },
+    { href: '#/learn', title: 'Learn', text: 'Lessons on Themes, endgames, openings and how to think during a game, and Puzzles to practise them.', offline: true },
   ];
 </script>
 

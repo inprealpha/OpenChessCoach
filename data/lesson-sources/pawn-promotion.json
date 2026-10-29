@@ -1,0 +1,104 @@
+{
+ "id": "pawn-promotion",
+ "name": "Pawns: promotion and en passant",
+ "kind": "endgame",
+ "track": "endgames",
+ "level": "beginner",
+ "side": "white",
+ "puzzleThemes": [
+  "promotion"
+ ],
+ "goal": "You can promote a pawn, tell with the square of the pawn whether a king can catch it, and capture en passant.",
+ "priorKnowledge": [],
+ "intro": "A pawn that reaches the far end of the board is promoted: it turns into a queen, a rook, a bishop or a knight, and nearly always you choose a queen. That is why so many endgames are a race to promote. In this Lesson you win such a race, use the square of the pawn to tell whether a king can still catch a pawn, and meet the special pawn capture called en passant.",
+ "parts": [
+  {
+   "title": "Two pawns race",
+   "fen": "8/8/1P6/4k3/2K2p1p/8/7P/8 b - - 0 48",
+   "side": "white",
+   "keyIdea": "Count the moves each pawn needs. Promoting first wins only if your new queen can stop the other pawn at once, for example with check.",
+   "text": "From a game played on Lichess. You are White. Only kings and pawns are left. Black's f-pawn is running down the board, and your b-pawn is running up. Count how many moves each pawn needs to reach the last rank, the far row where it promotes.",
+   "url": "https://lichess.org/training/KM0Nq",
+   "line": "f3 b7 f2 b8=Q+ Ke4 Qf8",
+   "notes": [
+    {
+     "ply": 1,
+     "san": "b7",
+     "text": "Your pawn steps up to b7. Before this push each pawn needed two more moves to promote, and it was your turn, so you are one step ahead. That alone is not enough, because Black's pawn can promote straight after yours: your new queen will have to deal with it at once."
+    },
+    {
+     "ply": 3,
+     "san": "b8=Q+",
+     "text": "The pawn reaches the last rank and becomes a queen. Better still, the new queen checks Black's king on e5 along the diagonal, so Black has no time to promote on this move."
+    },
+    {
+     "ply": 5,
+     "san": "Qf8",
+     "text": "The new queen goes straight to the f-file. From f8 it looks all the way down to the pawn on f2, so if Black promotes now, your queen takes the new queen at once."
+    }
+   ]
+  },
+  {
+   "title": "The square of the pawn",
+   "fen": "8/8/8/8/8/6kp/P7/6K1 w - - 1 58",
+   "side": "white",
+   "keyIdea": "A king catches a pawn only if it can step into the pawn's square; if it cannot, the pawn runs through on its own.",
+   "text": "From a game played on Lichess. You are White. Your king on g1 guards h2 and h1, the squares in front of Black's h-pawn, so the game turns on your a-pawn. Can Black's king catch it? Picture a large square drawn on the board: one side runs from the pawn to the square where it would promote, and it stretches the same number of files sideways, towards the enemy king. If the king can step inside it on its move, it can catch the pawn; if not, the pawn gets through.",
+   "url": "https://lichess.org/training/Ezeci",
+   "line": "a4 Kf4 a5 Ke5 a6 Kd6 a7 Kc7 a8=Q",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "a4",
+     "text": "From its starting square a pawn may move two squares at once, and here that decides the game. With the pawn on a4, its square runs from a4 up to a8 and across to the e-file, and Black's king on g3 cannot step into it. After a3 the square would reach the f-file, and the king could walk in and catch the pawn."
+    },
+    {
+     "ply": 2,
+     "san": "a5",
+     "text": "Black's king is chasing, but the pawn moves on and its square shrinks: now it runs from a5 across to d5 and up to the eighth rank. Black's king on f4 is still outside it."
+    },
+    {
+     "ply": 4,
+     "san": "a6",
+     "text": "Each push makes the square smaller, and the king never gets inside it."
+    },
+    {
+     "ply": 6,
+     "san": "a7",
+     "text": "One more step. Black's king on d6 is still too far away to stop the pawn."
+    },
+    {
+     "ply": 8,
+     "san": "a8=Q",
+     "text": "The pawn promotes to a queen. Black's king on c7 arrived one move too late. A queen against a lone pawn is an easy win."
+    }
+   ]
+  },
+  {
+   "title": "Capturing en passant",
+   "fen": "8/5Kp1/7p/5k1P/8/8/8/8 b - - 1 66",
+   "side": "white",
+   "keyIdea": "A pawn that moves two squares and lands beside an enemy pawn can be taken en passant, but only on the very next move.",
+   "text": "From a game played on Lichess. You are White, and a special rule decides the game. Black's g-pawn has just moved two squares, from g7 to g5, and landed beside your pawn on h5. Your pawn attacks g6, the square the black pawn passed over, and that gives you the right to capture it en passant, but only on this move.",
+   "url": "https://lichess.org/training/PuJBt",
+   "line": "g5 hxg6 h5 g7 h4 g8=Q",
+   "notes": [
+    {
+     "ply": 1,
+     "san": "hxg6",
+     "text": "En passant, step by step: your pawn on h5 moves diagonally to g6, the square Black's pawn passed over, and the black pawn on g5 comes off the board, just as if it had moved only one square. This capture is allowed only straight after the two-square move. Any other move loses here, because Black's g-pawn would run down the board and promote."
+    },
+    {
+     "ply": 3,
+     "san": "g7",
+     "text": "Your pawn, now on g6, moves on to g7. Your king on f7 guards g8, so Black's king cannot stop it."
+    },
+    {
+     "ply": 5,
+     "san": "g8=Q",
+     "text": "The pawn promotes to a queen. Nothing could stop it, so there was no hurry, but promoting now is the simplest way: a queen against a lone pawn is an easy win."
+    }
+   ]
+  }
+ ]
+}

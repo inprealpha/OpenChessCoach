@@ -1,0 +1,117 @@
+{
+ "id": "opening-principles",
+ "name": "Opening principles",
+ "kind": "thinking",
+ "track": "openings",
+ "level": "beginner",
+ "side": "white",
+ "goal": "In the first moves of any game, you can claim the centre with pawns, bring out knights and bishops, castle early, and avoid moving one piece again and again.",
+ "priorKnowledge": [],
+ "intro": "The first ten or so moves decide how well your pieces can fight for the rest of the game. A few habits work in almost every opening: put pawns in the centre (the four squares d4, e4, d5 and e5), bring out your knights and bishops, castle early, and give each piece one good move instead of moving the same one again and again. Each part of this Lesson shows one of these habits in a position from a real game.",
+ "parts": [
+  {
+   "title": "The first moves",
+   "fen": "start",
+   "side": "white",
+   "keyIdea": "Two pawns side by side in the centre take important squares away from the enemy pieces and open lines for your bishops and queen.",
+   "text": "From a game played on Lichess. You are White, and the game is just starting. Find moves that claim the centre and get your pieces ready to come out.",
+   "url": "https://lichess.org/NByeHwl3",
+   "line": "e4 h5 d4 e6 Nf3",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "e4",
+     "text": "The four centre squares are d4, e4, d5 and e5. 1.e4, the pawn in front of your king two squares forward, puts a pawn on one of them and attacks d5 and f5. It also opens diagonals for your queen and for the bishop on f1. 1.d4 is the other main first move."
+    },
+    {
+     "ply": 2,
+     "san": "d4",
+     "text": "Black's 1...h5 moves an edge pawn and does nothing for the centre. 2.d4 takes the chance: two pawns side by side on d4 and e4 control c5, d5, e5 and f5, so Black's pieces have fewer good squares."
+    },
+    {
+     "ply": 4,
+     "san": "Nf3",
+     "text": "With your centre built, 3.Nf3 brings out a piece. This is called developing: moving a knight or bishop off its starting square. On f3 the knight guards d4 and watches e5, and it is one of the two pieces that must move before you can castle kingside, on the half of the board where your king starts. A knight on the edge, on h3, would reach fewer squares."
+    }
+   ]
+  },
+  {
+   "title": "An early queen",
+   "fen": "rnb1kbnr/pppp1ppp/8/4P3/7q/8/PPP1PPPP/RNBQKBNR w KQkq - 1 3",
+   "side": "white",
+   "keyIdea": "A queen that comes out early can be chased: each developing move that attacks it wins you a move.",
+   "text": "From a game played on Lichess. You are White. After 1.d4 e5 2.dxe5 Qh4, Black has given up a pawn and brought the queen out on move two. Look for a developing move that also attacks something.",
+   "url": "https://lichess.org/8qudzjxx#4",
+   "line": "Nf3 Qe4 Nc3 Qc6 Bd2 Bc5 e3 Ne7 Bb5",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Nf3",
+     "text": "3.Nf3 brings out a knight and attacks the queen on h4 at the same time. Black has to spend the next move saving the queen, so your knight came out without costing you a move."
+    },
+    {
+     "ply": 2,
+     "san": "Nc3",
+     "text": "The queen went to e4. 4.Nc3 brings out your other knight, and again it attacks the queen. You have two pieces out, while Black's last two moves were both spent on the queen."
+    },
+    {
+     "ply": 4,
+     "san": "Bd2",
+     "text": "The queen had to move a third time, to c6. 5.Bd2 brings out a bishop. It also stands between your knight on c3 and your king, so if Black's bishop comes to b4, the knight can still move."
+    },
+    {
+     "ply": 6,
+     "san": "e3",
+     "text": "Black's bishop on c5 aims at f2. 6.e3 blocks that diagonal and opens a path for your other bishop, on f1."
+    },
+    {
+     "ply": 8,
+     "san": "Bb5",
+     "text": "7.Bb5 brings out your last bishop with a new attack on the queen. Taking the bishop would cost Black the queen, because your knight on c3 guards it. You have four pieces out and can castle next, while Black's queen has to move for the fourth time, and Black is still a pawn down."
+    }
+   ]
+  },
+  {
+   "title": "A king on an open file",
+   "fen": "r1bqk2r/p1p2ppp/2pb1n2/4N3/8/8/PPPPQPPP/RNB1K2R b KQkq - 2 9",
+   "side": "black",
+   "keyIdea": "A king left in the centre can be attacked along a file with no pawns on it; castling tucks it away and brings a rook towards the centre.",
+   "text": "From a game played on Lichess. You are Black. White's queen on e2 is on the same file, the same column, as your king, and only the knight on e5 stands between them. Think about what happens if that knight jumps away.",
+   "url": "https://lichess.org/2ZfRRVGM#17",
+   "line": "O-O O-O Re8",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "O-O",
+     "text": "9...O-O is castling: the king moves two squares towards the rook, and the rook jumps over to the king's other side. You may castle only if the king and that rook have not moved and nothing stands between them. You also cannot castle out of check, or through or onto a square the opponent attacks. Here castling takes your king off the e-file: if it stayed, the knight could take the pawn on c6 or f7, the queen behind it would give check, and the knight would attack your queen."
+    },
+    {
+     "ply": 2,
+     "san": "Re8",
+     "text": "White castled too. 10...Re8 brings your rook to the e-file, which has no pawns on it. The rook and your bishop on d6 both attack the knight on e5, and only White's queen defends it, so White has to spend a move on the knight."
+    }
+   ]
+  },
+  {
+   "title": "Two knights out, two bishops at home",
+   "fen": "rnb1kb1r/ppp1qpp1/3p1n1p/3Pp3/4P3/2N2N2/PPP2PPP/R1BQKB1R w KQkq - 0 6",
+   "side": "white",
+   "keyIdea": "In the opening, bring out a new piece each move; moving a developed piece again loses time and can leave a square unguarded.",
+   "text": "From a game played on Lichess. You are White. Both your knights are out, but both bishops are still on their starting squares. The knight on c3 could jump to b5 and attack c7: is that worth a move?",
+   "url": "https://lichess.org/B1PdfTNC#10",
+   "line": "Be2 c6 Be3",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Be2",
+     "text": "6.Be2 brings out a new piece and gets your king ready to castle. In the game White played 6.Nb5, moving the knight a second time; c7 is guarded by Black's queen, and the knight no longer guards e4, so 6...Nxe4 wins a pawn."
+    },
+    {
+     "ply": 2,
+     "san": "Be3",
+     "text": "Black's 6...c6 attacks your d5 pawn, but it is well defended. 7.Be3 brings out your last bishop, so all four of your knights and bishops are in play, and castling comes next."
+    }
+   ]
+  }
+ ]
+}

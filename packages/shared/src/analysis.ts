@@ -70,8 +70,10 @@ export function gradeFromAnalyses(
   const best = candidates[0];
   if (!best) throw new Error(`No Engine candidates for ${before.fen}`);
   const inCandidates = candidates.find((c) => c.uci === played.uci);
-  const playedScore = inCandidates?.score ?? scoreAfterMove(ends(played), played.fenAfter, after);
-  const { grade, winLoss } = gradeMove({ best: best.score, played: playedScore, isTopMove: best.uci === played.uci });
+  const outcome = ends(played);
+  const playedScore = inCandidates?.score ?? scoreAfterMove(outcome, played.fenAfter, after);
+  const givesMate = outcome?.reason === 'checkmate';
+  const { grade, winLoss } = gradeMove({ best: best.score, played: playedScore, isTopMove: best.uci === played.uci, givesMate });
   return {
     ply,
     side: turnOf(before.fen),

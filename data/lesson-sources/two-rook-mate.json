@@ -1,0 +1,114 @@
+{
+ "id": "two-rook-mate",
+ "name": "Mate with two rooks",
+ "kind": "endgame",
+ "track": "endgames",
+ "level": "beginner",
+ "side": "white",
+ "goal": "You can mate a lone king with two rooks, taking turns to push it rank by rank to the edge.",
+ "priorKnowledge": [
+  "queen-mate"
+ ],
+ "intro": "Two rooks can mate a lone king without any help from your own king. They work in turns: one rook guards a rank (a row of the board) so the king cannot step back, and the other gives check on the rank in front of it, which pushes the king one rank nearer the edge. Then the two rooks change jobs. Once the king is on the edge of the board, the next check is mate.",
+ "playOut": {
+  "title": "Mate the lone king with two rooks",
+  "fen": "8/8/8/8/5k2/R6R/6K1/8 w - - 8 61",
+  "side": "white",
+  "goal": "mate"
+ },
+ "parts": [
+  {
+   "title": "Push the king rank by rank",
+   "fen": "8/8/8/8/5k2/R6R/6K1/8 w - - 8 61",
+   "side": "white",
+   "keyIdea": "One rook guards a rank while the other checks on the next one; then they change jobs, one rank at a time.",
+   "text": "From a game played on Lichess. You are White, with two rooks, and Black's king stands alone on f4. Your rook on a3 already guards the whole third rank, so the king cannot come down. Find the check that starts pushing it up the board.",
+   "url": "https://lichess.org/4oh7JkMh#120",
+   "line": "Rh4+ Ke5 Ra5+ Kd6 Rh6+ Ke7 Ra7+ Kf8 Rh8#",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Rh4+",
+     "text": "Rh4+, the rook to h4, checks along the fourth rank. The king must leave that rank, and it cannot go down to the third, which the other rook guards, so it has to step up to the fifth. If the king steps to g5, where it attacks the rook on h4, that rook first slides far away along the fourth rank, to b4 for example, so it still guards that rank; then the checks carry on."
+    },
+    {
+     "ply": 2,
+     "san": "Ra5+",
+     "text": "Now the other rook takes its turn: it moves up to the fifth rank and checks. The rook on h4 guards the fourth rank behind the king, so the king has to go up again."
+    },
+    {
+     "ply": 4,
+     "san": "Rh6+",
+     "text": "The same again on the sixth rank. Both rooks stay on the edge files, far from Black's king, so it cannot come close enough to take either of them."
+    },
+    {
+     "ply": 6,
+     "san": "Ra7+",
+     "text": "Another check, and the king is pushed up to the eighth rank, the edge of the board."
+    },
+    {
+     "ply": 8,
+     "san": "Rh8#",
+     "text": "Mate. The rook checks along the eighth rank, and the rook on a7 guards every square of the seventh, so the king has nowhere to go."
+    }
+   ]
+  },
+  {
+   "title": "Rooks near the king",
+   "fen": "8/3k3K/1R6/R7/8/8/8/8 w - - 6 52",
+   "side": "white",
+   "keyIdea": "If the king can reach the square a rook needs, move that rook to the far side of the board first, then check.",
+   "text": "From a game played on Lichess. You are White, and Black's king has already been pushed up to the seventh rank, with your rooks on a5 and b6. Keep pushing, but before each check, ask whether the king could take the rook that gives it.",
+   "url": "https://lichess.org/ssh2gBsw#102",
+   "line": "Ra7+ Kc8 Rb1 Kd8 Rb8#",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Ra7+",
+     "text": "The rook on a5 checks along the seventh rank, and the rook on b6 guards the sixth, so the king must go up to the eighth rank."
+    },
+    {
+     "ply": 2,
+     "san": "Rb1",
+     "text": "Rb8+ would not be mate: the rook would stand right next to Black's king on c8, which would simply take it. So the rook first moves to the far end of the b-file. From b1 it still guards b8 and b7, and the king cannot reach it. Black's king has only d8 left."
+    },
+    {
+     "ply": 4,
+     "san": "Rb8#",
+     "text": "Now the king is on d8, too far from b8 to take the rook, and the check along the eighth rank is mate: the rook on a7 still guards the whole seventh rank."
+    }
+   ]
+  },
+  {
+   "title": "A queen and a rook take turns",
+   "fen": "8/8/4Q3/6k1/4R3/8/8/6K1 w - - 0 63",
+   "side": "white",
+   "keyIdea": "A queen and a rook can share the work: one guards a rank while the other checks on the next.",
+   "text": "From a game played on Lichess. You are White, with a queen and a rook against a lone king: they can take turns in the same way, with the queen doing one of the rooks' jobs. Black's king is on g5, and your rook on e4 already guards the fourth rank.",
+   "url": "https://lichess.org/YKLXC5Ov#124",
+   "line": "Qd5+ Kf6 Re6+ Kf7 Qd7+ Kf8 Re8#",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Qd5+",
+     "text": "Qd5+, the queen to d5, checks along the fifth rank while the rook guards the fourth, so the king must go up to the sixth. (The Engine also finds a quicker mate here that starts with Rg4+, but taking turns gets there just as surely.)"
+    },
+    {
+     "ply": 2,
+     "san": "Re6+",
+     "text": "Now the rook checks on the sixth rank. It stands right next to Black's king, but the queen on d5 protects it, so the king cannot take it and has to go up to the seventh."
+    },
+    {
+     "ply": 4,
+     "san": "Qd7+",
+     "text": "The queen moves up and checks on the seventh rank, and the rook on e6 guards the sixth behind the king. The queen also protects the rook, so the king must go to the eighth rank."
+    },
+    {
+     "ply": 6,
+     "san": "Re8#",
+     "text": "Mate. The rook checks along the eighth rank, the queen on d7 protects it, and the queen also covers every square on the seventh."
+    }
+   ]
+  }
+ ]
+}

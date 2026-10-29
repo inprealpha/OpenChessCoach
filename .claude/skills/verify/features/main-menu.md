@@ -44,8 +44,9 @@ first run isn't done); `OpenChessCoach` in the header from any screen.
 - The header (banner), on every screen once paired: links `Player Profile` (`#/profile`) and
   `Settings` (`#/settings`), icons with `aria-current="page"` on their own screen. Below 400px wide
   the `Connection` status shows its dot only; its words stay for screen readers.
-- The Learn screen: the navigation `Learn` with `Lessons` and `Puzzles`.
-- First run's `Start with the Opening Lessons` opens the Lessons (`#/lessons`).
+- The Learn screen: the navigation `Learn` with `Lessons` and `Puzzles`, then "Your next Lesson:
+  <name>", a link to the same Lesson as the catalogue's `Your next Lesson` (`lesson.md`).
+- First run's `Start with the Lessons` opens the Lessons (`#/lessons`).
 
 ## Drive
 

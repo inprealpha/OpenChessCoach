@@ -1,0 +1,83 @@
+{
+ "id": "weak-squares",
+ "name": "Weak squares and outposts",
+ "kind": "thinking",
+ "track": "thinking",
+ "level": "intermediate",
+ "side": "white",
+ "goal": "You can find a square that no enemy pawn can attack, and put a knight or another piece there.",
+ "priorKnowledge": [
+  "pawn-structure"
+ ],
+ "intro": "A pawn can only move forward. Once the enemy pawns that could attack a square have moved past it or been traded, no enemy pawn will ever attack that square again. If such a square is in or near your opponent's half, and you can guard a piece there, usually with a pawn, it is an outpost. A knight on an outpost is hard to shift: no pawn can chase it, so the only way to remove it is to trade a piece for it. In this Lesson you find outposts and plan the route that brings a knight to them.",
+ "parts": [
+  {
+   "title": "A square for the knight",
+   "fen": "rn1q1rk1/pp2bppp/3pbn2/4p3/2P1P3/3B4/PP2NPPP/RNBQ1RK1 w - - 1 9",
+   "side": "white",
+   "keyIdea": "Look in or near the enemy half for a square no enemy pawn can attack and your pawn guards, then bring a knight to it.",
+   "text": "From a game played on Lichess. You are White, and your knight on b1 has not moved yet. Look at the squares in front of Black's pawns: is there one that no black pawn can ever attack?",
+   "url": "https://lichess.org/bmZt0ZH1#16",
+   "line": "Nbc3 Nc6 Nd5",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Nbc3",
+     "text": "Black has no c-pawn, and the pawn on e5 can never go back to e6, so no black pawn can ever attack d5, and your pawns on c4 and e4 guard it. 9.Nbc3 brings the knight from b1 to c3, one jump from d5."
+    },
+    {
+     "ply": 2,
+     "san": "Nd5",
+     "text": "10.Nd5: the knight lands on d5 and attacks the bishop on e7 and the knight on f6. No pawn can drive it away: Black can only remove it by trading a piece for it."
+    }
+   ]
+  },
+  {
+   "title": "Plan the knight's route",
+   "fen": "r1b1r1k1/pp1p1p1p/2p3p1/2Pn4/3P4/P3P2B/1P1N1KPP/R3R3 w - - 2 24",
+   "side": "white",
+   "keyIdea": "If your knight is far from an outpost, plan its route: a couple of knight jumps to a square where no pawn can chase it.",
+   "text": "From a game played on Lichess. You are White, and the queens are off the board. Look at the square in front of Black's pawn on d7. Can any black pawn ever attack it, and how can your knight on d2 get there?",
+   "url": "https://lichess.org/CcWDCcsy#46",
+   "line": "Nc4 Nf6 Nd6",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Nc4",
+     "text": "The square d6 is a hole: Black's c-pawn has moved past it and there is no e-pawn. Your pawn on c5 guards it. The knight needs two jumps to get there, and 24.Nc4 is the first."
+    },
+    {
+     "ply": 2,
+     "san": "Nd6",
+     "text": "25.Nd6: the knight lands on the outpost. From d6 it attacks the rook on e8, the bishop on c8 and the pawns on b7 and f7, and it blocks Black's d-pawn. The bishop on c8 is shut in by its own pawns on b7 and d7."
+    }
+   ]
+  },
+  {
+   "title": "Your outpost, and one that is not",
+   "fen": "2rqrnk1/1b2bpp1/p3pn1p/1p1pN3/3P1P1B/P1NQP3/1P4PP/1BR2RK1 b - - 1 16",
+   "side": "black",
+   "keyIdea": "A square is an outpost only if no enemy pawn can ever attack it; a piece that a pawn can chase away is not on one.",
+   "text": "From a game played on Lichess. You are Black. White's pawns stand on d4, e3 and f4, and White's knight sits on e5. Look for a square in White's half that no white pawn can ever attack, close to your knight on f6.",
+   "url": "https://lichess.org/kWN1J7ZQ#31",
+   "line": "Ne4 Bxe7 Qxe7 Ne2 f6",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Ne4",
+     "text": "White's d-pawn and f-pawn have both moved past e4, so no white pawn can attack it, and your pawn on d5 guards it. 16...Ne4 puts the knight there: it attacks the knight on c3 and opens the way for your bishop on e7 to meet White's bishop on h4."
+    },
+    {
+     "ply": 2,
+     "san": "Qxe7",
+     "text": "17...Qxe7 takes back. Your knight on e4 stays where it is: White can only remove it by trading a piece for it."
+    },
+    {
+     "ply": 4,
+     "san": "f6",
+     "text": "Now look at White's knight on e5. It looks strong, but e5 is not an outpost: your f-pawn can attack it, and 18...f6 drives it away. Your own knight on e4 can never be chased by a pawn."
+    }
+   ]
+  }
+ ]
+}

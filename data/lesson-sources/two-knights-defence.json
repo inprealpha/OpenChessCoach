@@ -1,0 +1,75 @@
+{
+ "id": "two-knights-defence",
+ "name": "Two Knights Defence",
+ "kind": "opening",
+ "track": "openings",
+ "level": "beginner",
+ "side": "black",
+ "eco": "C58",
+ "puzzleTags": [
+  "Italian_Game_Two_Knights_Defense"
+ ],
+ "goal": "As Black against the Italian Game, you can play the Two Knights Defence and know how to meet the attack on f7.",
+ "priorKnowledge": [
+  "italian-game"
+ ],
+ "intro": "The Two Knights Defence is a reply to the Italian Game (1.e4 e5 2.Nf3 Nc6 3.Bc4): with 3...Nf6, the knight to f6, Black brings out the second knight and attacks the pawn on e4. White's most aggressive try, 4.Ng5, the knight to g5, aims a knight and a bishop at the pawn on f7. Black gives up a pawn to get out of trouble, and then almost every move attacks something, so White's pieces keep running while Black's come out.",
+ "parts": [
+  {
+   "title": "Two Knights Defence",
+   "fen": "start",
+   "side": "black",
+   "keyIdea": "Shut out one of the two pieces aimed at the pawn beside your king; a pawn given up early pays for moves that each come with a threat.",
+   "text": "You are Black, from White's first move. White plays the Italian Game, and you answer with the Two Knights Defence. At each move, ask what White is threatening and what your move does for your pieces.",
+   "url": "https://github.com/lichess-org/chess-openings",
+   "line": "e4 e5 Nf3 Nc6 Bc4 Nf6 Ng5 d5 exd5 Na5 Bb5+ c6 dxc6 bxc6 Ba4 h6 Nf3 e4",
+   "notes": [
+    {
+     "ply": 1,
+     "san": "e5",
+     "text": "1...e5 puts your own pawn in the centre, keeps White's e-pawn from going further, and opens paths for your queen and the bishop on f8."
+    },
+    {
+     "ply": 3,
+     "san": "Nc6",
+     "text": "2.Nf3 attacked your e5 pawn. 2...Nc6 defends it with a piece that also comes into play and watches d4. Defending with 2...f6 would take your knight's best square and open lines towards your king."
+    },
+    {
+     "ply": 5,
+     "san": "Nf6",
+     "text": "White's bishop on c4 aims at f7. 3...Nf6, the Two Knights Defence, develops your other knight (brings it off its starting square) and attacks the e4 pawn, which nothing defends, so White has to think about defence too. 3...Bc5 is the other main move."
+    },
+    {
+     "ply": 7,
+     "san": "d5",
+     "text": "4.Ng5 adds a second attacker on f7, and only your king guards that pawn. 4...d5 puts a pawn on the bishop's diagonal between c4 and f7, so the bishop no longer reaches f7, and the pawn attacks the bishop too. 4...h6 is a mistake, because of 5.Nxf7, which attacks your queen and your rook at once."
+    },
+    {
+     "ply": 9,
+     "san": "Na5",
+     "text": "5.exd5 took the pawn. Taking back with 5...Nxd5 would let White give up a knight on f7 and chase your king into the open. 5...Na5 attacks the bishop on c4 instead, so White must spend a move saving it."
+    },
+    {
+     "ply": 11,
+     "san": "c6",
+     "text": "6.Bb5+ saved the bishop with check. 6...c6 blocks the check, and the pawn attacks the bishop again and the pawn on d5 too."
+    },
+    {
+     "ply": 13,
+     "san": "bxc6",
+     "text": "7.dxc6 took your pawn, and 7...bxc6 takes back. The pawn on c6 attacks the bishop on b5 once more, and the b-file and the diagonal from c8 open up for your pieces. White is a pawn up, but White's bishop and knight have used several moves and will have to step back again, which gives you time."
+    },
+    {
+     "ply": 15,
+     "san": "h6",
+     "text": "8.Ba4, the bishop to a4, is the move beginners on Lichess play most often; 8.Be2, the bishop back to e2, and 8.Qf3, the queen to f3, are also common. 8...h6 hits the knight on g5 with a pawn, so it has to move for the third time, and the same move works well against 8.Be2."
+    },
+    {
+     "ply": 17,
+     "san": "e4",
+     "text": "9.Nf3 went back, and 9...e4 hits the knight again with a pawn. Count the moves: White has played nine, yet only a knight and a bishop are out, and the knight must move once more. You are a pawn down, but your bishop on f8 and castling come next."
+    }
+   ]
+  }
+ ]
+}

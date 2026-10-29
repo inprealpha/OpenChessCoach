@@ -1,0 +1,112 @@
+{
+ "id": "back-rank-mate",
+ "name": "Back-rank mate",
+ "kind": "theme",
+ "track": "themes",
+ "level": "beginner",
+ "side": "white",
+ "puzzleThemes": [
+  "backRankMate"
+ ],
+ "goal": "You can mate a king trapped behind its own pawns on the back rank, and give your own king an escape square in time.",
+ "priorKnowledge": [
+  "mate-in-one"
+ ],
+ "intro": "A king tucked behind its own pawns is safe from most attacks, but those same pawns can trap it. The back rank is the row the king started on. If an enemy rook or queen gives check along it, the king has nowhere to go, and it is mate. This back-rank mate decides many games at every level. You will learn to give it, to deal with the piece that guards against it, and to give your own king an escape square, a square it can step to, before it is too late.",
+ "parts": [
+  {
+   "title": "Mate on the back rank",
+   "fen": "6k1/p4ppp/4p3/8/4K3/PR1r2P1/5r1P/8 w - - 0 32",
+   "side": "white",
+   "keyIdea": "A rook or queen that checks along the back rank mates a king whose own pawns have taken away its escape squares.",
+   "text": "From a game played on Lichess. You are White. Black has just taken your rook on d3 and is now a rook and two pawns ahead. You could take back with your king, but first look at Black's back rank: both black rooks have left it, and the king on g8 is walled in by its own pawns.",
+   "url": "https://lichess.org/training/TIyEl",
+   "line": "Rb8+ Rd8 Rxd8#",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Rb8+",
+     "text": "Rb8+, your rook to b8, gives check along the back rank. Black's own pawns on f7, g7 and h7 stop the king from moving up, and your rook covers the rest of the back rank. Black's only way out of check is to bring the rook back from d3 to block on d8."
+    },
+    {
+     "ply": 2,
+     "san": "Rxd8#",
+     "text": "Your rook takes the rook that blocked. It is check again, nothing is left to block with, and the king still cannot move: back-rank mate."
+    }
+   ]
+  },
+  {
+   "title": "Your queen is attacked",
+   "fen": "4r1k1/5ppp/3n4/8/8/4BQ2/5PPP/1qR3K1 b - - 2 24",
+   "side": "black",
+   "keyIdea": "If a single piece guards the square where you would mate, take that piece, even if it costs your queen.",
+   "text": "From a game played on Lichess. You are Black. White's rook has just dropped back to c1, where it attacks your queen. Your rook on e8 would like to reach e1, but two white pieces stop it: the bishop on e3 stands in its way, and the rook on c1 guards e1. Look for a move that deals with both.",
+   "url": "https://lichess.org/training/popOX",
+   "line": "Qxc1+ Bxc1 Re1#",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Qxc1+",
+     "text": "Your queen takes the rook on c1 with check, giving itself up. That rook was the piece guarding e1. White must answer the check. Only the bishop on e3, the piece that blocks your rook, can take back. Blocking on d1 with the queen does not help: your queen takes it, with mate."
+    },
+    {
+     "ply": 2,
+     "san": "Re1#",
+     "text": "The bishop left e3 to take back, so the e-file is open and nothing guards e1. Your rook checks along the back rank, and the pawns on f2, g2 and h2 keep the king in: mate."
+    }
+   ]
+  },
+  {
+   "title": "Bernstein against Capablanca",
+   "fen": "3r2k1/p4ppp/1q6/8/8/2R1P3/P3QPPP/6K1 b - - 0 29",
+   "side": "black",
+   "keyIdea": "Attack the only guard of the back rank: if it takes your attacker or leaves to save another piece, your rook mates.",
+   "text": "From the game Bernstein against Capablanca, played in Moscow in 1914. You are Black. Only White's queen on e2 stops your rook from landing on d1, and White's rook on c3 is undefended. The game ended after your first move, when White resigned (gave up the game); the moves after it show why.",
+   "url": "https://en.wikipedia.org/wiki/Back-rank_checkmate",
+   "line": "Qb2 Qe1 Qxc3 Qxc3 Rd1+ Qe1 Rxe1#",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Qb2",
+     "text": "Capablanca's move: your queen attacks the rook on c3 and White's queen at the same time. White cannot take your queen, because then nothing guards d1 and your rook mates there. Bernstein resigned at this point."
+    },
+    {
+     "ply": 2,
+     "san": "Qxc3",
+     "text": "Suppose White had gone on with Qe1, which guards the rook on c3 and still guards the back rank. Your queen takes the rook anyway, because the white queen cannot take back without leaving the back rank."
+    },
+    {
+     "ply": 4,
+     "san": "Rd1+",
+     "text": "Here White's queen takes back on c3, a mistake, because it leaves the back rank. Your rook checks on d1, and White's only defence is to block with the queen on e1."
+    },
+    {
+     "ply": 6,
+     "san": "Rxe1#",
+     "text": "Your rook takes the queen with check. The king on g1 is shut in by its own pawns: back-rank mate."
+    }
+   ]
+  },
+  {
+   "title": "Lined up on the f-file",
+   "fen": "5rk1/p4q1p/1p4p1/4Q3/8/P1P1P3/1P4PP/R5K1 w - - 1 23",
+   "side": "white",
+   "keyIdea": "Before the back rank becomes a trap, move a pawn in front of your king so that it has a square to escape to.",
+   "text": "From a game played on Lichess. You are White. Black's queen and rook are lined up on the f-file, and your king cannot leave the back rank: its own pawns stand on g2 and h2, and Black's queen covers f2. In the game, White moved the queen to e4 and allowed a mate in three moves. Find a move that ends the danger for good.",
+   "url": "https://lichess.org/training/06X5t",
+   "line": "h3 Qf2+ Kh2",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "h3",
+     "text": "h3, the h-pawn one step forward, gives your king an escape square on h2. Black was threatening to check on f2. Your king would have had to go to h1, the queen would check again on f1, your rook would have to take it, and Black's rook would take back with mate. Now the king can step to h2, so that mate no longer works."
+    },
+    {
+     "ply": 2,
+     "san": "Kh2",
+     "text": "The king steps into the square the pawn made for it. It is safe on h2, and you are two pawns ahead."
+    }
+   ]
+  }
+ ]
+}

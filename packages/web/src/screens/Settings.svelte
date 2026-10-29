@@ -12,6 +12,7 @@
   } from '@chess-coach/shared/protocol';
   import { api, ApiError } from '../lib/api.svelte.ts';
   import { pairingCode } from '../lib/pairing-code.ts';
+  import { router } from '../lib/router.svelte.ts';
 
   /** A card on this screen, where the outcome of a change made in it is shown. */
   type Card = 'pairing' | 'tunnel' | 'live' | 'quality' | 'deeper';
@@ -76,6 +77,11 @@
   $effect(() => {
     void api.reconnects;
     if (api.state === 'online') void load();
+  });
+  // Back or Forward to Settings puts back the Player's place once the cards, or why they're missing, show.
+  const contentShown = router.loadsLater();
+  $effect(() => {
+    if (api.state !== 'online' || (settings && pairing) || message) contentShown();
   });
 
   $effect(() => {

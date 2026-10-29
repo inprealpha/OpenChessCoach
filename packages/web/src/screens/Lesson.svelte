@@ -237,6 +237,8 @@
   /** Start (or Resume) once: a double click must not show the first decision's prompt twice. */
   function start(s: number): void {
     if (phase !== 'intro') return;
+    // Back to the Lesson reopens it on its intro, at the top: no place in the decisions is kept.
+    router.opensAtTop();
     firstGrades = {};
     shownFirst = {};
     skipped = {};

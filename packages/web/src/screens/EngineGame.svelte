@@ -25,6 +25,7 @@
   import { saveFinishedEngineGame } from '../lib/offline.ts';
   import { scoreFromAnalysis } from '../lib/position-score.ts';
   import { randomId } from '../lib/random-id.ts';
+  import { router } from '../lib/router.svelte.ts';
   import { store } from '../lib/storage.ts';
   import { threatSetting, ThreatView } from '../lib/threat.svelte.ts';
 
@@ -130,6 +131,12 @@
   // Game by its id, so it is never saved twice, and the answer brings the Review link back.
   $effect(() => {
     if (api.state === 'online' && game?.result && saved === 'queued') void resave();
+  });
+
+  // Back or Forward to the Engine Game puts back the Player's place once the game on this device is read.
+  const contentShown = router.loadsLater();
+  $effect(() => {
+    if (loaded) contentShown();
   });
 
   async function restore(): Promise<void> {

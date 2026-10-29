@@ -25,21 +25,19 @@ export async function saveLessonProgress(lessonId: string, step: number, complet
   await loaded;
   // A Lesson finished while the desktop was away stays finished.
   const done = completed || unsent.some((p) => p.lessonId === lessonId && p.completed);
-  // Read after the request: a sync may have sent and dropped other entries meanwhile.
-  const others = () => unsent.filter((p) => p.lessonId !== lessonId);
-  if (api.state === 'online') {
-    try {
-      await api.request('lessons.update', { lessonId, step, completed: done });
-      await keepUnsent(others());
-      return;
-    } catch {
-      // kept on this device below
-    }
-  }
   // A timestamp, never changed: nothing reactive.
   // eslint-disable-next-line svelte/prefer-svelte-reactivity
-  const updatedAt = new Date().toISOString();
-  await keepUnsent([...others(), { lessonId, step, completed: done, updatedAt }]);
+  const saved: LessonProgress = { lessonId, step, completed: done, updatedAt: new Date().toISOString() };
+  // Kept before it is sent, in place of this Lesson's older entry: a sync already running then
+  // skips that older step instead of sending it after this one.
+  await keepUnsent([...unsent.filter((p) => p.lessonId !== lessonId), saved]);
+  if (api.state !== 'online') return;
+  try {
+    await api.request('lessons.update', { lessonId, step, completed: done });
+    await keepUnsent(unsent.filter((p) => p !== saved));
+  } catch {
+    // kept on this device until the desktop is back
+  }
 }
 
 let syncing: Promise<void> | undefined;
@@ -54,7 +52,10 @@ export function syncLessonProgress(): Promise<void> {
     if (!unsent.length || api.state !== 'online') return;
     try {
       const { lessons } = await api.request('lessons.progress', {});
+      // The list as the sync started; each entry is checked against the current one before it is sent.
       for (const p of unsent) {
+        // Saved again since the sync started: the newer entry has been sent, or will be.
+        if (!unsent.includes(p)) continue;
         const d = lessons.find((l) => l.lessonId === p.lessonId);
         if (!d || (p.completed && !d.completed) || p.step > d.step) await api.request('lessons.update', { lessonId: p.lessonId, step: p.step, completed: p.completed });
         await keepUnsent(unsent.filter((x) => x !== p));

@@ -53,6 +53,8 @@ class Router {
   #restore: number | undefined;
   /** Whether the step's screen is still loading its content (`loadsLater`). */
   #loading = false;
+  /** Whether the step's place is kept as the Player scrolls (`opensAtTop` stops it). */
+  #keeping = true;
 
   constructor() {
     this.#key = stepOf(history.state)?.key ?? markStep();
@@ -66,6 +68,7 @@ class Router {
       const step = stepOf(history.state);
       const key = (this.#key = step?.key ?? markStep());
       this.#loading = false;
+      this.#keeping = true;
       this.#restore = step ? (this.#places.get(key) ?? savedPlaces.get(key)) : undefined;
       const moved = next.name !== this.route.name || next.params.join('/') !== this.route.params.join('/');
       this.route = next;
@@ -93,6 +96,17 @@ class Router {
     };
   }
 
+  /**
+   * For a screen whose content from here on won't be there when the Player comes back to the step (a
+   * Lesson past its intro reopens on its intro): the step reopens at the top, and the router keeps
+   * no place on it until the step changes.
+   */
+  opensAtTop(): void {
+    this.#keeping = false;
+    this.#places.set(this.#key, 0);
+    savedPlaces.set(this.#key, 0);
+  }
+
   #putBack(): void {
     const y = this.#restore;
     this.#restore = undefined;
@@ -100,13 +114,13 @@ class Router {
   }
 
   /**
-   * Keeps the place of the step showing. Not while its screen is loading or its place is still to be
-   * put back, nor once the browser has moved to another step and the router hasn't heard yet: the
-   * browser's own restoring may scroll then.
+   * Keeps the place of the step showing. Not once its screen opens at the top, nor while its screen is
+   * loading or its place is still to be put back, nor once the browser has moved to another step and
+   * the router hasn't heard yet: the browser's own restoring may scroll then.
    */
   #remember(): void {
     const key = this.#key;
-    if (this.#loading || this.#restore !== undefined || stepOf(history.state)?.key !== key) return;
+    if (!this.#keeping || this.#loading || this.#restore !== undefined || stepOf(history.state)?.key !== key) return;
     this.#places.set(key, scrollY);
     savedPlaces.set(key, scrollY);
   }

@@ -853,6 +853,30 @@ for (const restoring of ['auto', 'manual'] as const) {
   });
 }
 
+test('Back to a Lesson the Player had started reopens its intro at the top, not at a place in the decisions', async ({ paired, app }) => {
+  const lesson = index.at(-1)!;
+  const heading = paired.getByRole('heading', { name: lesson.name, level: 1 });
+  await paired.setViewportSize({ width: 320, height: 400 });
+  await paired.goto(`${app.url}/#/lesson/${lesson.id}`);
+  await paired.getByRole('button', { name: 'Start the Lesson' }).click();
+  await expect(paired.getByText(/^Decision 1 of/)).toBeVisible();
+  // Scrolled down the first decision, then off to the Lessons.
+  const y = await paired.evaluate(async () => {
+    scrollTo(0, document.documentElement.scrollHeight);
+    await new Promise(requestAnimationFrame);
+    await new Promise(requestAnimationFrame);
+    return scrollY;
+  });
+  expect(y).toBeGreaterThan(200);
+  await paired.evaluate(() => (location.hash = '#/lessons'));
+  await expect(paired.getByRole('heading', { name: 'Lessons', level: 1 })).toBeVisible();
+  await paired.goBack();
+  await expect(heading).toBeVisible();
+  await expect(paired.getByRole('button', { name: 'Start the Lesson' })).toBeVisible();
+  await paired.evaluate(() => new Promise(requestAnimationFrame));
+  expect(await paired.evaluate(() => scrollY)).toBe(0);
+});
+
 test('on a phone with Safari’s bars (390×664), the Hint and Continue need no scrolling, even with the popularity table', async ({ paired, app }) => {
   const lesson = readLesson('italian-game');
   const { node } = decisions(lesson)[0]!;

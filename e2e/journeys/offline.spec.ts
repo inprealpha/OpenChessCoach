@@ -8,7 +8,7 @@ import { startVerifyInstance, type VerifyInstance } from '../../packages/backend
 import type { Page } from '@playwright/test';
 import { suggestNext, type CatalogueItem } from '../../packages/shared/src/content/course.ts';
 import { decisions, type LessonData } from '../../packages/shared/src/content/lessons.ts';
-import { board, coachPanel, connection, engineGate, expect, fenOf, play, resign, storedOnDevice, test } from '../fixtures/app.ts';
+import { board, coachIdle, coachPanel, connection, engineGate, expect, fenOf, play, resign, storedOnDevice, test } from '../fixtures/app.ts';
 
 /** Keeps the app's WebSockets within reach, so a journey can drop the connection as a Wi-Fi blip would. */
 async function trackSockets(page: Page): Promise<void> {
@@ -517,4 +517,86 @@ test('a Lesson finished offline shows as complete in the Lessons, and its progre
     await app.stop({ keepData: true });
     rmSync(dataDir, { recursive: true, force: true });
   }
+});
+
+test('a sync of progress kept on this device never moves a Lesson back after the Player has moved on', async ({ paired, app }) => {
+  const lesson = JSON.parse(readFileSync(new URL('../../data/lessons/italian-game.json', import.meta.url), 'utf8')) as LessonData;
+  const steps = decisions(lesson);
+  const boardName = `${lesson.name} Lesson board`;
+  // The desktop refuses saves at first, so they are kept on this device. Later, its answer to the
+  // sync's save of another Lesson is held back until the Player has moved on in this one.
+  let refuse = true;
+  let holdOther = false;
+  let heldId: string | undefined;
+  let release: (() => void) | undefined;
+  let asked = 0;
+  let close: (() => Promise<void>) | undefined;
+  await paired.routeWebSocket(/\/ws\b/, (ws) => {
+    const server = ws.connectToServer();
+    close = () => ws.close();
+    ws.onMessage((m) => {
+      const msg = JSON.parse(String(m)) as { v: number; id: string; type: string; lessonId?: string };
+      if (msg.type === 'lessons.update' && refuse) {
+        ws.send(JSON.stringify({ v: msg.v, id: msg.id, type: 'error', ok: false, code: 'internal', message: 'Not now.' }));
+        return;
+      }
+      if (msg.type === 'lessons.update' && msg.lessonId === 'caro-kann' && holdOther) heldId = msg.id;
+      if (msg.type === 'lessons.progress') asked++;
+      server.send(m);
+    });
+    server.onMessage((m) => {
+      const msg = JSON.parse(String(m)) as { id?: string };
+      if (msg.id !== undefined && msg.id === heldId) release = () => ws.send(m);
+      else ws.send(m);
+    });
+  });
+  await paired.goto(`${app.url}/#/lesson/${lesson.id}`);
+  // Another Lesson's progress, kept on this device first.
+  await paired.evaluate(
+    () =>
+      new Promise<void>((resolve, reject) => {
+        const open = indexedDB.open('ai-chess-coach', 1);
+        open.onerror = () => reject(open.error);
+        open.onsuccess = () => {
+          const tx = open.result.transaction('kv', 'readwrite');
+          tx.objectStore('kv').put([{ lessonId: 'caro-kann', step: 1, completed: false, updatedAt: '2026-10-01T10:00:00.000Z' }], 'lessonProgressUnsent');
+          tx.oncomplete = () => resolve();
+          tx.onerror = () => reject(tx.error);
+        };
+      }),
+  );
+  await paired.reload();
+  await expect(connection(paired)).toHaveText(/Desktop connected/);
+  await paired.getByRole('button', { name: 'Start the Lesson' }).click();
+  await play(paired, steps[0]!.node.main, boardName);
+  await coachIdle(paired);
+  await paired.getByRole('button', { name: /^Continue/ }).click();
+  await expect(paired.getByText(`Decision 2 of ${steps.length}`)).toBeVisible();
+  await expect
+    .poll(() => storedOnDevice(paired, 'lessonProgressUnsent'))
+    .toMatchObject([
+      { lessonId: 'caro-kann', step: 1 },
+      { lessonId: lesson.id, step: 1 },
+    ]);
+
+  // A blip: once the app is back, the sync sends the other Lesson first and waits on the desktop.
+  refuse = false;
+  holdOther = true;
+  await close!();
+  await expect.poll(() => release !== undefined, { timeout: 30_000 }).toBe(true);
+  // Meanwhile the Player moves on to step 2, which reaches the desktop.
+  await play(paired, steps[1]!.node.main, boardName);
+  await coachIdle(paired);
+  await paired.getByRole('button', { name: /^Continue/ }).click();
+  await expect(paired.getByText(`Decision 3 of ${steps.length}`)).toBeVisible();
+  const step = async () => (await app.rows<{ lesson_id: string; step: number }>('lesson_progress')).find((r) => r.lesson_id === lesson.id)?.step;
+  await expect.poll(step).toBe(2);
+
+  // The sync carries on, but its step 1, older than the save since, is not sent. The Lesson asks
+  // for the progress again once the sync is over, after anything the sync sent.
+  asked = 0;
+  release!();
+  await expect.poll(() => asked).toBeGreaterThan(0);
+  expect(await step()).toBe(2);
+  await expect.poll(() => storedOnDevice(paired, 'lessonProgressUnsent')).toEqual([]);
 });

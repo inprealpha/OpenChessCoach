@@ -1,25 +1,25 @@
 # Learn course outline
 
-This is the plan for the Learn section (ADR 0012): 64 Lessons in four tracks, from a complete beginner to the end of intermediate level. Advanced level is future work, listed at the end.
+This is the plan for the Learn screens (ADR 0012): a Course of 64 Lessons in four Tracks, from a complete beginner to the end of intermediate level. Advanced level is future work, listed at the end.
 
-- **Beginner** is for a Player who knows how the pieces move, up to a rating of about 1200. Its first Lessons also suit a Player who is still learning the moves: they start with capturing and with check.
-- **Intermediate** goes from about 1200 to about 1800.
+- **Beginner** is for a Player who knows how the pieces move, up to about 1400 on Lichess or chess.com. Its first Lessons also suit a Player who is still learning the moves: they start with capturing and with check.
+- **Intermediate** goes from about 1400 to about 1800.
 
 The rules of the game are taught where they are used: check and mate in the Themes, castling in the opening principles, promotion, en passant and the draw rules in the endgames.
 
 ## How the Lessons fit together
 
-Every Lesson has a learning goal (what the Player can do afterwards) and its prior knowledge (the Lessons to know first). Every part of a Lesson has a key idea, written in its source file. Nothing is locked. The app suggests the Lesson the Player started and has not finished, or else the first Lesson in the course order below whose prior knowledge the Player has finished. A Player who chose casual or club level is not sent through the beginner Lessons first.
+Every Lesson has a learning goal (what the Player can do afterwards) and its prior knowledge (the Lessons to know first). Every part of a Lesson has a key idea, written in its source file. Nothing is locked. The app suggests the Lesson the Player started and has not finished, or else the first Lesson in the Course order below whose prior knowledge the Player has finished. A Player above beginner level is not sent through the beginner Lessons first, unless their linked Lichess or chess.com rating is under 1400.
 
-The course order mixes the four tracks, so a Player never does two Lessons of the same kind in a row for long, and each Lesson comes after the ones it builds on. `data-prep/course.ts` holds this order. The Learn screen shows the Lessons by track and level, in the same order.
+The Course order mixes the four Tracks, so a Player never does two Lessons of the same kind in a row for long, and each Lesson comes after the ones it builds on. `data-prep/course.ts` holds this order. The Learn screen shows the Lessons by Track and level, in the same order.
 
 Positions come from Lichess's open data (the puzzle database, the games database and the chess-openings list) or from famous games as Wikipedia or Wikibooks give them. Every explanation is written fresh. The books in the owner's private folder decided the topics and their order only (ADR 0012).
 
-"Rewritten" Lessons existed before this course: their text is rewritten in the new style, and any part kept from Wikibooks or Wikipedia keeps its credit. "New" Lessons are written for this course. "Puzzles" names the Lichess puzzle themes, or for openings the opening, that the Lesson's practice Puzzles come from.
+"Rewritten" Lessons existed before this course: their text is rewritten in the new style, and any part kept from Wikibooks or Wikipedia keeps its credit. "New" Lessons are written for this course. "Puzzles" names the Lichess puzzle tags (Lichess calls them themes), or for openings the opening, that the Lesson's practice Puzzles come from.
 
 ## Track 1: Themes
 
-Patterns that win material or give mate.
+Patterns that win material, give mate or save a game.
 
 | # | Lesson | Level | Learning goal | Prior knowledge | Status | Puzzles |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -73,7 +73,7 @@ How to start a game, then openings for White and for Black. Each opening Lesson 
 | # | Lesson | Level | Learning goal | Prior knowledge | Status | Puzzles |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Opening principles (`opening-principles`) | Beginner | In the first moves of any game, you can claim the centre with pawns, bring out knights and bishops, castle early, and avoid moving one piece again and again. | none | New | none |
-| 2 | Stopping the early queen attack (`scholars-mate-defence`) | Beginner | As Black, you can stop Scholar's Mate and other early queen attacks, and gain time by developing while you attack the queen. | Opening principles, Spot the threat | New | Scholars mate (opening tags) |
+| 2 | Stopping the early queen attack (`scholars-mate-defence`) | Beginner | As Black, you can stop Scholar's Mate and other early queen attacks, and gain time by developing while you attack the queen. | Opening principles, Spot the threat | New | Scholar's Mate (opening tags) |
 | 3 | Italian Game (`italian-game`) | Beginner | As White, you can play the Italian Game: aim the bishop at f7, build a centre with c3 and d4, and castle. | Opening principles | Rewritten | Italian Game |
 | 4 | London System (`london-system`) | Beginner | As White, you can set up the London System: the bishop out to f4 before e3, pawns on d4, e3 and c3, and knights on f3 and d2. | Opening principles | Rewritten | London System |
 | 5 | Two Knights Defence (`two-knights-defence`) | Beginner | As Black against the Italian Game, you can play the Two Knights Defence and know how to meet the attack on f7. | Italian Game | Rewritten | Two Knights Defence |

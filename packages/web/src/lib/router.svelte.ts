@@ -66,6 +66,10 @@ class Router {
     window.addEventListener('hashchange', () => {
       const next = parseRoute(location.hash);
       const step = stepOf(history.state);
+      // Opening a new step: the one being left keeps the place it is at now. Its last scroll event can
+      // still be on its way (the browser sends them with the next frame), and that one would land on
+      // the new step. Back and Forward are left out: by now the browser's own restoring may have scrolled.
+      if (!step) this.#remember(this.#key, true);
       const key = (this.#key = step?.key ?? markStep());
       this.#loading = false;
       this.#keeping = true;
@@ -114,13 +118,14 @@ class Router {
   }
 
   /**
-   * Keeps the place of the step showing. Not once its screen opens at the top, nor while its screen is
-   * loading or its place is still to be put back, nor once the browser has moved to another step and
-   * the router hasn't heard yet: the browser's own restoring may scroll then.
+   * Keeps the place of the step showing, or of the step being left for a new one (`leaving`). Not once
+   * its screen opens at the top, nor while its screen is loading or its place is still to be put back,
+   * nor once the browser has moved to another step and the router hasn't heard yet: the browser's own
+   * restoring may scroll then.
    */
-  #remember(): void {
-    const key = this.#key;
-    if (!this.#keeping || this.#loading || this.#restore !== undefined || stepOf(history.state)?.key !== key) return;
+  #remember(key = this.#key, leaving = false): void {
+    if (!this.#keeping || this.#loading || this.#restore !== undefined) return;
+    if (!leaving && stepOf(history.state)?.key !== key) return;
     this.#places.set(key, scrollY);
     savedPlaces.set(key, scrollY);
   }

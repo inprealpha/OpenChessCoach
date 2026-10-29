@@ -1,0 +1,20 @@
+# Files a PR may change without needing a Verdict (ADR 0013): docs, tests and the process files
+# the owner reviews anyway. A PR that changes only these gets a passing "Verdict" status at once.
+# Every other file needs a Verdict, so a new kind of file is judged until it is listed here.
+# One path per line: a trailing / means everything under that folder; * matches within one name.
+
+# Docs
+docs/
+README.md
+CLAUDE.md
+CONTEXT.md
+LICENSE
+
+# Tests (CI runs them; the Verdict judges what the app does)
+packages/*/test/
+scripts/test/
+e2e/
+
+# CI, PR process and agent skills (protected paths: the owner reviews them)
+.github/
+.claude/

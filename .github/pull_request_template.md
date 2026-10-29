@@ -1,4 +1,5 @@
-<!-- A PR merges on evidence from the running app, not on a claim that it is done (ADR 0006). -->
+<!-- A PR merges on evidence from the running app, not on a claim that it is done (ADR 0006).
+Open it as a draft; mark it ready for review on the final commit, which starts the Verdict (ADR 0013). -->
 
 ## What changed
 

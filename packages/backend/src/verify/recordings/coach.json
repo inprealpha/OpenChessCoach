@@ -1,0 +1,12 @@
+{
+  "note": "Recorded Coach replies the fake Coach gives in verify mode and the tests, keyed as recordingKey keys a brief: job|position|move|Player's side. The overview of the seeded game 1 (default seed), with the Player as White, written the way the real Coach writes one, names its moves as its brief does, and every move in it is in that brief.",
+  "replies": {
+    "review-overview|3r2k1/ppp2rpp/4b3/2B5/4p3/1P6/5PPP/3q1RK1 w - -||white": {
+      "text": "Your opening went well, and your opponent had to find 9… d5 there: the Engine found every other move much worse. The game turned on 11. Bxf7+ and 12. Bg5, two Mistakes in a row, where axb4 and then Ng5 would have kept you in it. Your opponent made one Inaccuracy and no Mistake or Blunder all game, and two Inaccuracies of yours, 18. d5 and 24. Bxc5, gave away a little more.",
+      "moves": ["d7d5", "c4f7", "c1g5", "a3b4", "f3g5", "d4d5", "e3c5"],
+      "arrows": [],
+      "highlights": [],
+      "note": "Lets one Mistake follow another in the middlegame."
+    }
+  }
+}

@@ -16,7 +16,9 @@ import {
   type Brief,
 } from '../src/coach/brief.ts';
 import { allowedMoves, askedLineMoves, guardReply } from '../src/coach/guard.ts';
-import type { CoachAsk, CoachRawReply } from '../src/coach/types.ts';
+import type { CoachAsk, CoachRawReply, GameFacts } from '../src/coach/types.ts';
+import { MAX_KEY_MOMENTS, MAX_STANDOUTS, pickKeyMoments } from '../src/key-moments.ts';
+import { gameFacts } from '../src/overview.ts';
 import { legalMoves, playUci, turnOf } from '../src/chess.ts';
 import { scoreAfterPly } from '../src/position-score.ts';
 import { nullMoveFen, type Threat } from '../src/threat.ts';
@@ -480,6 +482,75 @@ describe('the Coach brief', () => {
   });
 });
 
+/** A Review overview's ask for a golden game, as a Review builds it. */
+function overviewAsk(id: string, playerSide: 'white' | 'black' = 'white', game: GameFacts | undefined = undefined): CoachAsk {
+  const g = golden.games.find((x) => x.site.endsWith(id));
+  if (!g) throw new Error(`No golden game ${id}`);
+  return {
+    job: 'review-overview',
+    fen: g.moves.at(-1)?.fenAfter as string,
+    recentMoves: g.moves.map((m) => m.san),
+    playerSide,
+    candidates: [],
+    opening: 'Italian Game',
+    allowNote: true,
+    game: game ?? gameFacts({ opening: g.opening, result: '1-0' }, g.moves, pickKeyMoments(g.moves, playerSide)),
+  };
+}
+
+describe('a Review overview’s brief', () => {
+  it('carries both sides’ Move Grade counts, the key moments and the standout moves, and no position facts', () => {
+    const brief = buildBrief({ ask: overviewAsk('i425hmuv'), profile });
+    expect(brief.game).toEqual({
+      opening: 'Italian Game: Giuoco Piano, Greco\'s Attack',
+      result: '1-0',
+      grades: { player: 'Best 10, Good 10, Inaccuracy 2, Mistake 2, Blunder 0', opponent: 'Best 14, Good 9, Inaccuracy 1, Mistake 0, Blunder 0' },
+      moments: [
+        { move: '11. Bxf7+', uci: 'c4f7', by: 'white', grade: 'Mistake', better: 'axb4', betterUci: 'a3b4' },
+        { move: '12. Bg5', uci: 'c1g5', by: 'white', grade: 'Mistake', better: 'Ng5', betterUci: 'f3g5' },
+        { move: '18. d5', uci: 'd4d5', by: 'white', grade: 'Inaccuracy', better: 'Qe2', betterUci: 'd1e2' },
+        { move: '24. Bxc5', uci: 'e3c5', by: 'white', grade: 'Inaccuracy', better: 'Qxd5', betterUci: 'd1d5' },
+      ],
+      standouts: [{ move: '9… d5', uci: 'd7d5', by: 'black', grade: 'Best', only: true }],
+    });
+    // The whole game, not one position: no candidates, no move, no Winning Chances of the final position.
+    expect(brief).toMatchObject({ job: 'review-overview', candidates: [], allowNote: true, maxWords: 90 });
+    expect(brief.move).toBeUndefined();
+    expect(brief.winningChances).toBeUndefined();
+  });
+
+  it('counts the Player’s Move Grades as the Player’s, whichever side they had', () => {
+    const brief = buildBrief({ ask: overviewAsk('i425hmuv', 'black'), profile });
+    expect(brief.game?.grades.player).toBe('Best 14, Good 9, Inaccuracy 1, Mistake 0, Blunder 0');
+    expect(brief.game?.moments.map((m) => m.move)).toEqual(['16… Nc6']);
+  });
+
+  it('stays within its budget for a long game, and for the most moves and longest names it can hold', () => {
+    for (const g of golden.games) {
+      for (const side of ['white', 'black'] as const) {
+        const brief = buildBrief({ ask: overviewAsk(g.site.slice(-8), side), profile, summary: 'y'.repeat(5000) });
+        expect(briefSize(brief)).toBeLessThanOrEqual(BRIEF_BUDGET);
+      }
+    }
+    // The longest golden game, 67 plies, with every move it ever played as a recent move.
+    expect(briefSize(buildBrief({ ask: overviewAsk('fzjtms6a'), profile }))).toBeLessThanOrEqual(BRIEF_BUDGET);
+    // Five key moments and eight standout moves, each with the longest SAN, number and better move there is.
+    const long = { side: 'black' as const, uci: 'e7d8q', san: 'exd8=Q+', label: '199… exd8=Q+', grade: 'Inaccuracy' as const };
+    const worst: GameFacts = {
+      opening: 'O'.repeat(500),
+      result: '1/2-1/2',
+      grades: { white: { Best: 300, Good: 300, Inaccuracy: 300, Mistake: 300, Blunder: 300 }, black: { Best: 300, Good: 300, Inaccuracy: 300, Mistake: 300, Blunder: 300 } },
+      moments: Array.from({ length: MAX_KEY_MOMENTS }, (_, i) => ({ ...long, ply: i, better: { uci: 'e7d8q', san: 'exd8=Q+' } })),
+      standouts: Array.from({ length: MAX_STANDOUTS }, (_, i) => ({ ...long, ply: 10 + i, only: true })),
+    };
+    const brief = buildBrief({ ask: overviewAsk('fzjtms6a', 'black', worst), profile });
+    expect(briefSize(brief)).toBeLessThanOrEqual(BRIEF_BUDGET);
+    // It fits whole: nothing about the game was trimmed away.
+    expect(brief.game?.moments).toHaveLength(MAX_KEY_MOMENTS);
+    expect(brief.game?.standouts).toHaveLength(MAX_STANDOUTS);
+  });
+});
+
 describe('the Coach-move guard', () => {
   const g = game('i425hmuv');
   const m = g.moves[20] as (typeof g.moves)[number]; // 11. Bxf7+
@@ -556,6 +627,20 @@ describe('the Coach-move guard', () => {
     expect(out.stripped).toEqual(["move d8h4 is not in the Engine's output", ...lineMoves.map((uci) => `arrow ${uci} is not in the Engine's output`)]);
     // Without the question, the same line gets nothing past the guard.
     expect(guardReply(why(), reply({ moves: lineMoves })).moves).toEqual([]);
+  });
+
+  it('lets a Review’s overview name only the game moves its brief lists, and draw nothing', () => {
+    const overview = buildBrief({ ask: overviewAsk('i425hmuv'), profile });
+    // The key moments, each one's better move and the standout move; nothing else, not even a legal game move.
+    expect([...allowedMoves(overview)].sort()).toEqual(['a3b4', 'c1g5', 'c4f7', 'd1d5', 'd1e2', 'd4d5', 'd7d5', 'e3c5', 'f3g5'].sort());
+    const out = guardReply(overview, reply({ moves: ['c4f7', 'd7d5', 'e2e4', 'g1f3'], arrows: [{ uci: 'c4f7', brush: 'red' }], highlights: ['f7'] }));
+    expect(out.moves).toEqual(['c4f7', 'd7d5']);
+    expect(out).toMatchObject({ arrows: [], highlights: [] });
+    expect(out.stripped).toEqual([
+      "move e2e4 is not in the Engine's output",
+      "move g1f3 is not in the Engine's output",
+      'arrow c4f7: an overview draws no arrows',
+    ]);
   });
 
   it('strips every move and arrow from a Hint', () => {

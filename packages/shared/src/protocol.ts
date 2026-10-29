@@ -8,7 +8,7 @@ import type { MoveGrade } from './grader.ts';
 import type { Threat } from './threat.ts';
 
 /** Raised whenever a message changes shape, so a client running older code is told to reload. */
-export const PROTOCOL_VERSION = 3;
+export const PROTOCOL_VERSION = 4;
 
 // ---------- Domain types ----------
 
@@ -98,9 +98,31 @@ export interface KeyMoment {
   arrows: CoachReply['arrows'];
 }
 
+/** A move of the game a Review's overview names, which the screen links to its place in the game. */
+export interface OverviewMove {
+  ply: number;
+  side: Side;
+  san: string;
+  grade: MoveGrade;
+  /** As a scoresheet writes it, the way the overview names it: "11. Bxf7+", "24… Nxf2". */
+  label: string;
+}
+
+/**
+ * The Coach's overview of the whole game, which opens a Review: how both sides played and the
+ * moves that stood out, built from the Review's own Engine facts.
+ */
+export interface ReviewOverview {
+  text: string;
+  /** The game's moves the overview names: key moments and standout moves, in game order. */
+  moves: OverviewMove[];
+}
+
 export interface Review {
   gameId: number;
   createdAt: string;
+  /** Null for a Review made with the overview turned off in Settings, or saved before there was one. */
+  overview: ReviewOverview | null;
   moments: KeyMoment[];
   /** Graded moves for the whole game, so rereading needs no Engine run. */
   moves: GradedMove[];
@@ -112,16 +134,27 @@ export interface Review {
  */
 export const MAX_QUESTION_LENGTH = 300;
 
-export type CoachJob = 'review-moment' | 'why' | 'lesson-turn' | 'hint' | 'live';
-export const COACH_JOBS: readonly CoachJob[] = ['review-moment', 'why', 'lesson-turn', 'hint', 'live'];
+/** The Coach jobs a client may ask for, each with its own model in Settings. */
+export type ModelJob = 'review-moment' | 'why' | 'lesson-turn' | 'hint' | 'live';
+export const MODEL_JOBS: readonly ModelJob[] = ['review-moment', 'why', 'lesson-turn', 'hint', 'live'];
+/**
+ * Every Coach job. A Review's overview is the desktop's own: no client asks for it, and it runs on
+ * the Review moments' model (see `modelJobOf`).
+ */
+export type CoachJob = ModelJob | 'review-overview';
+
+/** The job whose model setting a Coach job runs on: a Review's overview follows its key moments. */
+export function modelJobOf(job: CoachJob): ModelJob {
+  return job === 'review-overview' ? 'review-moment' : job;
+}
 
 /** A Coach quality preset: one choice that sets the model of every Coach job. */
 export type CoachQuality = 'thrifty' | 'balanced' | 'best';
 export const COACH_QUALITIES: readonly CoachQuality[] = ['thrifty', 'balanced', 'best'];
 
 export interface Settings {
-  /** Model per Coach job, passed to the Claude Agent SDK. */
-  models: Record<CoachJob, string>;
+  /** Model per Coach job, passed to the Claude Agent SDK. A Review's overview uses the Review moments' model. */
+  models: Record<ModelJob, string>;
   /** The preset the per-job models match, or custom when they match none. Read from `models`, never stored. */
   quality: CoachQuality | 'custom';
   liveCoachingDefault: boolean;
@@ -131,6 +164,8 @@ export interface Settings {
    * positions and moves while it answers (ADR 0010). Slower and costlier, so off by default.
    */
   thinkDeeper: boolean;
+  /** Each new Review opens with the Coach's overview of the whole game: one Coach call more. On by default. */
+  reviewOverview: boolean;
 }
 
 /**
@@ -138,7 +173,7 @@ export interface Settings {
  * preset's model for every Coach job; `models` named in the same change apply on top of it.
  */
 export type SettingsPatch = Partial<Omit<Settings, 'models' | 'quality'>> & {
-  models?: Partial<Record<CoachJob, string>>;
+  models?: Partial<Record<ModelJob, string>>;
   quality?: CoachQuality;
 };
 
@@ -259,8 +294,9 @@ export interface RequestMap {
   'games.syncOffline': { req: { games: EngineGameRecord[] }; res: { saved: GameSummary[]; duplicates: number } };
 
   /**
-   * Grades every move on the desktop's Engine (sending progress), picks the key moments and
-   * streams the Coach's explanation of each (ADR 0007).
+   * Grades every move on the desktop's Engine (sending progress), picks the key moments, then
+   * streams the Coach's overview of the whole game (part `overview`, unless Settings turn it off)
+   * and the Coach's explanation of each key moment (ADR 0007).
    */
   'review.start': { req: { gameId: number }; res: Review };
   /** The saved Review, if any; `beingMade` when the desktop is making it right now, for whichever request asked. */
@@ -284,6 +320,9 @@ export interface RequestMap {
   'settings.get': { req: Record<string, never>; res: Settings };
   'settings.update': { req: SettingsPatch; res: Settings };
 }
+
+/** Which part of a Review a chunk of Coach text belongs to: its overview, or a key moment by index. */
+export type ReviewPart = number | 'overview';
 
 export type RequestType = keyof RequestMap;
 export type RequestBody<K extends RequestType> = RequestMap[K]['req'];
@@ -319,9 +358,9 @@ export type ErrorCode =
 export type ServerMessage =
   | { v: number; id: string; type: 'result'; ok: true; data: unknown }
   | { v: number; id: string; type: 'error'; ok: false; code: ErrorCode; message: string }
-  /** A chunk of Coach text for request `id`. `part` separates the moments of a Review. */
+  /** A chunk of Coach text for request `id`. `part` separates a Review's overview and its key moments. */
   /** `status`, with Think deeper on: what the Coach is doing while no text streams, such as asking the Engine (ADR 0010). */
-  | { v: number; id: string; type: 'coach.delta'; text: string; part?: number; status?: string }
+  | { v: number; id: string; type: 'coach.delta'; text: string; part?: ReviewPart; status?: string }
   /**
    * How far the desktop has got with request `id`, for example grading a game for a Review or
    * fetching games by username. A total of 0 means the total isn't known yet.

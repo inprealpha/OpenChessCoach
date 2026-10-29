@@ -24,9 +24,13 @@ export async function desktopBack(): Promise<void> {
 }
 
 export class ReviewRun {
-  /** Grading every move on the desktop's Engine, then the Coach explaining the key moments. */
+  /** Grading every move on the desktop's Engine, then the Coach writing the overview and explaining the key moments. */
   phase = $state<'grading' | 'explaining'>('grading');
   progress = $state({ done: 0, total: 0 });
+  /** The Coach's overview of the whole game, as it is written; empty with the overview turned off. */
+  overview = $state('');
+  /** The desktop said the overview comes first: it does as soon as it starts writing one. */
+  overviewFirst = $state(false);
   /** The Coach's explanation of each key moment, as it is written. */
   streaming = $state<string[]>([]);
   /** True while the connection to the desktop is down: the Review goes on once it is back. */
@@ -49,15 +53,21 @@ export class ReviewRun {
           { gameId },
           (text, part) => {
             this.phase = 'explaining';
+            if (part === 'overview') {
+              this.overviewFirst = true;
+              this.overview += text;
+              return;
+            }
             const i = part ?? 0;
             const next = [...this.streaming];
             next[i] = (next[i] ?? '') + text;
             this.streaming = next;
           },
           // The desktop reports positions analysed; a move is graded once the position after it is.
+          // The Coach's part begins with the desktop's first word on it (the overview's, or a key
+          // moment's), so the card never says one thing comes next and then another.
           (done, total) => {
             this.progress = { done: Math.max(0, done - 1), total: total - 1 };
-            if (done === total) this.phase = 'explaining';
           },
         );
       } catch (err) {
@@ -67,6 +77,8 @@ export class ReviewRun {
         this.interrupted = false;
         // Asked again, the desktop returns the Review it finished meanwhile, joins the one it is
         // still making from where it has got to, or starts over if it was restarted.
+        this.overviewFirst = false;
+        this.overview = '';
         this.streaming = [];
       }
     }

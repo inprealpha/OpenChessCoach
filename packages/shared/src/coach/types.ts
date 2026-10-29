@@ -4,7 +4,7 @@ import type { Side } from '../chess.ts';
 import type { Score } from '../engine.ts';
 import type { MoveGrade } from '../grader.ts';
 import type { PositionScore } from '../position-score.ts';
-import type { CoachJob } from '../protocol.ts';
+import type { CoachJob, GradeCounts, ModelJob } from '../protocol.ts';
 import type { Threat } from '../threat.ts';
 
 export type Brush = 'green' | 'blue' | 'red' | 'yellow';
@@ -20,7 +20,8 @@ export interface Arrow {
  * findings. The desktop's Engine computes every fact in the brief (ADR 0007).
  */
 export interface CoachRequest {
-  job: CoachJob;
+  /** A Review's overview is never asked for by a client: the desktop makes it from its own Review. */
+  job: ModelJob;
   /** Follow-up questions in the same thread share a short summary, never the full history. */
   threadId?: string;
   /** The position under discussion: before the move, if there is one. */
@@ -48,6 +49,32 @@ export interface CoachRequest {
    * Puzzle do: the brief then leaves them out as well.
    */
   hideWinningChances?: boolean;
+}
+
+/** A move of a reviewed game, as a Review's overview names it. */
+export interface GameMoveFact {
+  ply: number;
+  side: Side;
+  uci: string;
+  san: string;
+  /** As a scoresheet writes it: "11. Bxf7+", "24… Nxf2". */
+  label: string;
+  grade: MoveGrade;
+}
+
+/**
+ * A Review's overview: the whole game from the Review's own graded moves, not one position. Every
+ * move in it was graded by the desktop's Engine (ADR 0007), and only the desktop sets it.
+ */
+export interface GameFacts {
+  opening: string;
+  result: string;
+  /** The Move Grade counts of each side's moves. */
+  grades: Record<Side, GradeCounts>;
+  /** The key moments the Review walks through next, each with the Engine's best move instead. */
+  moments: (GameMoveFact & { better?: { uci: string; san: string } })[];
+  /** The moves that stood out on both sides, other than the key moments (see `pickStandouts`). */
+  standouts: (GameMoveFact & { only: boolean })[];
 }
 
 /** A Coach request with the desktop Engine's facts added. Every chess fact in it comes from the Engine (ADR 0002). */
@@ -116,8 +143,10 @@ export interface CoachAsk {
   lessonFocus?: { lesson: string; learningGoal: string; keyIdea: string };
   /** Opening or theme, used to pick the relevant slice of the Player Profile. */
   opening?: string;
-  /** For Reviews: the last moment may carry a profile note. */
+  /** For Reviews: the overview, or the last moment without one, may carry a profile note. */
   allowNote?: boolean;
+  /** For a Review's overview: the whole game. */
+  game?: GameFacts;
   /** The screen hides the Winning Chances bar (a Lesson or a Puzzle), so the brief leaves them out. */
   hideWinningChances?: boolean;
 }
@@ -154,7 +183,7 @@ export interface CoachReply {
   moves: string[];
   arrows: Arrow[];
   highlights: string[];
-  /** The note saved to the Player Profile, if any. */
+  /** The note saved to the Player Profile, if any (or, for a Review, the one it saves with itself). */
   note: string | null;
   /** How many moves or arrows the guard removed. */
   stripped: number;

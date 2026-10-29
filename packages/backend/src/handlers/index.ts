@@ -1,4 +1,4 @@
-import type { RequestBody, RequestType, ResponseBody, ServerEvent } from '@chess-coach/shared/protocol';
+import type { RequestBody, RequestType, ResponseBody, ReviewPart, ServerEvent } from '@chess-coach/shared/protocol';
 import type { Clock } from '../clock.ts';
 import type { Db } from '../db.ts';
 import type { Pairing, Device } from '../pairing.ts';
@@ -48,7 +48,7 @@ export interface RequestContext {
    */
   connected: () => boolean;
   /** Streams a chunk of Coach text for this request, or with `status` what the Coach is doing meanwhile. */
-  delta: (text: string, part?: number, status?: string) => void;
+  delta: (text: string, part?: ReviewPart, status?: string) => void;
   /** Reports how far the desktop has got with this request; a total of 0 means it isn't known yet. */
   progress: (done: number, total: number) => void;
   /** Replaces this connection's token, after a pairing reset. */

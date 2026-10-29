@@ -13,7 +13,8 @@ In Windows PowerShell, type `npx.cmd` instead of `npx`. You need Node.js 22.18 o
 Code, logged in: see [What you need](#what-you-need).
 
 - **Review your own games** from Lichess, chess.com or a PGN: every move gets a Move Grade, a graph
-  shows where the game turned, and the Coach walks you through the key moments.
+  shows where the game turned, and the Coach sums up the whole game, then walks you through the
+  key moments.
 - **Play the Engine** at your strength, with Live Coaching and Hints.
 - **Learn** from your first moves to the end of intermediate level: 64 Lessons on Themes such as
   forks and pins, endgames, openings, and how to think during a game, with the next Lesson
@@ -26,11 +27,41 @@ Code, logged in: see [What you need](#what-you-need).
 
 ## What you need
 
-- **Node.js 22.18 or later** (`node --version`).
+- **Node.js 22.18 or later** (`node --version`). Node.js brings `npm` and `npx` with it, so
+  you install nothing else. If `node --version` says the command is not found, or shows a
+  version older than 22.18, see [Installing Node.js](#installing-nodejs).
 - **Claude Code, logged in** with a paid Claude plan (Pro or Max): install it from
   <https://claude.com/claude-code>, run `claude` once and log in. The Coach uses that login; the
   app never sees your password or token.
 - A desktop running macOS, Windows or Linux. Phones and tablets connect to it.
+
+### Installing Node.js
+
+Open a terminal (on Windows, PowerShell; on macOS, the Terminal app) and run the command for your
+system.
+
+On Windows:
+
+```powershell
+winget install OpenJS.NodeJS.LTS
+```
+
+Then close PowerShell and open a new one, so it finds `node`.
+
+On macOS or Linux:
+
+```bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+```
+
+Then close the terminal, open a new one, and run:
+
+```bash
+nvm install --lts
+```
+
+Check that it worked with `node --version`. If you prefer an installer you click through, download
+the LTS version from <https://nodejs.org/en/download>.
 
 ## Start
 
@@ -89,12 +120,14 @@ Two ways to reach your desktop from outside your Wi-Fi:
 Settings → Coach quality picks how much of your Claude limits the Coach uses:
 
 - **Thrifty**: Haiku for every job.
-- **Balanced** (the default): Sonnet for Reviews, Why Questions and Lessons; Haiku for Hints and
-  Live Coaching.
-- **Best**: Opus for Reviews, Why Questions and Lessons; Haiku for Hints and Live Coaching, which
-  must stay quick.
+- **Balanced** (the default): Sonnet for Reviews (the overview and the key moments), Why Questions
+  and Lessons; Haiku for Hints and Live Coaching.
+- **Best**: Opus for Reviews (the overview and the key moments), Why Questions and Lessons; Haiku
+  for Hints and Live Coaching, which must stay quick.
 
 Under **Advanced** you can choose the model for each job yourself; the choice then shows as Custom.
+A Review's overview uses the model chosen for Reviews. Settings → Reviews turns the overview off,
+which saves one Coach call per Review.
 The models are named by family (`haiku`, `sonnet`, `opus`), and the Claude Agent SDK maps each to
 the newest model of that family it knows, so updating the app keeps the Coach on the latest models.
 

@@ -16,7 +16,7 @@ import { parseArgs } from 'node:util';
 import { legalMoves, playUci, turnOf, type Side } from '../packages/shared/src/chess.ts';
 import type { CoachAsk, CoachReply, CoachRequest } from '../packages/shared/src/coach/types.ts';
 import { pickKeyMoments } from '../packages/shared/src/key-moments.ts';
-import type { CoachJob } from '../packages/shared/src/protocol.ts';
+import type { ModelJob } from '../packages/shared/src/protocol.ts';
 import { parsePgnGames } from '../packages/shared/src/pgn.ts';
 
 const POSITIONS = new URL('think-deeper-positions.json', import.meta.url);
@@ -37,7 +37,7 @@ export interface EvalPosition {
   /** What the position tests, for reading the results. */
   kind: 'blunder' | 'deep-blunder' | 'missed' | 'why-not' | 'review';
   source: string;
-  job: CoachJob;
+  job: ModelJob;
   fen: string;
   recentMoves: string[];
   playerSide: Side;

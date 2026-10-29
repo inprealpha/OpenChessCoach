@@ -188,7 +188,7 @@ describe('the Coach port', () => {
   it('keeps Coach notes short, de-duplicated and capped', async () => {
     const app = await instance();
     const c = await client(app);
-    // Notes are only allowed on a Lesson's last turn or a Review's last key moment.
+    // Notes are only allowed on a Lesson's last turn, a Review's overview or, without one, its last key moment.
     const lesson = { lessonId: 'italian-game', opening: 'Italian Game', notes: '', popularity: [], finalTurn: true };
     const ask: CoachRequest = { ...whyAsk(), job: 'lesson-turn', lesson };
     for (let i = 0; i < NOTE_CAP + 3; i++) {
@@ -521,6 +521,13 @@ describe('the Coach port', () => {
     const c = await client(app);
     await expect(c.request('coach.ask', { job: 'why', fen: 'not a fen', recentMoves: [] })).rejects.toMatchObject({ code: 'bad-request' });
     await expect(c.request('coach.ask', { ...whyAsk(), moveUci: 'e2e5' })).rejects.toMatchObject({ code: 'bad-request', message: expect.stringContaining('not a legal move') });
+    expect(rows(app, 'SELECT * FROM coach_calls')).toHaveLength(0);
+  });
+
+  it('refuses a Review overview asked for by a client: only a Review makes one, from its own Engine facts', async () => {
+    const app = await instance();
+    const c = await client(app);
+    await expect(c.request('coach.ask', { ...whyAsk(), job: 'review-overview' as never })).rejects.toMatchObject({ code: 'bad-request', message: 'Unknown Coach job.' });
     expect(rows(app, 'SELECT * FROM coach_calls')).toHaveLength(0);
   });
 

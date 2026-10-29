@@ -58,6 +58,30 @@ describe('the real-Coach check', () => {
     expect(check(shows, exd5).problems).toEqual(['the reply shows d5e4, which is not legal here', 'the reply shows d5e4, which is not legal here']);
   });
 
+  it('checks a Review’s overview against the game moves its brief lists, not one position', () => {
+    const overview: Brief = {
+      ...brief,
+      job: 'review-overview',
+      move: undefined,
+      replies: undefined,
+      candidates: [],
+      maxWords: 90,
+      game: {
+        opening: 'Italian Game',
+        result: '0-1',
+        grades: { player: 'Best 10, Good 10, Inaccuracy 2, Mistake 2, Blunder 0', opponent: 'Best 14, Good 9, Inaccuracy 1, Mistake 0, Blunder 0' },
+        moments: [{ move: '11. Bxf7+', uci: 'c4f7', by: 'white', grade: 'Mistake', better: 'axb4', betterUci: 'a3b4' }],
+        standouts: [{ move: '9… d5', uci: 'd7d5', by: 'black', grade: 'Best', only: true }],
+      },
+    };
+    const said = { text: 'It turned on 11. Bxf7+, where axb4 held; your opponent found 9… d5.', moves: ['c4f7', 'd7d5', 'a3b4'], arrows: [] };
+    const record = { job: 'review-overview' as const, brief: overview, raw: { ...raw, moves: ['c4f7', 'd7d5'] } };
+    expect(checkCall(record, { ...good, ...said }, terms).problems).toEqual([]);
+    // Bxf7 is legal nowhere near the final position, and still passes; a move the brief doesn't list fails.
+    expect(checkCall(record, { ...good, ...said, moves: ['g1f3'] }, terms).problems).toEqual(["the overview shows g1f3, which its brief doesn't list"]);
+    expect(checkCall(record, { ...good, ...said, text: `${said.text} Then 30. Qxh7 won.` }, terms).problems).toEqual(['the text names Qxh7, which is not in the brief']);
+  });
+
   it('fails a piece move named in the text that is not in the brief', () => {
     expect(check({ text: 'Bb5+ was the move.' }).problems).toEqual(['the text names Bb5, which is not in the brief']);
   });

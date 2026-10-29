@@ -41,7 +41,7 @@ _Avoid_: Win probability, odds, eval
 ### Teaching
 
 **Review**:
-The Coach's walk-through of the key moments of a finished game.
+The Coach's walk-through of a finished game: a short overview of the whole game, then its key moments.
 _Avoid_: Analysis, post-mortem, game report
 
 **Why Question**:

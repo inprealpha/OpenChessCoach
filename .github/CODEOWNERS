@@ -24,5 +24,6 @@
 /scripts/glossary-lint.ts @inprealpha
 /scripts/glossary-allowlist.json @inprealpha
 /scripts/real-coach-check.ts @inprealpha
+/scripts/verdict.ts @inprealpha
 /.claude/skills/verify/ @inprealpha
 /.claude/skills/real-coach-check/ @inprealpha

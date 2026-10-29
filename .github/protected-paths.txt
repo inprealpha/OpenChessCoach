@@ -34,6 +34,7 @@ scripts/protected-paths.ts
 scripts/glossary-lint.ts
 scripts/glossary-allowlist.json
 scripts/real-coach-check.ts
+scripts/verdict.ts
 
 # The verification skills and feature map
 .claude/skills/verify/

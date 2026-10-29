@@ -1,0 +1,328 @@
+# The independent Verdict (ADR 0013). A fresh Claude Code session that did not write the PR reads
+# the diff, drives a verify-mode copy of the app the way a Player would, and posts PASS, PASS+NOTES
+# or FAIL as the "Verdict" status on the PR's head commit, which main requires.
+#
+# It runs once per finished PR, never on every push:
+#   - a PR is marked ready for review (a draft never starts it);
+#   - someone with write access comments "/verdict" on the PR, to judge the commit after a push;
+#   - by hand from the Actions tab on main, with the PR number.
+# A push leaves the new commit with a pending Verdict (pr-labels.yml), so a stale verdict never
+# merges. PRs that change only the files in .github/no-verdict-paths.txt pass without a run.
+#
+# pull_request_target and issue_comment run this file as it is on main, so a PR can't change its own
+# judge. They run with secrets, so forks are refused: only branches of this repository, which only
+# people with write access can push, get their code run. Three jobs keep the PR's code away from
+# any token that can write to GitHub:
+#   gate   decides whether to judge, enforces the limits, waits for CI   (can post statuses)
+#   judge  runs the PR's code, the real-Coach check and the judge         (read-only token)
+#   post   reads what the judge wrote, as data, and posts it              (can post statuses)
+# The PR's code still runs on the judge's machine, so it could forge the judge's files; that is why
+# the owner still merges by hand (ADR 0006, ADR 0013).
+name: Verdict
+
+on:
+  pull_request_target:
+    types: [ready_for_review]
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: PR number
+        required: true
+
+permissions:
+  contents: read
+
+env:
+  # The judge's model. The real-Coach check always uses Haiku (scripts/real-coach-check.ts).
+  JUDGE_MODEL: opus
+  # Limits on Claude usage: judge runs (counted by their Verdict comments), per PR and per UTC day.
+  MAX_RUNS_PER_PR: 3
+  MAX_RUNS_PER_DAY: 10
+  CLAUDE_CODE_VERSION: 2.1.310
+  PR: ${{ github.event.pull_request.number || github.event.issue.number || inputs.pr }}
+  REPO: ${{ github.repository }}
+  GH_REPO: ${{ github.repository }}
+  RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+jobs:
+  gate:
+    name: Gate
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.ref_name == github.event.repository.default_branch) ||
+      (github.event_name == 'pull_request_target' && !github.event.pull_request.draft) ||
+      (github.event_name == 'issue_comment' && github.event.issue.pull_request &&
+       startsWith(github.event.comment.body, '/verdict') &&
+       contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association))
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    permissions:
+      contents: read
+      pull-requests: read
+      issues: read
+      checks: read
+      statuses: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      IN: ${{ github.workspace }}/verdict-in
+    outputs:
+      judge: ${{ steps.ci.outputs.green }}
+      sha: ${{ steps.pr.outputs.sha }}
+      base: ${{ steps.pr.outputs.base }}
+      coach: ${{ steps.pr.outputs.coach }}
+    steps:
+      - name: Check out main's scripts
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+
+      - name: Find the PR and decide whether it needs a judge
+        id: pr
+        run: |
+          mkdir -p "$IN"
+          gh api "repos/$REPO/pulls/$PR" > "$IN/pull.json"
+          sha=$(jq -r .head.sha "$IN/pull.json")
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "base=$(jq -r .base.ref "$IN/pull.json")" >> "$GITHUB_OUTPUT"
+          if [ "$(jq -r .state "$IN/pull.json")" != open ]; then echo "PR #$PR is not open."; exit 0; fi
+          if [ "$(jq -r .draft "$IN/pull.json")" = true ]; then echo "PR #$PR is a draft: mark it ready for review first."; exit 0; fi
+          if [ "$(jq -r .head.repo.full_name "$IN/pull.json")" != "$REPO" ]; then
+            node scripts/verdict.ts --status error --sha "$sha" --description "PRs from forks aren't judged here: the owner checks them by hand"
+            exit 0
+          fi
+          current=$(gh api "repos/$REPO/commits/$sha/status" --jq '[.statuses[] | select(.context == "Verdict")][0].state // ""')
+          if [ "$GITHUB_EVENT_NAME" = pull_request_target ] && { [ "$current" = success ] || [ "$current" = failure ]; }; then
+            echo "Commit $sha already has a verdict ($current); comment /verdict to judge it again."; exit 0
+          fi
+          gh api "repos/$REPO/pulls/$PR/files" --paginate --jq '.[] | .filename, (.previous_filename // empty)' | sort -u > "$IN/changed.txt"
+          node scripts/protected-paths.ts --needs-verdict < "$IN/changed.txt" > "$IN/judged.txt"
+          if [ ! -s "$IN/judged.txt" ]; then
+            node scripts/verdict.ts --status success --sha "$sha" --description "Changes only docs, tests or process files: no Verdict needed"
+            exit 0
+          fi
+          runs_on_pr=$(gh api "repos/$REPO/issues/$PR/comments" --paginate \
+            --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | startswith("<!-- verdict"))) | .id' | wc -l)
+          today=$(date -u +%F)
+          runs_today=$(gh api -X GET "repos/$REPO/issues/comments" -f since="${today}T00:00:00Z" -f per_page=100 --paginate \
+            --jq ".[] | select(.user.login == \"github-actions[bot]\" and (.body | startswith(\"<!-- verdict\")) and (.created_at | startswith(\"$today\"))) | .id" | wc -l)
+          echo "Verdict runs on this PR: $runs_on_pr of $MAX_RUNS_PER_PR; runs today: $runs_today of $MAX_RUNS_PER_DAY"
+          if [ "$runs_on_pr" -ge "$MAX_RUNS_PER_PR" ] || [ "$runs_today" -ge "$MAX_RUNS_PER_DAY" ]; then
+            node scripts/verdict.ts --status error --sha "$sha" --description \
+              "Run limit reached ($runs_on_pr of $MAX_RUNS_PER_PR on this PR, $runs_today of $MAX_RUNS_PER_DAY today): the owner decides"
+            exit 0
+          fi
+          echo "go=yes" >> "$GITHUB_OUTPUT"
+          # The real-Coach check runs the PR's own copy of the script, so a PR that changes the script
+          # leaves the real Coach status to the desktop.
+          coach_status=$(gh api "repos/$REPO/commits/$sha/status" --jq '[.statuses[] | select(.context == "real Coach")][0].state // ""')
+          if [ -n "$(node scripts/protected-paths.ts --match coach < "$IN/changed.txt")" ] \
+            && ! grep -qx scripts/real-coach-check.ts "$IN/changed.txt" \
+            && [ "$coach_status" != success ] && [ "$coach_status" != failure ]; then
+            echo "coach=yes" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Tell the owner a run started
+        if: steps.pr.outputs.go == 'yes'
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          SHA: ${{ steps.pr.outputs.sha }}
+        run: |
+          node scripts/verdict.ts --status pending --sha "$SHA" --description "Judging this commit: waiting for CI, then the judge drives the app"
+          if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ]; then
+            title=$(jq -r .title "$IN/pull.json")
+            curl -fsS -o /dev/null "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
+              --data-urlencode "chat_id=$TELEGRAM_CHAT_ID" \
+              --data-urlencode "text=OpenChessCoach: a Verdict run started for PR #$PR ($title). $RUN_URL" || echo "Telegram notice failed."
+          fi
+
+      - name: Wait for CI to pass on this commit
+        id: ci
+        if: steps.pr.outputs.go == 'yes'
+        env:
+          SHA: ${{ steps.pr.outputs.sha }}
+        run: |
+          for _ in $(seq 1 80); do
+            state=$(gh api "repos/$REPO/commits/$SHA/check-runs?per_page=100" --jq '
+              # The CI run a branch push starts skips these jobs (ci.yml checks branches through their
+              # PR), so its copies are left out.
+              [.check_runs[] | select((.name == "Checks" or .name == "Player journeys") and .conclusion != "skipped")]
+              | group_by(.name) | map(max_by(.id))
+              | if length < 2 then "waiting"
+                elif any(.status != "completed") then "waiting"
+                elif all(.conclusion == "success") then "green"
+                else "red" end')
+            echo "CI: $state"
+            if [ "$state" = green ]; then echo "green=yes" >> "$GITHUB_OUTPUT"; exit 0; fi
+            if [ "$state" = red ]; then
+              node scripts/verdict.ts --status error --sha "$SHA" --description "CI isn't green on this commit: fix it, then comment /verdict"
+              exit 0
+            fi
+            sleep 30
+          done
+          node scripts/verdict.ts --status error --sha "$SHA" --description "CI didn't finish within 40 minutes: comment /verdict to try again"
+
+  judge:
+    name: Judge
+    needs: gate
+    if: needs.gate.outputs.judge == 'yes'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 95
+    concurrency:
+      group: verdict-${{ github.event.pull_request.number || github.event.issue.number || inputs.pr }}
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      pull-requests: read
+      issues: read
+    env:
+      IN: ${{ github.workspace }}/verdict-in
+      OUT: ${{ github.workspace }}/verdict-out
+      SHA: ${{ needs.gate.outputs.sha }}
+      BASE: ${{ needs.gate.outputs.base }}
+    steps:
+      - name: Check out main's judge instructions
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          path: trusted
+          persist-credentials: false
+
+      - name: Check out the PR's head commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.gate.outputs.sha }}
+          path: pr
+          fetch-depth: 0
+          persist-credentials: false
+
+      # No npm cache: this job runs in main's cache scope, and the PR's packages mustn't land there.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Gather what the judge reads
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p "$IN" "$OUT/evidence"
+          gh api "repos/$REPO/pulls/$PR" > "$IN/pull.json"
+          git -C pr diff --name-only "origin/$BASE...$SHA" > "$IN/changed.txt"
+          git -C pr diff "origin/$BASE...$SHA" > "$IN/diff.patch"
+          jq --rawfile changed "$IN/changed.txt" \
+            '{number, title, body, labels: [.labels[].name], base: .base.ref, head: .head.sha, changed: ($changed | split("\n") | map(select(length > 0)))}' \
+            "$IN/pull.json" > "$IN/pr.json"
+          : > "$IN/issues.md"
+          for n in $(jq -r '.body // ""' "$IN/pull.json" | grep -oiE '(close[sd]?|fix(e[sd])?|resolve[sd]?) #[0-9]+' | grep -oE '[0-9]+' | sort -u); do
+            gh issue view "$n" --json number,title,body --jq '"# Issue #\(.number): \(.title)\n\n\(.body)\n"' >> "$IN/issues.md" || true
+          done
+
+      - name: Install the app, the browser and Claude Code
+        working-directory: pr
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+          npm run build -w @chess-coach/web
+          npm install -g "@anthropic-ai/claude-code@$CLAUDE_CODE_VERSION"
+          claude --version
+
+      - name: Real-Coach check, for a PR that touches the Coach
+        # The same check the desktop runs (.claude/skills/real-coach-check/), on the owner's token.
+        # Once more if it couldn't run (exit 2, such as a Think deeper timeout). The post job posts it.
+        if: needs.gate.outputs.coach == 'yes'
+        working-directory: pr
+        timeout-minutes: 25
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          mkdir -p "$OUT/real-coach"
+          for attempt in 1 2; do
+            code=0
+            node scripts/real-coach-check.ts > "$OUT/real-coach/result.json" 2> "$OUT/real-coach/log.txt" || code=$?
+            echo "Real-Coach check, attempt $attempt: exit $code"
+            [ "$code" != 2 ] && break
+          done
+          echo "$code" > "$OUT/real-coach/exit"
+          tail -n 5 "$OUT/real-coach/log.txt"
+          { jq '{ok, description, calls: [.calls[] | select((.problems | length) > 0 or (.warnings | length) > 0)]}' "$OUT/real-coach/result.json" 2>/dev/null \
+            || cat "$OUT/real-coach/log.txt"; } > "$IN/real-coach.txt"
+
+      - name: The judge
+        working-directory: pr
+        timeout-minutes: 55
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          prompt=$(sed -e "s|{{PR}}|$PR|g" -e "s|{{SHA}}|$SHA|g" -e "s|{{BASE}}|$BASE|g" -e "s|{{IN}}|$IN|g" -e "s|{{OUT}}|$OUT|g" ../trusted/.github/verdict-prompt.md)
+          # Marks a run that used Claude, so it counts toward the limits.
+          touch "$OUT/started"
+          claude -p "$prompt" --model "$JUDGE_MODEL" --dangerously-skip-permissions --output-format json < /dev/null > "$OUT/claude.json" \
+            || echo "Claude Code exited with $?"
+          jq '{subtype, num_turns, duration_ms, total_cost_usd, is_error}' "$OUT/claude.json" || true
+
+      - name: Leave no secret in what gets published
+        # Artifacts and comments on a public repository are public, and log masking doesn't reach them.
+        if: always()
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          mkdir -p "$OUT"
+          cp -r pr/evidence "$OUT/app-evidence" 2>/dev/null || true
+          if [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ]; then
+            grep -rlF -- "$CLAUDE_CODE_OAUTH_TOKEN" "$OUT" | while read -r f; do
+              echo "Removed $f: it contained a secret."; rm -f "$f"
+            done || true
+          fi
+
+      - name: Keep the judge's files
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verdict-evidence
+          path: verdict-out/
+          retention-days: 30
+          if-no-files-found: ignore
+
+  post:
+    name: Post the Verdict
+    needs: [gate, judge]
+    if: ${{ always() && needs.gate.outputs.judge == 'yes' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      statuses: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      SHA: ${{ needs.gate.outputs.sha }}
+    steps:
+      - name: Check out main's scripts
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+
+      - name: Fetch what the judge wrote
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: verdict-evidence
+          path: verdict-out
+
+      - name: Post the real-Coach status
+        if: needs.gate.outputs.coach == 'yes'
+        run: |
+          code=$(cat verdict-out/real-coach/exit 2>/dev/null || echo none)
+          if [ "$code" = 0 ] || [ "$code" = 1 ]; then
+            description=$(jq -r '.description // "The real-Coach check gave no description"' verdict-out/real-coach/result.json)
+            node scripts/verdict.ts --status "$([ "$code" = 0 ] && echo success || echo failure)" --context "real Coach" --sha "$SHA" --description "$description"
+          else
+            echo "The real-Coach check couldn't run (exit $code): the status stays pending for the desktop."
+          fi
+
+      - name: Post the Verdict
+        run: node scripts/verdict.ts --post verdict-out --pr "$PR" --sha "$SHA" --run-url "$RUN_URL"

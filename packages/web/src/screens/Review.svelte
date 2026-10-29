@@ -1,13 +1,14 @@
 <script lang="ts">
   // A Review of one game: the desktop's Engine grades every move (ADR 0007), the desktop picks the
-  // key moments, and the Coach explains each one, streamed as it's written. Saved Reviews reopen
-  // with no Coach call.
+  // key moments, and the Coach writes an overview of the whole game (unless Settings turn it off),
+  // then explains each key moment, streamed as it's written. Saved Reviews reopen with no Coach call.
   import { untrack } from 'svelte';
   import { moveLabel } from '@chess-coach/shared/chess';
   import type { MoveGrade } from '@chess-coach/shared/grader';
   import { scoreAfterPly } from '@chess-coach/shared/position-score';
   import { winningChancesFor, type WinningChances } from '@chess-coach/shared/winning-chances';
-  import type { GameDetail, GameSummary, KeyMoment, Review } from '@chess-coach/shared/protocol';
+  import { overviewSegments } from '@chess-coach/shared/overview';
+  import type { GameDetail, GameSummary, KeyMoment, OverviewMove, Review } from '@chess-coach/shared/protocol';
   import Board from '../components/Board.svelte';
   import CoachPanel from '../components/CoachPanel.svelte';
   import GradeBadge from '../components/GradeBadge.svelte';
@@ -155,6 +156,21 @@
     boardArea.scrollIntoView({ block: 'start', behavior: still ? 'auto' : 'smooth' });
   }
 
+  /** A move the overview names: the board goes to the position after it, as the move list does. */
+  function showMove(m: OverviewMove): void {
+    goto(m.ply);
+    showBoard();
+  }
+
+  /** The overview's text split at the moves it names, and the moves it names that its text doesn't link. */
+  const overview = $derived.by(() => {
+    const o = review?.overview;
+    if (!o) return null;
+    const segments = overviewSegments(o.text, o.moves);
+    const linked = new Set(segments.flatMap((p) => (p.move ? [p.move.ply] : [])));
+    return { segments, unlinked: o.moves.filter((m) => !linked.has(m.ply)) };
+  });
+
   /** A move picked in the move list, which sits under the board on a phone. */
   function pickMove(cursor: number): void {
     goto(cursor);
@@ -300,7 +316,7 @@
       <div class="side" bind:this={side}>
         {#if phase === 'ready'}
           <div class="card">
-            <p>The Engine grades every move, then the Coach explains the moments that mattered most.</p>
+            <p>The Engine grades every move, then the Coach sums up the game and explains the moments that mattered most.</p>
             <button type="button" onclick={start} disabled={api.state !== 'online'}>Start the Review</button>
           </div>
         {:else if phase === 'running' && run?.interrupted}
@@ -314,9 +330,43 @@
           </div>
         {:else if phase === 'running' && run?.phase === 'explaining'}
           <div class="card" role="status" aria-live="polite">
-            <p>The Coach is explaining the key moments…</p>
-            {#each run.streaming as text, i (i)}<p class="stream">{text}</p>{/each}
+            <!-- The overview comes first when Settings have it on: the desktop says so as it starts on it. -->
+            <p>{run.overviewFirst && !run.streaming.length ? 'The Coach is writing an overview of the game…' : 'The Coach is explaining the key moments…'}</p>
+            {#if run.overview}<p class="stream" data-testid="overview-stream">{run.overview}</p>{/if}
+            {#each run.streaming as text, i (i)}{#if text}<p class="stream">{text}</p>{/if}{/each}
           </div>
+        {/if}
+
+        {#if review && overview}
+          <section class="card" aria-label="Overview">
+            <h2>Overview</h2>
+            <p class="overview">
+              {#each overview.segments as part, i (i)}
+                {#if part.move}
+                  {@const m = part.move}
+                  <button
+                    type="button"
+                    class="link move"
+                    class:current={line.cursor === m.ply}
+                    onclick={() => showMove(m)}
+                    aria-label={`Go to move ${m.label}, ${m.grade}`}>{part.text}</button
+                  >
+                {:else}{part.text}{/if}
+              {/each}
+            </p>
+            {#if overview.unlinked.length}
+              <p class="small">
+                Moves it names:
+                {#each overview.unlinked as m, i (m.ply)}{i ? ', ' : ''}<button
+                    type="button"
+                    class="link move"
+                    class:current={line.cursor === m.ply}
+                    onclick={() => showMove(m)}
+                    aria-label={`Go to move ${m.label}, ${m.grade}`}>{m.label}</button
+                  >{/each}
+              </p>
+            {/if}
+          </section>
         {/if}
 
         {#if review}
@@ -378,6 +428,10 @@
   .chances { margin: 0.3rem 0; }
   .eval { font-size: 0.8rem; font-variant-numeric: tabular-nums; }
   .explanation { margin: 0.3rem 0 0; }
+  .overview { margin: 0.3rem 0 0; }
+  /* A move the overview names reads as part of its sentence, marked as something to click. */
+  .move { color: var(--accent); text-decoration: underline; text-underline-offset: 0.15em; font: inherit; }
+  .move.current { font-weight: 600; }
   .stream { white-space: pre-wrap; }
   /* The card's padding is its spacing: no extra paragraph margin above its first line. */
   .card > p:first-child { margin-top: 0; }

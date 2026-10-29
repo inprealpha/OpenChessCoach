@@ -1,16 +1,18 @@
 ---
 name: real-coach-check
-description: Check a PR that touches the Coach against the real Coach on the owner's desktop and post the "real Coach" status on its head commit. Use when a PR has the touches-coach label, from a Claude Code session on the owner's desktop where Claude Code is logged in.
+description: Check a PR that touches the Coach against the real Coach on the owner's desktop and post the "real Coach" status on its head commit. The Verdict job runs the same check when the PR is marked ready; use this when a PR has the touches-coach label and still has no real-Coach status, from a Claude Code session on the owner's desktop where Claude Code is logged in.
 ---
 
 # Real-Coach check
 
 CI uses the fake Coach, so a PR that touches the Coach (any path in `.github/coach-paths.txt`) gets
 the `touches-coach` label and a pending `real Coach` status. It can't merge until this check passes
-on its exact head commit. It runs here, on the owner's desktop, because the real Coach uses the
-owner's Claude Code login (ADR 0001), which cloud CI doesn't have. Each run makes about eight
-small Coach calls on the owner's Claude subscription, all on the latest Haiku (the `haiku` alias),
-whatever model each job uses in the app. The owner's rule: tests run on the latest Haiku.
+on its exact head commit. The Verdict job (`.github/workflows/verdict.yml`, ADR 0013) runs it when
+the PR is marked ready for review, with the owner's Claude login as a token. Run it here, on the
+owner's desktop, when that job didn't: the real Coach uses the owner's Claude Code login (ADR 0001).
+Each run makes 15 small Coach calls on the owner's Claude subscription, all on the latest Haiku
+(the `haiku` alias), whatever model each job uses in the app. The owner's rule: tests run on the
+latest Haiku.
 
 ## Steps
 
@@ -32,12 +34,13 @@ whatever model each job uses in the app. The owner's rule: tests run on the late
    ```
 
    It starts a verify-mode instance with the real Coach in place of the fake one, makes one call of
-   every Coach job (Why Question, Live Coaching, Hint, Lesson turn, and each Review key moment of
-   the seeded game) through the same protocol the web app uses: each request carries only the
-   position and the moves, and the instance's own Engine works out the facts (ADR 0007). It checks
-   structure only:
+   every Coach job (Why Question, Live Coaching, Hint, Lesson turn, and a Review of the seeded game:
+   its overview and each key moment) through the same protocol the web app uses: each request
+   carries only the position and the moves, and the instance's own Engine works out the facts
+   (ADR 0007). It checks structure only:
 
-   - every move or arrow a reply shows is legal and came from the Engine;
+   - every move or arrow a reply shows is legal and came from the Engine; a Review's overview
+     names only the game moves its brief lists;
    - every piece move named in the text appears in the brief (the Engine's output, the game or the
      Lesson notes), and a Hint names no move at all;
    - a Lesson turn on a move that isn't the Lesson's (the Forks Lesson's first decision) neither

@@ -1,7 +1,7 @@
 // A disposable verify-mode instance (ADR 0006): fake Coach, fake clock, fixed-depth Engine,
 // a fresh data folder with seeded data, and a port the OS picks so it never meets the owner's
 // own instance. It counts as ready only after a pairing handshake succeeds.
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { CoachClient, pairDevice } from '../client.ts';
@@ -12,6 +12,7 @@ import { appVersion, webRoot } from '../runtime.ts';
 import { startApp, type AppOptions, type RunningApp } from '../server.ts';
 import type { TunnelStarter } from '../tunnel.ts';
 import type { CoachPort } from '../coach/port.ts';
+import type { CoachRawReply } from '@chess-coach/shared/coach/types';
 import type { TemptingMovesService } from '../tempting-moves/service.ts';
 import { recordedFetch } from './recorded-sites.ts';
 import { seed, type Seed } from './seed.ts';
@@ -56,10 +57,15 @@ export const fakeTunnelStarter: TunnelStarter = async () => ({
   onExit: () => {},
 });
 
+/** The fake Coach's recorded replies (see recordings/coach.json): the seeded game's Review overview. */
+export function coachRecordings(): Record<string, CoachRawReply> {
+  return (JSON.parse(readFileSync(new URL('./recordings/coach.json', import.meta.url), 'utf8')) as { replies: Record<string, CoachRawReply> }).replies;
+}
+
 export async function startVerifyInstance(options: VerifyOptions = {}): Promise<VerifyInstance> {
   const dataDir = options.dataDir ?? mkdtempSync(join(tmpdir(), 'chess-coach-verify-'));
   const clock = new FakeClock();
-  const coach = new FakeCoach({ chunkDelayMs: options.chunkDelayMs ?? 5 });
+  const coach = new FakeCoach({ chunkDelayMs: options.chunkDelayMs ?? 5, recordings: coachRecordings() });
   const seeded = openDb(dataDir);
   seed(seeded, clock, options.seed ?? 'default');
   seeded.close();

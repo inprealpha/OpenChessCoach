@@ -32,7 +32,7 @@
   import { desktopBack, droppedConnection, runningReview, startReview, type ReviewRun } from '../lib/review-runs.svelte.ts';
   import { router } from '../lib/router.svelte.ts';
   import { threatSetting, ThreatView } from '../lib/threat.svelte.ts';
-  import { foldOpen, rememberFold } from '../lib/folds.ts';
+  import { foldFromNextVisit, foldOpen, rememberFold } from '../lib/folds.ts';
   import { gradeMark } from '../lib/grades.ts';
   import { narrow } from '../lib/narrow.svelte.ts';
   import { titleFrom } from '../lib/page-title.svelte.ts';
@@ -170,8 +170,17 @@
     goto(m.ply);
   }
 
+  // The overview is open on the first visit to its Review, then folded to its first sentence, unless
+  // the Player opens it again (docs/design/interface-guidelines.md, Collapsing and density).
+  $effect(() => {
+    if (game && review?.overview) foldFromNextVisit(`review-overview-${game.id}`);
+  });
+
   function toggleOverview(e: Event): void {
-    overviewOpen = (e.currentTarget as HTMLDetailsElement).open;
+    const now = (e.currentTarget as HTMLDetailsElement).open;
+    // A details element drawn open fires toggle too: only the Player's own opening or closing counts.
+    if (now === overviewOpen) return;
+    overviewOpen = now;
     if (game) rememberFold(`review-overview-${game.id}`, overviewOpen);
   }
 
@@ -471,7 +480,7 @@
               {#if overview}
                 <section class="card overview-card" aria-label="Overview">
                 <details class="fold overview-fold" open={overviewOpen} ontoggle={toggleOverview}>
-                  <summary><strong>Overview</strong>{#if !overviewOpen}<span class="summary-line"> · {firstSentence(review.overview?.text ?? '')}</span>{/if}</summary>
+                  <summary><strong>Overview</strong>{#if !overviewOpen}<span class="summary-line">{` · ${firstSentence(review.overview?.text ?? '')}`}</span>{/if}</summary>
                   <p class="overview">
                     {#each overview.segments as part, i (i)}
                       {#if part.move}

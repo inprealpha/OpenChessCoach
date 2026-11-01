@@ -22,3 +22,15 @@ export function rememberFold(name: string, open: boolean): void {
     // Storage is blocked: the section still opens and closes, it just isn't remembered.
   }
 }
+
+/**
+ * Folds the section `name` from the next visit on, unless the Player already opened or closed it:
+ * for a section read once, such as a Review's overview, then in the way.
+ */
+export function foldFromNextVisit(name: string): void {
+  try {
+    if (localStorage.getItem(PREFIX + name) === null) localStorage.setItem(PREFIX + name, '0');
+  } catch {
+    // Storage is blocked: the section opens on every visit instead.
+  }
+}

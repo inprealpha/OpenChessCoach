@@ -591,7 +591,7 @@
           {#if phase === 'done'}Lesson complete{:else}Decision {step + 1} of {decisionList.length}{/if}
         </p>
       {/if}
-      <a class="back" href="#/lessons" aria-label="Back to the Lessons"><span aria-hidden="true">←</span> <span class="long">Back to the </span>Lessons</a>
+      <a class="back" href="#/lessons" aria-label="Back to the Lessons"><span aria-hidden="true">←</span> <span class="long">Back to the</span> Lessons</a>
     </header>
     {#if phase === 'intro'}
       {@const firstPart = lesson.parts[0]}

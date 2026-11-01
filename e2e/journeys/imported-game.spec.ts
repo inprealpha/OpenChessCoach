@@ -483,9 +483,14 @@ test.describe('a Review’s overview', () => {
     await expect(board.getByRole('img', { name: 'Mistake on g5' })).toBeVisible();
     await expect(current).toHaveAccessibleName('Current position: 12. Bg5: White’s winning chances: 19%');
 
-    // Reopened, the saved overview is there, links and all, with no Coach call.
+    // Reopened, the saved overview is folded to its first sentence, having been read once; opened,
+    // it is all there, links and all, with no Coach call.
     const text = await overview.textContent();
     await paired.reload();
+    const fold = paired.getByRole('region', { name: 'Overview' }).locator('details');
+    await expect(fold).not.toHaveAttribute('open');
+    await expect(fold.locator('summary')).toContainText('Overview · Your opening went well');
+    await fold.locator('summary').click();
     await expect(paired.getByRole('region', { name: 'Overview' })).toHaveText(text ?? '');
     await expect(paired.getByRole('region', { name: 'Overview' }).getByRole('button')).toHaveCount(5);
     expect(await app.rows('coach_calls')).toHaveLength(calls.length);

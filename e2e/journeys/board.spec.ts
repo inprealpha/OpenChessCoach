@@ -680,7 +680,7 @@ test('a Why Question is answered with Engine moves only, and the brief is record
   expect(calls).toHaveLength(1);
   const call = calls[0] as { job: string; brief: string; model: string };
   expect(call.job).toBe('why');
-  expect(call.model).toBe('sonnet');
+  expect(call.model).toBe('opus');
   const brief = JSON.parse(call.brief) as Record<string, unknown> & { move: { san: string }; question: string };
   expect(brief.move.san).toBe('Qh5');
   expect(brief.question).toBe('Why not develop a knight?');

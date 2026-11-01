@@ -603,7 +603,7 @@ describe('Reviews', () => {
     // One overview call, on the Review moments' model, before any key moment.
     const calls = rows<{ job: string; model: string; brief: string; stripped: string }>(app, 'SELECT job, model, brief, stripped FROM coach_calls ORDER BY id');
     expect(calls.map((r) => r.job)).toEqual(['review-overview', 'review-moment', 'review-moment', 'review-moment', 'review-moment']);
-    expect(calls[0]?.model).toBe('sonnet');
+    expect(calls[0]?.model).toBe('opus');
     // Its recorded brief: Move Grade counts for both sides, the key moments and the standout moves, within its budget (ADR 0004).
     const brief = JSON.parse(calls[0]?.brief as string) as Brief;
     expect(calls[0]?.brief.length).toBeLessThanOrEqual(BRIEF_BUDGET);

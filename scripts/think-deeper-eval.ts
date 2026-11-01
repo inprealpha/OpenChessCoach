@@ -9,7 +9,7 @@
 //
 // --set picks the tuning set or the held-out one (default: tuning), --only some positions by id and
 // --modes one mode (default: off,on). --model is a model alias, or
-// "app" for the model each job uses in the app's Balanced preset. It spends the owner's Claude
+// "app" for the model each job uses in the app's default preset. It spends the owner's Claude
 // limits: about two Coach calls per position.
 import { readFileSync, writeFileSync } from 'node:fs';
 import { parseArgs } from 'node:util';
@@ -142,7 +142,7 @@ async function answer(positions: EvalPosition[], model: string, only: readonly s
   const { join } = await import('node:path');
   const { openDb } = await import('../packages/backend/src/db.ts');
   const { systemClock } = await import('../packages/backend/src/clock.ts');
-  const { updateSettings, COACH_QUALITY_MODELS } = await import('../packages/backend/src/settings.ts');
+  const { updateSettings, DEFAULT_MODELS } = await import('../packages/backend/src/settings.ts');
   const { CoachService } = await import('../packages/backend/src/coach/service.ts');
   const { RealCoach } = await import('../packages/backend/src/coach/real.ts');
   const { EngineService } = await import('../packages/backend/src/engine/service.ts');
@@ -152,7 +152,7 @@ async function answer(positions: EvalPosition[], model: string, only: readonly s
   const db = openDb(mkdtempSync(join(tmpdir(), 'think-deeper-')));
   const engine = new EngineService(() => createNodeEngine(desktopThreads()), ENGINE);
   const coach = new CoachService(db, systemClock, new RealCoach());
-  const models = model === 'app' ? COACH_QUALITY_MODELS.balanced : Object.fromEntries(Object.keys(COACH_QUALITY_MODELS.balanced).map((j) => [j, model]));
+  const models = model === 'app' ? DEFAULT_MODELS : Object.fromEntries(Object.keys(DEFAULT_MODELS).map((j) => [j, model]));
   updateSettings(db, { models });
 
   const out: EvalAnswer[] = [];

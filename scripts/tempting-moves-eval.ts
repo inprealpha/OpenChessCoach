@@ -92,7 +92,7 @@ async function answer(positions: TemptingPosition[], model: string): Promise<Tem
   const { tmpdir } = await import('node:os');
   const { openDb } = await import('../packages/backend/src/db.ts');
   const { systemClock } = await import('../packages/backend/src/clock.ts');
-  const { updateSettings, COACH_QUALITY_MODELS } = await import('../packages/backend/src/settings.ts');
+  const { updateSettings, DEFAULT_MODELS } = await import('../packages/backend/src/settings.ts');
   const { CoachService } = await import('../packages/backend/src/coach/service.ts');
   const { RealCoach } = await import('../packages/backend/src/coach/real.ts');
   const { EngineService } = await import('../packages/backend/src/engine/service.ts');
@@ -112,7 +112,7 @@ async function answer(positions: TemptingPosition[], model: string): Promise<Tem
   const db = openDb(mkdtempSync(join(tmpdir(), 'tempting-moves-')));
   const engine = new EngineService(() => createNodeEngine(desktopThreads()), ENGINE);
   const coach = new CoachService(db, systemClock, new RealCoach());
-  const models = model === 'app' ? COACH_QUALITY_MODELS.balanced : Object.fromEntries(Object.keys(COACH_QUALITY_MODELS.balanced).map((j) => [j, model]));
+  const models = model === 'app' ? DEFAULT_MODELS : Object.fromEntries(Object.keys(DEFAULT_MODELS).map((j) => [j, model]));
   updateSettings(db, { models, thinkDeeper: false });
 
   const out: TemptingAnswer[] = [];

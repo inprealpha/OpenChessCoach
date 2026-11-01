@@ -195,12 +195,13 @@ export const MIGRATIONS: string[] = [
   DELETE FROM settings WHERE key = 'thinkDeeper';
   `,
   // Opus is now the default for Reviews, Why Questions and Lessons (0.5.0), and every install moves
-  // to it once (the owner's call): a saved Sonnet for those jobs becomes Opus. Hints and Live
-  // Coaching keep what was saved, and a Player who picks Sonnet again keeps it.
+  // to it once (the owner's call): a saved Sonnet for those jobs, the alias or a full model id,
+  // becomes Opus. Hints and Live Coaching keep what was saved, a Player who picks Sonnet again keeps
+  // it, and a value that isn't JSON is left for the settings reader rather than stopping the start.
   `
-  UPDATE settings SET value = json_set(value, '$."review-moment"', 'opus') WHERE key = 'models' AND json_extract(value, '$."review-moment"') = 'sonnet';
-  UPDATE settings SET value = json_set(value, '$.why', 'opus') WHERE key = 'models' AND json_extract(value, '$.why') = 'sonnet';
-  UPDATE settings SET value = json_set(value, '$."lesson-turn"', 'opus') WHERE key = 'models' AND json_extract(value, '$."lesson-turn"') = 'sonnet';
+  UPDATE settings SET value = json_set(value, '$."review-moment"', 'opus') WHERE key = 'models' AND json_valid(value) AND lower(json_extract(value, '$."review-moment"')) LIKE '%sonnet%';
+  UPDATE settings SET value = json_set(value, '$.why', 'opus') WHERE key = 'models' AND json_valid(value) AND lower(json_extract(value, '$.why')) LIKE '%sonnet%';
+  UPDATE settings SET value = json_set(value, '$."lesson-turn"', 'opus') WHERE key = 'models' AND json_valid(value) AND lower(json_extract(value, '$."lesson-turn"')) LIKE '%sonnet%';
   `,
 ];
 

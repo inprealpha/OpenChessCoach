@@ -4,7 +4,7 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it, onTestFinished } from 'vitest';
-import { openDb } from '../src/db.ts';
+import { MIGRATIONS, openDb } from '../src/db.ts';
 import { getSettings, updateSettings } from '../src/settings.ts';
 import { client, instance } from './helpers.ts';
 
@@ -82,9 +82,10 @@ describe('Think deeper', () => {
     onTestFinished(() => rmSync(dir, { recursive: true, force: true }));
     // Before #32, saving any setting stored every setting, so "off" was stored with the rest.
     const old = openDb(dir);
-    const version = (old.prepare('SELECT version FROM schema_version').get() as { version: number }).version;
     old.prepare("INSERT INTO settings (key, value) VALUES ('thinkDeeper', 'false'), ('liveCoachingDefault', 'false')").run();
-    old.prepare('UPDATE schema_version SET version = ?').run(version - 1);
+    // Back to before the reset's migration, undoing the later ones that change a table.
+    old.exec('ALTER TABLE profile DROP COLUMN level_from_games; ALTER TABLE reviews DROP COLUMN counted');
+    old.prepare('UPDATE schema_version SET version = ?').run(MIGRATIONS.findIndex((m) => m.includes("DELETE FROM settings WHERE key = 'thinkDeeper'")));
     old.close();
     const db = openDb(dir);
     expect(getSettings(db)).toMatchObject({ thinkDeeper: true, liveCoachingDefault: false });

@@ -226,6 +226,101 @@ test.describe('a Player who never paired a phone', () => {
   });
 });
 
+test.describe('a phone the desktop\'s firewall keeps out (#31)', () => {
+  test.use({ seed: 'empty' });
+
+  test('after two minutes with no phone, "Connect another way" swaps in the tunnel\'s QR code, and the phone pairs through it', async ({ page, app, browser }) => {
+    await page.clock.install();
+    await page.goto(`${app.url}/#pair=${app.code}`);
+    const step = page.getByRole('region', { name: 'Play on your phone' });
+    const qr = step.getByRole('figure', { name: 'Pairing QR code' });
+    await expect(qr).toHaveAttribute('data-way', 'wifi');
+    // Not before the Player has had time to try.
+    await page.clock.fastForward('01:50');
+    await expect(step.getByText('Phone can’t open it?')).toHaveCount(0);
+    await page.clock.fastForward('00:10');
+    await expect(step.getByText('Phone can’t open it?')).toBeVisible();
+    await expect(step.getByTestId('another-way')).toContainText('scan again after a restart');
+
+    await step.getByRole('button', { name: 'Connect another way' }).click();
+    await expect(qr).toHaveAttribute('data-way', 'tunnel');
+    await expect(step.getByTestId('another-way')).toContainText('Scan this new code.');
+    await expect(step.getByTestId('another-way')).toBeFocused();
+    // The Wi-Fi step goes; a phone whose camera opens no link types the code at the tunnel's address.
+    await expect(step.getByRole('listitem')).toHaveText([/camera/, /Tap the link/]);
+    await step.getByText('No link appears?').click();
+    await expect(step.getByText('https://verify-mode.trycloudflare.com', { exact: true })).toBeVisible();
+    await expect(step.getByTestId('phone-pairing-code')).toHaveText(grouped(app.code));
+    // Saved like Settings' Away from home checkbox, so it comes back after a restart.
+    const settings = await app.rows<{ key: string; value: string }>('settings');
+    expect(settings.find((r) => r.key === 'tunnelEnabled')?.value).toBe('true');
+
+    // Pairing still applies: the phone opens the tunnel's pairing link (here the same instance).
+    const phone = await phoneScans(browser, app);
+    await expect(step.getByRole('status')).toContainText('Your phone is paired.');
+    await expect(step.getByRole('status')).toContainText('scan the new code in Settings, under Away from home');
+    await phone.context().close();
+  });
+
+  test.describe('when the tunnel fails to start', () => {
+    let starts = 0;
+    test.beforeEach(() => {
+      starts = 0;
+    });
+    test.use({
+      appOptions: {
+        tunnelStarter: async () => {
+          if (++starts === 1) throw new Error('The tunnel did not start within 45 seconds.');
+          return { url: 'https://second-try.trycloudflare.com', stop: async () => {}, onExit: () => {} };
+        },
+      },
+    });
+
+    test('it says so, and "Try again" starts it again', async ({ page, app }) => {
+      await page.clock.install();
+      await page.goto(`${app.url}/#pair=${app.code}`);
+      const step = page.getByRole('region', { name: 'Play on your phone' });
+      await expect(step.getByRole('figure', { name: 'Pairing QR code' })).toBeVisible();
+      await page.clock.fastForward('02:00');
+      await step.getByRole('button', { name: 'Connect another way' }).click();
+      await expect(step.getByTestId('another-way')).toContainText('Connecting another way didn’t work. Check this desktop is online, then try again.');
+      await expect(step.getByRole('figure', { name: 'Pairing QR code' })).toHaveAttribute('data-way', 'wifi');
+      await step.getByRole('button', { name: 'Try again' }).click();
+      await expect(step.getByRole('figure', { name: 'Pairing QR code' })).toHaveAttribute('data-way', 'tunnel');
+      await step.getByText('No link appears?').click();
+      await expect(step.getByText('https://second-try.trycloudflare.com', { exact: true })).toBeVisible();
+    });
+  });
+
+  test('with the code hidden, as in the main menu\'s reminder, the wait starts only once it is shown', async ({ page, app }) => {
+    await page.clock.install();
+    await page.goto(`${app.url}/#pair=${app.code}`);
+    await phoneLater(page);
+    await page.getByRole('button', { name: 'Skip to the main menu' }).click();
+    app.clock.advance(ASK_AGAIN_MS);
+    await page.reload();
+    const dialog = reminder(page);
+    await expect(dialog).toBeVisible();
+    await page.clock.fastForward('02:00');
+    await expect(dialog.getByText('Phone can’t open it?')).toHaveCount(0);
+    await dialog.getByRole('button', { name: 'Show the code' }).click();
+    await expect(dialog.getByRole('figure', { name: 'Pairing QR code' })).toBeVisible();
+    await page.clock.fastForward('02:00');
+    await expect(dialog.getByRole('button', { name: 'Connect another way' })).toBeVisible();
+  });
+
+  test('a Windows desktop warns about its question on Node.js beside the QR code', async ({ page, app }) => {
+    process.env.CHESS_COACH_DESKTOP_SYSTEM = 'windows';
+    try {
+      await page.goto(`${app.url}/#pair=${app.code}`);
+      const step = page.getByRole('region', { name: 'Play on your phone' });
+      await expect(step.getByText('Windows may ask whether Node.js can use your networks. Tick both boxes (Private and Public) and click Allow access, or your phone can’t open the app.')).toBeVisible();
+    } finally {
+      delete process.env.CHESS_COACH_DESKTOP_SYSTEM;
+    }
+  });
+});
+
 test('a pairing reset unpairs the phone, so the main menu asks again at once', async ({ paired }) => {
   await reloadAndHearBack(paired);
   await expect(reminder(paired)).toBeHidden();

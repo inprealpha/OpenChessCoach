@@ -96,3 +96,13 @@ Maia-3's code is AGPL-3.0, and its weights have no licence of their own; the mod
 - Verify mode stays deterministic (ADR 0006): it uses a fixed fake source of moves, never the network or Opus.
 - Maia2 (MIT) is the fallback choice if the AGPL becomes a problem. It is almost as good, and its top three match Maia-3's.
 - Building this changes the brief, the guard and the Coach's instructions, so it waits until the Think Deeper PR merges.
+
+## Amendment: a game's own ratings (#33)
+
+A game from Lichess or chess.com records each player's rating for that game. The Player Profile has a checkbox next to the level, "Pitch each Review at the game's rating", off by default. With it on, a game's Review, and a Why Question about it, is pitched at the rating the game gives the side the Review follows (its band, as `bandFor` reads a rating), and Maia-3 reads the same game's ratings:
+
+- The side's rating goes through the rules above, with the pool read from the game: Lichess names it in its Event ("Rated Blitz game"), and otherwise each site's rule on the time control gives it (the base time plus 40 times the increment: on Lichess under 480 seconds is blitz and under 1500 rapid; on chess.com under 600 is blitz and from 600 rapid). A blitz rating is used as the blitz rating, so a chess.com blitz game converts. A classical, bullet or daily game's rating doesn't convert soundly: the owner's own game then falls back on the Profile's rating, as with the checkbox off, and anyone else's gets 1500.
+- The opponent's rating is the game's too, through the same rules, so Maia-3 no longer takes it as the Player's for that game.
+- A game without a rating for the side, an Engine Game, or the checkbox off: the Player Profile's level and rating, as before.
+
+The checkbox costs nothing: it changes only the brief's level and rating and the numbers Maia-3 reads. A game the owner didn't play (one from the site their linked account is on that names neither side by it, such as a friend's games fetched by username) is told about by colour, "White" or "Black", never "you": its Review writes no Coach note and counts no Move Grades into the Player Profile, and the Review records that it didn't count, so dropping it later takes nothing back even if the account has changed since. A saved Review keeps the pitch it was made with; a new Review, or a Why Question, uses the checkbox as it is then.

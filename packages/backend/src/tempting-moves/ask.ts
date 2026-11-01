@@ -26,6 +26,8 @@ export interface Guess {
   playerSide?: Side | undefined;
   /** The Player's rating on the Lichess blitz scale (see rating.ts). */
   rating: number;
+  /** The opponent's, when a game's record gives it (#33). */
+  opponentRating?: number | undefined;
   /** The game up to the position: its first position and its moves in UCI. */
   history: { startFen: string; moves: readonly string[] };
   signal?: AbortSignal;
@@ -46,8 +48,8 @@ export function guessTempting(job: CoachJob, guess: Guess): Promise<TemptingMove
     startFen,
     moves,
     rating: guess.rating,
-    // The opponent's rating isn't known: Players mostly meet opponents near their own.
-    opponentRating: guess.rating,
+    // Without the game's record, the opponent's rating isn't known: Players mostly meet opponents near their own.
+    opponentRating: guess.opponentRating ?? guess.rating,
     count: TEMPTING_COUNT,
     ...(guess.signal ? { signal: guess.signal } : {}),
   });

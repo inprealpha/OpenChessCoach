@@ -78,6 +78,20 @@ function someThreat(fen: string): Threat {
 }
 
 describe('the Coach brief', () => {
+  it("pitches a game's Review at the game's rating, and names a game the owner didn't play (#33)", () => {
+    const ask = longGameAsk();
+    const own = buildBrief({ ask, profile });
+    expect(own).toMatchObject({ level: 'casual', rating: 1450 });
+    expect(own).not.toHaveProperty('ownGame');
+    const pitched = buildBrief({ ask: { ...ask, pitch: { level: 'club', rating: 1950 } }, profile });
+    expect(pitched).toMatchObject({ level: 'club', rating: 1950 });
+    // Someone else's game, at the Player Profile's level: only the side named by colour changes.
+    const theirs = buildBrief({ ask: { ...ask, pitch: { ownGame: false } }, profile: { ...profile, rating: null } });
+    expect(theirs).toMatchObject({ level: 'casual', ownGame: false });
+    expect(theirs).not.toHaveProperty('rating');
+    expect(briefSize(buildBrief({ ask: { ...ask, pitch: { level: 'club', rating: 1950, ownGame: false } }, profile, summary: 'y'.repeat(5000) }))).toBeLessThanOrEqual(BRIEF_BUDGET);
+  });
+
   it('stays within its budget for a long game, with a huge question and summary', () => {
     const brief = buildBrief({ ask: longGameAsk(), profile, summary: 'y'.repeat(5000) });
     expect(briefSize(brief)).toBeLessThanOrEqual(BRIEF_BUDGET);

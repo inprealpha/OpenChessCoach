@@ -8,7 +8,7 @@ import type { Brief, BriefCandidate, BriefGameMove } from '@chess-coach/shared/c
 import type { EngineAnswer, EngineQuestion } from '@chess-coach/shared/coach/engine-tool';
 import type { CoachRawReply } from '@chess-coach/shared/coach/types';
 import type { CoachStatus } from '@chess-coach/shared/protocol';
-import { positionKey, SIDE_NAMES } from '@chess-coach/shared/chess';
+import { otherSide, positionKey, SIDE_NAMES } from '@chess-coach/shared/chess';
 import { CoachDeadlineError, CoachLimitError, CoachUnavailableError, type CoachCall, type CoachPort } from './port.ts';
 
 export type ScriptedReply =
@@ -176,7 +176,9 @@ export function templateReply(brief: Brief): CoachRawReply {
       break;
     }
     case 'review-moment': {
-      text = `Here you played ${brief.move?.san ?? 'a move'}, graded ${brief.move?.grade ?? 'Mistake'}.${chances(brief)} The better move was ${best?.san ?? 'another move'}.`;
+      // A game the owner didn't play names the side by colour, as the real Coach is told to (#33).
+      const who = brief.ownGame === false && brief.playerSide ? SIDE_NAMES[brief.playerSide] : 'you';
+      text = `Here ${who} played ${brief.move?.san ?? 'a move'}, graded ${brief.move?.grade ?? 'Mistake'}.${chances(brief)} The better move was ${best?.san ?? 'another move'}.`;
       if (alt) text += ` ${alt.san} was another option worth a look.`;
       if (brief.move) add(brief.move, 'red');
       add(best, 'green');
@@ -248,11 +250,14 @@ function overviewReply(brief: Brief): CoachRawReply {
   const named = (ms: readonly BriefGameMove[]) => ms.map((m) => `${m.move} (${m.grade})`).join(', ');
   const yours = game.standouts.filter((m) => m.by === brief.playerSide);
   const theirs = game.standouts.filter((m) => m.by !== brief.playerSide);
-  let text = `Your Move Grades: ${game.grades.player}. Your opponent's: ${game.grades.opponent}.`;
-  if (game.moments.length) text += ` Your game went wrong at ${named(game.moments)}.`;
-  else text += ' None of your moves was a key moment.';
-  if (yours.length) text += ` Your moves that stood out: ${named(yours)}.`;
-  if (theirs.length) text += ` Your opponent's moves that stood out: ${named(theirs)}.`;
+  // A game the owner didn't play names both sides by colour (#33).
+  const side = brief.ownGame === false && brief.playerSide ? SIDE_NAMES[brief.playerSide] : undefined;
+  const [your, opponent] = side && brief.playerSide ? [`${side}'s`, `${SIDE_NAMES[otherSide(brief.playerSide)]}'s`] : ['Your', "Your opponent's"];
+  let text = `${your} Move Grades: ${game.grades.player}. ${opponent}: ${game.grades.opponent}.`;
+  if (game.moments.length) text += ` ${your} game went wrong at ${named(game.moments)}.`;
+  else text += ` None of ${side ? `${side}'s` : 'your'} moves was a key moment.`;
+  if (yours.length) text += ` ${your} moves that stood out: ${named(yours)}.`;
+  if (theirs.length) text += ` ${opponent} moves that stood out: ${named(theirs)}.`;
   const moves = [...game.moments, ...game.standouts].map((m) => m.uci);
   return { text, moves: [...new Set(moves)].slice(0, 8), arrows: [], highlights: [], note: brief.allowNote ? 'Worked on a Review.' : null };
 }

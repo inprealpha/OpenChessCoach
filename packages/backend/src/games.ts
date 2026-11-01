@@ -70,8 +70,17 @@ function gameRow(db: Db, id: number): GameRow {
 }
 
 export function getGame(db: Db, id: number): GameDetail {
-  const row = gameRow(db, id);
+  return toDetail(gameRow(db, id));
+}
+
+function toDetail(row: GameRow): GameDetail {
   return { ...toSummary(row), pgn: row.pgn, moves: row.moves ? row.moves.split(' ') : [], startFen: row.start_fen };
+}
+
+/** A game in the game list, or undefined when there is none with this id. */
+export function findGame(db: Db, id: number): GameDetail | undefined {
+  const row = Number.isInteger(id) ? one<GameRow>(db, `${SELECT} WHERE g.id = ?`, id) : undefined;
+  return row ? toDetail(row) : undefined;
 }
 
 function findBySource(db: Db, source: GameSource, sourceId: string): GameSummary | undefined {

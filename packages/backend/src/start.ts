@@ -7,6 +7,7 @@ import { checkClaude } from './claude-check.ts';
 import { systemClock } from './clock.ts';
 import { RealCoach } from './coach/real.ts';
 import { desktopThreads } from './engine/node-engine.ts';
+import { firewallAdvice, isLoopbackHost, systemPromptWarning } from './firewall.ts';
 import { pairUrl, qrTerminal } from './network.ts';
 import { defaultDataDir } from './paths.ts';
 import { appVersion, startOptions, webRoot } from './runtime.ts';
@@ -60,6 +61,12 @@ async function main(): Promise<void> {
     fallback: new OpusTemptingMoves(claude.path ? { claudePath: claude.path } : {}),
     log,
   });
+  // Said before the app starts listening, which is when Windows or macOS asks about Node.js (#31).
+  const listenOnLan = !isLoopbackHost(host);
+  const warning = listenOnLan ? systemPromptWarning() : undefined;
+  if (warning) process.stdout.write(`\n${warning}\n`);
+  /** On Linux, the command that lets the Wi-Fi through a firewall that is on: looked for once, printed under each QR code. */
+  let firewall: Promise<string | undefined> | undefined;
   const app = await startApp({
     dataDir,
     host,
@@ -105,7 +112,14 @@ async function main(): Promise<void> {
     process.stdout.write(`  On your Wi-Fi:    ${app.lanUrl}\n`);
     process.stdout.write(`  Pairing code:     ${app.pairing.code}\n\n`);
     process.stdout.write(`Scan this with your phone (same Wi-Fi) to open the app already paired:\n${await qrTerminal(url)}\n`);
-    process.stdout.write(`${url}\n\nPress Ctrl+C to stop.\n\n`);
+    process.stdout.write(`${url}\n\n`);
+    firewall ??= listenOnLan ? firewallAdvice(new URL(app.lanUrl).hostname, app.port) : Promise.resolve(undefined);
+    const advice = await firewall;
+    if (advice) process.stdout.write(`${advice}\n`);
+    if (listenOnLan) {
+      process.stdout.write('Phone can’t open it? The page on this desktop offers another way after a couple of minutes,\nand Settings has it under Away from home.\n\n');
+    }
+    process.stdout.write('Press Ctrl+C to stop.\n\n');
   }
   await printQr();
 

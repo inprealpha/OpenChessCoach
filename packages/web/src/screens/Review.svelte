@@ -209,6 +209,20 @@
     reveal(body, row, 'start');
   }
 
+  /**
+   * The Trying line, once it shows: its moment's row goes to the panel's top, so the line reads
+   * under the tabs in a phone's short sheet, whatever moved the panel while the move was played.
+   */
+  function keepTryingInView(el: HTMLElement): void {
+    requestAnimationFrame(() => {
+      const row = el.closest<HTMLElement>('.moment');
+      const body = el.closest<HTMLElement>('.panel-body');
+      if (!row || !body) return;
+      reveal(body, row, 'start');
+      reveal(body, el, 'nearest');
+    });
+  }
+
   /** A move the overview names: the board goes to the position after it, as the move list does. */
   function showMove(m: OverviewMove): void {
     goto(m.ply);
@@ -575,7 +589,7 @@
                             {@const g = variation.grades[0]}
                             {@const c = chances?.options.get(tried.uci)}
                             <!-- What the board shows now, first, so it reads in a short sheet. -->
-                            <p class="trying" role="status">
+                            <p class="trying" role="status" {@attach keepTryingInView}>
                               <strong>Trying {t ? moveLabel(t.fenBefore, t.san) : ''}</strong>
                               {#if g}<GradeBadge grade={g} />{/if}
                               instead of {m.san}{c ? ` · ${c.short}` : ''}. Your own line: Back to the game returns here.

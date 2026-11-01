@@ -12,12 +12,12 @@ import { scoreAfterPly } from '@chess-coach/shared/position-score';
 import type { KeyMoment, Review, ReviewOverview, ReviewPart } from '@chess-coach/shared/protocol';
 import { type Clock, iso } from './clock.ts';
 import { all, one, transaction, type Db } from './db.ts';
+import { gamePitch } from './game-pitch.ts';
 import { getGame } from './games.ts';
 import { THINK_DEEPER_DEADLINE_MS } from './coach/real.ts';
 import { addCoachNote, addGradeCounts, isNewNote, removeGradeCounts } from './profile.ts';
 import { getSettings } from './settings.ts';
 import { guessTempting, withTempting } from './tempting-moves/ask.ts';
-import { playerMaiaRating } from './tempting-moves/rating.ts';
 import type { TemptingMovesService } from './tempting-moves/service.ts';
 import type { CoachService } from './coach/service.ts';
 import type { EngineService } from './engine/service.ts';
@@ -100,10 +100,12 @@ export function reviewInProgress(db: Db, gameId: number): boolean {
  * game whose side changed or that is being deleted. Run it inside that change's transaction.
  */
 export function dropReview(db: Db, gameId: number): void {
-  if (!one(db, 'SELECT 1 FROM reviews WHERE game_id = ?', gameId)) return;
+  const review = one<{ counted: number }>(db, 'SELECT counted FROM reviews WHERE game_id = ?', gameId);
+  if (!review) return;
   const game = getGame(db, gameId);
-  // The sample game's Review never counted into the Player Profile, so there is nothing to take back.
-  if (game.source !== 'sample') {
+  // A Review that never counted into the Player Profile (the sample game's, a game the owner didn't
+  // play) has nothing to take back. It is the Review's own record: who played may read otherwise now.
+  if (review.counted === 1) {
     const grades = all<{ grade: MoveGrade }>(db, 'SELECT grade FROM graded_moves WHERE game_id = ? AND side = ?', gameId, game.playerSide);
     removeGradeCounts(db, game.opening, grades.map((g) => g.grade));
   }
@@ -177,8 +179,11 @@ async function makeReview(
   await coach.assertAvailable();
   const graded = await engine.gradeGame(game.moves, game.startFen, progress, signal);
   const moments = pickKeyMoments(graded, game.playerSide);
-  // The sample game isn't the Player's: its Review never feeds the Player Profile.
-  const counts = game.source !== 'sample';
+  // Who the Review speaks to and at what level, and the rating Maia-3 reads (#33).
+  const { pitch, maia } = gamePitch(db, game);
+  // The sample game isn't the Player's, nor is a game the owner didn't play (#33): their Reviews
+  // never feed the Player Profile, with Move Grades or a note.
+  const counts = game.source !== 'sample' && pitch?.ownGame !== false;
   // The overview first, so it streams before the key moments. It may write the Review's one note
   // for the Player Profile (ADR 0004); when it writes none, the last key moment still may. The note
   // is saved with the Review, so a Review that fails part way leaves none.
@@ -199,6 +204,7 @@ async function makeReview(
         opening: game.opening,
         allowNote: counts,
         game: facts,
+        ...(pitch ? { pitch } : {}),
       },
       (text) => delta(text, 'overview'),
       { holdNote: true, ...(signal ? { signal } : {}) },
@@ -209,13 +215,12 @@ async function makeReview(
   }
   const out: KeyMoment[] = [];
   const started = clock.now().getTime();
-  const rating = playerMaiaRating(db);
   for (const [index, m] of moments.entries()) {
     // Says at once that the Coach is on this key moment, before its first words: the threat, the
     // tempting moves and, with Think deeper on, the Engine's answers can take a while.
     delta('', index);
     // The moves many players would reach for at the moment (ADR 0011), from the game's own moves.
-    const guess = tempting && guessTempting('review-moment', { service: tempting, fen: m.fenBefore, playerSide: game.playerSide, rating, history: { startFen: game.startFen, moves: game.moves.slice(0, m.ply - 1) }, ...(signal ? { signal } : {}) });
+    const guess = tempting && guessTempting('review-moment', { service: tempting, fen: m.fenBefore, playerSide: game.playerSide, ...maia, history: { startFen: game.startFen, moves: game.moves.slice(0, m.ply - 1) }, ...(signal ? { signal } : {}) });
     // What the opponent threatened before the move: the brief keeps it only when the Engine's best
     // reply to the move is that threat, so the Coach can say the move left it on.
     const threat = await engine.threat(m.fenBefore);
@@ -234,6 +239,7 @@ async function makeReview(
         ...(threat ? { threat } : {}),
         opening: game.opening,
         allowNote: counts && note === null && index === moments.length - 1,
+        ...(pitch ? { pitch } : {}),
       },
       guess,
       engine,
@@ -267,11 +273,12 @@ async function makeReview(
       'INSERT INTO graded_moves (game_id, ply, side, uci, san, grade, win_loss, data) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
     );
     for (const m of graded) put.run(gameId, m.ply, m.side, m.uci, m.san, m.grade, m.winLoss, JSON.stringify(m));
-    db.prepare('INSERT INTO reviews (game_id, created_at, overview, moments) VALUES (?, ?, ?, ?)').run(
+    db.prepare('INSERT INTO reviews (game_id, created_at, overview, moments, counted) VALUES (?, ?, ?, ?, ?)').run(
       gameId,
       iso(clock),
       overview ? JSON.stringify(overview) : null,
       JSON.stringify(out),
+      counts ? 1 : 0,
     );
   });
   if (counts) {

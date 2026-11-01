@@ -8,5 +8,10 @@
     "term": "rating",
     "phrase": "your rating|Rating:",
     "reason": "The Player's Lichess or chess.com rating, a number from another site, not a Move Grade."
+  },
+  {
+    "term": "rating",
+    "phrase": "game[’']s rating",
+    "reason": "The rating a game's record gives a player on Lichess or chess.com, which a Review can be pitched at (#33), not a Move Grade."
   }
 ]

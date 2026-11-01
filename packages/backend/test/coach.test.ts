@@ -467,6 +467,9 @@ describe('the Coach port', () => {
     expect(SYSTEM_PROMPT).toContain('you and the Engine are one coach');
     const beginner = SYSTEM_PROMPT.split('\n- ').find((r) => r.startsWith('A beginner gets one idea')) ?? '';
     expect(beginner).toContain("Don't list the other candidates");
+    // A game the owner didn't play names its sides by colour (#33).
+    const colours = SYSTEM_PROMPT.split('\n- ').find((r) => r.startsWith('When the brief has ownGame: false')) ?? '';
+    expect(colours).toContain('never "you" or\n  "your" for a side of the board');
   });
 
   it('keeps a Coach move that names the threat, and still strips a move the Engine never produced', async () => {

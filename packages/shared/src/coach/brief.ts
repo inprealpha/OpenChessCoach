@@ -65,9 +65,15 @@ export interface BriefCandidate {
  */
 export interface Brief {
   job: CoachJob;
+  /** Who the explanation is pitched at: the Player Profile's level, or a game's rating's band (#33). */
   level: PlayerLevel;
   rating?: number;
   playerSide?: Side;
+  /**
+   * The owner didn't play this game (#33): `playerSide` is the side the Review follows, which the
+   * Coach names as White or Black, never as "you".
+   */
+  ownGame?: false;
   sideToMove: Side;
   fen: string;
   recentMoves: string;
@@ -199,11 +205,14 @@ export function buildBrief({ ask, profile, summary }: BriefInput): Brief {
   for (const c of candidates) if (tempting.some((t) => t.uci === c.uci)) c.tempting = true;
   const unlisted = tempting.filter((t) => t.uci !== ask.move?.uci && !candidates.some((c) => c.uci === t.uci));
   const temptingOthers = briefCandidates(ask.fen, unlisted, unlisted.length, (t) => explained(ask.fen, t.uci, t.pv.slice(1), t.score, { moves: hideMoves }), ask.candidates[0]);
+  const rating = ask.pitch?.rating ?? profile.rating;
   const brief: Brief = {
     job: ask.job,
-    level: profile.level,
-    ...(profile.rating ? { rating: profile.rating } : {}),
+    // A game's own rating, when the Player Profile asks for it and the game has one (#33).
+    level: ask.pitch?.level ?? profile.level,
+    ...(rating ? { rating } : {}),
     ...(ask.playerSide ? { playerSide: ask.playerSide } : {}),
+    ...(ask.pitch?.ownGame === false ? { ownGame: false as const } : {}),
     sideToMove: turnOf(ask.fen),
     fen: ask.fen,
     recentMoves: formatRecent(ask.recentMoves, ask.fen),

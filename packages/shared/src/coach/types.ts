@@ -4,7 +4,7 @@ import type { Side } from '../chess.ts';
 import type { Score } from '../engine.ts';
 import type { MoveGrade } from '../grader.ts';
 import type { PositionScore } from '../position-score.ts';
-import type { CoachJob, GradeCounts, ModelJob } from '../protocol.ts';
+import type { CoachJob, GradeCounts, ModelJob, PlayerLevel } from '../protocol.ts';
 import type { Threat } from '../threat.ts';
 
 export type Brush = 'green' | 'blue' | 'red' | 'yellow';
@@ -77,6 +77,21 @@ export interface GameFacts {
   standouts: (GameMoveFact & { only: boolean })[];
 }
 
+/**
+ * Who a game's Review speaks to and at what level, from the game's record (#33). Only the desktop
+ * sets it, for a Review and a Why Question about a game in the game list.
+ */
+export interface GamePitch {
+  /**
+   * The level and rating to pitch at in place of the Player Profile's: the rating the game's record
+   * gives the side the Review follows, and its band. Only when the Player Profile asks for it.
+   */
+  level?: PlayerLevel;
+  rating?: number;
+  /** The owner didn't play this game: its `playerSide` is the side the Review follows, not the Player's. */
+  ownGame?: false;
+}
+
 /** A Coach request with the desktop Engine's facts added. Every chess fact in it comes from the Engine (ADR 0002). */
 export interface CoachAsk {
   job: CoachJob;
@@ -147,6 +162,8 @@ export interface CoachAsk {
   allowNote?: boolean;
   /** For a Review's overview: the whole game. */
   game?: GameFacts;
+  /** For a Review, or a Why Question about a game in the game list: who to speak to, at what level (#33). */
+  pitch?: GamePitch;
   /** The screen hides the Winning Chances bar (a Lesson or a Puzzle), so the brief leaves them out. */
   hideWinningChances?: boolean;
 }

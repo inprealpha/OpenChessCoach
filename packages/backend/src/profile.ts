@@ -14,6 +14,7 @@ const MIN_MOVES_FOR_PATTERN = 10;
 interface ProfileRow {
   onboarded: number;
   level: string;
+  level_from_games: number;
   rating: number | null;
   rating_site: string | null;
   rating_username: string | null;
@@ -27,6 +28,7 @@ export function getProfile(db: Db): PlayerProfile {
   return {
     onboarded: row.onboarded === 1,
     level: (PLAYER_LEVELS as readonly string[]).includes(row.level) ? (row.level as PlayerProfile['level']) : 'beginner',
+    levelFromGames: row.level_from_games === 1,
     rating: row.rating,
     ratingSource: row.rating_site && row.rating_username ? { site: row.rating_site as RatingSite, username: row.rating_username } : null,
     goals: JSON.parse(row.goals) as string[],
@@ -58,6 +60,7 @@ export function getPuzzleStats(db: Db): PuzzleStats {
 
 export interface ProfilePatch {
   level?: string;
+  levelFromGames?: boolean;
   goals?: string[];
   onboarded?: boolean;
   /** `pool` and `blitz` are for Maia-3 (ADR 0011): the Player Profile shows only `rating`. */
@@ -69,6 +72,7 @@ export function updateProfile(db: Db, patch: ProfilePatch): PlayerProfile {
     if (!(PLAYER_LEVELS as readonly string[]).includes(patch.level)) throw new AppError('bad-request', 'Pick Beginner, Casual or Club.');
     db.prepare('UPDATE profile SET level = ? WHERE id = 1').run(patch.level);
   }
+  if (patch.levelFromGames !== undefined) db.prepare('UPDATE profile SET level_from_games = ? WHERE id = 1').run(patch.levelFromGames ? 1 : 0);
   if (patch.goals !== undefined) {
     const goals = patch.goals.map((g) => g.replace(/\s+/g, ' ').trim()).filter(Boolean).map((g) => g.slice(0, 100));
     if (goals.length > MAX_GOALS) throw new AppError('bad-request', `Keep it to ${MAX_GOALS} Goals or fewer.`);

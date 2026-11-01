@@ -33,6 +33,11 @@ in the top right of every screen.
   the desktop can't be called back. Other refusals show beside Save, such as "Not saved: your
   desktop can’t be reached right now. Save again once it’s back."; the desktop saves nothing
   from a connection that has closed, so a save the app gave up on never lands later.
+- Profile: the form's checkbox `Pitch each Review at the game’s rating`, next to `Level` and off by
+  default (#33). With it on, the Profile reads "(Reviews follow the game’s rating when it has
+  one)" beside the level, and a game whose record gives the reviewed side a rating (games from
+  Lichess and chess.com) has its Review and Why Questions pitched at that rating's band, with
+  Maia-3 given the game's ratings (see `review.md`).
 - Profile: the region `Lesson progress` (only the Lessons started, then "N
   more Lessons to try" or "No Lessons started yet." with `Browse the Lessons`; "No Puzzles tried
   yet." until one is), the region `Move Grades by opening` (below 32rem wide its column headers
@@ -74,6 +79,9 @@ Coach quality, on a `default` run: `#/settings`, check `Best`, then `$C db get s
   `games.test.ts`). A double press of Save asks the site once (`first-run.spec.ts`, with the site's
   answer held back). A save whose connection closed, during the lookup or in the same read as the
   message (a desktop waking from sleep), writes nothing (`games.test.ts`).
+- With the game's rating on, the `profile` row has `level_from_games: 1`, and every Coach brief
+  of game 1's Review has `level: "casual", rating: 1456` (White's rating in the seed's game) even
+  with the level set to Club (`first-run.spec.ts`, `game-pitch.test.ts`).
 - After `Best`, the `settings` row `models` is `{"review-moment":"opus","why":"opus","lesson-turn":
   "opus","hint":"haiku","live":"haiku"}` (Thrifty: all `haiku`; Balanced: `sonnet` for the first
   three). No `quality` row is ever written. `settings.get` returns `quality: "custom"` for any other

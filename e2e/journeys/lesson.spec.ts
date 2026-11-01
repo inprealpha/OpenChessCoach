@@ -266,7 +266,7 @@ test('Show the move names the Lesson’s move in the Coach log once per decision
   await paired.getByRole('button', { name: 'Show the move' }).dblclick();
   await paired.waitForTimeout(500);
   await expect(shown).toHaveCount(1);
-  await expect(paired.getByRole('img', { name: `Arrow ${node.main.slice(0, 2)} to ${node.main.slice(2, 4)} (green)` })).toHaveCount(1);
+  await expect(paired.getByRole('img', { name: `Arrow ${node.main.slice(0, 2)} to ${node.main.slice(2, 4)} (best)` })).toHaveCount(1);
 });
 
 test('a move played after Show the move is counted apart from the Player’s own first tries', async ({ paired, app }) => {
@@ -719,7 +719,7 @@ test('Try another move waits for the Coach’s answer, and starts the next try w
   for (const send of held.splice(0)) send();
   await coachIdle(paired);
   const board = paired.getByRole('group', { name: boardName });
-  await expect(board.getByRole('img', { name: /\((blue|red|yellow)\)$/ })).not.toHaveCount(0);
+  await expect(board.getByRole('img', { name: /\((other good move|threat|went wrong|reply|played)\)$/ })).not.toHaveCount(0);
   await choice.getByRole('button', { name: 'Try another move' }).click();
   // The arrows were about the move taken back, and so was the reasoning.
   await expect(board.getByRole('img', { name: /\((blue|red|yellow|green)\)$/ })).toHaveCount(0);
@@ -890,7 +890,7 @@ test('on a phone with Safari’s bars (390×664), the Hint and Continue need no 
   await coachIdle(paired);
   await paired.getByRole('button', { name: 'Show the move' }).click();
   await expect(paired.getByRole('group', { name: boardName })).toBeInViewport({ ratio: 0.9 });
-  await expect(paired.getByRole('img', { name: `Arrow ${node.main.slice(0, 2)} to ${node.main.slice(2, 4)} (green)` })).toHaveCount(1);
+  await expect(paired.getByRole('img', { name: `Arrow ${node.main.slice(0, 2)} to ${node.main.slice(2, 4)} (best)` })).toHaveCount(1);
   // After the choice, Continue comes before the popularity table.
   await play(paired, node.main, boardName);
   await coachIdle(paired);
@@ -999,8 +999,8 @@ test('after the Lesson’s move, the Coach’s arrows show no other move for the
   await expect(paired.getByRole('region', { name: 'Your choice' })).toContainText(`You played ${node.mainSan}`);
   const board = paired.getByRole('group', { name: boardName });
   // The move played and the opponent's reply stay; the other move for the Player is not drawn.
-  await expect(board.getByRole('img', { name: `Arrow ${node.main.slice(0, 2)} to ${node.main.slice(2, 4)} (green)` })).toHaveCount(1);
-  await expect(board.getByRole('img', { name: /\(yellow\)$/ })).not.toHaveCount(0);
+  await expect(board.getByRole('img', { name: `Arrow ${node.main.slice(0, 2)} to ${node.main.slice(2, 4)} (played)` })).toHaveCount(1);
+  await expect(board.getByRole('img', { name: /\(reply\)$/ })).not.toHaveCount(0);
   await expect(board.getByRole('img', { name: new RegExp(`^Arrow ${other.slice(0, 2)} to `) })).toHaveCount(0);
 });
 

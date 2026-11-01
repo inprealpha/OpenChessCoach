@@ -3,7 +3,7 @@ import type { Page } from '@playwright/test';
 import { INITIAL_FEN, playUci, turnOf } from '../../packages/shared/src/chess.ts';
 import { winningChancesFor } from '../../packages/shared/src/winning-chances.ts';
 import { CoachClient } from '../../packages/backend/src/client.ts';
-import { coachIdle, connection, expect, fenOf, play, resign, square, test } from '../fixtures/app.ts';
+import { coachIdle, connection, expect, fenOf, gameMenu, play, resign, square, test } from '../fixtures/app.ts';
 
 const BOARD = 'Engine Game board';
 /** A Move Grade symbol on the board, named like "Mistake on g4". */
@@ -91,20 +91,21 @@ test('Resign asks first: Keep playing (or Escape) carries on, Yes, resign ends t
   await startGame(paired, app.url);
   await moveAndWaitForReply(paired, 'e2e4', 2);
 
-  await paired.getByRole('button', { name: 'Resign' }).click();
+  await gameMenu(paired, 'Resign');
   const confirm = paired.getByRole('alertdialog', { name: 'Resign this game?' });
   await expect(confirm).toBeVisible();
   // Focus goes to the safe choice, so a stray Enter does not end the game.
   await expect(confirm.getByRole('button', { name: 'Keep playing' })).toBeFocused();
   await confirm.getByRole('button', { name: 'Keep playing' }).click();
   await expect(confirm).toHaveCount(0);
-  await expect(paired.getByRole('button', { name: 'Resign' })).toBeFocused();
+  // Focus goes back to the menu Resign was picked from.
+  await expect(paired.getByRole('button', { name: 'Game options' })).toBeFocused();
 
-  await paired.getByRole('button', { name: 'Resign' }).click();
+  await gameMenu(paired, 'Resign');
   await paired.keyboard.press('Escape');
   await expect(confirm).toHaveCount(0);
   // Escape still keeps playing after a click elsewhere took focus out of the question.
-  await paired.getByRole('button', { name: 'Resign' }).click();
+  await gameMenu(paired, 'Resign');
   await paired.getByRole('heading', { name: 'Engine Game' }).click();
   await paired.keyboard.press('Escape');
   await expect(confirm).toHaveCount(0);
@@ -113,7 +114,7 @@ test('Resign asks first: Keep playing (or Escape) carries on, Yes, resign ends t
   await moveAndWaitForReply(paired, 'e4d5', 4);
   expect((await app.rows<{ kind: string }>('games')).filter((g) => g.kind === 'engine')).toHaveLength(0);
 
-  await paired.getByRole('button', { name: 'Resign' }).click();
+  await gameMenu(paired, 'Resign');
   await confirm.getByRole('button', { name: 'Yes, resign' }).click();
   await expect(paired.getByRole('status', { name: 'Game status' })).toContainText('The Engine won by resignation.');
   // Resign is gone with the game: focus carries on from the end-of-game card, not the page.
@@ -131,16 +132,17 @@ test('New game asks first in the middle of a game: Keep playing (or Escape) carr
   await startGame(paired, app.url);
   await moveAndWaitForReply(paired, 'e2e4', 2);
 
-  const newGame = paired.getByRole('button', { name: 'New game' });
+  // New game sits in the ⋯ Game menu, away from Hint; focus comes back to the menu's button.
+  const menu = paired.getByRole('button', { name: 'Game options' });
   const confirm = paired.getByRole('alertdialog', { name: 'Abandon this game?' });
-  await newGame.click();
+  await gameMenu(paired, 'New game');
   await expect(confirm.getByRole('button', { name: 'Keep playing' })).toBeFocused();
   await paired.keyboard.press('Escape');
   await expect(confirm).toHaveCount(0);
-  await expect(newGame).toBeFocused();
+  await expect(menu).toBeFocused();
   await expect(paired.getByRole('list', { name: 'Moves' }).getByRole('button')).toHaveCount(2);
 
-  await newGame.click();
+  await gameMenu(paired, 'New game');
   await confirm.getByRole('button', { name: 'Yes, start a new game' }).click();
   await expect(paired.getByRole('form', { name: 'New Engine Game' })).toBeVisible();
   await expect(paired.getByRole('radio', { name: 'White' })).toBeFocused();
@@ -170,7 +172,7 @@ test('the Engine’s shown move does not stay on the board once the game ends', 
   await coachIdle(paired);
   await paired.getByRole('button', { name: 'Show the move' }).click();
   const board = paired.getByRole('group', { name: BOARD });
-  await expect(board.getByRole('img', { name: /^Arrow .* \(green\)$/ })).toHaveCount(1);
+  await expect(board.getByRole('img', { name: /^Arrow .* \(best\)$/ })).toHaveCount(1);
   await resign(paired);
   await expect(paired.getByRole('status', { name: 'Game status' })).toContainText('The Engine won by resignation.');
   await expect(board.getByRole('img', { name: /^Arrow / })).toHaveCount(0);
@@ -183,7 +185,7 @@ test('the game list and the Review name the Engine by the level the Player chose
   await moveAndWaitForReply(paired, 'e2e4', 2);
   await resign(paired);
   await paired.getByRole('link', { name: 'Review this game' }).click();
-  await expect(paired.getByText('You vs Engine (Beginner)')).toBeVisible();
+  await expect(paired.getByTestId('review-summary')).toContainText('You had White · Lost 0-1 · vs Engine (Beginner)');
   await paired.goto(`${app.url}/#/games`);
   await expect(paired.getByRole('cell', { name: 'Engine (Beginner)', exact: true })).toBeVisible();
 });
@@ -192,7 +194,7 @@ test('offering a draw early is declined, and the Engine moves first when the Pla
   await startGame(paired, app.url, 'Black');
   await expect(paired.getByRole('list', { name: 'Moves' }).getByRole('button')).toHaveCount(1);
   await expect(paired.getByRole('status', { name: 'Game status' })).toContainText('Your move');
-  await paired.getByRole('button', { name: 'Offer a draw' }).click();
+  await gameMenu(paired, 'Offer a draw');
   await expect(paired.getByText('The Engine declines the draw.')).toBeVisible();
 });
 
@@ -200,7 +202,7 @@ test('a small edge in the opening is no reason for the Engine to agree a draw', 
   // After 1. e4 the Player as White is a little better: the Engine still plays on.
   await startGame(paired, app.url, 'White', 'Casual');
   await moveAndWaitForReply(paired, 'e2e4', 2);
-  await paired.getByRole('button', { name: 'Offer a draw' }).click();
+  await gameMenu(paired, 'Offer a draw');
   await expect(paired.getByText('The Engine declines the draw.')).toBeVisible();
   await expect(paired.getByRole('status', { name: 'Game status' })).toContainText('Your move');
 });
@@ -208,7 +210,7 @@ test('a small edge in the opening is no reason for the Engine to agree a draw', 
 test('the Engine agrees a draw when it is clearly lost, and the game says Draw agreed', async ({ paired, app }) => {
   // 1. e4 e5 2. Qh5 Qg5 3. Qxg5: the Engine, as Black, is a queen down.
   await resumeGame(paired, app.url, 'white', ['e2e4', 'e7e5', 'd1h5', 'd8g5', 'h5g5']);
-  await paired.getByRole('button', { name: 'Offer a draw' }).click();
+  await gameMenu(paired, 'Offer a draw');
   await expect(paired.getByRole('status', { name: 'Game status' })).toContainText('Draw agreed.');
   await expect(paired.getByRole('link', { name: 'Review this game' })).toBeFocused();
   await expect
@@ -413,14 +415,14 @@ test('a finished game deleted from the game list: Review this game says so and l
 
 test('once the game ends, a declined draw is no longer reported', async ({ paired, app }) => {
   await startGame(paired, app.url);
-  await paired.getByRole('button', { name: 'Offer a draw' }).click();
+  await gameMenu(paired, 'Offer a draw');
   await expect(paired.getByText('The Engine declines the draw.')).toBeVisible();
   await resign(paired);
   await expect(paired.getByRole('status', { name: 'Game status' })).toContainText('The Engine won by resignation.');
   await expect(paired.getByText('The Engine declines the draw.')).toHaveCount(0);
 });
 
-test('a finished game’s board is read-only: clicks there say nothing about illegal moves', async ({ paired, app }) => {
+test('a finished game’s board drops a piece picked up during the game, and a move there is a variation', async ({ paired, app }) => {
   await startGame(paired, app.url);
   // A piece picked up before the game ends does not stay picked up afterwards.
   await square(paired, 'e2', BOARD).click();
@@ -432,6 +434,9 @@ test('a finished game’s board is read-only: clicks there say nothing about ill
   await square(paired, 'g1', BOARD).click();
   await square(paired, 'f3', BOARD).click();
   await expect(paired.getByText(/isn’t legal|not your move/)).toHaveCount(0);
+  // The finished game is explored on a variation of its own (explore.spec.ts); the game stays as it was.
+  await expect(paired.getByRole('group', { name: BOARD })).toHaveAttribute('data-fen', playUci(INITIAL_FEN, 'g1f3')?.fenAfter ?? '');
+  await paired.getByRole('button', { name: 'Back to the game' }).click();
   await expect(paired.getByRole('group', { name: BOARD })).toHaveAttribute('data-fen', INITIAL_FEN);
 });
 
@@ -493,14 +498,13 @@ test.describe('Live Coaching', () => {
     await expect(status.getByRole('button', { name: 'Take the move back' })).toBeInViewport();
     await expect(status.getByRole('button', { name: 'Carry on' })).toBeInViewport();
     expect(await paired.evaluate(() => window.scrollY)).toBe(0);
-    // The Coach's comment comes straight after, before the move list, with at least its first line
-    // on screen however long the reply is.
+    // The Coach's comment is docked at the foot of the screen, with at least its first line on
+    // screen however long the reply is, and the board stays in view above it.
     await coachIdle(paired);
     await expect(paired.getByLabel('Coach conversation')).toContainText('g4 is graded Mistake');
     const comment = (await paired.getByLabel('Coach conversation').boundingBox())!;
-    const moves = (await paired.getByRole('list', { name: 'Moves' }).boundingBox())!;
-    expect(comment.y).toBeLessThan(moves.y);
     expect(comment.y + 24).toBeLessThanOrEqual(844);
+    await expect(paired.getByRole('group', { name: BOARD })).toBeInViewport();
   });
 
   test('the takeback offer survives a reload, and the Engine waits for the Player’s choice', async ({ paired, app }) => {
@@ -613,7 +617,7 @@ test('the first Hint gives the idea with no move, the second shows the desktop E
   expect(call?.job).toBe('hint');
 
   await paired.getByRole('button', { name: 'Show the move' }).click();
-  await expect(paired.getByRole('img', { name: /^Arrow \w\d to \w\d \(green\)$/ })).toHaveCount(1);
+  await expect(paired.getByRole('img', { name: /^Arrow \w\d to \w\d \(best\)$/ })).toHaveCount(1);
   await expect(paired.getByLabel('Coach conversation')).toContainText('The Engine’s move:');
   expect(await app.rows('coach_calls')).toHaveLength(1);
   // The move comes from the desktop's Engine, like the facts behind the first Hint (ADR 0007).
@@ -632,7 +636,7 @@ test('Show the move adds the Engine’s move to the Coach log once per position'
   // Long enough for another analysis from the desktop to have come back.
   await paired.waitForTimeout(1000);
   await expect(engineMove).toHaveCount(1);
-  await expect(paired.getByRole('img', { name: /^Arrow \w\d to \w\d \(green\)$/ })).toHaveCount(1);
+  await expect(paired.getByRole('img', { name: /^Arrow \w\d to \w\d \(best\)$/ })).toHaveCount(1);
 });
 
 test('the Winning Chances bar follows an Engine Game from the browser Engine, the Player’s side at the bottom', async ({ paired, app }) => {
@@ -653,7 +657,7 @@ test('the Winning Chances bar follows an Engine Game from the browser Engine, th
   expect(await app.rows('coach_calls')).toHaveLength(0);
 
   // Playing Black, the Player's side is at the bottom of the board and of the bar.
-  await paired.getByRole('button', { name: 'New game' }).click();
+  await gameMenu(paired, 'New game');
   await paired.getByRole('alertdialog', { name: 'Abandon this game?' }).getByRole('button', { name: 'Yes, start a new game' }).click();
   await startGame(paired, app.url, 'Black');
   await expect(paired.getByRole('status', { name: 'Game status' })).toContainText('Your move');

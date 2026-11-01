@@ -21,7 +21,8 @@ by Lesson: an opening's Puzzles by the opening, a Theme's or endgame's by Liches
 - A link to a Lesson without Puzzles (`#/puzzles/queen-mate`) or to no Lesson serves every Lesson's
   Puzzles, with the note "There are no Puzzles for Mate with king and queen, so these are from every
   Lesson."
-- The region `Puzzle` with "Find the best move for <side>" and the Puzzle's rating. Once solved
+- The header line "Rated <rating> · from a real Lichess game"; the region `Puzzle` with "Find the
+  best move for <side>". The board stays in view and, once the Puzzle is over, the Ask box is docked. Once solved
   it reads "You found the best move for <side>."; after `Show the solution`, "The solution for
   <side> is on the board."
 - A wrong move: "<move> is not the move. Try again." and it is taken back.
@@ -29,7 +30,9 @@ by Lesson: an opening's Puzzles by the opening, a Theme's or endgame's by Liches
 - Once solved or shown, the region writes out the solution ("Solution: 19. Bxc6 Qxc6 20. Nxa7+ …",
   numbered from the Puzzle's own move number), each move a button (`Move 19. Bxc6`) that shows its
   position, and `First position` / `Previous move` / `Next move` / `Last position` step through it;
-  the first position is the Puzzle as it was set.
+  the first position is the Puzzle as it was set. The board is then free to explore: a move that
+  isn't the solution's starts a variation, written out under the solution as `Your variation`,
+  and `Back to the Puzzle` drops it (see `explore.md`); the solution's own next move steps along it.
 - A Why Question shows the position it explains (the Puzzle as set), so the Coach's arrows start
   on its pieces; stepping elsewhere hides them.
 - When a Lesson's Puzzles (or all of them) are done on this device, the region `No more Puzzles`

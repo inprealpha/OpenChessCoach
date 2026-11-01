@@ -1,23 +1,26 @@
 <script lang="ts">
   // An Engine Game: the Player picks a colour and the Engine's strength, and plays. Live Coaching
   // speaks up only on a Mistake or Blunder, and the Player may then take the move back. Hint gives
-  // the idea first and the Engine's move second. The game in progress survives a reload.
+  // the idea first and the Engine's move second. The game in progress survives a reload. Once the
+  // game is over its board is free: a move on it starts a variation, which Back to the game drops.
   import { tick } from 'svelte';
   import { candidatesFrom, type GradedMove } from '@chess-coach/shared/analysis';
-  import { outcomeOfLine, SIDE_NAMES, turnOf, type PlayedMove, type Side } from '@chess-coach/shared/chess';
+  import { otherSide, outcomeOfLine, SIDE_NAMES, turnOf, type PlayedMove, type Side } from '@chess-coach/shared/chess';
   import type { Analysis, Score } from '@chess-coach/shared/engine';
   import { GRADE_THRESHOLDS, MATERIAL_FLOOR_CP, negateScore, scoreToCp, winningChances, type MoveGrade } from '@chess-coach/shared/grader';
   import type { EngineGameRecord } from '@chess-coach/shared/protocol';
   import Board from '../components/Board.svelte';
   import CoachPanel from '../components/CoachPanel.svelte';
   import ConfirmDialog from '../components/ConfirmDialog.svelte';
+  import MenuButton from '../components/MenuButton.svelte';
   import GameEnd from '../components/GameEnd.svelte';
   import MoveList from '../components/MoveList.svelte';
   import StepButtons from '../components/StepButtons.svelte';
   import ThreatButton from '../components/ThreatButton.svelte';
+  import FlipButton from '../components/FlipButton.svelte';
   import WinningChancesBar from '../components/WinningChancesBar.svelte';
   import { api } from '../lib/api.svelte.ts';
-  import { threatArrows } from '../lib/arrows.ts';
+  import { punishingArrow, threatArrows } from '../lib/arrows.ts';
   import { CoachThread } from '../lib/coach.svelte.ts';
   import { analyse, analyseForCoach, bestMove, gradeMove, threat } from '../lib/engine/engine.svelte.ts';
   import { Line } from '../lib/game.svelte.ts';
@@ -28,6 +31,7 @@
   import { router } from '../lib/router.svelte.ts';
   import { store } from '../lib/storage.ts';
   import { threatSetting, ThreatView } from '../lib/threat.svelte.ts';
+  import { stepLine, Variation, type Step } from '../lib/variation.svelte.ts';
 
   /** Strength levels, mapped to Stockfish's Skill Level and a short search. */
   const LEVELS = [
@@ -57,6 +61,8 @@
   const KEY = 'engineGame';
   const line = new Line();
   const coach = new CoachThread();
+  /** The Player's own moves from a position of the finished game, graded by the browser's Engine. */
+  const variation = new Variation();
 
   let game = $state<Saved | null>(null);
   let loaded = $state(false);
@@ -75,13 +81,21 @@
   let resaving = false;
   let confirmingResign = $state(false);
   let confirmingNewGame = $state(false);
-  let resignButton = $state<HTMLButtonElement>();
-  let newGameButton = $state<HTMLButtonElement>();
+  /** The ⋯ Game menu, which gets the focus back once a question its items asked is answered. */
+  let gameMenu = $state<ReturnType<typeof MenuButton>>();
   let endActions = $state<HTMLDivElement>();
   let setupForm = $state<HTMLFormElement>();
 
   const finished = $derived(Boolean(game?.result));
+  /** The Player turned the board; the Winning Chances bar turns with it. */
+  let flipped = $state(false);
+  const orientation = $derived<Side>(game ? (flipped ? otherSide(game.playerSide) : game.playerSide) : 'white');
   const playerToMove = $derived(game !== null && !finished && !thinking && !awaitingChoice && turnOf(line.fen) === game.playerSide);
+  /** The position on the board: the game's, or the Player's variation from a finished game. */
+  const boardFen = $derived(variation.active ? variation.fen : line.fen);
+  const shownLast = $derived(variation.active ? variation.line.lastMove : line.lastMove);
+  /** Why the board takes no move while the game is on, in one line beside it. */
+  const refusal = $derived(thinking ? 'It’s the Engine’s move.' : awaitingChoice ? 'Take the move back or carry on first.' : '');
   // The Player's last graded move keeps its symbol through the Engine's reply, unless the reply
   // landed on that square. A finished game steps through its moves, so this follows the step shown.
   const mark = $derived.by(() => {
@@ -98,8 +112,15 @@
   // The Engine's threat, shown while it's the Player's move: finding it is a search of its own
   // (the opponent's move as if they could move again), which would queue ahead of the Engine's reply.
   const threats = new ThreatView(threat);
+  // The Blunder pause draws the move that punishes the Player's move: the Engine's best reply in
+  // the position on the board, from the same search the bar shows (ADR 0007), so it costs nothing.
+  const punishing = $derived.by(() => {
+    if (!awaitingChoice || !game || !analysis || analysis.fen !== line.fen) return [];
+    const reply = candidatesFrom(analysis)[0];
+    return punishingArrow(reply?.uci, reply?.san, otherSide(game.playerSide));
+  });
   // A finished game's board shows only the final position: no Hint, Coach or threat arrows left over.
-  const arrows = $derived(finished ? [] : [...threatArrows(threats.threat), ...coach.arrows, ...(hintArrow ? [hintArrow] : [])]);
+  const arrows = $derived(finished ? [] : [...threatArrows(threats.threat), ...punishing, ...coach.arrows, ...(hintArrow ? [hintArrow] : [])]);
 
   $effect(() => {
     threats.follow(threatSetting.on && playerToMove ? line.fen : null);
@@ -108,17 +129,17 @@
   /** The browser Engine's analysis of the position on the board, for the Winning Chances bar (ADR 0007). */
   let analysis = $state<Analysis | null>(null);
   // A drawn game reads level: a repetition or an agreed draw is one the position alone doesn't show.
-  const position = $derived(game?.result === '1/2-1/2' ? { score: { cp: 0 }, pov: turnOf(line.fen) } : scoreFromAnalysis(line.fen, analysis));
+  const position = $derived(game?.result === '1/2-1/2' && !variation.active ? { score: { cp: 0 }, pov: turnOf(line.fen) } : scoreFromAnalysis(boardFen, analysis));
   $effect(() => {
     if (!game) return;
-    const fen = line.fen;
+    const fen = boardFen;
     // The same cached analysis grades the moves either side of this position, so it costs no extra
     // search: after the Player's move it is the very search that grades it, which the Engine's
     // reply waits for anyway, so the bar needs no wait of its own.
     void analyse(fen, (partial) => {
-      if (line.fen === fen) analysis = partial;
+      if (boardFen === fen) analysis = partial;
     }).then((a) => {
-      if (line.fen === fen) analysis = a;
+      if (boardFen === fen) analysis = a;
     });
   });
 
@@ -202,7 +223,31 @@
     shownMove = null;
   }
 
+  /**
+   * A move on a finished game's board: the game's own next move steps to it; any other starts a
+   * variation from the position shown, or carries on the one shown.
+   */
+  function explore(uci: string): void {
+    const to = variation.gameStep(uci, line.moves, line.cursor);
+    if (to !== null) {
+      variation.leave();
+      line.goTo(to);
+    } else variation.play(uci, { cursor: line.cursor, fen: line.fen });
+  }
+
+  /** Steps through the variation while the board shows one, otherwise through the finished game. */
+  function step(where: Step): void {
+    stepLine(variation.active ? variation.line : line, where);
+  }
+
+  /** A move picked in the move list: the board leaves any variation for it. */
+  function pickMove(cursor: number): void {
+    variation.leave();
+    line.goTo(cursor);
+  }
+
   async function onmove(uci: string): Promise<void> {
+    if (finished) return explore(uci);
     if (!game || !playerToMove) return;
     const ply = line.moves.length + 1;
     const m = line.play(uci);
@@ -370,7 +415,7 @@
   async function keepPlaying(): Promise<void> {
     confirmingResign = false;
     await tick();
-    resignButton?.focus();
+    gameMenu?.focus();
   }
 
   async function resign(): Promise<void> {
@@ -415,17 +460,19 @@
   async function cancelNewGame(): Promise<void> {
     confirmingNewGame = false;
     await tick();
-    newGameButton?.focus();
+    gameMenu?.focus();
   }
 
   async function newGame(): Promise<void> {
     game = null;
+    flipped = false;
     saved = null;
     confirmingResign = false;
     confirmingNewGame = false;
     notice = '';
     coach.reset();
     clearHint();
+    variation.leave();
     line.reset();
     await store.del(KEY);
     // The button that started over is gone with the game: carry on from the form's first control.
@@ -488,8 +535,13 @@
   }
 </script>
 
-<section class="screen">
-  <h1>Engine Game</h1>
+<section class="screen board-screen engine-game">
+  <header class="frame-head">
+    <h1>Engine Game</h1>
+    {#if game}
+      <p class="head-line">You play {SIDE_NAMES[game.playerSide]} · Engine strength: {LEVELS.find((l) => l.value === game?.strength)?.name}</p>
+    {/if}
+  </header>
   {#if !loaded}
     <p class="muted">Loading…</p>
   {:else if !game}
@@ -509,102 +561,127 @@
     </form>
   {:else}
     <div class="board-layout">
-      <div class="board-and-bar">
-        <div class="with-bar">
-          <WinningChancesBar score={position?.score ?? null} pov={position?.pov ?? 'white'} orientation={game.playerSide} />
-          <Board
-            fen={line.fen}
-            orientation={game.playerSide}
-            movable={playerToMove ? game.playerSide : 'none'}
-            lastMove={line.lastMove ? { from: line.lastMove.uci.slice(0, 2), to: line.lastMove.uci.slice(2, 4) } : undefined}
-            {arrows}
-            highlights={coach.highlights}
-            gradeMark={mark}
-            {onmove}
-            label="Engine Game board"
-          />
+      <div class="board-col">
+        <div class="board-and-bar">
+          <div class="with-bar">
+            <WinningChancesBar score={position?.score ?? null} pov={position?.pov ?? 'white'} {orientation} />
+            <Board
+              fen={boardFen}
+              {orientation}
+              movable={finished ? 'both' : playerToMove ? game.playerSide : 'none'}
+              lastMove={shownLast ? { from: shownLast.uci.slice(0, 2), to: shownLast.uci.slice(2, 4) } : undefined}
+              {arrows}
+              highlights={coach.highlights}
+              gradeMark={variation.active ? variation.mark : mark}
+              {onmove}
+              {refusal}
+              label="Engine Game board"
+            />
+          </div>
         </div>
-        <div class="toolbar">
+        <div class="board-bar toolbar">
           {#if finished}
             <!-- Only a finished game steps back: while it is on, the board shows the position to play from. -->
-            <StepButtons onfirst={() => line.goTo(0)} onprevious={() => line.back()} onnext={() => line.forward()} onlast={() => line.goTo(line.moves.length)} />
+            <StepButtons onfirst={() => step('first')} onprevious={() => step('previous')} onnext={() => step('next')} onlast={() => step('last')} />
+            {#if variation.active}<button type="button" class="secondary" onclick={() => variation.leave()}>Back to the game</button>{/if}
+            <FlipButton onflip={() => (flipped = !flipped)} />
           {:else}
-            <button type="button" class="secondary" onclick={hint} disabled={!playerToMove || coach.busy}>{hintLevel === 0 ? 'Hint' : 'Show the move'}</button>
-            <button type="button" class="secondary" onclick={offerDraw} disabled={thinking || awaitingChoice}>Offer a draw</button>
-            <button type="button" class="secondary" onclick={askResign} aria-expanded={confirmingResign} bind:this={resignButton}>Resign</button>
-          {/if}
-          {#if !finished}
-            <!-- Once the game is over, New game is on the end-of-game card. -->
-            <button type="button" class="secondary" onclick={askNewGame} aria-expanded={confirmingNewGame} bind:this={newGameButton}>New game</button>
-            <ThreatButton />
+            <button
+              type="button"
+              class="secondary"
+              onclick={hint}
+              disabled={!playerToMove || coach.busy}
+              title={awaitingChoice ? 'Hint comes back once you’ve decided on the take-back' : undefined}>{hintLevel === 0 ? 'Hint' : 'Show the move'}</button
+            >
+            <ThreatButton view={threats} />
+            <FlipButton onflip={() => (flipped = !flipped)} />
+            <!-- What ends or abandons the game sits behind a menu, away from Hint; each still asks first. -->
+            <MenuButton text="⋯ Game" label="Game options" bind:this={gameMenu}>
+              <button type="button" role="menuitem" onclick={offerDraw} disabled={thinking || awaitingChoice}>Offer a draw</button>
+              <button type="button" role="menuitem" class="danger" onclick={askResign}>Resign</button>
+              <button type="button" role="menuitem" onclick={askNewGame}>New game</button>
+            </MenuButton>
           {/if}
         </div>
-        {#if confirmingResign && !finished}
-          <ConfirmDialog
-            id="resign"
-            title="Resign this game?"
-            detail="The Engine wins, and the game is saved as finished."
-            keepLabel="Keep playing"
-            confirmLabel="Yes, resign"
-            onkeep={keepPlaying}
-            onconfirm={resign}
-          />
-        {/if}
-        {#if confirmingNewGame && !finished}
-          <ConfirmDialog
-            id="new-game"
-            title="Abandon this game?"
-            detail="It isn’t saved: only finished games go to your game list."
-            keepLabel="Keep playing"
-            confirmLabel="Yes, start a new game"
-            onkeep={cancelNewGame}
-            onconfirm={newGame}
-          />
-        {/if}
       </div>
       <div class="side">
-        <div class="card game-status" class:ended={finished} data-outcome={game.result ? outcomeOf(game) : undefined}>
-          <div class="live" role="status" aria-live="polite" aria-label="Game status">
-            {#if game.result}
-              <GameEnd
-                headline={resultText(game)}
-                moves={Math.ceil(game.moves.length / 2)}
-                side={game.playerSide}
-                level={LEVELS.find((l) => l.value === game?.strength)?.name ?? ''}
-                grades={game.grades}
-              />
-            {:else if thinking}
-              <p>The Engine is thinking…</p>
-            {:else if awaitingChoice}
-              <p>Take the move back, or carry on?</p>
-              <!-- Here, right under the board, rather than in the Coach panel: on a phone that is below the fold. -->
-              {#if !coach.busy}
-                <div class="row">
-                  <button type="button" onclick={takeBack}>Take the move back</button>
-                  <button type="button" class="secondary" onclick={carryOn}>Carry on</button>
-                </div>
-              {/if}
-            {:else}
-              <p>Your move ({SIDE_NAMES[game.playerSide]}).</p>
-            {/if}
-            {#if notice}<p>{notice}</p>{/if}
-            {#if !finished}<p class="muted small">Engine strength: {LEVELS.find((l) => l.value === game?.strength)?.name}</p>{/if}
-          </div>
-          {#if game.result}
-            <!-- On the card but outside the status region, so a screen reader reads the result and the
-                 tally once, and not the whole card again when the Review link arrives. -->
-            <div class="end-actions" bind:this={endActions}>
-              {#if saved === 'queued'}
-                <p class="muted">Saved on this device. It goes to your game list when your desktop is reachable.</p>
-              {:else if saved}
-                <a class="button" href={`#/review/${saved.id}`}>Review this game</a>
-              {/if}
-              <button type="button" class="secondary" onclick={askNewGame}>New game</button>
-            </div>
+        <div class="panel-body">
+          {#if confirmingResign && !finished}
+            <ConfirmDialog
+              id="resign"
+              title="Resign this game?"
+              detail="The Engine wins, and the game is saved as finished."
+              keepLabel="Keep playing"
+              confirmLabel="Yes, resign"
+              onkeep={keepPlaying}
+              onconfirm={resign}
+            />
           {/if}
+          {#if confirmingNewGame && !finished}
+            <ConfirmDialog
+              id="new-game"
+              title="Abandon this game?"
+              detail="It isn’t saved: only finished games go to your game list."
+              keepLabel="Keep playing"
+              confirmLabel="Yes, start a new game"
+              onkeep={cancelNewGame}
+              onconfirm={newGame}
+            />
+          {/if}
+          <div class="card game-status" class:ended={finished} data-outcome={game.result ? outcomeOf(game) : undefined}>
+            <div class="live" role="status" aria-live="polite" aria-label="Game status">
+              {#if game.result}
+                <GameEnd
+                  headline={resultText(game)}
+                  moves={Math.ceil(game.moves.length / 2)}
+                  side={game.playerSide}
+                  level={LEVELS.find((l) => l.value === game?.strength)?.name ?? ''}
+                  grades={game.grades}
+                />
+              {:else if thinking}
+                <p>The Engine is thinking…</p>
+              {:else if awaitingChoice}
+                <p>Take the move back, or carry on?</p>
+                <!-- First in the panel, so on a phone the choice and its reason show right under the board. -->
+                {#if !coach.busy}
+                  <div class="row">
+                    <button type="button" onclick={takeBack}>Take the move back</button>
+                    <button type="button" class="secondary" onclick={carryOn}>Carry on</button>
+                  </div>
+                {/if}
+              {:else}
+                <p>Your move ({SIDE_NAMES[game.playerSide]}).</p>
+              {/if}
+              {#if notice}<p>{notice}</p>{/if}
+            </div>
+            {#if game.result}
+              <!-- On the card but outside the status region, so a screen reader reads the result and the
+                   tally once, and not the whole card again when the Review link arrives. -->
+              <div class="end-actions" bind:this={endActions}>
+                {#if saved === 'queued'}
+                  <p class="muted">Saved on this device. It goes to your game list when your desktop is reachable.</p>
+                {:else if saved}
+                  <a class="button" href={`#/review/${saved.id}`}>Review this game</a>
+                {/if}
+                <button type="button" class="secondary" onclick={askNewGame}>New game</button>
+              </div>
+            {/if}
+          </div>
+          {#if !finished}
+            <label class="toggle"><input type="checkbox" checked={game.live} onchange={toggleLive} /> Live Coaching in this game</label>
+          {/if}
+          <MoveList
+            moves={line.moves}
+            grades={game.grades}
+            cursor={line.cursor}
+            ongoto={finished ? pickMove : undefined}
+            variation={variation.active
+              ? { from: variation.from ?? 0, moves: variation.line.moves, grades: variation.grades, cursor: variation.line.cursor, ongoto: (c) => variation.line.goTo(c) }
+              : undefined}
+          />
         </div>
-        <!-- The Coach comes before the move list, as beside every other board. Once the game is over
-             it stays only if it said something worth rereading. -->
+        <!-- Docked at the panel's foot, as beside every other board. Once the game is over it stays
+             only if it said something worth rereading. -->
         {#if !finished || coach.entries.length}
           <CoachPanel
             thread={coach}
@@ -613,10 +690,6 @@
               : 'Live Coaching is off in this game. Press Hint for a nudge.'}
           />
         {/if}
-        {#if !finished}
-          <label class="toggle"><input type="checkbox" checked={game.live} onchange={toggleLive} /> Live Coaching in this game</label>
-        {/if}
-        <MoveList moves={line.moves} grades={game.grades} cursor={line.cursor} ongoto={finished ? (c) => line.goTo(c) : undefined} />
       </div>
     </div>
   {/if}
@@ -626,9 +699,6 @@
   .setup { display: flex; flex-direction: column; gap: 0.7rem; max-width: 420px; }
   fieldset { display: flex; flex-wrap: wrap; gap: 0.8rem; border: 1px solid var(--line); border-radius: 8px; }
   .toggle { display: flex; gap: 0.4rem; align-items: center; }
-  .small { font-size: 0.8rem; }
-  /* Five buttons, one of them "Show the move", fit one row under a full-size board. */
-  .toolbar :global(button) { padding-inline: 0.7rem; }
   .game-status, .game-status > .live { display: flex; flex-direction: column; gap: 0.45rem; }
   .game-status p { margin: 0; }
   .row { display: flex; gap: 0.5rem; flex-wrap: wrap; }

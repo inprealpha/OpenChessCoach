@@ -142,11 +142,12 @@ the Player asks (the moment's "Show all", Threat, a hovered Engine line).
 | Ink (near black) | The move that was played; its Move Grade shows as the badge on its square, not as the arrow's colour | Review, Engine Game, Lesson feedback |
 | Green | The Engine's best move | Review, Engine lines, Engine Game Hints that show the move; in a Lesson only where ADR 0012 allows (never a move the Lesson will ask for) |
 | Blue | Another good move (the Engine's second choice, or the Coach's alternative) | Review, Board |
+| Red, solid | A move that went wrong, when it isn't the move played (the Coach's red) | Review, Lesson feedback, Why Questions |
 | Red, dashed | The opponent's threat | Threat, the Blunder pause (the move that wins the piece) |
-| Orange | The move many players would reach for (a tempting move) | Review, Why Questions |
+| Orange | The opponent's reply the Coach points to | Review, Lesson feedback, Why Questions |
 
 The played move's arrow is ink, not its Move Grade's colour, because the grade colours overlap the
-others: a Mistake's dark orange is the tempting move's orange, and a Good move's green is the best
+others: a Mistake's dark orange is the reply's orange, and a Good move's green is the best
 move's green.
 
 - Every board that draws arrows shows a legend of the colours on it now, as one line under the board
@@ -238,11 +239,14 @@ The existing tokens in `packages/web/src/app.css` stay: `--bg`, `--panel`, `--te
 `--line`, `--accent`, `--danger`, with their dark-mode values, `--board-max` and `--screen-max`. New
 work adds tokens there instead of literal colours:
 
-- `--arrow-best`, `--arrow-alt`, `--arrow-threat`, `--arrow-tempting`, replacing the literals in
-  `lib/arrows.ts` and `Board.svelte`'s brushes; the played move keeps its Move Grade's colour from
-  `lib/grades.ts`.
+- `--arrow-played` (ink), `--arrow-best`, `--arrow-alt`, `--arrow-threat`, `--arrow-reply`,
+  which every arrow takes through its kind in `lib/arrows.ts` (`ARROW_LOOK`). The Coach's brushes
+  map onto them: green best, blue another good move, red a move that went wrong (solid, not
+  dashed), yellow the opponent's reply, and whichever arrow is the move played is ink.
+- `--app-head` (the header's height) and `--board-cap` (the largest board), from which the frame
+  sizes the board to fit one screen on desktop.
 - `--tap: 44px`, the smallest touch target.
-- `--coord-size: 11px` and `--coord-contrast` colours for the coordinates.
+- `--coord-size: 11px` for the coordinates, whose colours keep 4.5:1 on their square.
 
 ## Checking a screen against these guidelines
 

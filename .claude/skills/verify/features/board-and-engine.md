@@ -37,7 +37,9 @@ ADR 0007). Move Grades use the Lichess formula (Best, Good, Inaccuracy, Mistake,
   the first position, each graded once the Player stops on it. The Engine is asked about a
   position only after the Player has stayed on it for 200 ms (a move they play, at once), so
   holding → asks only where they stop. Playing the game's own next move steps to it and keeps the
-  rest. A FEN or PGN that can't be read shows its error in the form (an alert) and leaves the
+  rest; any other move after stepping back starts a variation and keeps the rest too (see
+  `explore.md`). `New board` on a board with moves asks first: the alert dialog `Clear this board?` with
+  `Keep this board` and `Yes, a new board`. A FEN or PGN that can't be read shows its error in the form (an alert) and leaves the
   board as it was: a board with no side to move or castling field, a link, a position no game can
   reach (more than 8 pawns, or more promoted pieces than the missing pawns allow) and castling
   rights standard chess can't have are refused or dropped. Set up and Cancel put focus back on
@@ -61,7 +63,8 @@ ADR 0007). Move Grades use the Lichess formula (Best, Good, Inaccuracy, Mistake,
   `First position` (`board.spec.ts`, "a graded move on the Board shows its Move Grade symbol, …").
 - `Show Engine lines` opens the region `Engine lines` with the Engine's top lines. Each line leads
   with the side to move's Winning Chances after it ("53%", or a mate phrase such as "White mates
-  in 3"), with the evaluation ("+0.38") smaller beside it. A line's accessible name reads
+  in 3"), with the evaluation ("+0.38") smaller beside it. Only the top line shows until
+  `More lines (4)` (remembered on the device; `Fewer lines` folds them again). A line's accessible name reads
   `Engine line 1: e4, White’s winning chances: 53%, +0.38`. Winning Chances come from the shared
   formatter `packages/shared/src/winning-chances.ts`: the Grader's winning chances as a
   percentage, so they always agree with the Move Grades.
@@ -73,17 +76,27 @@ ADR 0007). Move Grades use the Lichess formula (Best, Good, Inaccuracy, Mistake,
   `Winning Chances bar: Black mates in 1`, a checkmate on the board `Black has checkmated`. It
   comes from the browser Engine's best line for the position shown (the same as `Engine line 1`,
   ADR 0007), follows `◀ ▶ ⏮ ⏭` with no Coach call, and works with the desktop off. Where beside
-  the board doesn't fit (a phone), it lies under the board, as wide as the board, the bottom side
+  the board doesn't fit (a phone), it lies above the board, as wide as the board, the bottom side
   filling from the left. It also shows in Engine Games and Reviews, never in Lessons or Puzzles
   (`packages/web/src/components/WinningChancesBar.svelte`; `offline.spec.ts` reads it with the
   desktop off).
-- `Threat` (a toggle, `aria-pressed`, off by default and remembered on the device) draws a
-  red arrow (`#d32f2f`, under any other arrow) named
+- `Show threat` (a toggle, `aria-pressed`, off by default and remembered on the device) draws a
+  red dashed arrow (`--arrow-threat`, `data-kind="threat"`, under any other arrow) named
   `Threat: <Side> threatens <SAN> (<from> to <to>)`: the opponent's best move if they could move
   now, from the browser's Engine searching the position with the side to move swapped (a null
   move). No arrow when the side to move is in check, when the move is not a
   capture, check or promotion, or when it would cost less than an Inaccuracy's worth of winning
-  chances. The same button and arrow are on the Engine Game and Review boards.
+  chances. With it on and no arrow, the status "No threat" says the Engine found none. The same
+  button and arrow are on the Engine Game and Review boards.
+- Every board screen is one frame (`docs/design/interface-guidelines.md`): the header names the
+  screen and one line of context ("White to move"), the board bar under the board holds the step
+  buttons, `Flip board` (F) and `Show threat`, the panel beside the board scrolls inside itself on
+  a desktop and under it on a phone, and the Coach's Ask box is docked at its foot: the page
+  itself is one screen tall and never scrolls, so a choice at the panel's top (Continue, Take the
+  move back) is never under the board or the Ask box. Phone controls are at least 44 px tall. Each arrow colour has one meaning (ink played, green best,
+  blue other good move, red dashed threat, solid red a move that went wrong, orange the opponent's
+  reply, `packages/web/src/lib/arrows.ts`),
+  and the list `Arrow colours` under the board names the ones on it.
 - In verify mode the Engine runs at depth 10, 5 lines, one thread: the same moves always get the
   same evaluations and Move Grades.
 - Outside verify mode the multi-threaded Engine is tried first; if it can't start (an error or no

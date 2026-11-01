@@ -22,17 +22,21 @@ back. A Hint first asks the Coach for the idea; a second press shows the Engine'
 - Live Coaching on a Mistake or Blunder: one Coach comment, and `Take the move back` or `Carry on`
   in `Game status`, right under the board, so a 390×844 phone shows them without scrolling. The
   offer is saved with the game: after a reload it is still showing and the Engine waits.
-- The Coach panel comes before the move list. Until the Coach has said something it says what it
-  is for ("The Coach speaks up when a move is a Mistake or Blunder. Press Hint for a nudge.").
+- The header line says "You play White · Engine strength: Casual". The board bar under the board
+  holds `Hint`, `Show threat` and the menu `Game options` (`⋯ Game`: `Offer a draw`, `Resign`,
+  `New game`). The Coach panel is docked at the foot of the panel (on a phone, at the bottom of
+  the screen), so its comment shows with the board in view. While Live Coaching offers to take a
+  Mistake back, a dashed red arrow shows the Engine's punishing reply. Until the Coach has said
+  something it says what it is for ("The Coach speaks up when a move is a Mistake or Blunder. Press Hint for a nudge.").
 - The meter `Winning Chances bar: …` beside the board (see `board-and-engine.md`), with the
   Player's side at the bottom, from the browser Engine's analysis of the position on the board.
-- `Threat` (off by default, remembered on the device): while it's the Player's move, a red arrow
+- `Show threat` (off by default, remembered on the device): while it's the Player's move, a red dashed arrow
   shows the Engine's threat, from the browser's Engine (see `board-and-engine.md`).
-- `Offer a draw`: the Engine agrees ("Draw agreed.") only when it is a piece or more behind or
+- `Game options` → `Offer a draw`: the Engine agrees ("Draw agreed.") only when it is a piece or more behind or
   facing mate, or from move 20 when neither side is an Inaccuracy's worth of winning chances ahead;
   otherwise "The Engine declines the draw.", even after 1. e4 when the Player is a little better.
-- `Resign` asks first: the alert dialog `Resign this game?` with `Keep playing` (focused; Escape
-  does the same) and `Yes, resign`. `New game` in the middle of a game asks the same way: `Abandon
+- `Game options` → `Resign` asks first: the alert dialog `Resign this game?` with `Keep playing` (focused; Escape
+  does the same; focus goes back to `Game options`) and `Yes, resign`. `New game` in the middle of a game asks the same way: `Abandon
   this game?` with `Keep playing` and `Yes, start a new game` (never the browser's `confirm()`).
 - The game ends by itself on checkmate, stalemate, insufficient material, the fifty-move rule and
   a position occurring a third time ("Draw by threefold repetition."). The move that draws is
@@ -51,7 +55,7 @@ back. A Hint first asks the Coach for the idea; a second press shows the Engine'
   colour and still meet WCAG AA, and a move that never got one isn't counted). Under it, on the
   card but outside `Game status` so a screen reader doesn't read the card again when the link
   arrives: `Review this game` (or "Saved on this device…") and `New game`, which starts a fresh
-  game (the toolbar's New game goes once the game is over).
+  game (the `Game options` menu goes once the game is over).
 - Focus never drops to the page: after `Yes, resign` or an agreed draw it is on `Review this game`
   (`New game` while the game waits on the device); after New game, on the form's checked colour.
 - A game deleted from the game list still shows its card on the device that played it; its
@@ -60,9 +64,11 @@ back. A Hint first asks the Coach for the idea; a second press shows the Engine'
   `board-and-engine.md`) and the move list's buttons, with the Move Grade symbol following the
   step. While the game is on there are no step buttons and the keys do nothing: the board always
   shows the position to play from (`engine-game.spec.ts`, "a finished game steps through …").
-- A finished game's board is read-only: clicks on it do nothing (no "That move isn’t legal."),
-  and a declined draw is no longer reported once the game ends. It shows no arrows (Hint, Coach
-  or threat), the `Threat` button goes, and the Coach panel stays only if the Coach said something.
+- A finished game's board is free to explore: a move there starts a variation (see
+  `explore.md`), a piece picked up during the game is dropped when it ends, and a declined draw is
+  no longer reported once the game ends. While the game is on, a refused move says why ("It’s the
+  Engine’s move.", "Take the move back or carry on first."). It shows no arrows (Hint, Coach
+  or threat), the `Show threat` button goes, and the Coach panel stays only if the Coach said something.
 - The game list, the Review and the PGN name the Engine by its level: `Engine (Beginner)`. Games
   saved as `Engine (level 1)` before levels were named read the same way.
 - Settings → Coach quality → Advanced chooses the Coach model per job; the chosen model is what the
@@ -71,7 +77,7 @@ back. A Hint first asks the Coach for the idea; a second press shows the Engine'
 ## Drive
 
 Browser: `#/engine-game`, `Start the Engine Game` as White, play `g2g4` (a Mistake) to see Live
-Coaching, reload (the offer is still there), `Take the move back`, then `Resign` → `Yes, resign`. coachctl: `$C play --moves "e4 Nf3" --resign`.
+Coaching, reload (the offer is still there), `Take the move back`, then `Game options` → `Resign` → `Yes, resign`. coachctl: `$C play --moves "e4 Nf3" --resign`.
 
 ## Proof
 
@@ -80,8 +86,8 @@ Coaching, reload (the offer is still there), `Take the move back`, then `Resign`
   shows `Best on e4` once the Engine has replied.
 - After 1.g4 with Live Coaching on, the Coach panel shows one comment and `coach_calls` has exactly one `live` call; after
   1.e4 (Best) there is none.
-- After `Resign` → `Yes, resign`: "The Engine won by resignation." and a `games` row with `source: engine`.
-- `Review this game` opens the Review of that game, and is still there after a reload.
+- After `Game options` → `Resign` → `Yes, resign`: "The Engine won by resignation." and a `games` row with `source: engine`.
+- `Review this game` opens the Review of that game ("You had White · Lost 0-1 · vs Engine (Beginner)"), and is still there after a reload.
 - After 1. e4 at Casual, `Offer a draw` reads "The Engine declines the draw."; with the Engine a
   queen down it reads "Draw agreed." and the `games` row is `1/2-1/2`. Both knights out and back
   twice end the game "Draw by threefold repetition." (`engine-game.spec.ts`). A queen up after

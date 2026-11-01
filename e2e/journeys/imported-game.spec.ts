@@ -287,11 +287,27 @@ test('clearing an import box clears the message from the last import', async ({ 
 
 /** The seeded Italian Game's first key moment, 11. Bxf7+, as the Player sees its Winning Chances. */
 async function expectBxf7Chances(moment: Locator): Promise<void> {
-  await expect(moment.getByRole('button')).toHaveAccessibleName('Show moment: move 11. Bxf7+, Mistake');
-  // Before is the position after 10… dxe4, scored as the bar and the graph score it.
-  await expect(moment.getByTestId('chances-before')).toHaveText('Before: White’s winning chances: 48% -0.25');
-  await expect(moment.getByTestId('chances-after')).toHaveText('After 11. Bxf7+: White’s winning chances: 35% -1.72');
-  await expect(moment.getByText(/^Better: /)).toHaveText('Better: axb4 48% (-0.20), Ng5 44% (-0.67), Ne5 44% (-0.68)');
+  await expect(moment.getByRole('button', { name: /^Show moment/ })).toHaveAccessibleName('Show moment: move 11. Bxf7+, Mistake');
+  // One line: what changed, once. Before is the position after 10… dxe4, scored as the bar and the
+  // graph score it. A casual Player (the seed's level) sees no evaluation beside the percentages.
+  await expect(moment.getByTestId('chances-change')).toHaveText('48% → 35%');
+  await expect(moment.getByTestId('chances-before')).toHaveText('Before: White’s winning chances: 48%');
+  await expect(moment.getByTestId('chances-after')).toHaveText('After 11. Bxf7+: White’s winning chances: 35%');
+  // The best better move; the others are behind More moves.
+  await expect(moment.getByText(/^Better: /)).toHaveText('Better: axb4 48%');
+  await moment.getByText('More moves').click();
+  await expect(moment.getByText('Ng5 44%, Ne5 44%')).toBeVisible();
+}
+
+/** Shows a Review panel's tab: Moments (the overview and the key moments) or Moves. */
+async function showTab(page: Page, name: 'Moments' | 'Moves'): Promise<void> {
+  await page.getByRole('tab', { name }).click();
+}
+
+/** Picks a move from the Review's move list, on its Moves tab. */
+async function pickMove(page: Page, name: string): Promise<void> {
+  await showTab(page, 'Moves');
+  await page.getByRole('list', { name: 'Moves' }).getByRole('button', { name, exact: true }).click();
 }
 
 /** The seeded game's Winning Chances graph: the Player's two Mistakes (11. Bxf7+, 12. Bg5) and nothing else. */
@@ -332,13 +348,13 @@ test('a Review lists key moments with Move Grades, and reopening it makes no Coa
   await expect(moments.first()).toContainText('Before it, White’s winning chances: 48%. After it, White’s winning chances: 35%.');
 
   // Jump to a moment: the board shows the position before the move.
-  await moments.nth(1).getByRole('button').click();
+  await moments.nth(1).getByRole('button', { name: /^Show moment/ }).click();
   await expect(moments.nth(1)).toHaveClass(/active/);
 
   // Move Grade symbols sit on the square each graded move landed on, and follow the steps.
   const board = paired.getByRole('group', { name: 'Review board' });
   const symbols = board.getByRole('img', { name: /^(Best|Inaccuracy|Mistake|Blunder) on [a-h][1-8]$/ });
-  await paired.getByRole('button', { name: 'Move 11. Bxf7+, Mistake', exact: true }).click();
+  await pickMove(paired, 'Move 11. Bxf7+, Mistake');
   await expect(symbols).toHaveCount(1);
   await expect(board.getByRole('img', { name: 'Mistake on f7' })).toBeVisible();
   await paired.getByRole('button', { name: 'Next move' }).click(); // 11… Rxf7, Best: a star
@@ -361,6 +377,7 @@ test('a Review lists key moments with Move Grades, and reopening it makes no Coa
   await expect(current).toHaveAccessibleName('Current position: Start: White’s winning chances: 53%');
   await graph.getByRole('button', { name: 'Mistake by White, move 12' }).click();
   await expect(board.getByRole('img', { name: 'Mistake on g5' })).toBeVisible();
+  await showTab(paired, 'Moves');
   await expect(paired.getByRole('listitem').filter({ has: paired.getByRole('button', { name: 'Move 12. Bg5, Mistake', exact: true }) })).toHaveClass(/current/);
   await expect(current).toHaveAccessibleName('Current position: 12. Bg5: White’s winning chances: 19%');
   // The current move follows the steps.
@@ -381,7 +398,12 @@ test('a Review lists key moments with Move Grades, and reopening it makes no Coa
   await paired.reload();
   await expect(paired.getByRole('region', { name: 'Key moments' }).getByRole('listitem')).toHaveCount(count);
   expect(await app.rows('coach_calls')).toHaveLength(calls.length);
-  await expectBxf7Chances(paired.getByRole('region', { name: 'Key moments' }).getByRole('listitem').first());
+  // The moments open folded, the board at the start; opening one shows it in full.
+  const reopened = paired.getByRole('region', { name: 'Key moments' }).getByRole('listitem').first();
+  await expect(reopened.getByRole('button', { name: /^Show moment/ })).toHaveAttribute('aria-expanded', 'false');
+  await reopened.getByRole('button', { name: /^Show moment/ }).click();
+  await expectBxf7Chances(reopened);
+  await paired.getByRole('button', { name: 'First position' }).click();
   await expectGraphMarks(paired);
   expect((await app.rows('graded_moves')).length).toBe(48);
 
@@ -389,7 +411,7 @@ test('a Review lists key moments with Move Grades, and reopening it makes no Coa
   // Coach call and no Engine run. The Player is White, at the bottom of the board and of the bar.
   const bar = paired.getByRole('meter', { name: /^Winning Chances bar/ });
   await expect(bar).toHaveAccessibleName('Winning Chances bar: White’s winning chances: 53%');
-  await paired.getByRole('region', { name: 'Key moments' }).getByRole('listitem').first().getByRole('button').click();
+  await paired.getByRole('region', { name: 'Key moments' }).getByRole('listitem').first().getByRole('button', { name: /^Show moment/ }).click();
   // A key moment shows the position before the move: the bar agrees with the moment's "Before".
   await expect(bar).toHaveAccessibleName('Winning Chances bar: White’s winning chances: 48%');
   await paired.getByRole('button', { name: 'Next move' }).click();
@@ -399,6 +421,7 @@ test('a Review lists key moments with Move Grades, and reopening it makes no Coa
   expect(await app.rows('coach_calls')).toHaveLength(calls.length);
 
   // A Why Question works on any move of the game.
+  await showTab(paired, 'Moves');
   await paired.getByRole('button', { name: /^Move 3\. Nf3/ }).click();
   await paired.getByRole('button', { name: 'Ask the Coach why' }).click();
   await coachIdle(paired);
@@ -453,7 +476,9 @@ test.describe('a Review’s overview', () => {
     await overview.getByRole('button', { name: 'Go to move 9… d5, Best' }).click();
     await expect(board.getByRole('img', { name: 'Best on d5' })).toBeVisible();
     await expect(current).toHaveAccessibleName(/^Current position: 9… d5: /);
+    await showTab(paired, 'Moves');
     await expect(paired.getByRole('listitem').filter({ has: paired.getByRole('button', { name: 'Move 9… d5, Best', exact: true }) })).toHaveClass(/current/);
+    await showTab(paired, 'Moments');
     await overview.getByRole('button', { name: 'Go to move 12. Bg5, Mistake' }).click();
     await expect(board.getByRole('img', { name: 'Mistake on g5' })).toBeVisible();
     await expect(current).toHaveAccessibleName('Current position: 12. Bg5: White’s winning chances: 19%');
@@ -549,7 +574,6 @@ test('a Review shows one number per position, and an open key moment shows its p
   const symbols = board.getByRole('img', { name: /^(Best|Inaccuracy|Mistake|Blunder) on [a-h][1-8]$/ });
   const threat = paired.getByRole('img', { name: /^Threat: / });
   const coachArrows = paired.getByRole('img', { name: /^Arrow / });
-  const move = (name: string) => paired.getByRole('list', { name: 'Moves' }).getByRole('button', { name, exact: true });
   const moment = (san: string) => paired.getByRole('region', { name: 'Key moments' }).getByRole('listitem').filter({ hasText: san });
   /** The bar and the graph's current point name the same Winning Chances. */
   const expectShown = async (graphLabel: string, percent: string) => {
@@ -564,20 +588,21 @@ test('a Review shows one number per position, and an open key moment shows its p
 
   // 12. Bg5 was the Engine's fourth line: the bar, the graph and its card all read the score
   // that graded it (-3.88), not the next search's, one ply deeper.
-  await expect(moment('12. Bg5').getByTestId('chances-after')).toHaveText('After 12. Bg5: White’s winning chances: 19% -3.88');
-  await move('Move 12. Bg5, Mistake').click();
-  await expectShown('12. Bg5', '19%');
+  await expect(moment('12. Bg5').getByTestId('chances-after')).toHaveText('After 12. Bg5: White’s winning chances: 19%');
   // Its "Before" is the position after 11… Rxf7, as the bar and the graph show it there.
-  await expect(moment('12. Bg5').getByTestId('chances-before')).toHaveText('Before: White’s winning chances: 35% -1.72');
+  await expect(moment('12. Bg5').getByTestId('chances-before')).toHaveText('Before: White’s winning chances: 35%');
+  await expect(moment('12. Bg5').getByTestId('chances-change')).toHaveText('35% → 19%');
+  await pickMove(paired, 'Move 12. Bg5, Mistake');
+  await expectShown('12. Bg5', '19%');
   // A Why Question about it quotes those same numbers: the fake Coach repeats its brief's.
   await paired.getByRole('button', { name: 'Ask the Coach why' }).click();
   await coachIdle(paired);
   await expect(paired.getByLabel('Coach conversation')).toContainText('Before it, White’s winning chances: 35%. After it, White’s winning chances: 19%.');
-  await move('Move 11… Rxf7, Best').click();
+  await pickMove(paired, 'Move 11… Rxf7, Best');
   await expectShown('11… Rxf7', '35%');
 
   // The position after 10… dxe4: its symbol, and Black's threat with Threat on.
-  await move('Move 10… dxe4, Best').click();
+  await pickMove(paired, 'Move 10… dxe4, Best');
   await expectShown('10… dxe4', '48%');
   await expect(symbols).toHaveCount(1);
   await expect(board.getByRole('img', { name: 'Best on e4' })).toBeVisible();
@@ -585,7 +610,8 @@ test('a Review shows one number per position, and an open key moment shows its p
 
   // Opening 11. Bxf7+ shows that same position, and everything follows it: the bar, the graph's
   // cursor and the symbol. Only the Coach's arrows are drawn, not the threat.
-  await expect(moment('11. Bxf7+').getByTestId('chances-before')).toHaveText('Before: White’s winning chances: 48% -0.25');
+  await showTab(paired, 'Moments');
+  await expect(moment('11. Bxf7+').getByTestId('chances-before')).toHaveText('Before: White’s winning chances: 48%');
   const show = paired.getByRole('button', { name: 'Show moment: move 11. Bxf7+, Mistake' });
   await show.click();
   await expect(show).toHaveAttribute('aria-pressed', 'true');
@@ -609,31 +635,35 @@ test('a Review draws the move played and the Engine’s best as arrows, and the 
   const played = (name: string) => paired.getByRole('img', { name: `Move played: ${name}`, exact: true });
   const best = paired.getByRole('img', { name: /^Engine’s best: / });
   const coachArrows = paired.getByRole('img', { name: /^Arrow / });
-  const move = (name: string) => paired.getByRole('list', { name: 'Moves' }).getByRole('button', { name, exact: true });
 
   await paired.goto(`${app.url}/#/review/1`);
   await paired.getByRole('button', { name: 'Start the Review' }).click();
   await expect(paired.getByRole('region', { name: 'Key moments' }).getByRole('listitem').first()).toBeVisible({ timeout: 90_000 });
 
-  // A Mistake: the move played in the Mistake's color, the Engine's best in green.
-  await move('Move 11. Bxf7+, Mistake').click();
-  await expect(played('Bxf7+, Mistake')).toHaveAttribute('stroke', '#8a3d00');
-  await expect(paired.getByRole('img', { name: 'Engine’s best: axb4' })).toHaveAttribute('stroke', '#15781b');
+  // A Mistake: the move played in ink (its Move Grade is the badge on its square), the Engine's
+  // best in green, with a legend of the two, the move played drawn last so nothing hides it.
+  await pickMove(paired, 'Move 11. Bxf7+, Mistake');
+  await expect(played('Bxf7+, Mistake')).toHaveAttribute('data-kind', 'played');
+  await expect(paired.getByRole('img', { name: 'Engine’s best: axb4' })).toHaveAttribute('data-kind', 'best');
+  await expect(paired.getByRole('list', { name: 'Arrow colours' }).getByRole('listitem')).toHaveText(['played', 'best']);
+  const lines = paired.getByRole('group', { name: 'Review board' }).locator('line[data-kind]');
+  await expect(lines.last()).toHaveAttribute('data-kind', 'played');
   await expect(coachArrows).toHaveCount(0);
 
   // The Engine's best move itself: one green arrow.
-  await move('Move 5. d4, Best').click();
-  await expect(played('d4, Best, the Engine’s best')).toHaveAttribute('stroke', '#15781b');
+  await pickMove(paired, 'Move 5. d4, Best');
+  await expect(played('d4, Best, the Engine’s best')).toHaveAttribute('data-kind', 'best');
   await expect(best).toHaveCount(0);
   await expect(paired.getByRole('img', { name: /^Move played: / })).toHaveCount(1);
 
   // Every move, not only key moments: the opponent's Inaccuracy 16… Nc6.
-  await move('Move 16… Nc6, Inaccuracy').click();
-  await expect(played('Nc6, Inaccuracy')).toHaveAttribute('stroke', '#7a5a00');
+  await pickMove(paired, 'Move 16… Nc6, Inaccuracy');
+  await expect(played('Nc6, Inaccuracy')).toHaveAttribute('data-kind', 'played');
   await expect(paired.getByRole('img', { name: 'Engine’s best: Be6' })).toBeVisible();
 
   // Opening a key moment's explanation shows only the Coach's arrows; closing it brings these back.
   const show = paired.getByRole('button', { name: 'Show moment: move 11. Bxf7+, Mistake' });
+  await showTab(paired, 'Moments');
   await show.click();
   await expect(show).toHaveAttribute('aria-pressed', 'true');
   await expect(coachArrows.first()).toBeVisible();
@@ -653,7 +683,7 @@ test('a Review draws the move played and the Engine’s best as arrows, and the 
     }),
   );
   await paired.reload();
-  await move('Move 12. Bg5, Mistake').click();
+  await pickMove(paired, 'Move 12. Bg5, Mistake');
   await expect(played('Bg5, Mistake')).toBeVisible();
   await expect(paired.getByRole('img', { name: 'Engine’s best: Ng5' })).toBeVisible();
   expect(asked).toEqual([]);
@@ -682,37 +712,38 @@ test('from an open key moment, Next shows its move played and Previous the move 
   await expect(current).toHaveAccessibleName(/^Current position: 10\. a3: /);
 });
 
-test('on a phone, picking a key moment or a move brings the board into view; on a desktop it stays in view', async ({ paired, app }) => {
+test('the board never scrolls away: on a phone it stays at the top while the panel scrolls, on a desktop the page does not scroll', async ({ paired, app }) => {
   await paired.setViewportSize({ width: 390, height: 844 });
   await paired.goto(`${app.url}/#/review/1`);
   await paired.getByRole('button', { name: 'Start the Review' }).click();
   const moments = paired.getByRole('region', { name: 'Key moments' }).getByRole('listitem');
   await expect(moments.first()).toBeVisible({ timeout: 90_000 });
   const board = paired.getByRole('group', { name: 'Review board' });
-  /** The board's top edge is on screen, in the top half of the viewport. */
-  const boardOnScreen = async () => {
+  /** The whole board is on screen. */
+  const boardOnScreen = async (height: number) => {
     const box = await board.boundingBox();
-    return Boolean(box && box.y >= -1 && box.y < 844 / 2);
+    return Boolean(box && box.y >= -1 && box.y + box.height <= height + 1);
   };
 
-  // The key moments and the moves sit far below the board on a phone.
-  await moments.nth(2).getByRole('button').click();
-  await expect(moments.nth(2).getByRole('button')).toHaveAttribute('aria-pressed', 'true');
-  await expect.poll(boardOnScreen).toBe(true);
-
-  await paired.getByRole('list', { name: 'Moves' }).getByRole('button', { name: 'Move 16… Nc6, Inaccuracy', exact: true }).click();
-  await expect(board.getByRole('img', { name: 'Inaccuracy on c6' })).toBeVisible();
-  await expect.poll(boardOnScreen).toBe(true);
-
-  // Beside them on a desktop, the whole board stays in view however far down the Player scrolls.
-  await paired.setViewportSize({ width: 1280, height: 800 });
+  // The key moments and the moves scroll under the board on a phone; the Ask box stays docked.
   await paired.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
-  await moments.nth(3).getByRole('button').click();
-  await expect(moments.nth(3).getByRole('button')).toHaveAttribute('aria-pressed', 'true');
-  expect(await paired.evaluate(() => scrollY)).toBeGreaterThan(200);
-  const box = await board.boundingBox();
-  expect(box?.y).toBeGreaterThanOrEqual(-1);
-  expect((box?.y ?? 0) + (box?.height ?? 0)).toBeLessThanOrEqual(800);
+  await moments.nth(2).getByRole('button', { name: /^Show moment/ }).click();
+  await expect(moments.nth(2).getByRole('button', { name: /^Show moment/ })).toHaveAttribute('aria-pressed', 'true');
+  await expect.poll(() => boardOnScreen(844)).toBe(true);
+  await expect(paired.getByRole('textbox', { name: 'Your Why Question' })).toBeInViewport();
+
+  await pickMove(paired, 'Move 16… Nc6, Inaccuracy');
+  await expect(board.getByRole('img', { name: 'Inaccuracy on c6' })).toBeVisible();
+  await expect.poll(() => boardOnScreen(844)).toBe(true);
+
+  // On a desktop the frame is one screen tall: the page doesn't scroll, and the panel scrolls inside itself.
+  await paired.setViewportSize({ width: 1280, height: 800 });
+  await showTab(paired, 'Moments');
+  await moments.nth(3).getByRole('button', { name: /^Show moment/ }).click();
+  await expect(moments.nth(3).getByRole('button', { name: /^Show moment/ })).toHaveAttribute('aria-pressed', 'true');
+  expect(await paired.evaluate(() => document.documentElement.scrollHeight)).toBeLessThanOrEqual(800);
+  await expect.poll(() => boardOnScreen(800)).toBe(true);
+  await expect(paired.getByRole('textbox', { name: 'Your Why Question' })).toBeInViewport();
 });
 
 test('a game set up from a position numbers its moves from that position', async ({ paired, app }) => {
@@ -785,7 +816,7 @@ test.describe('a Review being made', () => {
     // moment as a Review finished on the spot does.
     const first = paired.getByRole('region', { name: 'Key moments' }).getByRole('listitem').first();
     await expect(first).toBeVisible({ timeout: 90_000 });
-    await expect(first.getByRole('button')).toHaveAttribute('aria-pressed', 'true');
+    await expect(first.getByRole('button', { name: /^Show moment/ })).toHaveAttribute('aria-pressed', 'true');
     expect(starts).toHaveLength(1);
     expect(await app.rows('reviews')).toHaveLength(1);
   });
@@ -817,7 +848,7 @@ test.describe('a Review being made', () => {
     // request joined it.
     const first = page.getByRole('region', { name: 'Key moments' }).getByRole('listitem').first();
     await expect(first).toBeVisible({ timeout: 90_000 });
-    await expect(first.getByRole('button')).toHaveAttribute('aria-pressed', 'true');
+    await expect(first.getByRole('button', { name: /^Show moment/ })).toHaveAttribute('aria-pressed', 'true');
     await expect(page.getByRole('alert')).toHaveCount(0);
     expect(starts).toHaveLength(2);
     expect(await app.rows('reviews')).toHaveLength(1);

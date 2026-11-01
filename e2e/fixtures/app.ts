@@ -88,8 +88,14 @@ export async function coachIdle(page: Page): Promise<void> {
 }
 
 /** Resigns an Engine Game: Resign, then Yes, resign in the confirmation. */
+/** Picks an item from an Engine Game's ⋯ Game menu: Offer a draw, Resign or New game. */
+export async function gameMenu(page: Page, item: 'Offer a draw' | 'Resign' | 'New game'): Promise<void> {
+  await page.getByRole('button', { name: 'Game options' }).click();
+  await page.getByRole('menu', { name: 'Game options' }).getByRole('menuitem', { name: item }).click();
+}
+
 export async function resign(page: Page): Promise<void> {
-  await page.getByRole('button', { name: 'Resign' }).click();
+  await gameMenu(page, 'Resign');
   await page.getByRole('alertdialog', { name: 'Resign this game?' }).getByRole('button', { name: 'Yes, resign' }).click();
 }
 

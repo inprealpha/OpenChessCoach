@@ -14,7 +14,7 @@
   import type { GradedMove } from '@chess-coach/shared/analysis';
   import { isCheck, otherSide, outcomeOf, playUci, SIDE_NAMES } from '@chess-coach/shared/chess';
   import type { CoachRequest } from '@chess-coach/shared/coach/types';
-  import { knownLevels, LEVEL_NAMES, suggestNext, TRACK_NAMES } from '@chess-coach/shared/content/course';
+  import { decisionsMade, knownLevels, LEVEL_NAMES, suggestNext, TRACK_NAMES } from '@chess-coach/shared/content/course';
   import {
     bandFor,
     BANDS,
@@ -231,7 +231,7 @@
         // offline: use the local copy
       }
     }
-    resumeStep = Math.min(saved, decisions(data).length - 1);
+    resumeStep = decisionsMade(saved, decisions(data).length);
   }
 
   /** Start (or Resume) once: a double click must not show the first decision's prompt twice. */

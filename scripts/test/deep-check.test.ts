@@ -59,6 +59,11 @@ describe('the tablebase verdict', () => {
     expect(tablebaseVerdict(answer, 'e1d2')).toBe('turns a win into a draw (tablebase)');
   });
 
+  it('counts a win the tablebase can only round as a win', () => {
+    const answer: TablebaseAnswer = { category: 'win', moves: [{ uci: 'a1a8', category: 'loss' }, { uci: 'e1d2', category: 'maybe-loss' }] };
+    expect(tablebaseVerdict(answer, 'e1d2')).toBeUndefined();
+  });
+
   it('passes every drawing move in a drawn position', () => {
     const answer: TablebaseAnswer = { category: 'draw', moves: [{ uci: 'a1a8', category: 'draw' }, { uci: 'e1d2', category: 'cursed-win' }, { uci: 'a1a2', category: 'win' }] };
     expect(tablebaseVerdict(answer, 'e1d2')).toBeUndefined();
@@ -119,6 +124,16 @@ describe('the Lichess tablebase client', () => {
     expect(waits).toEqual([60_000, 4_000]);
   });
 
+  it('doesn\'t try again after a 400', async () => {
+    let asked = 0;
+    const tablebase = lichessTablebase(async () => {
+      asked++;
+      return new Response('', { status: 400 });
+    }, noWait);
+    await expect(tablebase(KRK)).rejects.toThrow(/HTTP 400/);
+    expect(asked).toBe(1);
+  });
+
   it('gives up after five tries', async () => {
     const tablebase = lichessTablebase(async () => new Response('', { status: 503 }), noWait);
     await expect(tablebase(KRK)).rejects.toThrow(/didn't answer .* \(HTTP 503\)/);
@@ -144,5 +159,14 @@ describe('the deep check', () => {
     expect(kd8.length).toBeGreaterThan(0);
     const keepsWin: Tablebase = async (fen) => ({ category: 'win', moves: [{ uci: kd8.find((d) => d.node.fen === fen)?.node.main ?? '', category: 'loss' }] });
     expect(await deepCheck(await createNodeEngine(1), keepsWin, lesson, kd8)).toEqual([]);
+  });
+
+  it('lets the Engine judge when the tablebase can\'t be reached, and says so', async () => {
+    const lesson = read('check');
+    const kd8 = decisions(lesson).filter((d) => d.node.mainSan === 'Kd8' && inTablebase(d.node.fen));
+    const down: Tablebase = () => Promise.reject(new Error("The Lichess tablebase didn't answer"));
+    expect(await deepCheck(await createNodeEngine(1), down, lesson, kd8)).toEqual([
+      expect.stringMatching(/^check part 4 Kd8 at depth 22: Mistake, .* \(The Lichess tablebase didn't answer, so the Engine judged\)$/),
+    ]);
   });
 });

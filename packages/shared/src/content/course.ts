@@ -23,7 +23,8 @@ export interface CatalogueItem {
 /**
  * How many of a Lesson's decisions the Player has made, for "3 of 7 decisions". Saved progress can
  * be past the end of a Lesson that was shortened after it was saved; the Lesson then resumes at its
- * last decision (Lesson.svelte), so the count stops one short of the Lesson's length, never past it.
+ * last decision, so the count stops one short of the Lesson's length, never past it. Lesson.svelte
+ * resumes at this step.
  */
 export function decisionsMade(step: number, decisions: number): number {
   return Math.max(0, Math.min(step, decisions - 1));

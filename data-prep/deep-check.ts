@@ -55,13 +55,13 @@ export type Tablebase = (fen: string) => Promise<TablebaseAnswer>;
 /**
  * What a result is worth to the side to move, for comparing moves: a win, a draw or a loss. A cursed
  * win or blessed loss is a draw under the 50-move rule, so it counts as one. A maybe-win is a win
- * that might be cursed, so it sits between. Undefined when the tablebase doesn't know.
+ * the tablebase can't be sure of within the 50-move rule because of rounding; it counts as a win, so
+ * the check never fails a move over rounding. Undefined when the tablebase doesn't know.
  */
 function worth(category: TablebaseCategory): number | undefined {
   switch (category) {
     case 'win':
     case 'syzygy-win':
-      return 2;
     case 'maybe-win':
       return 1;
     case 'cursed-win':
@@ -69,16 +69,15 @@ function worth(category: TablebaseCategory): number | undefined {
     case 'blessed-loss':
       return 0;
     case 'maybe-loss':
-      return -1;
     case 'syzygy-loss':
     case 'loss':
-      return -2;
+      return -1;
     default:
       return undefined;
   }
 }
 
-const RESULT_NAMES: Record<number, string> = { 2: 'a win', 1: 'a win (perhaps not within 50 moves)', 0: 'a draw', [-1]: 'a loss (perhaps not within 50 moves)', [-2]: 'a loss' };
+const RESULT_NAMES: Record<number, string> = { 1: 'a win', 0: 'a draw', [-1]: 'a loss' };
 
 /** Whether the tablebase can judge a position: few enough pieces and no castling left. */
 export function inTablebase(fen: string): boolean {
@@ -117,7 +116,9 @@ export function lichessTablebase(fetchImpl: typeof fetch = fetch, wait = (ms: nu
       } catch {
         // a network error: try again
       }
-      if (attempt >= 5) throw new Error(`The Lichess tablebase didn't answer for ${fen}${status ? ` (HTTP ${status})` : ''}`);
+      // A 4xx other than 429 won't change on a second try.
+      const final = status >= 400 && status < 500 && status !== 429;
+      if (final || attempt >= 5) throw new Error(`The Lichess tablebase didn't answer for ${fen}${status ? ` (HTTP ${status})` : ''}`);
       // Lichess asks clients that get a 429 to wait a minute.
       await wait(status === 429 ? 60_000 : 2_000 * 2 ** (attempt - 1));
     }
@@ -147,14 +148,27 @@ export function newDecisions(lesson: LessonData, before: LessonData | undefined)
 
 /**
  * The deep check on some of a Lesson's decisions: the tablebase where it can judge, the Engine at
- * `depth` with the headroom elsewhere. Returns one line per move that fails.
+ * `depth` with the headroom elsewhere. Returns one line per move that fails. When the tablebase
+ * can't be reached the Engine judges, and a failure says so, since the Engine can fail a slow win.
+ *
+ * The Engine searches one line, not five as the app does: the move's score comes from a search of
+ * the position after it, the way Lichess compares the evaluations of consecutive positions when it
+ * analyses a game. A second-best move then gets its own full search, not the leftovers of a search
+ * spread over five lines, and a deep search of one line costs a third of one of five.
  */
 export async function deepCheck(engine: Engine, tablebase: Tablebase, lesson: LessonData, list: readonly Decision[], depth = DEEP_DEPTH): Promise<string[]> {
   const failures: string[] = [];
   for (const { partIndex, node } of list) {
     const where = `${lesson.id} part ${partIndex + 1} ${node.mainSan}`;
+    let unreached = '';
     if (inTablebase(node.fen)) {
-      const verdict = tablebaseVerdict(await tablebase(node.fen), node.main);
+      let verdict: string | undefined;
+      try {
+        verdict = tablebaseVerdict(await tablebase(node.fen), node.main);
+      } catch (e) {
+        verdict = 'unknown';
+        unreached = ` (${(e as Error).message}, so the Engine judged)`;
+      }
       if (verdict === undefined) continue;
       if (verdict !== 'unknown') {
         failures.push(`${where}: ${verdict}`);
@@ -169,8 +183,8 @@ export async function deepCheck(engine: Engine, tablebase: Tablebase, lesson: Le
     const next = outcomeOf(after) ? undefined : await engine.analyse(after, options);
     const { grade, winLoss } = gradeFromAnalyses(node.ply + 1, node.main, before, next);
     const tooClose = grade === 'Good' && winLoss >= HEADROOM;
-    if (grade !== 'Best' && grade !== 'Good') failures.push(`${where} at depth ${depth}: ${grade}, ${describe(node.fen, winLoss, top)}`);
-    else if (tooClose) failures.push(`${where} at depth ${depth}: Good, but too close to an Inaccuracy (${GRADE_THRESHOLDS.Inaccuracy}), ${describe(node.fen, winLoss, top)}`);
+    if (grade !== 'Best' && grade !== 'Good') failures.push(`${where} at depth ${depth}: ${grade}, ${describe(node.fen, winLoss, top)}${unreached}`);
+    else if (tooClose) failures.push(`${where} at depth ${depth}: Good, but too close to an Inaccuracy (${GRADE_THRESHOLDS.Inaccuracy}), ${describe(node.fen, winLoss, top)}${unreached}`);
   }
   return failures;
 }

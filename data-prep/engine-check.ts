@@ -5,8 +5,9 @@
 // many minutes). npm test runs it at depth 10 on every Lesson. Exits 1 and lists the moves that fail.
 //
 // --deep runs the deep check of deep-check.ts instead: depth 22 with headroom below an Inaccuracy,
-// and the Lichess tablebase in endgames of 7 pieces or fewer (it needs the network). It takes about
-// half a minute a move, so CI runs it only on the moves a PR adds (--changed-since=<the PR's base>).
+// and the Lichess tablebase in endgames of 7 pieces or fewer (it needs the network). It takes a few
+// seconds a move, up to a minute in a hard position, so CI runs it only on the moves a PR adds
+// (--changed-since=<the PR's base>); the whole Course takes about half an hour.
 //
 // Usage: node data-prep/engine-check.ts [lesson-id ...] [--depth=10,14]
 //        node data-prep/engine-check.ts --deep [lesson-id ...] [--changed-since=<git ref>] [--depth=22]
@@ -20,10 +21,32 @@ const args = process.argv.slice(2);
 const flag = (name: string) => args.find((a) => a.startsWith(`--${name}=`))?.slice(name.length + 3);
 const deep = args.includes('--deep');
 const since = flag('changed-since');
+const base = since && baseOf(since);
 const depths = (flag('depth') ?? (deep ? String(DEEP_DEPTH) : '10,14')).split(',').map(Number);
 const only = args.filter((a) => !a.startsWith('--'));
 const read = <T>(path: string): T => JSON.parse(readFileSync(new URL(path, import.meta.url), 'utf8')) as T;
 const ids = read<{ id: string }[]>('../data/lessons/index.json').map((l) => l.id).filter((id) => !only.length || only.includes(id));
+
+/**
+ * The commit to compare with: where this branch left `ref` (so moves `ref` changed since aren't
+ * counted as the branch's), or `ref` itself when the history to find that isn't here, as in CI's
+ * shallow checkout of the PR's merge commit, whose base is `ref`. Exits when `ref` doesn't exist,
+ * rather than count every move of every Lesson as new.
+ */
+function baseOf(ref: string): string {
+  const git = (...a: string[]) => execFileSync('git', a, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+  try {
+    git('rev-parse', '--verify', `${ref}^{commit}`);
+  } catch {
+    console.error(`--changed-since: ${ref} is not a commit here (fetch it first)`);
+    process.exit(2);
+  }
+  try {
+    return git('merge-base', 'HEAD', ref);
+  } catch {
+    return ref;
+  }
+}
 
 /** A Lesson as built at a git commit, or undefined when it didn't exist there. */
 function lessonAt(ref: string, id: string): LessonData | undefined {
@@ -41,7 +64,7 @@ let checked = 0;
 for (const id of ids) {
   const lesson = read<LessonData>(`../data/lessons/${id}.json`);
   if (deep) {
-    const list = since ? newDecisions(lesson, lessonAt(since, id)) : decisions(lesson);
+    const list = base ? newDecisions(lesson, lessonAt(base, id)) : decisions(lesson);
     if (!list.length) continue;
     for (const depth of depths) failures.push(...(await deepCheck(engine, tablebase, lesson, list, depth)));
     checked += list.length;

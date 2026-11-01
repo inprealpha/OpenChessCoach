@@ -297,6 +297,13 @@
   const drawn = $derived(
     drawOrder(arrows.map((a) => ('kind' in a ? a : (coachArrows([a], lastMove ? `${lastMove.from}${lastMove.to}` : undefined)[0] as BoardArrow)))),
   );
+  /**
+   * How far an arrow steps to its own side: two arrows between the same squares, opposite ways (the
+   * Blunder pause's best move and the threat that answers the move played), part so both show.
+   */
+  function sideStep(a: BoardArrow): number {
+    return drawn.some((b) => b.from === a.to && b.to === a.from) ? 0.13 : 0;
+  }
   /** The colours on the board now, for the legend under it. */
   const legend = $derived(legendOf(drawn));
   /** Arrowheads per kind; ids are per board, since two boards can be on one page. */
@@ -354,13 +361,16 @@
         {@const s = center(a.from)}
         {@const t = center(a.to)}
         {@const len = Math.hypot(t.x - s.x, t.y - s.y)}
+        {@const side = sideStep(a)}
+        {@const ox = (-(t.y - s.y) / len) * side}
+        {@const oy = ((t.x - s.x) / len) * side}
         <line
           role="img"
           aria-label={a.label}
-          x1={s.x}
-          y1={s.y}
-          x2={t.x - ((t.x - s.x) / len) * 0.35}
-          y2={t.y - ((t.y - s.y) / len) * 0.35}
+          x1={s.x + ox}
+          y1={s.y + oy}
+          x2={t.x - ((t.x - s.x) / len) * 0.35 + ox}
+          y2={t.y - ((t.y - s.y) / len) * 0.35 + oy}
           data-kind={a.kind}
           style:stroke={ARROW_LOOK[a.kind].color}
           stroke-width="0.16"

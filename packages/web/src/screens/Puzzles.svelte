@@ -360,7 +360,7 @@
           {#if finished}
             <!-- Stepping stays inside the Puzzle: its first position is the one the Player was set. -->
             <StepButtons onfirst={() => step('first')} onprevious={() => step('previous')} onnext={() => step('next')} onlast={() => step('last')} />
-            {#if variation.active}<button type="button" class="secondary back" onclick={() => variation.leave()}>Back to the Puzzle</button>{/if}
+            {#if variation.active}<button type="button" class="back" onclick={() => variation.leave()}>Back to the Puzzle</button>{/if}
           {/if}
           <FlipButton onflip={() => (flipped = !flipped)} />
         </div>
@@ -375,6 +375,14 @@
             </strong>
           </p>
           <p role="status" aria-live="polite" class:error={feedback.includes('not the move')}>{feedback}</p>
+          <!-- Before the solution, so a phone's resting sheet shows Next Puzzle without scrolling. -->
+          <div class="row">
+            {#if status === 'solving'}
+              <button type="button" class="secondary" onclick={showSolution} disabled={busy}>Show the solution</button>
+            {:else}
+              <button type="button" onclick={nextPuzzle}>Next Puzzle</button>
+            {/if}
+          </div>
           {#if finished}
             <p class="solution">
               Solution:
@@ -405,13 +413,6 @@
               </p>
             {/if}
           {/if}
-          <div class="row">
-            {#if status === 'solving'}
-              <button type="button" class="secondary" onclick={showSolution} disabled={busy}>Show the solution</button>
-            {:else}
-              <button type="button" onclick={nextPuzzle}>Next Puzzle</button>
-            {/if}
-          </div>
         </section>
         <p class="muted small">Puzzles: Lichess puzzle database, CC0.</p>
         </div>

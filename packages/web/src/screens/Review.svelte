@@ -510,7 +510,7 @@
         <div class="board-bar toolbar">
           <!-- Steps from the position on the board: an open key moment shows the one before its move. -->
           <StepButtons onfirst={() => step('first')} onprevious={() => step('previous')} onnext={() => step('next')} onlast={() => step('last')} />
-          {#if variation.active}<button type="button" class="secondary back" onclick={backToGame}>Back to the game</button>{/if}
+          {#if variation.active}<button type="button" class="back" onclick={backToGame}>Back to the game</button>{/if}
           <FlipButton onflip={() => (flipped = !flipped)} />
           <ThreatButton view={threats} />
         </div>
@@ -605,7 +605,7 @@
                             <div class="better small">
                               <span class="muted">Better</span>
                               <!-- The fix, on the board: a variation from the position before the move. -->
-                              <button type="button" class="secondary try" onclick={() => tryBetter(m, best!.uci)} aria-label={`Try ${best!.san} on the board`}>{option(best!)}</button>
+                              <button type="button" class="secondary try" onclick={() => tryBetter(m, best!.uci)} >Try {option(best!)}</button>
                               {#if others.length}
                                 <details class="more">
                                   <summary>More moves</summary>

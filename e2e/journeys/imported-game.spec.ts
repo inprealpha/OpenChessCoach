@@ -294,7 +294,8 @@ async function expectBxf7Chances(moment: Locator): Promise<void> {
   await expect(moment.getByTestId('chances-before')).toHaveText('Before: White’s winning chances: 48%');
   await expect(moment.getByTestId('chances-after')).toHaveText('After 11. Bxf7+: White’s winning chances: 35%');
   // The best better move, as a button that tries it on the board; the others are behind More moves.
-  await expect(moment.getByRole('button', { name: 'Try axb4 on the board' })).toHaveText('axb4 48%');
+  // The button says what it does, and its name is what it shows.
+  await expect(moment.getByRole('button', { name: 'Try axb4 48%' })).toHaveText('Try axb4 48%');
   await moment.getByText('More moves').click();
   await expect(moment.getByText('Ng5 44%, Ne5 44%')).toBeVisible();
 }
@@ -805,7 +806,7 @@ test('on an iPhone the page fits the screen, and the panel is a sheet: pulled up
   const show = first.getByRole('button', { name: /^Show moment/ });
   if ((await show.getAttribute('aria-expanded')) !== 'true') await show.click();
   await expect(show).toHaveAttribute('aria-expanded', 'true');
-  await first.getByRole('button', { name: 'Try axb4 on the board' }).click();
+  await first.getByRole('button', { name: 'Try axb4 48%' }).click();
   await expect(handle).toHaveAttribute('aria-expanded', 'false');
   await expect(paired.getByRole('button', { name: 'Back to the game' })).toBeVisible();
   await expect.poll(async () => (await board.boundingBox())!.width).toBe(wide);

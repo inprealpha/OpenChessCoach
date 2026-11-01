@@ -90,7 +90,7 @@ call.
   `data-testid="chances-change"`; evaluations only at the club level, a forced mate as a mate
   phrase). The visually hidden `chances-before` / `chances-after` lines keep the long form
   ("Before: White’s winning chances: 48%"). The open row shows the Coach's explanation,
-  "Better" with the best move as a button (`Try <SAN> on the board`, "axb4 48%"), which plays it on
+  "Better" with the best move as a button ("Try axb4 48%", its name the same), which plays it on
   the board as a variation from the position before the moment, and the Engine's other options
   behind `More moves`. The first moment is
   open on load.
@@ -196,7 +196,7 @@ Mistake` in the list `Moves`, then `Next move`. A Review without the overview:
   edge goes back to `Start: White’s winning chances: 53%` (`imported-game.spec.ts`, "a Review
   lists key moments …"). Marks for Black, mates and huge evaluations are covered on real games in
   `packages/shared/test/winning-chances-graph.test.ts`.
-- The moment 11. Bxf7+ shows `48% → 35%` with no evaluations (Beginner), the button `Try axb4 on the board` ("axb4 48%") and,
+- The moment 11. Bxf7+ shows `48% → 35%` with no evaluations (Beginner), the button "Try axb4 48%" and,
   under `More moves`, `Ng5 44%, Ne5 44%`, before and after a reopen
   (`imported-game.spec.ts`, "a Review lists key moments with Move Grades, …").
 - On the `Review board`: `Move 11. Bxf7+` shows the image `Mistake on f7`; `Next move` shows

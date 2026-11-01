@@ -5,7 +5,7 @@ import { DatabaseSync, type SQLInputValue } from 'node:sqlite';
 
 export const DB_FILE = 'coach.sqlite';
 
-/** Run in order; `schema_version` counts those applied. Exported for the tests that rewind to one. */
+/** The schema's steps, in order; exported so a test can take a database back to before one. */
 export const MIGRATIONS: string[] = [
   `
   CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
@@ -193,6 +193,15 @@ export const MIGRATIONS: string[] = [
   // applies. A Player who turns it off again keeps it off.
   `
   DELETE FROM settings WHERE key = 'thinkDeeper';
+  `,
+  // Whether a game's Review is pitched at the rating its record gives the side it follows, rather
+  // than at the Player Profile's level (#33). Off: the Player's own level, as before. And whether a
+  // Review's Move Grades counted into the Player Profile, so dropping it takes back only what it
+  // added: the sample game's never did, nor does a game the owner didn't play.
+  `
+  ALTER TABLE profile ADD COLUMN level_from_games INTEGER NOT NULL DEFAULT 0;
+  ALTER TABLE reviews ADD COLUMN counted INTEGER NOT NULL DEFAULT 1;
+  UPDATE reviews SET counted = 0 WHERE game_id IN (SELECT id FROM games WHERE source = 'sample');
   `,
   // Opus is now the default for Reviews, Why Questions and Lessons (0.5.0), and every install moves
   // to it once (the owner's call): a saved Sonnet for those jobs, the alias or a full model id,

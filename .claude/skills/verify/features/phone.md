@@ -43,6 +43,17 @@ no-phone`).
 - A pairing reset revokes every phone, so the desktop asks again at once (the `pairing-reset` event).
   When a phone was paired, the reset also clears `phone_reminder`, so it asks even after
   `Don’t ask again`; a reset with no phone paired keeps the Player's answer.
+- A phone the desktop's firewall, a guest Wi-Fi or a VPN keeps out gets no answer, and the desktop
+  can't test for it (#31). So once the QR code has been on screen for two minutes (`NO_PHONE_MS`,
+  counted from `Show the code` in the reminder) with no phone paired, the step says
+  `Phone can’t open it?` with the button `Connect another way`. It saves `tunnelEnabled` like
+  Settings' Away from home checkbox, and once the tunnel runs the figure `Pairing QR code` shows the
+  tunnel's code (`data-way="tunnel"`, else `wifi`), the Wi-Fi step goes, `No link appears?` names the
+  tunnel's address, and the text (`data-testid="another-way"`) says the address changes each time
+  the app starts. If the tunnel fails, it says so with `Try again`, which starts it again.
+- On a Windows or macOS desktop, a line beside the steps says to allow Node.js when the system asks
+  (`pairing.info`'s `systemPrompt`, the same words as the start-up message).
+  `CHESS_COACH_DESKTOP_SYSTEM=windows` pretends, for verify mode and the journeys.
 - Settings still shows the QR code for any device (`pairing.md`).
 
 ## Drive
@@ -66,6 +77,9 @@ starts at the level and Goals.
 - `devices` has an `iPhone or iPad browser` row with `revoked_at: null` after the phone scans.
 - `pairing.info`'s `phone` is `{ paired: false, remind: true }` on `no-phone`, `{ paired: true,
   remind: false }` on `default` (`packages/backend/test/phone.test.ts`).
+- `Connect another way`: `settings` row `tunnelEnabled` = `true`, and the figure's `data-way` is
+  `tunnel` (verify mode's fake tunnel, `https://verify-mode.trycloudflare.com`). The journeys move
+  the page's clock on with `page.clock.fastForward('02:00')`.
 - `phone.spec.ts` drives the sub-features above in the browser, at 1280px and 390px; the renaming
   at `hello` is in `phone.test.ts` only. A phone that connects is a paired phone, so the desktop
   stops asking for everyone: the journeys show what a phone sees, not that it would hold back alone.

@@ -89,6 +89,34 @@ Options: `--port <n>` (default 8737), `--host <address>`, `--data-dir <path>`, `
 Player Profile live in one SQLite file in your data folder (on Linux `~/.local/share/ai-chess-coach`,
 on macOS `~/Library/Application Support/ai-chess-coach`, on Windows `%APPDATA%\ai-chess-coach`).
 
+## My phone can't open the app
+
+If your phone's browser says it can't connect after you scan the QR code, something is keeping it
+from reaching your desktop. The quickest fix works whatever the cause: leave the QR code on the
+desktop's screen for a couple of minutes, and when it asks **Phone can't open it?**, press
+**Connect another way**. The desktop then reaches your phone through a Cloudflare tunnel (the same
+one as [Away from home](#away-from-home)) and shows a new QR code to scan. Its address changes each
+time you start the app, so scan again after a restart: Settings shows the new code under Away from
+home. Or find the cause:
+
+- **Windows:** when the app starts, Windows asks whether Node.js can use your networks. Tick both
+  boxes (Private and Public) and click **Allow access**. If you clicked Cancel, open **Windows
+  Security → Firewall & network protection → Allow an app through firewall**, find Node.js, and tick
+  both boxes.
+- **macOS:** if your Mac asks whether `node` can accept incoming network connections, click
+  **Allow**. If you clicked Deny, open **System Settings → Network → Firewall → Options** and set
+  node to allow incoming connections.
+- **Linux:** most systems have no firewall on, but some do (CachyOS turns on ufw). When ufw or
+  firewalld is on, the desktop prints the one command that lets devices on your Wi-Fi reach the app,
+  such as `sudo ufw allow from 192.168.1.0/24 to any port 8737 proto tcp comment 'OpenChessCoach'`,
+  under the QR code, with your own network and port. Run it once.
+- **Mobile data, guest Wi-Fi or a VPN:** the phone must be on the same Wi-Fi as the desktop, and
+  some guest networks and routers keep devices apart. Nothing on the desktop can change that: use
+  **Connect another way**.
+
+The app never changes your firewall itself: that needs administrator rights, and it doesn't help
+on a guest Wi-Fi.
+
 ## Pairing
 
 Only devices that scanned the QR code, or typed the pairing code shown on the desktop, can use the

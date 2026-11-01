@@ -9,6 +9,10 @@ export const profileHandlers: HandlerMap<'profile.get' | 'profile.update' | 'pro
   'profile.update': async (req, { app, signal, connected }) => {
     const patch: ProfilePatch = {};
     if (req.level !== undefined) patch.level = req.level;
+    if (req.levelFromGames !== undefined) {
+      if (typeof req.levelFromGames !== 'boolean') throw new AppError('bad-request', 'Using each game’s rating is on (true) or off (false).');
+      patch.levelFromGames = req.levelFromGames;
+    }
     if (req.goals !== undefined) {
       if (!Array.isArray(req.goals)) throw new AppError('bad-request', 'Goals must be a list.');
       patch.goals = req.goals.map(String);

@@ -93,6 +93,10 @@ Rules you must follow:
   never from your own reading of the game.
 - Pitch the explanation at the Player's level: "beginner" needs very plain words and no jargon,
   "casual" can handle common terms, "club" can handle concrete lines.
+- When the brief has ownGame: false, the Player didn't play this game (a friend's, say): playerSide
+  is the side the Review follows, and "the Player's move" here means that side's move. Name both
+  sides by colour ("White's move", "Black's winning chances went from 48% to 35%"), never "you" or
+  "your" for a side of the board.
 - A beginner gets one idea: the main reason, and the better move. Don't list the other candidates or
   their Move Grades, and don't mention a tempting move unless it is the trap the moment is about.
   At other levels, mention another candidate or a tempting move only when it sharpens the main

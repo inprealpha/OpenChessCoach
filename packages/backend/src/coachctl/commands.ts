@@ -8,6 +8,7 @@ import { INITIAL_FEN, outcomeOf, outcomeOfLine, playSan, playUci, turnOf, type P
 import type { ReviewOverview, ReviewPart } from '@chess-coach/shared/protocol';
 import type { EngineConfig } from '../server.ts';
 import { CoachClient, pairDevice, ProtocolError } from '../client.ts';
+import { desktopSystem, firewallAdvice, isLoopbackHost } from '../firewall.ts';
 import { defaultDataDir } from '../paths.ts';
 import { appVersion } from '../runtime.ts';
 import { evidenceRoot, isAlive, listRuns, readRun, runFilePath, stateDir, writeRun, type RunFile } from '../verify/runs.ts';
@@ -178,6 +179,14 @@ async function doctor(flags: Flags): Promise<Result> {
     } catch {
       add('web-app', false, 'the web app could not be fetched', 'Build the web app: npm run build -w @chess-coach/web');
     }
+    // The owner's app on this desktop: a Linux firewall that is on can keep the phone out, and the
+    // desktop can't test that itself (#31), so doctor names it with the command that lets the Wi-Fi in.
+    const lan = t.run ? undefined : ownerLanUrl(t.url);
+    if (lan) {
+      const advice = await firewallAdvice(lan.hostname, Number(lan.port));
+      const none = desktopSystem() === 'linux' ? 'neither ufw nor firewalld turns the phone away (other firewalls are not checked)' : 'not checked: only Linux firewalls are';
+      add('firewall', true, advice ? advice.replace(/\s+/g, ' ').trim() : none);
+    }
     try {
       await CoachClient.connect(t.url, 'not-a-token').then((c) => c.close());
       add('pairing-guard', false, 'a connection without a valid token was accepted', 'Pairing is broken: see ADR 0001 and src/server.ts.');
@@ -212,6 +221,21 @@ async function doctor(flags: Flags): Promise<Result> {
   }
   const healthy = checks.every((c) => c.ok);
   return { ok: healthy, healthy, url: t.url, ...(t.run ? { runId: t.run.runId } : {}), checks };
+}
+
+/**
+ * The Wi-Fi address of the owner's app on this desktop, from the file it writes at start-up, when
+ * doctor checks that app and it listens on the local network.
+ */
+function ownerLanUrl(url: string): URL | undefined {
+  if (!isLoopbackHost(new URL(url).hostname)) return undefined;
+  try {
+    const info = JSON.parse(readFileSync(join(defaultDataDir(), 'instance.json'), 'utf8')) as { lanUrl?: string };
+    const lan = info.lanUrl ? new URL(info.lanUrl) : undefined;
+    return lan && !isLoopbackHost(lan.hostname) ? lan : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 // ---------- pair ----------

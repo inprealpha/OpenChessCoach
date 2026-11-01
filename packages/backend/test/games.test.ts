@@ -472,7 +472,7 @@ describe('importing a PGN', () => {
     onTestFinished(() => rmSync(dir, { recursive: true, force: true }));
     // A database as it was before: no date_known column, the import time stored as the date.
     const old = openDb(dir);
-    old.exec('ALTER TABLE games DROP COLUMN date_known; ALTER TABLE reviews DROP COLUMN overview; UPDATE schema_version SET version = 1;');
+    old.exec('ALTER TABLE games DROP COLUMN date_known; ALTER TABLE reviews DROP COLUMN overview; ALTER TABLE profile DROP COLUMN level_from_games; ALTER TABLE reviews DROP COLUMN counted; UPDATE schema_version SET version = 1;');
     const put = old.prepare(
       `INSERT INTO games (kind, source, source_id, pgn, start_fen, moves, white, black, player_side, result, opening, played_at, imported_at)
        VALUES ('imported', ?, ?, ?, ?, 'e2e4 e7e5', 'a', 'b', 'white', '1-0', 'x', ?, '2026-01-01T12:00:00.000Z')`,
@@ -495,7 +495,7 @@ describe('importing a PGN', () => {
     const dir = mkdtempSync(join(tmpdir(), 'chess-coach-dates-'));
     onTestFinished(() => rmSync(dir, { recursive: true, force: true }));
     const old = openDb(dir);
-    old.exec('ALTER TABLE reviews DROP COLUMN overview; UPDATE schema_version SET version = 2;');
+    old.exec('ALTER TABLE reviews DROP COLUMN overview; ALTER TABLE profile DROP COLUMN level_from_games; ALTER TABLE reviews DROP COLUMN counted; UPDATE schema_version SET version = 2;');
     const put = old.prepare(
       `INSERT INTO games (kind, source, source_id, pgn, start_fen, moves, white, black, player_side, result, opening, played_at, date_known, imported_at)
        VALUES ('imported', 'pgn', ?, ?, ?, 'e2e4 e7e5', 'a', 'b', 'white', '1-0', 'x', ?, 1, '2026-01-01T12:00:00.000Z')`,
@@ -747,7 +747,9 @@ describe('Reviews', () => {
     // A database as it was before: no overview column, and a saved Review of game 1.
     const old = openDb(dir);
     seed(old, new FakeClock(), 'default');
-    old.exec(`ALTER TABLE reviews DROP COLUMN overview; UPDATE schema_version SET version = ${MIGRATIONS.findIndex((m) => m.includes('ADD COLUMN overview'))};`);
+    // Back to before the overview's migration, undoing the later ones that change a table.
+    old.exec('ALTER TABLE reviews DROP COLUMN overview; ALTER TABLE profile DROP COLUMN level_from_games; ALTER TABLE reviews DROP COLUMN counted;');
+    old.prepare('UPDATE schema_version SET version = ?').run(MIGRATIONS.findIndex((m) => m.includes('ADD COLUMN overview')));
     old.prepare("INSERT INTO reviews (game_id, created_at, moments) VALUES (1, '2026-01-01T12:00:00.000Z', '[]')").run();
     old.close();
 

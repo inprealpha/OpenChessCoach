@@ -107,6 +107,27 @@ test('the Player Profile edits the level and Goals', async ({ paired, app }) => 
   expect(JSON.parse(profile?.goals ?? '[]')[0]).toBe('Stop hanging pieces');
 });
 
+test('the Player Profile can pitch each Review at the game’s rating, and the Review follows it (#33)', async ({ paired, app }) => {
+  await paired.goto(`${app.url}/#/profile`);
+  await paired.getByRole('button', { name: 'Edit level, account and Goals' }).click();
+  const box = paired.getByRole('checkbox', { name: 'Pitch each Review at the game’s rating' });
+  await expect(box).not.toBeChecked();
+  await paired.getByLabel('Level', { exact: true }).selectOption('club');
+  await box.check();
+  await paired.getByRole('button', { name: 'Save' }).click();
+  await expect(paired.getByTestId('profile-level')).toHaveText('Club');
+  await expect(paired.getByText('(Reviews follow the game’s rating when it has one)')).toBeVisible();
+  const [profile] = await app.rows<{ level: string; level_from_games: number }>('profile');
+  expect(profile).toMatchObject({ level: 'club', level_from_games: 1 });
+  // The seed's game: the Player had White, rated 1456 in it, so the Review speaks to a casual Player.
+  await paired.goto(`${app.url}/#/review/1`);
+  await paired.getByRole('button', { name: 'Start the Review' }).click();
+  await expect(paired.getByRole('region', { name: 'Key moments' }).getByRole('listitem').first()).toBeVisible({ timeout: 90_000 });
+  const calls = await app.rows<{ job: string; brief: string }>('coach_calls');
+  expect(calls.length).toBeGreaterThan(0);
+  for (const c of calls) expect(JSON.parse(c.brief)).toMatchObject({ level: 'casual', rating: 1456 });
+});
+
 test('the Player Profile links, changes and removes a Lichess or chess.com account', async ({ paired, app }) => {
   await paired.goto(`${app.url}/#/profile`);
   const card = paired.getByRole('region', { name: 'Level, account and Goals' });

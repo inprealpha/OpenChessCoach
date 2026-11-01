@@ -127,7 +127,12 @@ describe('Think deeper', () => {
     const dir = mkdtempSync(join(tmpdir(), 'chess-coach-deeper-'));
     onTestFinished(() => rmSync(dir, { recursive: true, force: true }));
     // Before #32, saving any setting stored every setting, so "off" was stored with the rest.
-    before(dir, "key = 'thinkDeeper'", (old) => old.prepare("INSERT INTO settings (key, value) VALUES ('thinkDeeper', 'false'), ('liveCoachingDefault', 'false')").run());
+    const old = openDb(dir);
+    old.prepare("INSERT INTO settings (key, value) VALUES ('thinkDeeper', 'false'), ('liveCoachingDefault', 'false')").run();
+    // Back to before the reset's migration, undoing the later ones that change a table.
+    old.exec('ALTER TABLE profile DROP COLUMN level_from_games; ALTER TABLE reviews DROP COLUMN counted');
+    old.prepare('UPDATE schema_version SET version = ?').run(MIGRATIONS.findIndex((m) => m.includes("DELETE FROM settings WHERE key = 'thinkDeeper'")));
+    old.close();
     const db = openDb(dir);
     expect(getSettings(db)).toMatchObject({ thinkDeeper: true, liveCoachingDefault: false });
     updateSettings(db, { thinkDeeper: false });

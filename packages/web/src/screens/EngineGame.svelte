@@ -1,7 +1,8 @@
 <script lang="ts">
   // An Engine Game: the Player picks a colour and the Engine's strength, and plays. Live Coaching
   // speaks up only on a Mistake or Blunder, and the Player may then take the move back. Hint gives
-  // the idea first and the Engine's move second. The game in progress survives a reload.
+  // the idea first and the Engine's move second. The game in progress survives a reload. Once the
+  // game is over its board is free: a move on it starts a variation, which Back to the game drops.
   import { tick } from 'svelte';
   import { candidatesFrom, type GradedMove } from '@chess-coach/shared/analysis';
   import { outcomeOfLine, SIDE_NAMES, turnOf, type PlayedMove, type Side } from '@chess-coach/shared/chess';
@@ -28,6 +29,7 @@
   import { router } from '../lib/router.svelte.ts';
   import { store } from '../lib/storage.ts';
   import { threatSetting, ThreatView } from '../lib/threat.svelte.ts';
+  import { Variation } from '../lib/variation.svelte.ts';
 
   /** Strength levels, mapped to Stockfish's Skill Level and a short search. */
   const LEVELS = [
@@ -57,6 +59,8 @@
   const KEY = 'engineGame';
   const line = new Line();
   const coach = new CoachThread();
+  /** The Player's own moves from a position of the finished game, graded by the browser's Engine. */
+  const variation = new Variation();
 
   let game = $state<Saved | null>(null);
   let loaded = $state(false);
@@ -82,6 +86,11 @@
 
   const finished = $derived(Boolean(game?.result));
   const playerToMove = $derived(game !== null && !finished && !thinking && !awaitingChoice && turnOf(line.fen) === game.playerSide);
+  /** The position on the board: the game's, or the Player's variation from a finished game. */
+  const boardFen = $derived(variation.active ? variation.fen : line.fen);
+  const shownLast = $derived(variation.active ? variation.line.lastMove : line.lastMove);
+  /** Why the board takes no move while the game is on, in one line beside it. */
+  const refusal = $derived(thinking ? 'It’s the Engine’s move.' : awaitingChoice ? 'Take the move back or carry on first.' : '');
   // The Player's last graded move keeps its symbol through the Engine's reply, unless the reply
   // landed on that square. A finished game steps through its moves, so this follows the step shown.
   const mark = $derived.by(() => {
@@ -108,17 +117,17 @@
   /** The browser Engine's analysis of the position on the board, for the Winning Chances bar (ADR 0007). */
   let analysis = $state<Analysis | null>(null);
   // A drawn game reads level: a repetition or an agreed draw is one the position alone doesn't show.
-  const position = $derived(game?.result === '1/2-1/2' ? { score: { cp: 0 }, pov: turnOf(line.fen) } : scoreFromAnalysis(line.fen, analysis));
+  const position = $derived(game?.result === '1/2-1/2' && !variation.active ? { score: { cp: 0 }, pov: turnOf(line.fen) } : scoreFromAnalysis(boardFen, analysis));
   $effect(() => {
     if (!game) return;
-    const fen = line.fen;
+    const fen = boardFen;
     // The same cached analysis grades the moves either side of this position, so it costs no extra
     // search: after the Player's move it is the very search that grades it, which the Engine's
     // reply waits for anyway, so the bar needs no wait of its own.
     void analyse(fen, (partial) => {
-      if (line.fen === fen) analysis = partial;
+      if (boardFen === fen) analysis = partial;
     }).then((a) => {
-      if (line.fen === fen) analysis = a;
+      if (boardFen === fen) analysis = a;
     });
   });
 
@@ -202,7 +211,35 @@
     shownMove = null;
   }
 
+  /**
+   * A move on a finished game's board: the game's own next move steps to it; any other starts a
+   * variation from the position shown, or carries on the one shown.
+   */
+  function explore(uci: string): void {
+    const atGame = !variation.active || variation.line.cursor === 0;
+    const from = variation.from ?? line.cursor;
+    if (atGame && line.moves[from]?.uci === uci) {
+      variation.leave();
+      line.goTo(from + 1);
+      return;
+    }
+    variation.play(uci, { cursor: line.cursor, fen: line.fen });
+  }
+
+  /** Steps through the variation while the board shows one, otherwise through the finished game. */
+  function step(where: 'first' | 'previous' | 'next' | 'last'): void {
+    const l = variation.active ? variation.line : line;
+    l.goTo({ first: 0, previous: l.cursor - 1, next: l.cursor + 1, last: l.moves.length }[where]);
+  }
+
+  /** A move picked in the move list: the board leaves any variation for it. */
+  function pickMove(cursor: number): void {
+    variation.leave();
+    line.goTo(cursor);
+  }
+
   async function onmove(uci: string): Promise<void> {
+    if (finished) return explore(uci);
     if (!game || !playerToMove) return;
     const ply = line.moves.length + 1;
     const m = line.play(uci);
@@ -426,6 +463,7 @@
     notice = '';
     coach.reset();
     clearHint();
+    variation.leave();
     line.reset();
     await store.del(KEY);
     // The button that started over is gone with the game: carry on from the form's first control.
@@ -513,21 +551,23 @@
         <div class="with-bar">
           <WinningChancesBar score={position?.score ?? null} pov={position?.pov ?? 'white'} orientation={game.playerSide} />
           <Board
-            fen={line.fen}
+            fen={boardFen}
             orientation={game.playerSide}
-            movable={playerToMove ? game.playerSide : 'none'}
-            lastMove={line.lastMove ? { from: line.lastMove.uci.slice(0, 2), to: line.lastMove.uci.slice(2, 4) } : undefined}
+            movable={finished ? 'both' : playerToMove ? game.playerSide : 'none'}
+            lastMove={shownLast ? { from: shownLast.uci.slice(0, 2), to: shownLast.uci.slice(2, 4) } : undefined}
             {arrows}
             highlights={coach.highlights}
-            gradeMark={mark}
+            gradeMark={variation.active ? variation.mark : mark}
             {onmove}
+            {refusal}
             label="Engine Game board"
           />
         </div>
         <div class="toolbar">
           {#if finished}
             <!-- Only a finished game steps back: while it is on, the board shows the position to play from. -->
-            <StepButtons onfirst={() => line.goTo(0)} onprevious={() => line.back()} onnext={() => line.forward()} onlast={() => line.goTo(line.moves.length)} />
+            <StepButtons onfirst={() => step('first')} onprevious={() => step('previous')} onnext={() => step('next')} onlast={() => step('last')} />
+            {#if variation.active}<button type="button" onclick={() => variation.leave()}>Back to the game</button>{/if}
           {:else}
             <button type="button" class="secondary" onclick={hint} disabled={!playerToMove || coach.busy}>{hintLevel === 0 ? 'Hint' : 'Show the move'}</button>
             <button type="button" class="secondary" onclick={offerDraw} disabled={thinking || awaitingChoice}>Offer a draw</button>
@@ -616,7 +656,15 @@
         {#if !finished}
           <label class="toggle"><input type="checkbox" checked={game.live} onchange={toggleLive} /> Live Coaching in this game</label>
         {/if}
-        <MoveList moves={line.moves} grades={game.grades} cursor={line.cursor} ongoto={finished ? (c) => line.goTo(c) : undefined} />
+        <MoveList
+          moves={line.moves}
+          grades={game.grades}
+          cursor={line.cursor}
+          ongoto={finished ? pickMove : undefined}
+          variation={variation.active
+            ? { from: variation.from ?? 0, moves: variation.line.moves, grades: variation.grades, cursor: variation.line.cursor, ongoto: (c) => variation.line.goTo(c) }
+            : undefined}
+        />
       </div>
     </div>
   {/if}

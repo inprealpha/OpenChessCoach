@@ -987,9 +987,10 @@ test.describe('setting up a position', () => {
     await expect(board(paired, 'Chess board')).toHaveAttribute('data-fen', playUci(INITIAL_FEN, 'e2e4')?.fenAfter ?? '');
     await expect(moves).toHaveCount(6);
     await expect(moves.first()).toHaveAccessibleName(GRADED);
-    // Any other move starts a new line from there, as on Lichess.
+    // Any other move starts a variation from there, and the rest of the game stays (explore.spec.ts).
     await play(paired, 'd7d5');
-    await expect(moves).toHaveCount(2);
+    await expect(paired.getByRole('list', { name: 'Moves' }).getByRole('button', { name: /^Move / })).toHaveCount(6);
+    await expect(paired.getByRole('list', { name: 'Variation from move 1. e4' }).getByRole('button')).toHaveCount(1);
   });
 
   test('holding → through a pasted game, the Engine searches only where the Player stops, and each position once', async ({ paired, app }) => {

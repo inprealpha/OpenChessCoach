@@ -37,7 +37,8 @@ ADR 0007). Move Grades use the Lichess formula (Best, Good, Inaccuracy, Mistake,
   the first position, each graded once the Player stops on it. The Engine is asked about a
   position only after the Player has stayed on it for 200 ms (a move they play, at once), so
   holding → asks only where they stop. Playing the game's own next move steps to it and keeps the
-  rest. A FEN or PGN that can't be read shows its error in the form (an alert) and leaves the
+  rest; any other move after stepping back starts a variation and keeps the rest too (see
+  `explore.md`). A FEN or PGN that can't be read shows its error in the form (an alert) and leaves the
   board as it was: a board with no side to move or castling field, a link, a position no game can
   reach (more than 8 pawns, or more promoted pieces than the missing pawns allow) and castling
   rights standard chess can't have are refused or dropped. Set up and Cancel put focus back on

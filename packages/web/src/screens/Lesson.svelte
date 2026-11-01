@@ -10,6 +10,8 @@
   // move that gives checkmate counts as the Lesson's move, and ends its part. The Coach's arrows show
   // no move for the Player but the one on the board: another may be the next decision's answer.
   // "How moves are written" explains the move notation the Lesson's texts use, for a beginner.
+  // Once the Lesson is complete its final board is free: a move on it starts a variation, which Back
+  // to the Lesson drops. Not before: the next decision's answer stays kept back (ADR 0012).
   import { tick } from 'svelte';
   import type { GradedMove } from '@chess-coach/shared/analysis';
   import { isCheck, otherSide, outcomeOf, playUci, SIDE_NAMES } from '@chess-coach/shared/chess';
@@ -31,6 +33,7 @@
   import Board from '../components/Board.svelte';
   import CoachPanel from '../components/CoachPanel.svelte';
   import GradeBadge from '../components/GradeBadge.svelte';
+  import StepButtons from '../components/StepButtons.svelte';
   import { api } from '../lib/api.svelte.ts';
   import { lessonArrows, lessonHighlights } from '../lib/arrows.ts';
   import { CoachThread } from '../lib/coach.svelte.ts';
@@ -42,6 +45,7 @@
   import { profile } from '../lib/profile.svelte.ts';
   import { router } from '../lib/router.svelte.ts';
   import { store } from '../lib/storage.ts';
+  import { Variation } from '../lib/variation.svelte.ts';
 
   let { lessonId }: { lessonId: string } = $props();
 
@@ -73,6 +77,8 @@
   let skipped = $state<Record<number, true>>({});
   const line = new Line();
   const coach = new CoachThread();
+  /** The Player's own moves from the finished Lesson's final position. */
+  const variation = new Variation();
   const progress = lessonProgress();
 
   /** An example for the thinking box that fits the Theme or endgame being taught, within its two lines on a 375px phone. */
@@ -434,7 +440,47 @@
     };
   }
 
+  /** A move on the finished Lesson's board: it starts a variation from the final position, or carries on the one shown. */
+  function explore(uci: string): void {
+    if (phase !== 'done') return;
+    if (variation.play(uci, { cursor: line.cursor, fen: line.fen })) coach.clearAnnotations();
+  }
+
+  function stepVariation(where: 'first' | 'previous' | 'next' | 'last'): void {
+    const v = variation.line;
+    const before = v.cursor;
+    v.goTo({ first: 0, previous: v.cursor - 1, next: v.cursor + 1, last: v.moves.length }[where]);
+    if (v.cursor !== before) coach.clearAnnotations();
+  }
+
+  function backToLesson(): void {
+    variation.leave();
+    coach.clearAnnotations();
+  }
+
+  /** Why a board that takes no move refuses one, in one line beside it. */
+  const refusal = $derived.by(() => {
+    if (phase === 'decide') return grading ? 'The Engine is grading your move.' : coach.busy ? 'One moment: the Coach is answering.' : '';
+    if (phase === 'feedback' && otherMove) return 'Try another move, or continue with the Lesson’s move.';
+    if (phase === 'feedback' || phase === 'shown') return 'Press Continue for the Lesson’s next move.';
+    return '';
+  });
+
   async function why(question: string): Promise<void> {
+    const played = variation.line.lastMove;
+    if (phase === 'done' && variation.active) {
+      // About the Player's own move in the variation, or its first position: only the moves go,
+      // and the desktop's Engine works out the facts (ADR 0007).
+      const recentMoves = variation.movesSoFar(line.moves);
+      const grade = variation.grades[variation.line.cursor - 1];
+      await coach.ask(
+        played
+          ? { job: 'why', fen: played.fenBefore, recentMoves: recentMoves.slice(0, -1), ...whyContext(), moveUci: played.uci, ...(question ? { question } : {}) }
+          : { job: 'why', fen: variation.fen, recentMoves, ...whyContext(), ...(question ? { question } : {}) },
+        question || (played ? (grade ? `Why is ${played.san} graded ${grade}?` : `Why ${played.san}?`) : 'What are the ideas in this position?'),
+      );
+      return;
+    }
     const cursor = line.cursor;
     const move = line.moves[cursor - 1];
     // About the move on the board: the Player's, or the Lesson's once shown.
@@ -461,13 +507,16 @@
 
   /** The side the Player plays in this part. */
   const playerSide = $derived(part?.side ?? lesson?.side ?? 'white');
+  /** The position on the board: the Lesson's, or the Player's variation once the Lesson is complete. */
+  const boardFen = $derived(variation.active ? variation.fen : line.fen);
+  const shownLast = $derived(variation.active ? variation.line.lastMove : line.lastMove);
   /** The Coach's arrows, less any other move for the Player (`lessonArrows`), then Show the move's. */
   const arrows = $derived.by(() => {
-    const shown = lessonArrows(coach.arrows, line.fen, line.lastMove?.uci, playerSide);
+    const shown = lessonArrows(coach.arrows, boardFen, shownLast?.uci, playerSide);
     return hintArrow ? [...shown, hintArrow] : shown;
   });
   /** The Coach's highlights, less any square a move of the Player's could go to (`lessonHighlights`). */
-  const highlights = $derived(lessonHighlights(coach.highlights, line.fen, line.lastMove?.uci, playerSide, otherMove ? node?.fen : undefined));
+  const highlights = $derived(lessonHighlights(coach.highlights, boardFen, shownLast?.uci, playerSide, otherMove ? node?.fen : undefined));
 </script>
 
 <section class="screen">
@@ -583,20 +632,26 @@
         <div>
           <Board
             bind:this={board}
-            fen={line.fen}
+            fen={boardFen}
             orientation={part.side}
-            movable={phase === 'decide' && !grading && !coach.busy ? part.side : 'none'}
-            lastMove={line.lastMove ? { from: line.lastMove.uci.slice(0, 2), to: line.lastMove.uci.slice(2, 4) } : undefined}
+            movable={phase === 'done' ? 'both' : phase === 'decide' && !grading && !coach.busy ? part.side : 'none'}
+            lastMove={shownLast ? { from: shownLast.uci.slice(0, 2), to: shownLast.uci.slice(2, 4) } : undefined}
             {arrows}
             {highlights}
-            gradeMark={phase === 'feedback' && result ? gradeMark(line.lastMove, result.grade) : undefined}
-            {onmove}
+            gradeMark={variation.active ? variation.mark : phase === 'feedback' && result ? gradeMark(line.lastMove, result.grade) : undefined}
+            onmove={phase === 'done' ? explore : onmove}
+            {refusal}
             label={`${lesson.name} Lesson board`}
           />
           <!-- Straight under the board, so on a phone the Hint and the arrow Show the move draws are both in view. -->
           {#if phase === 'decide'}
             <div class="toolbar">
               <button type="button" class="secondary" bind:this={hintButton} onclick={hint} disabled={coach.busy || grading}>{hintLevel === 0 ? 'Hint' : 'Show the move'}</button>
+            </div>
+          {:else if phase === 'done' && variation.active}
+            <div class="toolbar">
+              <StepButtons onfirst={() => stepVariation('first')} onprevious={() => stepVariation('previous')} onnext={() => stepVariation('next')} onlast={() => stepVariation('last')} />
+              <button type="button" onclick={backToLesson}>Back to the Lesson</button>
             </div>
           {/if}
           <p class="muted center progress" aria-live="polite">

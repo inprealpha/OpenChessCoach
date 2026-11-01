@@ -420,7 +420,7 @@ test('once the game ends, a declined draw is no longer reported', async ({ paire
   await expect(paired.getByText('The Engine declines the draw.')).toHaveCount(0);
 });
 
-test('a finished game’s board is read-only: clicks there say nothing about illegal moves', async ({ paired, app }) => {
+test('a finished game’s board drops a piece picked up during the game, and a move there is a variation', async ({ paired, app }) => {
   await startGame(paired, app.url);
   // A piece picked up before the game ends does not stay picked up afterwards.
   await square(paired, 'e2', BOARD).click();
@@ -432,6 +432,9 @@ test('a finished game’s board is read-only: clicks there say nothing about ill
   await square(paired, 'g1', BOARD).click();
   await square(paired, 'f3', BOARD).click();
   await expect(paired.getByText(/isn’t legal|not your move/)).toHaveCount(0);
+  // The finished game is explored on a variation of its own (explore.spec.ts); the game stays as it was.
+  await expect(paired.getByRole('group', { name: BOARD })).toHaveAttribute('data-fen', playUci(INITIAL_FEN, 'g1f3')?.fenAfter ?? '');
+  await paired.getByRole('button', { name: 'Back to the game' }).click();
   await expect(paired.getByRole('group', { name: BOARD })).toHaveAttribute('data-fen', INITIAL_FEN);
 });
 

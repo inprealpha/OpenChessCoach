@@ -2,10 +2,11 @@
   // A Review of one game: the desktop's Engine grades every move (ADR 0007), the desktop picks the
   // key moments, and the Coach writes an overview of the whole game (unless Settings turn it off),
   // then explains each key moment, streamed as it's written. Saved Reviews reopen with no Coach call.
+  // The board is free: a move on it starts a variation, which Back to the game drops.
   import { untrack } from 'svelte';
   import { moveLabel } from '@chess-coach/shared/chess';
   import type { MoveGrade } from '@chess-coach/shared/grader';
-  import { scoreAfterPly } from '@chess-coach/shared/position-score';
+  import { finishedScore, scoreAfterPly } from '@chess-coach/shared/position-score';
   import { winningChancesFor, type WinningChances } from '@chess-coach/shared/winning-chances';
   import { overviewSegments } from '@chess-coach/shared/overview';
   import type { GameDetail, GameSummary, KeyMoment, OverviewMove, Review } from '@chess-coach/shared/protocol';
@@ -28,6 +29,7 @@
   import { threatSetting, ThreatView } from '../lib/threat.svelte.ts';
   import { gradeMark } from '../lib/grades.ts';
   import { titleFrom } from '../lib/page-title.svelte.ts';
+  import { Variation } from '../lib/variation.svelte.ts';
 
   let { gameId }: { gameId: number } = $props();
 
@@ -46,6 +48,8 @@
   let side = $state<HTMLElement>();
   const line = new Line();
   const coach = new CoachThread();
+  /** The Player's own moves from a position of the game, graded by the browser's Engine; the game's line never changes. */
+  const variation = new Variation();
 
   const grades = $derived((review?.moves ?? []).map((g) => g.grade as MoveGrade | undefined));
   titleFrom(() => game && `Review: ${game.white} vs ${game.black}`);
@@ -132,7 +136,9 @@
   function jump(m: KeyMoment): void {
     coach.clearAnnotations();
     selected = m.ply;
-    if (momentOpen && open === m.ply) {
+    const exploring = variation.active;
+    variation.leave();
+    if (momentOpen && open === m.ply && !exploring) {
       open = null;
       return;
     }
@@ -200,14 +206,86 @@
 
   function goto(cursor: number): void {
     const from = line.cursor;
+    const exploring = variation.active;
+    variation.leave();
     line.goTo(cursor);
     open = null;
     // The Coach's arrows belong to the move it was asked about.
-    if (line.cursor !== from) coach.clearAnnotations();
+    if (line.cursor !== from || exploring) coach.clearAnnotations();
     selected = review?.moments.some((m) => m.ply === line.cursor) ? line.cursor : null;
   }
 
+  /**
+   * A move on the board: the game's own next move steps to it, as on Lichess; any other starts a
+   * variation from the position shown, or carries on the one shown. The Coach's arrows belong to
+   * the position they were drawn on.
+   */
+  function explore(uci: string): void {
+    // Back at the variation's first position, the game's own move returns to the game.
+    const atGame = !variation.active || variation.line.cursor === 0;
+    const from = variation.from ?? shownIndex;
+    if (atGame && line.moves[from]?.uci === uci) {
+      goto(from + 1);
+      return;
+    }
+    if (variation.play(uci, { cursor: shownIndex, fen: boardFen })) coach.clearAnnotations();
+  }
+
+  /** Steps through the variation while the board shows one, otherwise through the game. */
+  function step(where: 'first' | 'previous' | 'next' | 'last'): void {
+    if (!variation.active) {
+      goto({ first: 0, previous: shownIndex - 1, next: shownIndex + 1, last: line.moves.length }[where]);
+      return;
+    }
+    const v = variation.line;
+    const before = v.cursor;
+    v.goTo({ first: 0, previous: v.cursor - 1, next: v.cursor + 1, last: v.moves.length }[where]);
+    if (v.cursor !== before) coach.clearAnnotations();
+  }
+
+  /** A move picked in the variation's row of the move list. */
+  function showVariationMove(cursor: number): void {
+    if (variation.line.cursor !== cursor) coach.clearAnnotations();
+    variation.line.goTo(cursor);
+    showBoard();
+  }
+
+  /** Drops the variation: the board shows the game where the Player left it, an open key moment too. */
+  function backToGame(): void {
+    variation.leave();
+    coach.clearAnnotations();
+  }
+
+  /** A Why Question about the variation's move on the board, or its first position: only the moves go, and the desktop's Engine works out the facts (ADR 0007). */
+  async function whyInVariation(question: string): Promise<void> {
+    if (!game) return;
+    const v = variation.line;
+    const move = v.lastMove;
+    const recentMoves = variation.movesSoFar(line.moves);
+    if (!move) {
+      await coach.ask(
+        { job: 'why', fen: v.fen, recentMoves, playerSide: game.playerSide, opening: game.opening, ...(question ? { question } : {}) },
+        question || 'What are the options in this position?',
+      );
+      return;
+    }
+    const grade = variation.grades[v.cursor - 1];
+    await coach.ask(
+      {
+        job: 'why',
+        fen: move.fenBefore,
+        recentMoves: recentMoves.slice(0, -1),
+        playerSide: game.playerSide,
+        moveUci: move.uci,
+        opening: game.opening,
+        ...(question ? { question } : {}),
+      },
+      question || (grade ? `Why is ${move.san} graded ${grade}?` : `Why ${move.san}?`),
+    );
+  }
+
   async function why(question: string): Promise<void> {
+    if (variation.active) return whyInVariation(question);
     const cursor = line.cursor;
     const move = line.moves[cursor - 1];
     if (!move || !game) return;
@@ -254,19 +332,35 @@
   const coachExplains = $derived(Boolean(openMoment) || coach.arrows.length > 0);
   // One set of arrows at a time: the Coach's while it explains, otherwise the move played and the
   // Engine's best from the Review's graded moves, with the threat when Threat is on.
+  // A variation has no Review arrows: only the threat, and the Coach's once it answers about it.
   const shownArrows = $derived(
-    coachExplains
-      ? coach.arrows.length ? coach.arrows : (openMoment?.arrows ?? [])
-      : [...threatArrows(threats.threat), ...reviewArrows(review?.moves[line.cursor - 1])],
+    variation.active
+      ? coach.arrows.length ? coach.arrows : threatArrows(threats.threat)
+      : coachExplains
+        ? coach.arrows.length ? coach.arrows : (openMoment?.arrows ?? [])
+        : [...threatArrows(threats.threat), ...reviewArrows(review?.moves[line.cursor - 1])],
   );
   const momentFen = $derived(openMoment ? openMoment.fenBefore : null);
   /** An open key moment shows the position before its move; any other cursor, the position after it. */
   const shownIndex = $derived(momentFen ? line.cursor - 1 : line.cursor);
   /** The Move Grade of the move that reached the position on the board, on the square it landed on. */
-  const mark = $derived(gradeMark(line.moves[shownIndex - 1], grades[shownIndex - 1]));
-  /** The Winning Chances bar's facts, from the Review's graded moves: no new data and no Engine run. */
-  const position = $derived(review ? scoreAfterPly(review.moves, shownIndex) : null);
-  const boardFen = $derived(momentFen ?? line.fen);
+  const mark = $derived(variation.active ? variation.mark : gradeMark(line.moves[shownIndex - 1], grades[shownIndex - 1]));
+  /**
+   * The Winning Chances bar's facts, from the Review's graded moves: no new data and no Engine run.
+   * In a variation, from the browser Engine's Move Grade of the move shown, and at its first
+   * position, the game's.
+   */
+  const position = $derived.by(() => {
+    if (!variation.active) return review ? scoreAfterPly(review.moves, shownIndex) : null;
+    const v = variation.line;
+    if (v.cursor === 0) return review ? scoreAfterPly(review.moves, variation.from ?? 0) : null;
+    const g = variation.graded[v.cursor - 1];
+    return g ? (finishedScore(g.fenAfter) ?? { score: g.playedScore, pov: g.side }) : null;
+  });
+  const gameFen = $derived(momentFen ?? line.fen);
+  const boardFen = $derived(variation.active ? variation.fen : gameFen);
+  /** The move that reached the position on the board: none on an open key moment, which shows the position before its move. */
+  const shownLast = $derived(variation.active ? variation.line.lastMove : momentFen ? undefined : line.lastMove);
 
   $effect(() => {
     threats.follow(threatSetting.on ? boardFen : null);
@@ -286,31 +380,31 @@
             score={position?.score ?? null}
             pov={position?.pov ?? 'white'}
             orientation={game.playerSide}
-            waiting={review ? 'not graded in this Review' : 'shown once the Review is done'}
+            waiting={variation.active ? 'the Engine is thinking' : review ? 'not graded in this Review' : 'shown once the Review is done'}
           />
           <!-- Opening or closing a key moment is not a move: a fresh Board shows it at once. -->
           {#key momentFen}
             <Board
               fen={boardFen}
               orientation={game.playerSide}
-              movable="none"
-              lastMove={line.lastMove && !momentFen
-                ? { from: line.lastMove.uci.slice(0, 2), to: line.lastMove.uci.slice(2, 4) }
-                : undefined}
+              movable="both"
+              lastMove={shownLast ? { from: shownLast.uci.slice(0, 2), to: shownLast.uci.slice(2, 4) } : undefined}
               arrows={shownArrows}
               highlights={coach.highlights}
               gradeMark={mark}
               label="Review board"
+              onmove={explore}
             />
           {/key}
         </div>
         <div class="toolbar">
           <!-- Steps from the position on the board: an open key moment shows the one before its move. -->
-          <StepButtons onfirst={() => goto(0)} onprevious={() => goto(shownIndex - 1)} onnext={() => goto(shownIndex + 1)} onlast={() => goto(line.moves.length)} />
+          <StepButtons onfirst={() => step('first')} onprevious={() => step('previous')} onnext={() => step('next')} onlast={() => step('last')} />
+          {#if variation.active}<button type="button" onclick={backToGame}>Back to the game</button>{/if}
           <ThreatButton />
         </div>
         {#if review}
-          <WinningChancesGraph moves={review.moves} cursor={shownIndex} ongoto={goto} />
+          <WinningChancesGraph moves={review.moves} cursor={variation.from ?? shownIndex} ongoto={goto} />
         {/if}
       </div>
       <div class="side" bind:this={side}>
@@ -403,8 +497,16 @@
           </section>
         {/if}
 
-        <MoveList moves={line.moves} {grades} cursor={line.cursor} ongoto={pickMove} />
-        {#if line.cursor > 0}
+        <MoveList
+          moves={line.moves}
+          {grades}
+          cursor={variation.from ?? line.cursor}
+          ongoto={pickMove}
+          variation={variation.active
+            ? { from: variation.from ?? 0, moves: variation.line.moves, grades: variation.grades, cursor: variation.line.cursor, ongoto: showVariationMove }
+            : undefined}
+        />
+        {#if line.cursor > 0 || variation.active}
           <CoachPanel thread={coach} onwhy={why} placeholder="Ask why about this move" />
         {/if}
       </div>

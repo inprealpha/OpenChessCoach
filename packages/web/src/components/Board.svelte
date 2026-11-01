@@ -19,6 +19,8 @@
     /** A Move Grade to draw on the square its move landed on (nothing for Good). */
     gradeMark?: GradeMark | undefined;
     label?: string;
+    /** Why a board that takes no moves (`movable="none"`) refuses one, said when the Player picks up a piece. */
+    refusal?: string;
     onmove?: (uci: string) => void;
   }
 
@@ -31,6 +33,7 @@
     highlights = [],
     gradeMark = undefined,
     label = 'Chess board',
+    refusal = '',
     onmove,
   }: Props = $props();
 
@@ -74,6 +77,14 @@
     selected = null;
     promotion = null;
     message = '';
+  });
+
+  // A board whose rules change (a game that ends and leaves its board free to explore) drops a
+  // piece picked up under the old ones, so the next click starts afresh.
+  $effect(() => {
+    void movable;
+    selected = null;
+    promotion = null;
   });
 
   /** How long a piece takes to slide to its new square, as on Lichess. */
@@ -237,7 +248,7 @@
       return;
     }
     if (!canMove) {
-      if (p) message = movable === 'none' ? '' : 'It’s not your move.';
+      if (p) message = movable === 'none' ? refusal : 'It’s not your move.';
       return;
     }
     if (p && p.color === toMove) {

@@ -159,6 +159,16 @@ jobs:
       - run: npx playwright install --with-deps webkit
       - run: npm run build -w @chess-coach/web
       - run: node scripts/tmp-screens.ts webkit webkit-screens
+      # Artifacts can't be fetched from the agent's network, so the log carries small copies.
+      - name: Print the screens into the log
+        run: |
+          cat webkit-screens/report.json
+          for f in webkit-screens/*.png; do
+            convert "$f" -resize 50% -quality 70 "${f%.png}.jpg"
+            echo "=====BEGIN $(basename "${f%.png}").jpg"
+            base64 -w0 "${f%.png}.jpg"; echo
+            echo "=====END"
+          done
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:

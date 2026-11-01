@@ -48,7 +48,11 @@
   $effect(() => {
     const el = log;
     if (!el) return;
-    const measure = () => (cut = !sheet.full && el.scrollHeight > el.clientHeight + 2);
+    // The latest message, not the whole log: a short line under "Earlier" is shown whole.
+    const measure = () => {
+      const last = [...el.querySelectorAll(':scope > .entry')].at(-1);
+      cut = !sheet.full && Boolean(last) && last!.getBoundingClientRect().height > el.clientHeight + 2;
+    };
     void sheet.full;
     void thread.entries[thread.entries.length - 1]?.text;
     measure();

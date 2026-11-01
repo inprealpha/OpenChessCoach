@@ -92,6 +92,19 @@ test('a Theme Lesson has its own Puzzles', async ({ paired, app }) => {
     .toEqual([[puzzle.id, 'forks']]);
 });
 
+test('on an iPhone, Next Puzzle shows under the board once the solution is shown', async ({ paired, app }) => {
+  await paired.goto(`${app.url}/#/puzzles/italian-game`);
+  for (const [width, height] of [[402, 714], [440, 790]] as const) {
+    await paired.setViewportSize({ width, height });
+    await paired.getByRole('button', { name: 'Show the solution' }).click();
+    await expect(paired.getByText('Here is the solution.')).toBeAttached();
+    const next = paired.getByRole('button', { name: 'Next Puzzle' });
+    await expect(next).toBeInViewport({ ratio: 1 });
+    expect(await paired.evaluate(() => [document.documentElement.scrollWidth, document.documentElement.scrollHeight])).toEqual([width, height]);
+    await next.click();
+  }
+});
+
 test('a shown Puzzle writes out its solution, and the Player can step through it', async ({ paired, app }) => {
   await paired.goto(`${app.url}/#/puzzles/italian-game`);
   const puzzle = await current(paired);

@@ -758,6 +758,34 @@ test('the board never scrolls away: on a phone it stays at the top while the pan
   await expect(paired.getByRole('textbox', { name: 'Your Why Question' })).toBeInViewport();
 });
 
+/** A variation's bar beside the strip board: no page wider than the screen, Back to the game whole. */
+async function expectBarBesideStripFits(page: Page, width: number): Promise<void> {
+  await expect.poll(() => page.evaluate(() => [document.documentElement.scrollWidth, document.documentElement.clientWidth])).toEqual([width, width]);
+  const back = page.getByRole('button', { name: 'Back to the game' });
+  expect((await back.boundingBox())!.width).toBeGreaterThan(80);
+  await expect(back).toBeInViewport({ ratio: 1 });
+  await expect(page.getByRole('button', { name: 'Show threat' })).toBeInViewport({ ratio: 1 });
+}
+
+test('on an iPhone, a variation with the sheet pulled up keeps the page the screen’s width', async ({ paired, app }) => {
+  for (const [width, height] of [[402, 714], [440, 790]] as const) {
+    await paired.setViewportSize({ width, height });
+    await paired.goto(`${app.url}/#/review/1`);
+    if (width === 402) await paired.getByRole('button', { name: 'Start the Review' }).click();
+    const first = paired.getByRole('region', { name: 'Key moments' }).getByRole('listitem').first();
+    const show = first.getByRole('button', { name: /^Show moment/ });
+    await expect(show).toBeVisible({ timeout: 90_000 });
+    if ((await show.getAttribute('aria-expanded')) !== 'true') await show.click();
+    await first.getByRole('button', { name: 'Try axb4 48%' }).click();
+    const handle = paired.getByRole('button', { name: /^(Pull the panel up|Let the panel down)$/ });
+    await expect(handle).toHaveAttribute('aria-expanded', 'false');
+    await handle.click();
+    await expect(handle).toHaveAttribute('aria-expanded', 'true');
+    await expectBarBesideStripFits(paired, width);
+    await paired.getByRole('button', { name: 'Back to the game' }).click();
+  }
+});
+
 test('on an iPhone the page fits the screen, and the panel is a sheet: pulled up, the board is a strip a tap brings back', async ({ paired, app }) => {
   // Safari's visible area on current iPhones, from the 402 px of a 16 Pro to the 440 px of a 16 Pro Max:
   // the page never pans sideways or scrolls behind the panel.
@@ -822,6 +850,8 @@ test('on an iPhone the page fits the screen, and the panel is a sheet: pulled up
   await expect(handle).toHaveAttribute('aria-expanded', 'true');
   const conversation = paired.getByLabel('Coach conversation');
   await expect(conversation).not.toBeEmpty();
+  // Beside the strip, the bar wraps rather than squeeze Back to the game or run off the screen.
+  await expectBarBesideStripFits(paired, 440);
   // Back to the game: the moment is back, and the answer about the variation is put away.
   await paired.getByRole('button', { name: 'Back to the game' }).click();
   await expect(paired.getByRole('tab', { name: 'Moments' })).toHaveAttribute('aria-selected', 'true');

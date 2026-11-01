@@ -61,6 +61,8 @@
   // Every Lesson's Puzzles, whatever Lesson the address names.
   titleFrom(() => (opening && all.length && !lesson ? 'Puzzles' : null));
   const finished = $derived(status === 'solved' || status === 'shown');
+  /** Next Puzzle goes in the board bar on a phone, unless the bar holds Back to the Puzzle. */
+  const nextInBar = $derived(sheet.on && !variation.active);
   const boardFen = $derived(variation.active ? variation.fen : line.fen);
   const shownLast = $derived(variation.active ? variation.line.lastMove : line.lastMove);
 
@@ -363,6 +365,8 @@
             {#if variation.active}<button type="button" class="back" onclick={() => variation.leave()}>Back to the Puzzle</button>{/if}
           {/if}
           <FlipButton onflip={() => (flipped = !flipped)} />
+          <!-- On a phone, Next Puzzle sits in the bar under the board, where the resting sheet can't hide it. -->
+          {#if finished && nextInBar}<button type="button" class="next" onclick={nextPuzzle}>Next Puzzle</button>{/if}
         </div>
       </div>
       <div class="side panel">
@@ -379,7 +383,7 @@
           <div class="row">
             {#if status === 'solving'}
               <button type="button" class="secondary" onclick={showSolution} disabled={busy}>Show the solution</button>
-            {:else}
+            {:else if !nextInBar}
               <button type="button" onclick={nextPuzzle}>Next Puzzle</button>
             {/if}
           </div>

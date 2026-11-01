@@ -1,6 +1,7 @@
 import { isPhoneOrTablet } from '@chess-coach/shared/devices';
 import { PROTOCOL_VERSION } from '@chess-coach/shared/protocol';
 import { AppError } from '../errors.ts';
+import { systemPromptWarning } from '../firewall.ts';
 import { pairUrl, qrSvg } from '../network.ts';
 import { askAgain, phoneStatus, remindLater } from '../phone.ts';
 import { getSettings, updateSettings } from '../settings.ts';
@@ -37,6 +38,7 @@ export const systemHandlers: HandlerMap<
       tunnelPairUrl,
       tunnelQrSvg: tunnelPairUrl ? await qrSvg(tunnelPairUrl) : null,
       phone: phoneStatus(app.db, app.clock),
+      systemPrompt: systemPromptWarning() ?? null,
     };
   },
 
@@ -59,10 +61,11 @@ export const systemHandlers: HandlerMap<
   'settings.update': async (req, { app }) => {
     const before = getSettings(app.db);
     const next = updateSettings(app.db, req);
-    if (next.tunnelEnabled !== before.tunnelEnabled) {
-      if (next.tunnelEnabled) app.tunnel.start().catch((err: unknown) => app.log(`Tunnel failed: ${String(err)}`));
-      else await app.tunnel.stop();
-    }
+    // Asked for while it is on but stopped, as "Connect another way" does after a failure: try again.
+    const stopped = ['off', 'error'].includes(app.tunnel.state().status);
+    if (next.tunnelEnabled && (!before.tunnelEnabled || (req.tunnelEnabled === true && stopped))) {
+      app.tunnel.start().catch((err: unknown) => app.log(`Tunnel failed: ${String(err)}`));
+    } else if (!next.tunnelEnabled && before.tunnelEnabled) await app.tunnel.stop();
     return next;
   },
 };

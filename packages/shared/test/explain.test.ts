@@ -178,6 +178,9 @@ describe('what a move does', () => {
     // Taking the checker (1. e4 f5 2. Qh5+ g6 3. Qxg6+ hxg6), and stepping the king out of a rook's check.
     expect(moveFacts('rnbqkbnr/ppppp2p/6Q1/5p2/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 0 3', 'h7g6', [])).toContainEqual({ kind: 'answers-check', how: 'takes', checker: { side: 'white', role: 'queen', square: 'g6' } });
     expect(moveFacts('4k3/8/8/8/8/8/4R3/4K3 b - - 0 1', 'e8d7', [])).toContainEqual({ kind: 'answers-check', how: 'king', checker: { side: 'white', role: 'rook', square: 'e2' } });
+    // A double check from a rook and a knight names both checkers.
+    const double = moveFacts('4k3/8/3N4/8/8/8/4R3/4K3 b - - 0 1', 'e8f8', []);
+    expect(double.map(describeFact)).toContain("moves the king out of the double check from White's rook on e2 and White's knight on d6");
   });
 
   it('a knight check that also attacks the queen is a double attack on the king and the queen', () => {

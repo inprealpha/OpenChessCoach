@@ -32,7 +32,7 @@ The brief (ADR 0004, ADR 0009) covers the position, the Engine's best moves, the
 
 ## Amendment: on by default (#32)
 
-The Coach explains better with the Engine at hand, so Think deeper is now on by default. Installs that stored "off" get the new default once (saving any setting used to store every setting, so a stored "off" was almost always the old default); a Player who turns it off again keeps it off. To keep the cost down now that every Review uses it:
+The Coach explains better with the Engine at hand, so Think deeper is now on by default. Installs that stored "off" get the new default once: saving any setting stored every setting until now, so a stored "off" was almost always the old default rather than a choice, and the two can't be told apart. From now on only the settings a Player changes are stored, so a later default change needs no such reset. A Player who turns it off again keeps it off. To keep the cost down now that every Review uses it:
 
 - A Review's key moment may ask at most 2 questions (a Why Question still 3), and asking there is the Coach's call: it asks when the brief's facts don't show the main reason for the Move Grade or why the better move is better. The Review's shared three minutes for the tool are unchanged. A Why Question still asks at least once, as it is the Player's own deeper study.
 - Hints, Live Coaching and Lesson turns still never get the tool.

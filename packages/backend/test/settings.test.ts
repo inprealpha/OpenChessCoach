@@ -70,6 +70,13 @@ describe('Think deeper', () => {
     expect(await c.request('settings.update', { thinkDeeper: true })).toMatchObject({ thinkDeeper: true, models: THRIFTY });
   });
 
+  it('stores only the settings the Player changed, so an untouched one follows its default', async () => {
+    const app = await instance({ seed: 'empty' });
+    const c = await client(app);
+    await c.request('settings.update', { quality: 'thrifty' });
+    expect(app.app.db.prepare('SELECT key FROM settings ORDER BY key').all()).toEqual([{ key: 'models' }]);
+  });
+
   it('turns on once for an install that saved the old default, and stays off when the Player turns it off again', () => {
     const dir = mkdtempSync(join(tmpdir(), 'chess-coach-deeper-'));
     onTestFinished(() => rmSync(dir, { recursive: true, force: true }));

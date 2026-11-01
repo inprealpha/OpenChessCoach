@@ -90,6 +90,9 @@ describe('Winning Chances', () => {
 
   it('reads a position that is already checkmate as a win', () => {
     expect(winningChancesFor({ mate: 0 }, 'black').text).toBe('White has checkmated');
+    // From White's point of view: White mated is -M0, Black mated M0, for either side's Winning Chances.
+    expect(winningChancesFor({ mate: 0 }, 'black', 'white').evaluation).toBe('M0');
+    expect(winningChancesFor({ mate: 0 }, 'white', 'black').evaluation).toBe('-M0');
     expect(winningChancesFor({ mate: 0 }, 'black').percent).toBeLessThan(3);
     // The same checkmate read for the winner, as a bar with White at the bottom does.
     const white = winningChancesFor({ mate: 0 }, 'black', 'white');

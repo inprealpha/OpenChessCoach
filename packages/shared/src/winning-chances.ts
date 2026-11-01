@@ -43,7 +43,8 @@ export function matePhrase(mate: Mate): string {
 export function winningChancesFor(score: Score, pov: Side, side: Side = pov): WinningChances {
   // Read from `pov`, then turned round: mate 0 (`pov` is checkmated) has no negative to turn into.
   const percent = 50 + 50 * (side === pov ? 1 : -1) * winningChances(score);
-  const evaluation = formatScore(pov === 'white' ? score : negateScore(score));
+  // Checkmate on the board is mate 0 for the mated side, which has no sign to turn round.
+  const evaluation = score.mate === 0 ? (pov === 'white' ? '-M0' : 'M0') : formatScore(pov === 'white' ? score : negateScore(score));
   if (score.mate !== undefined) {
     // A positive mate is `pov` giving mate; zero or negative is `pov` getting mated.
     const mate: Mate = score.mate > 0 ? { winner: pov, moves: score.mate } : { winner: otherSide(pov), moves: Math.abs(score.mate) };

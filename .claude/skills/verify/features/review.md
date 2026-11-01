@@ -52,11 +52,12 @@ call.
   list; on a phone the graph too) and `Overview` (when the Review has one). Until the Player opens
   it on a first visit to a Review, the tab is `Overview, not read yet`, with a dot; on later visits
   (remembered per game) just `Overview`.
-- Opening a key moment's row on a phone pulls the sheet up to read it. Its better move, `Try <SAN>
-  on the board`, lets the sheet down, plays the move as a variation and keeps the moment open with
+- Opening a key moment's row on a phone pulls the sheet up to read it. Its better move's button,
+  "Try axb4 48%" (its name is what it shows), lets the sheet down, plays the move as a variation and keeps the moment open with
   "Trying 11. axb4 … instead of Bxf7+ · 48%"; `Back to the game` returns to the moment and puts the
   Coach's answer about the variation behind `Earlier`. An open moment draws the move played and the
-  best; `Show all N arrows` adds the Coach's others.
+  best (all its arrows when it has neither); `Show all N arrows` adds the others, and steps aside
+  while the Coach's own arrows are on the board. What was said before the variation stays.
 - On a phone held upright the panel is a sheet under the board: the grab handle `Pull the panel up`
   / `Let the panel down` (`aria-expanded`), a swipe up in the panel or a wheel turned down pulls it up, the board
   shrinks to a strip beside its bar, and the strip, the button `Show the board full size`, brings it

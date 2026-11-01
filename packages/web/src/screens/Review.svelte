@@ -36,7 +36,7 @@
   import { router } from '../lib/router.svelte.ts';
   import { threatSetting, ThreatView } from '../lib/threat.svelte.ts';
   import { reveal } from '../lib/reveal.ts';
-  import { foldFromNextVisit, foldOpen } from '../lib/folds.ts';
+  import { foldFromNextVisit, foldOpen, renameFold } from '../lib/folds.ts';
   import { gradeMark } from '../lib/grades.ts';
   import { narrow } from '../lib/narrow.svelte.ts';
   import { titleFrom } from '../lib/page-title.svelte.ts';
@@ -69,6 +69,8 @@
   let allArrows = $state(false);
   /** The panel's tab when the Player started a variation, which Back to the game returns to. */
   let tabBeforeVariation: Tab = 'moments';
+  /** Where the Coach's messages about the variation begin: Back to the game puts those away. */
+  let variationMark = 0;
   /** The side at the bottom of the board: the Player's, until they flip it. */
   let flipped = $state(false);
   /** Whether the overview is new to the Player: the first visit to this game's Review. */
@@ -103,6 +105,8 @@
         if (api.state !== 'online') kept = (await keptGames())?.games.find((g) => g.id === id) ?? null;
         await api.whenOnline();
         game = await api.request('games.get', { gameId: id });
+        // A game reviewed before the overview had its own tab was seen under the old fold's name.
+        renameFold(`review-overview-${id}`, seenKey(id));
         overviewNew = foldOpen(seenKey(id), true);
         line.reset(game.startFen, game.moves);
         line.goTo(0);
@@ -317,6 +321,7 @@
       // A new variation shows in the move list, so the panel turns to it; Back to the game turns it back.
       // A better move tried from its key moment stays with the moment, which says what is tried.
       if (starting) {
+        variationMark = coach.mark();
         tabBeforeVariation = tab;
         if (!keepTab) tab = 'moves';
       }
@@ -343,8 +348,9 @@
   /** Drops the variation: the board shows the game where the Player left it, an open key moment too. */
   function backToGame(): void {
     variation.leave();
-    // The Coach's answer was about the variation: put away behind "Earlier", with its arrows.
-    coach.settle();
+    // The Coach's answers about the variation are put away behind "Earlier", with their arrows; what
+    // was said about the game before it stays, and a reply still arriving lands.
+    coach.settle(variationMark);
     tab = tabBeforeVariation;
     // The key moment the variation started from comes back into view.
     const at = open;
@@ -424,7 +430,14 @@
    * guidelines ask; the rest when the Player asks for them.
    */
   const momentArrows = $derived(coachArrows(openMoment?.arrows ?? [], line.moves[line.cursor - 1]?.uci));
-  const momentArrowsShown = $derived(allArrows ? momentArrows : momentArrows.filter((a) => a.kind === 'played' || a.kind === 'best'));
+  /**
+   * The moment's arrows: the move played and the best one, unless the Player asked for all. A moment
+   * whose arrows are neither shows them all, so its explanation never points at an empty board.
+   */
+  const momentArrowsShown = $derived.by(() => {
+    const main = momentArrows.filter((a) => a.kind === 'played' || a.kind === 'best');
+    return allArrows || main.length === 0 ? momentArrows : main;
+  });
   const shownArrows = $derived(
     variation.active
       ? coach.arrows.length ? coachArrows(coach.arrows, variation.line.lastMove?.uci) : threatArrows(threats.threat)
@@ -614,7 +627,7 @@
                               {/if}
                             </div>
                           {/if}
-                          {#if momentOpen && open === m.ply && !variation.active && momentArrows.length > momentArrowsShown.length}
+                          {#if momentOpen && open === m.ply && !variation.active && !coach.arrows.length && momentArrows.length > momentArrowsShown.length}
                             <button type="button" class="link more-arrows small" onclick={() => (allArrows = true)}>Show all {momentArrows.length} arrows</button>
                           {/if}
                         </div>

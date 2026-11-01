@@ -27,8 +27,9 @@
     sheet.full = afterSwipe(sheet.full, dy, 0);
     startY = null;
   }
-  function click(): void {
-    if (!swiped) sheet.toggle();
+  function click(e: MouseEvent): void {
+    // A keyboard's Enter or Space (no pointer, detail 0) always toggles, whatever a swipe left behind.
+    if (e.detail === 0 || !swiped) sheet.toggle();
     swiped = false;
   }
 </script>

@@ -44,7 +44,8 @@ const BRUSH_KIND: Record<Brush, ArrowKind> = { green: 'best', blue: 'alt', red: 
  */
 export function coachArrows(arrows: readonly Arrow[], played?: string): BoardArrow[] {
   return arrows.map((a) => {
-    const kind = played && `${a.from}${a.to}` === played.slice(0, 4) ? 'played' : BRUSH_KIND[a.brush];
+    // A brush the Coach doesn't know, from an older desktop, draws as another move.
+    const kind = played && `${a.from}${a.to}` === played.slice(0, 4) ? 'played' : (BRUSH_KIND[a.brush] ?? 'alt');
     return { from: a.from, to: a.to, kind, label: `Arrow ${a.from} to ${a.to} (${ARROW_LOOK[kind].legend})` };
   });
 }

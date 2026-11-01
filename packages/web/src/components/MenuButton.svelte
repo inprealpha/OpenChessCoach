@@ -28,6 +28,22 @@
     }
   }
 
+  /** The menu's keys: ↑ ↓ Home End move between its items; Tab leaves it closed. */
+  function onmenukeydown(e: KeyboardEvent): void {
+    const items = [...(root?.querySelectorAll<HTMLElement>('[role="menuitem"]:not(:disabled)') ?? [])];
+    const at = items.indexOf(document.activeElement as HTMLElement);
+    const to =
+      e.key === 'ArrowDown' ? (at + 1) % items.length
+      : e.key === 'ArrowUp' ? (at - 1 + items.length) % items.length
+      : e.key === 'Home' ? 0
+      : e.key === 'End' ? items.length - 1
+      : -1;
+    if (e.key === 'Tab') open = false;
+    if (to < 0 || !items.length) return;
+    e.preventDefault();
+    items[to]?.focus();
+  }
+
   function onmenuclick(e: MouseEvent): void {
     if ((e.target as HTMLElement).closest('[role="menuitem"]')) open = false;
   }
@@ -49,8 +65,7 @@
     >{text}</button
   >
   {#if open}
-    <!-- svelte-ignore a11y_click_events_have_key_events -->
-    <div class="menu" role="menu" aria-label={label} tabindex="-1" onclick={onmenuclick}>
+    <div class="menu" role="menu" aria-label={label} tabindex="-1" onclick={onmenuclick} onkeydown={onmenukeydown}>
       {@render children()}
     </div>
   {/if}

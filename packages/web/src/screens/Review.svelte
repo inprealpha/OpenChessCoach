@@ -196,7 +196,8 @@
 
   /** The overview's first sentence, its one-line summary while it is folded. */
   function firstSentence(text: string): string {
-    const m = /^.*?[.!?](?=\s|$)/s.exec(text.trim());
+    // A move number such as "12." ends no sentence; "Nf3." does.
+    const m = /^.*?(?<!\b\d+)[.!?](?=\s|$)/s.exec(text.trim());
     return m ? m[0] : text;
   }
 

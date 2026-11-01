@@ -432,6 +432,7 @@
 
   async function newGame(): Promise<void> {
     game = null;
+    flipped = false;
     saved = null;
     confirmingResign = false;
     confirmingNewGame = false;

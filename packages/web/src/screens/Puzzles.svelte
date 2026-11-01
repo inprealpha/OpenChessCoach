@@ -107,6 +107,7 @@
   }
 
   async function nextPuzzle(): Promise<void> {
+    flipped = false;
     done = (await store.get<string[]>('puzzlesDone')) ?? [];
     missed = (await store.get<string[]>('puzzlesMissed')) ?? [];
     const target = profile.profile?.rating ?? LEVEL_PUZZLE_RATING[profile.profile?.level ?? 'beginner'];

@@ -111,7 +111,7 @@ h1 { font-size: 1.4rem; margin: 0.5rem 0 1rem; }
   .board-screen .board-col { margin-inline: -0.75rem; padding: 0.2rem 0.75rem; border-bottom: 1px solid var(--line); }
   .board-screen .board-layout > .side { gap: 0.5rem; padding-top: 0.5rem; }
   /* Every control a thumb can reach: at least 44 px tall. */
-  .board-screen :is(.panel-body, .board-bar, .side > .coach) :is(button, summary, select) { min-height: var(--tap); }
+  .board-screen :is(.panel-body, .board-bar, .side > .coach) :is(button:not(.link), summary, select) { min-height: var(--tap); }
   .board-screen .frame-head a { display: inline-flex; align-items: center; gap: 0.25rem; min-height: var(--tap); }
   /* The header line on one row: the screen's name whole, its context cut short if need be. */
   .board-screen .frame-head { flex-wrap: nowrap; align-items: center; margin-bottom: 0.2rem; }

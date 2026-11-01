@@ -63,6 +63,10 @@ describe('one arrow colour per meaning', () => {
     expect(drawn[1]?.label).toBe('Arrow a3 to b4 (best)');
   });
 
+  it('draws a brush it doesn’t know, from an older desktop, as another move rather than failing', () => {
+    expect(coachArrows([arrow('a3b4', 'orange' as Arrow['brush'])])[0]?.kind).toBe('alt');
+  });
+
   it('draws the move played last, so no other arrow hides it', () => {
     const drawn = drawOrder(coachArrows([arrow('c4f7', 'red'), arrow('a3b4', 'green')], 'c4f7'));
     expect(drawn.map((a) => a.kind)).toEqual(['best', 'played']);

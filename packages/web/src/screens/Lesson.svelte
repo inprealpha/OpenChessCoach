@@ -380,7 +380,12 @@
         // Bring the card to the top of its panel, so the next Lesson shows without scrolling, and
         // give it the focus, so the keyboard carries on from there.
         await tick();
-        doneCard?.scrollIntoView({ block: 'start' });
+        if (panelBody && doneCard && getComputedStyle(panelBody).overflowY === 'auto') panelBody.scrollTo({ top: doneCard.offsetTop });
+        else {
+          // A screen too short for the frame scrolls as a page: only when the card is out of view.
+          const box = doneCard?.getBoundingClientRect();
+          if (box && (box.top < 0 || box.bottom > innerHeight)) doneCard?.scrollIntoView({ block: 'start' });
+        }
         doneCard?.focus({ preventScroll: true });
         await saveProgress(decisionList.length, true);
         return;

@@ -300,7 +300,7 @@
 <section class="screen board-screen board-free">
   <header class="frame-head">
     <h1>Board</h1>
-    <p class="head-line">{SIDE_NAMES[turnOf(line.fen)]} to move</p>
+    <p class="head-line">{outcomeOf(line.fen) ? 'Game over' : `${SIDE_NAMES[turnOf(line.fen)]} to move`}</p>
     <div class="head-actions">
       <button type="button" class="secondary" aria-expanded={settingUp} onclick={openSetUp} bind:this={setupButton}>Set up a position</button>
       <button type="button" class="secondary" onclick={askNewBoard} aria-expanded={confirmingNew} bind:this={newButton}>New board</button>

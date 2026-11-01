@@ -37,18 +37,22 @@
   });
   const earlier = $derived(thread.entries.slice(0, latestFrom));
   const latest = $derived(thread.entries.slice(latestFrom));
-  /** What the Coach is doing, whenever a job runs; "Coach ready" only when nothing does. */
-  const working = $derived(thread.entries.findLast((e) => e.streaming)?.status ?? 'The Coach is answering…');
 
+  /** The long entry the log was last scrolled to the start of: left alone after that. */
+  let atStart: Element | null = null;
   $effect(() => {
     void thread.entries.length;
     void thread.entries[thread.entries.length - 1]?.text;
     // The newest entry in view: its end, or its start when it is taller than the log, so a long
     // answer is read from its first line.
+    // Once at its first line, a long answer stays where the Player scrolls it while it streams.
     const last = [...(log?.querySelectorAll(':scope > .entry') ?? [])].at(-1);
     if (!log || !last) return;
-    const top = last.getBoundingClientRect().top - log.getBoundingClientRect().top + log.scrollTop;
-    log.scrollTop = last.getBoundingClientRect().height > log.clientHeight ? top : log.scrollHeight;
+    if (last === atStart) return;
+    if (last.getBoundingClientRect().height > log.clientHeight) {
+      log.scrollTop = last.getBoundingClientRect().top - log.getBoundingClientRect().top + log.scrollTop;
+      atStart = last;
+    } else log.scrollTop = log.scrollHeight;
   });
 
   async function submit(e: SubmitEvent): Promise<void> {
@@ -70,7 +74,7 @@
   <header>
     <h2>Coach</h2>
     <span class="status" role="status">
-      {#if !available}Coach unavailable{:else if thread.busy}{working}{:else}Coach ready{/if}
+      {#if !available}Coach unavailable{:else if thread.busy}Answering…{:else}Coach ready{/if}
     </span>
   </header>
   {#if !available}

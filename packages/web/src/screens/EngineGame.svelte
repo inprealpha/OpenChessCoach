@@ -17,7 +17,8 @@
   import MoveList from '../components/MoveList.svelte';
   import StepButtons from '../components/StepButtons.svelte';
   import SheetHandle from '../components/SheetHandle.svelte';
-  import { Sheet } from '../lib/sheet.svelte.ts';
+  import SheetStrip from '../components/SheetStrip.svelte';
+  import { sheet } from '../lib/sheet.svelte.ts';
   import ThreatButton from '../components/ThreatButton.svelte';
   import FlipButton from '../components/FlipButton.svelte';
   import WinningChancesBar from '../components/WinningChancesBar.svelte';
@@ -66,9 +67,6 @@
   const coach = new CoachThread();
   /** The Player's own moves from a position of the finished game, graded by the browser's Engine. */
   const variation = new Variation();
-
-  /** A phone's panel, pulled up or not. */
-  const sheet = new Sheet();
   let game = $state<Saved | null>(null);
   let loaded = $state(false);
   let side = $state<Side>('white');
@@ -550,7 +548,7 @@
   }
 </script>
 
-<section class="screen board-screen engine-game" class:sheet-full={sheet.on && sheet.full}>
+<section class="screen board-screen engine-game" class:sheet-full={sheet.shown}>
   <header class="frame-head">
     <h1>Engine Game</h1>
     {#if game}
@@ -578,10 +576,7 @@
     <div class="board-layout">
       <div class="board-col">
         <div class="board-and-bar">
-          {#if sheet.on && sheet.full}
-          <!-- The board as a strip: a tap brings it back full size. -->
-          <button type="button" class="strip-tap" aria-label="Show the board full size" onclick={() => (sheet.full = false)}></button>
-        {/if}
+          <SheetStrip />
           <div class="with-bar">
             <WinningChancesBar score={position?.score ?? null} pov={position?.pov ?? 'white'} {orientation} />
             <Board
@@ -602,7 +597,7 @@
           {#if finished}
             <!-- Only a finished game steps back: while it is on, the board shows the position to play from. -->
             <StepButtons onfirst={() => step('first')} onprevious={() => step('previous')} onnext={() => step('next')} onlast={() => step('last')} />
-            {#if variation.active}<button type="button" class="secondary" onclick={() => variation.leave()}>Back to the game</button>{/if}
+            {#if variation.active}<button type="button" class="secondary back" onclick={() => variation.leave()}>Back to the game</button>{/if}
             <FlipButton onflip={() => (flipped = !flipped)} />
           {:else}
             <button
@@ -624,7 +619,7 @@
         </div>
       </div>
       <div class="side panel">
-        <SheetHandle {sheet} />
+        <SheetHandle />
         <div class="panel-body" {@attach sheet.gestures}>
           {#if confirmingResign && !finished}
             <ConfirmDialog

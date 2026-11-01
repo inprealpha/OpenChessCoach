@@ -433,7 +433,7 @@ test.describe('a Review’s overview', () => {
   // Slow enough to see the overview stream before the key moments.
   test.use({ appOptions: { chunkDelayMs: 40 } });
 
-  test('is streamed before the key moments, which open under its first sentence; each move it names jumps the board there; it reopens with no Coach call', async ({ paired, app }) => {
+  test('is streamed before the key moments, then waits on its own tab, marked unread; each move it names jumps the board there; it reopens with no Coach call', async ({ paired, app }) => {
     await paired.goto(`${app.url}/#/review/1`);
     // Every change to the card of the Review being made, as it happens: what its first line says,
     // and what the Coach has written so far, the overview first. Read after the Review, so a slow
@@ -461,13 +461,13 @@ test.describe('a Review’s overview', () => {
     expect(seen).toContain(`${explaining} | overview, moment`);
     expect(seen.findIndex((e) => e.startsWith(explaining))).toBeGreaterThan(seen.indexOf(`${writing} | overview`));
     expect(seen.filter((e) => e.includes('moment')).every((e) => e.startsWith(explaining))).toBe(true);
-    // The recorded reply for game 1 (verify/recordings/coach.json): its first sentence above the key
-    // moments on this first visit, and the whole of it on its own tab, one tap away.
-    const teaser = paired.getByRole('button', { name: 'Read the overview' });
-    await expect(teaser).toContainText('Overview · Your opening went well, and your opponent had to find 9… d5 there');
-    expect((await teaser.boundingBox())!.y).toBeLessThan((await keyMoments.boundingBox())!.y);
-    await teaser.click();
-    await expect(paired.getByRole('tab', { name: 'Overview' })).toHaveAttribute('aria-selected', 'true');
+    // The recorded reply for game 1 (verify/recordings/coach.json) on its own tab, one tap away,
+    // marked unread on this first visit.
+    const overviewTab = paired.getByRole('tab', { name: /^Overview/ });
+    await expect(overviewTab).toHaveAccessibleName('Overview, not read yet');
+    await overviewTab.click();
+    await expect(overviewTab).toHaveAttribute('aria-selected', 'true');
+    await expect(overviewTab).toHaveAccessibleName('Overview');
     const overview = paired.getByRole('region', { name: 'Overview' });
     await expect(overview).toContainText('Your opening went well, and your opponent had to find 9… d5 there');
     const calls = await app.rows<{ job: string }>('coach_calls');
@@ -493,7 +493,7 @@ test.describe('a Review’s overview', () => {
     const text = await overview.textContent();
     await paired.reload();
     await expect(keyMoments).toBeVisible();
-    await expect(teaser).toHaveCount(0);
+    await expect(overviewTab).toHaveAccessibleName('Overview');
     await showTab(paired, 'Overview');
     await expect(paired.getByRole('region', { name: 'Overview' })).toHaveText(text ?? '');
     await expect(paired.getByRole('region', { name: 'Overview' }).getByRole('button')).toHaveCount(5);
@@ -532,9 +532,11 @@ test('in a Review, the arrow keys step through the game as on Lichess', async ({
   const list = paired.getByRole('list', { name: 'Moves' });
   const current = list.locator('li.current').getByRole('button');
   const last = list.getByRole('listitem').last();
-  /** Whether the last move shows inside the move list's own scroll box. */
+  // The move list scrolls with the panel around it, as in Doop's panel: one scroll box, not two.
+  const panel = paired.locator('.panel-body').filter({ has: list });
+  /** Whether the last move shows inside the panel's scroll box. */
   const lastInView = async () => {
-    const box = await list.boundingBox();
+    const box = await panel.boundingBox();
     const item = await last.boundingBox();
     return Boolean(box && item && item.y >= box.y - 1 && item.y + item.height <= box.y + box.height + 1);
   };
@@ -770,14 +772,17 @@ test('on an iPhone the page fits the screen, and the panel is a sheet: pulled up
 
   const board = paired.getByRole('group', { name: 'Review board' });
   const panel = paired.locator('.side.panel');
-  const handle = paired.getByRole('button', { name: 'Expand the panel' });
+  // The grab handle: its name says what a tap does, its state whether the sheet is up.
+  const handle = paired.getByRole('button', { name: /^(Pull the panel up|Let the panel down)$/ });
   const wide = (await board.boundingBox())!.width;
   const low = (await panel.boundingBox())!.height;
   await expect(handle).toHaveAttribute('aria-expanded', 'false');
+  await expect(handle).toHaveAccessibleName('Pull the panel up');
 
   // Pulled up: the board is a strip beside its bar, still whole on screen, and the panel takes the height.
   await handle.click();
   await expect(handle).toHaveAttribute('aria-expanded', 'true');
+  await expect(handle).toHaveAccessibleName('Let the panel down');
   await expect.poll(async () => (await board.boundingBox())!.width).toBeLessThan(wide * 0.6);
   expect((await panel.boundingBox())!.height).toBeGreaterThan(low + 150);
   await expect(board).toBeInViewport({ ratio: 1 });
@@ -794,6 +799,35 @@ test('on an iPhone the page fits the screen, and the panel is a sheet: pulled up
   await rows.hover();
   await paired.mouse.wheel(0, 200);
   await expect(handle).toHaveAttribute('aria-expanded', 'true');
+
+  // The better move tries itself on the board, which comes back full size to show it.
+  const first = paired.getByRole('region', { name: 'Key moments' }).getByRole('listitem').first();
+  const show = first.getByRole('button', { name: /^Show moment/ });
+  if ((await show.getAttribute('aria-expanded')) !== 'true') await show.click();
+  await expect(show).toHaveAttribute('aria-expanded', 'true');
+  await first.getByRole('button', { name: 'Try axb4 on the board' }).click();
+  await expect(handle).toHaveAttribute('aria-expanded', 'false');
+  await expect(paired.getByRole('button', { name: 'Back to the game' })).toBeVisible();
+  await expect.poll(async () => (await board.boundingBox())!.width).toBe(wide);
+  // The moment stays open on its tab and says what the board shows, with the bar on one row.
+  await expect(paired.getByRole('tab', { name: 'Moments' })).toHaveAttribute('aria-selected', 'true');
+  await expect(first.getByRole('status')).toContainText(/^Trying 11\. axb4.*instead of Bxf7\+ · 48%/);
+  await expect(first.getByRole('status')).toBeInViewport();
+  const bar = paired.locator('.board-bar');
+  expect((await bar.boundingBox())!.height).toBeLessThan(60);
+
+  // A Why Question about it pulls the sheet up so its answer has room above the Ask box.
+  await paired.getByRole('button', { name: 'Ask the Coach why' }).click();
+  await expect(handle).toHaveAttribute('aria-expanded', 'true');
+  const conversation = paired.getByLabel('Coach conversation');
+  await expect(conversation).not.toBeEmpty();
+  // Back to the game: the moment is back, and the answer about the variation is put away.
+  await paired.getByRole('button', { name: 'Back to the game' }).click();
+  await expect(paired.getByRole('tab', { name: 'Moments' })).toHaveAttribute('aria-selected', 'true');
+  await expect(first.getByRole('status')).toHaveCount(0);
+  await expect(conversation.locator(':scope > .entry')).toHaveCount(0);
+  await expect(conversation.getByText(/^Earlier \(\d+\)$/)).toBeVisible();
+  await expect(show).toBeInViewport();
 });
 
 test('on a phone, an opened key moment and the current move show clear of the tabs', async ({ paired, app }) => {

@@ -36,7 +36,20 @@ export class CoachThread {
    */
   private annotating = 0;
 
+  /** Entries before this one are put away: the Coach panel folds them behind "Earlier". */
+  shownFrom = $state(0);
+
+  /**
+   * Puts the conversation so far away, behind "Earlier", with its arrows: for when the board leaves
+   * what it was about (Back to the game), or the Player dismisses the answer.
+   */
+  settle(): void {
+    this.shownFrom = this.entries.length;
+    this.clearAnnotations();
+  }
+
   reset(): void {
+    this.shownFrom = 0;
     this.entries = [];
     this.clearAnnotations();
     this.threadId = randomId();

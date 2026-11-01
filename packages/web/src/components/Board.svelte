@@ -539,7 +539,8 @@
   /* On a phone the line under the board is as short as its words: every pixel is the panel's. */
   @media (max-width: 820px) {
     .legend { gap: 0 0.5rem; font-size: 0.72rem; line-height: 1.2; }
-    .under { min-height: 1.2em; margin-top: 0.2rem; }
+    /* One legend line's height, kept while there are no arrows, so the bar under it doesn't jump. */
+    .under { min-height: calc(0.72rem * 1.2); margin-top: 0.15rem; }
     .board-status { font-size: 0.8rem; line-height: 1.2; }
   }
   .swatch { display: inline-block; width: 1.1rem; height: 0.22rem; border-radius: 2px; background: var(--swatch); }

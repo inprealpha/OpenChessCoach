@@ -86,7 +86,7 @@
 </script>
 
 <section class="coach" class:unavailable={!available} aria-label="Coach">
-  <header>
+  <header class:idle={available && !thread.busy}>
     <h2>Coach</h2>
     <span class="status" role="status">
       {#if !available}Coach unavailable{:else if thread.busy}Answering…{:else}Coach ready{/if}
@@ -147,6 +147,7 @@
 
 <style>
   .coach {
+    position: relative;
     background: var(--panel);
     border: 1px solid var(--line);
     border-radius: 10px;
@@ -172,9 +173,13 @@
      and the box and its button share one row. */
   @media (max-width: 820px) {
     .coach { gap: 0.35rem; padding: 0.45rem 0.6rem; border-radius: 10px 10px 0 0; }
-    /* Docked at the foot of a phone's screen: two lines of the answer, more while typing. */
+    /* Docked at the foot of a phone's screen: two lines of the answer, more while typing, and the
+       sheet's room when it is pulled up. */
     .log { max-height: 3rem; }
     .coach:focus-within .log { max-height: 9rem; }
+    :global(.sheet-full) .log { max-height: 38dvh; }
+    /* Its name and "Coach ready" cost a phone a line: said only while it works or can't. */
+    header.idle { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
     h2 { font-size: 0.85rem; }
     .status { font-size: 0.75rem; }
     form { flex-wrap: nowrap; }

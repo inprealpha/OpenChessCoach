@@ -3,9 +3,10 @@
   // key moments, and the Coach writes an overview of the whole game (unless Settings turn it off),
   // then explains each key moment, streamed as it's written. Saved Reviews reopen with no Coach call.
   // The board frame (docs/design/interface-guidelines.md): the header line says whose side the
-  // Player had and how it ended, the board stays in view, and the panel has two tabs, Moments (the
-  // overview and one line per key moment, the open one expanded) and Moves, with the Ask box docked
-  // at its foot.
+  // Player had and how it ended, the board stays in view, and the panel is one card with three tabs,
+  // Moments (one line per key moment, the open one expanded), Moves and Overview, with the Ask box
+  // docked at its foot. On a phone the panel is a sheet under the board: pulled up, the board
+  // shrinks to a strip beside its bar, and a tap on the strip brings it back.
   // The board is free: a move on it starts a variation, which Back to the game drops.
   import { tick, untrack } from 'svelte';
   import { moveLabel, otherSide, SIDE_NAMES, type Side } from '@chess-coach/shared/chess';
@@ -19,6 +20,7 @@
   import FlipButton from '../components/FlipButton.svelte';
   import GradeBadge from '../components/GradeBadge.svelte';
   import MoveList from '../components/MoveList.svelte';
+  import SheetHandle from '../components/SheetHandle.svelte';
   import StepButtons from '../components/StepButtons.svelte';
   import ThreatButton from '../components/ThreatButton.svelte';
   import WinningChancesBar from '../components/WinningChancesBar.svelte';
@@ -32,14 +34,17 @@
   import { desktopBack, droppedConnection, runningReview, startReview, type ReviewRun } from '../lib/review-runs.svelte.ts';
   import { router } from '../lib/router.svelte.ts';
   import { threatSetting, ThreatView } from '../lib/threat.svelte.ts';
-  import { firstSentence } from '../lib/first-sentence.ts';
   import { reveal } from '../lib/reveal.ts';
-  import { foldFromNextVisit, foldOpen, rememberFold } from '../lib/folds.ts';
+  import { foldFromNextVisit, foldOpen } from '../lib/folds.ts';
+  import { firstSentence } from '../lib/first-sentence.ts';
   import { gradeMark } from '../lib/grades.ts';
   import { narrow } from '../lib/narrow.svelte.ts';
   import { titleFrom } from '../lib/page-title.svelte.ts';
   import { stepLine, Variation, type Step } from '../lib/variation.svelte.ts';
   import { profile } from '../lib/profile.svelte.ts';
+  import { Sheet } from '../lib/sheet.svelte.ts';
+
+  type Tab = 'moments' | 'moves' | 'overview';
 
   let { gameId }: { gameId: number } = $props();
 
@@ -57,13 +62,15 @@
   /** The key moment whose row is expanded in the panel: the last one the Player opened. */
   let expanded = $state<number | null>(null);
   /** The panel's tab. */
-  let tab = $state<'moments' | 'moves'>('moments');
+  let tab = $state<Tab>('moments');
   /** The panel's tab when the Player started a variation, which Back to the game returns to. */
-  let tabBeforeVariation: 'moments' | 'moves' = 'moments';
+  let tabBeforeVariation: Tab = 'moments';
+  /** A phone's panel, pulled up or not. */
+  const sheet = new Sheet();
   /** The side at the bottom of the board: the Player's, until they flip it. */
   let flipped = $state(false);
-  /** Whether the overview is open: on the first visit to this game's Review, then as the Player left it. */
-  let overviewOpen = $state(true);
+  /** Whether the overview is new to the Player: the first visit to this game's Review. */
+  let overviewNew = $state(true);
   const line = new Line();
   const coach = new CoachThread();
   /** The Player's own moves from a position of the game, graded by the browser's Engine; the game's line never changes. */
@@ -94,7 +101,7 @@
         if (api.state !== 'online') kept = (await keptGames())?.games.find((g) => g.id === id) ?? null;
         await api.whenOnline();
         game = await api.request('games.get', { gameId: id });
-        overviewOpen = foldOpen(`review-overview-${id}`, true);
+        overviewNew = foldOpen(`review-overview-${id}`, true);
         line.reset(game.startFen, game.moves);
         line.goTo(0);
         const reply = await api.request('review.get', { gameId: id });
@@ -168,6 +175,19 @@
     void tick().then(() => revealMoment(m.ply));
   }
 
+  /** A key moment's better move, played on the board as a variation from the position before it. */
+  function tryBetter(m: KeyMoment, uci: string): void {
+    if (!(momentOpen && open === m.ply) || variation.active) {
+      variation.leave();
+      coach.clearAnnotations();
+      selected = m.ply;
+      open = m.ply;
+      expanded = m.ply;
+      line.goTo(m.ply);
+    }
+    explore(uci);
+  }
+
   /**
    * Scrolls the panel so an opened key moment's row is at its top, under the tabs: closing the one
    * above can leave the panel scrolled past it, above all in a phone's short panel.
@@ -184,18 +204,15 @@
     goto(m.ply);
   }
 
-  // The overview is open on the first visit to its Review, then folded to its first sentence, unless
-  // the Player opens it again (docs/design/interface-guidelines.md, Collapsing and density).
+  // The overview has its own tab. On the first visit to its Review, the key moments open under its
+  // first sentence, one tap from the rest; after that, the tab alone
+  // (docs/design/interface-guidelines.md, Collapsing and density).
   $effect(() => {
     if (game && review?.overview) foldFromNextVisit(`review-overview-${game.id}`);
   });
 
-  function toggleOverview(e: Event): void {
-    const now = (e.currentTarget as HTMLDetailsElement).open;
-    // A details element drawn open fires toggle too: only the Player's own opening or closing counts.
-    if (now === overviewOpen) return;
-    overviewOpen = now;
-    if (game) rememberFold(`review-overview-${game.id}`, overviewOpen);
+  function pickTab(to: Tab): void {
+    tab = to;
   }
 
   /** The overview's text split at the moves it names, and the moves it names that its text doesn't link. */
@@ -266,7 +283,7 @@
       coach.clearAnnotations();
       // A new variation shows in the move list, so the panel turns to it; Back to the game turns it back.
       if (starting) {
-        tabBeforeVariation = tab;
+        if (tab !== 'moves') tabBeforeVariation = tab;
         tab = 'moves';
       }
     }
@@ -297,6 +314,8 @@
   }
 
   async function why(question: string): Promise<void> {
+    // The answer comes above the Ask box: on a phone the sheet comes up to give it room.
+    if (sheet.on) sheet.full = true;
     if (variation.active && game) {
       // Only the moves go, and the desktop's Engine works out the facts (ADR 0007). No gameId: the
       // Review has no score for a position the game never reached.
@@ -408,7 +427,7 @@
   });
 </script>
 
-<section class="screen board-screen review">
+<section class="screen board-screen review" class:sheet-full={sheet.on && sheet.full}>
   <header class="frame-head">
     <h1>Review</h1>
     {#if game}<p class="head-line" data-testid="review-summary">{summaryOf(game)}</p>{:else if kept}<p class="head-line">{summaryOf(kept)}</p>{/if}
@@ -418,6 +437,10 @@
     <div class="board-layout">
       <div class="board-col">
         <div class="board-and-bar">
+          {#if sheet.on && sheet.full}
+            <!-- The board as a strip: a tap brings it back full size, to read or to move on. -->
+            <button type="button" class="strip-tap" aria-label="Show the board full size" onclick={() => (sheet.full = false)}></button>
+          {/if}
           <div class="with-bar">
             <WinningChancesBar
               score={position?.score ?? null}
@@ -454,8 +477,9 @@
           <WinningChancesGraph moves={review.moves} cursor={variation.from ?? shownIndex} ongoto={goto} compact />
         {/if}
       </div>
-      <div class="side">
-        <div class="panel-body">
+      <div class="side panel">
+        <SheetHandle {sheet} />
+        <div class="panel-body" {@attach sheet.gestures}>
           {#if game.source === 'sample'}<p class="muted small" role="note">A sample game: it doesn’t count towards your Player Profile.</p>{/if}
           {#if phase === 'ready'}
             <div class="card">
@@ -481,48 +505,23 @@
           {/if}
 
           {#if review}
+            {@const tabs = (overview ? ['moments', 'moves', 'overview'] : ['moments', 'moves']) as Tab[]}
+            {@const names = { moments: 'Moments', moves: 'Moves', overview: 'Overview' }}
             <div class="tabs" role="tablist" aria-label="Review">
-              <button type="button" role="tab" id="tab-moments" aria-controls="panel-moments" aria-selected={tab === 'moments'} class:on={tab === 'moments'} onclick={() => (tab = 'moments')}>Moments</button>
-              <button type="button" role="tab" id="tab-moves" aria-controls="panel-moves" aria-selected={tab === 'moves'} class:on={tab === 'moves'} onclick={() => (tab = 'moves')}>Moves</button>
+              {#each tabs as t (t)}
+                <button type="button" role="tab" id={`tab-${t}`} aria-controls={`panel-${t}`} aria-selected={tab === t} class:on={tab === t} onclick={() => pickTab(t)}>{names[t]}</button>
+              {/each}
             </div>
-            <div id="panel-moments" role="tabpanel" aria-labelledby="tab-moments" hidden={tab !== 'moments'} class="tab-panel">
-              {#if overview}
-                <section class="card overview-card" aria-label="Overview">
-                <details class="fold overview-fold" open={overviewOpen} ontoggle={toggleOverview}>
-                  <summary><strong>Overview</strong>{#if !overviewOpen}<span class="summary-line">{` · ${firstSentence(review.overview?.text ?? '')}`}</span>{/if}</summary>
-                  <p class="overview">
-                    {#each overview.segments as part, i (i)}
-                      {#if part.move}
-                        {@const m = part.move}
-                        <button
-                          type="button"
-                          class="link move"
-                          class:current={line.cursor === m.ply}
-                          onclick={() => showMove(m)}
-                          aria-label={`Go to move ${m.label}, ${m.grade}`}>{part.text}</button
-                        >
-                      {:else}{part.text}{/if}
-                    {/each}
-                  </p>
-                  {#if overview.unlinked.length}
-                    <p class="small">
-                      Moves it names:
-                      {#each overview.unlinked as m, i (m.ply)}{i ? ', ' : ''}<button
-                          type="button"
-                          class="link move"
-                          class:current={line.cursor === m.ply}
-                          onclick={() => showMove(m)}
-                          aria-label={`Go to move ${m.label}, ${m.grade}`}>{m.label}</button
-                        >{/each}
-                    </p>
-                  {/if}
-                </details>
-                </section>
+            <div id="panel-moments" role="tabpanel" aria-labelledby="tab-moments" hidden={tab !== 'moments'} class="tab-panel rows">
+              {#if overview && overviewNew}
+                <button type="button" class="teaser" onclick={() => pickTab('overview')} aria-label="Read the overview">
+                  <strong>Overview</strong><span class="muted">{` · ${firstSentence(review.overview?.text ?? '')}`}</span>
+                </button>
               {/if}
               <section aria-label="Key moments">
-                <h2>Key moments</h2>
+                <h2 class="visually-hidden">Key moments</h2>
                 {#if review.moments.length === 0}
-                  <p class="muted">{noMoments(game)}</p>
+                  <p class="muted none">{noMoments(game)}</p>
                 {/if}
                 <ol class="moments">
                   {#each review.moments as m (m.ply)}
@@ -551,13 +550,17 @@
                               const c = chances?.options.get(o.uci);
                               return c ? `${o.san} ${c.short}${evals ? ` (${c.evaluation})` : ''}` : `${o.san} (${o.score})`;
                             }}
-                            <p class="small better">Better: <strong>{option(best!)}</strong></p>
-                            {#if others.length}
-                              <details class="more small">
-                                <summary>More moves</summary>
-                                <p>{others.map(option).join(', ')}</p>
-                              </details>
-                            {/if}
+                            <div class="better small">
+                              <span class="muted">Better</span>
+                              <!-- The fix, on the board: a variation from the position before the move. -->
+                              <button type="button" class="secondary try" onclick={() => tryBetter(m, best!.uci)} aria-label={`Try ${best!.san} on the board`}>{option(best!)}</button>
+                              {#if others.length}
+                                <details class="more">
+                                  <summary>More moves</summary>
+                                  <p>{others.map(option).join(', ')}</p>
+                                </details>
+                              {/if}
+                            </div>
                           {/if}
                         </div>
                       {/if}
@@ -573,6 +576,38 @@
               <!-- Drawn when shown, so it opens scrolled to the current move. -->
               {#if tab === 'moves'}<MoveList moves={line.moves} {grades} cursor={variation.from ?? line.cursor} ongoto={pickMove} variation={shownVariation} />{/if}
             </div>
+            {#if overview}
+              <div id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" hidden={tab !== 'overview'} class="tab-panel">
+                <section aria-label="Overview">
+                  <p class="overview">
+                    {#each overview.segments as part, i (i)}
+                      {#if part.move}
+                        {@const m = part.move}
+                        <button
+                          type="button"
+                          class="link move"
+                          class:current={line.cursor === m.ply}
+                          onclick={() => showMove(m)}
+                          aria-label={`Go to move ${m.label}, ${m.grade}`}>{part.text}</button
+                        >
+                      {:else}{part.text}{/if}
+                    {/each}
+                  </p>
+                  {#if overview.unlinked.length}
+                    <p class="small">
+                      Moves it names:
+                      {#each overview.unlinked as m, i (m.ply)}{i ? ', ' : ''}<button
+                          type="button"
+                          class="link move"
+                          class:current={line.cursor === m.ply}
+                          onclick={() => showMove(m)}
+                          aria-label={`Go to move ${m.label}, ${m.grade}`}>{m.label}</button
+                        >{/each}
+                    </p>
+                  {/if}
+                </section>
+              </div>
+            {/if}
           {:else}
             <MoveList moves={line.moves} {grades} cursor={variation.from ?? line.cursor} ongoto={pickMove} variation={shownVariation} />
           {/if}
@@ -596,32 +631,48 @@
 </section>
 
 <style>
-  /* Under the board on desktop: the bar, the legend line and the graph's strip. */
-  .review { --under-board: 12.75rem; --phone-reserve: 27rem; }
-  .tabs { display: flex; gap: 0.25rem; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--bg); z-index: 1; }
-  .tabs button { background: none; color: var(--muted); border-radius: 8px 8px 0 0; padding: 0.45rem 0.9rem; min-height: 2.5rem; border-bottom: 2px solid transparent; }
+  /* Under the board on desktop: the bar, the legend line and the graph's strip. On a phone, what the
+     frame keeps under and above the board: the header, the bar, the legend, the panel's tabs and its
+     first lines, and the Ask box. */
+  .review { --under-board: 12.75rem; --phone-reserve: 26rem; }
+  .tabs { display: flex; gap: 0.25rem; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--panel); z-index: 1; margin-inline: calc(-1 * var(--panel-pad)); padding-inline: calc(var(--panel-pad) - 0.25rem); }
+  .tabs button { background: none; color: var(--muted); border-radius: 0; padding: 0.45rem 0.75rem; min-height: 2.5rem; border-bottom: 2px solid transparent; margin-bottom: -1px; }
   .tabs button.on { color: var(--text); font-weight: 600; border-bottom-color: var(--accent); }
   .tab-panel { display: flex; flex-direction: column; gap: 0.6rem; }
   .tab-panel[hidden] { display: none; }
-  .moments { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.35rem; }
-  .moment { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
-  .moment.active { outline: 2px solid var(--accent); }
-  /* One line per key moment: the move, its Move Grade and what changed. */
+  .tab-panel.rows { gap: 0; }
+  /* One line per key moment, ruled off from the next: the move, its Move Grade and what changed. */
+  .moments { list-style: none; padding: 0; margin: 0 calc(-1 * var(--panel-pad)); display: flex; flex-direction: column; }
+  .moment { border-bottom: 1px solid var(--line); }
+  .moment.active { box-shadow: inset 3px 0 0 var(--accent); }
+  .moment.expanded { background: color-mix(in srgb, var(--accent) 7%, var(--panel)); }
   .row {
     width: 100%; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
-    background: none; color: inherit; text-align: left; padding: 0.5rem 0.75rem; min-height: var(--tap);
+    background: none; color: inherit; text-align: left; border-radius: 0;
+    padding: 0.5rem var(--panel-pad); min-height: var(--tap);
   }
   .row .change { margin-left: auto; font-variant-numeric: tabular-nums; font-weight: 600; }
-  .detail { padding: 0 0.75rem 0.65rem; }
+  .detail { padding: 0 var(--panel-pad) 0.65rem; }
   .link { background: none; border: none; padding: 0; color: inherit; cursor: pointer; text-align: left; }
   .small { font-size: 0.85rem; margin: 0.3rem 0; }
   .eval { font-size: 0.8rem; font-weight: 400; font-variant-numeric: tabular-nums; }
-  .explanation { margin: 0 0 0.3rem; }
-  .better { margin-bottom: 0; }
+  .explanation { margin: 0 0 0.45rem; }
+  /* Better: the best move as a button that tries it on the board, the others one tap away. */
+  .better { display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem 0.6rem; margin-bottom: 0; }
+  .better .try { padding: 0.15rem 0.6rem; min-height: 2rem; font-weight: 600; border-color: var(--accent); border-radius: 6px; font-variant-numeric: tabular-nums; }
+  .more { margin-left: auto; }
   .more summary { cursor: pointer; color: var(--muted); }
+  .more[open] { flex-basis: 100%; margin-left: 0; }
   .more p { margin: 0.2rem 0 0; }
-  .overview { margin: 0.4rem 0 0; }
-  .overview-fold summary { line-height: 1.4; }
+  .none { margin: 0.6rem 0 0; }
+  /* The overview's first sentence, on a first visit: a row like the moments', that opens its tab. */
+  .teaser {
+    display: block; width: auto; margin: 0 calc(-1 * var(--panel-pad)); padding: 0.55rem var(--panel-pad);
+    background: none; color: inherit; text-align: left; border-radius: 0; border-bottom: 1px solid var(--line);
+    min-height: var(--tap); line-height: 1.4;
+  }
+  .teaser .muted { font-size: 0.9rem; }
+  .overview { margin: 0.6rem 0 0; line-height: 1.5; }
   /* A move the overview names reads as part of its sentence, marked as something to click. */
   .move { color: var(--accent); text-decoration: underline; text-underline-offset: 0.15em; font: inherit; }
   .move.current { font-weight: 600; }
@@ -629,5 +680,9 @@
   /* The card's padding is its spacing: no extra paragraph margin above its first line. */
   .card > p:first-child { margin-top: 0; }
   progress { width: 100%; }
-  h2 { font-size: 1rem; margin: 0.2rem 0 0.4rem; }
+  .panel-body > .card { margin-top: 0.6rem; }
+  @media (max-width: 820px) {
+    .tabs button { min-height: var(--tap); }
+    .better .try { min-height: var(--tap); }
+  }
 </style>

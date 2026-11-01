@@ -15,6 +15,7 @@
   import FlipButton from '../components/FlipButton.svelte';
   import EngineLines from '../components/EngineLines.svelte';
   import MoveList from '../components/MoveList.svelte';
+  import SheetHandle from '../components/SheetHandle.svelte';
   import StepButtons from '../components/StepButtons.svelte';
   import ThreatButton from '../components/ThreatButton.svelte';
   import { threatArrows } from '../lib/arrows.ts';
@@ -28,6 +29,10 @@
   import { scoreFromAnalysis } from '../lib/position-score.ts';
   import { stepLine, Variation, type Step } from '../lib/variation.svelte.ts';
   import { foldOpen, rememberFold } from '../lib/folds.ts';
+  import { Sheet } from '../lib/sheet.svelte.ts';
+
+  /** A phone's panel, pulled up or not. */
+  const sheet = new Sheet();
 
   /** A FEN to open on, from #/board?fen=…. */
   let { fen: openAt }: { fen?: string } = $props();
@@ -212,6 +217,8 @@
   }
 
   async function why(question: string): Promise<void> {
+    // The answer comes above the Ask box: on a phone the sheet comes up to give it room.
+    if (sheet.on) sheet.full = true;
     if (variation.active) {
       // Only the moves go: the desktop's Engine works out the facts (ADR 0007).
       const { label, ...asked } = variation.question(line.moves);
@@ -345,7 +352,7 @@
   });
 </script>
 
-<section class="screen board-screen board-free">
+<section class="screen board-screen board-free" class:sheet-full={sheet.on && sheet.full}>
   <header class="frame-head">
     <h1>Board</h1>
     <p class="head-line">{outcomeOf(boardFen) ? 'Game over' : `${SIDE_NAMES[turnOf(boardFen)]} to move`}</p>
@@ -357,6 +364,10 @@
   <div class="board-layout">
     <div class="board-col">
       <div class="board-and-bar">
+        {#if sheet.on && sheet.full}
+          <!-- The board as a strip: a tap brings it back full size, to move on it. -->
+          <button type="button" class="strip-tap" aria-label="Show the board full size" onclick={() => (sheet.full = false)}></button>
+        {/if}
         <div class="with-bar">
           <WinningChancesBar score={position?.score ?? null} pov={position?.pov ?? 'white'} {orientation} />
           {#key boards}
@@ -382,8 +393,9 @@
       <p class="visually-hidden" role="status">{setupNote}</p>
       <p class="result" role="status" aria-label="Result">{result}</p>
     </div>
-    <div class="side">
-      <div class="panel-body">
+    <div class="side panel">
+      <SheetHandle {sheet} />
+      <div class="panel-body" {@attach sheet.gestures}>
         {#if confirmingNew}
           <ConfirmDialog
             id="new-board"

@@ -48,12 +48,18 @@ call.
   `data-testid="review-summary"`), the board never scrolls away, and the Ask box is docked. On a
   desktop and on a phone the page is one screen tall and never scrolls: the panel beside (or under)
   the board scrolls inside itself, with the Ask box docked at its foot. `Flip board` (or the F key) turns the board, the bar and the graph with it.
-- The panel has two tabs, `Moments` (the overview and the key moments) and `Moves` (the move
-  list; on a phone the graph too). The overview is open on the first visit to a Review and folded on later
-  visits unless the Player opens it again (remembered per game); folded, it shows its first sentence.
+- The panel is one card with three tabs, `Moments` (the key moments, the default), `Moves` (the move
+  list; on a phone the graph too) and `Overview` (when the Review has one). On the first visit to a
+  Review, `Moments` opens under the overview's first sentence, the button `Read the overview`, which
+  turns to its tab; on later visits (remembered per game) the tab alone.
+- On a phone held upright the panel is a sheet under a full-width board: the grab handle `Expand the
+  panel` (`aria-expanded`), a swipe up in the panel or a wheel turned down pulls it up, the board
+  shrinks to a strip beside its bar, and the strip, the button `Show the board full size`, brings it
+  back. Asking a Why Question pulls it up so the answer has room. At Safari's sizes (402×714 to
+  440×790) the page is exactly the screen: nothing pans sideways or scrolls behind the panel.
 - The move list numbers moves from the game's start position, so a game set up from a position
   (`[SetUp "1"]`, `[FEN …]`) reads `40… Kd3`, `41. Ra3+`, as the key moments and the graph do.
-- The overview, the region `Overview` above `Key moments`: how the Player played, where it went
+- The overview, the region `Overview` on its tab: how the Player played, where it went
   wrong, how the opponent played and the moves that stood out on both sides. Its brief (job
   `review-overview`, on the Review moments' model) holds each side's Move Grade counts, the key
   moments with the Engine's best move instead, and up to eight standout moves
@@ -78,7 +84,9 @@ call.
   `data-testid="chances-change"`; evaluations only at the club level, a forced mate as a mate
   phrase). The visually hidden `chances-before` / `chances-after` lines keep the long form
   ("Before: White’s winning chances: 48%"). The open row shows the Coach's explanation,
-  "Better: <best> 48%" and the Engine's other options behind `More moves`. The first moment is
+  "Better" with the best move as a button (`Try <SAN> on the board`, "axb4 48%"), which plays it on
+  the board as a variation from the position before the moment, and the Engine's other options
+  behind `More moves`. The first moment is
   open on load.
   Winning Chances come from the Review's own graded moves: no new data and no Engine run. The
   `Show moment` button opens the moment on the board (the position before the move, with the

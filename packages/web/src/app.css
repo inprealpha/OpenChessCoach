@@ -44,7 +44,9 @@
   :root { --board-max: min(760px, calc(100vh - 280px)); --board-cap: 760px; --screen-max: 1360px; }
 }
 * { box-sizing: border-box; }
-body { margin: 0; min-height: 100vh; }
+/* The visible height: iOS takes 100vh as the height with its toolbars hidden, which leaves a page
+   that fits the screen something to scroll, and the toolbars collapse and resize it mid-swipe. */
+body { margin: 0; min-height: 100vh; min-height: 100dvh; }
 button, input, select, textarea { font: inherit; }
 button {
   background: var(--accent);
@@ -90,6 +92,29 @@ h1 { font-size: 1.4rem; margin: 0.5rem 0 1rem; }
 .board-bar button { min-height: 2.5rem; }
 /* The panel's content scrolls inside it; the Coach sits at its foot. */
 .panel-body { display: flex; flex-direction: column; gap: 0.75rem; min-width: 0; position: relative; }
+/* The panel as one card, as in the guidelines' sketches: its tabs at the top, its content
+   scrolling inside it, and the Coach's Ask box docked at its foot, ruled off rather than a card of
+   its own. A screen opts in with `.side.panel`. */
+.board-screen .side.panel {
+  --panel-pad: 0.85rem;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+  gap: 0; overflow: hidden;
+}
+.board-screen .side.panel > .panel-body { padding: 0.6rem var(--panel-pad) 0.75rem; }
+/* The panel's sections are parts of the one card, ruled off from each other, not cards in a card. */
+.board-screen .side.panel > .panel-body > .card { background: none; border: 0; border-radius: 0; padding: 0.15rem 0 0.75rem; border-bottom: 1px solid var(--line); }
+.board-screen .side.panel > .panel-body > .card:last-child { border-bottom: 0; padding-bottom: 0; }
+/* Tabs sit flush with the card's top edge. */
+.board-screen .side.panel > .panel-body:has(> .tabs) { padding-top: 0; }
+/* The board as a strip (lib/sheet.svelte.ts): the whole of it is one button that brings it back. */
+.board-and-bar { position: relative; }
+.strip-tap { position: absolute; inset: 0; z-index: 5; background: transparent; border: 0; padding: 0; border-radius: 4px; cursor: zoom-in; }
+.board-screen .side.panel > .coach { border: 0; border-top: 1px solid var(--line); border-radius: 0; box-shadow: none; padding-inline: var(--panel-pad); }
+/* Docked in the panel, the Ask box is the Coach: its name and "Coach ready" show only while it
+   works or can't, as the sketches have it. */
+.board-screen .side.panel > .coach > header.idle {
+  position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
 /* A collapsed section: its heading and a one-line summary, one tap from the rest. */
 .fold > summary { cursor: pointer; list-style-position: inside; }
 .fold > summary .summary-line { color: var(--muted); font-weight: 400; font-size: 0.9rem; }
@@ -118,8 +143,8 @@ h1 { font-size: 1.4rem; margin: 0.5rem 0 1rem; }
   .board-screen .frame-head > * { flex-shrink: 0; }
   .board-screen .frame-head > .head-line { flex: 1 1 auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .board-screen .side > .coach { margin-inline: -0.75rem; box-shadow: 0 -6px 16px rgb(0 0 0 / 12%); }
-  .board-bar { gap: 0.3rem; }
-  .board-bar button { min-width: var(--tap); min-height: var(--tap); padding-inline: 0.55rem; }
+  .board-bar { gap: 0.25rem; }
+  .board-bar button { min-width: var(--tap); min-height: var(--tap); padding-inline: 0.5rem; }
   /* On every screen, the controls a thumb taps are at least 44 px (guidelines, Controls); links in
      running text and the board's own squares keep their size. */
   .screen :is(button:not(.link), a.button, summary, select):not(.board *) { min-height: var(--tap); }
@@ -147,8 +172,27 @@ h1 { font-size: 1.4rem; margin: 0.5rem 0 1rem; }
   .board-screen .board-layout > .side { flex: 1 1 auto; min-height: 0; }
   .board-screen .panel-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
   .board-screen .side > .coach { flex: 0 0 auto; }
-  /* Typing a question: the board shrinks so it stays in view above the keyboard. */
-  .board-screen .board-layout:has(.coach input.typing) .board-col { --board-max: 48vw; }
+  /* Nothing to scroll but the panel: no rubber band of the page behind it. */
+  html:has(.board-screen > .board-layout) { overscroll-behavior: none; }
+  /* The panel as a sheet: a full-width card from the board's foot to the screen's, with rounded top
+     corners, its grab handle and no gaps the page shows through. */
+  .board-screen:has(> .board-layout) .board-col { border-bottom: 0; padding-bottom: 0.5rem; }
+  .board-screen .board-layout > .side.panel {
+    --panel-pad: 0.75rem;
+    margin-inline: -0.75rem; border-width: 1px 0 0; border-radius: 14px 14px 0 0; gap: 0; padding-top: 0;
+    box-shadow: 0 -4px 14px rgb(0 0 0 / 10%);
+  }
+  .board-screen .side.panel > .coach { margin-inline: 0; box-shadow: none; border-radius: 0; }
+  /* Pulled up (lib/sheet.svelte.ts), or typing a question: the board is a strip beside its bar,
+     and the panel takes the rest of the height. A tap on the strip brings the board back. */
+  .board-screen:is(.sheet-full, :has(.coach input.typing)) .board-col {
+    --strip: min(44vw, 34dvh);
+    --board-max: var(--strip);
+    display: grid; grid-template-columns: var(--strip) minmax(0, 1fr); gap: 0.6rem; align-items: start;
+  }
+  .board-screen:is(.sheet-full, :has(.coach input.typing)) .board-bar {
+    margin-top: 0; justify-content: flex-start; align-content: flex-start; gap: 0.3rem;
+  }
 }
 .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 0.75rem 1rem; }
 /* The card's padding is its spacing: its first and last children add no margin of their own. */

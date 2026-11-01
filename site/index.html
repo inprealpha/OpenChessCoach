@@ -321,6 +321,9 @@ footer { font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--li
     <details><summary>Claude Code is installed but not logged in</summary><div>
       <p>Run <code class="inline">claude</code>, type <code class="inline">/login</code> and sign in. A free Claude plan can't log in to Claude Code; you need Pro or Max.</p>
     </div></details>
+    <details><summary>Claude turned the login down, so it has probably expired</summary><div>
+      <p>OpenChessCoach asks Claude once when it starts, because Claude Code can still say it is logged in after its login has expired or was signed out elsewhere. Run <code class="inline">claude</code>, type <code class="inline">/login</code> and sign in again, then run the start command again. If it happens while the app runs, the Coach says so and comes back on its own once you have logged in again.</p>
+    </div></details>
     <details><summary>Port 8737 is already in use</summary><div>
       <p>OpenChessCoach is probably already running in another terminal window: use that one. Otherwise start it on another port, for example <code class="inline">npx openchesscoach@latest --port 8738</code>.</p>
     </div></details>

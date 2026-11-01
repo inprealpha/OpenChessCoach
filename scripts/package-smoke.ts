@@ -120,6 +120,7 @@ const baseEnv: NodeJS.ProcessEnv = {
   npm_config_update_notifier: 'false',
 };
 delete baseEnv.CHESS_COACH_CLAUDE;
+delete baseEnv.CHESS_COACH_SKIP_LOGIN_CHECK;
 // Where WinGet links Claude Code, which the app also searches: empty, like the home folder.
 if (win) baseEnv.LOCALAPPDATA = join(work, 'local app data');
 
@@ -139,8 +140,13 @@ if (win) baseEnv.LOCALAPPDATA = join(work, 'local app data');
   check(run.output().includes(installFix()), "and prints this system's Claude Code install command", run.output().trim().split('\n').pop());
 }
 
-// 2. Claude Code logged in: the app starts, serves the web app and pairs a device.
-const run = npx(['--no-open', '--port', String(port + 1), '--data-dir', join(work, 'data')], { ...baseEnv, CHESS_COACH_CLAUDE: fakeClaude() });
+// 2. Claude Code logged in: the app starts, serves the web app and pairs a device. The stand-in
+//    has no login for Claude to take, so the start-up call to Claude is skipped.
+const run = npx(['--no-open', '--port', String(port + 1), '--data-dir', join(work, 'data')], {
+  ...baseEnv,
+  CHESS_COACH_CLAUDE: fakeClaude(),
+  CHESS_COACH_SKIP_LOGIN_CHECK: '1',
+});
 try {
   const code = await waitFor(run, /Pairing code:\s+(\S+)/, 240_000);
   check(code, 'the app starts and prints a pairing code', code ? undefined : run.output().slice(-2000));

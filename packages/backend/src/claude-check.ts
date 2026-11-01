@@ -23,6 +23,32 @@ export function installFix(platform: NodeJS.Platform = process.platform): string
 }
 export const LOGIN_FIX =
   'Claude Code is installed but not logged in. Run `claude`, type /login and sign in with your Claude account, then start the app again.';
+/**
+ * `claude auth status` only reads the login saved on this desktop, so it says "logged in" for a
+ * login that has expired or been signed out elsewhere. Only a call to Claude finds that out.
+ */
+export const EXPIRED_FIX =
+  'Claude Code says it is logged in, but Claude turned the login down, so it has probably expired. Run `claude`, type /login and sign in with your Claude account again.';
+
+/** Why Claude turned the desktop's login down, from the error a call ended with, and how the owner fixes it. */
+export function refusedLogin(error: string | undefined): string | undefined {
+  switch (error) {
+    case 'authentication_failed':
+      return EXPIRED_FIX;
+    case 'oauth_org_not_allowed':
+      return 'Claude turned the login down because your Claude organization doesn’t allow Claude Code. Run `claude`, type /login and sign in with an account that can use it.';
+    case 'account_on_hold':
+      return 'Claude turned the login down because your Claude account is on hold. Check your account on claude.ai.';
+    case 'billing_error':
+      return 'Claude turned the login down because your Claude account has a billing issue. Check your account on claude.ai.';
+    case 'verification_required':
+      return 'Claude turned the login down until your Claude account is verified. Open claude.ai and follow its steps.';
+    case 'cloud_credential_error':
+      return 'Claude Code could not use its cloud provider’s credentials on this desktop. Check them there.';
+    default:
+      return undefined;
+  }
+}
 
 /**
  * Where Claude Code's installers put `claude` when the terminal's PATH doesn't have it yet: the

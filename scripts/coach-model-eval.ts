@@ -24,7 +24,7 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
-import { INITIAL_FEN, playSan, playUci, sanLine, sansIn, turnOf, type Side } from '../packages/shared/src/chess.ts';
+import { INITIAL_FEN, playSan, playUci, positionKey, sanLine, sansIn, turnOf, type Side } from '../packages/shared/src/chess.ts';
 import type { Brief } from '../packages/shared/src/coach/brief.ts';
 import type { CoachAsk, CoachReply, CoachRequest, CoachUsage } from '../packages/shared/src/coach/types.ts';
 import type { PlayerLevel } from '../packages/shared/src/protocol.ts';
@@ -115,6 +115,7 @@ async function select(): Promise<ModelEvalPosition[]> {
     let tookDefend = false;
     let tookQuiet = false;
     for (const m of moves) {
+      if ((tookDefend || defend.length >= 3) && (tookQuiet || quiet.length >= 2)) break;
       if (m.ply < 8) continue;
       const best = m.candidates[0];
       if (!best) continue;
@@ -206,7 +207,7 @@ async function facts(positions: ModelEvalPosition[]): Promise<LevelAsk[]> {
   const modelPath = process.env.MAIA_MODEL ?? join(defaultDataDir(), 'models', `${MAIA3_5M.name}-${MAIA3_5M.sha256.slice(0, 8)}.onnx`);
   const maia = existsSync(modelPath) ? await MaiaTemptingMoves.load(new Uint8Array(readFileSync(modelPath)), desktopThreads()) : undefined;
   if (!maia) process.stderr.write(`No Maia-3 model at ${modelPath}: Hints get no tempting moves.\n`);
-  const tempting = maia ? new TemptingMovesService({ fallback: { ...maia, name: 'maia', suggest: (req) => maia.suggest(req) } }) : TemptingMovesService.fake();
+  const tempting = maia && new TemptingMovesService({ fallback: maia });
 
   const db = openDb(mkdtempSync(join(tmpdir(), 'coach-model-')));
   const engine = new EngineService(() => createNodeEngine(desktopThreads()), ENGINE);
@@ -218,8 +219,8 @@ async function facts(positions: ModelEvalPosition[]): Promise<LevelAsk[]> {
     updateProfile(db, { level, rating: { site: 'lichess', username: 'eval', rating, pool: 'blitz', blitz: rating } });
     for (const p of positions) {
       const req: CoachRequest = { job: p.job, fen: p.fen, recentMoves: p.recentMoves, playerSide: p.playerSide, ...(p.moveUci ? { moveUci: p.moveUci } : {}), ...(p.lessonFocus ? { lessonFocus: p.lessonFocus } : {}) };
-      const history = p.startFen === INITIAL_FEN ? historyFromSans(p.fen, p.recentMoves) : historyFromStart(p.startFen, p.recentMoves);
-      const guess = guessTempting(p.job, { service: tempting, fen: p.fen, playerSide: p.playerSide, rating: playerMaiaRating(db), history });
+      const history = p.startFen === INITIAL_FEN ? historyFromSans(p.fen, p.recentMoves) : historyFromStart(p.startFen, p.recentMoves, p.fen);
+      const guess = tempting && guessTempting(p.job, { service: tempting, fen: p.fen, playerSide: p.playerSide, rating: playerMaiaRating(db), history });
       const ask = await withTempting(await engine.factsFor(req), guess, engine);
       out.push({ id: p.id, level, ask, brief: coach.brief(ask) });
       process.stderr.write(`${p.id} ${level}\n`);
@@ -228,17 +229,20 @@ async function facts(positions: ModelEvalPosition[]): Promise<LevelAsk[]> {
   return out;
 }
 
-/** The game from a set-up position, as UCI, for Maia-3. */
-function historyFromStart(startFen: string, sans: readonly string[]): { startFen: string; moves: string[] } {
-  let fen = startFen;
+/**
+ * The game from a set-up position, as UCI, for Maia-3, when its moves lead to `fen`; otherwise
+ * `fen` alone, as `historyFromSans` does for a game from the usual start.
+ */
+function historyFromStart(startFen: string, sans: readonly string[], fen: string): { startFen: string; moves: string[] } {
+  let current = startFen;
   const moves: string[] = [];
   for (const san of sans) {
-    const played = playSan(fen, san);
+    const played = playSan(current, san);
     if (!played) return { startFen: fen, moves: [] };
     moves.push(played.uci);
-    fen = played.fenAfter;
+    current = played.fenAfter;
   }
-  return { startFen, moves };
+  return positionKey(current) === positionKey(fen) ? { startFen, moves } : { startFen: fen, moves: [] };
 }
 
 /** What one model said for one position at one level. */
@@ -269,7 +273,7 @@ export interface HintFlags {
 export function hintFlags(text: string, brief: Pick<Brief, 'candidates'>): HintFlags {
   const best = brief.candidates[0];
   const to = best?.uci.slice(2, 4);
-  return { namesMove: [...new Set(sansIn(text, { pushes: true }))], namesBestSquare: !!to && new RegExp(`(?<![a-z])${to}(?!\\d)`).test(text) };
+  return { namesMove: [...new Set(sansIn(text, { pushes: true }))], namesBestSquare: !!to && new RegExp(`(?<![a-wyz])${to}(?!\\d)`).test(text) };
 }
 
 async function answer(asks: LevelAsk[], model: string): Promise<ModelAnswer[]> {
@@ -281,6 +285,7 @@ async function answer(asks: LevelAsk[], model: string): Promise<ModelAnswer[]> {
   const { updateSettings } = await import('../packages/backend/src/settings.ts');
   const { CoachService } = await import('../packages/backend/src/coach/service.ts');
   const { RealCoach } = await import('../packages/backend/src/coach/real.ts');
+  const { AppError } = await import('../packages/backend/src/errors.ts');
 
   const db = openDb(mkdtempSync(join(tmpdir(), 'coach-model-')));
   const coach = new CoachService(db, systemClock, new RealCoach());
@@ -294,14 +299,19 @@ async function answer(asks: LevelAsk[], model: string): Promise<ModelAnswer[]> {
     if (JSON.stringify(brief) !== JSON.stringify(a.brief)) throw new Error(`${a.id} ${a.level}: the brief differs from the one --facts built`);
     const job = a.ask.job as 'hint' | 'live';
     const row: ModelAnswer = { id: a.id, job, level: a.level, model, brief, ms: 0, words: 0 };
+    const last = (db.prepare('SELECT COALESCE(MAX(id), 0) AS id FROM coach_calls').get() as { id: number }).id;
     const started = Date.now();
     try {
       row.reply = await coach.ask(a.ask, () => {});
     } catch (err) {
+      // Past the usage limit, or with the Coach unavailable, every later call would fail too: stop
+      // rather than write a round that looks worse than it is.
+      if (err instanceof AppError && (err.code === 'coach-limit' || err.code === 'coach-unavailable')) throw err;
       row.error = err instanceof Error ? err.message : String(err);
     }
     row.ms = Date.now() - started;
-    const call = db.prepare('SELECT raw_reply FROM coach_calls ORDER BY id DESC LIMIT 1').get() as { raw_reply: string | null } | undefined;
+    // This call's own row: a call that failed before it was logged has none.
+    const call = db.prepare('SELECT raw_reply FROM coach_calls WHERE id > ? ORDER BY id DESC LIMIT 1').get(last) as { raw_reply: string | null } | undefined;
     const usage = call?.raw_reply ? (JSON.parse(call.raw_reply) as { usage?: CoachUsage }).usage : undefined;
     if (usage) {
       row.usage = usage;
@@ -371,13 +381,15 @@ async function engineAt18() {
   };
 }
 
-/** Both rounds side by side for the final judge: per position and level, A and B in a fixed shuffled order. */
+/** Both rounds side by side for the final judge: per position and level, A and B in a fixed shuffled order. Pass rounds that don't name the model. */
 export function pairs(a: { round: string; answers: JudgedAnswer[]; engine: Record<string, unknown> }, b: { round: string; answers: JudgedAnswer[] }) {
   const out = [];
   for (const x of a.answers) {
     const y = b.answers.find((z) => z.id === x.id && z.level === x.level);
     if (!y) continue;
-    // A stable coin from the key, so the order is fixed but the judge can't tell the rounds apart.
+    // A stable coin from the position and level, so the order is fixed but A is not always the same
+    // round. The keys still name the rounds, so the final judge can give a verdict per round; neither
+    // names the model.
     const flip = [...`${x.id}${x.level}`].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7) % 2 === 1;
     const [first, second] = flip ? [y, x] : [x, y];
     out.push({ pair: `${x.id}|${x.level}`, keys: [first.key, second.key], id: x.id, job: x.job, level: x.level, brief: x.brief, A: { key: first.key, text: first.text, arrows: first.arrows, hint: first.hint }, B: { key: second.key, text: second.text, arrows: second.arrows, hint: second.hint } });
@@ -498,9 +510,15 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   } else if (values.facts) {
     const positions = (JSON.parse(readFileSync(POSITIONS, 'utf8')) as ModelEvalPosition[]).filter((p) => !only || only.includes(p.id));
     writeFileSync(values.facts, `${JSON.stringify(await facts(positions))}\n`);
+  } else if (values.answer && !values.out) {
+    process.stderr.write('--answer needs --out <answers.json>.\n');
+    process.exit(2);
   } else if (values.answer && values.out) {
     const asks = (JSON.parse(readFileSync(values.answer, 'utf8')) as LevelAsk[]).filter((a) => !only || only.includes(a.id));
     writeFileSync(values.out, `${JSON.stringify(await answer(asks, values.model), null, 1)}\n`);
+  } else if (values.packet && values.round && /haiku|sonnet|opus/i.test(values.round)) {
+    process.stderr.write('Give the round a name that doesn\'t say the model, such as R1: its judge mustn\'t know.\n');
+    process.exit(2);
   } else if (values.packet && values.round) {
     const view = await engineAt18();
     write(await packet(JSON.parse(readFileSync(values.packet, 'utf8')) as ModelAnswer[], values.round, (fen, uci) => view(fen, uci)));

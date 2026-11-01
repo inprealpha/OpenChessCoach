@@ -16,6 +16,9 @@ describe('hintFlags', () => {
   it('flags a named move and the best move’s square', () => {
     expect(hintFlags('Play Rh6#, it mates.', brief('hint'))).toEqual({ namesMove: ['Rh6'], namesBestSquare: true });
     expect(hintFlags('Your rook can go to h6.', brief('hint'))).toEqual({ namesMove: [], namesBestSquare: true });
+    expect(hintFlags('Think about …xh6 here.', brief('hint')).namesBestSquare).toBe(true);
+    expect(hintFlags('Look at the h6-square and the h7 pawn.', brief('hint')).namesBestSquare).toBe(true);
+    expect(hintFlags('Look at the h66 file.', brief('hint')).namesBestSquare).toBe(false);
   });
 
   it('leaves a Hint that only points at the idea alone', () => {

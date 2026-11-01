@@ -57,7 +57,7 @@ async function main(): Promise<void> {
   const coach = new RealCoach(claude.path ? { claudePath: claude.path } : {});
   // The package check's stand-in `claude` has no login for Claude to take, so it skips the call.
   const skip = process.env.CHESS_COACH_SKIP_LOGIN_CHECK === '1';
-  if (!skip) process.stdout.write('\nChecking your Claude login…\n');
+  process.stdout.write(skip ? '\nSkipping the Claude login check (CHESS_COACH_SKIP_LOGIN_CHECK=1).\n' : '\nChecking your Claude login…\n');
   const login = skip ? ({ state: 'ok' } as const) : await coach.checkLogin();
   if (login.state === 'refused') {
     process.stderr.write(`\n✗ ${login.message} Then start the app again.\n\n`);

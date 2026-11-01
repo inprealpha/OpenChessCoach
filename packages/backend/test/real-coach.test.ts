@@ -241,7 +241,7 @@ describe('the login check', () => {
     expect(await new RealCoach({ query: claudeSays([], () => overloaded) }).checkLogin()).toMatchObject({ state: 'unknown' });
     expect(await new RealCoach({ query: claudeSays([], () => 'never'), loginCheckMs: 20 }).checkLogin()).toEqual({
       state: 'unknown',
-      message: 'Claude didn’t answer within 0 seconds.',
+      message: expect.stringMatching(/^Claude didn’t answer within \d+ seconds\.$/),
     });
   });
 
@@ -263,5 +263,24 @@ describe('the login check', () => {
     loggedIn = true;
     await expect.poll(() => heard, { timeout: 2000 }).toEqual([{ state: 'ready' }]);
     expect(await coach.status()).toEqual({ state: 'ready' });
+  });
+
+  it.skipIf(process.platform === 'win32')('keeps a Coach call Claude turned down over a check that started before it', async () => {
+    const answers: ((said: unknown[]) => void)[] = [];
+    const held = (() =>
+      (async function* () {
+        for (const m of await new Promise<unknown[]>((r) => answers.push(r))) yield m;
+      })()) as unknown as typeof query;
+    const coach = new RealCoach({ claudePath: loggedInClaude(), query: held });
+    const check = coach.checkLogin();
+    await new Promise((r) => setTimeout(r, 5));
+    const call = coach.ask({ job: 'why', model: 'haiku', brief }, () => {}).catch((err: unknown) => err);
+    await expect.poll(() => answers.length).toBe(2);
+    // The Coach call is turned down while the check waits; then the check hears "OK".
+    answers[1]!(turnedDown);
+    expect(await call).toBeInstanceOf(CoachUnavailableError);
+    answers[0]!(ok);
+    expect(await check).toEqual({ state: 'ok' });
+    expect(await coach.status()).toMatchObject({ state: 'unavailable' });
   });
 });

@@ -56,10 +56,15 @@ export type LoginCheck =
   /** No answer either way: the desktop is offline, Claude is down or too slow. */
   | { state: 'unknown'; message: string };
 
-/** How long the login check waits for Claude's answer. */
-export const LOGIN_CHECK_MS = 30_000;
-/** While Claude turns the login down, how often the Coach checks again, so it comes back once the owner logs in. */
+/** How long the login check waits for Claude's answer: a real answer takes 2 to 3 seconds. */
+export const LOGIN_CHECK_MS = 15_000;
+/**
+ * While Claude turns the login down, the Coach checks again after this long, then twice as long
+ * each time up to {@link LOGIN_RECHECK_MAX_MS}, so it comes back once the owner logs in without
+ * starting Claude Code every half minute all day. A device asking for the status checks sooner.
+ */
 export const LOGIN_RECHECK_MS = 30_000;
+export const LOGIN_RECHECK_MAX_MS = 5 * 60_000;
 /** Said after a turned-down login while the app runs: the owner doesn't need to restart it. */
 export const COMES_BACK = 'The Coach comes back on its own once you have.';
 const CHECK_PROMPT = 'Reply with OK.';
@@ -119,9 +124,11 @@ export class RealCoach implements CoachPort {
    * can't tell a login that has expired or was signed out elsewhere; this can.
    */
   checkLogin(): Promise<LoginCheck> {
+    const started = Date.now();
     this.checking ??= this.askClaude().then((check) => {
       if (check.state === 'refused') this.refuse(check.message);
-      else if (check.state !== 'unknown') this.accept();
+      // A Coach call Claude turned down while this check ran is newer news than its answer.
+      else if (check.state !== 'unknown' && !(this.refused && this.refused.at > started)) this.accept();
       else if (this.refused) this.refused.at = Date.now();
       return check;
     }).finally(() => (this.checking = undefined));
@@ -157,19 +164,29 @@ export class RealCoach implements CoachPort {
       return { state: 'unknown', message: err instanceof Error ? err.message : String(err) };
     } finally {
       clearTimeout(timer);
+      // Ends the Claude Code process when the answer came before the call finished.
+      abort.abort();
     }
   }
 
   /** Claude turned the login down: the Coach says so until a check finds it works again. */
   private refuse(message: string): void {
     this.refused = { message, at: Date.now() };
-    this.recheck ??= setInterval(() => void this.checkLogin(), this.loginRecheckMs).unref();
+    if (!this.recheck) this.scheduleRecheck(this.loginRecheckMs);
+  }
+
+  private scheduleRecheck(delayMs: number): void {
+    this.recheck = setTimeout(() => {
+      void this.checkLogin().then(() => {
+        if (this.refused) this.scheduleRecheck(Math.min(delayMs * 2, Math.max(LOGIN_RECHECK_MAX_MS, this.loginRecheckMs)));
+      });
+    }, delayMs).unref();
   }
 
   private accept(): void {
     const was = this.refused;
     this.refused = undefined;
-    clearInterval(this.recheck);
+    clearTimeout(this.recheck);
     this.recheck = undefined;
     if (was) this.listener?.({ state: 'ready' });
   }

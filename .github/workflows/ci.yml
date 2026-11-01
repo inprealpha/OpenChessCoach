@@ -34,12 +34,31 @@ jobs:
         run: npm run lint
       - name: CODEOWNERS follows the protected-path list
         run: npm run check:paths
+      - name: The built Lesson data matches its sources
+        # The tests and the Engine check read data/lessons/, so a source change that wasn't rebuilt
+        # would pass them unchecked.
+        run: |
+          node data-prep/lessons.ts
+          if [ -n "$(git status --porcelain -- data/lessons/)" ]; then
+            git status --short -- data/lessons/
+            echo "::error::data/lessons/ is out of date with data/lesson-sources/: run node data-prep/lessons.ts and commit the result."
+            exit 1
+          fi
       - name: Build
         run: npm run build
       - name: Unit, golden, data and protocol tests (ADR checks included)
         run: npm test
       - name: The real-Coach check drives every Coach job (with the fake Coach)
         run: node scripts/real-coach-check.ts --fake
+      - name: Lesson moves the PR adds pass the deep Engine check, with the tablebase in endgames
+        # Depth 22 and the Lichess tablebase (data-prep/deep-check.ts), only on the moves this PR
+        # adds or changes: a PR that changes no Lesson move spends a few seconds here.
+        if: ${{ github.event_name == 'pull_request' }}
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          git fetch --no-tags --depth=1 origin "$BASE"
+          node data-prep/engine-check.ts --deep --changed-since="$BASE"
 
   journeys:
     name: Player journeys

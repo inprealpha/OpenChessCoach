@@ -26,8 +26,10 @@ its runtime. Run each check once per commit:
 
 - **Not again** after a change to docs or comments only, or on a commit a subagent already ran the
   gate on.
-- **Lesson data:** `node data-prep/engine-check.ts <ids you changed>`; `npm test` already checks
-  every Lesson at verify mode's depth.
+- **Lesson data:** `node data-prep/lessons.ts`, then `node data-prep/engine-check.ts <ids you changed>`;
+  `npm test` already checks every Lesson at verify mode's depth. CI runs the deep check on the moves
+  the PR adds (`node data-prep/engine-check.ts --deep --changed-since=origin/main` runs it locally;
+  it needs the network for the tablebase).
 - **This skill's run and evidence:** once per PR, on the final code, not on every fix round.
 - **Keep output short:** the default reporters print only failures and a summary. Don't add
   `--reporter=verbose` or paste whole logs into the conversation; read the failure you need.

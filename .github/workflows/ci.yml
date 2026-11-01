@@ -91,3 +91,51 @@ jobs:
             test-results/
           retention-days: 14
           if-no-files-found: ignore
+
+  # TEMPORARY: the README's Windows PowerShell step, run as written on a fresh policy. Removed
+  # before the PR's final commit.
+  readme-powershell:
+    name: README PowerShell step (temporary)
+    runs-on: windows-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        shell: [powershell, pwsh]
+    steps:
+      - name: npx is blocked, then runs after the README's command
+        shell: pwsh
+        env:
+          PS_EXE: ${{ matrix.shell }}
+        run: |
+          $ErrorActionPreference = 'Continue'
+          function Child([string]$cmd) {
+            $out = & $env:PS_EXE -NoProfile -NonInteractive -Command "$cmd" 2>&1 | Out-String
+            Write-Host "[$env:PS_EXE] $cmd`n$out"
+            return $out
+          }
+          Write-Host "npx resolves to: $((Get-Command npx).Source)"
+          # A fresh Windows desktop: Restricted, nothing set for the user.
+          Set-ExecutionPolicy -Scope LocalMachine Restricted -Force
+          Set-ExecutionPolicy -Scope CurrentUser Undefined -Force
+          Child 'Get-ExecutionPolicy -List' | Out-Null
+          $blocked = Child 'npx --version'
+          if ($blocked -notmatch 'running scripts is disabled') { throw 'npx was not blocked as the README says' }
+          $cmd = Child 'npx.cmd --version'
+          if ($cmd -notmatch '^\s*\d+\.\d+') { throw 'npx.cmd did not run' }
+          # The README's command (-Force only because CI can't answer its Y prompt).
+          Child 'Set-ExecutionPolicy -Scope CurrentUser RemoteSigned -Force' | Out-Null
+          $policy = Child 'Get-ExecutionPolicy'
+          if ($policy.Trim() -ne 'RemoteSigned') { throw "Get-ExecutionPolicy printed $policy" }
+          $ok = Child 'npx --version'
+          if ($ok -notmatch '^\s*\d+\.\d+') { throw 'npx still did not run after the README step' }
+          $npm = Child 'npm --version'
+          if ($npm -notmatch '^\s*\d+\.\d+') { throw 'npm did not run after the README step' }
+          # A script downloaded from the internet (Mark of the Web) is still blocked.
+          $f = Join-Path $env:RUNNER_TEMP 'downloaded.ps1'
+          Set-Content $f 'Write-Output ran'
+          Set-Content -Path $f -Stream Zone.Identifier -Value "[ZoneTransfer]`nZoneId=3"
+          $dl = Child "& '$f'"
+          if ($dl -match '(?m)^ran') { throw 'a downloaded unsigned script ran' }
+          Write-Host 'README PowerShell step: all as written.'
+

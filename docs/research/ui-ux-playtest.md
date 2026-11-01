@@ -173,8 +173,11 @@ Ranked by how many Players they hurt and how often:
 Each playtester ran its own disposable copy of the app in verify mode (`npm run verify`, seeds
 `empty`, `many-games` and `default`) from `main` at 99a0ea7, with the fake Coach, and drove it with
 Playwright by accessible name at 1280 by 800 and at 390 by 844 with touch. No real model was called.
-The club player imported a game played as Black and reviewed it. About 230 screenshots are in the
-project's files under `evidence/ui-ux-playtest/` (`beginner/`, `casual/`, `club/`).
+The club player imported a game played as Black and reviewed it. The measurements above (page
+heights, y positions) were read from the page in Playwright. The playtests' screenshots, about 230,
+are not in the repository: they are in the project's shared files, under `evidence/ui-ux-playtest/`
+(`beginner/`, `casual/`, `club/`). Two of them appear, beside the guideline sketches, in
+`docs/design/images/review-desktop.png` and `review-phone.png`.
 
 Not covered: a real phone paired by QR code, offline mode, the real Coach's waiting times (the
 earlier study measured them: 7 to 63 seconds), and Lessons beyond the first of each track.

@@ -33,7 +33,7 @@ screen fills the frame's slots; it doesn't invent its own layout.
 
 | Slot | What goes in it | Always visible |
 | --- | --- | --- |
-| **Header line** | What this is, in words: "Review · You had Black · Lost 0-1", "Lesson · Forks · 2 of 5" | Yes |
+| **Header line** | What this is, in words: "Review · You had Black · Lost 1-0", "Lesson · Forks · 2 of 5" | Yes |
 | **Board** | The board, with the Winning Chances bar beside it on desktop and above it on a phone | Yes |
 | **Board bar** | Step buttons (⏮ ◀ ▶ ⏭), Flip board, and the screen's one or two board tools (Threat, Hint) | Yes |
 | **Panel** | The screen's content: the Coach, the moves, the key moments, the Lesson text | Its top and its Ask box |
@@ -67,14 +67,17 @@ screen fills the frame's slots; it doesn't invent its own layout.
 ## Exploring a position
 
 Every board that shows a position to learn from lets the Player move pieces: the Review, a Lesson
-once it is over (or between decisions, on its own "Try it" board), a solved Puzzle, an Engine Game
-once it is over, and the Board.
+once it is over, a solved Puzzle, an Engine Game once it is over, and the Board. Not a Lesson in
+progress: the next decision's answer stays kept back (ADR 0012), so no free board, Engine grade or
+arrow there may show a move the Lesson will ask for.
 
 - A move on such a board starts a **variation**. The move list shows it indented under the move it
   branches from, and the board bar shows **Back to the game**, which drops the variation and returns
   to where the Player left the game line.
-- The Engine grades variation moves like any other (the browser's Engine, ADR 0007), and the Ask box
-  takes questions about them.
+- The browser's Engine grades variation moves on screen, as it does in play (ADR 0007). A Why
+  Question about a variation sends only the moves; the desktop's Engine works out the Coach's facts,
+  as for every Coach call. While the desktop can't be reached, the Ask box says so instead of
+  taking the question.
 - Stepping back and playing a different move never deletes the rest of a line without asking. On the
   Board it starts a variation; where a screen keeps only one line, it asks first.
 - A Review's "Better" moves, the Board's Engine lines and the moves in the overview are buttons: a
@@ -102,8 +105,10 @@ or a choice the Player must make now.
 | "How moves are written" | A help link next to the first notation the Player meets, not at the foot of the page | Help where it's needed |
 
 A collapsed section always shows its heading and a one-line summary, uses a native `<details>` or a
-button with `aria-expanded`, and remembers its state on the device (the offline store in
-`lib/storage.ts`, so a blocked storage only loses the memory, never the screen).
+button with `aria-expanded`, and remembers its state on the device in `localStorage`, read synchronously before the first paint so
+nothing jumps, and wrapped in try/catch so a blocked storage only loses the memory, never the
+screen. (The offline store in `lib/storage.ts` is asynchronous and holds the pairing token and
+games, ADR 0003; it is the wrong place for this.)
 
 ## Numbers and words
 
@@ -111,7 +116,10 @@ button with `aria-expanded`, and remembers its state on the device (the offline 
   Review and a Lesson, they are the Player's own ("your winning chances 48% → 35%"). On the Board and
   in Engine lines they are White's, as on Lichess.
 - **One sign convention.** Where an evaluation shows, "+" always means White is better, on every
-  screen, whoever is to move and whoever the Player is.
+  screen, whoever is to move and whoever the Player is. The percentage stays the Player's own where
+  the screen says so; only the evaluation's sign is fixed. Today `evaluation` in
+  `packages/shared/src/winning-chances.ts` follows the side the percentage is for, so this rule
+  changes that one formatter, not each screen.
 - **A label never repeats inside its value.** "Black's winning chances: 68%" is a label and a value;
   inside a sentence it is "68%". This holds for the Coach's text too: what the Coach brief gives the
   Coach is a value, not a label.
@@ -131,11 +139,15 @@ the Player asks (the moment's "Show all", Threat, a hovered Engine line).
 
 | Colour | Means | Where |
 | --- | --- | --- |
-| Green | The Engine's best move | Review, Lesson feedback, Engine lines, Hints that show the move |
-| The Move Grade's colour | The move that was played, graded | Review, Engine Game, Lesson feedback |
+| Ink (near black) | The move that was played; its Move Grade shows as the badge on its square, not as the arrow's colour | Review, Engine Game, Lesson feedback |
+| Green | The Engine's best move | Review, Engine lines, Engine Game Hints that show the move; in a Lesson only where ADR 0012 allows (never a move the Lesson will ask for) |
 | Blue | Another good move (the Engine's second choice, or the Coach's alternative) | Review, Board |
 | Red, dashed | The opponent's threat | Threat, the Blunder pause (the move that wins the piece) |
 | Orange | The move many players would reach for (a tempting move) | Review, Why Questions |
+
+The played move's arrow is ink, not its Move Grade's colour, because the grade colours overlap the
+others: a Mistake's dark orange is the tempting move's orange, and a Good move's green is the best
+move's green.
 
 - Every board that draws arrows shows a legend of the colours on it now, as one line under the board
   (● played ● best ● threat), and every arrow keeps its accessible name.
@@ -197,6 +209,8 @@ the Player asks (the moment's "Show all", Threat, a hovered Engine line).
 
 - Panel: the part's title and key idea, the decision prompt, then the feedback for the last move,
   with Continue or Try another move as the first thing under it.
+- The board takes the Lesson's moves only while a decision waits; arrows and highlights follow
+  `lessonArrows` and `lessonHighlights` in `lib/arrows.ts` (ADR 0012).
 - After a decision's feedback, the board scrolls nowhere: Continue keeps the board where it was.
 - At the end, "What you learned" and the next Lesson, with the final position free to explore.
 

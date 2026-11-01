@@ -129,6 +129,9 @@ description's **Evidence** section, collect:
 - database readback for every side effect (`coachctl db get <table>`);
 - the journeys you added or ran, with their result (`npx playwright test e2e/journeys/<file>`).
 
+A PR that changes what a Player sees also ticks the checklist at the end of
+`docs/design/interface-guidelines.md` in its Evidence section, at desktop and phone sizes.
+
 A PR whose Evidence section is empty gets the `no-evidence` label. Copy the ticket's "Done means"
 checks into the PR and tick each one you proved.
 

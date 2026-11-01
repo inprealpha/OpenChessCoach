@@ -116,8 +116,9 @@ jobs:
           }
           Write-Host "npx resolves to: $((Get-Command npx).Source)"
           # A fresh Windows desktop: Restricted, nothing set for the user.
-          Set-ExecutionPolicy -Scope LocalMachine Restricted -Force
-          Set-ExecutionPolicy -Scope CurrentUser Undefined -Force
+          # Through the shell under test: Windows PowerShell and PowerShell 7 keep their own policies.
+          Child 'Set-ExecutionPolicy -Scope LocalMachine Restricted -Force' | Out-Null
+          Child 'Set-ExecutionPolicy -Scope CurrentUser Undefined -Force' | Out-Null
           Child 'Get-ExecutionPolicy -List' | Out-Null
           $blocked = Child 'npx --version'
           if ($blocked -notmatch 'running scripts is disabled') { throw 'npx was not blocked as the README says' }
@@ -138,4 +139,6 @@ jobs:
           $dl = Child "& '$f'"
           if ($dl -match '(?m)^ran') { throw 'a downloaded unsigned script ran' }
           Write-Host 'README PowerShell step: all as written.'
+          # The blocked child calls above leave a failing exit code behind.
+          exit 0
 

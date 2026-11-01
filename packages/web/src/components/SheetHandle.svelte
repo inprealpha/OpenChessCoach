@@ -1,14 +1,18 @@
 <script lang="ts">
   // The grab handle at the top of a phone's panel sheet (lib/sheet.svelte.ts): a tap or a swipe on
-  // it pulls the sheet up or lets it down; a swipe in the panel does too. Not shown where the frame
-  // has no sheet.
-  import type { Sheet } from '../lib/sheet.svelte.ts';
-  import { afterSwipe } from '../lib/swipe.ts';
+  // it pulls the sheet up or lets it down; a swipe in the panel does too. A screen opens with it
+  // down. Not shown where the frame has no sheet.
+  import { untrack } from 'svelte';
+  import { sheet } from '../lib/sheet.svelte.ts';
+  import { afterSwipe, SWIPE } from '../lib/swipe.ts';
 
-  let { sheet }: { sheet: Sheet } = $props();
   let startY: number | null = null;
-  /** A swipe moved the sheet: the click that ends it is not a tap. */
+  /** The pointer moved far enough to be a swipe: the click that ends it is not a tap. */
   let swiped = false;
+
+  $effect(() => {
+    untrack(() => (sheet.full = false));
+  });
 
   function down(e: PointerEvent): void {
     startY = e.clientY;
@@ -16,10 +20,11 @@
   }
   function move(e: PointerEvent): void {
     if (startY === null) return;
-    const next = afterSwipe(sheet.full, e.clientY - startY, 0);
-    if (next === sheet.full) return;
-    sheet.full = next;
+    const dy = e.clientY - startY;
+    if (Math.abs(dy) < SWIPE) return;
+    // A swipe, whether or not it moves the sheet (up when it is already up): never a tap as well.
     swiped = true;
+    sheet.full = afterSwipe(sheet.full, dy, 0);
     startY = null;
   }
   function click(): void {
@@ -33,8 +38,8 @@
     type="button"
     class="sheet-handle"
     aria-expanded={sheet.full}
-    aria-label="Expand the panel"
-    title={sheet.full ? 'Show the board full size' : 'Give the panel more room'}
+    aria-label={sheet.full ? 'Let the panel down' : 'Pull the panel up'}
+    title={sheet.full ? 'Let the panel down: the board full size' : 'Pull the panel up: more room to read'}
     onpointerdown={down}
     onpointermove={move}
     onpointerup={() => (startY = null)}

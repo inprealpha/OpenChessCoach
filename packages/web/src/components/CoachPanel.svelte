@@ -5,6 +5,7 @@
   import type { Snippet } from 'svelte';
   import { MAX_QUESTION_LENGTH } from '@chess-coach/shared/protocol';
   import { api } from '../lib/api.svelte.ts';
+  import { sheet } from '../lib/sheet.svelte.ts';
   import type { CoachThread, Entry } from '../lib/coach.svelte.ts';
 
   interface Props {
@@ -61,6 +62,8 @@
     const asked = question.trim();
     const calls = thread.calls;
     question = '';
+    // The answer comes right above the Ask box: on a phone the panel's sheet comes up to give it room.
+    sheet.pullUp();
     await onwhy(asked);
     // The button was disabled while the Coach answered, which drops the focus: the box takes it back.
     // Not on a touch screen, where a focused box opens the on-screen keyboard over the board.

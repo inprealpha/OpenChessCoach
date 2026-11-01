@@ -770,14 +770,17 @@ test('on an iPhone the page fits the screen, and the panel is a sheet: pulled up
 
   const board = paired.getByRole('group', { name: 'Review board' });
   const panel = paired.locator('.side.panel');
-  const handle = paired.getByRole('button', { name: 'Expand the panel' });
+  // The grab handle: its name says what a tap does, its state whether the sheet is up.
+  const handle = paired.getByRole('button', { name: /^(Pull the panel up|Let the panel down)$/ });
   const wide = (await board.boundingBox())!.width;
   const low = (await panel.boundingBox())!.height;
   await expect(handle).toHaveAttribute('aria-expanded', 'false');
+  await expect(handle).toHaveAccessibleName('Pull the panel up');
 
   // Pulled up: the board is a strip beside its bar, still whole on screen, and the panel takes the height.
   await handle.click();
   await expect(handle).toHaveAttribute('aria-expanded', 'true');
+  await expect(handle).toHaveAccessibleName('Let the panel down');
   await expect.poll(async () => (await board.boundingBox())!.width).toBeLessThan(wide * 0.6);
   expect((await panel.boundingBox())!.height).toBeGreaterThan(low + 150);
   await expect(board).toBeInViewport({ ratio: 1 });
@@ -793,6 +796,24 @@ test('on an iPhone the page fits the screen, and the panel is a sheet: pulled up
   const rows = paired.getByRole('region', { name: 'Key moments' });
   await rows.hover();
   await paired.mouse.wheel(0, 200);
+  await expect(handle).toHaveAttribute('aria-expanded', 'true');
+
+  // The better move tries itself on the board, which comes back full size to show it.
+  const first = paired.getByRole('region', { name: 'Key moments' }).getByRole('listitem').first();
+  const show = first.getByRole('button', { name: /^Show moment/ });
+  if ((await show.getAttribute('aria-expanded')) !== 'true') await show.click();
+  await expect(show).toHaveAttribute('aria-expanded', 'true');
+  await first.getByRole('button', { name: 'Try axb4 on the board' }).click();
+  await expect(handle).toHaveAttribute('aria-expanded', 'false');
+  await expect(paired.getByRole('button', { name: 'Back to the game' })).toBeVisible();
+  await expect(paired.getByRole('tab', { name: 'Moves' })).toHaveAttribute('aria-selected', 'true');
+  await expect.poll(async () => (await board.boundingBox())!.width).toBe(wide);
+  // Back to the game turns the panel back to the key moments it came from.
+  await paired.getByRole('button', { name: 'Back to the game' }).click();
+  await expect(paired.getByRole('tab', { name: 'Moments' })).toHaveAttribute('aria-selected', 'true');
+
+  // A Why Question pulls the sheet up so its answer has room above the Ask box.
+  await paired.getByRole('button', { name: 'Ask the Coach why' }).click();
   await expect(handle).toHaveAttribute('aria-expanded', 'true');
 });
 

@@ -106,9 +106,8 @@ h1 { font-size: 1.4rem; margin: 0.5rem 0 1rem; }
 .board-screen .side.panel > .panel-body > .card:last-child { border-bottom: 0; padding-bottom: 0; }
 /* Tabs sit flush with the card's top edge. */
 .board-screen .side.panel > .panel-body:has(> .tabs) { padding-top: 0; }
-/* The board as a strip (lib/sheet.svelte.ts): the whole of it is one button that brings it back. */
+/* The board as a strip is one button over it (SheetStrip.svelte). */
 .board-and-bar { position: relative; }
-.strip-tap { position: absolute; inset: 0; z-index: 5; background: transparent; border: 0; padding: 0; border-radius: 4px; cursor: zoom-in; }
 .board-screen .side.panel > .coach { border: 0; border-top: 1px solid var(--line); border-radius: 0; box-shadow: none; padding-inline: var(--panel-pad); }
 /* Docked in the panel, the Ask box is the Coach: its name and "Coach ready" show only while it
    works or can't, as the sketches have it. */
@@ -198,8 +197,10 @@ h1 { font-size: 1.4rem; margin: 0.5rem 0 1rem; }
 /* The card's padding is its spacing: its first and last children add no margin of their own. */
 .card > :first-child { margin-top: 0; }
 .card > :last-child { margin-bottom: 0; }
-/* The board with the Winning Chances bar beside it; under it where beside doesn't fit. */
-.board-and-bar { container-type: inline-size; --wc-bar-width: 1.6rem; --wc-bar-gap: 0.4rem; }
+/* The board with the Winning Chances bar beside it on a desktop, as in the guidelines' sketches;
+   above it on a phone, so the board keeps the full width. */
+:root { --wc-bar-width: 1.6rem; --wc-bar-gap: 0.4rem; }
+.board-and-bar { container-type: inline-size; }
 .board-and-bar > .with-bar {
   display: grid;
   grid-template-columns: var(--wc-bar-width) minmax(0, var(--board-max));
@@ -207,8 +208,12 @@ h1 { font-size: 1.4rem; margin: 0.5rem 0 1rem; }
   justify-content: center;
   align-items: start;
 }
-@container (max-width: 520px) {
+@media (max-width: 820px) {
   .board-and-bar > .with-bar { grid-template-columns: minmax(0, 1fr); gap: 0; }
+}
+/* Beside the board, the bar takes its own width rather than the board's. */
+@media (min-width: 821px) {
+  .board-layout:has(.wc-bar) { grid-template-columns: minmax(0, calc(var(--board-max) + var(--wc-bar-width) + var(--wc-bar-gap))) minmax(0, 1fr); }
 }
 /* The Player asked for less motion: nothing slides, fades or blinks. Near-zero rather than none,
    so anything waiting for an animation or a transition to end still hears that it did. */

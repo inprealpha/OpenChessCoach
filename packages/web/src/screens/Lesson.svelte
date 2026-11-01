@@ -35,7 +35,8 @@
   import GradeBadge from '../components/GradeBadge.svelte';
   import StepButtons from '../components/StepButtons.svelte';
   import SheetHandle from '../components/SheetHandle.svelte';
-  import { Sheet } from '../lib/sheet.svelte.ts';
+  import SheetStrip from '../components/SheetStrip.svelte';
+  import { sheet } from '../lib/sheet.svelte.ts';
   import { api } from '../lib/api.svelte.ts';
   import { lessonArrows, lessonHighlights } from '../lib/arrows.ts';
   import { CoachThread } from '../lib/coach.svelte.ts';
@@ -48,9 +49,6 @@
   import { router } from '../lib/router.svelte.ts';
   import { store } from '../lib/storage.ts';
   import { stepLine, Variation, type Step } from '../lib/variation.svelte.ts';
-
-  /** A phone's panel, pulled up or not. */
-  const sheet = new Sheet();
   let { lessonId }: { lessonId: string } = $props();
 
   let lesson = $state<LessonData | null>(null);
@@ -529,7 +527,7 @@
   );
 </script>
 
-<section class="screen" class:board-screen={lesson && phase !== 'intro' && part} class:sheet-full={sheet.on && sheet.full}>
+<section class="screen" class:board-screen={lesson && phase !== 'intro' && part} class:sheet-full={sheet.shown}>
   {#if missing}
     <h1>Lesson not found</h1>
     <p><a href="#/lessons">Back to the Lessons</a></p>
@@ -646,10 +644,7 @@
       <div class="board-layout">
         <div class="board-col">
           <div class="board-and-bar">
-          {#if sheet.on && sheet.full}
-          <!-- The board as a strip: a tap brings it back full size. -->
-          <button type="button" class="strip-tap" aria-label="Show the board full size" onclick={() => (sheet.full = false)}></button>
-        {/if}
+          <SheetStrip />
           <Board
             bind:this={board}
             fen={boardFen}
@@ -677,7 +672,7 @@
           {/if}
         </div>
         <div class="side panel">
-          <SheetHandle {sheet} />
+          <SheetHandle />
           <div class="panel-body" {@attach sheet.gestures} bind:this={panelBody} class:feedback={phase === 'feedback' || phase === 'shown'}>
           {#if !isOpening && phase !== 'done'}
             <section class="card" aria-label="Position">

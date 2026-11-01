@@ -15,7 +15,8 @@
   import FlipButton from '../components/FlipButton.svelte';
   import StepButtons from '../components/StepButtons.svelte';
   import SheetHandle from '../components/SheetHandle.svelte';
-  import { Sheet } from '../lib/sheet.svelte.ts';
+  import SheetStrip from '../components/SheetStrip.svelte';
+  import { sheet } from '../lib/sheet.svelte.ts';
   import { api } from '../lib/api.svelte.ts';
   import { CoachThread } from '../lib/coach.svelte.ts';
   import { lessonCatalogue, loadPuzzles } from '../lib/content.ts';
@@ -25,9 +26,6 @@
   import { profile } from '../lib/profile.svelte.ts';
   import { store } from '../lib/storage.ts';
   import { stepLine, Variation, type Step } from '../lib/variation.svelte.ts';
-
-  /** A phone's panel, pulled up or not. */
-  const sheet = new Sheet();
   let { opening }: { opening?: string | undefined } = $props();
 
   let all = $state<PuzzleData[]>([]);
@@ -290,7 +288,7 @@
   }
 </script>
 
-<section class="screen board-screen puzzles" class:sheet-full={sheet.on && sheet.full}>
+<section class="screen board-screen puzzles" class:sheet-full={sheet.shown}>
   <header class="frame-head">
     <h1>{lessonName ? `${lessonName} Puzzles` : 'Puzzles'}</h1>
     {#if puzzle && status !== 'empty'}<p class="head-line">Rated {puzzle.rating} · from a real Lichess game</p>{/if}
@@ -344,10 +342,7 @@
     <div class="board-layout">
       <div class="board-col">
         <div class="board-and-bar">
-        {#if sheet.on && sheet.full}
-          <!-- The board as a strip: a tap brings it back full size. -->
-          <button type="button" class="strip-tap" aria-label="Show the board full size" onclick={() => (sheet.full = false)}></button>
-        {/if}
+        <SheetStrip />
         <Board
           fen={boardFen}
           orientation={flipped ? otherSide(solver) : solver}
@@ -371,7 +366,7 @@
         </div>
       </div>
       <div class="side panel">
-        <SheetHandle {sheet} />
+        <SheetHandle />
         <div class="panel-body" {@attach sheet.gestures}>
         <section class="card" aria-label="Puzzle" data-puzzle-id={puzzle.id}>
           <p>

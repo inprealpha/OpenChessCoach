@@ -21,6 +21,7 @@
   import GradeBadge from '../components/GradeBadge.svelte';
   import MoveList from '../components/MoveList.svelte';
   import SheetHandle from '../components/SheetHandle.svelte';
+  import SheetStrip from '../components/SheetStrip.svelte';
   import StepButtons from '../components/StepButtons.svelte';
   import ThreatButton from '../components/ThreatButton.svelte';
   import WinningChancesBar from '../components/WinningChancesBar.svelte';
@@ -42,7 +43,7 @@
   import { titleFrom } from '../lib/page-title.svelte.ts';
   import { stepLine, Variation, type Step } from '../lib/variation.svelte.ts';
   import { profile } from '../lib/profile.svelte.ts';
-  import { Sheet } from '../lib/sheet.svelte.ts';
+  import { sheet } from '../lib/sheet.svelte.ts';
 
   type Tab = 'moments' | 'moves' | 'overview';
 
@@ -65,8 +66,6 @@
   let tab = $state<Tab>('moments');
   /** The panel's tab when the Player started a variation, which Back to the game returns to. */
   let tabBeforeVariation: Tab = 'moments';
-  /** A phone's panel, pulled up or not. */
-  const sheet = new Sheet();
   /** The side at the bottom of the board: the Player's, until they flip it. */
   let flipped = $state(false);
   /** Whether the overview is new to the Player: the first visit to this game's Review. */
@@ -101,7 +100,7 @@
         if (api.state !== 'online') kept = (await keptGames())?.games.find((g) => g.id === id) ?? null;
         await api.whenOnline();
         game = await api.request('games.get', { gameId: id });
-        overviewNew = foldOpen(`review-overview-${id}`, true);
+        overviewNew = foldOpen(seenKey(id), true);
         line.reset(game.startFen, game.moves);
         line.goTo(0);
         const reply = await api.request('review.get', { gameId: id });
@@ -177,6 +176,8 @@
 
   /** A key moment's better move, played on the board as a variation from the position before it. */
   function tryBetter(m: KeyMoment, uci: string): void {
+    // The move plays on the board, so a phone's board comes back full size to show it.
+    sheet.full = false;
     if (!(momentOpen && open === m.ply) || variation.active) {
       variation.leave();
       coach.clearAnnotations();
@@ -208,8 +209,16 @@
   // first sentence, one tap from the rest; after that, the tab alone
   // (docs/design/interface-guidelines.md, Collapsing and density).
   $effect(() => {
-    if (game && review?.overview) foldFromNextVisit(`review-overview-${game.id}`);
+    if (game && review?.overview) foldFromNextVisit(seenKey(game.id));
   });
+
+  /**
+   * Remembers that the Player has seen a game's overview. Not the old fold's key, which a Player
+   * who opened the fold left at "open" and would bring the first sentence back on every visit.
+   */
+  function seenKey(id: number): string {
+    return `review-overview-seen-${id}`;
+  }
 
   function pickTab(to: Tab): void {
     tab = to;
@@ -283,7 +292,7 @@
       coach.clearAnnotations();
       // A new variation shows in the move list, so the panel turns to it; Back to the game turns it back.
       if (starting) {
-        if (tab !== 'moves') tabBeforeVariation = tab;
+        tabBeforeVariation = tab;
         tab = 'moves';
       }
     }
@@ -314,8 +323,6 @@
   }
 
   async function why(question: string): Promise<void> {
-    // The answer comes above the Ask box: on a phone the sheet comes up to give it room.
-    if (sheet.on) sheet.full = true;
     if (variation.active && game) {
       // Only the moves go, and the desktop's Engine works out the facts (ADR 0007). No gameId: the
       // Review has no score for a position the game never reached.
@@ -427,7 +434,7 @@
   });
 </script>
 
-<section class="screen board-screen review" class:sheet-full={sheet.on && sheet.full}>
+<section class="screen board-screen review" class:sheet-full={sheet.shown}>
   <header class="frame-head">
     <h1>Review</h1>
     {#if game}<p class="head-line" data-testid="review-summary">{summaryOf(game)}</p>{:else if kept}<p class="head-line">{summaryOf(kept)}</p>{/if}
@@ -437,10 +444,7 @@
     <div class="board-layout">
       <div class="board-col">
         <div class="board-and-bar">
-          {#if sheet.on && sheet.full}
-            <!-- The board as a strip: a tap brings it back full size, to read or to move on. -->
-            <button type="button" class="strip-tap" aria-label="Show the board full size" onclick={() => (sheet.full = false)}></button>
-          {/if}
+          <SheetStrip />
           <div class="with-bar">
             <WinningChancesBar
               score={position?.score ?? null}
@@ -478,7 +482,7 @@
         {/if}
       </div>
       <div class="side panel">
-        <SheetHandle {sheet} />
+        <SheetHandle />
         <div class="panel-body" {@attach sheet.gestures}>
           {#if game.source === 'sample'}<p class="muted small" role="note">A sample game: it doesn’t count towards your Player Profile.</p>{/if}
           {#if phase === 'ready'}
@@ -567,6 +571,7 @@
                     </li>
                   {/each}
                 </ol>
+                <p class="muted small explore-hint">Move a piece on the board to try your own idea. Back to the game returns here.</p>
               </section>
             </div>
             <div id="panel-moves" role="tabpanel" aria-labelledby="tab-moves" hidden={tab !== 'moves'} class="tab-panel">
@@ -634,7 +639,7 @@
   /* Under the board on desktop: the bar, the legend line and the graph's strip. On a phone, what the
      frame keeps under and above the board: the header, the bar, the legend, the panel's tabs and its
      first lines, and the Ask box. */
-  .review { --under-board: 12.75rem; --phone-reserve: 26rem; }
+  .review { --under-board: 12.75rem; --phone-reserve: 25.25rem; }
   .tabs { display: flex; gap: 0.25rem; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--panel); z-index: 1; margin-inline: calc(-1 * var(--panel-pad)); padding-inline: calc(var(--panel-pad) - 0.25rem); }
   .tabs button { background: none; color: var(--muted); border-radius: 0; padding: 0.45rem 0.75rem; min-height: 2.5rem; border-bottom: 2px solid transparent; margin-bottom: -1px; }
   .tabs button.on { color: var(--text); font-weight: 600; border-bottom-color: var(--accent); }
@@ -665,6 +670,7 @@
   .more[open] { flex-basis: 100%; margin-left: 0; }
   .more p { margin: 0.2rem 0 0; }
   .none { margin: 0.6rem 0 0; }
+  .explore-hint { margin: 0.6rem 0 0; }
   /* The overview's first sentence, on a first visit: a row like the moments', that opens its tab. */
   .teaser {
     display: block; width: auto; margin: 0 calc(-1 * var(--panel-pad)); padding: 0.55rem var(--panel-pad);

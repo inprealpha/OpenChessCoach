@@ -52,10 +52,11 @@ call.
   list; on a phone the graph too) and `Overview` (when the Review has one). On the first visit to a
   Review, `Moments` opens under the overview's first sentence, the button `Read the overview`, which
   turns to its tab; on later visits (remembered per game) the tab alone.
-- On a phone held upright the panel is a sheet under a full-width board: the grab handle `Expand the
-  panel` (`aria-expanded`), a swipe up in the panel or a wheel turned down pulls it up, the board
+- On a phone held upright the panel is a sheet under the board: the grab handle `Pull the panel up`
+  / `Let the panel down` (`aria-expanded`), a swipe up in the panel or a wheel turned down pulls it up, the board
   shrinks to a strip beside its bar, and the strip, the button `Show the board full size`, brings it
-  back. Asking a Why Question pulls it up so the answer has room. At Safari's sizes (402×714 to
+  back. Asking a Why Question pulls it up so the answer has room, on every board screen; trying a
+  better move lets it down so the move shows on the full board. At Safari's sizes (402×714 to
   440×790) the page is exactly the screen: nothing pans sideways or scrolls behind the panel.
 - The move list numbers moves from the game's start position, so a game set up from a position
   (`[SetUp "1"]`, `[FEN …]`) reads `40… Kd3`, `41. Ra3+`, as the key moments and the graph do.
@@ -190,7 +191,7 @@ Mistake` in the list `Moves`, then `Next move`. A Review without the overview:
   edge goes back to `Start: White’s winning chances: 53%` (`imported-game.spec.ts`, "a Review
   lists key moments …"). Marks for Black, mates and huge evaluations are covered on real games in
   `packages/shared/test/winning-chances-graph.test.ts`.
-- The moment 11. Bxf7+ shows `48% → 35%` with no evaluations (Beginner), `Better: axb4 48%` and,
+- The moment 11. Bxf7+ shows `48% → 35%` with no evaluations (Beginner), the button `Try axb4 on the board` ("axb4 48%") and,
   under `More moves`, `Ng5 44%, Ne5 44%`, before and after a reopen
   (`imported-game.spec.ts`, "a Review lists key moments with Move Grades, …").
 - On the `Review board`: `Move 11. Bxf7+` shows the image `Mistake on f7`; `Next move` shows

@@ -142,3 +142,26 @@ jobs:
           # The blocked child calls above leave a failing exit code behind.
           exit 0
 
+
+  # TEMPORARY: every board screen in WebKit, Safari's engine, at desktop and iPhone sizes, for the
+  # Doop comparison. Removed before the PR's final commit.
+  webkit-screens:
+    name: WebKit screens (temporary)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps webkit
+      - run: npm run build -w @chess-coach/web
+      - run: node scripts/tmp-screens.ts webkit webkit-screens
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: webkit-screens
+          path: webkit-screens/
+          retention-days: 7

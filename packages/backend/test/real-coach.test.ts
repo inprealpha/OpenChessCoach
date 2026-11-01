@@ -10,6 +10,10 @@ import type { Brief } from '@chess-coach/shared/coach/brief';
 import { ENGINE_TOOL_NAME, RealCoach, COACH_OUTPUT_TOKENS, COMES_BACK } from '../src/coach/real.ts';
 import { EXPIRED_FIX } from '../src/claude-check.ts';
 import { CoachUnavailableError } from '../src/coach/port.ts';
+import { CoachService } from '../src/coach/service.ts';
+import { systemClock } from '../src/clock.ts';
+import type { Db } from '../src/db.ts';
+import type { CoachStatus } from '@chess-coach/shared/protocol';
 import { EngineTool } from '../src/coach/engine-tool.ts';
 import type { EngineService } from '../src/engine/service.ts';
 import type { CoachEngine } from '../src/coach/port.ts';
@@ -261,7 +265,7 @@ describe('the login check', () => {
     expect(await coach.checkLogin()).toMatchObject({ state: 'refused' });
     expect((await coach.status()).state).toBe('unavailable');
     loggedIn = true;
-    await expect.poll(() => heard, { timeout: 2000 }).toEqual([{ state: 'ready' }]);
+    await expect.poll(() => heard, { timeout: 2000 }).toEqual([{}]);
     expect(await coach.status()).toEqual({ state: 'ready' });
   });
 
@@ -282,5 +286,42 @@ describe('the login check', () => {
     answers[0]!(ok);
     expect(await check).toEqual({ state: 'ok' });
     expect(await coach.status()).toMatchObject({ state: 'unavailable' });
+  });
+
+  it.skipIf(process.platform === 'win32')('keeps a Coach call turned down in the same millisecond the check started', async () => {
+    const answers: ((said: unknown[]) => void)[] = [];
+    const held = (() =>
+      (async function* () {
+        for (const m of await new Promise<unknown[]>((r) => answers.push(r))) yield m;
+      })()) as unknown as typeof query;
+    const coach = new RealCoach({ claudePath: loggedInClaude(), query: held });
+    // Both start at once, so they share a millisecond: only the order of the answers decides.
+    const check = coach.checkLogin();
+    const call = coach.ask({ job: 'why', model: 'haiku', brief }, () => {}).catch((err: unknown) => err);
+    await expect.poll(() => answers.length).toBe(2);
+    answers[1]!(turnedDown);
+    expect(await call).toBeInstanceOf(CoachUnavailableError);
+    answers[0]!(ok);
+    await check;
+    expect(await coach.status()).toMatchObject({ state: 'unavailable' });
+  });
+
+  it.skipIf(process.platform === 'win32')('says the usage limit, not ready, when the owner logs back in out of limits', async () => {
+    let answer = turnedDown as unknown[];
+    const coach = new RealCoach({ claudePath: loggedInClaude(), query: claudeSays([], () => answer), loginRecheckMs: 20 });
+    const heard: CoachStatus[] = [];
+    const service = new CoachService({} as Db, systemClock, coach, (status) => heard.push(status));
+    expect(await coach.checkLogin()).toMatchObject({ state: 'refused' });
+    answer = [{ type: 'rate_limit_event', rate_limit_info: { status: 'rejected', resetsAt: Math.floor(Date.now() / 1000) + 3600 } }];
+    await expect.poll(() => heard.map((s) => s.state), { timeout: 2000 }).toEqual(['limit-reached']);
+    expect((await service.status()).state).toBe('limit-reached');
+  });
+
+  it('tells a service that starts after the check about a usage limit the check found', async () => {
+    const limit = [{ type: 'rate_limit_event', rate_limit_info: { status: 'rejected' } }];
+    const coach = new RealCoach({ query: claudeSays([], () => limit) });
+    expect(await coach.checkLogin()).toMatchObject({ state: 'limit' });
+    const service = new CoachService({} as Db, systemClock, coach);
+    expect((await service.status()).state).toBe('limit-reached');
   });
 });

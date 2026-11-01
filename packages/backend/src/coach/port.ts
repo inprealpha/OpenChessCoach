@@ -31,7 +31,15 @@ export interface CoachPort {
   ask(call: CoachCall, onText: (delta: string) => void): Promise<CoachRawReply>;
   status(): Promise<CoachStatus>;
   /** Hears the Coach become available again on its own, such as once the owner logs back in to Claude. */
-  watch?(listener: (status: CoachStatus) => void): void;
+  watch?(listener: (back: CoachBack) => void): void;
+}
+
+/**
+ * The Coach came back on its own. `limited` says Claude takes the login but the usage limit is
+ * reached, with when it resets if Claude said.
+ */
+export interface CoachBack {
+  limited?: { resetsAt?: Date };
 }
 
 /** The owner's Claude limits are used up. */

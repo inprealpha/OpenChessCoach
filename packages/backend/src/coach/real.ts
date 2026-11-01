@@ -9,7 +9,7 @@ import { z } from 'zod';
 import type { CoachStatus } from '@chess-coach/shared/protocol';
 import { tmpdir } from 'node:os';
 import { checkClaude, isWindowsShim, refusedLogin } from '../claude-check.ts';
-import { CoachDeadlineError, CoachLimitError, CoachUnavailableError, type CoachCall, type CoachEngine, type CoachPort } from './port.ts';
+import { CoachDeadlineError, CoachLimitError, CoachUnavailableError, type CoachBack, type CoachCall, type CoachEngine, type CoachPort } from './port.ts';
 import { engineToolPrompt, REPLY_SCHEMA, SYSTEM_PROMPT, userPrompt } from './prompts.ts';
 
 /** Turns without the Engine: the answer, and a retry of its structured output. */
@@ -66,7 +66,7 @@ export const LOGIN_CHECK_MS = 15_000;
 export const LOGIN_RECHECK_MS = 30_000;
 export const LOGIN_RECHECK_MAX_MS = 5 * 60_000;
 /** Said after a turned-down login while the app runs: the owner doesn't need to restart it. */
-export const COMES_BACK = 'The Coach comes back on its own once you have.';
+export const COMES_BACK = 'The Coach comes back on its own once Claude takes the login again.';
 const CHECK_PROMPT = 'Reply with OK.';
 
 export interface RealCoachOptions {
@@ -91,9 +91,13 @@ export class RealCoach implements CoachPort {
   private readonly loginRecheckMs: number;
   /** Set while Claude turns the desktop's login down: why, and when that was last checked. */
   private refused: { message: string; at: number } | undefined;
+  /** Counts the times Claude turned the login down, so a check knows whether one came while it ran. */
+  private refusals = 0;
   private checking: Promise<LoginCheck> | undefined;
   private recheck: NodeJS.Timeout | undefined;
-  private listener: ((status: CoachStatus) => void) | undefined;
+  private listener: ((back: CoachBack) => void) | undefined;
+  /** What a check found before anything watched, such as the usage limit at start-up: told on `watch`. */
+  private untold: CoachBack | undefined;
 
   constructor(options: RealCoachOptions = {}) {
     this.claudePath = options.claudePath;
@@ -114,8 +118,9 @@ export class RealCoach implements CoachPort {
     return { state: 'ready' };
   }
 
-  watch(listener: (status: CoachStatus) => void): void {
+  watch(listener: (back: CoachBack) => void): void {
     this.listener = listener;
+    if (this.untold) this.tell(this.untold);
   }
 
   /**
@@ -124,11 +129,11 @@ export class RealCoach implements CoachPort {
    * can't tell a login that has expired or was signed out elsewhere; this can.
    */
   checkLogin(): Promise<LoginCheck> {
-    const started = Date.now();
+    const before = this.refusals;
     this.checking ??= this.askClaude().then((check) => {
       if (check.state === 'refused') this.refuse(check.message);
       // A Coach call Claude turned down while this check ran is newer news than its answer.
-      else if (check.state !== 'unknown' && !(this.refused && this.refused.at > started)) this.accept();
+      else if (check.state !== 'unknown' && this.refusals === before) this.accept(check);
       else if (this.refused) this.refused.at = Date.now();
       return check;
     }).finally(() => (this.checking = undefined));
@@ -144,16 +149,9 @@ export class RealCoach implements CoachPort {
         options: { ...this.callOptions(abort), model: 'haiku', systemPrompt: CHECK_PROMPT, maxTurns: 1 },
       });
       for await (const message of stream) {
-        if (message.type === 'rate_limit_event' && message.rate_limit_info.status === 'rejected') {
-          const resets = message.rate_limit_info.resetsAt;
-          return { state: 'limit', ...(resets ? { resetsAt: new Date(resets * 1000) } : {}) };
-        }
-        if (message.type === 'assistant' && message.error) {
-          const refused = refusedLogin(message.error);
-          if (refused) return { state: 'refused', message: refused };
-          if (message.error === 'rate_limit') return { state: 'limit' };
-          return { state: 'unknown', message: `Claude answered with an error (${message.error}).` };
-        }
+        const stop = callStopped(message);
+        if (stop) return stop;
+        if (message.type === 'assistant' && message.error) return { state: 'unknown', message: `Claude answered with an error (${message.error}).` };
         if (message.type === 'result') {
           return message.subtype === 'success' && !message.is_error ? { state: 'ok' } : { state: 'unknown', message: `Claude stopped early (${message.subtype}).` };
         }
@@ -172,6 +170,7 @@ export class RealCoach implements CoachPort {
   /** Claude turned the login down: the Coach says so until a check finds it works again. */
   private refuse(message: string): void {
     this.refused = { message, at: Date.now() };
+    this.refusals++;
     if (!this.recheck) this.scheduleRecheck(this.loginRecheckMs);
   }
 
@@ -183,12 +182,19 @@ export class RealCoach implements CoachPort {
     }, delayMs).unref();
   }
 
-  private accept(): void {
+  /** Claude takes the login: the Coach is back, or out of its usage limit, which the service keeps. */
+  private accept(check: Extract<LoginCheck, { state: 'ok' | 'limit' }>): void {
     const was = this.refused;
     this.refused = undefined;
     clearTimeout(this.recheck);
     this.recheck = undefined;
-    if (was) this.listener?.({ state: 'ready' });
+    if (check.state === 'limit') this.tell({ limited: check.resetsAt ? { resetsAt: check.resetsAt } : {} });
+    else if (was) this.tell({});
+  }
+
+  private tell(back: CoachBack): void {
+    this.untold = this.listener ? undefined : back;
+    this.listener?.(back);
   }
 
   /** What every call to Claude shares: no tools, no settings from disk, the owner's login. */
@@ -278,18 +284,12 @@ export class RealCoach implements CoachPort {
           held = '';
           live = engine.exhausted;
         }
-        if (message.type === 'rate_limit_event' && message.rate_limit_info.status === 'rejected') {
-          const resets = message.rate_limit_info.resetsAt;
-          throw new CoachLimitError('Your Claude usage limit has been reached.', resets ? new Date(resets * 1000) : undefined);
-        }
-        if (message.type === 'assistant' && message.error) {
-          if (message.error === 'rate_limit') throw new CoachLimitError('Your Claude usage limit has been reached.');
-          const refused = refusedLogin(message.error);
-          if (refused) {
-            // Remembered, so the Coach stays unavailable rather than looking ready to the next Player.
-            this.refuse(refused);
-            throw new CoachUnavailableError(`${refused} ${COMES_BACK}`);
-          }
+        const stop = callStopped(message);
+        if (stop?.state === 'limit') throw new CoachLimitError('Your Claude usage limit has been reached.', stop.resetsAt);
+        if (stop?.state === 'refused') {
+          // Remembered, so the Coach stays unavailable rather than looking ready to the next Player.
+          this.refuse(stop.message);
+          throw new CoachUnavailableError(`${stop.message} ${COMES_BACK}`);
         }
         if (message.type === 'result') {
           if (held) show(held);
@@ -317,6 +317,18 @@ export class RealCoach implements CoachPort {
     if (late) throw new CoachDeadlineError(deadlineMs);
     return { ...toRawReply(text, structured), ...(usage ? { usage } : {}) };
   }
+}
+
+/** Whether a message from Claude ends the call: the usage limit is reached, or Claude turned the login down. */
+function callStopped(message: SDKMessage): Extract<LoginCheck, { state: 'limit' | 'refused' }> | undefined {
+  if (message.type === 'rate_limit_event' && message.rate_limit_info.status === 'rejected') {
+    const resets = message.rate_limit_info.resetsAt;
+    return { state: 'limit', ...(resets ? { resetsAt: new Date(resets * 1000) } : {}) };
+  }
+  if (message.type !== 'assistant' || !message.error) return undefined;
+  if (message.error === 'rate_limit') return { state: 'limit' };
+  const refused = refusedLogin(message.error);
+  return refused ? { state: 'refused', message: refused } : undefined;
 }
 
 /** Whether a turn of the Coach's ends by asking the Engine. */

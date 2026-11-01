@@ -44,7 +44,7 @@ export function refusedLogin(error: string | undefined): string | undefined {
     case 'verification_required':
       return 'Claude turned the login down until your Claude account is verified. Open claude.ai and follow its steps.';
     case 'cloud_credential_error':
-      return 'Claude Code could not use its cloud provider’s credentials on this desktop. Check them, then try again.';
+      return 'Claude Code could not use its cloud provider’s credentials on this desktop. Check them there.';
     default:
       return undefined;
   }

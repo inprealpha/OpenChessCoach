@@ -50,18 +50,18 @@ describe("a game's rating pool", () => {
     });
     // An Engine Game's PGN is the app's own.
     expect(gameRatings({ source: 'engine', pgn: '[WhiteElo "1500"]\n\n1. e4 *' })).toEqual({});
-    expect(pgnHeaders('[White "a \\"b\\""]\n[Black "c"]\n\n1. e4')).toEqual({ White: 'a "b"', Black: 'c' });
+    expect(pgnHeaders('[White "a \\"b\\""]\n[Black "c"]\n\n1. e4 { [WhiteElo "9"] } e5')).toEqual({ White: 'a "b"', Black: 'c' });
   });
 
   it("takes a game as the owner's unless their account's site shows it is someone else's", () => {
-    const pgn = lichessPgn('Friend', 'Rival', '1500', '1500');
+    const friends = { white: 'Friend', black: 'Rival' };
     const linked = { ratingSource: { site: 'lichess' as const, username: 'owner' } };
-    expect(ownersGame(linked, { source: 'lichess', pgn })).toBe(false);
-    expect(ownersGame(linked, { source: 'lichess', pgn: lichessPgn('Rival', 'OWNER', '1500', '1500') })).toBe(true);
+    expect(ownersGame(linked, { source: 'lichess', ...friends })).toBe(false);
+    expect(ownersGame(linked, { source: 'lichess', white: 'Rival', black: 'OWNER' })).toBe(true);
     // No account, another site, or a pasted PGN: the app can't tell, so it is the owner's as before.
-    expect(ownersGame({ ratingSource: null }, { source: 'lichess', pgn })).toBe(true);
-    expect(ownersGame({ ratingSource: { site: 'chesscom', username: 'owner' } }, { source: 'lichess', pgn })).toBe(true);
-    expect(ownersGame(linked, { source: 'pgn', pgn })).toBe(true);
+    expect(ownersGame({ ratingSource: null }, { source: 'lichess', ...friends })).toBe(true);
+    expect(ownersGame({ ratingSource: { site: 'chesscom', username: 'owner' } }, { source: 'lichess', ...friends })).toBe(true);
+    expect(ownersGame(linked, { source: 'pgn', ...friends })).toBe(true);
   });
 });
 
@@ -137,6 +137,17 @@ describe("a game the owner didn't play", () => {
     for (const b of [...briefs(app, 'review-overview'), ...briefs(app, 'review-moment')]) expect(b).toMatchObject({ ownGame: false, playerSide: 'black', allowNote: false });
     expect(review.moments.every((m) => m.explanation.startsWith('Here Black played'))).toBe(true);
     expect(rows(app, 'SELECT * FROM coach_notes')).toEqual([]);
+    // Nor do its Move Grades count into the owner's Player Profile, and dropping it takes none back,
+    // even once the account no longer tells the game apart.
+    expect(rows(app, 'SELECT * FROM grade_counts')).toEqual([]);
+    expect(rows(app, 'SELECT counted FROM reviews WHERE game_id = ?', friends)).toEqual([{ counted: 0 }]);
+    const own = rows<{ id: number }>(app, "SELECT id FROM games WHERE source_id = 'iinnkv77'")[0]?.id as number;
+    updateProfile(app.app.db, { rating: { site: 'lichess', username: 'CoachVerify', rating: 1500, pool: 'rapid' } });
+    await c.request('review.start', { gameId: own });
+    const counted = rows(app, 'SELECT * FROM grade_counts');
+    expect(counted.length).toBeGreaterThan(0);
+    await c.request('games.delete', { gameId: friends });
+    expect(rows(app, 'SELECT * FROM grade_counts')).toEqual(counted);
   });
 
   it("is the owner's own game when it names their account", async () => {

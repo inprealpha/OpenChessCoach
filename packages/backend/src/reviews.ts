@@ -100,10 +100,12 @@ export function reviewInProgress(db: Db, gameId: number): boolean {
  * game whose side changed or that is being deleted. Run it inside that change's transaction.
  */
 export function dropReview(db: Db, gameId: number): void {
-  if (!one(db, 'SELECT 1 FROM reviews WHERE game_id = ?', gameId)) return;
+  const review = one<{ counted: number }>(db, 'SELECT counted FROM reviews WHERE game_id = ?', gameId);
+  if (!review) return;
   const game = getGame(db, gameId);
-  // The sample game's Review never counted into the Player Profile, so there is nothing to take back.
-  if (game.source !== 'sample') {
+  // A Review that never counted into the Player Profile (the sample game's, a game the owner didn't
+  // play) has nothing to take back. It is the Review's own record: who played may read otherwise now.
+  if (review.counted === 1) {
     const grades = all<{ grade: MoveGrade }>(db, 'SELECT grade FROM graded_moves WHERE game_id = ? AND side = ?', gameId, game.playerSide);
     removeGradeCounts(db, game.opening, grades.map((g) => g.grade));
   }
@@ -177,12 +179,11 @@ async function makeReview(
   await coach.assertAvailable();
   const graded = await engine.gradeGame(game.moves, game.startFen, progress, signal);
   const moments = pickKeyMoments(graded, game.playerSide);
-  // The sample game isn't the Player's: its Review never feeds the Player Profile.
-  const counts = game.source !== 'sample';
   // Who the Review speaks to and at what level, and the rating Maia-3 reads (#33).
   const { pitch, maia } = gamePitch(db, game);
-  // A note is about the owner: a game they didn't play says nothing about them.
-  const notes = counts && pitch?.ownGame !== false;
+  // The sample game isn't the Player's, nor is a game the owner didn't play (#33): their Reviews
+  // never feed the Player Profile, with Move Grades or a note.
+  const counts = game.source !== 'sample' && pitch?.ownGame !== false;
   // The overview first, so it streams before the key moments. It may write the Review's one note
   // for the Player Profile (ADR 0004); when it writes none, the last key moment still may. The note
   // is saved with the Review, so a Review that fails part way leaves none.
@@ -201,7 +202,7 @@ async function makeReview(
         playerSide: game.playerSide,
         candidates: [],
         opening: game.opening,
-        allowNote: notes,
+        allowNote: counts,
         game: facts,
         ...(pitch ? { pitch } : {}),
       },
@@ -237,7 +238,7 @@ async function makeReview(
         replies: graded[m.ply]?.candidates ?? [],
         ...(threat ? { threat } : {}),
         opening: game.opening,
-        allowNote: notes && note === null && index === moments.length - 1,
+        allowNote: counts && note === null && index === moments.length - 1,
         ...(pitch ? { pitch } : {}),
       },
       guess,
@@ -272,11 +273,12 @@ async function makeReview(
       'INSERT INTO graded_moves (game_id, ply, side, uci, san, grade, win_loss, data) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
     );
     for (const m of graded) put.run(gameId, m.ply, m.side, m.uci, m.san, m.grade, m.winLoss, JSON.stringify(m));
-    db.prepare('INSERT INTO reviews (game_id, created_at, overview, moments) VALUES (?, ?, ?, ?)').run(
+    db.prepare('INSERT INTO reviews (game_id, created_at, overview, moments, counted) VALUES (?, ?, ?, ?, ?)').run(
       gameId,
       iso(clock),
       overview ? JSON.stringify(overview) : null,
       JSON.stringify(out),
+      counts ? 1 : 0,
     );
   });
   if (counts) {

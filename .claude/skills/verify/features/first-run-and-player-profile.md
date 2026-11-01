@@ -34,8 +34,8 @@ in the top right of every screen.
   desktop can’t be reached right now. Save again once it’s back."; the desktop saves nothing
   from a connection that has closed, so a save the app gave up on never lands later.
 - Profile: the form's checkbox `Pitch each Review at the game’s rating`, next to `Level` and off by
-  default (#33). With it on, the Profile reads "(a game with ratings is reviewed at the game’s
-  rating)" beside the level, and a game whose record gives the reviewed side a rating (games from
+  default (#33). With it on, the Profile reads "(Reviews follow the game’s rating when it has
+  one)" beside the level, and a game whose record gives the reviewed side a rating (games from
   Lichess and chess.com) has its Review and Why Questions pitched at that rating's band, with
   Maia-3 given the game's ratings (see `review.md`).
 - Profile: the region `Lesson progress` (only the Lessons started, then "N

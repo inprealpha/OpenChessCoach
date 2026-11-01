@@ -22,6 +22,7 @@
   let ratingError = $state('');
   let siteSelect = $state<HTMLSelectElement>();
   let usernameBox = $state<HTMLInputElement>();
+  let saveErrorLine = $state<HTMLParagraphElement>();
   /**
    * What Save says while the desktop works on a save, such as "Checking Lichess…"; empty when idle.
    * Save and Cancel both wait: once asked, the desktop can't be called back, so a save the Player
@@ -97,6 +98,11 @@
     } finally {
       saving = '';
     }
+    // The error sits under Save, which on a phone can be the bottom of the screen: bring it into view.
+    if (saveError) {
+      await tick();
+      saveErrorLine?.scrollIntoView({ block: 'nearest' });
+    }
   }
 
   async function deleteNote(id: number): Promise<void> {
@@ -133,8 +139,8 @@
           Pitch each Review at the game’s rating
         </label>
         <p class="muted small" id="profile-game-level">
-          Games from Lichess and chess.com record the players’ ratings. With this on, the Coach explains such a game, and your Why Questions about it,
-          at the game’s rating for the side its Review follows. Other games use your level.
+          Lichess and chess.com games record the players’ ratings. With this on, new Reviews of those games, and your Why Questions about them,
+          follow the game’s rating instead of your level.
         </p>
         <fieldset class="account">
           <legend>Your online account</legend>
@@ -175,11 +181,11 @@
           <button type="button" onclick={save} disabled={!!saving}>{saving || 'Save'}</button>
           <button type="button" class="secondary" onclick={() => (editing = false)} disabled={!!saving}>Cancel</button>
         </div>
-        {#if saveError}<p class="error small save-error" role="alert">{saveError}</p>{/if}
+        {#if saveError}<p bind:this={saveErrorLine} class="error small save-error" role="alert">{saveError}</p>{/if}
       {:else}
         <p>
           <strong>Level:</strong> <span data-testid="profile-level">{LEVEL_NAME[p.level]}</span>
-          {#if p.levelFromGames}<span class="muted small">(a game with ratings is reviewed at the game’s rating)</span>{/if}
+          {#if p.levelFromGames}<span class="muted small">(Reviews follow the game’s rating when it has one)</span>{/if}
         </p>
         <p>
           <strong>Rating:</strong>

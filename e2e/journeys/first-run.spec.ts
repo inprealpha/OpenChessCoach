@@ -116,7 +116,7 @@ test('the Player Profile can pitch each Review at the game’s rating, and the R
   await box.check();
   await paired.getByRole('button', { name: 'Save' }).click();
   await expect(paired.getByTestId('profile-level')).toHaveText('Club');
-  await expect(paired.getByText('(a game with ratings is reviewed at the game’s rating)')).toBeVisible();
+  await expect(paired.getByText('(Reviews follow the game’s rating when it has one)')).toBeVisible();
   const [profile] = await app.rows<{ level: string; level_from_games: number }>('profile');
   expect(profile).toMatchObject({ level: 'club', level_from_games: 1 });
   // The seed's game: the Player had White, rated 1456 in it, so the Review speaks to a casual Player.

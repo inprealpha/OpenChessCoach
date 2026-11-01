@@ -118,7 +118,8 @@ call.
   Review follows (the brief's `level` and `rating`; Maia-3 reads the game's ratings too). A game
   from the site the Player's linked account is on that names neither side by that username (a
   friend's games fetched by their username) is someone else's: its briefs have `ownGame: false`,
-  the Coach names the sides "White" and "Black", never "you", and it writes no Coach note.
+  the Coach names the sides "White" and "Black", never "you", and it writes no Coach note and
+  counts no Move Grades (`reviews.counted` is 0, so deleting the game takes nothing back).
 - With Think deeper on in Settings, each key moment's Coach call may ask the desktop's Engine up to
   3 questions (see `why-question.md`); the fake Coach asks one each, logged in `coach_questions`
   (`think-deeper.test.ts`).

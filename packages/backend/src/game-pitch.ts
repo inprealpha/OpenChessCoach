@@ -11,6 +11,7 @@ import type { GameDetail, PlayerProfile, RatingSite } from '@chess-coach/shared/
 import { sideOf } from '@chess-coach/shared/pgn';
 import type { Db } from './db.ts';
 import { getProfile } from './profile.ts';
+import { DEFAULT_RATING } from './tempting-moves/port.ts';
 import { maiaRating, playerMaiaRating } from './tempting-moves/rating.ts';
 
 /** What a game's record says about its players' ratings: each side's, the site and the rating pool. */
@@ -22,10 +23,15 @@ export interface GameRatings {
   pool?: string;
 }
 
-/** A PGN's headers, read without replaying its moves. */
+/**
+ * A PGN's headers, read without replaying its moves: its tag pairs up to the first move. The PGN is
+ * one the import already parsed, so this only reads back what it stored.
+ */
 export function pgnHeaders(pgn: string): Record<string, string> {
   const out: Record<string, string> = {};
-  for (const m of pgn.matchAll(/^\s*\[(\w+)\s+"((?:\\.|[^"\\])*)"\s*\]\s*$/gm)) out[m[1] as string] = (m[2] as string).replace(/\\(.)/g, '$1');
+  const end = pgn.search(/^[ \t]*[^\s[]/m);
+  const head = end < 0 ? pgn : pgn.slice(0, end);
+  for (const m of head.matchAll(/\[(\w+)\s+"((?:\\.|[^"\\])*)"\s*\]/g)) out[m[1] as string] = (m[2] as string).replace(/\\(.)/g, '$1');
   return out;
 }
 
@@ -82,16 +88,20 @@ export function gameRatings(game: Pick<GameDetail, 'source' | 'pgn'>): GameRatin
  * on can tell: there, a game that names neither side by that username is someone else's, such as a
  * friend's games fetched by their username. Any other game is taken as the owner's, as before.
  */
-export function ownersGame(profile: Pick<PlayerProfile, 'ratingSource'>, game: Pick<GameDetail, 'source' | 'pgn'>): boolean {
+export function ownersGame(profile: Pick<PlayerProfile, 'ratingSource'>, game: Pick<GameDetail, 'source' | 'white' | 'black'>): boolean {
   const account = profile.ratingSource;
   if (!account || (game.source !== 'lichess' && game.source !== 'chesscom') || game.source !== account.site) return true;
-  return sideOf(pgnHeaders(game.pgn), account.username) !== undefined;
+  return sideOf({ White: game.white, Black: game.black }, account.username) !== undefined;
 }
 
-/** A side's rating on the Lichess blitz scale Maia-3 learned, by ADR 0011's rules for the Profile's rating. */
-function maiaFor(rating: number, { site, pool }: GameRatings): number {
-  const blitz = pool === 'blitz' || pool === 'chess_blitz' ? rating : undefined;
-  return maiaRating({ rating, site, pool, blitz });
+/**
+ * A side's rating on the Lichess blitz scale Maia-3 learned, by ADR 0011's rules for the Profile's
+ * rating; undefined for a pool that doesn't convert soundly (bullet, classical, daily…).
+ */
+function maiaFor(rating: number, { site, pool }: GameRatings): number | undefined {
+  const blitz = pool === 'blitz' || pool === 'chess_blitz';
+  const sound = blitz || (site === 'lichess' && pool === 'rapid') || (site === 'chesscom' && pool === 'chess_rapid');
+  return sound ? maiaRating({ rating, site, pool, ...(blitz ? { blitz: rating } : {}) }) : undefined;
 }
 
 /** How a game's Review is pitched: its brief's `pitch`, and the ratings Maia-3 is given. */
@@ -102,8 +112,8 @@ export interface GamePitchFor {
   maia: { rating: number; opponentRating?: number };
 }
 
-/** The pitch for a game whose Review follows `side` (its Player's side). */
-export function gamePitch(db: Db, game: Pick<GameDetail, 'source' | 'pgn' | 'playerSide'>, side: Side = game.playerSide): GamePitchFor {
+/** The pitch for a game whose Review follows `side`: its Player's side, or the side a Why Question names. */
+export function gamePitch(db: Db, game: Pick<GameDetail, 'source' | 'pgn' | 'white' | 'black' | 'playerSide'>, side: Side = game.playerSide): GamePitchFor {
   const profile = getProfile(db);
   const own = ownersGame(profile, game);
   const ratings = profile.levelFromGames ? gameRatings(game) : {};
@@ -111,8 +121,15 @@ export function gamePitch(db: Db, game: Pick<GameDetail, 'source' | 'pgn' | 'pla
   const opponent = ratings[otherSide(side)];
   // The rating's band, as the popularity tables and the Course read a rating (`bandFor`).
   const pitch: GamePitch = { ...(rating ? { level: bandFor(profile.level, rating), rating } : {}), ...(own ? {} : { ownGame: false as const }) };
+  // A rating whose pool doesn't convert says nothing Maia-3 can read: the owner's own game then
+  // falls back on the Player Profile's rating, as with the checkbox off, and anyone else's on the
+  // middle of the pool, as ADR 0011 does for such a pool.
+  const maia = rating !== undefined ? maiaFor(rating, ratings) : undefined;
+  const opponentMaia = maia !== undefined && opponent !== undefined ? maiaFor(opponent, ratings) : undefined;
   return {
     ...(Object.keys(pitch).length ? { pitch } : {}),
-    maia: rating ? { rating: maiaFor(rating, ratings), ...(opponent ? { opponentRating: maiaFor(opponent, ratings) } : {}) } : { rating: playerMaiaRating(db) },
+    maia: maia !== undefined
+      ? { rating: maia, ...(opponentMaia !== undefined ? { opponentRating: opponentMaia } : {}) }
+      : { rating: rating !== undefined && !own ? DEFAULT_RATING : playerMaiaRating(db) },
   };
 }

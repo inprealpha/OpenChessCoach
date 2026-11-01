@@ -22,6 +22,8 @@
   // rather than glides, so reduced motion needs nothing more. It looks again when the current
   // move's Move Grade arrives, since the badge widens the move and can wrap it onto a new row.
   function keepInView(el: HTMLOListElement): void {
+    // A list on a tab that isn't shown has no box to scroll to: leave the panel where it is.
+    if (el.getClientRects().length === 0) return;
     const item = variation ? el.querySelector('.variation .current') ?? el.querySelector('.variation') : el.querySelector(`[data-ply="${cursor}"]`);
     if (!item) {
       el.scrollTop = 0;

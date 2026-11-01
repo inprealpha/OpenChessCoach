@@ -12,10 +12,56 @@ const THRIFTY = { 'review-moment': 'haiku', why: 'haiku', 'lesson-turn': 'haiku'
 const BALANCED = { 'review-moment': 'sonnet', why: 'sonnet', 'lesson-turn': 'sonnet', hint: 'haiku', live: 'haiku' };
 const BEST = { 'review-moment': 'opus', why: 'opus', 'lesson-turn': 'opus', hint: 'haiku', live: 'haiku' };
 
+/** Marks the migration that moves saved Sonnet models to Opus (0.5.0). */
+const OPUS_MIGRATION = `json_set(value, '$.why', 'opus')`;
+
+/** A database as it was just before the migration that contains `marker`, so reopening runs it and the ones after. */
+function before(dir: string, marker: string, setup: (db: ReturnType<typeof openDb>) => void): void {
+  const at = MIGRATIONS.findIndex((m) => m.includes(marker));
+  if (at < 0) throw new Error(`no migration contains ${marker}`);
+  const old = openDb(dir);
+  setup(old);
+  old.prepare('UPDATE schema_version SET version = ?').run(at);
+  old.close();
+}
+
 describe('Coach quality', () => {
-  it('is Balanced on a fresh install, with Sonnet for the explaining jobs and Haiku for the quick ones', async () => {
+  it('is Best on a fresh install, with Opus for the explaining jobs and Haiku for the quick ones', async () => {
     const c = await client(await instance({ seed: 'empty' }));
-    expect(await c.request('settings.get', {})).toMatchObject({ quality: 'balanced', models: BALANCED });
+    expect(await c.request('settings.get', {})).toMatchObject({ quality: 'best', models: BEST });
+  });
+
+  it('moves an install that saved Sonnet to Opus once, keeping its other choices, and a Player who picks Sonnet again keeps it', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'chess-coach-opus-'));
+    onTestFinished(() => rmSync(dir, { recursive: true, force: true }));
+    // Balanced as saved before 0.5.0, with Hints changed by hand to Sonnet.
+    before(dir, OPUS_MIGRATION, (old) => old.prepare("INSERT INTO settings (key, value) VALUES ('models', ?)").run(JSON.stringify({ ...BALANCED, hint: 'sonnet' })));
+    const db = openDb(dir);
+    expect(getSettings(db)).toMatchObject({ quality: 'custom', models: { ...BEST, hint: 'sonnet' } });
+    updateSettings(db, { quality: 'balanced' });
+    db.close();
+    const again = openDb(dir);
+    onTestFinished(() => again.close());
+    expect(getSettings(again)).toMatchObject({ quality: 'balanced', models: BALANCED });
+  });
+
+  it('moves a saved Sonnet model id too, and leaves every other model as it was', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'chess-coach-opus-'));
+    onTestFinished(() => rmSync(dir, { recursive: true, force: true }));
+    const mine = { 'review-moment': 'haiku', why: 'claude-sonnet-4-5', 'lesson-turn': 'claude-opus-4-1', hint: 'sonnet', live: 'haiku' };
+    before(dir, OPUS_MIGRATION, (old) => old.prepare("INSERT INTO settings (key, value) VALUES ('models', ?)").run(JSON.stringify(mine)));
+    const db = openDb(dir);
+    onTestFinished(() => db.close());
+    expect(getSettings(db).models).toEqual({ ...mine, why: 'opus' });
+  });
+
+  it('starts even when the saved models are not JSON', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'chess-coach-opus-'));
+    onTestFinished(() => rmSync(dir, { recursive: true, force: true }));
+    before(dir, OPUS_MIGRATION, (old) => old.prepare("INSERT INTO settings (key, value) VALUES ('models', '{not json')").run());
+    const db = openDb(dir);
+    onTestFinished(() => db.close());
+    expect((db.prepare("SELECT value FROM settings WHERE key = 'models'").get() as { value: string }).value).toBe('{not json');
   });
 
   it('writes the per-job models of each preset and reads the preset back from them', async () => {
@@ -54,7 +100,7 @@ describe('Coach quality', () => {
     const c = await client(await instance());
     await expect(c.request('settings.update', { quality: 'custom' as never })).rejects.toMatchObject({ code: 'bad-request' });
     await expect(c.request('settings.update', { quality: 'cheap' as never })).rejects.toMatchObject({ code: 'bad-request' });
-    expect(await c.request('settings.get', {})).toMatchObject({ quality: 'balanced', models: BALANCED });
+    expect(await c.request('settings.get', {})).toMatchObject({ quality: 'best', models: BEST });
   });
 });
 
@@ -123,6 +169,6 @@ describe('the Review overview', () => {
       await expect(c.request('settings.update', { reviewOverview: value as never })).rejects.toMatchObject({ code: 'bad-request' });
     }
     await expect(c.request('settings.update', { models: { 'review-overview': 'opus' } as never })).rejects.toMatchObject({ code: 'bad-request' });
-    expect(await c.request('settings.get', {})).toMatchObject({ reviewOverview: true, quality: 'balanced', models: BALANCED });
+    expect(await c.request('settings.get', {})).toMatchObject({ reviewOverview: true, quality: 'best', models: BEST });
   });
 });

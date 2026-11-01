@@ -69,7 +69,7 @@ describe('the Coach port', () => {
     const ask = { ...(whyAsk()), opening: 'Italian Game' };
     await c.request('coach.ask', ask);
     const [call] = rows<{ brief: string; job: string; model: string; coach: string }>(app, 'SELECT * FROM coach_calls');
-    expect(call).toMatchObject({ job: 'why', model: 'sonnet', coach: 'fake' });
+    expect(call).toMatchObject({ job: 'why', model: 'opus', coach: 'fake' });
     expect(call?.brief.length).toBeLessThanOrEqual(BRIEF_BUDGET);
     const brief = JSON.parse(call?.brief ?? '{}');
     expect(brief).toMatchObject({ job: 'why', level: 'casual', fen: START, question: 'Why e4?', move: { san: 'e4' } });

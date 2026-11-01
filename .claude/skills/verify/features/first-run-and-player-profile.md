@@ -45,8 +45,9 @@ in the top right of every screen.
   names as their accessible names, so every column fits a 320px phone), Coach notes with
   `Delete note: <text>`.
 - Settings shows what came of a change ("Saved.", an error) in the card where it was made.
-- Settings → the group `Coach quality`: radios `Thrifty`, `Balanced (recommended)` and `Best`, each
-  with a line on what it costs in Claude limits. The choice is not stored: it is read from the
+- Settings → the group `Coach quality`: radios `Thrifty`, `Balanced` and `Best (recommended)`, each
+  with a line on what it costs in Claude limits. `Best` is the default, and an install that saved
+  `sonnet` for Reviews, Why Questions or Lessons moved to `opus` once (0.5.0). The choice is not stored: it is read from the
   per-job models, and when they match no preset a checked, disabled `Custom` radio shows. Choosing a
   preset writes every job's model. `Advanced` (a disclosure) holds one select per job, `Model for
   <Reviews | Why Questions | Lessons | Hints | Live Coaching>`, with options `Fastest, latest Haiku`,

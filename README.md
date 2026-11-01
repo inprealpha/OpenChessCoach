@@ -148,10 +148,11 @@ Two ways to reach your desktop from outside your Wi-Fi:
 Settings → Coach quality picks how much of your Claude limits the Coach uses:
 
 - **Thrifty**: Haiku for every job.
-- **Balanced** (the default): Sonnet for Reviews (the overview and the key moments), Why Questions
-  and Lessons; Haiku for Hints and Live Coaching.
-- **Best**: Opus for Reviews (the overview and the key moments), Why Questions and Lessons; Haiku
-  for Hints and Live Coaching, which must stay quick.
+- **Balanced**: Sonnet for Reviews (the overview and the key moments), Why Questions and Lessons;
+  Haiku for Hints and Live Coaching.
+- **Best** (the default): Opus for Reviews (the overview and the key moments), Why Questions and
+  Lessons; Haiku for Hints and Live Coaching, which must stay quick (Haiku was measured good enough
+  for them: `docs/research/hint-and-live-coaching-models.md`).
 
 Under **Advanced** you can choose the model for each job yourself; the choice then shows as Custom.
 A Review's overview uses the model chosen for Reviews. Settings → Reviews turns the overview off,

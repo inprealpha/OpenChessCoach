@@ -322,50 +322,50 @@ test('a Review adds Move Grade counts and a Coach note, and the Player can delet
 });
 
 test.describe('Settings: Coach quality', () => {
-  const BEST = { 'review-moment': 'opus', why: 'opus', 'lesson-turn': 'opus', hint: 'haiku', live: 'haiku' };
+  const BALANCED = { 'review-moment': 'sonnet', why: 'sonnet', 'lesson-turn': 'sonnet', hint: 'haiku', live: 'haiku' };
   const savedModels = async (app: { rows: <T>(t: string) => Promise<T[]> }): Promise<unknown> => {
     const row = (await app.rows<{ key: string; value: string }>('settings')).find((r) => r.key === 'models');
     return row ? JSON.parse(row.value) : undefined;
   };
 
-  test('is Balanced by default; choosing Best sets every job’s model, shown under Advanced', async ({ paired, app }) => {
+  test('is Best by default; choosing Balanced sets every job’s model, shown under Advanced', async ({ paired, app }) => {
     await paired.goto(`${app.url}/#/settings`);
     const quality = paired.getByRole('group', { name: 'Coach quality' });
-    await expect(quality.getByRole('radio', { name: /^Balanced/ })).toBeChecked();
+    await expect(quality.getByRole('radio', { name: /^Best \(recommended\)/ })).toBeChecked();
     await expect(quality).toContainText('Haiku for every job. Uses the least of your Claude limits');
     await expect(quality).toContainText('Uses your Claude limits fastest');
     await expect(quality.getByRole('radio', { name: /^Custom/ })).toHaveCount(0);
     // The per-job models are tucked away until the Player opens Advanced.
     await expect(paired.getByLabel('Model for Reviews')).toBeHidden();
 
-    await quality.getByRole('radio', { name: /^Best/ }).check();
-    await expect.poll(() => savedModels(app)).toEqual(BEST);
+    await quality.getByRole('radio', { name: /^Balanced/ }).check();
+    await expect.poll(() => savedModels(app)).toEqual(BALANCED);
     // The confirmation shows beside the choice, not at the foot of a long page.
     await expect(quality.getByRole('status')).toHaveText('Saved.');
     await expect(quality.getByRole('status')).toBeInViewport();
     await paired.getByText('Advanced', { exact: true }).click();
-    await expect(paired.getByLabel('Model for Reviews')).toHaveValue('opus');
-    await expect(paired.getByLabel('Model for Reviews').locator('option:checked')).toHaveText('Strongest, latest Opus');
+    await expect(paired.getByLabel('Model for Reviews')).toHaveValue('sonnet');
+    await expect(paired.getByLabel('Model for Reviews').locator('option:checked')).toHaveText('Balanced, latest Sonnet');
     await expect(paired.getByLabel('Model for Hints').locator('option:checked')).toHaveText('Fastest, latest Haiku');
 
     // One job changed by hand: the choice reads Custom, and a preset puts every job back.
     await paired.getByLabel('Model for Hints').selectOption('sonnet');
     await expect(quality.getByRole('radio', { name: /^Custom/ })).toBeChecked();
-    await quality.getByRole('radio', { name: /^Best/ }).check();
+    await quality.getByRole('radio', { name: /^Balanced/ }).check();
     await expect(paired.getByLabel('Model for Hints')).toHaveValue('haiku');
-    await expect.poll(() => savedModels(app)).toEqual(BEST);
+    await expect.poll(() => savedModels(app)).toEqual(BALANCED);
   });
 
   test('Think deeper warns that on Haiku it can add mistakes: shown for Thrifty, not for Balanced or Best', async ({ paired, app }) => {
     await paired.goto(`${app.url}/#/settings`);
     const quality = paired.getByRole('group', { name: 'Coach quality' });
     const warning = paired.getByRole('region', { name: 'Think deeper' }).getByTestId('think-deeper-haiku');
-    // Balanced, the default, runs Why Questions and Reviews on Sonnet.
-    await expect(quality.getByRole('radio', { name: /^Balanced/ })).toBeChecked();
+    // Best, the default, runs Why Questions and Reviews on Opus.
+    await expect(quality.getByRole('radio', { name: /^Best/ })).toBeChecked();
     await expect(warning).toHaveCount(0);
     await quality.getByRole('radio', { name: /^Thrifty/ }).check();
     await expect(warning).toContainText('On Haiku, Think deeper makes answers fuller but can add mistakes.');
-    await quality.getByRole('radio', { name: /^Best/ }).check();
+    await quality.getByRole('radio', { name: /^Balanced/ }).check();
     await expect(warning).toHaveCount(0);
   });
 

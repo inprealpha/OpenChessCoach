@@ -55,8 +55,10 @@ async function main(): Promise<void> {
   // Claude Code saying it is logged in isn't enough: a login that expired still says so. One short
   // call finds out now, rather than when the Player first asks the Coach.
   const coach = new RealCoach(claude.path ? { claudePath: claude.path } : {});
-  process.stdout.write('\nChecking your Claude login…\n');
-  const login = await coach.checkLogin();
+  // The package check's stand-in `claude` has no login for Claude to take, so it skips the call.
+  const skip = process.env.CHESS_COACH_SKIP_LOGIN_CHECK === '1';
+  if (!skip) process.stdout.write('\nChecking your Claude login…\n');
+  const login = skip ? ({ state: 'ok' } as const) : await coach.checkLogin();
   if (login.state === 'refused') {
     process.stderr.write(`\n✗ ${login.message} Then start the app again.\n\n`);
     process.exit(2);
@@ -66,7 +68,7 @@ async function main(): Promise<void> {
     process.stdout.write(`  Your Claude login works, but your usage limit is reached${until}. The Coach answers again after that.\n`);
   } else if (login.state === 'unknown') {
     process.stdout.write(`  Couldn’t confirm your Claude login: ${login.message} Starting anyway; the Coach says so if Claude turns the login down.\n`);
-  } else {
+  } else if (!skip) {
     process.stdout.write('  Claude Code is logged in and Claude answers.\n');
   }
 

@@ -10,7 +10,7 @@ import { attacks, kingAttacks, ray } from 'chessops/attacks';
 import { SquareSet } from 'chessops/squareSet';
 import type { Role } from 'chessops/types';
 import { makeSquare, parseSquare } from 'chessops/util';
-import { isCheck, legalMoves, otherSide, playUci, positionFromFen, SIDE_NAMES, type Side } from '../chess.ts';
+import { legalMoves, otherSide, playUci, positionFromFen, SIDE_NAMES, type Side } from '../chess.ts';
 import type { Score } from '../engine.ts';
 import { isForcing, nullMoveFen } from '../threat.ts';
 
@@ -298,12 +298,21 @@ export type MoveFact =
   | { kind: 'checkmate' }
   | { kind: 'develops'; piece: PieceAt }
   | { kind: 'only-move' }
+  /**
+   * The mover was in check from `checker` (and `also`, in a double check), and the move gets out of
+   * it: by blocking the check, moving the king, or taking the checker with another piece.
+   */
+  | { kind: 'answers-check'; how: 'blocks' | 'king' | 'takes'; checker: PieceAt; also?: PieceAt }
   /** The moved piece attacks two or more pieces at once (the king counting, when it gives check) and goes on to take one. */
   | { kind: 'double-attack'; by: PieceAt; targets: PieceAt[] }
   /** Pieces that can be taken now and couldn't before, by the moved piece or one it uncovered, which the line takes. */
   | { kind: 'attacks'; targets: LoosePiece[] }
-  /** One of the mover's pieces that can be taken after the move, and the line takes; `moved` when it is the moved piece, `wasLoose` when it could be taken before too. */
-  | { kind: 'leaves'; loose: LoosePiece; moved: boolean; wasLoose: boolean }
+  /**
+   * One of the mover's pieces that can be taken after the move, and the line takes; `moved` when it
+   * is the moved piece, `wasLoose` when it could be taken before too, and `unguarded` when the moved
+   * piece guarded it before the move and no longer does: the cause, not only the result.
+   */
+  | { kind: 'leaves'; loose: LoosePiece; moved: boolean; wasLoose: boolean; unguarded?: true }
   /** A check along a line with `behind` beyond the king on it, which the checking piece goes on to take. */
   | { kind: 'skewer'; king: PieceAt; behind: PieceAt }
   /** The moved piece guarded `square` and no longer does, and the reply goes there and uses it. */
@@ -338,15 +347,22 @@ interface Loose {
 function ownFacts(fen: string, move: LinePly): MoveFact[] {
   const facts: MoveFact[] = [];
   if (legalMoves(fen).length === 1) facts.push({ kind: 'only-move' });
+  // A move made in check is first of all the answer to it: that is what the Player needs to hear
+  // before anything else the move does, and why "develops" would point the wrong way.
+  const [checker, also] = checkersOf(fen);
+  if (checker) {
+    const how = move.role === 'king' ? 'king' : move.capturedAt === checker.square ? 'takes' : 'blocks';
+    facts.push({ kind: 'answers-check', how, checker, ...(also ? { also } : {}) });
+  }
   if (move.san.startsWith('O-O')) facts.push({ kind: 'castles', wing: move.san.startsWith('O-O-O') ? 'queen' : 'king' });
   else if (move.captured) facts.push({ kind: 'takes', piece: { side: otherSide(move.side), role: move.captured, square: move.to } });
   if (move.promotion) facts.push({ kind: 'promotes', role: move.promotion });
   if (move.san.endsWith('#')) facts.push({ kind: 'checkmate' });
   else if (move.san.endsWith('+')) facts.push({ kind: 'check' });
-  if (HOME[move.from] === move.role && move.from[1] === (move.side === 'white' ? '1' : '8')) facts.push({ kind: 'develops', piece: { side: move.side, role: move.role, square: move.to } });
+  if (!checker && HOME[move.from] === move.role && move.from[1] === (move.side === 'white' ? '1' : '8')) facts.push({ kind: 'develops', piece: { side: move.side, role: move.role, square: move.to } });
   // A king walk is what costs castling worth a word, and what can box in its own pieces; a king
   // forced out of check had no choice.
-  if (move.role === 'king' && !move.san.startsWith('O-O') && !isCheck(fen)) {
+  if (move.role === 'king' && !move.san.startsWith('O-O') && !checker) {
     const castling = castlingLost(fen, move.fenAfter, move.side);
     if (castling.length) facts.push({ kind: 'gives-up-castling', wings: castling });
     const blocked = blockedByKing(fen, move);
@@ -393,7 +409,11 @@ function exposureFacts(fen: string, move: LinePly, rest: readonly LinePly[], loo
     // Taking a piece worth as much or more is a trade, even when the taker can be taken back.
     if (moved && move.captured && VALUE[move.captured] >= VALUE[move.role]) continue;
     const square = moved ? move.from : l.piece.square;
-    facts.push({ kind: 'leaves', loose: l, moved, wasLoose: before.some((b) => b.piece.square === square && b.piece.side === move.side) });
+    const wasLoose = before.some((b) => b.piece.square === square && b.piece.side === move.side);
+    // The moved piece was what kept it safe: it guarded the piece before the move and doesn't after.
+    const at = parseSquare(l.piece.square) as number;
+    const unguarded = !moved && !wasLoose && guards(fen, move.from).has(at) && !guards(after, move.to).has(at);
+    facts.push({ kind: 'leaves', loose: l, moved, wasLoose, ...(unguarded ? { unguarded: true as const } : {}) });
   }
   // A square the moved piece guarded and no longer does, which the reply goes to and uses: it takes
   // or checks there, or takes from there later in the line. Not when a king steps in, nor when
@@ -431,6 +451,10 @@ export function describeFact(f: MoveFact): string {
       return `brings the ${f.piece.role} out from its starting square`;
     case 'only-move':
       return 'is the only legal move';
+    case 'answers-check':
+      if (f.how === 'blocks') return `blocks the check from ${named(f.checker)}`;
+      if (f.how === 'king') return `moves the king out of the ${f.also ? 'double ' : ''}check from ${list([f.checker, ...(f.also ? [f.also] : [])].map(named))}`;
+      return `gets out of check by taking ${named(f.checker)}, the piece giving it`;
     case 'double-attack':
       return `attacks ${NUMBERS[f.targets.length] ?? f.targets.length} pieces at once: ${list(f.targets.map(named))}`;
     case 'attacks':
@@ -439,6 +463,7 @@ export function describeFact(f: MoveFact): string {
       const { piece, attacker, defended } = f.loose;
       // Whether taking it pays is the line's result to say: a piece can be offered on purpose.
       const takes = `where ${named(attacker)} can take it${defended ? '' : ' and nothing defends it'}`;
+      if (f.unguarded) return `stops guarding ${named(piece)}, ${takes.replace(/^where/, 'leaving it where')}`;
       if (!f.moved) return `leaves ${named(piece)} ${takes}`;
       return f.wasLoose ? `moves the attacked ${piece.role} to ${piece.square}, ${takes}` : `puts the ${piece.role} on ${piece.square}, ${takes}`;
     }
@@ -524,6 +549,17 @@ function ownNeighbours(fen: string, side: Side): PieceAt[] {
   for (const sq of kingAttacks(king)) {
     const piece = pos.board.get(sq);
     if (piece?.color === side && pos.kingAttackers(sq, otherSide(side), pos.board.occupied.without(king).without(sq)).isEmpty()) out.push({ side, role: piece.role, square: makeSquare(sq) });
+  }
+  return out;
+}
+
+/** The pieces giving check to the side to move in `fen`: none, one, or two in a double check. */
+function checkersOf(fen: string): PieceAt[] {
+  const pos = positionFromFen(fen);
+  const out: PieceAt[] = [];
+  for (const sq of pos.ctx().checkers) {
+    const piece = pos.board.get(sq);
+    if (piece) out.push({ side: piece.color, role: piece.role, square: makeSquare(sq) });
   }
   return out;
 }

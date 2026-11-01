@@ -88,7 +88,7 @@ export class RealCoach implements CoachPort {
       prompt: userPrompt(call.brief),
       options: {
         model: call.model,
-        systemPrompt: engine ? SYSTEM_PROMPT + engineToolPrompt(engine.maxQuestions, call.brief.summary !== undefined) : SYSTEM_PROMPT,
+        systemPrompt: engine ? SYSTEM_PROMPT + engineToolPrompt(engine.maxQuestions, call.brief.summary !== undefined, call.brief.job) : SYSTEM_PROMPT,
         // No built-in tools, and no MCP servers but the Engine's: the Engine tool is the only one allowed to run.
         tools: [],
         allowedTools: engine ? [ENGINE_TOOL_NAME] : [],

@@ -1,7 +1,7 @@
 // The Engine as the Coach's one tool, with Think deeper on (ADR 0010). Each Coach call gets its
-// own, bound to its brief's position: it answers at most MAX_ENGINE_QUESTIONS questions from the
-// desktop's Engine, and keeps every move its answers gave, which the move guard then accepts as
-// Engine output. A client never reaches it: only the backend builds it, from its own Engine (ADR 0007).
+// own, bound to its brief's position: it answers at most its job's number of questions
+// (`maxEngineQuestions`) from the desktop's Engine, and keeps every move its answers gave, which
+// the move guard then accepts as Engine output. A client never reaches it: only the backend builds it, from its own Engine (ADR 0007).
 import { candidatesFrom } from '@chess-coach/shared/analysis';
 import {
   answerMoves,
@@ -26,8 +26,8 @@ export interface EngineCall {
 }
 
 export class EngineTool implements CoachEngine {
-  readonly maxQuestions = MAX_ENGINE_QUESTIONS;
-  readonly maxCalls = MAX_ENGINE_QUESTIONS + MAX_REFUSED_QUESTIONS;
+  readonly maxQuestions: number;
+  readonly maxCalls: number;
   /** Every question, in the order asked. */
   readonly calls: EngineCall[] = [];
   /** Every move the Engine's answers gave the Coach, with the position it is played in. */
@@ -41,9 +41,12 @@ export class EngineTool implements CoachEngine {
   /**
    * `signal` ends the call: questions after it are refused, and searches it started are stopped or
    * dropped, so the shared Engine never works for an answer nobody reads. `onQuestion` hears each
-   * question the Engine starts on, numbered from 1, so the Player can be told.
+   * question the Engine starts on, numbered from 1, so the Player can be told. `maxQuestions` is the
+   * cap for the Coach job (`maxEngineQuestions`).
    */
-  constructor(engine: EngineService, fen: string, options: { signal?: AbortSignal; onQuestion?: (n: number) => void } = {}) {
+  constructor(engine: EngineService, fen: string, options: { signal?: AbortSignal; onQuestion?: (n: number) => void; maxQuestions?: number } = {}) {
+    this.maxQuestions = options.maxQuestions ?? MAX_ENGINE_QUESTIONS;
+    this.maxCalls = this.maxQuestions + MAX_REFUSED_QUESTIONS;
     this.engine = engine;
     this.fen = fen;
     this.signal = options.signal;

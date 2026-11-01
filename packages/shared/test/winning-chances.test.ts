@@ -29,7 +29,8 @@ describe('Winning Chances', () => {
     const black = winningChancesFor(best, 'white', 'black');
     expect(black.percent).toBeCloseTo(46.51, 2);
     expect(black.text).toBe('Black’s winning chances: 47%');
-    expect(black.evaluation).toBe('-0.38');
+    // The evaluation is always from White's point of view, as most chess sites show it (#32).
+    expect(black.evaluation).toBe('+0.38');
   });
 
   it('reads a winning position for the side that is winning', () => {
@@ -62,7 +63,7 @@ describe('Winning Chances', () => {
     expect(white.percent).toBeGreaterThan(97);
     const black = winningChancesFor(best, 'white', 'black');
     expect(black.text).toBe('White mates in 3');
-    expect(black.evaluation).toBe('-M3');
+    expect(black.evaluation).toBe('M3');
     expect(black.percent).toBeLessThan(3);
   });
 
@@ -75,7 +76,8 @@ describe('Winning Chances', () => {
     const black = winningChancesFor(best, 'black');
     expect(black.mate).toEqual({ winner: 'white', moves: 5 });
     expect(black.text).toBe('White mates in 5');
-    expect(black.evaluation).toBe('-M5');
+    // White mates: positive from White's point of view, though the Winning Chances are Black's.
+    expect(black.evaluation).toBe('M5');
   });
 
   it('names Black when Black mates', () => {
@@ -88,6 +90,9 @@ describe('Winning Chances', () => {
 
   it('reads a position that is already checkmate as a win', () => {
     expect(winningChancesFor({ mate: 0 }, 'black').text).toBe('White has checkmated');
+    // From White's point of view: White mated is -M0, Black mated M0, for either side's Winning Chances.
+    expect(winningChancesFor({ mate: 0 }, 'black', 'white').evaluation).toBe('M0');
+    expect(winningChancesFor({ mate: 0 }, 'white', 'black').evaluation).toBe('-M0');
     expect(winningChancesFor({ mate: 0 }, 'black').percent).toBeLessThan(3);
     // The same checkmate read for the winner, as a bar with White at the bottom does.
     const white = winningChancesFor({ mate: 0 }, 'black', 'white');

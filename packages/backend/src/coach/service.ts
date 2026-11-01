@@ -1,7 +1,7 @@
 // Runs one Coach call: fresh brief, budget check, the Engine tool with Think deeper on, Coach
 // port, move guard, profile note.
 import { assertBriefWithinBudget, BriefTooLargeError, buildBrief, type Brief } from '@chess-coach/shared/coach/brief';
-import { ENGINE_TOOL_JOBS } from '@chess-coach/shared/coach/engine-tool';
+import { ENGINE_TOOL_JOBS, maxEngineQuestions } from '@chess-coach/shared/coach/engine-tool';
 import { guardReply } from '@chess-coach/shared/coach/guard';
 import type { CoachAsk, CoachReply } from '@chess-coach/shared/coach/types';
 import { modelJobOf, type CoachStatus } from '@chess-coach/shared/protocol';
@@ -96,7 +96,7 @@ export class CoachService {
     signal?.addEventListener('abort', cancel, { once: true });
     const tool =
       engine && settings.thinkDeeper && ENGINE_TOOL_JOBS.includes(ask.job)
-        ? new EngineTool(engine, brief.fen, { signal: stop.signal, onQuestion: (n) => options.onStatus?.(checkingText(n)) })
+        ? new EngineTool(engine, brief.fen, { signal: stop.signal, onQuestion: (n) => options.onStatus?.(checkingText(n)), maxQuestions: maxEngineQuestions(ask.job) })
         : undefined;
     let raw;
     try {

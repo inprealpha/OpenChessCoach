@@ -270,8 +270,9 @@
         Let the Coach check its explanations with the Engine
       </label>
       <p class="muted small">
-        For deeper study. In Why Questions and Reviews, the Coach can ask the Engine about other moves and where they lead before it
-        answers, up to three questions each time. Answers take longer and use more of your Claude limits than usual. Hints, Live
+        On by default. In Why Questions and Reviews, the Coach can ask the Engine about other moves and where they lead before it
+        answers: up to three questions for a Why Question, and up to two for each key moment of a Review, only when it needs them.
+        Answers take a little longer and use a little more of your Claude limits. Turn it off for quicker answers. Hints, Live
         Coaching and Lessons stay as they are.
       </p>
       {#if haikuThinksDeeper}

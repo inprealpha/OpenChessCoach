@@ -21,6 +21,7 @@ npm run build -w @chess-coach/web && npm run test:journeys
 | Imported Game | Main menu → Review your games, Import your games or Import more | `imported-game.spec.ts` | [imported-game.md](imported-game.md) |
 | Review (the overview, then the key moments) | Main menu → Review your games → Review, or the end of an Engine Game | `imported-game.spec.ts`, `first-run.spec.ts` | [review.md](review.md) |
 | Engine Game, with Hints and Live Coaching | Main menu → Play a game | `engine-game.spec.ts` | [engine-game.md](engine-game.md) |
+| Exploring a position (variations, Back to the game) | a move on the Review board, a complete Lesson's, a finished Puzzle's or Engine Game's, or the Board after stepping back | `explore.spec.ts` | [explore.md](explore.md) |
 | Offline mode | any screen while the desktop is unreachable | `offline.spec.ts` | [offline-mode.md](offline-mode.md) |
 
 The seed (`packages/backend/src/verify/seed.ts`): `default` is a casual-level Player with Goals, a

@@ -1,7 +1,8 @@
 <script lang="ts">
   // A free board: play moves for both sides, see each Move Grade and the Engine's candidates, and
   // ask the Coach a Why Question about any move or position. The Player can set up any position
-  // from a FEN, or a game from its PGN, and #/board?fen=… opens on a position.
+  // from a FEN, or a game from its PGN, and #/board?fen=… opens on a position. A move played after
+  // stepping back, where the line goes on, starts a variation, so the rest of the line is kept.
   import { tick, untrack } from 'svelte';
   import type { GradedMove } from '@chess-coach/shared/analysis';
   import type { Analysis } from '@chess-coach/shared/engine';
@@ -25,6 +26,7 @@
   import { router } from '../lib/router.svelte.ts';
   import { threatSetting, ThreatView } from '../lib/threat.svelte.ts';
   import { scoreFromAnalysis } from '../lib/position-score.ts';
+  import { stepLine, Variation, type Step } from '../lib/variation.svelte.ts';
   import { foldOpen, rememberFold } from '../lib/folds.ts';
 
   /** A FEN to open on, from #/board?fen=…. */
@@ -34,6 +36,11 @@
 
   const line = new Line();
   const coach = new CoachThread();
+  /** Moves played from an earlier position of the line, which keeps its own moves. */
+  const variation = new Variation();
+  /** The position on the board: the line's, or the variation's. */
+  const boardFen = $derived(variation.active ? variation.fen : line.fen);
+  const shownLast = $derived(variation.active ? variation.line.lastMove : line.lastMove);
   let orientation = $state<Side>('white');
   /** The side the Player last turned the board to, which New board keeps; a set-up turns it on its own. */
   let chosenOrientation: Side = 'white';
@@ -46,9 +53,9 @@
   let boards = $state(0);
   const grades = $derived(graded.map((g) => g?.grade as MoveGrade | undefined));
   /** The Move Grade of the move that reached the position on the board, on the square it landed on. */
-  const mark = $derived(gradeMark(line.lastMove, grades[line.cursor - 1]));
+  const mark = $derived(variation.active ? variation.mark : gradeMark(line.lastMove, grades[line.cursor - 1]));
   /** The browser Engine's verdict on the position shown, for the Winning Chances bar (ADR 0007). */
-  const position = $derived(scoreFromAnalysis(line.fen, analysis));
+  const position = $derived(scoreFromAnalysis(boardFen, analysis));
   /** The move already sent to the Engine at each ply, so each move is graded once. */
   const asked: string[] = [];
 
@@ -91,7 +98,7 @@
 
   /** What ends the game in the position shown: the free board has nobody else to say so. */
   const result = $derived.by(() => {
-    const o = outcomeOf(line.fen);
+    const o = outcomeOf(boardFen);
     if (!o) return '';
     if (o.winner) return `Checkmate. ${SIDE_NAMES[o.winner]} wins.`;
     if (o.reason === 'stalemate') return 'Stalemate. It’s a draw.';
@@ -102,7 +109,7 @@
   });
 
   $effect(() => {
-    const fen = line.fen;
+    const fen = boardFen;
     analysis = null;
     // Only this run writes, so a search for a position the Player has left can't overwrite the one shown.
     let current = true;
@@ -148,20 +155,28 @@
 
   // After the position's own search, so the bar and the lines come first.
   $effect(() => {
-    const fen = threatSetting.on ? line.fen : null;
+    const fen = threatSetting.on ? boardFen : null;
     // The threat shown belongs to the position left; the new one's comes once the Player stays.
     if (!fen || !known.has(`threat ${fen}`)) threats.follow(null);
     if (fen) return whenSettled([`threat ${fen}`], () => threats.follow(fen));
   });
 
   function onmove(uci: string): void {
-    const m = playUci(line.fen, uci);
+    const m = playUci(boardFen, uci);
     if (!m) return;
     known.add(m.fenBefore).add(m.fenAfter);
     coach.clearAnnotations();
-    // The line's own next move steps to it, as on Lichess, so a set-up game keeps the rest of its moves.
-    if (line.moves[line.cursor]?.uci === m.uci) {
-      line.forward();
+    // The line's own next move steps to it, as on Lichess, so a set-up game keeps the rest of its
+    // moves; from the variation's first position too, which leaves it.
+    const to = variation.gameStep(m.uci, line.moves, line.cursor);
+    if (to !== null) {
+      variation.leave();
+      line.goTo(to);
+      return;
+    }
+    // Another move where the line goes on starts a variation, rather than deleting the rest of the line.
+    if (variation.active || !line.atEnd) {
+      variation.play(uci, { cursor: line.cursor, fen: line.fen });
       return;
     }
     const ply = line.cursor + 1;
@@ -170,7 +185,39 @@
     asked.length = Math.min(asked.length, ply - 1);
   }
 
+  /** Steps through the variation while the board shows one, otherwise through the line. */
+  function step(where: Step): void {
+    const l = variation.active ? variation.line : line;
+    const before = l.cursor;
+    stepLine(l, where);
+    if (l.cursor !== before) coach.clearAnnotations();
+  }
+
+  /** A move picked in the variation's row of the move list. */
+  function pickVariationMove(cursor: number): void {
+    if (variation.line.cursor !== cursor) coach.clearAnnotations();
+    variation.line.goTo(cursor);
+  }
+
+  /** A move picked in the line's move list: the board leaves any variation for it. */
+  function pickMove(cursor: number): void {
+    if (variation.active || line.cursor !== cursor) coach.clearAnnotations();
+    variation.leave();
+    line.goTo(cursor);
+  }
+
+  function backToLine(): void {
+    variation.leave();
+    coach.clearAnnotations();
+  }
+
   async function why(question: string): Promise<void> {
+    if (variation.active) {
+      // Only the moves go: the desktop's Engine works out the facts (ADR 0007).
+      const { label, ...asked } = variation.question(line.moves);
+      await coach.ask({ job: 'why', ...asked, ...(question ? { question } : {}) }, question || label);
+      return;
+    }
     const cursor = line.cursor;
     const move = line.moves[cursor - 1];
     if (move) {
@@ -193,6 +240,7 @@
   /** A fresh line from a start position and its moves, shown from its first position on a fresh Board, so it doesn't slide. */
   function start(p: SetUpPosition = { startFen: INITIAL_FEN, moves: [] }): void {
     boards++;
+    variation.leave();
     line.reset(p.startFen, p.moves);
     line.goTo(0);
     graded = [];
@@ -300,7 +348,7 @@
 <section class="screen board-screen board-free">
   <header class="frame-head">
     <h1>Board</h1>
-    <p class="head-line">{outcomeOf(line.fen) ? 'Game over' : `${SIDE_NAMES[turnOf(line.fen)]} to move`}</p>
+    <p class="head-line">{outcomeOf(boardFen) ? 'Game over' : `${SIDE_NAMES[turnOf(boardFen)]} to move`}</p>
     <div class="head-actions">
       <button type="button" class="secondary" aria-expanded={settingUp} onclick={openSetUp} bind:this={setupButton}>Set up a position</button>
       <button type="button" class="secondary" onclick={askNewBoard} aria-expanded={confirmingNew} bind:this={newButton}>New board</button>
@@ -313,10 +361,10 @@
           <WinningChancesBar score={position?.score ?? null} pov={position?.pov ?? 'white'} {orientation} />
           {#key boards}
             <Board
-              fen={line.fen}
+              fen={boardFen}
               {orientation}
               movable="both"
-              lastMove={line.lastMove ? { from: line.lastMove.uci.slice(0, 2), to: line.lastMove.uci.slice(2, 4) } : undefined}
+              lastMove={shownLast ? { from: shownLast.uci.slice(0, 2), to: shownLast.uci.slice(2, 4) } : undefined}
               arrows={[...threatArrows(threats.threat), ...coach.arrows]}
               highlights={coach.highlights}
               gradeMark={mark}
@@ -326,7 +374,8 @@
         </div>
       </div>
       <div class="board-bar toolbar">
-        <StepButtons onfirst={() => line.goTo(0)} onprevious={() => line.back()} onnext={() => line.forward()} onlast={() => line.goTo(line.moves.length)} />
+        <StepButtons onfirst={() => step('first')} onprevious={() => step('previous')} onnext={() => step('next')} onlast={() => step('last')} />
+        {#if variation.active}<button type="button" class="secondary" onclick={backToLine}>Back to the main line</button>{/if}
         <FlipButton onflip={flip} />
         <ThreatButton view={threats} />
       </div>
@@ -360,13 +409,21 @@
         <button type="button" class="secondary lines-toggle" aria-pressed={showLines} onclick={toggleLines}>
           {showLines ? 'Hide Engine lines' : 'Show Engine lines'}
         </button>
-        {#if showLines}<EngineLines {analysis} fen={line.fen} />{/if}
-        <MoveList moves={line.moves} {grades} cursor={line.cursor} ongoto={(c) => line.goTo(c)} />
+        {#if showLines}<EngineLines {analysis} fen={boardFen} />{/if}
+        <MoveList
+          moves={line.moves}
+          {grades}
+          cursor={line.cursor}
+          ongoto={pickMove}
+          variation={variation.active
+            ? { from: variation.from ?? 0, moves: variation.line.moves, grades: variation.grades, cursor: variation.line.cursor, ongoto: pickVariationMove }
+            : undefined}
+        />
       </div>
       <CoachPanel
         thread={coach}
         onwhy={why}
-        placeholder={line.lastMove ? `Ask why about ${moveLabel(line.lastMove.fenBefore, line.lastMove.san)}` : 'Ask about this position'}
+        placeholder={shownLast ? `Ask why about ${moveLabel(shownLast.fenBefore, shownLast.san)}` : 'Ask about this position'}
       />
     </div>
   </div>

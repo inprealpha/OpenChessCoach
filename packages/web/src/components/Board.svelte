@@ -21,6 +21,8 @@
     /** A Move Grade to draw on the square its move landed on (nothing for Good). */
     gradeMark?: GradeMark | undefined;
     label?: string;
+    /** Why a board that takes no moves (`movable="none"`) refuses one, said when the Player picks up a piece. */
+    refusal?: string;
     onmove?: (uci: string) => void;
   }
 
@@ -33,6 +35,7 @@
     highlights = [],
     gradeMark = undefined,
     label = 'Chess board',
+    refusal = '',
     onmove,
   }: Props = $props();
 
@@ -69,10 +72,12 @@
     message = '';
   });
 
-  // A board that stops taking moves (a finished game, the Engine thinking) drops a piece picked up
-  // before, so the next click on it is not read as a move.
+  // A board whose rules change drops a piece picked up under the old ones, so the next click is not
+  // read as a move: one that stops taking moves (the Engine thinking), or a finished game whose board
+  // is now free to explore. What it said goes too, such as a refusal whose reason has passed.
   $effect(() => {
-    if (canMove) return;
+    void movable;
+    void refusal;
     selected = null;
     promotion = null;
     message = '';
@@ -239,7 +244,7 @@
       return;
     }
     if (!canMove) {
-      if (p) message = movable === 'none' ? '' : 'It’s not your move.';
+      if (p) message = movable === 'none' ? refusal : 'It’s not your move.';
       return;
     }
     if (p && p.color === toMove) {

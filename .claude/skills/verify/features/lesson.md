@@ -118,6 +118,10 @@ the order. `#/lessons?track=<track>` opens the catalogue at a track. Play it out
 - `Continue` to the next decision (one decision per Continue, however fast it is clicked); after
   it and after `Try another move` the focus goes to the board. An opening's prompt says whose move
   it is ("Move 4, Black to play. What are your options here?").
+- Once the Lesson is complete its final board is free to explore: a move starts a variation, with
+  the step buttons and `Back to the Lesson` under the board (see `explore.md`). Before that the
+  next decision's answer stays kept back (ADR 0012), so the board takes only the decision's move,
+  and a refused move says why beside it ("Press Continue for the Lesson’s next move.").
 - The region `Lesson complete` at the end, with the Move Grades of the Player's first tries
   ("Your first tries: 4 Best, 2 Blunders."), `What you learned` (the key ideas),
   `Your next Lesson: <name>` (the Lesson `suggestNext` gives with this one counted complete) and,

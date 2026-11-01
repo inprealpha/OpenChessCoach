@@ -64,8 +64,10 @@ back. A Hint first asks the Coach for the idea; a second press shows the Engine'
   `board-and-engine.md`) and the move list's buttons, with the Move Grade symbol following the
   step. While the game is on there are no step buttons and the keys do nothing: the board always
   shows the position to play from (`engine-game.spec.ts`, "a finished game steps through …").
-- A finished game's board is read-only: clicks on it do nothing (no "That move isn’t legal."),
-  and a declined draw is no longer reported once the game ends. It shows no arrows (Hint, Coach
+- A finished game's board is free to explore: a move there starts a variation (see
+  `explore.md`), a piece picked up during the game is dropped when it ends, and a declined draw is
+  no longer reported once the game ends. While the game is on, a refused move says why ("It’s the
+  Engine’s move.", "Take the move back or carry on first."). It shows no arrows (Hint, Coach
   or threat), the `Show threat` button goes, and the Coach panel stays only if the Coach said something.
 - The game list, the Review and the PGN name the Engine by its level: `Engine (Beginner)`. Games
   saved as `Engine (level 1)` before levels were named read the same way.

@@ -3,6 +3,7 @@
   // and the Player retries; every finished Puzzle is recorded in the Player Profile. Once finished, the solution is
   // written out and can be stepped through, and the Puzzles the Player missed can be tried again. The Player picks what
   // to practise: every Lesson mixed, or one Lesson's Puzzles, grouped by track, each with this device's progress.
+  // A finished Puzzle's board is free: a move on it starts a variation, which Back to the Puzzle drops.
   import { tick } from 'svelte';
   import { moveLabel, otherSide, outcomeOf, playUci, SIDE_NAMES, turnOf } from '@chess-coach/shared/chess';
   import { TRACK_NAMES } from '@chess-coach/shared/content/course';
@@ -10,6 +11,7 @@
   import { LEVEL_PUZZLE_RATING, pickPuzzles, type PuzzleData } from '@chess-coach/shared/content/puzzles';
   import Board from '../components/Board.svelte';
   import CoachPanel from '../components/CoachPanel.svelte';
+  import GradeBadge from '../components/GradeBadge.svelte';
   import FlipButton from '../components/FlipButton.svelte';
   import { api } from '../lib/api.svelte.ts';
   import { CoachThread } from '../lib/coach.svelte.ts';
@@ -19,6 +21,7 @@
   import { arrivedByChoosing, markChosen } from '../lib/puzzle-choice.ts';
   import { profile } from '../lib/profile.svelte.ts';
   import { store } from '../lib/storage.ts';
+  import { stepLine, Variation, type Step } from '../lib/variation.svelte.ts';
 
   let { opening }: { opening?: string | undefined } = $props();
 
@@ -33,13 +36,15 @@
   let missed = $state<string[]>([]);
   /** Puzzles this device finished, solved or not. */
   let done = $state<string[]>([]);
-  /** The move the Coach's arrows belong to: they show only while the board is on that position. */
-  let explained = $state<number | null>(null);
+  /** The position the Coach's arrows belong to: they show only while the board is on it. */
+  let explained = $state<string | null>(null);
   /** The choice of what to practise, opened to pick another set. */
   let choosing = $state(false);
   let summary = $state<HTMLElement | undefined>();
   const line = new Line();
   const coach = new CoachThread();
+  /** The Player's own moves from a position of the finished Puzzle; its solution never changes. */
+  const variation = new Variation();
 
   /** The Lesson whose Puzzles these are. A link to a Lesson without Puzzles, or to none, gets every Lesson's. */
   const lesson = $derived(all.length && !all.some((p) => p.lessonId === opening) ? undefined : lessonCatalogue.find((l) => l.id === opening));
@@ -53,6 +58,8 @@
   // Every Lesson's Puzzles, whatever Lesson the address names.
   titleFrom(() => (opening && all.length && !lesson ? 'Puzzles' : null));
   const finished = $derived(status === 'solved' || status === 'shown');
+  const boardFen = $derived(variation.active ? variation.fen : line.fen);
+  const shownLast = $derived(variation.active ? variation.line.lastMove : line.lastMove);
 
   /** What the Player can practise: every Lesson mixed, then each Lesson that has Puzzles, with this device's progress on them. */
   const mixed = $derived({ id: '', name: 'Mixed: every Lesson', ...progressOn(all.map((p) => p.id)) });
@@ -113,6 +120,7 @@
     const target = profile.profile?.rating ?? LEVEL_PUZZLE_RATING[profile.profile?.level ?? 'beginner'];
     const [p] = pickPuzzles(all, target, { ...(lesson ? { lessonId: lesson.id } : {}), exclude: new Set(done), count: 1 });
     coach.reset();
+    variation.leave();
     explained = null;
     feedback = '';
     mistakes = 0;
@@ -211,14 +219,55 @@
     await nextPuzzle();
   }
 
+  /**
+   * A move on a finished Puzzle's board: the solution's own next move steps to it; any other starts a
+   * variation from the position shown, or carries on the one shown.
+   */
+  function explore(uci: string): void {
+    const to = variation.gameStep(uci, line.moves, line.cursor);
+    if (to !== null) {
+      variation.leave();
+      line.goTo(to);
+    } else variation.play(uci, { cursor: line.cursor, fen: line.fen });
+  }
+
+  /** Steps through the variation while the board shows one, otherwise through the Puzzle, whose first position is the one the Player was set. */
+  function step(where: Step): void {
+    if (variation.active) stepLine(variation.line, where);
+    else stepLine(line, where, 1);
+  }
+
+  /** A move of the solution picked in its list: the board leaves any variation for it. */
+  function showSolutionMove(cursor: number): void {
+    variation.leave();
+    line.goTo(cursor);
+  }
+
   async function why(question: string): Promise<void> {
     if (!puzzle) return;
+    if (variation.active) {
+      // About the Player's own variation: only the moves go, and the desktop's Engine works out the facts (ADR 0007).
+      const { label, ...asked } = variation.question(line.moves);
+      explained = variation.fen;
+      await coach.ask(
+        {
+          job: 'why',
+          ...asked,
+          playerSide: solver,
+          hideWinningChances: true,
+          ...(question ? { question } : {}),
+          ...(lesson?.kind === 'opening' ? { opening: lesson.name } : {}),
+        },
+        question || label,
+      );
+      return;
+    }
     const setup = playUci(puzzle.fen, puzzle.moves[0] as string);
     const answer = setup && playUci(setup.fenAfter, puzzle.moves[1] as string);
     if (!setup || !answer) return;
     // The answer is about the Puzzle's position: show it, so the Coach's arrows start on its pieces.
     line.goTo(1);
-    explained = 1;
+    explained = line.fen;
     await coach.ask(
       {
         job: 'why',
@@ -290,22 +339,25 @@
     <div class="board-layout">
       <div class="board-col">
         <Board
-          fen={line.fen}
+          fen={boardFen}
           orientation={flipped ? otherSide(solver) : solver}
-          movable={status === 'solving' && !busy ? solver : 'none'}
-          lastMove={line.lastMove ? { from: line.lastMove.uci.slice(0, 2), to: line.lastMove.uci.slice(2, 4) } : undefined}
-          arrows={explained === line.cursor ? coach.arrows : []}
-          highlights={explained === line.cursor ? coach.highlights : []}
-          {onmove}
+          movable={busy ? 'none' : finished ? 'both' : status === 'solving' ? solver : 'none'}
+          lastMove={shownLast ? { from: shownLast.uci.slice(0, 2), to: shownLast.uci.slice(2, 4) } : undefined}
+          arrows={explained === boardFen ? coach.arrows : []}
+          highlights={explained === boardFen ? coach.highlights : []}
+          gradeMark={variation.active ? variation.mark : undefined}
+          onmove={finished ? explore : onmove}
+          refusal="One moment: the moves are being played."
           label="Puzzle board"
         />
         <div class="board-bar toolbar">
           {#if finished}
             <!-- Stepping stays inside the Puzzle: its first position is the one the Player was set. -->
-            <button type="button" class="secondary" onclick={() => line.goTo(1)} aria-label="First position">⏮</button>
-            <button type="button" class="secondary" onclick={() => line.goTo(Math.max(1, line.cursor - 1))} aria-label="Previous move">◀</button>
-            <button type="button" class="secondary" onclick={() => line.forward()} aria-label="Next move">▶</button>
-            <button type="button" class="secondary" onclick={() => line.goTo(line.moves.length)} aria-label="Last position">⏭</button>
+            <button type="button" class="secondary" onclick={() => step('first')} aria-label="First position">⏮</button>
+            <button type="button" class="secondary" onclick={() => step('previous')} aria-label="Previous move">◀</button>
+            <button type="button" class="secondary" onclick={() => step('next')} aria-label="Next move">▶</button>
+            <button type="button" class="secondary" onclick={() => step('last')} aria-label="Last position">⏭</button>
+            {#if variation.active}<button type="button" class="secondary" onclick={() => variation.leave()}>Back to the Puzzle</button>{/if}
           {/if}
           <FlipButton onflip={() => (flipped = !flipped)} />
         </div>
@@ -324,11 +376,30 @@
               Solution:
               {#each line.moves.slice(1) as m, i (i)}
                 {@const label = moveLabel(m.fenBefore, m.san)}
-                <button type="button" class:current={line.cursor === i + 2} aria-current={line.cursor === i + 2 ? 'step' : undefined} aria-label={`Move ${label}`} onclick={() => line.goTo(i + 2)}>
+                {@const here = !variation.active && line.cursor === i + 2}
+                <button type="button" class:current={here} aria-current={here ? 'step' : undefined} aria-label={`Move ${label}`} onclick={() => showSolutionMove(i + 2)}>
                   {i === 0 || turnOf(m.fenBefore) === 'white' ? label : m.san}
                 </button>
               {/each}
             </p>
+            {#if variation.active}
+              <p class="solution" aria-label="Your variation">
+                Your variation:
+                {#each variation.line.moves as m, i (i)}
+                  {@const label = moveLabel(m.fenBefore, m.san)}
+                  {@const grade = variation.grades[i]}
+                  <button
+                    type="button"
+                    class:current={variation.line.cursor === i + 1}
+                    aria-current={variation.line.cursor === i + 1 ? 'step' : undefined}
+                    aria-label={`Variation move ${label}${grade ? `, ${grade}` : ''}`}
+                    onclick={() => variation.line.goTo(i + 1)}
+                  >
+                    {i === 0 || turnOf(m.fenBefore) === 'white' ? label : m.san}{#if grade}&nbsp;<GradeBadge {grade} />{/if}
+                  </button>
+                {/each}
+              </p>
+            {/if}
           {/if}
           <div class="row">
             {#if status === 'solving'}
@@ -341,7 +412,7 @@
         <p class="muted small">Puzzles: Lichess puzzle database, CC0.</p>
         </div>
         {#if status !== 'solving'}
-          <CoachPanel thread={coach} onwhy={why} placeholder="Why is this the answer?" />
+          <CoachPanel thread={coach} onwhy={why} placeholder={variation.active ? (variation.line.lastMove ? `Ask why about ${variation.line.lastMove.san}` : 'Ask about this position') : 'Why is this the answer?'} />
         {/if}
       </div>
     </div>

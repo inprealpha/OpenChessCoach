@@ -1,6 +1,7 @@
 <script lang="ts">
   // The moves played so far, each with its Move Grade, clickable to revisit a position: two columns,
   // White's move and Black's, with the move number before White's, as on Lichess.
+  // A variation the Player is trying shows on a row of its own, indented under the move it branches from.
   import type { MoveGrade } from '@chess-coach/shared/grader';
   import { moveNumberOf, turnOf, type PlayedMove } from '@chess-coach/shared/chess';
   import GradeBadge from './GradeBadge.svelte';
@@ -10,15 +11,17 @@
     grades?: (MoveGrade | undefined)[];
     cursor: number;
     ongoto?: (cursor: number) => void;
+    /** The Player's variation: the game's cursor it branches from, its moves and Move Grades, and the move shown in it. */
+    variation?: { from: number; moves: PlayedMove[]; grades: (MoveGrade | undefined)[]; cursor: number; ongoto: (cursor: number) => void } | undefined;
   }
-  let { moves, grades = [], cursor, ongoto }: Props = $props();
+  let { moves, grades = [], cursor, ongoto, variation }: Props = $props();
   let list = $state<HTMLOListElement>();
 
   // Keep the current move in view: the list scrolls in its own box, never the page, and jumps
   // rather than glides, so reduced motion needs nothing more. It looks again when the current
   // move's Move Grade arrives, since the badge widens the move and can wrap it onto a new row.
   function keepInView(el: HTMLOListElement): void {
-    const item = el.children[cursor - 1];
+    const item = variation ? el.querySelector('.variation .current') ?? el.querySelector('.variation') : el.querySelector(`[data-ply="${cursor}"]`);
     if (!item) {
       el.scrollTop = 0;
       return;
@@ -31,6 +34,8 @@
   $effect(() => {
     if (!list || moves.length === 0) return;
     void grades[cursor - 1];
+    void variation?.cursor;
+    void variation?.grades[variation.cursor - 1];
     keepInView(list);
   });
   // And when the list's box shrinks, as when the Coach's answer grows beside it.
@@ -48,16 +53,35 @@
   }
 </script>
 
-<ol class="moves" aria-label="Moves" bind:this={list}>
+{#snippet branch(v: NonNullable<Props['variation']>)}
+  <li class="variation">
+    <ol aria-label={`Variation from ${v.from === 0 ? 'the start' : `move ${label(moves[v.from - 1] as PlayedMove)} ${moves[v.from - 1]?.san}`}`}>
+      {#each v.moves as m, i (i)}
+        <li class:current={v.cursor === i + 1}>
+          <button type="button" onclick={() => v.ongoto(i + 1)} aria-label={`Variation move ${label(m)} ${m.san}${v.grades[i] ? `, ${v.grades[i]}` : ''}`}>
+            <span class="no">{label(m)}</span>
+            <span class="san">{m.san}</span>
+            {#if v.grades[i]}<GradeBadge grade={v.grades[i] as MoveGrade} />{/if}
+          </button>
+        </li>
+      {/each}
+    </ol>
+  </li>
+{/snippet}
+
+<ol class="moves" class:exploring={variation} aria-label="Moves" bind:this={list}>
+  {#if variation?.from === 0}{@render branch(variation)}{/if}
   {#each moves as m, i (i)}
     {@const white = turnOf(m.fenBefore) === 'white'}
-    <li class:current={cursor === i + 1} class:white class:black={!white} class:opens-black={i === 0 && !white}>
+    <!-- Black's move opens its own row, in Black's column, at the start of a game set up with Black to move and after a variation. -->
+    <li class:current={cursor === i + 1} data-ply={i + 1} class:white class:black={!white} class:opens-black={!white && (i === 0 || variation?.from === i)}>
       <button type="button" onclick={() => ongoto?.(i + 1)} aria-label={`Move ${label(m)} ${m.san}${grades[i] ? `, ${grades[i]}` : ''}`}>
         <span class="no" aria-hidden="true">{label(m)}</span>
         <span class="san">{m.san}</span>
         {#if grades[i]}<GradeBadge grade={grades[i] as MoveGrade} />{/if}
       </button>
     </li>
+    {#if variation && variation.from === i + 1}{@render branch(variation)}{/if}
   {/each}
 </ol>
 
@@ -95,6 +119,20 @@
   }
   button:hover { background: var(--bg); }
   .current button { border-color: var(--accent); background: var(--bg); }
+  /* The game's move stays marked, less strongly, while the board shows the variation. */
+  .exploring > .current > button { border-style: dashed; background: none; }
+  .variation { grid-column: 1 / -1; }
+  .variation ol {
+    list-style: none;
+    margin: 0 0 0 1rem;
+    padding: 0.2rem 0 0.2rem 0.6rem;
+    border-left: 3px solid var(--line);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+  .variation button { width: auto; }
+  .variation .no { min-width: 0; }
   .no { color: var(--muted); min-width: 2.2rem; font-variant-numeric: tabular-nums; }
   /* The number shows once per row, before White's move; Black's keeps it for a screen reader only. */
   .black:not(.opens-black) .no { visibility: hidden; width: 0; min-width: 0; }

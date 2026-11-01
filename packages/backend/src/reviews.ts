@@ -2,7 +2,8 @@
 // Coach's overview of the whole game (unless Settings turn it off) and the Coach's explanation of
 // each key moment. A saved Review is reread with no Coach call.
 import type { GradedMove } from '@chess-coach/shared/analysis';
-import { formatScore, type MoveGrade } from '@chess-coach/shared/grader';
+import { turnOf } from '@chess-coach/shared/chess';
+import { formatScore, negateScore, type MoveGrade } from '@chess-coach/shared/grader';
 import { pickKeyMoments } from '@chess-coach/shared/key-moments';
 import type { CoachAsk } from '@chess-coach/shared/coach/types';
 import { gameFacts, namedMoves } from '@chess-coach/shared/overview';
@@ -253,7 +254,8 @@ async function makeReview(
       betterOptions: m.candidates
         .filter((c) => c.uci !== m.uci)
         .slice(0, 3)
-        .map((c) => ({ uci: c.uci, san: c.san, score: formatScore(c.score) })),
+        // From White's point of view, as every evaluation the Player sees (#32).
+        .map((c) => ({ uci: c.uci, san: c.san, score: formatScore(turnOf(m.fenBefore) === 'white' ? c.score : negateScore(c.score)) })),
       explanation: reply.text,
       arrows: reply.arrows,
     });

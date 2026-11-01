@@ -29,3 +29,11 @@ The brief (ADR 0004, ADR 0009) covers the position, the Engine's best moves, the
 - The questions and the Engine's answers are logged with each Coach call (the `coach_questions` table), also when the call ends at the usage limit or with the Coach unavailable, and the Coach panel says how many questions an answer asked.
 - The real-Coach check makes one Why Question with Think deeper on, and accepts moves from the Engine's answers exactly as the guard does.
 - The fake Coach asks one question, or scripted ones, so verify mode and the tests exercise the tool end to end.
+
+## Amendment: on by default (#32)
+
+The Coach explains better with the Engine at hand, so Think deeper is now on by default. Installs that stored "off" get the new default once (saving any setting used to store every setting, so a stored "off" was almost always the old default); a Player who turns it off again keeps it off. To keep the cost down now that every Review uses it:
+
+- A Review's key moment may ask at most 2 questions (a Why Question still 3), and asking there is the Coach's call: it asks when the brief's facts don't show the main reason for the Move Grade or why the better move is better. The Review's shared three minutes for the tool are unchanged. A Why Question still asks at least once, as it is the Player's own deeper study.
+- Hints, Live Coaching and Lesson turns still never get the tool.
+- The Haiku warning on the Think deeper card stays: on Haiku the tool made answers fuller but added false claims. Whether Haiku is good enough for Hints and Live Coaching is measured separately (#34).

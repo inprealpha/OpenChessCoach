@@ -386,7 +386,8 @@ describe('the Coach brief', () => {
     const analysisOf = (fen: string, lines: readonly Candidate[]): Analysis => ({ fen, depth: 10, lines: lines.map((c) => ({ pv: c.pv, score: c.score, depth: 10 })) });
     const bar = (fen: string, lines: readonly Candidate[]) => {
       const shown = scoreFromAnalysis(fen, analysisOf(fen, lines));
-      return shown ? winningChancesFor(shown.score, shown.pov, 'white').text : undefined;
+      // The brief has the bar's numbers, without its label (#32).
+      return shown ? winningChancesFor(shown.score, shown.pov, 'white').short : undefined;
     };
     const differ: string[] = [];
     let compared = 0;
@@ -421,7 +422,7 @@ describe('the Coach brief', () => {
     const [before, after] = [scoreAfterPly(g.moves, ply - 1), scoreAfterPly(g.moves, ply)];
     if (!before || !after) throw new Error('fixture too short');
     const brief = buildBrief({ ask: { ...longGameAsk(), positionBefore: before, positionAfter: after }, profile });
-    expect(brief.winningChances).toEqual({ before: winningChancesFor(before.score, before.pov, 'white').text, after: winningChancesFor(after.score, after.pov, 'white').text });
+    expect(brief.winningChances).toEqual({ side: 'white', before: winningChancesFor(before.score, before.pov, 'white').short, after: winningChancesFor(after.score, after.pov, 'white').short });
   });
 
   it('carries only the Winning Chances in the position when there is no move, for the side to move', () => {
@@ -429,7 +430,7 @@ describe('the Coach brief', () => {
     const brief = buildBrief({ ask: { ...rest, job: 'why' }, profile });
     const best = rest.candidates[0];
     if (!best) throw new Error('fixture has no candidates');
-    expect(brief.winningChances).toEqual({ before: winningChancesFor(best.score, turnOf(rest.fen)).text });
+    expect(brief.winningChances).toEqual({ side: turnOf(rest.fen), before: winningChancesFor(best.score, turnOf(rest.fen)).short });
   });
 
   it('includes only the slice of the Player Profile that matches the topic', () => {

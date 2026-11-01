@@ -149,8 +149,8 @@ describe('pieces that can be taken', () => {
 });
 
 describe('what a move does', () => {
-  it('a blunder that leaves a piece to be taken, when the line takes it', () => {
-    // Puzzle aSgS1: Qa6 steps off the c-file and leaves the bishop on c1 to the rook on c8.
+  it('a blunder that leaves a piece to be taken, when the line takes it, says the moved piece was its guard', () => {
+    // Puzzle aSgS1: Qa6 steps off the c-file and leaves the bishop on c1, which the queen guarded, to the rook on c8.
     const p = puzzle('aSgS1');
     const facts = moveFacts(p.fen, p.moves[0] as string, p.moves.slice(1));
     expect(facts).toContainEqual({
@@ -158,7 +158,26 @@ describe('what a move does', () => {
       loose: { piece: { side: 'white', role: 'bishop', square: 'c1' }, attacker: { side: 'black', role: 'rook', square: 'c8' }, defended: false },
       moved: false,
       wasLoose: false,
+      unguarded: true,
     });
+    expect(facts.map(describeFact)).toContain("stops guarding White's bishop on c1, leaving it where Black's rook on c8 can take it and nothing defends it");
+  });
+
+  it('a move made in check answers the check first, and blocking with a piece from home is not development (#32)', () => {
+    // 1. e4 e5 2. Nf3 Nc6 3. d4 exd4 4. Nxd4 Nxd4 5. Qxd4 b6 6. Bc4 Bb7 7. Qe5+: Black can block with
+    // the queen, the knight or the bishop. Be7 is the Blunder because the bishop on f8 was the only
+    // guard of g7: the Engine's line (depth 14) takes it at once.
+    const fen = 'r2qkbnr/pbpp1ppp/1p6/4Q3/2B1P3/8/PPP2PPP/RNB1K2R b KQkq - 3 7';
+    const checker = { side: 'white', role: 'queen', square: 'e5' };
+    const be7 = moveFacts(fen, 'f8e7', ['e5g7', 'e7b4', 'c2c3', 'd8e7', 'c3b4', 'e8c8', 'g7h8', 'g8f6']);
+    expect(be7.map(describeFact)).toEqual([
+      "blocks the check from White's queen on e5",
+      "stops guarding Black's pawn on g7, leaving it where White's queen on e5 can take it and nothing defends it",
+    ]);
+    expect(moveFacts(fen, 'g8e7', ['b1c3', 'f7f6'])).toEqual([{ kind: 'answers-check', how: 'blocks', checker }]);
+    // Taking the checker (1. e4 f5 2. Qh5+ g6 3. Qxg6+ hxg6), and stepping the king out of a rook's check.
+    expect(moveFacts('rnbqkbnr/ppppp2p/6Q1/5p2/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 0 3', 'h7g6', [])).toContainEqual({ kind: 'answers-check', how: 'takes', checker: { side: 'white', role: 'queen', square: 'g6' } });
+    expect(moveFacts('4k3/8/8/8/8/8/4R3/4K3 b - - 0 1', 'e8d7', [])).toContainEqual({ kind: 'answers-check', how: 'king', checker: { side: 'white', role: 'rook', square: 'e2' } });
   });
 
   it('a knight check that also attacks the queen is a double attack on the king and the queen', () => {
@@ -252,6 +271,8 @@ describe('what a move does', () => {
           if (f.kind === 'skewer') [f.king, f.behind].forEach(check);
           if (f.kind === 'pinned-attackers') f.pins.flatMap((p) => [p.piece, p.by]).forEach(check);
           if (f.kind === 'blocks') f.pieces.forEach(check);
+          // The checker stood where it says before the move; the move may take it.
+          if (f.kind === 'answers-check') expect(boardOf(m.fenBefore).get(f.checker.square), `${g.site} ${m.ply}. ${m.san}`).toBe(`${f.checker.side} ${f.checker.role}`);
         }
       });
     }

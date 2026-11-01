@@ -24,7 +24,10 @@ export interface WinningChances {
   text: string;
   /** The compact form for tight spaces: "68%", or the mate phrase. */
   short: string;
-  /** The evaluation from `side`'s point of view: "+1.40", or "M3" / "-M3" for a mate. */
+  /**
+   * The evaluation from White's point of view, as most chess sites show it, whichever side the
+   * Winning Chances are for: "+1.40" favours White, "-M3" is Black mating in 3 (#32).
+   */
   evaluation: string;
 }
 
@@ -38,10 +41,9 @@ export function matePhrase(mate: Mate): string {
  * move for a candidate line, the mover for a played move's score).
  */
 export function winningChancesFor(score: Score, pov: Side, side: Side = pov): WinningChances {
-  const own = side === pov ? score : negateScore(score);
   // Read from `pov`, then turned round: mate 0 (`pov` is checkmated) has no negative to turn into.
   const percent = 50 + 50 * (side === pov ? 1 : -1) * winningChances(score);
-  const evaluation = formatScore(own);
+  const evaluation = formatScore(pov === 'white' ? score : negateScore(score));
   if (score.mate !== undefined) {
     // A positive mate is `pov` giving mate; zero or negative is `pov` getting mated.
     const mate: Mate = score.mate > 0 ? { winner: pov, moves: score.mate } : { winner: otherSide(pov), moves: Math.abs(score.mate) };

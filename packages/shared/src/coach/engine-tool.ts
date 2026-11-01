@@ -14,6 +14,16 @@ export const ENGINE_TOOL_JOBS: readonly CoachJob[] = ['why', 'review-moment'];
 /** How many questions one Coach answer may ask the Engine. A question past it is refused, and the Coach answers. */
 export const MAX_ENGINE_QUESTIONS = 3;
 /**
+ * A Review's key moment asks fewer: with Think deeper on by default, every Review asks for each of
+ * its moments, while a Why Question is the Player's own deeper study (#32).
+ */
+export const MAX_REVIEW_MOMENT_QUESTIONS = 2;
+
+/** How many questions a Coach answer for `job` may ask the Engine. */
+export function maxEngineQuestions(job: CoachJob): number {
+  return job === 'review-moment' ? MAX_REVIEW_MOMENT_QUESTIONS : MAX_ENGINE_QUESTIONS;
+}
+/**
  * How many more calls the tool takes besides those, for questions it refuses (an illegal move, an
  * Engine that can't answer), which don't count as questions. Every call is a turn of the Coach's.
  */

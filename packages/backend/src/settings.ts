@@ -28,7 +28,8 @@ const DEFAULT_SETTINGS: StoredSettings = {
   models: DEFAULT_MODELS,
   liveCoachingDefault: true,
   tunnelEnabled: false,
-  thinkDeeper: false,
+  // On by default: the Coach explains better with the Engine at hand (#32, ADR 0010).
+  thinkDeeper: true,
   reviewOverview: true,
 };
 

@@ -57,10 +57,10 @@ describe('coachctl', () => {
     expect(games.json).toMatchObject({ ok: true, count: 1 });
     const devices = await ctl('db', 'get', 'devices', '--where', 'name=coachctl', ...target);
     expect(devices.json.count).toBe(1);
-    expect((await ctl('settings', ...target)).json).toMatchObject({ ok: true, settings: { thinkDeeper: false } });
-    expect((await ctl('settings', '--think-deeper', 'on', ...target)).json).toMatchObject({ ok: true, settings: { thinkDeeper: true } });
+    expect((await ctl('settings', ...target)).json).toMatchObject({ ok: true, settings: { thinkDeeper: true } });
+    expect((await ctl('settings', '--think-deeper', 'off', ...target)).json).toMatchObject({ ok: true, settings: { thinkDeeper: false } });
     expect((await ctl('settings', '--think-deeper', 'maybe', ...target)).json).toMatchObject({ ok: false, fix: 'Pass --think-deeper on or --think-deeper off.' });
-    expect((await ctl('settings', '--review-overview', 'off', ...target)).json).toMatchObject({ ok: true, settings: { thinkDeeper: true, reviewOverview: false } });
+    expect((await ctl('settings', '--review-overview', 'off', ...target)).json).toMatchObject({ ok: true, settings: { thinkDeeper: false, reviewOverview: false } });
     expect((await ctl('settings', '--review-overview', 'maybe', ...target)).json).toMatchObject({ ok: false, fix: 'Pass --review-overview on or --review-overview off.' });
   });
 

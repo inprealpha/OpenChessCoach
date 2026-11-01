@@ -176,7 +176,7 @@ export function templateReply(brief: Brief): CoachRawReply {
       break;
     }
     case 'review-moment': {
-      text = `Here you played ${brief.move?.san ?? 'a move'}, graded ${brief.move?.grade ?? 'Mistake'}.${chances(brief)} The Engine's better option was ${best?.san ?? 'another move'} (${best?.evaluation ?? ''}), which the Engine rates higher.`;
+      text = `Here you played ${brief.move?.san ?? 'a move'}, graded ${brief.move?.grade ?? 'Mistake'}.${chances(brief)} The better move was ${best?.san ?? 'another move'}.`;
       if (alt) text += ` ${alt.san} was another option worth a look.`;
       if (brief.move) add(brief.move, 'red');
       add(best, 'green');
@@ -186,8 +186,8 @@ export function templateReply(brief: Brief): CoachRawReply {
     case 'why':
     default: {
       text = brief.move
-        ? `${brief.move.san} is graded ${brief.move.grade}.${chances(brief)} The Engine's top choice was ${best?.san ?? 'another move'} (${best?.evaluation ?? ''}).`
-        : `The Engine's top choice here is ${best?.san ?? 'unclear'} (${best?.evaluation ?? ''}).${chances(brief)}`;
+        ? `${brief.move.san} is graded ${brief.move.grade}.${chances(brief)} The best move was ${best?.san ?? 'another move'}.`
+        : `The best move here is ${best?.san ?? 'unclear'}.${chances(brief)}`;
       // A move the Player's question names takes the place of the other option, with the facts the brief gives for it.
       const asked = brief.candidates.find((c) => c.asked);
       if (asked) {
@@ -229,11 +229,13 @@ export function templateReply(brief: Brief): CoachRawReply {
   return { text, moves, arrows, highlights: [], note };
 }
 
-/** The brief's Winning Chances, word for word, as a key moment shows them. */
+/** The brief's Winning Chances, with their numbers word for word, as a key moment shows them. */
 function chances(brief: Brief): string {
   const c = brief.winningChances;
   if (!c) return '';
-  return c.after ? ` Before it, ${c.before}. After it, ${c.after}.` : ` ${c.before}.`;
+  // A percentage is the side's; a mate is said as the brief says it.
+  const say = (x: string) => (x.endsWith('%') ? `${SIDE_NAMES[c.side]}’s winning chances: ${x}` : x);
+  return c.after ? ` Before it, ${say(c.before)}. After it, ${say(c.after)}.` : ` ${say(c.before)}.`;
 }
 
 /**

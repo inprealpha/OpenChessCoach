@@ -7,7 +7,7 @@
   // overview and one line per key moment, the open one expanded) and Moves, with the Ask box docked
   // at its foot.
   // The board is free: a move on it starts a variation, which Back to the game drops.
-  import { untrack } from 'svelte';
+  import { tick, untrack } from 'svelte';
   import { moveLabel, otherSide, SIDE_NAMES, type Side } from '@chess-coach/shared/chess';
   import type { MoveGrade } from '@chess-coach/shared/grader';
   import { scoreAfterPly } from '@chess-coach/shared/position-score';
@@ -32,7 +32,9 @@
   import { desktopBack, droppedConnection, runningReview, startReview, type ReviewRun } from '../lib/review-runs.svelte.ts';
   import { router } from '../lib/router.svelte.ts';
   import { threatSetting, ThreatView } from '../lib/threat.svelte.ts';
-  import { foldOpen, rememberFold } from '../lib/folds.ts';
+  import { firstSentence } from '../lib/first-sentence.ts';
+  import { reveal } from '../lib/reveal.ts';
+  import { foldFromNextVisit, foldOpen, rememberFold } from '../lib/folds.ts';
   import { gradeMark } from '../lib/grades.ts';
   import { narrow } from '../lib/narrow.svelte.ts';
   import { titleFrom } from '../lib/page-title.svelte.ts';
@@ -163,6 +165,18 @@
     open = m.ply;
     expanded = m.ply;
     line.goTo(m.ply);
+    void tick().then(() => revealMoment(m.ply));
+  }
+
+  /**
+   * Scrolls the panel so an opened key moment's row is at its top, under the tabs: closing the one
+   * above can leave the panel scrolled past it, above all in a phone's short panel.
+   */
+  function revealMoment(ply: number): void {
+    const row = document.querySelector<HTMLElement>(`.moment[data-ply="${ply}"]`);
+    const body = row?.closest<HTMLElement>('.panel-body');
+    if (!row || !body) return;
+    reveal(body, row, 'start');
   }
 
   /** A move the overview names: the board goes to the position after it, as the move list does. */
@@ -170,8 +184,17 @@
     goto(m.ply);
   }
 
+  // The overview is open on the first visit to its Review, then folded to its first sentence, unless
+  // the Player opens it again (docs/design/interface-guidelines.md, Collapsing and density).
+  $effect(() => {
+    if (game && review?.overview) foldFromNextVisit(`review-overview-${game.id}`);
+  });
+
   function toggleOverview(e: Event): void {
-    overviewOpen = (e.currentTarget as HTMLDetailsElement).open;
+    const now = (e.currentTarget as HTMLDetailsElement).open;
+    // A details element drawn open fires toggle too: only the Player's own opening or closing counts.
+    if (now === overviewOpen) return;
+    overviewOpen = now;
     if (game) rememberFold(`review-overview-${game.id}`, overviewOpen);
   }
 
@@ -200,13 +223,6 @@
   function summaryOf(g: Pick<GameSummary, 'white' | 'black' | 'result' | 'opening' | 'date' | 'playerSide'>): string {
     const opponent = g.playerSide === 'white' ? g.black : g.white;
     return [`You had ${SIDE_NAMES[g.playerSide]}`, outcome(g), `vs ${opponent}`, g.opening, g.date?.slice(0, 10)].filter(Boolean).join(' · ');
-  }
-
-  /** The overview's first sentence, its one-line summary while it is folded. */
-  function firstSentence(text: string): string {
-    // A move number such as "12." ends no sentence; "Nf3." does.
-    const m = /^.*?(?<!\b\d+)[.!?](?=\s|$)/s.exec(text.trim());
-    return m ? m[0] : text;
   }
 
   /** Fewer moves of the Player's than this make a short game, such as one resigned in the opening. */
@@ -432,7 +448,9 @@
           <FlipButton onflip={() => (flipped = !flipped)} />
           <ThreatButton view={threats} />
         </div>
-        {#if review && !narrow.on}
+        <!-- The game's graph steps aside while the Player tries a variation, leaving its bar the room
+             Back to the game takes, so the frame stays one screen tall. -->
+        {#if review && !narrow.on && !variation.active}
           <WinningChancesGraph moves={review.moves} cursor={variation.from ?? shownIndex} ongoto={goto} compact />
         {/if}
       </div>
@@ -471,7 +489,7 @@
               {#if overview}
                 <section class="card overview-card" aria-label="Overview">
                 <details class="fold overview-fold" open={overviewOpen} ontoggle={toggleOverview}>
-                  <summary><strong>Overview</strong>{#if !overviewOpen}<span class="summary-line"> · {firstSentence(review.overview?.text ?? '')}</span>{/if}</summary>
+                  <summary><strong>Overview</strong>{#if !overviewOpen}<span class="summary-line">{` · ${firstSentence(review.overview?.text ?? '')}`}</span>{/if}</summary>
                   <p class="overview">
                     {#each overview.segments as part, i (i)}
                       {#if part.move}
@@ -516,7 +534,7 @@
                         <strong class="san">{label}</strong>
                         <GradeBadge grade={m.grade} />
                         {#if chances}
-                          <span class="change" data-testid="chances-change">{chances.before.short} → {chances.after.short}{#if evals}<span class="eval muted"> {chances.before.evaluation} → {chances.after.evaluation}</span>{/if}</span>
+                          <span class="change" data-testid="chances-change">{chances.before.short} → {chances.after.short}{#if evals}<span class="eval muted">{` ${chances.before.evaluation} → ${chances.after.evaluation}`}</span>{/if}</span>
                         {/if}
                       </button>
                       <!-- The row's numbers in words, for a screen reader. -->

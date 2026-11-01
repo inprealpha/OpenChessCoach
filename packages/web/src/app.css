@@ -120,6 +120,12 @@ h1 { font-size: 1.4rem; margin: 0.5rem 0 1rem; }
   .board-screen .side > .coach { margin-inline: -0.75rem; box-shadow: 0 -6px 16px rgb(0 0 0 / 12%); }
   .board-bar { gap: 0.3rem; }
   .board-bar button { min-width: var(--tap); min-height: var(--tap); padding-inline: 0.55rem; }
+  /* On every screen, the controls a thumb taps are at least 44 px (guidelines, Controls); links in
+     running text and the board's own squares keep their size. */
+  .screen :is(button:not(.link), a.button, summary, select):not(.board *) { min-height: var(--tap); }
+  .screen td.actions :is(a, button) { display: inline-flex; align-items: center; min-height: var(--tap); min-width: var(--tap); justify-content: center; }
+  .screen :is(input[type='checkbox'], input[type='radio']) { width: 1.25rem; height: 1.25rem; }
+  .screen label:has(> :is(input[type='checkbox'], input[type='radio'])) { min-height: var(--tap); display: inline-flex; align-items: center; gap: 0.45rem; }
 }
 /* A phone held upright: one screen tall, as on a desktop. The header line, the board, then the
    panel as a sheet that scrolls inside itself, with the Coach's Ask box docked at the foot of the
@@ -142,7 +148,7 @@ h1 { font-size: 1.4rem; margin: 0.5rem 0 1rem; }
   .board-screen .panel-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
   .board-screen .side > .coach { flex: 0 0 auto; }
   /* Typing a question: the board shrinks so it stays in view above the keyboard. */
-  .board-screen .board-layout:has(.coach input:focus) .board-col { --board-max: 48vw; }
+  .board-screen .board-layout:has(.coach input.typing) .board-col { --board-max: 48vw; }
 }
 .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 0.75rem 1rem; }
 /* The card's padding is its spacing: its first and last children add no margin of their own. */

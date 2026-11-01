@@ -483,9 +483,14 @@ test.describe('a Review’s overview', () => {
     await expect(board.getByRole('img', { name: 'Mistake on g5' })).toBeVisible();
     await expect(current).toHaveAccessibleName('Current position: 12. Bg5: White’s winning chances: 19%');
 
-    // Reopened, the saved overview is there, links and all, with no Coach call.
+    // Reopened, the saved overview is folded to its first sentence, having been read once; opened,
+    // it is all there, links and all, with no Coach call.
     const text = await overview.textContent();
     await paired.reload();
+    const fold = paired.getByRole('region', { name: 'Overview' }).locator('details');
+    await expect(fold).not.toHaveAttribute('open');
+    await expect(fold.locator('summary')).toContainText('Overview · Your opening went well');
+    await fold.locator('summary').click();
     await expect(paired.getByRole('region', { name: 'Overview' })).toHaveText(text ?? '');
     await expect(paired.getByRole('region', { name: 'Overview' }).getByRole('button')).toHaveCount(5);
     expect(await app.rows('coach_calls')).toHaveLength(calls.length);
@@ -744,6 +749,40 @@ test('the board never scrolls away: on a phone it stays at the top while the pan
   expect(await paired.evaluate(() => document.documentElement.scrollHeight)).toBeLessThanOrEqual(800);
   await expect.poll(() => boardOnScreen(800)).toBe(true);
   await expect(paired.getByRole('textbox', { name: 'Your Why Question' })).toBeInViewport();
+});
+
+test('on a phone, an opened key moment and the current move show clear of the tabs', async ({ paired, app }) => {
+  await paired.setViewportSize({ width: 390, height: 844 });
+  await paired.goto(`${app.url}/#/review/1`);
+  await paired.getByRole('button', { name: 'Start the Review' }).click();
+  const moments = paired.getByRole('region', { name: 'Key moments' }).getByRole('listitem');
+  await expect(moments.first()).toBeVisible({ timeout: 90_000 });
+  /** The element's top edge and its middle are on top where they are drawn: nothing, such as the sticky tabs, covers them. */
+  const uncovered = (el: Locator) =>
+    el.evaluate((node) => {
+      const r = node.getBoundingClientRect();
+      const x = r.left + r.width / 2;
+      return [r.top + 2, r.top + r.height / 2].every((y) => {
+        const hit = document.elementFromPoint(x, y);
+        return Boolean(hit && (node === hit || node.contains(hit)));
+      });
+    });
+
+  // The first moment opens by itself; each next one opens with the one above it closing.
+  for (const i of [1, 2, 3]) {
+    const show = moments.nth(i).getByRole('button', { name: /^Show moment/ });
+    await show.click();
+    await expect(show).toHaveAttribute('aria-pressed', 'true');
+    await expect.poll(() => uncovered(show)).toBe(true);
+  }
+
+  // Stepping back through the moves, the current one stays in sight, under the tabs as well.
+  await pickMove(paired, 'Move 24. Bxc5, Inaccuracy');
+  const current = paired.getByRole('list', { name: 'Moves' }).locator('li.current');
+  for (let step = 0; step < 24; step++) {
+    await paired.getByRole('button', { name: 'Previous move' }).click();
+    await expect.poll(() => uncovered(current), { message: `after ${step + 1} steps back` }).toBe(true);
+  }
 });
 
 test('a game set up from a position numbers its moves from that position', async ({ paired, app }) => {

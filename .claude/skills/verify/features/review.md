@@ -49,8 +49,8 @@ call.
   desktop and on a phone the page is one screen tall and never scrolls: the panel beside (or under)
   the board scrolls inside itself, with the Ask box docked at its foot. `Flip board` (or the F key) turns the board, the bar and the graph with it.
 - The panel has two tabs, `Moments` (the overview and the key moments) and `Moves` (the move
-  list; on a phone the graph too). The overview folds, remembered per game, and folded shows its
-  first sentence.
+  list; on a phone the graph too). The overview is open on the first visit to a Review and folded on later
+  visits unless the Player opens it again (remembered per game); folded, it shows its first sentence.
 - The move list numbers moves from the game's start position, so a game set up from a position
   (`[SetUp "1"]`, `[FEN …]`) reads `40… Kd3`, `41. Ra3+`, as the key moments and the graph do.
 - The overview, the region `Overview` above `Key moments`: how the Player played, where it went

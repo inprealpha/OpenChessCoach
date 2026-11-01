@@ -68,6 +68,21 @@
     // Not answered (the desktop refused it, or the Coach couldn't be reached): give it back to edit.
     if (asked && thread.calls > calls && thread.failed && !question) question = asked;
   }
+
+  // While the Player types, a phone's board shrinks to stay in view above the keyboard (app.css).
+  // It grows back a moment after the box loses the focus, so a tap that took the focus away still
+  // lands on the button it was aimed at, not on whatever the growing board moved under it.
+  let typing = $state(false);
+  let stopping: ReturnType<typeof setTimeout> | undefined;
+  function startTyping(): void {
+    clearTimeout(stopping);
+    typing = true;
+  }
+  function stopTyping(): void {
+    clearTimeout(stopping);
+    stopping = setTimeout(() => (typing = false), 400);
+  }
+  $effect(() => () => clearTimeout(stopping));
 </script>
 
 <section class="coach" class:unavailable={!available} aria-label="Coach">
@@ -115,6 +130,9 @@
         maxlength={MAX_QUESTION_LENGTH}
         autocomplete="off"
         aria-describedby="why-chars-left"
+        class:typing
+        onfocus={startTyping}
+        onblur={stopTyping}
       />
       <!-- "Ask" on a phone, where the box and the button share one row; the name stays the same. -->
       <button type="submit" disabled={!available || thread.busy || Boolean(closed)} aria-label={whyLabel}

@@ -27,6 +27,7 @@
   import { gradeMark } from '../lib/grades.ts';
   import { saveFinishedEngineGame } from '../lib/offline.ts';
   import { scoreFromAnalysis } from '../lib/position-score.ts';
+  import { profile } from '../lib/profile.svelte.ts';
   import { randomId } from '../lib/random-id.ts';
   import { router } from '../lib/router.svelte.ts';
   import { store } from '../lib/storage.ts';
@@ -68,6 +69,12 @@
   let loaded = $state(false);
   let side = $state<Side>('white');
   let strength = $state(2);
+  /** Whether the Player picked a strength; until then it follows their level, "at your strength". */
+  let strengthPicked = false;
+  $effect(() => {
+    const level = profile.player.level;
+    if (!strengthPicked) strength = level === 'beginner' ? 1 : level === 'club' ? 3 : 2;
+  });
   let thinking = $state(false);
   let awaitingChoice = $state(false);
   let notice = $state('');
@@ -378,8 +385,12 @@
     // Resign and an agreed draw take away the button that ended the game: carry on from the card's
     // first action, Review this game (or New game while the game waits on this device).
     await tick();
+    // The card from its result line, at the panel's top: a phone's short panel may be scrolled past it.
+    const card = endActions?.closest<HTMLElement>('.game-status');
+    const panel = card?.closest<HTMLElement>('.panel-body');
+    if (card && panel) panel.scrollTop += card.getBoundingClientRect().top - panel.getBoundingClientRect().top;
     const focusLost = !document.activeElement || document.activeElement === document.body;
-    if (focusLost) endActions?.querySelector<HTMLElement>('a, button')?.focus();
+    if (focusLost) endActions?.querySelector<HTMLElement>('a, button')?.focus({ preventScroll: true });
   }
 
   /** The record the desktop saves for a finished game. */
@@ -554,7 +565,7 @@
       <fieldset>
         <legend>The Engine’s strength</legend>
         {#each LEVELS as l (l.value)}
-          <label><input type="radio" bind:group={strength} value={l.value} /> {l.name}</label>
+          <label><input type="radio" bind:group={strength} value={l.value} onchange={() => (strengthPicked = true)} /> {l.name}</label>
         {/each}
       </fieldset>
       <button type="submit">Start the Engine Game</button>

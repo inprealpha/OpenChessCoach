@@ -40,7 +40,7 @@
 
 <dialog bind:this={dialog} class="card" aria-labelledby="phone-reminder-title" oncancel={() => later(false)}>
   <h2 id="phone-reminder-title" tabindex="-1" bind:this={heading}>Play on your phone</h2>
-  <p>OpenChessCoach works best on your phone. This desktop does the Coach’s work, and your phone connects to it over your Wi-Fi.</p>
+  <p>OpenChessCoach works best on your phone. This desktop does the Coach’s work, and your phone connects to it over your Wi-Fi, or through the internet when the Wi-Fi way is blocked.</p>
   {#if phone.info}<PhonePairing info={phone.info} hideCode />{/if}
   <div class="row">
     {#if phone.info?.phone.paired}

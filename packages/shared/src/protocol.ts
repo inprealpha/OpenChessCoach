@@ -8,7 +8,7 @@ import type { MoveGrade } from './grader.ts';
 import type { Threat } from './threat.ts';
 
 /** Raised whenever a message changes shape, so a client running older code is told to reload. */
-export const PROTOCOL_VERSION = 4;
+export const PROTOCOL_VERSION = 5;
 
 // ---------- Domain types ----------
 
@@ -42,6 +42,11 @@ export interface PlayerProfile {
   /** False until the first-run screen is finished or skipped. */
   onboarded: boolean;
   level: PlayerLevel;
+  /**
+   * Whether a game's Review, and a Why Question about it, is pitched at the rating its record gives
+   * the side the Review follows, rather than at `level` (#33). Games without one still use `level`.
+   */
+  levelFromGames: boolean;
   rating: number | null;
   ratingSource: { site: RatingSite; username: string } | null;
   goals: string[];
@@ -258,7 +263,7 @@ export interface RequestMap {
 
   'profile.get': { req: Record<string, never>; res: PlayerProfile };
   'profile.update': {
-    req: { level?: PlayerLevel; goals?: string[]; onboarded?: boolean; rating?: { site: RatingSite; username: string } | null };
+    req: { level?: PlayerLevel; levelFromGames?: boolean; goals?: string[]; onboarded?: boolean; rating?: { site: RatingSite; username: string } | null };
     res: PlayerProfile;
   };
   'profile.deleteNote': { req: { noteId: number }; res: PlayerProfile };

@@ -10,6 +10,8 @@
 
   let editing = $state(false);
   let level = $state<PlayerLevel>('beginner');
+  /** Whether a game's Review is pitched at the game's rating, when it has one (#33). */
+  let levelFromGames = $state(false);
   let goals = $state<string[]>([]);
   let site = $state<RatingSite | ''>('');
   let username = $state('');
@@ -44,6 +46,7 @@
   async function startEdit(atAccount = false): Promise<void> {
     if (!p) return;
     level = p.level;
+    levelFromGames = p.levelFromGames;
     goals = p.goals.length ? [...p.goals] : [''];
     site = p.ratingSource?.site ?? '';
     username = p.ratingSource?.username ?? '';
@@ -79,7 +82,7 @@
     try {
       // One update: the desktop reads the rating before it saves anything, so an unknown
       // username leaves the whole Player Profile as it was.
-      profile.set(await api.request('profile.update', { level, goals: goals.map((g) => g.trim()).filter(Boolean), ...account }));
+      profile.set(await api.request('profile.update', { level, levelFromGames, goals: goals.map((g) => g.trim()).filter(Boolean), ...account }));
       editing = false;
     } catch (err) {
       if (!(err instanceof ApiError)) saveError = 'Could not save. Try again.';
@@ -125,6 +128,14 @@
             {#each PLAYER_LEVELS as l (l)}<option value={l}>{LEVEL_NAME[l]}</option>{/each}
           </select>
         </label>
+        <label class="check">
+          <input type="checkbox" bind:checked={levelFromGames} aria-describedby="profile-game-level" />
+          Pitch each Review at the game’s rating
+        </label>
+        <p class="muted small" id="profile-game-level">
+          Games from Lichess and chess.com record the players’ ratings. With this on, the Coach explains such a game, and your Why Questions about it,
+          at the game’s rating for the side its Review follows. Other games use your level.
+        </p>
         <fieldset class="account">
           <legend>Your online account</legend>
           <p class="muted small">The app reads your rating so “players at your level” uses a real number, and fills in your username when you import your games.</p>
@@ -166,7 +177,10 @@
         </div>
         {#if saveError}<p class="error small save-error" role="alert">{saveError}</p>{/if}
       {:else}
-        <p><strong>Level:</strong> <span data-testid="profile-level">{LEVEL_NAME[p.level]}</span></p>
+        <p>
+          <strong>Level:</strong> <span data-testid="profile-level">{LEVEL_NAME[p.level]}</span>
+          {#if p.levelFromGames}<span class="muted small">(a game with ratings is reviewed at the game’s rating)</span>{/if}
+        </p>
         <p>
           <strong>Rating:</strong>
           {#if p.rating && p.ratingSource}{p.rating} ({SITE_NAME[p.ratingSource.site]}, {p.ratingSource.username}){:else}<span class="muted">not linked</span>
@@ -268,6 +282,9 @@
   .account .error, .save-error { margin: 0.4rem 0 0; }
   .link { background: none; border: 0; padding: 0 0.2rem; color: var(--accent); text-decoration: underline; cursor: pointer; }
   input { display: block; width: 100%; margin: 0.25rem 0; }
+  .check { margin-top: 0.6rem; }
+  .check input { width: auto; margin: 0; flex: none; }
+  .check + .muted { margin: 0.2rem 0 0; }
   .notes li { display: flex; justify-content: space-between; gap: 0.5rem; align-items: center; margin: 0.25rem 0; }
   .small { font-size: 0.85rem; }
   /* Only very large counts could still be too wide: then the table scrolls inside its card, never the page. */

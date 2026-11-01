@@ -5,7 +5,8 @@ import { DatabaseSync, type SQLInputValue } from 'node:sqlite';
 
 export const DB_FILE = 'coach.sqlite';
 
-const MIGRATIONS: string[] = [
+/** The schema's steps, in order; exported so a test can take a database back to before one. */
+export const MIGRATIONS: string[] = [
   `
   CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
   CREATE TABLE devices (
@@ -192,6 +193,11 @@ const MIGRATIONS: string[] = [
   // applies. A Player who turns it off again keeps it off.
   `
   DELETE FROM settings WHERE key = 'thinkDeeper';
+  `,
+  // Whether a game's Review is pitched at the rating its record gives the side it follows, rather
+  // than at the Player Profile's level (#33). Off: the Player's own level, as before.
+  `
+  ALTER TABLE profile ADD COLUMN level_from_games INTEGER NOT NULL DEFAULT 0;
   `,
 ];
 

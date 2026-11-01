@@ -489,6 +489,25 @@ test.describe('Live Coaching', () => {
     expect(calls).toHaveLength(1);
   });
 
+  // Safari's visible area on current iPhones too: a short sheet must still show the choice, not the move list under it.
+  for (const [width, height] of [[402, 714], [440, 790]] as const) {
+    test(`on an iPhone at ${width}×${height}, the choice to take a Mistake back shows in the resting sheet`, async ({ paired, app }) => {
+      await paired.setViewportSize({ width, height });
+      // A few moves in, so the move list under the choice has rows to scroll to.
+      await startGame(paired, app.url);
+      await moveAndWaitForReply(paired, 'e2e4', 2);
+      await coachIdle(paired);
+      // Ba6 gives the bishop away: a Blunder.
+      await play(paired, 'f1a6', BOARD);
+      const status = paired.getByRole('status', { name: 'Game status' });
+      await expect(status).toContainText('Take the move back, or carry on?');
+      await coachIdle(paired);
+      await expect(status.getByRole('button', { name: 'Take the move back' })).toBeInViewport({ ratio: 1 });
+      await expect(status.getByRole('button', { name: 'Carry on' })).toBeInViewport({ ratio: 1 });
+      expect(await paired.evaluate(() => window.scrollY)).toBe(0);
+    });
+  }
+
   test('on a phone, the choice to take a Mistake back is on screen without scrolling', async ({ paired, app }) => {
     await paired.setViewportSize({ width: 390, height: 844 });
     await startGame(paired, app.url);

@@ -360,6 +360,8 @@
   /** Continue with the Lesson's move: the board shows it, with its note, before the Lesson moves on. */
   async function showLessonMove(): Promise<void> {
     if (!node || phase !== 'feedback' || lessonMove) return;
+    // The Lesson's move plays on the board: a phone's sheet comes down to show it.
+    sheet.full = false;
     line.takeBack();
     line.play(node.main);
     coach.clearAnnotations();
@@ -373,6 +375,8 @@
     // step the first one has just advanced, and skip a decision.
     if (!node || !lesson || advancing || !(phase === 'shown' || (phase === 'feedback' && lessonMove))) return;
     advancing = true;
+    // The next decision is on the board: a phone's sheet comes down so the first tap moves a piece.
+    sheet.full = false;
     const from = step;
     // A checkmate ends its part: the decisions left in it are needless.
     const mated = phase === 'feedback' && mates;
@@ -671,7 +675,7 @@
           {:else if phase === 'done' && variation.active}
             <div class="board-bar toolbar">
               <StepButtons onfirst={() => stepVariation('first')} onprevious={() => stepVariation('previous')} onnext={() => stepVariation('next')} onlast={() => stepVariation('last')} />
-              <button type="button" class="secondary back" onclick={backToLesson}>Back to the Lesson</button>
+              <button type="button" class="back" onclick={backToLesson}>Back to the Lesson</button>
             </div>
           {/if}
         </div>

@@ -41,6 +41,22 @@
   const earlier = $derived(thread.entries.slice(0, latestFrom));
   const latest = $derived(thread.entries.slice(latestFrom));
 
+  /** The latest exchange answers the Player's own question. */
+  const answered = $derived(latest[0]?.from === 'player');
+  /** The log at rest shows less than the latest message: there is more to read with the sheet up. */
+  let cut = $state(false);
+  $effect(() => {
+    const el = log;
+    if (!el) return;
+    const measure = () => (cut = !sheet.full && el.scrollHeight > el.clientHeight + 2);
+    void sheet.full;
+    void thread.entries[thread.entries.length - 1]?.text;
+    measure();
+    const watch = new ResizeObserver(measure);
+    watch.observe(el);
+    return () => watch.disconnect();
+  });
+
   /** The long entry the log was last scrolled to the start of: left alone after that. */
   let atStart: Element | null = null;
   $effect(() => {
@@ -122,9 +138,14 @@
     {/if}
     {#each latest as entry (entry.id)}{@render message(entry)}{/each}
   </div>
-  {#if latest.length && !thread.busy && sheet.on}
-    <!-- On a phone the answer takes the sheet's room: one tap puts it away behind "Earlier". -->
-    <button type="button" class="link put-away" onclick={() => thread.settle()}>Put the answer away</button>
+  {#if sheet.on && !thread.busy && (cut || answered)}
+    <!-- A phone's docked log shows two lines at rest: Read all pulls the sheet up for the rest, and
+         an answer to the Player's question, which takes the sheet's room, can be put away behind
+         "Earlier". -->
+    <div class="log-actions">
+      {#if cut}<button type="button" class="link" onclick={() => sheet.pullUp()}>Read all</button>{/if}
+      {#if answered}<button type="button" class="link" onclick={() => thread.settle()}>Put the answer away</button>{/if}
+    </div>
   {/if}
   {#if actions}<div class="actions">{@render actions()}</div>{/if}
   {#if onwhy}
@@ -187,7 +208,9 @@
     .log { max-height: 3rem; }
     .coach:focus-within .log { max-height: 9rem; }
     :global(.sheet-full) .log { max-height: 26dvh; }
-    .put-away { align-self: flex-end; background: none; border: 0; padding: 0 0.2rem; color: var(--muted); font-size: 0.8rem; text-decoration: underline; }
+    /* Full-height taps, as every phone button is, but no more than one row. */
+    .log-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: -0.35rem; }
+    .log-actions button { min-height: var(--tap, 2.75rem); padding: 0 0.2rem; background: none; border: 0; color: var(--muted); font-size: 0.85rem; text-decoration: underline; }
     /* Its name and "Coach ready" cost a phone a line: said only while it works or can't. */
     header.idle { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
     h2 { font-size: 0.85rem; }

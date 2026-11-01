@@ -10,7 +10,7 @@ import { INITIAL_FEN } from '@chess-coach/shared/chess';
 import { BRIEF_BUDGET, type Brief } from '@chess-coach/shared/coach/brief';
 import { GAMES_PAGE_SIZE, PROTOCOL_VERSION, type EngineGameRecord, type ReviewPart } from '@chess-coach/shared/protocol';
 import { FakeClock } from '../src/clock.ts';
-import { openDb } from '../src/db.ts';
+import { MIGRATIONS, openDb } from '../src/db.ts';
 import { createNodeEngine } from '../src/engine/node-engine.ts';
 import { listGames } from '../src/games.ts';
 import { getReview, reviewInProgress } from '../src/reviews.ts';
@@ -603,7 +603,7 @@ describe('Reviews', () => {
     // One overview call, on the Review moments' model, before any key moment.
     const calls = rows<{ job: string; model: string; brief: string; stripped: string }>(app, 'SELECT job, model, brief, stripped FROM coach_calls ORDER BY id');
     expect(calls.map((r) => r.job)).toEqual(['review-overview', 'review-moment', 'review-moment', 'review-moment', 'review-moment']);
-    expect(calls[0]?.model).toBe('sonnet');
+    expect(calls[0]?.model).toBe('opus');
     // Its recorded brief: Move Grade counts for both sides, the key moments and the standout moves, within its budget (ADR 0004).
     const brief = JSON.parse(calls[0]?.brief as string) as Brief;
     expect(calls[0]?.brief.length).toBeLessThanOrEqual(BRIEF_BUDGET);
@@ -747,7 +747,7 @@ describe('Reviews', () => {
     // A database as it was before: no overview column, and a saved Review of game 1.
     const old = openDb(dir);
     seed(old, new FakeClock(), 'default');
-    old.exec('ALTER TABLE reviews DROP COLUMN overview; UPDATE schema_version SET version = version - 1;');
+    old.exec(`ALTER TABLE reviews DROP COLUMN overview; UPDATE schema_version SET version = ${MIGRATIONS.findIndex((m) => m.includes('ADD COLUMN overview'))};`);
     old.prepare("INSERT INTO reviews (game_id, created_at, moments) VALUES (1, '2026-01-01T12:00:00.000Z', '[]')").run();
     old.close();
 

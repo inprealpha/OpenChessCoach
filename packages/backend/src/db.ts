@@ -5,7 +5,8 @@ import { DatabaseSync, type SQLInputValue } from 'node:sqlite';
 
 export const DB_FILE = 'coach.sqlite';
 
-const MIGRATIONS: string[] = [
+/** Run in order; `schema_version` counts those applied. Exported for the tests that rewind to one. */
+export const MIGRATIONS: string[] = [
   `
   CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
   CREATE TABLE devices (
@@ -192,6 +193,14 @@ const MIGRATIONS: string[] = [
   // applies. A Player who turns it off again keeps it off.
   `
   DELETE FROM settings WHERE key = 'thinkDeeper';
+  `,
+  // Opus is now the default for Reviews, Why Questions and Lessons (0.5.0), and every install moves
+  // to it once (the owner's call): a saved Sonnet for those jobs becomes Opus. Hints and Live
+  // Coaching keep what was saved, and a Player who picks Sonnet again keeps it.
+  `
+  UPDATE settings SET value = json_set(value, '$."review-moment"', 'opus') WHERE key = 'models' AND json_extract(value, '$."review-moment"') = 'sonnet';
+  UPDATE settings SET value = json_set(value, '$.why', 'opus') WHERE key = 'models' AND json_extract(value, '$.why') = 'sonnet';
+  UPDATE settings SET value = json_set(value, '$."lesson-turn"', 'opus') WHERE key = 'models' AND json_extract(value, '$."lesson-turn"') = 'sonnet';
   `,
 ];
 

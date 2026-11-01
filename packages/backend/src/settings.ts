@@ -19,10 +19,11 @@ export const COACH_QUALITY_MODELS: Record<CoachQuality, Record<ModelJob, string>
 };
 
 /**
- * Balanced: Haiku for Live Coaching and Hints, the stronger model for everything else. Haiku was
- * measured good enough for the two short jobs (docs/research/hint-and-live-coaching-models.md).
+ * Best: Opus for Reviews, Why Questions and Lessons (the owner's choice for 0.5.0), and Haiku for
+ * Live Coaching and Hints, which was measured good enough for the two short jobs
+ * (docs/research/hint-and-live-coaching-models.md).
  */
-export const DEFAULT_MODELS: Record<ModelJob, string> = COACH_QUALITY_MODELS.balanced;
+export const DEFAULT_MODELS: Record<ModelJob, string> = COACH_QUALITY_MODELS.best;
 
 /** What the settings table holds. The Coach quality is not stored: it is read from the models. */
 type StoredSettings = Omit<Settings, 'quality'>;

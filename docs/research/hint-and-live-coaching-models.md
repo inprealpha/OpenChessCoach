@@ -63,7 +63,7 @@ By level, with Haiku's count first and Sonnet's second:
 
 ## Decision and follow-ups
 
-The split stays. Haiku is as accurate as Sonnet in Hints and more accurate in Live Coaching, gives away fewer Hints, and costs about a ninth as much. Moving Hints alone to Sonnet would buy fewer bad reasons for beginners at the price of twice the giveaways. The counts don't show enough of a gain for that.
+The split stays: every preset keeps Haiku for Hints and Live Coaching. (Separately, from 0.5.0 the default preset is Best, with Opus for Reviews, Why Questions and Lessons, the owner's choice; this measurement doesn't bear on that.) Haiku is as accurate as Sonnet in Hints and more accurate in Live Coaching, gives away fewer Hints, and costs about a ninth as much. Moving Hints alone to Sonnet would buy fewer bad reasons for beginners at the price of twice the giveaways. The counts don't show enough of a gain for that.
 
 Worth doing separately, each with its own measurement:
 

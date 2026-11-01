@@ -4,7 +4,7 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it, onTestFinished } from 'vitest';
-import { openDb } from '../src/db.ts';
+import { MIGRATIONS, openDb } from '../src/db.ts';
 import { getSettings, updateSettings } from '../src/settings.ts';
 import { client, instance } from './helpers.ts';
 
@@ -12,10 +12,44 @@ const THRIFTY = { 'review-moment': 'haiku', why: 'haiku', 'lesson-turn': 'haiku'
 const BALANCED = { 'review-moment': 'sonnet', why: 'sonnet', 'lesson-turn': 'sonnet', hint: 'haiku', live: 'haiku' };
 const BEST = { 'review-moment': 'opus', why: 'opus', 'lesson-turn': 'opus', hint: 'haiku', live: 'haiku' };
 
+/** A database as it was just before the migration that contains `marker`, so reopening runs it and the ones after. */
+function before(dir: string, marker: string, setup: (db: ReturnType<typeof openDb>) => void): void {
+  const at = MIGRATIONS.findIndex((m) => m.includes(marker));
+  if (at < 0) throw new Error(`no migration contains ${marker}`);
+  const old = openDb(dir);
+  setup(old);
+  old.prepare('UPDATE schema_version SET version = ?').run(at);
+  old.close();
+}
+
 describe('Coach quality', () => {
-  it('is Balanced on a fresh install, with Sonnet for the explaining jobs and Haiku for the quick ones', async () => {
+  it('is Best on a fresh install, with Opus for the explaining jobs and Haiku for the quick ones', async () => {
     const c = await client(await instance({ seed: 'empty' }));
-    expect(await c.request('settings.get', {})).toMatchObject({ quality: 'balanced', models: BALANCED });
+    expect(await c.request('settings.get', {})).toMatchObject({ quality: 'best', models: BEST });
+  });
+
+  it('moves an install that saved Sonnet to Opus once, keeping its other choices, and a Player who picks Sonnet again keeps it', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'chess-coach-opus-'));
+    onTestFinished(() => rmSync(dir, { recursive: true, force: true }));
+    // Balanced as saved before 0.5.0, with Hints changed by hand to Sonnet.
+    before(dir, 'json_set', (old) => old.prepare("INSERT INTO settings (key, value) VALUES ('models', ?)").run(JSON.stringify({ ...BALANCED, hint: 'sonnet' })));
+    const db = openDb(dir);
+    expect(getSettings(db)).toMatchObject({ quality: 'custom', models: { ...BEST, hint: 'sonnet' } });
+    updateSettings(db, { quality: 'balanced' });
+    db.close();
+    const again = openDb(dir);
+    onTestFinished(() => again.close());
+    expect(getSettings(again)).toMatchObject({ quality: 'balanced', models: BALANCED });
+  });
+
+  it('leaves saved models without the sonnet alias as they were', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'chess-coach-opus-'));
+    onTestFinished(() => rmSync(dir, { recursive: true, force: true }));
+    const mine = { 'review-moment': 'haiku', why: 'claude-sonnet-4-5', 'lesson-turn': 'haiku', hint: 'haiku', live: 'haiku' };
+    before(dir, 'json_set', (old) => old.prepare("INSERT INTO settings (key, value) VALUES ('models', ?)").run(JSON.stringify(mine)));
+    const db = openDb(dir);
+    onTestFinished(() => db.close());
+    expect(getSettings(db).models).toEqual(mine);
   });
 
   it('writes the per-job models of each preset and reads the preset back from them', async () => {
@@ -54,7 +88,7 @@ describe('Coach quality', () => {
     const c = await client(await instance());
     await expect(c.request('settings.update', { quality: 'custom' as never })).rejects.toMatchObject({ code: 'bad-request' });
     await expect(c.request('settings.update', { quality: 'cheap' as never })).rejects.toMatchObject({ code: 'bad-request' });
-    expect(await c.request('settings.get', {})).toMatchObject({ quality: 'balanced', models: BALANCED });
+    expect(await c.request('settings.get', {})).toMatchObject({ quality: 'best', models: BEST });
   });
 });
 
@@ -81,11 +115,7 @@ describe('Think deeper', () => {
     const dir = mkdtempSync(join(tmpdir(), 'chess-coach-deeper-'));
     onTestFinished(() => rmSync(dir, { recursive: true, force: true }));
     // Before #32, saving any setting stored every setting, so "off" was stored with the rest.
-    const old = openDb(dir);
-    const version = (old.prepare('SELECT version FROM schema_version').get() as { version: number }).version;
-    old.prepare("INSERT INTO settings (key, value) VALUES ('thinkDeeper', 'false'), ('liveCoachingDefault', 'false')").run();
-    old.prepare('UPDATE schema_version SET version = ?').run(version - 1);
-    old.close();
+    before(dir, "key = 'thinkDeeper'", (old) => old.prepare("INSERT INTO settings (key, value) VALUES ('thinkDeeper', 'false'), ('liveCoachingDefault', 'false')").run());
     const db = openDb(dir);
     expect(getSettings(db)).toMatchObject({ thinkDeeper: true, liveCoachingDefault: false });
     updateSettings(db, { thinkDeeper: false });
@@ -122,6 +152,6 @@ describe('the Review overview', () => {
       await expect(c.request('settings.update', { reviewOverview: value as never })).rejects.toMatchObject({ code: 'bad-request' });
     }
     await expect(c.request('settings.update', { models: { 'review-overview': 'opus' } as never })).rejects.toMatchObject({ code: 'bad-request' });
-    expect(await c.request('settings.get', {})).toMatchObject({ reviewOverview: true, quality: 'balanced', models: BALANCED });
+    expect(await c.request('settings.get', {})).toMatchObject({ reviewOverview: true, quality: 'best', models: BEST });
   });
 });

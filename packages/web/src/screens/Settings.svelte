@@ -43,11 +43,11 @@
       cost: 'Haiku for every job. Uses the least of your Claude limits; explanations are shorter and simpler.',
     },
     balanced: {
-      name: 'Balanced (recommended)',
+      name: 'Balanced',
       cost: 'Sonnet for Reviews (the overview and the key moments), Why Questions and Lessons; Haiku for Hints and Live Coaching. A moderate share of your Claude limits.',
     },
     best: {
-      name: 'Best',
+      name: 'Best (recommended)',
       cost: 'Opus for Reviews (the overview and the key moments), Why Questions and Lessons; Haiku for Hints and Live Coaching, which must stay quick. Uses your Claude limits fastest.',
     },
   };

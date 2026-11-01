@@ -91,11 +91,7 @@
         line.goTo(0);
         const reply = await api.request('review.get', { gameId: id });
         review = reply.review;
-        if (review) {
-          phase = 'done';
-          // The first key moment's row starts expanded, so the panel opens on words, not a list.
-          expanded = review.moments[0]?.ply ?? null;
-        }
+        if (review) phase = 'done';
         else {
           // Started on this device before the Player left the screen: follow it rather than offer
           // Start. Started by a request this device no longer holds, before a reload or in a tab
@@ -340,7 +336,7 @@
           <!-- Steps from the position on the board: an open key moment shows the one before its move. -->
           <StepButtons onfirst={() => goto(0)} onprevious={() => goto(shownIndex - 1)} onnext={() => goto(shownIndex + 1)} onlast={() => goto(line.moves.length)} />
           <FlipButton onflip={() => (flipped = !flipped)} />
-          <ThreatButton />
+          <ThreatButton view={threats} />
         </div>
         {#if review && !narrow.on}
           <WinningChancesGraph moves={review.moves} cursor={shownIndex} ongoto={goto} compact />
@@ -462,7 +458,8 @@
               {#if narrow.on}
                 <WinningChancesGraph moves={review.moves} cursor={shownIndex} ongoto={goto} />
               {/if}
-              <MoveList moves={line.moves} {grades} cursor={line.cursor} ongoto={pickMove} />
+              <!-- Drawn when shown, so it opens scrolled to the current move. -->
+              {#if tab === 'moves'}<MoveList moves={line.moves} {grades} cursor={line.cursor} ongoto={pickMove} />{/if}
             </div>
           {:else}
             <MoveList moves={line.moves} {grades} cursor={line.cursor} ongoto={pickMove} />
@@ -488,7 +485,7 @@
 
 <style>
   /* Under the board on desktop: the bar, the legend line and the graph's strip. */
-  .review { --under-board: 12.75rem; }
+  .review { --under-board: 12.75rem; --phone-reserve: 27rem; }
   .tabs { display: flex; gap: 0.25rem; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--bg); z-index: 1; }
   .tabs button { background: none; color: var(--muted); border-radius: 8px 8px 0 0; padding: 0.45rem 0.9rem; min-height: 2.5rem; border-bottom: 2px solid transparent; }
   .tabs button.on { color: var(--text); font-weight: 600; border-bottom-color: var(--accent); }

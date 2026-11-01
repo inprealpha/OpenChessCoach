@@ -61,6 +61,13 @@
   let shownContinue = $state<HTMLButtonElement>();
   let hintButton = $state<HTMLButtonElement>();
   let doneCard = $state<HTMLElement>();
+  let panelBody = $state<HTMLElement>();
+  // Each decision, its feedback and the end open the panel at its top, where the choice to make is.
+  $effect(() => {
+    void step;
+    // The end scrolls to its own card.
+    if (phase !== 'done') panelBody?.scrollTo({ top: 0 });
+  });
   /** The Lesson's move once shown, so Show the move says it once per decision. */
   let shownMove: { fen: string; arrow: { from: string; to: string; brush: 'green' } } | null = null;
   /** A Hint in flight: a second click while it is answered does nothing. */
@@ -370,11 +377,10 @@
         coach.clearAnnotations();
         hintArrow = null;
         phase = 'done';
-        // On a phone the card is under the board: bring it into view, so the next Lesson shows
-        // without scrolling, and give it the focus, so the keyboard carries on from there.
+        // Bring the card to the top of its panel, so the next Lesson shows without scrolling, and
+        // give it the focus, so the keyboard carries on from there.
         await tick();
-        const box = doneCard?.getBoundingClientRect();
-        if (box && (box.top < 0 || box.bottom > innerHeight)) doneCard?.scrollIntoView({ block: 'start' });
+        doneCard?.scrollIntoView({ block: 'start' });
         doneCard?.focus({ preventScroll: true });
         await saveProgress(decisionList.length, true);
         return;
@@ -536,7 +542,7 @@
           {#if phase === 'done'}Lesson complete{:else}Decision {step + 1} of {decisionList.length}{/if}
         </p>
       {/if}
-      <a class="back" href="#/lessons"><span aria-hidden="true">←</span> Back to the Lessons</a>
+      <a class="back" href="#/lessons" aria-label="Back to the Lessons"><span aria-hidden="true">←</span> <span class="long">Back to the </span>Lessons</a>
     </header>
     {#if phase === 'intro'}
       {@const firstPart = lesson.parts[0]}
@@ -606,7 +612,7 @@
           {/if}
         </div>
         <div class="side">
-          <div class="panel-body" class:feedback={phase === 'feedback' || phase === 'shown'}>
+          <div class="panel-body" bind:this={panelBody} class:feedback={phase === 'feedback' || phase === 'shown'}>
           {#if !isOpening && phase !== 'done'}
             <section class="card" aria-label="Position">
               <h2>{lesson.parts.length > 1 ? `${(current?.partIndex ?? 0) + 1} of ${lesson.parts.length}: ` : ''}{part.title}</h2>
@@ -689,6 +695,15 @@
           {#if phase === 'done'}
             <section class="card done" aria-label="Lesson complete" tabindex="-1" bind:this={doneCard}>
               <p><strong>Lesson complete.</strong> It is marked complete in your Player Profile.</p>
+              <!-- The next step first, so a phone shows it in the panel's first lines. -->
+              {#if nextLesson}
+                <p class="next"><a class="button" href={`#/lesson/${nextLesson.id}`}>Your next Lesson: {nextLesson.name}</a></p>
+                {#if nextInTrack && nextInTrack.id !== nextLesson.id}
+                  <p class="next"><a class="button secondary" href={`#/lesson/${nextInTrack.id}`}>Next in {TRACK_NAMES[lesson.track].name}: {nextInTrack.name}</a></p>
+                {/if}
+              {:else}
+                <p>You have done every Lesson. Go over any of them again, or practise with <a href="#/puzzles">Puzzles</a>.</p>
+              {/if}
               {#if tally}
                 <p>{tallyLead}: {tally}.</p>
               {/if}
@@ -697,14 +712,6 @@
                 <ul class="learned" aria-labelledby="learned-heading">
                   {#each keyIdeas as idea, i (i)}<li>{idea}</li>{/each}
                 </ul>
-              {/if}
-              {#if nextLesson}
-                <p class="next"><a class="button" href={`#/lesson/${nextLesson.id}`}>Your next Lesson: {nextLesson.name}</a></p>
-                {#if nextInTrack && nextInTrack.id !== nextLesson.id}
-                  <p class="next"><a class="button secondary" href={`#/lesson/${nextInTrack.id}`}>Next in {TRACK_NAMES[lesson.track].name}: {nextInTrack.name}</a></p>
-                {/if}
-              {:else}
-                <p>You have done every Lesson. Go over any of them again, or practise with <a href="#/puzzles">Puzzles</a>.</p>
               {/if}
               <ul class="more">
                 {#if lesson.playOut}
@@ -738,8 +745,12 @@
   .title { justify-content: flex-start; }
   .title h1 { margin: 0; }
   .back { margin-left: auto; font-size: 0.9rem; white-space: nowrap; }
+  /* A phone keeps the header to one line: the link reads "← Lessons". */
+  @media (max-width: 820px) { .board-screen .back .long { display: none; } }
   /* Under the board: the Hint button and the legend line. */
-  .board-screen { --under-board: 5.5rem; }
+  .board-screen { --under-board: 5.5rem; --phone-reserve: 26.5rem; }
+  /* Lesson complete: the board gives the card room, so a short phone shows the next Lesson. */
+  .board-screen:has(.done) { --phone-reserve: 29rem; }
   .intro { max-width: 42rem; display: flex; flex-direction: column; gap: 0.6rem; align-items: flex-start; }
   .intro p { margin: 0; }
   .intro h2 { margin: 0 0 0.2rem; }

@@ -43,7 +43,12 @@
   $effect(() => {
     void thread.entries.length;
     void thread.entries[thread.entries.length - 1]?.text;
-    log?.scrollTo({ top: log.scrollHeight });
+    // The newest entry in view: its end, or its start when it is taller than the log, so a long
+    // answer is read from its first line.
+    const last = [...(log?.querySelectorAll(':scope > .entry') ?? [])].at(-1);
+    if (!log || !last) return;
+    const top = last.getBoundingClientRect().top - log.getBoundingClientRect().top + log.scrollTop;
+    log.scrollTop = last.getBoundingClientRect().height > log.clientHeight ? top : log.scrollHeight;
   });
 
   async function submit(e: SubmitEvent): Promise<void> {
@@ -145,7 +150,9 @@
      and the box and its button share one row. */
   @media (max-width: 820px) {
     .coach { gap: 0.35rem; padding: 0.45rem 0.6rem; border-radius: 10px 10px 0 0; }
-    .log { max-height: 6.5rem; }
+    /* Docked at the foot of a phone's screen: two lines of the answer, more while typing. */
+    .log { max-height: 3rem; }
+    .coach:focus-within .log { max-height: 9rem; }
     h2 { font-size: 0.85rem; }
     .status { font-size: 0.75rem; }
     form { flex-wrap: nowrap; }

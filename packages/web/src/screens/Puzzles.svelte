@@ -10,6 +10,7 @@
   import { LEVEL_PUZZLE_RATING, pickPuzzles, type PuzzleData } from '@chess-coach/shared/content/puzzles';
   import Board from '../components/Board.svelte';
   import CoachPanel from '../components/CoachPanel.svelte';
+  import FlipButton from '../components/FlipButton.svelte';
   import { api } from '../lib/api.svelte.ts';
   import { CoachThread } from '../lib/coach.svelte.ts';
   import { lessonCatalogue, loadPuzzles } from '../lib/content.ts';
@@ -44,6 +45,8 @@
   const lesson = $derived(all.length && !all.some((p) => p.lessonId === opening) ? undefined : lessonCatalogue.find((l) => l.id === opening));
   const lessonName = $derived(lesson?.name);
   const solver = $derived(puzzle ? otherSide(turnOf(puzzle.fen)) : 'white');
+  /** The Player turned the board: it then shows the solver's side at the top. */
+  let flipped = $state(false);
   /** This screen's Puzzles: a Lesson's, or all of them. */
   const pool = $derived(all.filter((p) => !lesson || p.lessonId === lesson.id).map((p) => p.id));
   const here = $derived(progressOn(pool));
@@ -287,7 +290,7 @@
       <div class="board-col">
         <Board
           fen={line.fen}
-          orientation={solver}
+          orientation={flipped ? otherSide(solver) : solver}
           movable={status === 'solving' && !busy ? solver : 'none'}
           lastMove={line.lastMove ? { from: line.lastMove.uci.slice(0, 2), to: line.lastMove.uci.slice(2, 4) } : undefined}
           arrows={explained === line.cursor ? coach.arrows : []}
@@ -295,15 +298,16 @@
           {onmove}
           label="Puzzle board"
         />
-        {#if finished}
-          <!-- Stepping stays inside the Puzzle: its first position is the one the Player was set. -->
-          <div class="board-bar toolbar">
+        <div class="board-bar toolbar">
+          {#if finished}
+            <!-- Stepping stays inside the Puzzle: its first position is the one the Player was set. -->
             <button type="button" class="secondary" onclick={() => line.goTo(1)} aria-label="First position">⏮</button>
             <button type="button" class="secondary" onclick={() => line.goTo(Math.max(1, line.cursor - 1))} aria-label="Previous move">◀</button>
             <button type="button" class="secondary" onclick={() => line.forward()} aria-label="Next move">▶</button>
             <button type="button" class="secondary" onclick={() => line.goTo(line.moves.length)} aria-label="Last position">⏭</button>
-          </div>
-        {/if}
+          {/if}
+          <FlipButton onflip={() => (flipped = !flipped)} />
+        </div>
       </div>
       <div class="side">
         <div class="panel-body">

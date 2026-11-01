@@ -14,10 +14,12 @@ import { board, coachIdle, connection, expect, fenOf, play, square, test } from 
 
 const MOVES = ['e2e4', 'e7e5', 'g1f3', 'b8c6', 'f1c4', 'f8c5', 'b2b4'];
 
-/** New board, which asks first when the board has moves: the Player says yes. */
-async function newBoard(page: Page): Promise<void> {
+/** New board, which asks first when the board has moves (`asks`): the Player says yes. */
+async function newBoard(page: Page, asks = true): Promise<void> {
   await page.getByRole('button', { name: 'New board' }).click();
-  await page.getByRole('alertdialog', { name: 'Clear this board?' }).getByRole('button', { name: 'Yes, a new board' }).click();
+  const dialog = page.getByRole('alertdialog', { name: 'Clear this board?' });
+  if (asks) await dialog.getByRole('button', { name: 'Yes, a new board' }).click();
+  else await expect(dialog).toHaveCount(0);
 }
 
 /** The threat arrows on the board, by accessible name. */
@@ -139,10 +141,14 @@ test('the Threat button shows the opponent’s threat, follows each move and is 
   // The choice survives a reload.
   await paired.reload();
   await expect(button).toHaveAttribute('aria-pressed', 'true');
+  // The start position has none, and the board says so rather than look broken.
+  const none = paired.getByRole('status').filter({ hasText: 'No threat' });
+  await expect(none).toBeVisible();
   await play(paired, 'e2e4');
   await play(paired, 'e7e5');
   await play(paired, 'g1f3');
   await expect(threatArrows(paired)).toHaveAccessibleName('Threat: White threatens Nxe5 (f3 to e5)');
+  await expect(none).toHaveCount(0);
 
   await button.click();
   await expect(button).toHaveAttribute('aria-pressed', 'false');
@@ -960,7 +966,8 @@ test.describe('setting up a position', () => {
     // The message about an illegal move goes with the position it was about.
     await play(paired, 'e7e4');
     await expect(paired.getByText('That move isn’t legal.')).toBeVisible();
-    await newBoard(paired);
+    // A position with no moves played has nothing to lose: no question.
+    await newBoard(paired, false);
     await expect(board(paired, 'Chess board')).toHaveAttribute('data-fen', INITIAL_FEN);
     await expect(board(paired, 'Chess board')).toHaveAttribute('data-orientation', 'white');
     await expect(paired.getByText('That move isn’t legal.')).toHaveCount(0);

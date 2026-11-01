@@ -17,18 +17,29 @@
   // Keep the current move in view: the list scrolls in its own box, never the page, and jumps
   // rather than glides, so reduced motion needs nothing more. It looks again when the current
   // move's Move Grade arrives, since the badge widens the move and can wrap it onto a new row.
+  function keepInView(el: HTMLOListElement): void {
+    const item = el.children[cursor - 1];
+    if (!item) {
+      el.scrollTop = 0;
+      return;
+    }
+    const box = el.getBoundingClientRect();
+    const at = item.getBoundingClientRect();
+    if (at.top < box.top) el.scrollTop -= box.top - at.top;
+    else if (at.bottom > box.bottom) el.scrollTop += at.bottom - box.bottom;
+  }
   $effect(() => {
     if (!list || moves.length === 0) return;
     void grades[cursor - 1];
-    const item = list.children[cursor - 1];
-    if (!item) {
-      list.scrollTop = 0;
-      return;
-    }
-    const box = list.getBoundingClientRect();
-    const at = item.getBoundingClientRect();
-    if (at.top < box.top) list.scrollTop -= box.top - at.top;
-    else if (at.bottom > box.bottom) list.scrollTop += at.bottom - box.bottom;
+    keepInView(list);
+  });
+  // And when the list's box shrinks, as when the Coach's answer grows beside it.
+  $effect(() => {
+    const el = list;
+    if (!el) return;
+    const watch = new ResizeObserver(() => keepInView(el));
+    watch.observe(el);
+    return () => watch.disconnect();
   });
 
   /** "11." for White, "11…" for Black, from the position the move was played in, so a game set up from a position keeps its numbers. */

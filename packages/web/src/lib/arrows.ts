@@ -1,6 +1,6 @@
 // The arrows on every board, one colour per meaning (docs/design/interface-guidelines.md, "Arrows
 // and marks"): the move played in ink, the Engine's best in green, another good move in blue, a
-// threat in dashed red, a tempting move in orange. Each keeps its accessible name, and the board
+// threat in dashed red, a move that went wrong in solid red, the opponent's reply in orange. Each keeps its accessible name, and the board
 // shows a legend of the colours it draws.
 import type { GradedMove } from '@chess-coach/shared/analysis';
 import { legalMoves, piecesOf, SIDE_NAMES, turnOf, type Side } from '@chess-coach/shared/chess';
@@ -8,7 +8,7 @@ import type { Arrow, Brush } from '@chess-coach/shared/coach/types';
 import { nullMoveFen, type Threat } from '@chess-coach/shared/threat';
 
 /** What an arrow means, which picks its colour on every board. */
-export type ArrowKind = 'played' | 'best' | 'alt' | 'threat' | 'tempting';
+export type ArrowKind = 'played' | 'best' | 'alt' | 'threat' | 'wrong' | 'reply';
 
 /** An arrow on the board: what it means and its accessible name. */
 export interface BoardArrow {
@@ -24,14 +24,19 @@ export const ARROW_LOOK: Record<ArrowKind, { color: string; legend: string; dash
   best: { color: 'var(--arrow-best)', legend: 'best', dashed: false },
   alt: { color: 'var(--arrow-alt)', legend: 'other good move', dashed: false },
   threat: { color: 'var(--arrow-threat)', legend: 'threat', dashed: true },
-  tempting: { color: 'var(--arrow-tempting)', legend: 'tempting', dashed: false },
+  wrong: { color: 'var(--arrow-threat)', legend: 'went wrong', dashed: false },
+  reply: { color: 'var(--arrow-reply)', legend: 'reply', dashed: false },
 };
 
 /** The legend's order: the move played first, as it is drawn on top. */
-export const ARROW_KINDS: readonly ArrowKind[] = ['played', 'best', 'alt', 'threat', 'tempting'];
+export const ARROW_KINDS: readonly ArrowKind[] = ['played', 'best', 'alt', 'threat', 'wrong', 'reply'];
 
-/** What the Coach's brushes mean (prompts.ts): green the best move, blue another, red what went wrong, yellow a reply. */
-const BRUSH_KIND: Record<Brush, ArrowKind> = { green: 'best', blue: 'alt', red: 'threat', yellow: 'tempting' };
+/**
+ * What the Coach's brushes mean (prompts.ts): green the best move, blue another, red a move that
+ * went wrong, yellow the opponent's reply. When the move that went wrong is the move played it is
+ * drawn in ink, as every move played is.
+ */
+const BRUSH_KIND: Record<Brush, ArrowKind> = { green: 'best', blue: 'alt', red: 'wrong', yellow: 'reply' };
 
 /**
  * The Coach's arrows on the board. The move that was played (`played`, in UCI) is ink whatever its

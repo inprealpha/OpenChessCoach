@@ -328,7 +328,7 @@
       <div class="board-bar toolbar">
         <StepButtons onfirst={() => line.goTo(0)} onprevious={() => line.back()} onnext={() => line.forward()} onlast={() => line.goTo(line.moves.length)} />
         <FlipButton onflip={flip} />
-        <ThreatButton />
+        <ThreatButton view={threats} />
       </div>
       <p class="visually-hidden" role="status">{setupNote}</p>
       <p class="result" role="status" aria-label="Result">{result}</p>

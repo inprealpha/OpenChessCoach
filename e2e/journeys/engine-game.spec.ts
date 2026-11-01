@@ -654,7 +654,7 @@ test('the Winning Chances bar follows an Engine Game from the browser Engine, th
   expect(await app.rows('coach_calls')).toHaveLength(0);
 
   // Playing Black, the Player's side is at the bottom of the board and of the bar.
-  await paired.getByRole('button', { name: 'New game' }).click();
+  await gameMenu(paired, 'New game');
   await paired.getByRole('alertdialog', { name: 'Abandon this game?' }).getByRole('button', { name: 'Yes, start a new game' }).click();
   await startGame(paired, app.url, 'Black');
   await expect(paired.getByRole('status', { name: 'Game status' })).toContainText('Your move');

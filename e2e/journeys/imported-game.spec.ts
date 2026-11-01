@@ -354,7 +354,7 @@ test('a Review lists key moments with Move Grades, and reopening it makes no Coa
   // Move Grade symbols sit on the square each graded move landed on, and follow the steps.
   const board = paired.getByRole('group', { name: 'Review board' });
   const symbols = board.getByRole('img', { name: /^(Best|Inaccuracy|Mistake|Blunder) on [a-h][1-8]$/ });
-  await paired.getByRole('button', { name: 'Move 11. Bxf7+, Mistake', exact: true }).click();
+  await pickMove(paired, 'Move 11. Bxf7+, Mistake');
   await expect(symbols).toHaveCount(1);
   await expect(board.getByRole('img', { name: 'Mistake on f7' })).toBeVisible();
   await paired.getByRole('button', { name: 'Next move' }).click(); // 11… Rxf7, Best: a star
@@ -398,7 +398,12 @@ test('a Review lists key moments with Move Grades, and reopening it makes no Coa
   await paired.reload();
   await expect(paired.getByRole('region', { name: 'Key moments' }).getByRole('listitem')).toHaveCount(count);
   expect(await app.rows('coach_calls')).toHaveLength(calls.length);
-  await expectBxf7Chances(paired.getByRole('region', { name: 'Key moments' }).getByRole('listitem').first());
+  // The moments open folded, the board at the start; opening one shows it in full.
+  const reopened = paired.getByRole('region', { name: 'Key moments' }).getByRole('listitem').first();
+  await expect(reopened.getByRole('button', { name: /^Show moment/ })).toHaveAttribute('aria-expanded', 'false');
+  await reopened.getByRole('button', { name: /^Show moment/ }).click();
+  await expectBxf7Chances(reopened);
+  await paired.getByRole('button', { name: 'First position' }).click();
   await expectGraphMarks(paired);
   expect((await app.rows('graded_moves')).length).toBe(48);
 
@@ -416,6 +421,7 @@ test('a Review lists key moments with Move Grades, and reopening it makes no Coa
   expect(await app.rows('coach_calls')).toHaveLength(calls.length);
 
   // A Why Question works on any move of the game.
+  await showTab(paired, 'Moves');
   await paired.getByRole('button', { name: /^Move 3\. Nf3/ }).click();
   await paired.getByRole('button', { name: 'Ask the Coach why' }).click();
   await coachIdle(paired);

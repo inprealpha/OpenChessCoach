@@ -161,6 +161,9 @@
     .conn-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   }
   .icon { display: inline-flex; padding: 0.35rem; border-radius: 8px; color: var(--muted); }
+  @media (max-width: 820px) { .icon { min-width: var(--tap); min-height: var(--tap); align-items: center; justify-content: center; } }
+  /* Three 44 px icons still fit a 320 px phone beside the name. */
+  @media (max-width: 360px) { .top { padding-inline: 0.5rem; } .end { gap: 0; } .conn { margin-right: 0; } }
   .icon:hover, .icon[aria-current='page'] { color: var(--accent); background: var(--bg); }
   .conn.online::before { content: '● '; color: #2e9b47; }
   .conn.offline::before { content: '● '; color: #c27c00; }

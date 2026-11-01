@@ -85,13 +85,16 @@ ADR 0007). Move Grades use the Lichess formula (Best, Good, Inaccuracy, Mistake,
   now, from the browser's Engine searching the position with the side to move swapped (a null
   move). No arrow when the side to move is in check, when the move is not a
   capture, check or promotion, or when it would cost less than an Inaccuracy's worth of winning
-  chances. The same button and arrow are on the Engine Game and Review boards.
+  chances. With it on and no arrow, the status "No threat" says the Engine found none. The same
+  button and arrow are on the Engine Game and Review boards.
 - Every board screen is one frame (`docs/design/interface-guidelines.md`): the header names the
   screen and one line of context ("White to move"), the board bar under the board holds the step
   buttons, `Flip board` (F) and `Show threat`, the panel beside the board scrolls inside itself on
-  a desktop, and the Coach's Ask box is docked at its foot (on a phone the board sticks to the
-  top and the Ask box to the bottom). Each arrow colour has one meaning (ink played, green best,
-  blue other good move, red dashed threat, orange tempting, `packages/web/src/lib/arrows.ts`),
+  a desktop and under it on a phone, and the Coach's Ask box is docked at its foot: the page
+  itself is one screen tall and never scrolls, so a choice at the panel's top (Continue, Take the
+  move back) is never under the board or the Ask box. Phone controls are at least 44 px tall. Each arrow colour has one meaning (ink played, green best,
+  blue other good move, red dashed threat, solid red a move that went wrong, orange the opponent's
+  reply, `packages/web/src/lib/arrows.ts`),
   and the list `Arrow colours` under the board names the ones on it.
 - In verify mode the Engine runs at depth 10, 5 lines, one thread: the same moves always get the
   same evaluations and Move Grades.

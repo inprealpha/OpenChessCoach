@@ -46,9 +46,8 @@ call.
 - The screen is one frame (`docs/design/interface-guidelines.md`): the header line names the
   Player's side and the result ("You had White · Lost 0-1 · vs ikatsca · <opening> · <date>",
   `data-testid="review-summary"`), the board never scrolls away, and the Ask box is docked. On a
-  desktop the page is one screen tall and the panel beside the board scrolls inside itself; on a
-  phone the board column sticks to the top and the Ask box to the bottom while the panel scrolls
-  between them. `Flip board` (or the F key) turns the board, the bar and the graph with it.
+  desktop and on a phone the page is one screen tall and never scrolls: the panel beside (or under)
+  the board scrolls inside itself, with the Ask box docked at its foot. `Flip board` (or the F key) turns the board, the bar and the graph with it.
 - The panel has two tabs, `Moments` (the overview and the key moments) and `Moves` (the move
   list; on a phone the graph too). The overview folds, remembered per game, and folded shows its
   first sentence.
@@ -89,7 +88,7 @@ call.
   last) and the img `Engine’s best: <SAN>` in green (`best`), or one `Move played: <SAN>, <Move
   Grade>, the Engine’s best` when they are the same move. Each arrow colour has one meaning
   (`packages/web/src/lib/arrows.ts`): ink played, green best, blue other good move, red dashed
-  threat, orange tempting; the list `Arrow colours` under the board names the ones it shows. While a key moment is open, or the Coach has answered a Why
+  threat, solid red a move that went wrong, orange the opponent's reply; the list `Arrow colours` under the board names the ones it shows. While a key moment is open, or the Coach has answered a Why
   Question on this move, only the Coach's arrows (`Arrow <from> to <to> (<kind>)`, such as `(best)`; an arrow on the move played is ink) show: no
   Review arrows and no threat arrow.
 - The meter `Winning Chances bar: …` beside the board (see `board-and-engine.md`), with the

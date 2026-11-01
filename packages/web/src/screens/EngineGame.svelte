@@ -16,6 +16,7 @@
   import MoveList from '../components/MoveList.svelte';
   import StepButtons from '../components/StepButtons.svelte';
   import ThreatButton from '../components/ThreatButton.svelte';
+  import FlipButton from '../components/FlipButton.svelte';
   import WinningChancesBar from '../components/WinningChancesBar.svelte';
   import { api } from '../lib/api.svelte.ts';
   import { punishingArrow, threatArrows } from '../lib/arrows.ts';
@@ -82,6 +83,9 @@
   let setupForm = $state<HTMLFormElement>();
 
   const finished = $derived(Boolean(game?.result));
+  /** The Player turned the board; the Winning Chances bar turns with it. */
+  let flipped = $state(false);
+  const orientation = $derived<Side>(game ? (flipped ? otherSide(game.playerSide) : game.playerSide) : 'white');
   const playerToMove = $derived(game !== null && !finished && !thinking && !awaitingChoice && turnOf(line.fen) === game.playerSide);
   // The Player's last graded move keeps its symbol through the Engine's reply, unless the reply
   // landed on that square. A finished game steps through its moves, so this follows the step shown.
@@ -525,10 +529,10 @@
       <div class="board-col">
         <div class="board-and-bar">
           <div class="with-bar">
-            <WinningChancesBar score={position?.score ?? null} pov={position?.pov ?? 'white'} orientation={game.playerSide} />
+            <WinningChancesBar score={position?.score ?? null} pov={position?.pov ?? 'white'} {orientation} />
             <Board
               fen={line.fen}
-              orientation={game.playerSide}
+              {orientation}
               movable={playerToMove ? game.playerSide : 'none'}
               lastMove={line.lastMove ? { from: line.lastMove.uci.slice(0, 2), to: line.lastMove.uci.slice(2, 4) } : undefined}
               {arrows}
@@ -543,6 +547,7 @@
           {#if finished}
             <!-- Only a finished game steps back: while it is on, the board shows the position to play from. -->
             <StepButtons onfirst={() => line.goTo(0)} onprevious={() => line.back()} onnext={() => line.forward()} onlast={() => line.goTo(line.moves.length)} />
+            <FlipButton onflip={() => (flipped = !flipped)} />
           {:else}
             <button
               type="button"
@@ -551,7 +556,8 @@
               disabled={!playerToMove || coach.busy}
               title={awaitingChoice ? 'Hint comes back once you’ve decided on the take-back' : undefined}>{hintLevel === 0 ? 'Hint' : 'Show the move'}</button
             >
-            <ThreatButton />
+            <ThreatButton view={threats} />
+            <FlipButton onflip={() => (flipped = !flipped)} />
             <!-- What ends or abandons the game sits behind a menu, away from Hint; each still asks first. -->
             <MenuButton text="⋯ Game" label="Game options" bind:this={gameMenu}>
               <button type="button" role="menuitem" onclick={offerDraw} disabled={thinking || awaitingChoice}>Offer a draw</button>

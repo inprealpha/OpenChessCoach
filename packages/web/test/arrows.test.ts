@@ -59,7 +59,7 @@ describe('a Lesson’s Coach highlights', () => {
 describe('one arrow colour per meaning', () => {
   it('draws the Coach’s arrow on the move played in ink, whatever its brush, and the rest by brush', () => {
     const drawn = coachArrows([arrow('c4f7', 'red'), arrow('a3b4', 'green'), arrow('f3g5', 'blue'), arrow('d8h4', 'yellow'), arrow('e5d4', 'red')], 'c4f7');
-    expect(drawn.map((a) => a.kind)).toEqual(['played', 'best', 'alt', 'tempting', 'threat']);
+    expect(drawn.map((a) => a.kind)).toEqual(['played', 'best', 'alt', 'reply', 'wrong']);
     expect(drawn[1]?.label).toBe('Arrow a3 to b4 (best)');
   });
 

@@ -166,13 +166,13 @@ test('a saved Engine Game that is over on the board, or can’t be replayed, is 
       value,
     );
   const game = (over: Record<string, unknown>) => ({ clientId: 'x', playerSide: 'white', strength: 2, moves: ['e2e4'], grades: [], live: false, startedAt: '2026-10-25T00:00:00.000Z', ...over });
-  const card = choice(paired, 'Play a game');
+  const card = paired.getByRole('region', { name: 'Continue' });
 
   // A game in progress, as the Engine Game screen keeps it: the menu offers it.
   await keep(game({ playerSide: 'black' }));
   await paired.goto(`${app.url}/#/menu`);
   await paired.reload();
-  await expect(card).toContainText('Move 1, you play Black');
+  await expect(card).toContainText('Your Engine Game: move 1, you play Black.');
 
   for (const saved of [
     // Checkmate on the board, the app closed before the result was saved.

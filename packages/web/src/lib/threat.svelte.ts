@@ -29,6 +29,8 @@ export const threatSetting = new ThreatSetting();
 /** The threat in the position a board shows, asked of an Engine whenever the position changes. */
 export class ThreatView {
   threat = $state<Threat | null>(null);
+  /** The Engine has answered for the position shown: with `threat` null, it found none. */
+  checked = $state(false);
   private fen: string | null = null;
   private readonly find: (fen: string) => Promise<Threat | undefined>;
 
@@ -41,10 +43,13 @@ export class ThreatView {
     if (fen === this.fen) return;
     this.fen = fen;
     this.threat = null;
+    this.checked = false;
     if (!fen) return;
     this.find(fen).then(
       (t) => {
-        if (this.fen === fen) this.threat = t ?? null;
+        if (this.fen !== fen) return;
+        this.threat = t ?? null;
+        this.checked = true;
       },
       // No threat arrow is better than an error: the board works without it.
       () => undefined,

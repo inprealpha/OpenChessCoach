@@ -262,6 +262,36 @@ test.describe('a phone the desktop\'s firewall keeps out (#31)', () => {
     await phone.context().close();
   });
 
+  test.describe('when the tunnel fails to start', () => {
+    let starts = 0;
+    test.beforeEach(() => {
+      starts = 0;
+    });
+    test.use({
+      appOptions: {
+        tunnelStarter: async () => {
+          if (++starts === 1) throw new Error('The tunnel did not start within 45 seconds.');
+          return { url: 'https://second-try.trycloudflare.com', stop: async () => {}, onExit: () => {} };
+        },
+      },
+    });
+
+    test('it says so, and "Try again" starts it again', async ({ page, app }) => {
+      await page.clock.install();
+      await page.goto(`${app.url}/#pair=${app.code}`);
+      const step = page.getByRole('region', { name: 'Play on your phone' });
+      await expect(step.getByRole('figure', { name: 'Pairing QR code' })).toBeVisible();
+      await page.clock.fastForward('02:00');
+      await step.getByRole('button', { name: 'Connect another way' }).click();
+      await expect(step.getByTestId('another-way')).toContainText('Connecting another way didn’t work. Check this desktop is online, then try again.');
+      await expect(step.getByRole('figure', { name: 'Pairing QR code' })).toHaveAttribute('data-way', 'wifi');
+      await step.getByRole('button', { name: 'Try again' }).click();
+      await expect(step.getByRole('figure', { name: 'Pairing QR code' })).toHaveAttribute('data-way', 'tunnel');
+      await step.getByText('No link appears?').click();
+      await expect(step.getByText('https://second-try.trycloudflare.com', { exact: true })).toBeVisible();
+    });
+  });
+
   test('with the code hidden, as in the main menu\'s reminder, the wait starts only once it is shown', async ({ page, app }) => {
     await page.clock.install();
     await page.goto(`${app.url}/#pair=${app.code}`);
@@ -274,6 +304,7 @@ test.describe('a phone the desktop\'s firewall keeps out (#31)', () => {
     await page.clock.fastForward('02:00');
     await expect(dialog.getByText('Phone can’t open it?')).toHaveCount(0);
     await dialog.getByRole('button', { name: 'Show the code' }).click();
+    await expect(dialog.getByRole('figure', { name: 'Pairing QR code' })).toBeVisible();
     await page.clock.fastForward('02:00');
     await expect(dialog.getByRole('button', { name: 'Connect another way' })).toBeVisible();
   });
@@ -283,7 +314,7 @@ test.describe('a phone the desktop\'s firewall keeps out (#31)', () => {
     try {
       await page.goto(`${app.url}/#pair=${app.code}`);
       const step = page.getByRole('region', { name: 'Play on your phone' });
-      await expect(step.getByText('If Windows asks whether Node.js can use your networks, tick both boxes and click Allow access.')).toBeVisible();
+      await expect(step.getByText('Windows may ask whether Node.js can use your networks. Tick both boxes (Private and Public) and click Allow access, or your phone can’t open the app.')).toBeVisible();
     } finally {
       delete process.env.CHESS_COACH_DESKTOP_SYSTEM;
     }

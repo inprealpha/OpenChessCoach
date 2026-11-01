@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { describe, expect, it, onTestFinished } from 'vitest';
 import { PROTOCOL_VERSION } from '@chess-coach/shared/protocol';
-import { desktopSystem } from '../src/firewall.ts';
+import { systemPromptWarning } from '../src/firewall.ts';
 import { checkClaude, installDirs, installFix, isWindowsShim, LOGIN_FIX, shimTarget } from '../src/claude-check.ts';
 import { minNode, nodeTooOld, startOptions } from '../src/runtime.ts';
 import { client, instance } from './helpers.ts';
@@ -232,9 +232,12 @@ describe('verify mode', () => {
     expect(starts).toBe(2);
   });
 
-  it("tells the web app the desktop's system, for the warning about its question on Node.js", async () => {
+  it("tells the web app what to do when the desktop's system asks about Node.js", async () => {
     const app = await instance();
     const c = await client(app);
-    expect((await c.request('pairing.info', {})).desktopSystem).toBe(desktopSystem());
+    expect((await c.request('pairing.info', {})).systemPrompt).toBe(systemPromptWarning() ?? null);
+    process.env.CHESS_COACH_DESKTOP_SYSTEM = 'windows';
+    onTestFinished(() => void delete process.env.CHESS_COACH_DESKTOP_SYSTEM);
+    expect((await c.request('pairing.info', {})).systemPrompt).toMatch(/^Windows may ask whether Node\.js/);
   });
 });

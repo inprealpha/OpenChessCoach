@@ -1,7 +1,7 @@
 import { isPhoneOrTablet } from '@chess-coach/shared/devices';
 import { PROTOCOL_VERSION } from '@chess-coach/shared/protocol';
 import { AppError } from '../errors.ts';
-import { desktopSystem } from '../firewall.ts';
+import { systemPromptWarning } from '../firewall.ts';
 import { pairUrl, qrSvg } from '../network.ts';
 import { askAgain, phoneStatus, remindLater } from '../phone.ts';
 import { getSettings, updateSettings } from '../settings.ts';
@@ -38,7 +38,7 @@ export const systemHandlers: HandlerMap<
       tunnelPairUrl,
       tunnelQrSvg: tunnelPairUrl ? await qrSvg(tunnelPairUrl) : null,
       phone: phoneStatus(app.db, app.clock),
-      desktopSystem: desktopSystem(),
+      systemPrompt: systemPromptWarning() ?? null,
     };
   },
 

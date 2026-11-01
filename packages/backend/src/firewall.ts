@@ -22,8 +22,17 @@ export function desktopSystem(platform: string = process.platform, env: NodeJS.P
   return 'other';
 }
 
-/** What the system will ask about Node.js when the app starts listening, said before it asks. */
-export function systemPromptWarning(system: DesktopSystem): string | undefined {
+/** Whether the app listens only on this desktop, so no phone can reach it whatever the firewall says. */
+export function isLoopbackHost(host: string): boolean {
+  return host === 'localhost' || host === '::1' || /^127\./.test(host);
+}
+
+/**
+ * What the system will ask about Node.js when the app starts listening, said before it asks: in the
+ * start-up message and, through `pairing.info`, beside the QR code. Both boxes on Windows, as it
+ * may call a home Wi-Fi Public.
+ */
+export function systemPromptWarning(system: DesktopSystem = desktopSystem()): string | undefined {
   if (system === 'windows') {
     return 'Windows may ask whether Node.js can use your networks. Tick both boxes (Private and Public) and click Allow access, or your phone can’t open the app.';
   }
@@ -48,12 +57,16 @@ const systemProbe: FirewallProbe = {
 };
 
 /**
- * The firewall that is on, if any: ufw by its config file (`ufw status` needs root), firewalld by
- * systemd. Null when neither is, or when the desktop can't tell.
+ * The firewall that is on and may turn the phone away, if any: ufw by its config files (`ufw
+ * status` needs root), unless it lets everything in; firewalld by systemd. Null when neither is,
+ * or when the desktop can't tell. Other firewalls, such as plain nftables rules, aren't looked for.
  */
 export async function linuxFirewall(probe: FirewallProbe = systemProbe): Promise<LinuxFirewall | null> {
   const ufw = await probe.readFile('/etc/ufw/ufw.conf').catch(() => '');
-  if (/^\s*ENABLED\s*=\s*"?yes"?\s*$/im.test(ufw)) return 'ufw';
+  if (/^\s*ENABLED\s*=\s*"?yes"?\s*$/im.test(ufw)) {
+    const defaults = await probe.readFile('/etc/default/ufw').catch(() => '');
+    if (!/^\s*DEFAULT_INPUT_POLICY\s*=\s*"?ACCEPT"?\s*$/im.test(defaults)) return 'ufw';
+  }
   const firewalld = await probe.run('systemctl', ['is-active', 'firewalld']).catch(() => '');
   if (firewalld.trim() === 'active') return 'firewalld';
   return null;
@@ -83,10 +96,7 @@ export function openPortCommand(firewall: LinuxFirewall, subnet: string, port: n
 
 /** What the start-up message says about a Linux firewall that is on: why, and the command. */
 export function linuxFirewallAdvice(firewall: LinuxFirewall, subnet: string, port: number): string {
-  const why =
-    firewall === 'ufw'
-      ? 'The firewall on this desktop (ufw) is on, and it blocks your phone unless you let your Wi-Fi in.'
-      : 'The firewall on this desktop (firewalld) is on, and it may block your phone.';
+  const why = `The firewall on this desktop (${firewall}) is on, and it may block your phone.`;
   return `${why} If your phone can’t open the app, run this once:\n\n    ${openPortCommand(firewall, subnet, port)}\n`;
 }
 

@@ -31,10 +31,12 @@
 
   const paired = $derived(info.phone.paired);
   const shown = $derived(!hideCode || asked);
-  // The live state when the desktop has sent one since, else the state the QR codes came with.
-  const tunnel = $derived(api.tunnel ?? info.tunnel);
+  // From the same answer as the QR codes, so the address shown and the code always match.
+  const tunnel = $derived(info.tunnel);
   /** Showing the tunnel's QR code rather than the Wi-Fi one. */
   const viaTunnel = $derived(anotherWay && tunnel.status === 'running' && info.tunnelQrSvg !== null && info.tunnelPairUrl !== null);
+  /** Connecting another way didn't work: the desktop couldn't be asked, or the tunnel failed. */
+  const broken = $derived(anotherWay && (failed !== '' || tunnel.status === 'error'));
 
   $effect(() => {
     if (!shown || paired || waited) return;
@@ -43,9 +45,10 @@
   });
 
   $effect(() => {
-    // A running tunnel, or a new address, means a new QR code: fetch it.
-    void tunnel.url;
-    if (anotherWay && tunnel.status === 'running' && tunnel.url !== info.tunnel.url) void phone.load();
+    // Each change of the tunnel (starting, running, a new address, failed) means new QR codes: fetch them.
+    void api.tunnel?.status;
+    void api.tunnel?.url;
+    if (anotherWay) void phone.load();
   });
 
   async function connectAnotherWay(): Promise<void> {
@@ -56,7 +59,7 @@
       await api.request('settings.update', { tunnelEnabled: true });
       await phone.load();
     } catch (err) {
-      failed = err instanceof ApiError ? err.message : 'Could not connect another way. Try again.';
+      failed = err instanceof ApiError ? err.message : 'Connecting another way didn’t work.';
     }
     // The button goes: keep the focus on the news that replaced it.
     await tick();
@@ -79,11 +82,7 @@
         <li>Open your phone’s camera and point it at the code.</li>
         <li>Tap the link that appears. The app opens on your phone, already paired.</li>
       </ol>
-      {#if !viaTunnel && info.desktopSystem === 'windows'}
-        <p class="muted small">If Windows asks whether Node.js can use your networks, tick both boxes and click Allow access.</p>
-      {:else if !viaTunnel && info.desktopSystem === 'macos'}
-        <p class="muted small">If your Mac asks whether node can accept incoming network connections, click Allow.</p>
-      {/if}
+      {#if !viaTunnel && info.systemPrompt}<p class="muted small">{info.systemPrompt}</p>{/if}
       <p class="muted small">Keep OpenChessCoach running on this desktop while you play: your phone uses it for the Coach.</p>
       {#if shown}
         <details>
@@ -102,7 +101,7 @@
               too. Its address changes each time OpenChessCoach starts: after a restart, scan the new code in Settings, under Away
               from home.
             </p>
-          {:else if anotherWay && !failed && tunnel.status !== 'error'}
+          {:else if anotherWay && !broken}
             <p class="small">Connecting another way… The first time, this can take a minute.</p>
           {:else if waited}
             <p class="small">
@@ -110,14 +109,14 @@
               another way instead: through Cloudflare, which works on any network. Its address changes each time OpenChessCoach
               starts, so you scan again after a restart.
             </p>
-            {#if failed || (anotherWay && tunnel.status === 'error')}
-              <p class="small error">{failed || tunnel.error}</p>
+            {#if broken}
+              <p class="small error">{failed || 'Connecting another way didn’t work.'} Check this desktop is online, then try again.</p>
             {/if}
           {/if}
         </div>
         {#if waited && !anotherWay}
           <button type="button" onclick={connectAnotherWay}>Connect another way</button>
-        {:else if failed || (anotherWay && tunnel.status === 'error')}
+        {:else if broken}
           <button type="button" onclick={connectAnotherWay}>Try again</button>
         {/if}
       {:else}

@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 import {
   desktopSystem,
   firewallAdvice,
+  isLoopbackHost,
   linuxFirewall,
   openPortCommand,
   subnetOf,
@@ -28,8 +29,9 @@ const INTERFACES = {
 };
 
 /** A Linux desktop with this ufw config file and this answer from `systemctl is-active firewalld`. */
-const probe = (ufwConf: string | null, firewalld: string | null): FirewallProbe => ({
-  readFile: async () => {
+const probe = (ufwConf: string | null, firewalld: string | null, ufwDefaults = 'DEFAULT_INPUT_POLICY="DROP"\n'): FirewallProbe => ({
+  readFile: async (path) => {
+    if (path === '/etc/default/ufw') return ufwDefaults;
     if (ufwConf === null) throw new Error('ENOENT');
     return ufwConf;
   },
@@ -49,6 +51,11 @@ describe('the desktop system', () => {
     expect(desktopSystem('linux', { CHESS_COACH_DESKTOP_SYSTEM: 'amiga' })).toBe('linux');
   });
 
+  it('counts an app that listens only on this desktop as out of every phone\'s reach', () => {
+    for (const host of ['127.0.0.1', '127.0.1.1', 'localhost', '::1']) expect(isLoopbackHost(host)).toBe(true);
+    for (const host of ['0.0.0.0', '192.168.1.23', '::']) expect(isLoopbackHost(host)).toBe(false);
+  });
+
   it('warns Windows and macOS Players about the question on Node.js before it is asked', () => {
     expect(systemPromptWarning('windows')).toMatch(/Windows may ask .*Node\.js.*Tick both boxes.*Allow/);
     expect(systemPromptWarning('macos')).toMatch(/Mac asks .*click Allow/);
@@ -60,6 +67,8 @@ describe('a Linux firewall', () => {
   it('is ufw when its config file says it is enabled', async () => {
     expect(await linuxFirewall(probe('# comment\nENABLED=yes\nLOGLEVEL=low\n', 'inactive'))).toBe('ufw');
     expect(await linuxFirewall(probe('ENABLED=no\n', 'inactive'))).toBeNull();
+    // Enabled but letting everything in: it turns no phone away.
+    expect(await linuxFirewall(probe('ENABLED=yes\n', 'inactive', 'DEFAULT_INPUT_POLICY="ACCEPT"\n'))).toBeNull();
   });
 
   it('is firewalld when systemd says it is active', async () => {

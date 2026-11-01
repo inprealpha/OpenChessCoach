@@ -203,7 +203,7 @@ export interface TunnelState {
   error?: string;
 }
 
-/** The desktop's system: Windows and macOS ask about Node.js when the app starts, so the web app warns about it. */
+/** The desktop's system: Windows and macOS ask about Node.js when the app starts, so the app warns about it. */
 export type DesktopSystem = 'windows' | 'macos' | 'linux' | 'other';
 
 export interface PairingInfo {
@@ -217,7 +217,8 @@ export interface PairingInfo {
   tunnelPairUrl: string | null;
   tunnelQrSvg: string | null;
   phone: PhoneStatus;
-  desktopSystem: DesktopSystem;
+  /** What to do when the desktop's system asks about Node.js (Windows, macOS), shown beside the QR code; null elsewhere. */
+  systemPrompt: string | null;
 }
 
 /** Whether the Player has a phone or tablet paired, and whether a desktop browser should ask them to pair one. */

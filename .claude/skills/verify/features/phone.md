@@ -50,9 +50,10 @@ no-phone`).
   Settings' Away from home checkbox, and once the tunnel runs the figure `Pairing QR code` shows the
   tunnel's code (`data-way="tunnel"`, else `wifi`), the Wi-Fi step goes, `No link appears?` names the
   tunnel's address, and the text (`data-testid="another-way"`) says the address changes each time
-  the app starts. A failed tunnel shows its error and `Try again`, which starts it again.
-- On a Windows or macOS desktop (`pairing.info`'s `desktopSystem`), a line beside the steps says to
-  allow Node.js when the system asks. `CHESS_COACH_DESKTOP_SYSTEM=windows` pretends, for verify mode.
+  the app starts. If the tunnel fails, it says so with `Try again`, which starts it again.
+- On a Windows or macOS desktop, a line beside the steps says to allow Node.js when the system asks
+  (`pairing.info`'s `systemPrompt`, the same words as the start-up message).
+  `CHESS_COACH_DESKTOP_SYSTEM=windows` pretends, for verify mode and the journeys.
 - Settings still shows the QR code for any device (`pairing.md`).
 
 ## Drive

@@ -297,6 +297,8 @@ test.describe('a phone the desktop\'s firewall keeps out (#31)', () => {
     await page.goto(`${app.url}/#pair=${app.code}`);
     await phoneLater(page);
     await page.getByRole('button', { name: 'Skip to the main menu' }).click();
+    // First run is done only once the desktop has it: a reload before then shows first run again.
+    await expect(menu(page)).toBeVisible();
     app.clock.advance(ASK_AGAIN_MS);
     await page.reload();
     const dialog = reminder(page);

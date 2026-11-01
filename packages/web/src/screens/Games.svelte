@@ -489,5 +489,9 @@
   @media (max-width: 600px) {
     .wide-only { display: none; }
     .narrow-only { display: block; font-size: 0.8rem; }
+    /* The ⋯ button is a full 44 px tap on a phone, so the row gives it the room from its spacing,
+       and Open Review may take two lines on the narrowest phones. */
+    .actions { padding-right: 0; white-space: normal; }
+    .more { margin-left: 0.15rem; }
   }
 </style>

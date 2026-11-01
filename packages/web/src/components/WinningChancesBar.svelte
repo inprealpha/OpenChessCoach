@@ -1,7 +1,7 @@
 <script lang="ts">
   // The Winning Chances bar beside the board: White and Black fill it in proportion to the
   // position's Winning Chances, with each side's percentage at its end. The side at the bottom of
-  // the board fills it from the bottom, or from the left where the bar sits under the board on a
+  // the board fills it from the bottom, or from the left where the bar lies above the board on a
   // phone. Its value comes from the shared formatter, so it agrees with the Engine lines and the
   // Move Grades (ADR 0002).
   import { otherSide, type Side } from '@chess-coach/shared/chess';
@@ -104,13 +104,15 @@
   }
   .percent.start { top: auto; bottom: 0.25rem; }
 
-  /* Under the board on a phone-sized screen: a horizontal bar, the bottom side filling from the left. */
+  /* Above the board on a phone-sized screen: a horizontal bar, the bottom side filling from the left. */
   @container (max-width: 520px) {
     .wc-bar {
       width: min(var(--board-max, 560px), 92vw, 100cqw);
       height: 1.1rem;
       justify-self: center;
-      order: 1;
+      /* Above the board, so the board keeps the full width and the bar reads before it. */
+      order: -1;
+      margin-bottom: 0.3rem;
     }
     .fill { height: 100%; width: var(--share); }
     .percent { top: 50%; transform: translateY(-50%); left: auto; right: 0.35rem; width: auto; }

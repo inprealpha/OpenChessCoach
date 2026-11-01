@@ -1,13 +1,21 @@
 <script lang="ts">
-  // The Engine's few best candidate moves, shown when the Player asks. Each leads with the side to
-  // move's Winning Chances after it, with the evaluation kept smaller beside them.
+  // The Engine's best candidate moves, shown when the Player asks: the top line, and the rest behind
+  // "More lines". Each leads with the side to move's Winning Chances after it, with the evaluation
+  // kept smaller beside them.
   import { sanLine, SIDE_NAMES, turnOf } from '@chess-coach/shared/chess';
   import type { Analysis } from '@chess-coach/shared/engine';
   import { winningChancesFor } from '@chess-coach/shared/winning-chances';
+  import { foldOpen, rememberFold } from '../lib/folds.ts';
 
   let { analysis, fen }: { analysis: Analysis | null; fen: string } = $props();
 
   const side = $derived(turnOf(fen));
+  let more = $state(foldOpen('engine-lines-more', false));
+
+  function toggle(): void {
+    more = !more;
+    rememberFold('engine-lines-more', more);
+  }
 </script>
 
 <section class="lines" aria-label="Engine lines">
@@ -19,7 +27,7 @@
     <p class="depth muted">Depth {analysis.depth}</p>
     <p class="heading muted">{SIDE_NAMES[side]}’s winning chances after each move</p>
     <ol>
-      {#each analysis.lines as line, i (i)}
+      {#each analysis.lines.slice(0, more ? undefined : 1) as line, i (i)}
         {@const sans = sanLine(fen, line.pv.slice(0, 6))}
         {@const chances = winningChancesFor(line.score, side)}
         <li aria-label={`Engine line ${i + 1}: ${sans[0] ?? ''}, ${chances.text}, ${chances.evaluation}`}>
@@ -32,6 +40,9 @@
         </li>
       {/each}
     </ol>
+    {#if analysis.lines.length > 1}
+      <button type="button" class="secondary more" aria-expanded={more} onclick={toggle}>{more ? 'Fewer lines' : `More lines (${analysis.lines.length - 1})`}</button>
+    {/if}
   {/if}
 </section>
 
@@ -46,4 +57,5 @@
   .san { font-weight: 600; min-width: 3rem; }
   .pv { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .depth, .heading { margin: 0 0 0.25rem; font-size: 0.8rem; }
+  .more { margin-top: 0.35rem; padding: 0.25rem 0.6rem; font-size: 0.85rem; }
 </style>

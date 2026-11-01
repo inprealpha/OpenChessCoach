@@ -1,34 +1,70 @@
-// Arrows the Board draws besides the Coach's: each with its own color and accessible name.
+// The arrows on every board, one colour per meaning (docs/design/interface-guidelines.md, "Arrows
+// and marks"): the move played in ink, the Engine's best in green, another good move in blue, a
+// threat in dashed red, a move that went wrong in solid red, the opponent's reply in orange. Each keeps its accessible name, and the board
+// shows a legend of the colours it draws.
 import type { GradedMove } from '@chess-coach/shared/analysis';
 import { legalMoves, piecesOf, SIDE_NAMES, turnOf, type Side } from '@chess-coach/shared/chess';
-import type { Arrow } from '@chess-coach/shared/coach/types';
+import type { Arrow, Brush } from '@chess-coach/shared/coach/types';
 import { nullMoveFen, type Threat } from '@chess-coach/shared/threat';
-import { GRADE_LOOK } from './grades.ts';
 
-/** An arrow on the board: one of the Coach's (named by its brush), or one with its own color and name. */
-export type BoardArrow = Arrow | { from: string; to: string; color: string; label: string };
+/** What an arrow means, which picks its colour on every board. */
+export type ArrowKind = 'played' | 'best' | 'alt' | 'threat' | 'wrong' | 'reply';
 
-/** The Engine's best move, and the Coach's green arrows. */
-export const BEST_COLOR = '#15781b';
+/** An arrow on the board: what it means and its accessible name. */
+export interface BoardArrow {
+  from: string;
+  to: string;
+  kind: ArrowKind;
+  label: string;
+}
 
-/** The opponent's threat. */
-export const THREAT_COLOR = '#d32f2f';
+/** How each kind of arrow looks, and its word in the legend under the board. */
+export const ARROW_LOOK: Record<ArrowKind, { color: string; legend: string; dashed: boolean }> = {
+  played: { color: 'var(--arrow-played)', legend: 'played', dashed: false },
+  best: { color: 'var(--arrow-best)', legend: 'best', dashed: false },
+  alt: { color: 'var(--arrow-alt)', legend: 'other good move', dashed: false },
+  threat: { color: 'var(--arrow-threat)', legend: 'threat', dashed: true },
+  wrong: { color: 'var(--arrow-threat)', legend: 'went wrong', dashed: false },
+  reply: { color: 'var(--arrow-reply)', legend: 'reply', dashed: false },
+};
+
+/** The legend's order: the move played first, as it is drawn on top. */
+export const ARROW_KINDS: readonly ArrowKind[] = ['played', 'best', 'alt', 'threat', 'wrong', 'reply'];
+
+/**
+ * What the Coach's brushes mean (prompts.ts): green the best move, blue another, red a move that
+ * went wrong, yellow the opponent's reply. When the move that went wrong is the move played it is
+ * drawn in ink, as every move played is.
+ */
+const BRUSH_KIND: Record<Brush, ArrowKind> = { green: 'best', blue: 'alt', red: 'wrong', yellow: 'reply' };
+
+/**
+ * The Coach's arrows on the board. The move that was played (`played`, in UCI) is ink whatever its
+ * brush, so it reads the same as on every other board; the rest take their brush's meaning.
+ */
+export function coachArrows(arrows: readonly Arrow[], played?: string): BoardArrow[] {
+  return arrows.map((a) => {
+    // A brush the Coach doesn't know, from an older desktop, draws as another move.
+    const kind = played && `${a.from}${a.to}` === played.slice(0, 4) ? 'played' : (BRUSH_KIND[a.brush] ?? 'alt');
+    return { from: a.from, to: a.to, kind, label: `Arrow ${a.from} to ${a.to} (${ARROW_LOOK[kind].legend})` };
+  });
+}
 
 /**
  * The threat arrow, when Threat is on and the Engine found one: the opponent's best move if they
- * could move now, in red. Callers put it first, so other arrows draw over it.
+ * could move now, dashed red.
  */
 export function threatArrows(threat: Pick<Threat, 'side' | 'uci' | 'san'> | null | undefined): BoardArrow[] {
   if (!threat) return [];
   const from = threat.uci.slice(0, 2);
   const to = threat.uci.slice(2, 4);
-  return [{ from, to, color: THREAT_COLOR, label: `Threat: ${SIDE_NAMES[threat.side]} threatens ${threat.san} (${from} to ${to})` }];
+  return [{ from, to, kind: 'threat', label: `Threat: ${SIDE_NAMES[threat.side]} threatens ${threat.san} (${from} to ${to})` }];
 }
 
 /**
- * A Review's arrows for one graded move: the move played, in its Move Grade's color (the dark one
- * of its badge), and the Engine's best in green; one green arrow when they are the same move.
- * Drawn only from what the Review already carries, so they cost no Engine time (ADR 0002).
+ * A Review's arrows for one graded move: the move played, in ink, and the Engine's best in green;
+ * one green arrow when they are the same move. Drawn only from what the Review already carries, so
+ * they cost no Engine time (ADR 0002).
  */
 export function reviewArrows(move: GradedMove | undefined): BoardArrow[] {
   if (!move) return [];
@@ -37,12 +73,36 @@ export function reviewArrows(move: GradedMove | undefined): BoardArrow[] {
   const to = move.uci.slice(2, 4);
   if (!best || best.uci === move.uci) {
     const label = `Move played: ${move.san}, ${move.grade}${best ? ', the Engine’s best' : ''}`;
-    return [{ from, to, color: best ? BEST_COLOR : GRADE_LOOK[move.grade].dark, label }];
+    return [{ from, to, kind: best ? 'best' : 'played', label }];
   }
   return [
-    { from, to, color: GRADE_LOOK[move.grade].dark, label: `Move played: ${move.san}, ${move.grade}` },
-    { from: best.uci.slice(0, 2), to: best.uci.slice(2, 4), color: BEST_COLOR, label: `Engine’s best: ${best.san}` },
+    { from, to, kind: 'played', label: `Move played: ${move.san}, ${move.grade}` },
+    { from: best.uci.slice(0, 2), to: best.uci.slice(2, 4), kind: 'best', label: `Engine’s best: ${best.san}` },
   ];
+}
+
+/**
+ * The move that punishes a Blunder or Mistake: the opponent's best reply, dashed red like a threat,
+ * so the Blunder pause shows on the board what the move gives away.
+ */
+export function punishingArrow(uci: string | undefined, san: string | undefined, side: Side): BoardArrow[] {
+  if (!uci || !san) return [];
+  const from = uci.slice(0, 2);
+  const to = uci.slice(2, 4);
+  return [{ from, to, kind: 'threat', label: `Threat: ${SIDE_NAMES[side]} answers ${san} (${from} to ${to})` }];
+}
+
+/**
+ * The arrows in the order the board draws them: the move played last, so no other arrow hides it.
+ */
+export function drawOrder(arrows: readonly BoardArrow[]): BoardArrow[] {
+  return [...arrows.filter((a) => a.kind !== 'played'), ...arrows.filter((a) => a.kind === 'played')];
+}
+
+/** The legend under a board: the kinds of arrow on it now, in the legend's order. */
+export function legendOf(arrows: readonly BoardArrow[]): ArrowKind[] {
+  const on = new Set(arrows.map((a) => a.kind));
+  return ARROW_KINDS.filter((k) => on.has(k));
 }
 
 /**

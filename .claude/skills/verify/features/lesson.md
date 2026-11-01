@@ -54,6 +54,10 @@ the order. `#/lessons?track=<track>` opens the catalogue at a track. Play it out
 
 - `Start the Lesson` / `Resume the Lesson`; progress saved per decision. However fast it is
   clicked, the first prompt ("What are your options here?") shows once.
+- The header line counts the decisions ("Decision N of M", then "Lesson complete") beside
+  `Back to the Lessons`; the board stays in view and the Ask box is docked under the Lesson's
+  panel (see `board-and-engine.md`). Arrow names end in their kind: `(best)`, `(other good move)`,
+  `(threat)`, `(went wrong)`, `(reply)` or `(played)`.
 - `Hint` then `Show the move`, in a toolbar straight under the board, so on a phone the arrow is in
   view with it. After a Hint the focus stays on the button, now Show the move. Show the move gives the Lesson's move ("The Lesson’s move here is X." with a green
   arrow), never another move the Engine likes as well; it is said once per decision: another click

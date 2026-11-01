@@ -43,10 +43,14 @@ call.
   graded Inaccuracy or worse while the game was still open, …").
 - The step buttons step from the position on the board: from an open key moment (the position
   before its move) `Next move` plays that move and `Previous move` goes one move back.
-- On a phone the key moments and the moves sit under the board: picking one brings the board back
-  into view (smoothly, unless the Player asked for reduced motion). Beside the board, as on a
-  desktop, the page stays where it is, and the board's column stays in view as the page scrolls
-  on a screen at least 800px tall, so a key moment picked low on the page shows on a whole board.
+- The screen is one frame (`docs/design/interface-guidelines.md`): the header line names the
+  Player's side and the result ("You had White · Lost 0-1 · vs ikatsca · <opening> · <date>",
+  `data-testid="review-summary"`), the board never scrolls away, and the Ask box is docked. On a
+  desktop and on a phone the page is one screen tall and never scrolls: the panel beside (or under)
+  the board scrolls inside itself, with the Ask box docked at its foot. `Flip board` (or the F key) turns the board, the bar and the graph with it.
+- The panel has two tabs, `Moments` (the overview and the key moments) and `Moves` (the move
+  list; on a phone the graph too). The overview folds, remembered per game, and folded shows its
+  first sentence.
 - The move list numbers moves from the game's start position, so a game set up from a position
   (`[SetUp "1"]`, `[FEN …]`) reads `40… Kd3`, `41. Ra3+`, as the key moments and the graph do.
 - The overview, the region `Overview` above `Key moments`: how the Player played, where it went
@@ -69,19 +73,23 @@ call.
 - Settings → `Reviews` → `Open each Review with the Coach’s overview of the whole game` (on by
   default). Off, a Review is its key moments only and makes no `review-overview` call; turning it
   on later doesn't give a saved Review an overview.
-- Each key moment: a button `Show moment: move N. <SAN>, <Move Grade>`, a Move Grade badge, the
-  Player's Winning Chances before and after their move with the evaluation beside them
-  ("Before: White’s winning chances: 48% -0.20", "After 11. Bxf7+: White’s winning chances: 35%
-  -1.72"; a forced mate reads as a mate phrase such as "White mates in 3"), "Better: …" with the
-  Engine's options, each with its Winning Chances and evaluation, and the Coach's explanation.
+- Each key moment is one row: a button `Show moment: move N. <SAN>, <Move Grade>` with a Move
+  Grade badge and the Player's Winning Chances before and after their move ("48% → 35%",
+  `data-testid="chances-change"`; evaluations only at the club level, a forced mate as a mate
+  phrase). The visually hidden `chances-before` / `chances-after` lines keep the long form
+  ("Before: White’s winning chances: 48%"). The open row shows the Coach's explanation,
+  "Better: <best> 48%" and the Engine's other options behind `More moves`. The first moment is
+  open on load.
   Winning Chances come from the Review's own graded moves: no new data and no Engine run. The
   `Show moment` button opens the moment on the board (the position before the move, with the
   Coach's arrows; `aria-pressed` true) and a second click closes it.
 - Review arrows on every move the board shows, drawn from the Review's graded moves with no
-  Engine run: the img `Move played: <SAN>, <Move Grade>` in the Move Grade's color and the img
-  `Engine’s best: <SAN>` in green, or one green img `Move played: <SAN>, <Move Grade>, the Engine’s
-  best` when they are the same move. While a key moment is open, or the Coach has answered a Why
-  Question on this move, only the Coach's arrows (`Arrow <from> to <to> (<brush>)`) show: no
+  Engine run: the img `Move played: <SAN>, <Move Grade>` in ink (`data-kind="played"`, drawn
+  last) and the img `Engine’s best: <SAN>` in green (`best`), or one `Move played: <SAN>, <Move
+  Grade>, the Engine’s best` when they are the same move. Each arrow colour has one meaning
+  (`packages/web/src/lib/arrows.ts`): ink played, green best, blue other good move, red dashed
+  threat, solid red a move that went wrong, orange the opponent's reply; the list `Arrow colours` under the board names the ones it shows. While a key moment is open, or the Coach has answered a Why
+  Question on this move, only the Coach's arrows (`Arrow <from> to <to> (<kind>)`, such as `(best)`; an arrow on the move played is ink) show: no
   Review arrows and no threat arrow.
 - The meter `Winning Chances bar: …` beside the board (see `board-and-engine.md`), with the
   Player's side at the bottom. It follows the board through the game from the Review's own
@@ -109,7 +117,7 @@ call.
   slider `Move on the Winning Chances graph` (arrow keys, Home and End too), jumps the board there.
   The current move is the image `Current position: 12. Bg5: White’s winning chances: 19%`, and a
   hover or tap reads the point under the pointer below the graph.
-- `Threat` (off by default, remembered on the device): a red arrow with the opponent's threat in
+- `Show threat` (off by default, remembered on the device): a red dashed arrow with the opponent's threat in
   the position on the board, from the desktop's Engine (`engine.threat`, ADR 0007); see
   `board-and-engine.md`. Works before the Review is started too.
 - The Player Profile's Move Grade counts update, and the Coach may add one note.
@@ -174,15 +182,14 @@ Mistake` in the list `Moves`, then `Next move`. A Review without the overview:
   edge goes back to `Start: White’s winning chances: 53%` (`imported-game.spec.ts`, "a Review
   lists key moments …"). Marks for Black, mates and huge evaluations are covered on real games in
   `packages/shared/test/winning-chances-graph.test.ts`.
-- The moment 11. Bxf7+ shows `Before: White’s winning chances: 48% -0.20`,
-  `After 11. Bxf7+: White’s winning chances: 35% -1.72` and
-  `Better: axb4 48% (-0.20), Ng5 44% (-0.67), Ne5 44% (-0.68)`, before and after a reopen
+- The moment 11. Bxf7+ shows `48% → 35%` with no evaluations (Beginner), `Better: axb4 48%` and,
+  under `More moves`, `Ng5 44%, Ne5 44%`, before and after a reopen
   (`imported-game.spec.ts`, "a Review lists key moments with Move Grades, …").
 - On the `Review board`: `Move 11. Bxf7+` shows the image `Mistake on f7`; `Next move` shows
   `Best on f7` (11… Rxf7) and then `Mistake on g5` (12. Bg5), one symbol at a time;
   `Move 10. a3` (Good) and `First position` show none; 16… Nc6 shows `Inaccuracy on c6`.
-- On `#/review/1` after the Review, move `11. Bxf7+` shows `Move played: Bxf7+, Mistake` (stroke
-  `#8a3d00`) and `Engine’s best: axb4` (stroke `#15781b`); `5. d4` shows one arrow,
+- On `#/review/1` after the Review, move `11. Bxf7+` shows `Move played: Bxf7+, Mistake` (kind
+  `played`, drawn last) and `Engine’s best: axb4` (kind `best`), and the legend lists `played`, `best`; `5. d4` shows one arrow,
   `Move played: d4, Best, the Engine’s best`. `Show moment: move 11. Bxf7+, Mistake` swaps them for
   the Coach's arrows; clicking it again brings them back. After a reload they show again and the
   browser sends no `engine.*` or `review.start` request.
@@ -191,7 +198,7 @@ Mistake` in the list `Moves`, then `Next move`. A Review without the overview:
   `coach_calls` row (the same journey).
 - One number per position (`imported-game.spec.ts`, "a Review shows one number per position, …"):
   after 12. Bg5 (the Engine's fourth line) the bar, the graph's current point and the moment's
-  `After 12. Bg5: White’s winning chances: 19% -3.88` all read 19%. With Threat on, `Move 10… dxe4`
+  `After 12. Bg5: White’s winning chances: 19%` all read 19%. With Threat on, `Move 10… dxe4`
   shows `Best on e4`, the graph at `10… dxe4` (48%) and one threat arrow; opening
   `Show moment: move 11. Bxf7+, Mistake` keeps that symbol, graph point and bar, shows the Coach's
   arrows and no threat arrow; closing it shows `Mistake on f7` and `11. Bxf7+` (35%).
@@ -200,9 +207,9 @@ Mistake` in the list `Moves`, then `Next move`. A Review without the overview:
 - From the open moment 11. Bxf7+ (graph at `10… dxe4`), `Next move` shows
   `Current position: 11. Bxf7+: White’s winning chances: 35%` and `Mistake on f7`; from the open
   moment again, `Previous move` shows `10. a3` (`imported-game.spec.ts`, "from an open key moment …").
-- At 390×844, tapping the third key moment or `Move 16… Nc6` leaves the `Review board`'s top in the
-  top half of the viewport; at 1280×800, scrolled to the bottom, picking the fourth key moment
-  leaves the whole board on screen (`imported-game.spec.ts`, "on a phone, …").
+- At 390×844 and 1280×800, picking any key moment or move leaves the whole `Review board` and the
+  Ask box on screen, and the page never scrolls the board away (`imported-game.spec.ts`, "the
+  board never scrolls away …").
 - A pasted game from `[FEN "8/8/8/8/8/4k3/8/R3K3 b - - 0 40"]` lists `Move 40… Kd3`,
   `Move 41. Ra3+`, `Move 41… Kc4`, `Move 42. Kd2` (`imported-game.spec.ts`).
 - Leaving a Review being made for the menu and coming back shows its progress, then the key

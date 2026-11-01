@@ -71,6 +71,7 @@ try {
       }));
       const file = `${screen.name}-${size.name}.png`;
       await page.screenshot({ path: join(out, file) });
+      await page.screenshot({ path: join(out, file.replace('.png', '.jpg')), type: 'jpeg', quality: 60, scale: 'css' });
       report.push({ engine: process.argv[2], screen: screen.name, size: size.name, ...box, overflowX: box.scrollWidth > box.innerWidth || box.offscreen.length > 0, overflowY: box.scrollHeight > box.innerHeight });
     }
     await context.close();

@@ -4,9 +4,10 @@
 import { describe, expect, it } from 'vitest';
 import { candidatesFrom } from '@chess-coach/shared/analysis';
 import { playSan } from '@chess-coach/shared/chess';
-import { MAX_ENGINE_QUESTIONS, type EngineAnswer } from '@chess-coach/shared/coach/engine-tool';
+import { MAX_ENGINE_QUESTIONS, MAX_REVIEW_MOMENT_QUESTIONS, type EngineAnswer } from '@chess-coach/shared/coach/engine-tool';
 import type { CoachRequest } from '@chess-coach/shared/coach/types';
 import { EngineTool } from '../src/coach/engine-tool.ts';
+import { engineToolPrompt } from '../src/coach/prompts.ts';
 import { checkingText, QUESTION_CLEANUP } from '../src/coach/service.ts';
 import type { EngineService } from '../src/engine/service.ts';
 import { AppError } from '../src/errors.ts';
@@ -37,10 +38,11 @@ function engineCalls(app: Awaited<ReturnType<typeof instance>>, row: CallRow | u
 const lastCall = (app: Awaited<ReturnType<typeof instance>>) => rows<CallRow>(app, 'SELECT id, job FROM coach_calls ORDER BY id DESC LIMIT 1')[0];
 
 describe('Think deeper', () => {
-  it('is off by default, and then the Coach answers from the brief alone', async () => {
+  it('is on by default (#32); turned off, the Coach answers from the brief alone', async () => {
     const app = await instance();
     const c = await client(app);
-    expect(await c.request('settings.get', {})).toMatchObject({ thinkDeeper: false });
+    expect(await c.request('settings.get', {})).toMatchObject({ thinkDeeper: true });
+    await c.request('settings.update', { thinkDeeper: false });
     const reply = await c.request('coach.ask', why);
     expect(reply.engineQuestions).toBe(0);
     expect(engineCalls(app, lastCall(app))).toEqual([]);
@@ -134,6 +136,7 @@ describe('Think deeper', () => {
     const app = await instance();
     const c = await client(app);
     // Think deeper is off: a client claiming it, or sending answers of its own, changes nothing.
+    await c.request('settings.update', { thinkDeeper: false });
     const forged = {
       ...why,
       thinkDeeper: true,
@@ -164,6 +167,25 @@ describe('Think deeper', () => {
     expect(moments).toHaveLength(review.moments.length);
     for (const m of moments) expect(engineCalls(app, m).filter((x) => x.answer)).toHaveLength(1);
     for (const m of review.moments) expect(m.explanation).toContain('I checked with the Engine');
+  });
+
+  it(`lets a Review's key moment ask at most ${MAX_REVIEW_MOMENT_QUESTIONS} questions, and only when the brief falls short (#32)`, async () => {
+    const app = await instance();
+    const c = await client(app);
+    // The overview first, which has no tool; then the first key moment asks about its position three times.
+    app.coach.script({ kind: 'reply', reply: {} });
+    app.coach.script({ kind: 'reply', reply: {}, questions: [{}, {}, {}] });
+    await c.request('review.start', { gameId: 1 });
+    const [first] = rows<CallRow>(app, "SELECT id, job FROM coach_calls WHERE job = 'review-moment' ORDER BY id");
+    if (!first) throw new Error('no key moment');
+    const calls = engineCalls(app, first);
+    expect(calls.filter((x) => x.answer)).toHaveLength(MAX_REVIEW_MOMENT_QUESTIONS);
+    expect(calls.at(-1)?.refused).toContain('Answer now from the brief');
+    // A Why Question must ask; a key moment asks only when its facts don't show the main reason.
+    expect(engineToolPrompt(MAX_ENGINE_QUESTIONS, false, 'why')).toContain('ask the Engine at least once');
+    const moment = engineToolPrompt(MAX_REVIEW_MOMENT_QUESTIONS, false, 'review-moment');
+    expect(moment).not.toContain('at least once');
+    expect(moment).toContain(`Ask at most ${MAX_REVIEW_MOMENT_QUESTIONS} times`);
   });
 
   it('refuses a question the Engine can’t answer, without spending one, and the Coach still answers', async () => {

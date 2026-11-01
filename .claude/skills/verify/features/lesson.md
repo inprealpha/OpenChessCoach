@@ -177,7 +177,9 @@ decision (`data/lessons/<id>.json` lists them as `parts[].mainLine`) → `Contin
   credit, and no uncredited text keeps 8 words in a row from the earlier Wikibooks and Wikipedia
   texts in `data/open-texts.json` (`content.test.ts`). `node data-prep/engine-check.ts` checks every main-line move the Player is
   asked for is Best or Good at depths 10 and 14 (pass the ids you changed: all of them take a few
-  minutes); `npm test` checks it at depth 10 on every Lesson (`lesson-engine.test.ts`). The Lesson
+  minutes); `npm test` checks it at depth 10 on every Lesson (`lesson-engine.test.ts`). CI also runs
+  the deep check on the moves a PR adds: depth 22 with headroom below an Inaccuracy, and the Lichess
+  tablebase in endgames of 7 pieces or fewer (`data-prep/deep-check.ts`). The Lesson
   journeys walk an opening, a Theme, an endgame and a `thinking` Lesson in the browser, not the
   whole catalogue.
 - Journeys read goals, key ideas and prior knowledge from `data/lessons/`, never from the journey;

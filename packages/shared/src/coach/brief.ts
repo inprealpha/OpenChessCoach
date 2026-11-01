@@ -72,8 +72,12 @@ export interface Brief {
   fen: string;
   recentMoves: string;
   move?: { san: string; uci: string; grade: MoveGrade; evaluationAfter: string; does?: string; result?: string; tempting?: true };
-  /** The Player's Winning Chances in `fen` and after the move, worded exactly as the screen shows them. */
-  winningChances?: { before: string; after?: string };
+  /**
+   * `side`'s Winning Chances in `fen` and after the move, as the screen shows their numbers ("68%",
+   * or a mate such as "White mates in 3"). `side` is the Player's side when the brief has one. Only
+   * the numbers: given the screen's whole label, the Coach copied it into its sentence (#32).
+   */
+  winningChances?: { side: Side; before: string; after?: string };
   candidates: BriefCandidate[];
   /**
    * The tempting moves the Engine didn't list (ADR 0011): moves many players at the Player's level
@@ -285,8 +289,9 @@ function winningChancesOf(ask: CoachAsk): Brief['winningChances'] {
   const played = ask.move ? playUci(ask.fen, ask.move.uci) : null;
   const after = played ? (ask.positionAfter ?? bestLineScore(played.fenAfter, ask.replies ?? [])) : undefined;
   return {
-    before: winningChancesFor(before.score, before.pov, side).text,
-    ...(after ? { after: winningChancesFor(after.score, after.pov, side).text } : {}),
+    side,
+    before: winningChancesFor(before.score, before.pov, side).short,
+    ...(after ? { after: winningChancesFor(after.score, after.pov, side).short } : {}),
   };
 }
 

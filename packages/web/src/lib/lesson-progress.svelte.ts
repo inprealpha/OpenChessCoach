@@ -2,6 +2,7 @@
 // the desktop's, asked afresh whenever the desktop can be reached. Progress saved while the desktop
 // can't be reached is kept on this device, shown in the lists with the rest, and sent to the desktop
 // once it is back (ADR 0003: the desktop's database stays the single source of truth).
+import { decisionsMade } from '@chess-coach/shared/content/course';
 import type { LessonProgress } from '@chess-coach/shared/protocol';
 import { api } from './api.svelte.ts';
 import { profile } from './profile.svelte.ts';
@@ -103,5 +104,5 @@ export function lessonStatus(progress: readonly LessonProgress[], id: string, de
   const p = progress.find((x) => x.lessonId === id);
   if (!p) return 'Not started';
   if (p.completed) return 'Complete';
-  return `${p.step} of ${decisions} decisions`;
+  return `${decisionsMade(p.step, decisions)} of ${decisions} decisions`;
 }

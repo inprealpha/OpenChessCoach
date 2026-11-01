@@ -28,7 +28,8 @@ const DEFAULT_SETTINGS: StoredSettings = {
   models: DEFAULT_MODELS,
   liveCoachingDefault: true,
   tunnelEnabled: false,
-  thinkDeeper: false,
+  // On by default: the Coach explains better with the Engine at hand (#32, ADR 0010).
+  thinkDeeper: true,
   reviewOverview: true,
 };
 
@@ -75,7 +76,10 @@ export function updateSettings(db: Db, patch: SettingsPatch): Settings {
     reviewOverview: patch.reviewOverview ?? current.reviewOverview,
   };
   const put = db.prepare('INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value');
-  for (const [k, v] of Object.entries(next)) put.run(k, JSON.stringify(v));
+  // Only what the Player changed is stored: a setting never touched follows its default, so a new
+  // default reaches every install without a migration (#32).
+  const touched = new Set<string>(Object.keys(patch).map((k) => (k === 'quality' ? 'models' : k)));
+  for (const [k, v] of Object.entries(next)) if (touched.has(k)) put.run(k, JSON.stringify(v));
   return withQuality(next);
 }
 

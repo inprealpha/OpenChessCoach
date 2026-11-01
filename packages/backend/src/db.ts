@@ -187,6 +187,12 @@ const MIGRATIONS: string[] = [
   `
   ALTER TABLE reviews ADD COLUMN overview TEXT;
   `,
+  // Think deeper is now on by default (#32). Saving any setting stored every setting, so a stored
+  // "off" is almost always the old default rather than a choice: it goes once, and the new default
+  // applies. A Player who turns it off again keeps it off.
+  `
+  DELETE FROM settings WHERE key = 'thinkDeeper';
+  `,
 ];
 
 /** Tables `coachctl db get` may read. */

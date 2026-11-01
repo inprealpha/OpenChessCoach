@@ -20,7 +20,9 @@ Proof from the running app, following .claude/skills/verify/SKILL.md:
 - the commands you ran (npm run verify, coachctl ...) and their JSON output;
 - screenshots or accessibility snapshots from evidence/<runId>/;
 - database readback (coachctl db get <table>) for any side effect;
-- the Player journeys and tests you added or ran.
+- the Player journeys and tests you added or ran;
+- for a change to what a Player sees, the checklist at the end of docs/design/interface-guidelines.md,
+  ticked at desktop and phone sizes.
 A PR with nothing here gets the no-evidence label.
 -->
 

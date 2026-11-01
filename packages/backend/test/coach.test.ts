@@ -25,12 +25,15 @@ function whyAsk(): CoachRequest {
 }
 
 /** What the Winning Chances bar on the Board shows in a position, from the Engine at verify mode's settings, which the browser shares. */
-async function barAt(fen: string, side: 'white' | 'black' = 'white'): Promise<string> {
+async function barAt(fen: string, side: 'white' | 'black' = 'white', form: 'text' | 'short' = 'text'): Promise<string> {
   barEngine ??= createNodeEngine();
   const shown = scoreFromAnalysis(fen, await (await barEngine).analyse(fen, { depth: VERIFY_ENGINE.depth, multiPv: VERIFY_ENGINE.multiPv }));
   if (!shown) throw new Error('the Engine found no line');
-  return winningChancesFor(shown.score, shown.pov, side).text;
+  return winningChancesFor(shown.score, shown.pov, side)[form];
 }
+
+/** The bar's numbers without its label, as the brief carries them (#32). */
+const numbersAt = (fen: string) => barAt(fen, 'white', 'short');
 let barEngine: ReturnType<typeof createNodeEngine> | undefined;
 
 /** The desktop Engine's own facts for 1. e4, from Node Stockfish at the verify depth. */
@@ -84,7 +87,7 @@ describe('the Coach port', () => {
     if (!bc4) throw new Error('bad fixture');
     await c.request('coach.ask', { job: 'why', fen: before, recentMoves: ['e4', 'e5', 'Nf3', 'Nc6'], moveUci: bc4.uci });
     const [call] = rows<{ brief: string; raw_reply: string }>(app, 'SELECT brief, raw_reply FROM coach_calls');
-    expect(JSON.parse(call?.brief ?? '{}').winningChances).toEqual({ before: await barAt(before), after: await barAt(bc4.fenAfter) });
+    expect(JSON.parse(call?.brief ?? '{}').winningChances).toEqual({ side: 'white', before: await numbersAt(before), after: await numbersAt(bc4.fenAfter) });
     // The fake Coach repeats them, so journeys show what the real Coach is told.
     expect(JSON.parse(call?.raw_reply ?? '{}').text).toContain(`After it, ${await barAt(bc4.fenAfter)}.`);
   });
@@ -109,7 +112,7 @@ describe('the Coach port', () => {
     const said = rows<{ brief: string }>(app, 'SELECT brief FROM coach_calls ORDER BY id').map((r) => JSON.parse(r.brief).winningChances?.after);
     const shown = await Promise.all(cases.map(async ({ fen, san }) => barAt(playSan(fen, san)?.fenAfter ?? '')));
     expect(shown).toEqual(cases.map((x) => x.bar));
-    expect(said).toEqual(shown);
+    expect(said).toEqual(await Promise.all(cases.map(async ({ fen, san }) => numbersAt(playSan(fen, san)?.fenAfter ?? ''))));
   });
 
   it('leaves Winning Chances out where the screen hides the bar: Hints, Lesson turns, and Why Questions in a Lesson or a Puzzle', async () => {
@@ -129,7 +132,7 @@ describe('the Coach port', () => {
       ['hint', undefined],
       ['lesson-turn', undefined],
       ['why', undefined],
-      ['why', { before: 'White mates in 2', after: 'White mates in 1' }],
+      ['why', { side: 'white', before: 'White mates in 2', after: 'White mates in 1' }],
     ]);
     for (const r of briefs.slice(0, 3)) expect(JSON.parse(r.raw_reply).text).not.toMatch(/winning chances|mates in/);
   });
@@ -143,7 +146,7 @@ describe('the Coach port', () => {
     const card = (ply: number) => {
       const [before, after] = [scoreAfterPly(review.moves, ply - 1), scoreAfterPly(review.moves, ply)];
       if (!before || !after) throw new Error(`no score around ply ${ply}`);
-      return { before: winningChancesFor(before.score, before.pov, game.playerSide).text, after: winningChancesFor(after.score, after.pov, game.playerSide).text };
+      return { side: game.playerSide, before: winningChancesFor(before.score, before.pov, game.playerSide).short, after: winningChancesFor(after.score, after.pov, game.playerSide).short };
     };
     const briefs = (job: string) => rows<{ brief: string }>(app, 'SELECT brief FROM coach_calls WHERE job = ? ORDER BY id', job).map((r) => JSON.parse(r.brief).winningChances);
     expect(review.moments.length).toBeGreaterThan(0);
@@ -245,8 +248,9 @@ describe('the Coach port', () => {
     expect(briefReplies).toEqual(facts.replies.map((x) => x.uci).slice(0, briefReplies.length));
     expect(brief?.candidates.map((x) => x.uci)).not.toContain('h2h4');
     expect(brief?.winningChances).toEqual({
-      before: winningChancesFor(facts.move.candidates[0]?.score ?? { cp: 0 }, 'white').text,
-      after: winningChancesFor(facts.replies[0]?.score ?? { cp: 0 }, 'black', 'white').text,
+      side: 'white',
+      before: winningChancesFor(facts.move.candidates[0]?.score ?? { cp: 0 }, 'white').short,
+      after: winningChancesFor(facts.replies[0]?.score ?? { cp: 0 }, 'black', 'white').short,
     });
     // The start position holds no threat for the desktop's Engine, whatever the client claims.
     expect(brief).not.toHaveProperty('threat');
@@ -445,6 +449,24 @@ describe('the Coach port', () => {
     expect(rule).toContain('threat.by');
     expect(rule).toContain('threat.ignored');
     expect(rule).not.toMatch(/opponent|does nothing about/);
+  });
+
+  it('tells the main story of a move made in check, as one coach, and gives a beginner one idea (#32)', async () => {
+    const app = await instance();
+    const c = await client(app);
+    // 7. Qe5+ and Black blocks with 7... Be7, the only guard of g7 (1. e4 e5 2. Nf3 Nc6 3. d4 exd4
+    // 4. Nxd4 Nxd4 5. Qxd4 b6 6. Bc4 Bb7 7. Qe5+).
+    const fen = 'r2qkbnr/pbpp1ppp/1p6/4Q3/2B1P3/8/PPP2PPP/RNB1K2R b KQkq - 3 7';
+    await c.request('coach.ask', { job: 'why', fen, recentMoves: ['Bc4', 'Bb7', 'Qe5+'], playerSide: 'black', moveUci: 'f8e7' });
+    const does = app.coach.lastBrief?.move?.does ?? '';
+    expect(does).toContain("blocks the check from White's queen on e5");
+    expect(does).toContain("stops guarding Black's pawn on g7");
+    expect(does).not.toContain('brings the bishop out');
+    // The prompt has the Coach pick the main reason, speak as one coach, and keep a beginner to one idea.
+    expect(SYSTEM_PROMPT).toContain('First decide the one main reason');
+    expect(SYSTEM_PROMPT).toContain('you and the Engine are one coach');
+    const beginner = SYSTEM_PROMPT.split('\n- ').find((r) => r.startsWith('A beginner gets one idea')) ?? '';
+    expect(beginner).toContain("Don't list the other candidates");
   });
 
   it('keeps a Coach move that names the threat, and still strips a move the Engine never produced', async () => {

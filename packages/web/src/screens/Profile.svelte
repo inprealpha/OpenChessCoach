@@ -3,6 +3,7 @@
   import { tick } from 'svelte';
   import { PLAYER_LEVELS, type PlayerLevel, type RatingSite } from '@chess-coach/shared/protocol';
   import { MOVE_GRADES } from '@chess-coach/shared/grader';
+  import { decisionsMade } from '@chess-coach/shared/content/course';
   import { api, ApiError } from '../lib/api.svelte.ts';
   import { lessonCatalogue } from '../lib/content.ts';
   import { GRADE_LOOK } from '../lib/grades.ts';
@@ -192,7 +193,7 @@
       {#if begun.length}
         <ul>
           {#each begun as { lesson: l, prog } (l.id)}
-            <li>{l.name}: {prog.completed ? 'complete' : `${prog.step} of ${l.decisions} decisions`}</li>
+            <li>{l.name}: {prog.completed ? 'complete' : `${decisionsMade(prog.step, l.decisions)} of ${l.decisions} decisions`}</li>
           {/each}
         </ul>
         {#if begun.length < lessonCatalogue.length}

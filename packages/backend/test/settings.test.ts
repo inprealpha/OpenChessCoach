@@ -1,6 +1,11 @@
 // Settings over the protocol: the Coach quality choice, the per-job models it stands for, Think deeper
 // and the Review overview.
-import { describe, expect, it } from 'vitest';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { describe, expect, it, onTestFinished } from 'vitest';
+import { openDb } from '../src/db.ts';
+import { getSettings, updateSettings } from '../src/settings.ts';
 import { client, instance } from './helpers.ts';
 
 const THRIFTY = { 'review-moment': 'haiku', why: 'haiku', 'lesson-turn': 'haiku', hint: 'haiku', live: 'haiku' };
@@ -54,15 +59,40 @@ describe('Coach quality', () => {
 });
 
 describe('Think deeper', () => {
-  it('is off on a fresh install, and turning it on or off leaves the models alone', async () => {
+  it('is on on a fresh install, and turning it off or on leaves the models alone (#32)', async () => {
     const c = await client(await instance({ seed: 'empty' }));
-    expect(await c.request('settings.get', {})).toMatchObject({ thinkDeeper: false });
-    await c.request('settings.update', { quality: 'best' });
-    expect(await c.request('settings.update', { thinkDeeper: true })).toMatchObject({ thinkDeeper: true, quality: 'best', models: BEST });
     expect(await c.request('settings.get', {})).toMatchObject({ thinkDeeper: true });
-    // Changing something else leaves it on.
-    expect(await c.request('settings.update', { quality: 'thrifty' })).toMatchObject({ thinkDeeper: true, models: THRIFTY });
-    expect(await c.request('settings.update', { thinkDeeper: false })).toMatchObject({ thinkDeeper: false, models: THRIFTY });
+    await c.request('settings.update', { quality: 'best' });
+    expect(await c.request('settings.update', { thinkDeeper: false })).toMatchObject({ thinkDeeper: false, quality: 'best', models: BEST });
+    expect(await c.request('settings.get', {})).toMatchObject({ thinkDeeper: false });
+    // Changing something else leaves it off.
+    expect(await c.request('settings.update', { quality: 'thrifty' })).toMatchObject({ thinkDeeper: false, models: THRIFTY });
+    expect(await c.request('settings.update', { thinkDeeper: true })).toMatchObject({ thinkDeeper: true, models: THRIFTY });
+  });
+
+  it('stores only the settings the Player changed, so an untouched one follows its default', async () => {
+    const app = await instance({ seed: 'empty' });
+    const c = await client(app);
+    await c.request('settings.update', { quality: 'thrifty' });
+    expect(app.app.db.prepare('SELECT key FROM settings ORDER BY key').all()).toEqual([{ key: 'models' }]);
+  });
+
+  it('turns on once for an install that saved the old default, and stays off when the Player turns it off again', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'chess-coach-deeper-'));
+    onTestFinished(() => rmSync(dir, { recursive: true, force: true }));
+    // Before #32, saving any setting stored every setting, so "off" was stored with the rest.
+    const old = openDb(dir);
+    const version = (old.prepare('SELECT version FROM schema_version').get() as { version: number }).version;
+    old.prepare("INSERT INTO settings (key, value) VALUES ('thinkDeeper', 'false'), ('liveCoachingDefault', 'false')").run();
+    old.prepare('UPDATE schema_version SET version = ?').run(version - 1);
+    old.close();
+    const db = openDb(dir);
+    expect(getSettings(db)).toMatchObject({ thinkDeeper: true, liveCoachingDefault: false });
+    updateSettings(db, { thinkDeeper: false });
+    db.close();
+    const again = openDb(dir);
+    onTestFinished(() => again.close());
+    expect(getSettings(again)).toMatchObject({ thinkDeeper: false });
   });
 
   it('is on or off, nothing else', async () => {
@@ -70,7 +100,7 @@ describe('Think deeper', () => {
     for (const value of ['no', 1, null]) {
       await expect(c.request('settings.update', { thinkDeeper: value as never })).rejects.toMatchObject({ code: 'bad-request' });
     }
-    expect(await c.request('settings.get', {})).toMatchObject({ thinkDeeper: false });
+    expect(await c.request('settings.get', {})).toMatchObject({ thinkDeeper: true });
   });
 });
 

@@ -14,6 +14,12 @@ import { board, coachIdle, connection, expect, fenOf, play, square, test } from 
 
 const MOVES = ['e2e4', 'e7e5', 'g1f3', 'b8c6', 'f1c4', 'f8c5', 'b2b4'];
 
+/** New board, which asks first when the board has moves: the Player says yes. */
+async function newBoard(page: Page): Promise<void> {
+  await page.getByRole('button', { name: 'New board' }).click();
+  await page.getByRole('alertdialog', { name: 'Clear this board?' }).getByRole('button', { name: 'Yes, a new board' }).click();
+}
+
 /** The threat arrows on the board, by accessible name. */
 function threatArrows(page: Page) {
   return page.getByRole('img', { name: /^Threat: / });
@@ -32,6 +38,8 @@ async function playAndRead(page: Page, url: string): Promise<{ grades: string[];
   for (let i = 0; i < MOVES.length; i++) await expect(moves.nth(i)).toHaveAccessibleName(/, (Best|Good|Inaccuracy|Mistake|Blunder)$/);
   const grades = await moves.evaluateAll((els) => els.map((e) => e.getAttribute('aria-label') ?? ''));
   await page.getByRole('button', { name: 'Show Engine lines' }).click();
+  // Lines 2 to 5 are behind More lines.
+  await page.getByRole('button', { name: /^More lines/ }).click();
   const section = page.getByRole('region', { name: 'Engine lines' });
   await expect(section.getByText('Depth 10')).toBeVisible();
   const lines = await section.getByRole('listitem').evaluateAll((els) => els.map((e) => e.getAttribute('aria-label') ?? ''));
@@ -90,6 +98,8 @@ test('the browser Engine shows the same lines as the desktop Engine for golden p
   try {
     await paired.goto(`${app.url}/#/board`);
     await paired.getByRole('button', { name: 'Show Engine lines' }).click();
+    // Lines 2 to 5 are behind More lines.
+    await paired.getByRole('button', { name: /^More lines/ }).click();
     let played = 0;
     for (const ply of checkpoints) {
       for (; played < ply; played++) await play(paired, (golden.moves[played] as GradedMove).uci);
@@ -145,6 +155,8 @@ test('the Engine lines lead with the side to move’s Winning Chances, the evalu
   // The start position and 1. e4 in verify mode: the same Engine facts as the golden Italian Game.
   await paired.goto(`${app.url}/#/board`);
   await paired.getByRole('button', { name: 'Show Engine lines' }).click();
+  // Lines 2 to 5 are behind More lines.
+  await paired.getByRole('button', { name: /^More lines/ }).click();
   const section = paired.getByRole('region', { name: 'Engine lines' });
   const first = section.getByRole('listitem').first();
   await expect(section.getByText('Depth 10')).toBeVisible();
@@ -177,6 +189,8 @@ test('the Winning Chances bar beside the board matches the Engine lines, follows
 
   // The same value as the Engine's first candidate move for the same position.
   await paired.getByRole('button', { name: 'Show Engine lines' }).click();
+  // Lines 2 to 5 are behind More lines.
+  await paired.getByRole('button', { name: /^More lines/ }).click();
   const section = paired.getByRole('region', { name: 'Engine lines' });
   await expect(section.getByRole('listitem').first()).toHaveAccessibleName('Engine line 1: e4, White’s winning chances: 53%, +0.38');
 
@@ -212,7 +226,7 @@ test('the Winning Chances bar beside the board matches the Engine lines, follows
   await expect.poll(fill).toEqual({ side: 'black', fromBottom: true, share: 100 - white });
 });
 
-test('the Winning Chances bar stands beside the board, and under it on a phone', async ({ paired, app }) => {
+test('the Winning Chances bar stands beside the board, and above it on a phone', async ({ paired, app }) => {
   await paired.goto(`${app.url}/#/board`);
   const bar = chancesBar(paired);
   await expect(bar).toHaveAccessibleName('Winning Chances bar: White’s winning chances: 53%');
@@ -226,12 +240,12 @@ test('the Winning Chances bar stands beside the board, and under it on a phone',
   expect(wide.bar.x + wide.bar.width).toBeLessThanOrEqual(wide.board.x);
   expect(Math.abs(wide.bar.height - wide.board.height)).toBeLessThan(2);
 
-  // A phone: the board keeps the full width and the bar lies under it, as wide as the board.
+  // A phone: the board keeps the full width and the bar lies above it, as wide as the board.
   await paired.setViewportSize({ width: 390, height: 844 });
   await expect
     .poll(async () => {
       const { board: b, bar: c } = await boxes();
-      return c.y >= b.y + b.height;
+      return c.y + c.height <= b.y;
     })
     .toBe(true);
   const narrow = await boxes();
@@ -360,13 +374,13 @@ test('a move slides its piece; a dropped piece, a new board, a jump and a device
   await slides(paired);
   await play(paired, 'b7a8q');
   await expect.poll(() => slides(paired)).toEqual(['b7-a8']);
-  await paired.getByRole('button', { name: 'New board' }).click();
+  await newBoard(paired);
   await expect(square(paired, 'b7')).toHaveAccessibleName('b7, black pawn');
   expect(await slides(paired)).toEqual([]);
   // Nor is a new board after a single move: it shows the start at once, not that move taken back.
   await play(paired, 'e2e4');
   await expect.poll(() => slides(paired)).toEqual(['e2-e4']);
-  await paired.getByRole('button', { name: 'New board' }).click();
+  await newBoard(paired);
   await expect(square(paired, 'e2')).toHaveAccessibleName('e2, white pawn');
   expect(await slides(paired)).toEqual([]);
   // Nothing slides when the device asks for less motion.
@@ -497,7 +511,10 @@ test('in a Review, a step slides its piece; a jump through the moves and opening
   await paired.getByRole('button', { name: 'Start the Review' }).click();
   const show = paired.getByRole('button', { name: 'Show moment: move 11. Bxf7+, Mistake' });
   await expect(show).toBeVisible({ timeout: 90_000 });
+  // Once the Review is done, the moves are on the panel's Moves tab.
+  await paired.getByRole('tab', { name: 'Moves' }).click();
   await paired.getByRole('button', { name: /^Move 11\. Bxf7\+/ }).click();
+  await paired.getByRole('tab', { name: 'Moments' }).click();
   await expect(square(paired, 'f7', 'Review board')).toHaveAccessibleName('f7, white bishop');
   await slides(paired);
   await show.click();
@@ -692,7 +709,7 @@ test('a Why Question still on its way when the Player starts a New board is drop
   await paired.getByLabel('Your Why Question').fill('Why the centre pawn?');
   await paired.getByRole('button', { name: 'Ask the Coach why' }).click();
   await expect.poll(() => held.length).toBeGreaterThan(0);
-  await paired.getByRole('button', { name: 'New board' }).click();
+  await newBoard(paired);
   holding = false;
   for (const send of held.splice(0)) send();
   // The late answer was about the board before: it never shows in the new conversation.
@@ -702,7 +719,7 @@ test('a Why Question still on its way when the Player starts a New board is drop
   await coachIdle(paired);
   const log = paired.getByLabel('Coach conversation');
   await expect(log.locator('.entry')).toHaveCount(2);
-  await expect(log.locator('.entry.player')).toHaveText('You: Why this pawn?');
+  await expect(log.locator('.entry.from-player')).toHaveText('You: Why this pawn?');
   await expect(log).not.toContainText('Why the centre pawn?');
   expect(errors).toEqual([]);
 });
@@ -717,7 +734,7 @@ test('a Why Question about a move the Engine didn’t list gets that move graded
   await coachIdle(paired);
   // The fake Coach answers about it from the brief's facts, and the guard lets its arrow through.
   await expect(paired.getByLabel('Coach conversation')).toContainText("You asked about Nxe5: it is graded Inaccuracy. It takes Black's pawn on e5");
-  await expect(paired.getByRole('img', { name: 'Arrow f3 to e5 (blue)' })).toBeVisible();
+  await expect(paired.getByRole('img', { name: 'Arrow f3 to e5 (other good move)' })).toBeVisible();
   const [call] = await app.rows<{ brief: string; stripped: string }>('coach_calls');
   const brief = JSON.parse(call?.brief ?? '{}') as { candidates: { san: string; asked?: true }[] };
   expect(brief.candidates.filter((c) => c.asked)).toEqual([expect.objectContaining({ san: 'Nxe5', uci: 'f3e5', grade: 'Inaccuracy' })]);
@@ -866,6 +883,8 @@ test.describe('setting up a position', () => {
     await expect(paired.getByRole('form', { name: 'Set up a position' })).toHaveCount(0);
     await expect(chancesBar(paired)).toHaveAccessibleName('Winning Chances bar: White mates in 1');
     await paired.getByRole('button', { name: 'Show Engine lines' }).click();
+    // Lines 2 to 5 are behind More lines.
+    await paired.getByRole('button', { name: /^More lines/ }).click();
     await expect(paired.getByRole('region', { name: 'Engine lines' }).getByRole('listitem').first()).toHaveAccessibleName(/^Engine line 1: Rd8#/);
     // The Player plays on from it as from any position.
     await play(paired, 'd1d8');
@@ -941,7 +960,7 @@ test.describe('setting up a position', () => {
     // The message about an illegal move goes with the position it was about.
     await play(paired, 'e7e4');
     await expect(paired.getByText('That move isn’t legal.')).toBeVisible();
-    await paired.getByRole('button', { name: 'New board' }).click();
+    await newBoard(paired);
     await expect(board(paired, 'Chess board')).toHaveAttribute('data-fen', INITIAL_FEN);
     await expect(board(paired, 'Chess board')).toHaveAttribute('data-orientation', 'white');
     await expect(paired.getByText('That move isn’t legal.')).toHaveCount(0);

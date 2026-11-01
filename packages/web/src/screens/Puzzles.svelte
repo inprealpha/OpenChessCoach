@@ -232,8 +232,11 @@
   }
 </script>
 
-<section class="screen">
-  <h1>{lessonName ? `${lessonName} Puzzles` : 'Puzzles'}</h1>
+<section class="screen board-screen puzzles">
+  <header class="frame-head">
+    <h1>{lessonName ? `${lessonName} Puzzles` : 'Puzzles'}</h1>
+    {#if puzzle && status !== 'empty'}<p class="head-line">Rated {puzzle.rating} · from a real Lichess game</p>{/if}
+  </header>
   {#if all.length}
     {#if opening && !lesson}
       <p role="note">There are no Puzzles for {lessonCatalogue.find((l) => l.id === opening)?.name ?? 'that link'}, so these are from every Lesson.</p>
@@ -281,7 +284,7 @@
     </section>
   {:else if puzzle}
     <div class="board-layout">
-      <div>
+      <div class="board-col">
         <Board
           fen={line.fen}
           orientation={solver}
@@ -294,7 +297,7 @@
         />
         {#if finished}
           <!-- Stepping stays inside the Puzzle: its first position is the one the Player was set. -->
-          <div class="toolbar">
+          <div class="board-bar toolbar">
             <button type="button" class="secondary" onclick={() => line.goTo(1)} aria-label="First position">⏮</button>
             <button type="button" class="secondary" onclick={() => line.goTo(Math.max(1, line.cursor - 1))} aria-label="Previous move">◀</button>
             <button type="button" class="secondary" onclick={() => line.forward()} aria-label="Next move">▶</button>
@@ -303,13 +306,13 @@
         {/if}
       </div>
       <div class="side">
+        <div class="panel-body">
         <section class="card" aria-label="Puzzle" data-puzzle-id={puzzle.id}>
           <p>
             <strong>
               {#if status === 'solved'}You found the best move for {SIDE_NAMES[solver]}.{:else if status === 'shown'}The solution for {SIDE_NAMES[solver]} is on the board.{:else}Find the best move for {SIDE_NAMES[solver]}.{/if}
             </strong>
           </p>
-          <p class="muted small">Puzzle {puzzle.id} · rated {puzzle.rating} · from a real Lichess game</p>
           <p role="status" aria-live="polite" class:error={feedback.includes('not the move')}>{feedback}</p>
           {#if finished}
             <p class="solution">
@@ -330,19 +333,24 @@
             {/if}
           </div>
         </section>
+        <p class="muted small">Puzzles: Lichess puzzle database, CC0.</p>
+        </div>
         {#if status !== 'solving'}
           <CoachPanel thread={coach} onwhy={why} placeholder="Why is this the answer?" />
         {/if}
-        <p class="muted small">Puzzles: Lichess puzzle database, CC0.</p>
       </div>
     </div>
   {/if}
 </section>
 
 <style>
+  /* The picker's line sits between the header line and the frame. */
+  @media (min-width: 821px) {
+    .puzzles { --frame-h: calc(100dvh - var(--app-head) - 5.6rem); }
+  }
   .row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
   .small { font-size: 0.8rem; }
-  .picker { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.35rem 1rem; margin: 0 0 1rem; }
+  .picker { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.35rem 1rem; margin: 0 0 0.5rem; min-height: 1.5rem; }
   .picker p { margin: 0; }
   /* Open, the sets take the whole width and the progress line goes under them; the summary stays where it was. */
   .picker details[open] { flex: 1 1 100%; }

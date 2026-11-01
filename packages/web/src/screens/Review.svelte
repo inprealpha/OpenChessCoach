@@ -2,8 +2,12 @@
   // A Review of one game: the desktop's Engine grades every move (ADR 0007), the desktop picks the
   // key moments, and the Coach writes an overview of the whole game (unless Settings turn it off),
   // then explains each key moment, streamed as it's written. Saved Reviews reopen with no Coach call.
+  // The board frame (docs/design/interface-guidelines.md): the header line says whose side the
+  // Player had and how it ended, the board stays in view, and the panel has two tabs, Moments (the
+  // overview and one line per key moment, the open one expanded) and Moves, with the Ask box docked
+  // at its foot.
   import { untrack } from 'svelte';
-  import { moveLabel } from '@chess-coach/shared/chess';
+  import { moveLabel, otherSide, SIDE_NAMES, type Side } from '@chess-coach/shared/chess';
   import type { MoveGrade } from '@chess-coach/shared/grader';
   import { scoreAfterPly } from '@chess-coach/shared/position-score';
   import { winningChancesFor, type WinningChances } from '@chess-coach/shared/winning-chances';
@@ -11,6 +15,7 @@
   import type { GameDetail, GameSummary, KeyMoment, OverviewMove, Review } from '@chess-coach/shared/protocol';
   import Board from '../components/Board.svelte';
   import CoachPanel from '../components/CoachPanel.svelte';
+  import FlipButton from '../components/FlipButton.svelte';
   import GradeBadge from '../components/GradeBadge.svelte';
   import MoveList from '../components/MoveList.svelte';
   import StepButtons from '../components/StepButtons.svelte';
@@ -18,7 +23,7 @@
   import WinningChancesBar from '../components/WinningChancesBar.svelte';
   import WinningChancesGraph from '../components/WinningChancesGraph.svelte';
   import { api, ApiError } from '../lib/api.svelte.ts';
-  import { reviewArrows, threatArrows } from '../lib/arrows.ts';
+  import { coachArrows, reviewArrows, threatArrows } from '../lib/arrows.ts';
   import { CoachThread } from '../lib/coach.svelte.ts';
   import { threatOnDesktop } from '../lib/engine/engine.svelte.ts';
   import { Line } from '../lib/game.svelte.ts';
@@ -26,8 +31,11 @@
   import { desktopBack, droppedConnection, runningReview, startReview, type ReviewRun } from '../lib/review-runs.svelte.ts';
   import { router } from '../lib/router.svelte.ts';
   import { threatSetting, ThreatView } from '../lib/threat.svelte.ts';
+  import { foldOpen, rememberFold } from '../lib/folds.ts';
   import { gradeMark } from '../lib/grades.ts';
+  import { narrow } from '../lib/narrow.svelte.ts';
   import { titleFrom } from '../lib/page-title.svelte.ts';
+  import { profile } from '../lib/profile.svelte.ts';
 
   let { gameId }: { gameId: number } = $props();
 
@@ -42,8 +50,14 @@
   let selected = $state<number | null>(null);
   /** The key moment whose explanation is open on the board: the position before it, with the Coach's arrows. */
   let open = $state<number | null>(null);
-  let boardArea = $state<HTMLElement>();
-  let side = $state<HTMLElement>();
+  /** The key moment whose row is expanded in the panel: the last one the Player opened. */
+  let expanded = $state<number | null>(null);
+  /** The panel's tab. */
+  let tab = $state<'moments' | 'moves'>('moments');
+  /** The side at the bottom of the board: the Player's, until they flip it. */
+  let flipped = $state(false);
+  /** Whether the overview is open: on the first visit to this game's Review, then as the Player left it. */
+  let overviewOpen = $state(true);
   const line = new Line();
   const coach = new CoachThread();
 
@@ -72,11 +86,16 @@
         if (api.state !== 'online') kept = (await keptGames())?.games.find((g) => g.id === id) ?? null;
         await api.whenOnline();
         game = await api.request('games.get', { gameId: id });
+        overviewOpen = foldOpen(`review-overview-${id}`, true);
         line.reset(game.startFen, game.moves);
         line.goTo(0);
         const reply = await api.request('review.get', { gameId: id });
         review = reply.review;
-        if (review) phase = 'done';
+        if (review) {
+          phase = 'done';
+          // The first key moment's row starts expanded, so the panel opens on words, not a list.
+          expanded = review.moments[0]?.ply ?? null;
+        }
         else {
           // Started on this device before the Player left the screen: follow it rather than offer
           // Start. Started by a request this device no longer holds, before a reload or in a tab
@@ -134,32 +153,22 @@
     selected = m.ply;
     if (momentOpen && open === m.ply) {
       open = null;
+      expanded = null;
       return;
     }
     open = m.ply;
+    expanded = m.ply;
     line.goTo(m.ply);
-    showBoard();
-  }
-
-  /**
-   * Brings the board back into view when the key moments and the moves sit under it, as on a
-   * phone, and picking one would otherwise change a board scrolled out of sight. Beside the board
-   * the page stays where it is.
-   */
-  function showBoard(): void {
-    if (!boardArea || !side) return;
-    const board = boardArea.getBoundingClientRect();
-    if (side.getBoundingClientRect().top < board.bottom) return;
-    const visible = Math.min(board.bottom, innerHeight) - Math.max(board.top, 0);
-    if (visible >= board.height / 2) return;
-    const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    boardArea.scrollIntoView({ block: 'start', behavior: still ? 'auto' : 'smooth' });
   }
 
   /** A move the overview names: the board goes to the position after it, as the move list does. */
   function showMove(m: OverviewMove): void {
     goto(m.ply);
-    showBoard();
+  }
+
+  function toggleOverview(e: Event): void {
+    overviewOpen = (e.currentTarget as HTMLDetailsElement).open;
+    if (game) rememberFold(`review-overview-${game.id}`, overviewOpen);
   }
 
   /** The overview's text split at the moves it names, and the moves it names that its text doesn't link. */
@@ -171,15 +180,28 @@
     return { segments, unlinked: o.moves.filter((m) => !linked.has(m.ply)) };
   });
 
-  /** A move picked in the move list, which sits under the board on a phone. */
+  /** A move picked in the move list. */
   function pickMove(cursor: number): void {
     goto(cursor);
-    showBoard();
   }
 
-  /** The line under the heading: who played, the result, the opening and the date. */
-  function summaryOf(g: Pick<GameSummary, 'white' | 'black' | 'result' | 'opening' | 'date'>): string {
-    return [g.white + ' vs ' + g.black, g.result, g.opening, g.date?.slice(0, 10)].filter(Boolean).join(' · ');
+  /** How the game ended for the Player: "Won 1-0", "Lost 0-1", "Drew ½-½". */
+  function outcome(g: Pick<GameSummary, 'result' | 'playerSide'>): string {
+    if (g.result === '1/2-1/2') return 'Drew ½-½';
+    if (g.result !== '1-0' && g.result !== '0-1') return g.result;
+    return `${(g.result === '1-0') === (g.playerSide === 'white') ? 'Won' : 'Lost'} ${g.result}`;
+  }
+
+  /** The header line: the Player's side, how it ended, the opponent, the opening and the date. */
+  function summaryOf(g: Pick<GameSummary, 'white' | 'black' | 'result' | 'opening' | 'date' | 'playerSide'>): string {
+    const opponent = g.playerSide === 'white' ? g.black : g.white;
+    return [`You had ${SIDE_NAMES[g.playerSide]}`, outcome(g), `vs ${opponent}`, g.opening, g.date?.slice(0, 10)].filter(Boolean).join(' · ');
+  }
+
+  /** The overview's first sentence, its one-line summary while it is folded. */
+  function firstSentence(text: string): string {
+    const m = /^.*?[.!?](?=\s|$)/s.exec(text.trim());
+    return m ? m[0] : text;
   }
 
   /** Fewer moves of the Player's than this make a short game, such as one resigned in the opening. */
@@ -246,6 +268,12 @@
     };
   }
 
+  const orientation = $derived<Side>(game ? (flipped ? otherSide(game.playerSide) : game.playerSide) : 'white');
+  /** Evaluations show beside the percentages at the club level only. */
+  const evals = $derived(profile.showsEvaluations);
+  /** The move the Ask box asks about: the one on the board. */
+  const askedMove = $derived(line.moves[line.cursor - 1]);
+
   // The threat in the position on the board, from the desktop's Engine that graded the game (ADR 0007).
   const threats = new ThreatView(threatOnDesktop);
   const momentOpen = $derived(open !== null && line.cursor === open);
@@ -254,9 +282,10 @@
   const coachExplains = $derived(Boolean(openMoment) || coach.arrows.length > 0);
   // One set of arrows at a time: the Coach's while it explains, otherwise the move played and the
   // Engine's best from the Review's graded moves, with the threat when Threat is on.
+  // The move played is ink in the Coach's arrows too, as everywhere.
   const shownArrows = $derived(
     coachExplains
-      ? coach.arrows.length ? coach.arrows : (openMoment?.arrows ?? [])
+      ? coachArrows(coach.arrows.length ? coach.arrows : (openMoment?.arrows ?? []), line.moves[line.cursor - 1]?.uci)
       : [...threatArrows(threats.threat), ...reviewArrows(review?.moves[line.cursor - 1])],
   );
   const momentFen = $derived(openMoment ? openMoment.fenBefore : null);
@@ -273,144 +302,181 @@
   });
 </script>
 
-<section class="screen">
-  <h1>Review</h1>
+<section class="screen board-screen review">
+  <header class="frame-head">
+    <h1>Review</h1>
+    {#if game}<p class="head-line" data-testid="review-summary">{summaryOf(game)}</p>{:else if kept}<p class="head-line">{summaryOf(kept)}</p>{/if}
+  </header>
   {#if error}<p class="error" role="alert">{error}</p>{/if}
   {#if game}
-    <p class="muted">{summaryOf(game)}</p>
-    {#if game.source === 'sample'}<p class="muted small" role="note">A sample game: it doesn’t count towards your Player Profile.</p>{/if}
     <div class="board-layout">
-      <div class="board-and-bar" bind:this={boardArea}>
-        <div class="with-bar">
-          <WinningChancesBar
-            score={position?.score ?? null}
-            pov={position?.pov ?? 'white'}
-            orientation={game.playerSide}
-            waiting={review ? 'not graded in this Review' : 'shown once the Review is done'}
-          />
-          <!-- Opening or closing a key moment is not a move: a fresh Board shows it at once. -->
-          {#key momentFen}
-            <Board
-              fen={boardFen}
-              orientation={game.playerSide}
-              movable="none"
-              lastMove={line.lastMove && !momentFen
-                ? { from: line.lastMove.uci.slice(0, 2), to: line.lastMove.uci.slice(2, 4) }
-                : undefined}
-              arrows={shownArrows}
-              highlights={coach.highlights}
-              gradeMark={mark}
-              label="Review board"
+      <div class="board-col">
+        <div class="board-and-bar">
+          <div class="with-bar">
+            <WinningChancesBar
+              score={position?.score ?? null}
+              pov={position?.pov ?? 'white'}
+              {orientation}
+              waiting={review ? 'not graded in this Review' : 'shown once the Review is done'}
             />
-          {/key}
+            <!-- Opening or closing a key moment is not a move: a fresh Board shows it at once. -->
+            {#key momentFen}
+              <Board
+                fen={boardFen}
+                {orientation}
+                movable="none"
+                lastMove={line.lastMove && !momentFen
+                  ? { from: line.lastMove.uci.slice(0, 2), to: line.lastMove.uci.slice(2, 4) }
+                  : undefined}
+                arrows={shownArrows}
+                highlights={coach.highlights}
+                gradeMark={mark}
+                label="Review board"
+              />
+            {/key}
+          </div>
         </div>
-        <div class="toolbar">
+        <div class="board-bar toolbar">
           <!-- Steps from the position on the board: an open key moment shows the one before its move. -->
           <StepButtons onfirst={() => goto(0)} onprevious={() => goto(shownIndex - 1)} onnext={() => goto(shownIndex + 1)} onlast={() => goto(line.moves.length)} />
+          <FlipButton onflip={() => (flipped = !flipped)} />
           <ThreatButton />
         </div>
-        {#if review}
-          <WinningChancesGraph moves={review.moves} cursor={shownIndex} ongoto={goto} />
+        {#if review && !narrow.on}
+          <WinningChancesGraph moves={review.moves} cursor={shownIndex} ongoto={goto} compact />
         {/if}
       </div>
-      <div class="side" bind:this={side}>
-        {#if phase === 'ready'}
-          <div class="card">
-            <p>The Engine grades every move, then the Coach sums up the game and explains the moments that mattered most.</p>
-            <button type="button" onclick={start} disabled={api.state !== 'online'}>Start the Review</button>
-          </div>
-        {:else if phase === 'running' && run?.interrupted}
-          <div class="card" role="status">
-            <p>The connection to your desktop dropped. The Review goes on once it is back.</p>
-          </div>
-        {:else if phase === 'running' && run?.phase === 'grading'}
-          <div class="card" role="status">
-            <label for="grading">Grading move {run.progress.done} of {run.progress.total}…</label>
-            <progress id="grading" max={run.progress.total} value={run.progress.done}></progress>
-          </div>
-        {:else if phase === 'running' && run?.phase === 'explaining'}
-          <div class="card" role="status" aria-live="polite">
-            <!-- The overview comes first when Settings have it on: the desktop says so as it starts on it. -->
-            <p>{run.overviewFirst && !run.streaming.length ? 'The Coach is writing an overview of the game…' : 'The Coach is explaining the key moments…'}</p>
-            {#if run.overview}<p class="stream" data-testid="overview-stream">{run.overview}</p>{/if}
-            {#each run.streaming as text, i (i)}{#if text}<p class="stream">{text}</p>{/if}{/each}
-          </div>
-        {/if}
+      <div class="side">
+        <div class="panel-body">
+          {#if game.source === 'sample'}<p class="muted small" role="note">A sample game: it doesn’t count towards your Player Profile.</p>{/if}
+          {#if phase === 'ready'}
+            <div class="card">
+              <p>The Engine grades every move, then the Coach sums up the game and explains the moments that mattered most.</p>
+              <button type="button" onclick={start} disabled={api.state !== 'online'}>Start the Review</button>
+            </div>
+          {:else if phase === 'running' && run?.interrupted}
+            <div class="card" role="status">
+              <p>The connection to your desktop dropped. The Review goes on once it is back.</p>
+            </div>
+          {:else if phase === 'running' && run?.phase === 'grading'}
+            <div class="card" role="status">
+              <label for="grading">Grading move {run.progress.done} of {run.progress.total}…</label>
+              <progress id="grading" max={run.progress.total} value={run.progress.done}></progress>
+            </div>
+          {:else if phase === 'running' && run?.phase === 'explaining'}
+            <div class="card" role="status" aria-live="polite">
+              <!-- The overview comes first when Settings have it on: the desktop says so as it starts on it. -->
+              <p>{run.overviewFirst && !run.streaming.length ? 'The Coach is writing an overview of the game…' : 'The Coach is explaining the key moments…'}</p>
+              {#if run.overview}<p class="stream" data-testid="overview-stream">{run.overview}</p>{/if}
+              {#each run.streaming as text, i (i)}{#if text}<p class="stream">{text}</p>{/if}{/each}
+            </div>
+          {/if}
 
-        {#if review && overview}
-          <section class="card" aria-label="Overview">
-            <h2>Overview</h2>
-            <p class="overview">
-              {#each overview.segments as part, i (i)}
-                {#if part.move}
-                  {@const m = part.move}
-                  <button
-                    type="button"
-                    class="link move"
-                    class:current={line.cursor === m.ply}
-                    onclick={() => showMove(m)}
-                    aria-label={`Go to move ${m.label}, ${m.grade}`}>{part.text}</button
-                  >
-                {:else}{part.text}{/if}
-              {/each}
-            </p>
-            {#if overview.unlinked.length}
-              <p class="small">
-                Moves it names:
-                {#each overview.unlinked as m, i (m.ply)}{i ? ', ' : ''}<button
-                    type="button"
-                    class="link move"
-                    class:current={line.cursor === m.ply}
-                    onclick={() => showMove(m)}
-                    aria-label={`Go to move ${m.label}, ${m.grade}`}>{m.label}</button
-                  >{/each}
-              </p>
-            {/if}
-          </section>
-        {/if}
-
-        {#if review}
-          <section aria-label="Key moments">
-            <h2>Key moments</h2>
-            {#if review.moments.length === 0}
-              <p class="muted">{noMoments(game)}</p>
-            {/if}
-            <ol class="moments">
-              {#each review.moments as m (m.ply)}
-                {@const chances = chancesOf(m)}
-                {@const label = moveLabel(m.fenBefore, m.san)}
-                <li class="card" class:active={selected === m.ply} data-ply={m.ply}>
-                  <button type="button" class="link" onclick={() => jump(m)} aria-pressed={momentOpen && open === m.ply} aria-label={`Show moment: move ${label}, ${m.grade}`}>
-                    <strong>{label}</strong>
-                  </button>
-                  <GradeBadge grade={m.grade} />
-                  {#if chances}
-                    <p class="chances" data-testid="chances-before">Before: <strong>{chances.before.text}</strong> <span class="eval muted">{chances.before.evaluation}</span></p>
-                    <p class="chances" data-testid="chances-after">After {label}: <strong>{chances.after.text}</strong> <span class="eval muted">{chances.after.evaluation}</span></p>
+          {#if review}
+            <div class="tabs" role="tablist" aria-label="Review">
+              <button type="button" role="tab" id="tab-moments" aria-controls="panel-moments" aria-selected={tab === 'moments'} class:on={tab === 'moments'} onclick={() => (tab = 'moments')}>Moments</button>
+              <button type="button" role="tab" id="tab-moves" aria-controls="panel-moves" aria-selected={tab === 'moves'} class:on={tab === 'moves'} onclick={() => (tab = 'moves')}>Moves</button>
+            </div>
+            <div id="panel-moments" role="tabpanel" aria-labelledby="tab-moments" hidden={tab !== 'moments'} class="tab-panel">
+              {#if overview}
+                <section class="card overview-card" aria-label="Overview">
+                <details class="fold overview-fold" open={overviewOpen} ontoggle={toggleOverview}>
+                  <summary><strong>Overview</strong>{#if !overviewOpen}<span class="summary-line"> · {firstSentence(review.overview?.text ?? '')}</span>{/if}</summary>
+                  <p class="overview">
+                    {#each overview.segments as part, i (i)}
+                      {#if part.move}
+                        {@const m = part.move}
+                        <button
+                          type="button"
+                          class="link move"
+                          class:current={line.cursor === m.ply}
+                          onclick={() => showMove(m)}
+                          aria-label={`Go to move ${m.label}, ${m.grade}`}>{part.text}</button
+                        >
+                      {:else}{part.text}{/if}
+                    {/each}
+                  </p>
+                  {#if overview.unlinked.length}
+                    <p class="small">
+                      Moves it names:
+                      {#each overview.unlinked as m, i (m.ply)}{i ? ', ' : ''}<button
+                          type="button"
+                          class="link move"
+                          class:current={line.cursor === m.ply}
+                          onclick={() => showMove(m)}
+                          aria-label={`Go to move ${m.label}, ${m.grade}`}>{m.label}</button
+                        >{/each}
+                    </p>
                   {/if}
-                  {#if m.betterOptions.length}
-                    <p class="small">Better: {m.betterOptions
-                        .map((o) => {
-                          const c = chances?.options.get(o.uci);
-                          return c ? `${o.san} ${c.short} (${c.evaluation})` : `${o.san} (${o.score})`;
-                        })
-                        .join(', ')}</p>
-                  {/if}
-                  <p class="explanation">{m.explanation}</p>
-                </li>
-              {/each}
-            </ol>
-          </section>
-        {/if}
-
-        <MoveList moves={line.moves} {grades} cursor={line.cursor} ongoto={pickMove} />
-        {#if line.cursor > 0}
-          <CoachPanel thread={coach} onwhy={why} placeholder="Ask why about this move" />
-        {/if}
+                </details>
+                </section>
+              {/if}
+              <section aria-label="Key moments">
+                <h2>Key moments</h2>
+                {#if review.moments.length === 0}
+                  <p class="muted">{noMoments(game)}</p>
+                {/if}
+                <ol class="moments">
+                  {#each review.moments as m (m.ply)}
+                    {@const chances = chancesOf(m)}
+                    {@const label = moveLabel(m.fenBefore, m.san)}
+                    {@const isOpen = expanded === m.ply}
+                    <li class="moment" class:active={selected === m.ply} class:expanded={isOpen} data-ply={m.ply}>
+                      <button type="button" class="row" onclick={() => jump(m)} aria-pressed={momentOpen && open === m.ply} aria-expanded={isOpen} aria-label={`Show moment: move ${label}, ${m.grade}`}>
+                        <strong class="san">{label}</strong>
+                        <GradeBadge grade={m.grade} />
+                        {#if chances}
+                          <span class="change" data-testid="chances-change">{chances.before.short} → {chances.after.short}{#if evals}<span class="eval muted"> {chances.before.evaluation} → {chances.after.evaluation}</span>{/if}</span>
+                        {/if}
+                      </button>
+                      <!-- The row's numbers in words, for a screen reader. -->
+                      {#if chances}
+                        <p class="visually-hidden" data-testid="chances-before">Before: {chances.before.text}</p>
+                        <p class="visually-hidden" data-testid="chances-after">After {label}: {chances.after.text}</p>
+                      {/if}
+                      {#if isOpen}
+                        <div class="detail">
+                          <p class="explanation">{m.explanation}</p>
+                          {#if m.betterOptions.length}
+                            {@const [best, ...others] = m.betterOptions}
+                            {@const option = (o: (typeof m.betterOptions)[number]) => {
+                              const c = chances?.options.get(o.uci);
+                              return c ? `${o.san} ${c.short}${evals ? ` (${c.evaluation})` : ''}` : `${o.san} (${o.score})`;
+                            }}
+                            <p class="small better">Better: <strong>{option(best!)}</strong></p>
+                            {#if others.length}
+                              <details class="more small">
+                                <summary>More moves</summary>
+                                <p>{others.map(option).join(', ')}</p>
+                              </details>
+                            {/if}
+                          {/if}
+                        </div>
+                      {/if}
+                    </li>
+                  {/each}
+                </ol>
+              </section>
+            </div>
+            <div id="panel-moves" role="tabpanel" aria-labelledby="tab-moves" hidden={tab !== 'moves'} class="tab-panel">
+              {#if narrow.on}
+                <WinningChancesGraph moves={review.moves} cursor={shownIndex} ongoto={goto} />
+              {/if}
+              <MoveList moves={line.moves} {grades} cursor={line.cursor} ongoto={pickMove} />
+            </div>
+          {:else}
+            <MoveList moves={line.moves} {grades} cursor={line.cursor} ongoto={pickMove} />
+          {/if}
+        </div>
+        <CoachPanel
+          thread={coach}
+          onwhy={why}
+          placeholder={askedMove ? `Ask why about ${moveLabel(askedMove.fenBefore, askedMove.san)}` : 'Ask why about this move'}
+          closed={askedMove ? undefined : 'Step to a move to ask why about it'}
+        />
       </div>
     </div>
   {:else if !error && api.state === 'offline'}
-    {#if kept}<p class="muted">{summaryOf(kept)}</p>{/if}
     <p class="card" role="note">Reviews live on your desktop, which can’t be reached right now. This one opens here once it is back.</p>
   {:else if !error}
     <p class="muted">Loading the game…</p>
@@ -421,14 +487,32 @@
 </section>
 
 <style>
-  .moments { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.5rem; }
-  .moments li.active { outline: 2px solid var(--accent); }
+  /* Under the board on desktop: the bar, the legend line and the graph's strip. */
+  .review { --under-board: 12.75rem; }
+  .tabs { display: flex; gap: 0.25rem; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--bg); z-index: 1; }
+  .tabs button { background: none; color: var(--muted); border-radius: 8px 8px 0 0; padding: 0.45rem 0.9rem; min-height: 2.5rem; border-bottom: 2px solid transparent; }
+  .tabs button.on { color: var(--text); font-weight: 600; border-bottom-color: var(--accent); }
+  .tab-panel { display: flex; flex-direction: column; gap: 0.6rem; }
+  .tab-panel[hidden] { display: none; }
+  .moments { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.35rem; }
+  .moment { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
+  .moment.active { outline: 2px solid var(--accent); }
+  /* One line per key moment: the move, its Move Grade and what changed. */
+  .row {
+    width: 100%; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
+    background: none; color: inherit; text-align: left; padding: 0.5rem 0.75rem; min-height: var(--tap);
+  }
+  .row .change { margin-left: auto; font-variant-numeric: tabular-nums; font-weight: 600; }
+  .detail { padding: 0 0.75rem 0.65rem; }
   .link { background: none; border: none; padding: 0; color: inherit; cursor: pointer; text-align: left; }
   .small { font-size: 0.85rem; margin: 0.3rem 0; }
-  .chances { margin: 0.3rem 0; }
-  .eval { font-size: 0.8rem; font-variant-numeric: tabular-nums; }
-  .explanation { margin: 0.3rem 0 0; }
-  .overview { margin: 0.3rem 0 0; }
+  .eval { font-size: 0.8rem; font-weight: 400; font-variant-numeric: tabular-nums; }
+  .explanation { margin: 0 0 0.3rem; }
+  .better { margin-bottom: 0; }
+  .more summary { cursor: pointer; color: var(--muted); }
+  .more p { margin: 0.2rem 0 0; }
+  .overview { margin: 0.4rem 0 0; }
+  .overview-fold summary { line-height: 1.4; }
   /* A move the overview names reads as part of its sentence, marked as something to click. */
   .move { color: var(--accent); text-decoration: underline; text-underline-offset: 0.15em; font: inherit; }
   .move.current { font-weight: 600; }
@@ -436,10 +520,5 @@
   /* The card's padding is its spacing: no extra paragraph margin above its first line. */
   .card > p:first-child { margin-top: 0; }
   progress { width: 100%; }
-  h2 { font-size: 1.05rem; }
-  /* Beside the key moments and the moves, the board stays in view while the Player scrolls down to
-     them, on a screen tall enough to show its whole column. Under them, as on a phone, it scrolls. */
-  @media (min-width: 821px) and (min-height: 800px) {
-    .board-and-bar { position: sticky; top: 0; }
-  }
+  h2 { font-size: 1rem; margin: 0.2rem 0 0.4rem; }
 </style>

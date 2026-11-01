@@ -1,20 +1,22 @@
 # Main menu and navigation
 
-The main menu is a clear starting point: three big choices, `Review your games` (the game
-list, `#/games`), `Play a game` (an Engine Game, `#/engine-game`) and `Learn` (`#/learn`, which
-offers Lessons and Puzzles), with the Board as a small link under them. While the Player has no
+The main menu is a clear starting point: a `Continue` card (the Engine Game in progress, or the
+suggested next Lesson), then three big choices, `Learn` (`#/learn`, which offers Lessons and
+Puzzles), `Play a game` (an Engine Game, `#/engine-game`) and `Review your games` (the game list,
+`#/games`). While the Player has no
 games, a prompt to import them sits above the choices; once they have games it goes away and
 `Import more` sits inside Review your games. Settings and the Player Profile are icons in the top
-right of every screen.
+right of every screen, with the Board beside them.
 
 **Reached from:** the root (`#/`) once first run is done (or `#/menu`, also on an `empty` run whose
 first run isn't done); `OpenChessCoach` in the header from any screen.
 
 ## Sub-features
 
-- The navigation `Main menu`: with no games, the region `Import your games` (link `Import your
-  games`, to `#/games/import`); the list of three choices, each a link with a heading
-  (`Review your games`, `Play a game`, `Learn`); the link `Board`. Nothing else.
+- The navigation `Main menu`: the card `Continue` (or `Your next Lesson`) with its one link; the
+  list of three choices, each a link with a heading (`Learn`, `Play a game`, `Review your
+  games`); with no games, the region `Import your games` (link `Import your games`, to
+  `#/games/import`). Nothing else. The header's `Board` icon opens `#/board`.
 - With no games, the import prompt also has the button `Try a sample Review`: it imports the
   sample game (`packages/shared/src/sample-game.ts`, a Lichess database game, CC0; the same game
   verify mode seeds) with `games.importSample`, as source `sample` with the Player as White, and
@@ -25,9 +27,12 @@ first run isn't done); `OpenChessCoach` in the header from any screen.
   without `Try a sample Review`, and there is no `Import more`.
 - With games of their own: no import prompt; `Import more` inside Review your games, to
   `#/games/import`, which opens the game list with the `Username` box focused.
-- An Engine Game in progress on this device (kept under `engineGame` in its store, no result yet):
-  `Play a game` shows the link `Continue your game` (to `#/engine-game`) and "Move N, you play
-  White|Black". Gone once the game is over. The saved moves are replayed first: a game whose
+- The menu opens on the card `Continue`: an Engine Game in progress on this device (kept under
+  `engineGame` in its store, no result yet) reads "Your Engine Game: move N, you play
+  White|Black." with the link `Continue your game` (to `#/engine-game`); with none, the card names
+  the suggested next Lesson (`Continue` and `Continue the Lesson` for one started, `Your next
+  Lesson` and `Start the Lesson` otherwise; see `lesson.md`). The choices follow: `Learn`, `Play a
+  game`, `Review your games`. The game goes from the card once it is over. The saved moves are replayed first: a game whose
   moves can't all be played, whose side isn't White or Black, or that is already over on the board
   (the app closed before its result was saved) is not offered.
 - Whether the Player has games: `games.list` with `limit: 1` from the desktop, else the list this
@@ -68,9 +73,9 @@ $C screenshot --route "#/" --width 390 --height 844 --full-page   # phone size
   `player_side: white`), however many times it is tried, and `grade_counts` stays empty. Back on
   `#/menu`, the region `Import your games` still shows, without `Try a sample Review`.
 - `default`: no `Import your games` region; `Import more` inside Review your games.
-- After 1. e4 d5 2. exd5 and the Engine's reply in an Engine Game (Beginner), the menu's `Play a game` shows `Continue your game` and
-  "Move 3, you play White"; after `Resign` it is gone.
-- From any screen, the banner's `Settings` and `Player Profile` open those screens.
+- After 1. e4 d5 2. exd5 and the Engine's reply in an Engine Game (Beginner), the menu's region `Continue` shows `Continue your game` and
+  "Your Engine Game: move 3, you play White."; after `Resign` it names the next Lesson instead.
+- From any screen, the banner's `Board`, `Player Profile` and `Settings` open those screens.
 - `#/settings` ends with the region `About`: a `Source code` link to
   `https://github.com/inprealpha/OpenChessCoach` and a `Third-party notices` link, shown even when
   the desktop can't be reached. The Maia-3 model's AGPL asks that every Player on the Wi-Fi or

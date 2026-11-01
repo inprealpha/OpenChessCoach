@@ -1,10 +1,11 @@
 <script lang="ts">
   // The board: 64 buttons with stable accessible names ("e4, white knight"), click-to-move and
-  // drag for touch and mouse, an overlay for arrows (the Coach's, a Review's) and highlights, and the
-  // last Move Grade's symbol on its own layer.
+  // drag for touch and mouse, an overlay for arrows (the Coach's, a Review's) and highlights, the
+  // last Move Grade's symbol on its own layer, and a legend of the arrows' colours under it.
+  import type { Arrow } from '@chess-coach/shared/coach/types';
   import { untrack } from 'svelte';
   import { illegalReason, isCheck, isPromotion, legalDests, piecesOf, playUci, SIDE_NAMES, turnOf, type BoardPiece, type Side } from '@chess-coach/shared/chess';
-  import { BEST_COLOR, type BoardArrow } from '../lib/arrows.ts';
+  import { ARROW_LOOK, coachArrows, drawOrder, legendOf, type ArrowKind, type BoardArrow } from '../lib/arrows.ts';
   import type { GradeMark } from '../lib/grades.ts';
   import GradeSymbol from './GradeSymbol.svelte';
 
@@ -14,7 +15,8 @@
     /** Which side the Player may move. */
     movable?: Side | 'both' | 'none';
     lastMove?: { from: string; to: string } | undefined;
-    arrows?: BoardArrow[];
+    /** The board's arrows; a Coach arrow on the board's last move is drawn as the move played. */
+    arrows?: (BoardArrow | Arrow)[];
     highlights?: string[];
     /** A Move Grade to draw on the square its move landed on (nothing for Good). */
     gradeMark?: GradeMark | undefined;
@@ -286,18 +288,15 @@
     return orientation === 'white' ? { x: f + 0.5, y: 7 - r + 0.5 } : { x: 7 - f + 0.5, y: r + 0.5 };
   }
 
-  const BRUSH: Record<string, string> = { green: BEST_COLOR, blue: '#003088', red: '#882020', yellow: '#e68f00' };
-
-  /** Each arrow's color and accessible name: a Coach arrow is named by its brush. */
+  /** Each arrow by what it means, the move played drawn last so no other arrow hides it. */
   const drawn = $derived(
-    arrows.map((a) =>
-      'color' in a
-        ? { from: a.from, to: a.to, color: a.color, label: a.label }
-        : { from: a.from, to: a.to, color: BRUSH[a.brush] ?? BEST_COLOR, label: `Arrow ${a.from} to ${a.to} (${a.brush})` },
-    ),
+    drawOrder(arrows.map((a) => ('kind' in a ? a : (coachArrows([a], lastMove ? `${lastMove.from}${lastMove.to}` : undefined)[0] as BoardArrow)))),
   );
-  const headColors = $derived([...new Set([...Object.values(BRUSH), ...drawn.map((a) => a.color)])]);
-  const headId = (color: string): string => `head-${color.replace(/[^\w]/g, '')}`;
+  /** The colours on the board now, for the legend under it. */
+  const legend = $derived(legendOf(drawn));
+  /** Arrowheads per kind; ids are per board, since two boards can be on one page. */
+  const boardId = Math.random().toString(36).slice(2, 8);
+  const headId = (kind: ArrowKind): string => `head-${boardId}-${kind}`;
 </script>
 
 <svelte:window onpointermove={pointerMove} onpointerup={pointerUp} />
@@ -336,9 +335,9 @@
 
     <svg class="overlay" viewBox="0 0 8 8" aria-label="Coach annotations">
       <defs>
-        {#each headColors as color (color)}
-          <marker id={headId(color)} viewBox="0 0 10 10" refX="5" refY="5" markerWidth="2.6" markerHeight="2.6" orient="auto-start-reverse">
-            <path d="M0,0 L10,5 L0,10 z" fill={color} />
+        {#each legend as kind (kind)}
+          <marker id={headId(kind)} viewBox="0 0 10 10" refX="5" refY="5" markerWidth="2.6" markerHeight="2.6" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" style:fill={ARROW_LOOK[kind].color} />
           </marker>
         {/each}
       </defs>
@@ -357,11 +356,13 @@
           y1={s.y}
           x2={t.x - ((t.x - s.x) / len) * 0.35}
           y2={t.y - ((t.y - s.y) / len) * 0.35}
-          stroke={a.color}
+          data-kind={a.kind}
+          style:stroke={ARROW_LOOK[a.kind].color}
           stroke-width="0.16"
-          stroke-linecap="round"
-          opacity="0.8"
-          marker-end={`url(#${headId(a.color)})`}
+          stroke-linecap={ARROW_LOOK[a.kind].dashed ? 'butt' : 'round'}
+          stroke-dasharray={ARROW_LOOK[a.kind].dashed ? '0.3 0.16' : undefined}
+          opacity={a.kind === 'played' ? 0.85 : 0.8}
+          marker-end={`url(#${headId(a.kind)})`}
         />
       {/each}
     </svg>
@@ -389,7 +390,16 @@
       <button type="button" class="cancel" onclick={() => (promotion = null)}>Cancel</button>
     </div>
   {/if}
-  <p class="board-status" role="status" aria-live="polite">{message}</p>
+  <div class="under">
+    {#if legend.length}
+      <ul class="legend" aria-label="Arrow colours">
+        {#each legend as kind (kind)}
+          <li data-kind={kind}><span class="swatch" class:dashed={ARROW_LOOK[kind].dashed} style:--swatch={ARROW_LOOK[kind].color} aria-hidden="true"></span>{ARROW_LOOK[kind].legend}</li>
+        {/each}
+      </ul>
+    {/if}
+    <p class="board-status" role="status" aria-live="polite">{message}</p>
+  </div>
 </div>
 
 <style>
@@ -450,16 +460,19 @@
   .check { background: radial-gradient(circle, #ff3030 0%, #e70000aa 30%, transparent 75%); }
   .highlight { box-shadow: inset 0 0 0 4px rgb(230 143 0 / 85%); }
   .sq:focus-visible { outline: 3px solid #1a73e8; outline-offset: -3px; }
+  /* Coordinates at 11 px with at least 4.5:1 contrast on their square, above the piece. */
   .coord {
     position: absolute;
-    font-size: 0.65rem;
-    font-weight: 600;
+    z-index: 1;
+    font-size: var(--coord-size, 11px);
+    font-weight: 700;
+    line-height: 1;
     pointer-events: none;
   }
-  .light .coord { color: #b58863; }
-  .dark .coord { color: #f0d9b5; }
+  .light .coord { color: #7a5230; }
+  .dark .coord { color: #2f1f10; }
   .coord.rank { top: 2px; left: 3px; }
-  .coord.file { bottom: 1px; right: 3px; }
+  .coord.file { bottom: 2px; right: 3px; }
   .overlay {
     position: absolute;
     inset: 0;
@@ -500,11 +513,24 @@
   }
   .promotion .cancel { width: auto; padding: 0 0.75rem; }
   .promotion img { width: 100%; height: 100%; }
-  .board-status {
+  /* One line under the board: the legend of the arrows on it, and why a move was refused. */
+  .under {
     min-height: 1.4em;
-    margin: 0.35rem 0 0;
+    margin: 0.3rem 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: baseline;
+    gap: 0.1rem 1rem;
+  }
+  .board-status {
+    margin: 0;
     font-size: 0.9rem;
     color: var(--muted, #555);
     text-align: center;
   }
+  .legend { list-style: none; display: flex; flex-wrap: wrap; gap: 0.1rem 0.75rem; margin: 0; padding: 0; font-size: 0.8rem; color: var(--muted, #555); }
+  .legend li { display: inline-flex; align-items: center; gap: 0.3rem; }
+  .swatch { display: inline-block; width: 1.1rem; height: 0.22rem; border-radius: 2px; background: var(--swatch); }
+  .swatch.dashed { background: repeating-linear-gradient(90deg, var(--swatch) 0 0.3rem, transparent 0.3rem 0.45rem); }
 </style>

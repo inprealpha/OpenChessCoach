@@ -1,14 +1,19 @@
 <script lang="ts">
-  // The main menu: three big choices, a prompt to import games while the Player has none
-  // (with a sample Review to try first), an Engine Game in progress to continue, and the Board as a
-  // small link. Settings and the Player Profile are icons in the header. On a desktop without a
-  // phone paired, it asks the Player to pair one (PhoneReminder).
+  // The main menu: a Continue card that follows the Player (an Engine Game in progress, or their
+  // next Lesson), then three equal choices, Learn, Play and Review your games, and a prompt to
+  // import games while the Player has none (with a sample Review to try first). The Board, Settings
+  // and the Player Profile are in the header. On a desktop without a phone paired, it asks the
+  // Player to pair one (PhoneReminder).
   import { SIDE_NAMES } from '@chess-coach/shared/chess';
+  import { suggestNext } from '@chess-coach/shared/content/course';
   import type { GameSummary } from '@chess-coach/shared/protocol';
   import PhoneReminder from '../components/PhoneReminder.svelte';
   import { ApiError, api } from '../lib/api.svelte.ts';
   import { gameInProgress, type GameInProgress } from '../lib/game-in-progress.ts';
   import { keptGames } from '../lib/kept-games.ts';
+  import { lessonCatalogue } from '../lib/content.ts';
+  import { lessonProgress } from '../lib/lesson-progress.svelte.ts';
+  import { profile } from '../lib/profile.svelte.ts';
   import { router } from '../lib/router.svelte.ts';
 
   /**
@@ -72,10 +77,14 @@
   }
 
   const choices = [
-    { href: '#/games', title: 'Review your games', text: 'The Coach walks you through the key moments of the games you played.', offline: false },
-    { href: '#/engine-game', title: 'Play a game', text: 'An Engine Game at your strength, with Live Coaching and Hints.', offline: true },
     { href: '#/learn', title: 'Learn', text: 'Lessons on Themes, endgames, openings and how to think during a game, and Puzzles to practise them.', offline: true },
+    { href: '#/engine-game', title: 'Play a game', text: 'An Engine Game at your strength, with Live Coaching and Hints.', offline: true },
+    { href: '#/games', title: 'Review your games', text: 'The Coach walks you through the key moments of the games you played.', offline: false },
   ];
+
+  const progress = lessonProgress();
+  /** The Player's next Lesson: the one they left unfinished, else the next one for their level. */
+  const nextLesson = $derived(suggestNext(lessonCatalogue, progress.list, profile.player));
 </script>
 
 <section class="screen menu">
@@ -84,6 +93,42 @@
     <p class="card muted" role="note">Your desktop can’t be reached. The board, the Engine, Engine Games and bundled Lessons still work; Coach features are greyed out.</p>
   {/if}
   <nav aria-label="Main menu">
+    <!-- One card that follows the Player: the game they left, or their next Lesson. -->
+    {#if inProgress}
+      <section class="card continue-card" aria-labelledby="continue-heading">
+        <div>
+          <h2 id="continue-heading">Continue</h2>
+          <p class="muted">Your Engine Game: move {inProgress.moveNumber}, you play {SIDE_NAMES[inProgress.playerSide]}.</p>
+        </div>
+        <a class="button" href="#/engine-game">Continue your game</a>
+      </section>
+    {:else if nextLesson}
+      <section class="card continue-card" aria-labelledby="continue-heading">
+        <div>
+          <h2 id="continue-heading">{nextLesson.why === 'unfinished' ? 'Continue' : 'Your next Lesson'}</h2>
+          <p class="muted">{nextLesson.lesson.name}</p>
+        </div>
+        <a class="button" href={`#/lesson/${nextLesson.lesson.id}`}>{nextLesson.why === 'unfinished' ? 'Continue the Lesson' : 'Start the Lesson'}</a>
+      </section>
+    {/if}
+
+    <ul class="choices">
+      {#each choices as c (c.href)}
+        <li class="card choice">
+          <a class="main" href={c.href}>
+            <h2>{c.title}</h2>
+            <span class="muted">{c.text}</span>
+          </a>
+          {#if offline}
+            <p class="small {c.offline ? 'works' : 'needs'}">{c.offline ? 'Works without your desktop' : 'Needs your desktop'}</p>
+          {/if}
+          {#if c.href === '#/games' && games === 'own'}
+            <a class="button secondary more" class:disabled={offline} {...importLink}>Import more</a>
+          {/if}
+        </li>
+      {/each}
+    </ul>
+
     {#if games === 'none' || games === 'sample'}
       <section class="card import" aria-labelledby="import-heading">
         <div>
@@ -102,30 +147,6 @@
       </section>
     {/if}
 
-    <ul class="choices">
-      {#each choices as c (c.href)}
-        <li class="card choice">
-          <a class="main" href={c.href}>
-            <h2>{c.title}</h2>
-            <span class="muted">{c.text}</span>
-          </a>
-          {#if offline}
-            <p class="small {c.offline ? 'works' : 'needs'}">{c.offline ? 'Works without your desktop' : 'Needs your desktop'}</p>
-          {/if}
-          {#if c.href === '#/games' && games === 'own'}
-            <a class="button secondary more" class:disabled={offline} {...importLink}>Import more</a>
-          {/if}
-          {#if c.href === '#/engine-game' && inProgress}
-            <p class="continue">
-              <a class="button secondary" href="#/engine-game">Continue your game</a>
-              <span class="muted small">Move {inProgress.moveNumber}, you play {SIDE_NAMES[inProgress.playerSide]}</span>
-            </p>
-          {/if}
-        </li>
-      {/each}
-    </ul>
-
-    <p class="board-link muted small"><a href="#/board">Board</a>: play out any position and see the Engine’s candidate moves.</p>
   </nav>
   <PhoneReminder />
 </section>
@@ -161,8 +182,12 @@
   .small { font-size: 0.85rem; }
   .works::before { content: '● '; color: #2e9b47; }
   .needs::before { content: '● '; color: #c27c00; }
-  .board-link { margin: 0; text-align: center; }
+  .continue-card {
+    display: flex; flex-wrap: wrap; gap: 0.6rem 1.5rem; align-items: center; justify-content: space-between;
+    border: 2px solid var(--accent); padding: 1rem 1.25rem;
+  }
+  .continue-card p { margin: 0; }
+  .continue-card h2 { font-size: 1.2rem; }
   .import > .sample { flex: 1 0 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.8rem; }
   .sample .error { flex-basis: 100%; margin: 0; }
-  .continue { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.8rem; }
 </style>

@@ -1,7 +1,7 @@
-// Feature map: Main menu and navigation. Three big choices (Review your games, Play a game,
-// Learn), an import prompt while the Player has no games, the Board as a small link, and Settings
-// and the Player Profile as icons in the top right of every screen. A sample Review for a Player
-// with no games yet, and the Engine Game in progress to continue.
+// Feature map: Main menu and navigation. A Continue card that follows the Player (an Engine Game
+// in progress, or their next Lesson), three equal choices (Learn, Play a game, Review your games),
+// an import prompt while the Player has no games, and the Board, Settings and the Player Profile
+// as icons in the top right of every screen. A sample Review for a Player with no games yet.
 import { type Page } from '@playwright/test';
 import { startVerifyInstance } from '../../packages/backend/src/verify/instance.ts';
 import { connection, expect, phoneLater, play, resign, test } from '../fixtures/app.ts';
@@ -23,9 +23,10 @@ test.describe('a Player with no games', () => {
     await expect(prompt.getByRole('link', { name: 'Import your games' })).toHaveAttribute('href', '#/games/import');
     for (const name of ['Review your games', 'Play a game', 'Learn']) await expect(choice(page, name)).toBeVisible();
     await expect(menu(page).getByRole('link', { name: 'Import more' })).toHaveCount(0);
-    // The import prompt, the three choices and the Board's small link: nothing else.
-    await expect(menu(page).getByRole('link')).toHaveText([/^Import your games$/, /^Review your games/, /^Play a game/, /^Learn/, /^Board$/]);
+    // The next Lesson first, then the three choices, Learn first, and the import prompt: nothing else.
+    await expect(menu(page).getByRole('link')).toHaveText([/^Start the Lesson$/, /^Learn/, /^Play a game/, /^Review your games/, /^Import your games$/]);
     await expect(page.getByRole('main').getByRole('link')).toHaveCount(5);
+    await expect(menu(page).getByRole('region', { name: 'Your next Lesson' })).toBeVisible();
 
     await prompt.getByRole('link', { name: 'Import your games' }).click();
     await expect(page.getByRole('heading', { name: 'Imported Games and Reviews' })).toBeVisible();
@@ -43,7 +44,7 @@ test.describe('a Player with no games', () => {
 
     await menu(page).getByRole('region', { name: 'Import your games' }).getByRole('button', { name: 'Try a sample Review' }).click();
     await expect(page).toHaveURL(/#\/review\/\d+$/);
-    await expect(page.getByText('bijean vs ikatsca')).toBeVisible();
+    await expect(page.getByText('You had White · Lost 0-1 · vs ikatsca', { exact: false })).toBeVisible();
     await expect(page.getByRole('note')).toHaveText('A sample game: it doesn’t count towards your Player Profile.');
     await page.getByRole('button', { name: 'Start the Review' }).click();
     await expect(page.getByRole('region', { name: 'Key moments' }).getByRole('listitem')).toHaveCount(4);
@@ -119,7 +120,7 @@ test('with games, the import prompt is gone and Review your games has Import mor
 
 test('an Engine Game in progress shows on the menu as Continue your game, until it is over', async ({ paired }) => {
   await expect(choice(paired, 'Play a game')).toBeVisible();
-  await expect(choice(paired, 'Play a game').getByRole('link', { name: 'Continue your game' })).toHaveCount(0);
+  await expect(paired.getByRole('link', { name: 'Continue your game' })).toHaveCount(0);
 
   await choice(paired, 'Play a game').getByRole('link').click();
   await paired.getByRole('radio', { name: 'Beginner' }).check();
@@ -132,16 +133,18 @@ test('an Engine Game in progress shows on the menu as Continue your game, until 
   }
 
   await paired.getByRole('link', { name: 'OpenChessCoach' }).click();
-  const card = choice(paired, 'Play a game');
+  // The Continue card leads the menu, above the three choices.
+  const card = menu(paired).getByRole('region', { name: 'Continue' });
   await expect(card.getByRole('link', { name: 'Continue your game' })).toBeVisible();
-  await expect(card).toContainText('Move 3, you play White');
+  await expect(card).toContainText('move 3, you play White');
+  expect((await card.boundingBox())!.y).toBeLessThan((await choice(paired, 'Learn').boundingBox())!.y);
   await card.getByRole('link', { name: 'Continue your game' }).click();
   await expect(moves).toHaveCount(4);
 
   await resign(paired);
   await paired.getByRole('link', { name: 'OpenChessCoach' }).click();
   await expect(choice(paired, 'Play a game')).toBeVisible();
-  await expect(choice(paired, 'Play a game').getByRole('link', { name: 'Continue your game' })).toHaveCount(0);
+  await expect(paired.getByRole('link', { name: 'Continue your game' })).toHaveCount(0);
 });
 
 test('a saved Engine Game that is over on the board, or can’t be replayed, is not offered to continue', async ({ paired, app }) => {
@@ -182,12 +185,12 @@ test('a saved Engine Game that is over on the board, or can’t be replayed, is 
     await expect(choice(paired, 'Review your games').getByRole('link', { name: 'Import more' })).toBeVisible();
     // The menu reads the saved game once it opens; give it the time it took above.
     await paired.waitForTimeout(500);
-    await expect(card.getByRole('link', { name: 'Continue your game' })).toHaveCount(0);
+    await expect(paired.getByRole('link', { name: 'Continue your game' })).toHaveCount(0);
   }
   expect(errors).toEqual([]);
 });
 
-test('Play a game opens an Engine Game; Learn offers Lessons and Puzzles; the Board opens from its small link', async ({ paired }) => {
+test('Play a game opens an Engine Game; Learn offers Lessons and Puzzles; the Board opens from the header', async ({ paired }) => {
   await choice(paired, 'Play a game').getByRole('link').click();
   await expect(paired.getByRole('heading', { name: 'Engine Game', exact: true })).toBeVisible();
 
@@ -202,7 +205,7 @@ test('Play a game opens an Engine Game; Learn offers Lessons and Puzzles; the Bo
   await expect(paired.getByRole('heading', { name: 'Puzzles', exact: true })).toBeVisible();
 
   await paired.getByRole('link', { name: 'OpenChessCoach' }).click();
-  await menu(paired).getByRole('link', { name: 'Board', exact: true }).click();
+  await paired.getByRole('banner').getByRole('link', { name: 'Board', exact: true }).click();
   await expect(paired.getByRole('heading', { name: 'Board', exact: true })).toBeVisible();
 });
 

@@ -3,7 +3,7 @@
 import { describe, expect, it } from 'vitest';
 import { playUci } from '@chess-coach/shared/chess';
 import type { Arrow } from '@chess-coach/shared/coach/types';
-import { lessonArrows, lessonHighlights } from '../src/lib/arrows.ts';
+import { ARROW_LOOK, coachArrows, drawOrder, legendOf, lessonArrows, lessonHighlights, punishingArrow, threatArrows } from '../src/lib/arrows.ts';
 
 const arrow = (uci: string, brush: Arrow['brush']): Arrow => ({ from: uci.slice(0, 2), to: uci.slice(2, 4), brush });
 
@@ -53,5 +53,30 @@ describe('a Lesson’s Coach highlights', () => {
   it('keep only the move’s own squares after a check, when the Player’s next move can’t be known', () => {
     const after = playUci('6k1/8/5QK1/8/8/8/8/8 w - - 0 1', 'f6f7')!.fenAfter;
     expect(lessonHighlights(['f7', 'f6', 'h8', 'a1'], after, 'f6f7', 'white')).toEqual(['f7', 'f6']);
+  });
+});
+
+describe('one arrow colour per meaning', () => {
+  it('draws the Coach’s arrow on the move played in ink, whatever its brush, and the rest by brush', () => {
+    const drawn = coachArrows([arrow('c4f7', 'red'), arrow('a3b4', 'green'), arrow('f3g5', 'blue'), arrow('d8h4', 'yellow'), arrow('e5d4', 'red')], 'c4f7');
+    expect(drawn.map((a) => a.kind)).toEqual(['played', 'best', 'alt', 'tempting', 'threat']);
+    expect(drawn[1]?.label).toBe('Arrow a3 to b4 (best)');
+  });
+
+  it('draws the move played last, so no other arrow hides it', () => {
+    const drawn = drawOrder(coachArrows([arrow('c4f7', 'red'), arrow('a3b4', 'green')], 'c4f7'));
+    expect(drawn.map((a) => a.kind)).toEqual(['best', 'played']);
+  });
+
+  it('lists in the legend only the colours on the board, the move played first', () => {
+    expect(legendOf([...threatArrows({ side: 'black', uci: 'd5e4', san: 'dxe4' }), ...coachArrows([arrow('e2e4', 'blue')], 'e2e4')])).toEqual(['played', 'threat']);
+    expect(legendOf([])).toEqual([]);
+  });
+
+  it('marks the punishing reply as a threat, dashed', () => {
+    const [a] = punishingArrow('d8h4', 'Qh4#', 'black');
+    expect(a).toEqual({ from: 'd8', to: 'h4', kind: 'threat', label: 'Threat: Black answers Qh4# (d8 to h4)' });
+    expect(ARROW_LOOK.threat.dashed).toBe(true);
+    expect(punishingArrow(undefined, undefined, 'black')).toEqual([]);
   });
 });

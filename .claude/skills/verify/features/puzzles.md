@@ -21,7 +21,8 @@ by Lesson: an opening's Puzzles by the opening, a Theme's or endgame's by Liches
 - A link to a Lesson without Puzzles (`#/puzzles/queen-mate`) or to no Lesson serves every Lesson's
   Puzzles, with the note "There are no Puzzles for Mate with king and queen, so these are from every
   Lesson."
-- The region `Puzzle` with "Find the best move for <side>" and the Puzzle's rating. Once solved
+- The header line "Rated <rating> · from a real Lichess game"; the region `Puzzle` with "Find the
+  best move for <side>". The board stays in view and, once the Puzzle is over, the Ask box is docked. Once solved
   it reads "You found the best move for <side>."; after `Show the solution`, "The solution for
   <side> is on the board."
 - A wrong move: "<move> is not the move. Try again." and it is taken back.

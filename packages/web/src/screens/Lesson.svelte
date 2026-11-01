@@ -470,7 +470,7 @@
   const highlights = $derived(lessonHighlights(coach.highlights, line.fen, line.lastMove?.uci, playerSide, otherMove ? node?.fen : undefined));
 </script>
 
-<section class="screen">
+<section class="screen" class:board-screen={lesson && phase !== 'intro' && part}>
   {#if missing}
     <h1>Lesson not found</h1>
     <p><a href="#/lessons">Back to the Lessons</a></p>
@@ -528,11 +528,16 @@
         </table>
       </div>
     {/snippet}
-    <!-- The way back first, then the name; on one line where both fit, so a phone keeps the room for the board. -->
-    <div class="title">
-      <a class="back" href="#/lessons"><span aria-hidden="true">←</span> Back to the Lessons</a>
+    <!-- The header line: the name, where the Player is in it, and the way back, on one line. -->
+    <header class="frame-head title">
       <h1>{lesson.name}</h1>
-    </div>
+      {#if phase !== 'intro' && part}
+        <p class="head-line" aria-live="polite">
+          {#if phase === 'done'}Lesson complete{:else}Decision {step + 1} of {decisionList.length}{/if}
+        </p>
+      {/if}
+      <a class="back" href="#/lessons"><span aria-hidden="true">←</span> Back to the Lessons</a>
+    </header>
     {#if phase === 'intro'}
       {@const firstPart = lesson.parts[0]}
       <section class="card intro" aria-label="About this Lesson">
@@ -580,7 +585,7 @@
       </section>
     {:else if part}
       <div class="board-layout">
-        <div>
+        <div class="board-col">
           <Board
             bind:this={board}
             fen={line.fen}
@@ -595,15 +600,13 @@
           />
           <!-- Straight under the board, so on a phone the Hint and the arrow Show the move draws are both in view. -->
           {#if phase === 'decide'}
-            <div class="toolbar">
+            <div class="board-bar toolbar">
               <button type="button" class="secondary" bind:this={hintButton} onclick={hint} disabled={coach.busy || grading}>{hintLevel === 0 ? 'Hint' : 'Show the move'}</button>
             </div>
           {/if}
-          <p class="muted center progress" aria-live="polite">
-            {#if phase === 'done'}Lesson complete{:else}Decision {step + 1} of {decisionList.length}{/if}
-          </p>
         </div>
-        <div class="side" class:feedback={phase === 'feedback' || phase === 'shown'} class:hinted={phase === 'decide' && hintLevel > 0}>
+        <div class="side">
+          <div class="panel-body" class:feedback={phase === 'feedback' || phase === 'shown'}>
           {#if !isOpening && phase !== 'done'}
             <section class="card" aria-label="Position">
               <h2>{lesson.parts.length > 1 ? `${(current?.partIndex ?? 0) + 1} of ${lesson.parts.length}: ` : ''}{part.title}</h2>
@@ -714,9 +717,6 @@
               </ul>
             </section>
           {/if}
-          <!-- While the Player chooses, the thinking box is the one place to type; Why Questions follow
-               the Move Grade, once the answer is no longer kept back. -->
-          <CoachPanel thread={coach} onwhy={phase === 'decide' || otherMove ? undefined : why} />
           {@render notation()}
           {#if node?.notes?.credit || (lesson.statsSource && popular.length)}
             <p class="credit small">
@@ -724,6 +724,10 @@
               {#if lesson.statsSource && popular.length}Popularity: {lesson.statsSource}.{/if}
             </p>
           {/if}
+          </div>
+          <!-- Docked at the panel's foot. While the Player chooses, the thinking box is the one place
+               to type; Why Questions follow the Move Grade, once the answer is no longer kept back. -->
+          <CoachPanel thread={coach} onwhy={phase === 'decide' || otherMove ? undefined : why} />
         </div>
       </div>
     {/if}
@@ -731,9 +735,11 @@
 </section>
 
 <style>
-  .title { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.2rem 1rem; margin-bottom: 0.8rem; }
+  .title { justify-content: flex-start; }
   .title h1 { margin: 0; }
-  .back { order: 1; font-size: 0.9rem; }
+  .back { margin-left: auto; font-size: 0.9rem; white-space: nowrap; }
+  /* Under the board: the Hint button and the legend line. */
+  .board-screen { --under-board: 5.5rem; }
   .intro { max-width: 42rem; display: flex; flex-direction: column; gap: 0.6rem; align-items: flex-start; }
   .intro p { margin: 0; }
   .intro h2 { margin: 0 0 0.2rem; }
@@ -769,8 +775,6 @@
   .more a { display: inline-block; padding: 0.4rem 0; }
   .credit { color: var(--muted); }
   .small { font-size: 0.8rem; }
-  .center { text-align: center; }
-  .progress { margin: 0.2rem 0 0; }
   .typed { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.9rem; }
   /* Two lines that wrap, so the example and the Player's own words show whole on any phone's font. */
   .typed textarea { width: 100%; box-sizing: border-box; resize: vertical; }
@@ -783,12 +787,10 @@
   .bar span { display: block; height: 0.7rem; background: var(--accent); border-radius: 3px; min-width: 2px; }
   tr.mine td { font-weight: 700; }
   .row { display: flex; gap: 0.5rem; margin-top: 0.6rem; flex-wrap: wrap; }
-  /* On a phone the board and the side panel stack: put the Player's choice, Continue and the Coach's
-     reply straight under the board, before the position's text, so no decision needs scrolling. A
-     Hint's answer comes there too, under the Hint button. */
+  /* On a phone the panel scrolls under the board: put the Player's choice and Continue first, before
+     the position's text, so no decision needs scrolling. The Coach's reply is docked at the foot. */
   @media (max-width: 820px) {
-    .side.feedback > .choice { order: -2; }
-    .side.feedback > :global(.coach), .side.hinted > :global(.coach) { order: -1; }
+    .panel-body.feedback > .choice { order: -2; }
     /* The buttons straight after the first line, then the rest, the popularity table last: so the
        way on shows on a phone even with Safari's bars. */
     .choice { display: flex; flex-direction: column; gap: 0.5rem; }

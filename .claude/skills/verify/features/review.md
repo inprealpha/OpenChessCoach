@@ -49,9 +49,14 @@ call.
   desktop and on a phone the page is one screen tall and never scrolls: the panel beside (or under)
   the board scrolls inside itself, with the Ask box docked at its foot. `Flip board` (or the F key) turns the board, the bar and the graph with it.
 - The panel is one card with three tabs, `Moments` (the key moments, the default), `Moves` (the move
-  list; on a phone the graph too) and `Overview` (when the Review has one). On the first visit to a
-  Review, `Moments` opens under the overview's first sentence, the button `Read the overview`, which
-  turns to its tab; on later visits (remembered per game) the tab alone.
+  list; on a phone the graph too) and `Overview` (when the Review has one). Until the Player opens
+  it on a first visit to a Review, the tab is `Overview, not read yet`, with a dot; on later visits
+  (remembered per game) just `Overview`.
+- Opening a key moment's row on a phone pulls the sheet up to read it. Its better move, `Try <SAN>
+  on the board`, lets the sheet down, plays the move as a variation and keeps the moment open with
+  "Trying 11. axb4 … instead of Bxf7+ · 48%"; `Back to the game` returns to the moment and puts the
+  Coach's answer about the variation behind `Earlier`. An open moment draws the move played and the
+  best; `Show all N arrows` adds the Coach's others.
 - On a phone held upright the panel is a sheet under the board: the grab handle `Pull the panel up`
   / `Let the panel down` (`aria-expanded`), a swipe up in the panel or a wheel turned down pulls it up, the board
   shrinks to a strip beside its bar, and the strip, the button `Show the board full size`, brings it

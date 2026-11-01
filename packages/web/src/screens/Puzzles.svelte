@@ -360,7 +360,7 @@
           {#if finished}
             <!-- Stepping stays inside the Puzzle: its first position is the one the Player was set. -->
             <StepButtons onfirst={() => step('first')} onprevious={() => step('previous')} onnext={() => step('next')} onlast={() => step('last')} />
-            {#if variation.active}<button type="button" class="secondary" onclick={() => variation.leave()}>Back to the Puzzle</button>{/if}
+            {#if variation.active}<button type="button" class="secondary back" onclick={() => variation.leave()}>Back to the Puzzle</button>{/if}
           {/if}
           <FlipButton onflip={() => (flipped = !flipped)} />
         </div>

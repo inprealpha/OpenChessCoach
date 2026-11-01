@@ -379,7 +379,7 @@
       </div>
       <div class="board-bar toolbar">
         <StepButtons onfirst={() => step('first')} onprevious={() => step('previous')} onnext={() => step('next')} onlast={() => step('last')} />
-        {#if variation.active}<button type="button" class="secondary" onclick={backToLine}>Back to the main line</button>{/if}
+        {#if variation.active}<button type="button" class="secondary back" onclick={backToLine}>Back to the main line</button>{/if}
         <FlipButton onflip={flip} />
         <ThreatButton view={threats} />
       </div>

@@ -345,6 +345,8 @@
    */
   async function retry(): Promise<void> {
     if (!node || phase !== 'feedback' || coach.busy) return;
+    // The next move is on the board: a phone's sheet comes down so the first tap moves a piece.
+    sheet.full = false;
     line.takeBack();
     result = null;
     typed = '';
@@ -409,6 +411,8 @@
 
   async function hint(): Promise<void> {
     if (!node || phase !== 'decide' || hinting || grading) return;
+    // The Hint's arrow is on the board: a phone's sheet comes down to show it full size.
+    sheet.full = false;
     // Show the move once per decision: another click (after Try another move, say) brings the
     // arrow back, with no new line.
     if (shownMove?.fen === node.fen) {
@@ -667,7 +671,7 @@
           {:else if phase === 'done' && variation.active}
             <div class="board-bar toolbar">
               <StepButtons onfirst={() => stepVariation('first')} onprevious={() => stepVariation('previous')} onnext={() => stepVariation('next')} onlast={() => stepVariation('last')} />
-              <button type="button" class="secondary" onclick={backToLesson}>Back to the Lesson</button>
+              <button type="button" class="secondary back" onclick={backToLesson}>Back to the Lesson</button>
             </div>
           {/if}
         </div>

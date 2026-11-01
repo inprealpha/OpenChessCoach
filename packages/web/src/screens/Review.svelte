@@ -37,7 +37,6 @@
   import { threatSetting, ThreatView } from '../lib/threat.svelte.ts';
   import { reveal } from '../lib/reveal.ts';
   import { foldFromNextVisit, foldOpen } from '../lib/folds.ts';
-  import { firstSentence } from '../lib/first-sentence.ts';
   import { gradeMark } from '../lib/grades.ts';
   import { narrow } from '../lib/narrow.svelte.ts';
   import { titleFrom } from '../lib/page-title.svelte.ts';
@@ -64,6 +63,10 @@
   let expanded = $state<number | null>(null);
   /** The panel's tab. */
   let tab = $state<Tab>('moments');
+  /** A key moment's better move the Player is trying on the board, from that moment's position. */
+  let trying = $state<{ ply: number; uci: string } | null>(null);
+  /** The open key moment shows all the Coach's arrows, not only the move played and the best. */
+  let allArrows = $state(false);
   /** The panel's tab when the Player started a variation, which Back to the game returns to. */
   let tabBeforeVariation: Tab = 'moments';
   /** The side at the bottom of the board: the Player's, until they flip it. */
@@ -158,8 +161,9 @@
   }
 
   /** Opens a key moment's explanation on the board, or closes it when it is already open. */
-  function jump(m: KeyMoment): void {
+  function jump(m: KeyMoment, byPlayer = false): void {
     coach.clearAnnotations();
+    allArrows = false;
     selected = m.ply;
     const exploring = variation.active;
     variation.leave();
@@ -171,6 +175,8 @@
     open = m.ply;
     expanded = m.ply;
     line.goTo(m.ply);
+    // Reading a moment needs the height: on a phone the sheet comes up, the board a strip beside it.
+    if (byPlayer) sheet.pullUp();
     void tick().then(() => revealMoment(m.ply));
   }
 
@@ -186,7 +192,10 @@
       expanded = m.ply;
       line.goTo(m.ply);
     }
-    explore(uci);
+    trying = { ply: m.ply, uci };
+    explore(uci, { keepTab: true });
+    // The moment's row and its Trying line show under the tabs, above all in a phone's short panel.
+    void tick().then(() => revealMoment(m.ply));
   }
 
   /**
@@ -222,6 +231,7 @@
 
   function pickTab(to: Tab): void {
     tab = to;
+    if (to === 'overview') overviewNew = false;
   }
 
   /** The overview's text split at the moves it names, and the moves it names that its text doesn't link. */
@@ -283,7 +293,7 @@
    * variation from the position shown, or carries on the one shown. The Coach's arrows belong to
    * the position they were drawn on.
    */
-  function explore(uci: string): void {
+  function explore(uci: string, { keepTab = false } = {}): void {
     const to = variation.gameStep(uci, line.moves, shownIndex);
     if (to !== null) goto(to);
     else {
@@ -291,9 +301,10 @@
       if (!variation.play(uci, { cursor: shownIndex, fen: boardFen })) return;
       coach.clearAnnotations();
       // A new variation shows in the move list, so the panel turns to it; Back to the game turns it back.
+      // A better move tried from its key moment stays with the moment, which says what is tried.
       if (starting) {
         tabBeforeVariation = tab;
-        tab = 'moves';
+        if (!keepTab) tab = 'moves';
       }
     }
   }
@@ -318,8 +329,12 @@
   /** Drops the variation: the board shows the game where the Player left it, an open key moment too. */
   function backToGame(): void {
     variation.leave();
-    coach.clearAnnotations();
+    // The Coach's answer was about the variation: put away behind "Earlier", with its arrows.
+    coach.settle();
     tab = tabBeforeVariation;
+    // The key moment the variation started from comes back into view.
+    const at = open;
+    if (at !== null) void tick().then(() => revealMoment(at));
   }
 
   async function why(question: string): Promise<void> {
@@ -390,12 +405,22 @@
   // Engine's best from the Review's graded moves, with the threat when Threat is on.
   // The move played is ink in the Coach's arrows too, as everywhere. A variation has no Review
   // arrows: only the threat, and the Coach's once it answers about it.
+  /**
+   * An open key moment's arrows: at most two by default, the move played and the best, as the
+   * guidelines ask; the rest when the Player asks for them.
+   */
+  const momentArrows = $derived(coachArrows(openMoment?.arrows ?? [], line.moves[line.cursor - 1]?.uci));
+  const momentArrowsShown = $derived(allArrows ? momentArrows : momentArrows.filter((a) => a.kind === 'played' || a.kind === 'best'));
   const shownArrows = $derived(
     variation.active
       ? coach.arrows.length ? coachArrows(coach.arrows, variation.line.lastMove?.uci) : threatArrows(threats.threat)
       : coachExplains
-        ? coachArrows(coach.arrows.length ? coach.arrows : (openMoment?.arrows ?? []), line.moves[line.cursor - 1]?.uci)
+        ? coach.arrows.length ? coachArrows(coach.arrows, line.moves[line.cursor - 1]?.uci) : momentArrowsShown
         : [...threatArrows(threats.threat), ...reviewArrows(review?.moves[line.cursor - 1])],
+  );
+  /** The better move being tried from the open key moment, while the board shows its variation. */
+  const tried = $derived(
+    trying && variation.active && variation.from === trying.ply - 1 && variation.line.moves[0]?.uci === trying.uci ? trying : null,
   );
   const momentFen = $derived(openMoment ? openMoment.fenBefore : null);
   /** An open key moment shows the position before its move; any other cursor, the position after it. */
@@ -471,7 +496,7 @@
         <div class="board-bar toolbar">
           <!-- Steps from the position on the board: an open key moment shows the one before its move. -->
           <StepButtons onfirst={() => step('first')} onprevious={() => step('previous')} onnext={() => step('next')} onlast={() => step('last')} />
-          {#if variation.active}<button type="button" class="secondary" onclick={backToGame}>Back to the game</button>{/if}
+          {#if variation.active}<button type="button" class="secondary back" onclick={backToGame}>Back to the game</button>{/if}
           <FlipButton onflip={() => (flipped = !flipped)} />
           <ThreatButton view={threats} />
         </div>
@@ -513,15 +538,13 @@
             {@const names = { moments: 'Moments', moves: 'Moves', overview: 'Overview' }}
             <div class="tabs" role="tablist" aria-label="Review">
               {#each tabs as t (t)}
-                <button type="button" role="tab" id={`tab-${t}`} aria-controls={`panel-${t}`} aria-selected={tab === t} class:on={tab === t} onclick={() => pickTab(t)}>{names[t]}</button>
+                <button type="button" role="tab" id={`tab-${t}`} aria-controls={`panel-${t}`} aria-selected={tab === t} class:on={tab === t} onclick={() => pickTab(t)}
+                  aria-label={t === 'overview' && overviewNew ? 'Overview, not read yet' : undefined}
+                  >{names[t]}{#if t === 'overview' && overviewNew}<span class="new-dot" aria-hidden="true"></span>{/if}</button
+                >
               {/each}
             </div>
             <div id="panel-moments" role="tabpanel" aria-labelledby="tab-moments" hidden={tab !== 'moments'} class="tab-panel rows">
-              {#if overview && overviewNew}
-                <button type="button" class="teaser" onclick={() => pickTab('overview')} aria-label="Read the overview">
-                  <strong>Overview</strong><span class="muted">{` · ${firstSentence(review.overview?.text ?? '')}`}</span>
-                </button>
-              {/if}
               <section aria-label="Key moments">
                 <h2 class="visually-hidden">Key moments</h2>
                 {#if review.moments.length === 0}
@@ -533,7 +556,7 @@
                     {@const label = moveLabel(m.fenBefore, m.san)}
                     {@const isOpen = expanded === m.ply}
                     <li class="moment" class:active={selected === m.ply} class:expanded={isOpen} data-ply={m.ply}>
-                      <button type="button" class="row" onclick={() => jump(m)} aria-pressed={momentOpen && open === m.ply} aria-expanded={isOpen} aria-label={`Show moment: move ${label}, ${m.grade}`}>
+                      <button type="button" class="row" onclick={() => jump(m, true)} aria-pressed={momentOpen && open === m.ply} aria-expanded={isOpen} aria-label={`Show moment: move ${label}, ${m.grade}`}>
                         <strong class="san">{label}</strong>
                         <GradeBadge grade={m.grade} />
                         {#if chances}
@@ -547,6 +570,17 @@
                       {/if}
                       {#if isOpen}
                         <div class="detail">
+                          {#if tried?.ply === m.ply}
+                            {@const t = variation.line.moves[0]}
+                            {@const g = variation.grades[0]}
+                            {@const c = chances?.options.get(tried.uci)}
+                            <!-- What the board shows now, first, so it reads in a short sheet. -->
+                            <p class="trying" role="status">
+                              <strong>Trying {t ? moveLabel(t.fenBefore, t.san) : ''}</strong>
+                              {#if g}<GradeBadge grade={g} />{/if}
+                              instead of {m.san}{c ? ` · ${c.short}` : ''}. Your own line: Back to the game returns here.
+                            </p>
+                          {/if}
                           <p class="explanation">{m.explanation}</p>
                           {#if m.betterOptions.length}
                             {@const [best, ...others] = m.betterOptions}
@@ -565,6 +599,9 @@
                                 </details>
                               {/if}
                             </div>
+                          {/if}
+                          {#if momentOpen && open === m.ply && !variation.active && momentArrows.length > momentArrowsShown.length}
+                            <button type="button" class="link more-arrows small" onclick={() => (allArrows = true)}>Show all {momentArrows.length} arrows</button>
                           {/if}
                         </div>
                       {/if}
@@ -671,13 +708,10 @@
   .more p { margin: 0.2rem 0 0; }
   .none { margin: 0.6rem 0 0; }
   .explore-hint { margin: 0.6rem 0 0; }
-  /* The overview's first sentence, on a first visit: a row like the moments', that opens its tab. */
-  .teaser {
-    display: block; width: auto; margin: 0 calc(-1 * var(--panel-pad)); padding: 0.55rem var(--panel-pad);
-    background: none; color: inherit; text-align: left; border-radius: 0; border-bottom: 1px solid var(--line);
-    min-height: var(--tap); line-height: 1.4;
-  }
-  .teaser .muted { font-size: 0.9rem; }
+  /* The overview not read yet: a dot on its tab, not a row that costs a phone's sheet a line. */
+  .new-dot { display: inline-block; width: 0.45rem; height: 0.45rem; margin-left: 0.3rem; border-radius: 50%; background: var(--accent); vertical-align: 0.15rem; }
+  .trying { margin: 0 0 0.45rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.2rem 0.4rem; }
+  .more-arrows { display: block; margin-top: 0.4rem; color: var(--muted); text-decoration: underline; }
   .overview { margin: 0.6rem 0 0; line-height: 1.5; }
   /* A move the overview names reads as part of its sentence, marked as something to click. */
   .move { color: var(--accent); text-decoration: underline; text-underline-offset: 0.15em; font: inherit; }

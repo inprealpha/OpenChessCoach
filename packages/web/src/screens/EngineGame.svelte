@@ -597,7 +597,7 @@
           {#if finished}
             <!-- Only a finished game steps back: while it is on, the board shows the position to play from. -->
             <StepButtons onfirst={() => step('first')} onprevious={() => step('previous')} onnext={() => step('next')} onlast={() => step('last')} />
-            {#if variation.active}<button type="button" class="secondary" onclick={() => variation.leave()}>Back to the game</button>{/if}
+            {#if variation.active}<button type="button" class="secondary back" onclick={() => variation.leave()}>Back to the game</button>{/if}
             <FlipButton onflip={() => (flipped = !flipped)} />
           {:else}
             <button

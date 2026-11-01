@@ -101,7 +101,7 @@ or a choice the Player must make now.
 
 | Element | Default | Why |
 | --- | --- | --- |
-| Review overview | Its own tab; on the first visit its first sentence heads the Moments tab, one tap from the rest | Read once, then it's in the way |
+| Review overview | Its own tab, marked with a dot until it is read on the first visit | Read once, then it's in the way |
 | Key moment | The open one expanded; the others one line each: move, Move Grade, what changed ("48% → 35%") | One moment at a time |
 | "Better" moves | The best one as a move button; the others behind "More moves" | The fix, not a list |
 | Evaluations (+0.65) | Hidden at the beginner and casual levels; shown small after the percentage at the club level; a setting either way | Two numbers for one idea |

@@ -33,8 +33,10 @@
   /** The latest exchange: from the Player's last question on, or the Coach's last message. */
   const latestFrom = $derived.by(() => {
     const entries = thread.entries;
-    for (let i = entries.length - 1; i >= 0; i--) if (entries[i]?.from === 'player') return i;
-    return Math.max(0, entries.length - 1);
+    let from = Math.max(0, entries.length - 1);
+    for (let i = entries.length - 1; i >= 0; i--) if (entries[i]?.from === 'player') { from = i; break; }
+    // What the Player or the screen put away stays behind "Earlier".
+    return Math.max(from, thread.shownFrom);
   });
   const earlier = $derived(thread.entries.slice(0, latestFrom));
   const latest = $derived(thread.entries.slice(latestFrom));
@@ -120,6 +122,10 @@
     {/if}
     {#each latest as entry (entry.id)}{@render message(entry)}{/each}
   </div>
+  {#if latest.length && !thread.busy && sheet.on}
+    <!-- On a phone the answer takes the sheet's room: one tap puts it away behind "Earlier". -->
+    <button type="button" class="link put-away" onclick={() => thread.settle()}>Put the answer away</button>
+  {/if}
   {#if actions}<div class="actions">{@render actions()}</div>{/if}
   {#if onwhy}
     <form onsubmit={submit}>
@@ -180,7 +186,8 @@
        sheet's room when it is pulled up. */
     .log { max-height: 3rem; }
     .coach:focus-within .log { max-height: 9rem; }
-    :global(.sheet-full) .log { max-height: 38dvh; }
+    :global(.sheet-full) .log { max-height: 26dvh; }
+    .put-away { align-self: flex-end; background: none; border: 0; padding: 0 0.2rem; color: var(--muted); font-size: 0.8rem; text-decoration: underline; }
     /* Its name and "Coach ready" cost a phone a line: said only while it works or can't. */
     header.idle { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
     h2 { font-size: 0.85rem; }

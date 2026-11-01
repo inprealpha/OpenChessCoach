@@ -3,7 +3,7 @@
   // the course order, with each Lesson's progress from the Player Profile. Nothing is locked: the
   // next Lesson only says where to go next. With about sixty Lessons, links at the top jump to a track.
   import { SIDE_NAMES } from '@chess-coach/shared/chess';
-  import { LEVEL_NAMES, suggestNext, TRACK_NAMES, type CatalogueItem, type Suggestion } from '@chess-coach/shared/content/course';
+  import { decisionsMade, LEVEL_NAMES, suggestNext, TRACK_NAMES, type CatalogueItem, type Suggestion } from '@chess-coach/shared/content/course';
   import { bandFor, BANDS, COURSE_LEVELS, TRACKS, type Track } from '@chess-coach/shared/content/lessons';
   import { lessonCatalogue } from '../lib/content.ts';
   import { lessonProgress, lessonStatus } from '../lib/lesson-progress.svelte.ts';
@@ -47,7 +47,7 @@
     const { lesson: l } = s;
     if (s.why === 'unfinished') {
       const p = progress.list.find((x) => x.lessonId === l.id);
-      return `You started this Lesson and have made ${p?.step ?? 0} of its ${l.decisions} decisions.`;
+      return `You started this Lesson and have made ${decisionsMade(p?.step ?? 0, l.decisions)} of its ${l.decisions} decisions.`;
     }
     if (s.why === 'first') return band !== 'beginner' && l.level !== 'beginner' ? 'Start here. At your level you can skip the beginner Lessons.' : 'Start here.';
     if (s.why === 'ready') return 'You have done the Lessons it builds on.';

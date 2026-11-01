@@ -20,6 +20,16 @@ export interface CatalogueItem {
   playOut?: boolean;
 }
 
+/**
+ * How many of a Lesson's decisions the Player has made, for "3 of 7 decisions". Saved progress can
+ * be past the end of a Lesson that was shortened after it was saved; the Lesson then resumes at its
+ * last decision, so the count stops one short of the Lesson's length, never past it. Lesson.svelte
+ * resumes at this step.
+ */
+export function decisionsMade(step: number, decisions: number): number {
+  return Math.max(0, Math.min(step, decisions - 1));
+}
+
 export const TRACK_NAMES: Record<Track, { name: string; text: string }> = {
   themes: { name: 'Themes', text: 'Patterns that win material, give mate or save a game, such as forks and pins.' },
   endgames: { name: 'Endgames', text: 'Positions with few pieces left, and how to win or save them.' },

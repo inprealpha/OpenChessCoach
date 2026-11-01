@@ -8,6 +8,8 @@ import { INITIAL_FEN, outcomeOf, outcomeOfLine, playSan, playUci, turnOf, type P
 import type { ReviewOverview, ReviewPart } from '@chess-coach/shared/protocol';
 import type { EngineConfig } from '../server.ts';
 import { CoachClient, pairDevice, ProtocolError } from '../client.ts';
+import { desktopSystem, firewallAdvice } from '../firewall.ts';
+import { lanAddress } from '../network.ts';
 import { defaultDataDir } from '../paths.ts';
 import { appVersion } from '../runtime.ts';
 import { evidenceRoot, isAlive, listRuns, readRun, runFilePath, stateDir, writeRun, type RunFile } from '../verify/runs.ts';
@@ -177,6 +179,14 @@ async function doctor(flags: Flags): Promise<Result> {
       add('web-app', page.includes('id="app"'), 'the web app is served', 'Build the web app: npm run build -w @chess-coach/web');
     } catch {
       add('web-app', false, 'the web app could not be fetched', 'Build the web app: npm run build -w @chess-coach/web');
+    }
+    // The owner's app on this desktop: a Linux firewall that is on can keep the phone out, and the
+    // desktop can't test that itself (#31), so doctor names it with the command that lets the Wi-Fi in.
+    const here = new URL(t.url);
+    if (!t.run && (here.hostname === '127.0.0.1' || here.hostname === 'localhost')) {
+      const advice = await firewallAdvice(lanAddress(), Number(here.port));
+      const none = desktopSystem() === 'linux' ? 'neither ufw nor firewalld is on' : 'not checked: only Linux firewalls are';
+      add('firewall', true, advice ? advice.replace(/\s+/g, ' ').trim() : none);
     }
     try {
       await CoachClient.connect(t.url, 'not-a-token').then((c) => c.close());

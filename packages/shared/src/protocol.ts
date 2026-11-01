@@ -203,6 +203,9 @@ export interface TunnelState {
   error?: string;
 }
 
+/** The desktop's system: Windows and macOS ask about Node.js when the app starts, so the web app warns about it. */
+export type DesktopSystem = 'windows' | 'macos' | 'linux' | 'other';
+
 export interface PairingInfo {
   /** Address of this install on the local network. */
   lanUrl: string;
@@ -214,6 +217,7 @@ export interface PairingInfo {
   tunnelPairUrl: string | null;
   tunnelQrSvg: string | null;
   phone: PhoneStatus;
+  desktopSystem: DesktopSystem;
 }
 
 /** Whether the Player has a phone or tablet paired, and whether a desktop browser should ask them to pair one. */

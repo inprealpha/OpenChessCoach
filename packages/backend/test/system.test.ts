@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { describe, expect, it, onTestFinished } from 'vitest';
 import { PROTOCOL_VERSION } from '@chess-coach/shared/protocol';
+import { desktopSystem } from '../src/firewall.ts';
 import { checkClaude, installDirs, installFix, isWindowsShim, LOGIN_FIX, shimTarget } from '../src/claude-check.ts';
 import { minNode, nodeTooOld, startOptions } from '../src/runtime.ts';
 import { client, instance } from './helpers.ts';
@@ -212,5 +213,28 @@ describe('verify mode', () => {
     const secondQr = (await c2.request('pairing.info', {})).tunnelQrSvg;
     expect(secondQr).toMatch(/^<svg/);
     expect(secondQr).not.toBe(firstQr);
+  });
+
+  it('tries the tunnel again when asked for while it is on but failed, as "Connect another way" does', async () => {
+    let starts = 0;
+    const tunnelStarter = async () => {
+      if (++starts === 1) throw new Error('The tunnel did not start within 45 seconds.');
+      return { url: 'https://second-try.trycloudflare.com', stop: async () => {}, onExit: () => {} };
+    };
+    const app = await instance({ tunnelStarter });
+    const c = await client(app);
+    await c.request('settings.update', { tunnelEnabled: true });
+    await expect.poll(async () => (await c.request('pairing.info', {})).tunnel.status).toBe('error');
+    await c.request('settings.update', { tunnelEnabled: true });
+    await expect.poll(async () => (await c.request('pairing.info', {})).tunnel.url).toBe('https://second-try.trycloudflare.com');
+    // Asked for again while it runs: the same tunnel, not a second one.
+    await c.request('settings.update', { tunnelEnabled: true });
+    expect(starts).toBe(2);
+  });
+
+  it("tells the web app the desktop's system, for the warning about its question on Node.js", async () => {
+    const app = await instance();
+    const c = await client(app);
+    expect((await c.request('pairing.info', {})).desktopSystem).toBe(desktopSystem());
   });
 });

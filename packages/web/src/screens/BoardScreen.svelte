@@ -6,11 +6,13 @@
   import { tick, untrack } from 'svelte';
   import type { GradedMove } from '@chess-coach/shared/analysis';
   import type { Analysis } from '@chess-coach/shared/engine';
-  import { INITIAL_FEN, otherSide, outcomeOf, playUci, SIDE_NAMES, turnOf, type Side } from '@chess-coach/shared/chess';
+  import { INITIAL_FEN, moveLabel, otherSide, outcomeOf, playUci, SIDE_NAMES, turnOf, type Side } from '@chess-coach/shared/chess';
   import type { MoveGrade } from '@chess-coach/shared/grader';
   import { readPosition, type SetUpPosition } from '@chess-coach/shared/setup';
   import Board from '../components/Board.svelte';
   import CoachPanel from '../components/CoachPanel.svelte';
+  import ConfirmDialog from '../components/ConfirmDialog.svelte';
+  import FlipButton from '../components/FlipButton.svelte';
   import EngineLines from '../components/EngineLines.svelte';
   import MoveList from '../components/MoveList.svelte';
   import StepButtons from '../components/StepButtons.svelte';
@@ -25,6 +27,7 @@
   import { threatSetting, ThreatView } from '../lib/threat.svelte.ts';
   import { scoreFromAnalysis } from '../lib/position-score.ts';
   import { stepLine, Variation, type Step } from '../lib/variation.svelte.ts';
+  import { foldOpen, rememberFold } from '../lib/folds.ts';
 
   /** A FEN to open on, from #/board?fen=…. */
   let { fen: openAt }: { fen?: string } = $props();
@@ -41,7 +44,9 @@
   let orientation = $state<Side>('white');
   /** The side the Player last turned the board to, which New board keeps; a set-up turns it on its own. */
   let chosenOrientation: Side = 'white';
-  let showLines = $state(false);
+  let showLines = $state(foldOpen('board-lines', false));
+  let confirmingNew = $state(false);
+  let newButton = $state<HTMLButtonElement>();
   let analysis = $state<Analysis | null>(null);
   let graded = $state<(GradedMove | undefined)[]>([]);
   /** Counts new boards: each gets a fresh Board, so its start position shows at once rather than sliding. */
@@ -254,7 +259,25 @@
     router.replace('board');
   }
 
+  /** New board asks first when it would clear moves, as New game does in an Engine Game. */
+  function askNewBoard(): void {
+    if (line.moves.length) confirmingNew = true;
+    else newBoard();
+  }
+
+  async function keepBoard(): Promise<void> {
+    confirmingNew = false;
+    await tick();
+    newButton?.focus();
+  }
+
+  function toggleLines(): void {
+    showLines = !showLines;
+    rememberFold('board-lines', showLines);
+  }
+
   function newBoard(): void {
+    confirmingNew = false;
     start();
     orientation = chosenOrientation;
     setupNote = '';
@@ -322,70 +345,97 @@
   });
 </script>
 
-<section class="screen">
-  <h1>Board</h1>
+<section class="screen board-screen board-free">
+  <header class="frame-head">
+    <h1>Board</h1>
+    <p class="head-line">{outcomeOf(boardFen) ? 'Game over' : `${SIDE_NAMES[turnOf(boardFen)]} to move`}</p>
+    <div class="head-actions">
+      <button type="button" class="secondary" aria-expanded={settingUp} onclick={openSetUp} bind:this={setupButton}>Set up a position</button>
+      <button type="button" class="secondary" onclick={askNewBoard} aria-expanded={confirmingNew} bind:this={newButton}>New board</button>
+    </div>
+  </header>
   <div class="board-layout">
-    <div class="board-and-bar">
-      <div class="with-bar">
-        <WinningChancesBar score={position?.score ?? null} pov={position?.pov ?? 'white'} {orientation} />
-        {#key boards}
-          <Board
-            fen={boardFen}
-            {orientation}
-            movable="both"
-            lastMove={shownLast ? { from: shownLast.uci.slice(0, 2), to: shownLast.uci.slice(2, 4) } : undefined}
-            arrows={[...threatArrows(threats.threat), ...coach.arrows]}
-            highlights={coach.highlights}
-            gradeMark={mark}
-            {onmove}
-          />
-        {/key}
+    <div class="board-col">
+      <div class="board-and-bar">
+        <div class="with-bar">
+          <WinningChancesBar score={position?.score ?? null} pov={position?.pov ?? 'white'} {orientation} />
+          {#key boards}
+            <Board
+              fen={boardFen}
+              {orientation}
+              movable="both"
+              lastMove={shownLast ? { from: shownLast.uci.slice(0, 2), to: shownLast.uci.slice(2, 4) } : undefined}
+              arrows={[...threatArrows(threats.threat), ...coach.arrows]}
+              highlights={coach.highlights}
+              gradeMark={mark}
+              {onmove}
+            />
+          {/key}
+        </div>
       </div>
-      <div class="toolbar">
+      <div class="board-bar toolbar">
         <StepButtons onfirst={() => step('first')} onprevious={() => step('previous')} onnext={() => step('next')} onlast={() => step('last')} />
         {#if variation.active}<button type="button" class="secondary" onclick={backToLine}>Back to the main line</button>{/if}
-        <button type="button" class="secondary" onclick={flip}>Flip board</button>
-        <button type="button" class="secondary" onclick={newBoard}>New board</button>
-        <button type="button" class="secondary" aria-expanded={settingUp} onclick={openSetUp} bind:this={setupButton}>Set up a position</button>
-        <ThreatButton />
+        <FlipButton onflip={flip} />
+        <ThreatButton view={threats} />
       </div>
-      {#if settingUp}
-        <form class="card setup" aria-label="Set up a position" onsubmit={(e) => { e.preventDefault(); void submitSetUp(); }}>
-          <label for="setup-text">Paste a FEN for one position, or a PGN to step through its moves.</label>
-          <textarea id="setup-text" rows="3" bind:value={setupText} bind:this={setupBox} spellcheck="false" placeholder={'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1\nor 1. e4 e5 2. Nf3 …'}></textarea>
-          {#if setupError}<p class="error" role="alert">{setupError}</p>{/if}
-          <div class="actions">
-            <button type="submit">Set up</button>
-            <button type="button" class="secondary" onclick={closeSetUp}>Cancel</button>
-          </div>
-        </form>
-      {/if}
       <p class="visually-hidden" role="status">{setupNote}</p>
       <p class="result" role="status" aria-label="Result">{result}</p>
     </div>
     <div class="side">
-      <MoveList
-        moves={line.moves}
-        {grades}
-        cursor={line.cursor}
-        ongoto={pickMove}
-        variation={variation.active
-          ? { from: variation.from ?? 0, moves: variation.line.moves, grades: variation.grades, cursor: variation.line.cursor, ongoto: pickVariationMove }
-          : undefined}
+      <div class="panel-body">
+        {#if confirmingNew}
+          <ConfirmDialog
+            id="new-board"
+            title="Clear this board?"
+            detail="Its moves are not saved anywhere."
+            keepLabel="Keep this board"
+            confirmLabel="Yes, a new board"
+            onkeep={keepBoard}
+            onconfirm={newBoard}
+          />
+        {/if}
+        {#if settingUp}
+          <form class="card setup" aria-label="Set up a position" onsubmit={(e) => { e.preventDefault(); void submitSetUp(); }}>
+            <label for="setup-text">Paste a FEN for one position, or a PGN to step through its moves.</label>
+            <textarea id="setup-text" rows="3" bind:value={setupText} bind:this={setupBox} spellcheck="false" placeholder={'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1\nor 1. e4 e5 2. Nf3 …'}></textarea>
+            {#if setupError}<p class="error" role="alert">{setupError}</p>{/if}
+            <div class="actions">
+              <button type="submit">Set up</button>
+              <button type="button" class="secondary" onclick={closeSetUp}>Cancel</button>
+            </div>
+          </form>
+        {/if}
+        <button type="button" class="secondary lines-toggle" aria-pressed={showLines} onclick={toggleLines}>
+          {showLines ? 'Hide Engine lines' : 'Show Engine lines'}
+        </button>
+        {#if showLines}<EngineLines {analysis} fen={boardFen} />{/if}
+        <MoveList
+          moves={line.moves}
+          {grades}
+          cursor={line.cursor}
+          ongoto={pickMove}
+          variation={variation.active
+            ? { from: variation.from ?? 0, moves: variation.line.moves, grades: variation.grades, cursor: variation.line.cursor, ongoto: pickVariationMove }
+            : undefined}
+        />
+      </div>
+      <CoachPanel
+        thread={coach}
+        onwhy={why}
+        placeholder={shownLast ? `Ask why about ${moveLabel(shownLast.fenBefore, shownLast.san)}` : 'Ask about this position'}
       />
-      <button type="button" class="secondary" aria-pressed={showLines} onclick={() => (showLines = !showLines)}>
-        {showLines ? 'Hide Engine lines' : 'Show Engine lines'}
-      </button>
-      {#if showLines}<EngineLines {analysis} fen={boardFen} />{/if}
-      <CoachPanel thread={coach} onwhy={why} />
     </div>
   </div>
 </section>
 
 <style>
+  .head-actions { margin-left: auto; display: flex; gap: 0.4rem; flex-shrink: 0; }
+  .head-actions button { padding: 0.3rem 0.7rem; font-size: 0.9rem; }
+  .lines-toggle { align-self: flex-start; }
   .result { margin: 0.5rem 0 0; text-align: center; font-weight: 600; }
   .result:empty { margin: 0; }
-  .setup { display: grid; gap: 0.5rem; margin-top: 0.6rem; }
+  .setup { display: grid; gap: 0.5rem; }
   .setup label { font-size: 0.9rem; }
   .setup textarea { width: 100%; box-sizing: border-box; font-family: ui-monospace, monospace; font-size: 0.85rem; }
   /* A FEN in the message has no spaces to wrap at on a phone. */

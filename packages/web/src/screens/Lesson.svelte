@@ -65,6 +65,13 @@
   let shownContinue = $state<HTMLButtonElement>();
   let hintButton = $state<HTMLButtonElement>();
   let doneCard = $state<HTMLElement>();
+  let panelBody = $state<HTMLElement>();
+  // Each decision, its feedback and the end open the panel at its top, where the choice to make is.
+  $effect(() => {
+    void step;
+    // The end scrolls to its own card.
+    if (phase !== 'done') panelBody?.scrollTo({ top: 0 });
+  });
   /** The Lesson's move once shown, so Show the move says it once per decision. */
   let shownMove: { fen: string; arrow: { from: string; to: string; brush: 'green' } } | null = null;
   /** A Hint in flight: a second click while it is answered does nothing. */
@@ -376,11 +383,15 @@
         coach.clearAnnotations();
         hintArrow = null;
         phase = 'done';
-        // On a phone the card is under the board: bring it into view, so the next Lesson shows
-        // without scrolling, and give it the focus, so the keyboard carries on from there.
+        // Bring the card to the top of its panel, so the next Lesson shows without scrolling, and
+        // give it the focus, so the keyboard carries on from there.
         await tick();
-        const box = doneCard?.getBoundingClientRect();
-        if (box && (box.top < 0 || box.bottom > innerHeight)) doneCard?.scrollIntoView({ block: 'start' });
+        if (panelBody && doneCard && getComputedStyle(panelBody).overflowY === 'auto') panelBody.scrollTo({ top: doneCard.offsetTop });
+        else {
+          // A screen too short for the frame scrolls as a page: only when the card is out of view.
+          const box = doneCard?.getBoundingClientRect();
+          if (box && (box.top < 0 || box.bottom > innerHeight)) doneCard?.scrollIntoView({ block: 'start' });
+        }
         doneCard?.focus({ preventScroll: true });
         await saveProgress(decisionList.length, true);
         return;
@@ -514,7 +525,7 @@
   );
 </script>
 
-<section class="screen">
+<section class="screen" class:board-screen={lesson && phase !== 'intro' && part}>
   {#if missing}
     <h1>Lesson not found</h1>
     <p><a href="#/lessons">Back to the Lessons</a></p>
@@ -572,11 +583,16 @@
         </table>
       </div>
     {/snippet}
-    <!-- The way back first, then the name; on one line where both fit, so a phone keeps the room for the board. -->
-    <div class="title">
-      <a class="back" href="#/lessons"><span aria-hidden="true">←</span> Back to the Lessons</a>
+    <!-- The header line: the name, where the Player is in it, and the way back, on one line. -->
+    <header class="frame-head title">
       <h1>{lesson.name}</h1>
-    </div>
+      {#if phase !== 'intro' && part}
+        <p class="head-line" aria-live="polite">
+          {#if phase === 'done'}Lesson complete{:else}Decision {step + 1} of {decisionList.length}{/if}
+        </p>
+      {/if}
+      <a class="back" href="#/lessons" aria-label="Back to the Lessons"><span aria-hidden="true">←</span> <span class="long">Back to the </span>Lessons</a>
+    </header>
     {#if phase === 'intro'}
       {@const firstPart = lesson.parts[0]}
       <section class="card intro" aria-label="About this Lesson">
@@ -624,7 +640,7 @@
       </section>
     {:else if part}
       <div class="board-layout">
-        <div>
+        <div class="board-col">
           <Board
             bind:this={board}
             fen={boardFen}
@@ -640,20 +656,18 @@
           />
           <!-- Straight under the board, so on a phone the Hint and the arrow Show the move draws are both in view. -->
           {#if phase === 'decide'}
-            <div class="toolbar">
+            <div class="board-bar toolbar">
               <button type="button" class="secondary" bind:this={hintButton} onclick={hint} disabled={coach.busy || grading}>{hintLevel === 0 ? 'Hint' : 'Show the move'}</button>
             </div>
           {:else if phase === 'done' && variation.active}
-            <div class="toolbar">
+            <div class="board-bar toolbar">
               <StepButtons onfirst={() => stepVariation('first')} onprevious={() => stepVariation('previous')} onnext={() => stepVariation('next')} onlast={() => stepVariation('last')} />
               <button type="button" class="secondary" onclick={backToLesson}>Back to the Lesson</button>
             </div>
           {/if}
-          <p class="muted center progress" aria-live="polite">
-            {#if phase === 'done'}Lesson complete{:else}Decision {step + 1} of {decisionList.length}{/if}
-          </p>
         </div>
-        <div class="side" class:feedback={phase === 'feedback' || phase === 'shown'} class:hinted={phase === 'decide' && hintLevel > 0}>
+        <div class="side">
+          <div class="panel-body" bind:this={panelBody} class:feedback={phase === 'feedback' || phase === 'shown'}>
           {#if !isOpening && phase !== 'done'}
             <section class="card" aria-label="Position">
               <h2>{lesson.parts.length > 1 ? `${(current?.partIndex ?? 0) + 1} of ${lesson.parts.length}: ` : ''}{part.title}</h2>
@@ -736,6 +750,15 @@
           {#if phase === 'done'}
             <section class="card done" aria-label="Lesson complete" tabindex="-1" bind:this={doneCard}>
               <p><strong>Lesson complete.</strong> It is marked complete in your Player Profile.</p>
+              <!-- The next step first, so a phone shows it in the panel's first lines. -->
+              {#if nextLesson}
+                <p class="next"><a class="button" href={`#/lesson/${nextLesson.id}`}>Your next Lesson: {nextLesson.name}</a></p>
+                {#if nextInTrack && nextInTrack.id !== nextLesson.id}
+                  <p class="next"><a class="button secondary" href={`#/lesson/${nextInTrack.id}`}>Next in {TRACK_NAMES[lesson.track].name}: {nextInTrack.name}</a></p>
+                {/if}
+              {:else}
+                <p>You have done every Lesson. Go over any of them again, or practise with <a href="#/puzzles">Puzzles</a>.</p>
+              {/if}
               {#if tally}
                 <p>{tallyLead}: {tally}.</p>
               {/if}
@@ -744,14 +767,6 @@
                 <ul class="learned" aria-labelledby="learned-heading">
                   {#each keyIdeas as idea, i (i)}<li>{idea}</li>{/each}
                 </ul>
-              {/if}
-              {#if nextLesson}
-                <p class="next"><a class="button" href={`#/lesson/${nextLesson.id}`}>Your next Lesson: {nextLesson.name}</a></p>
-                {#if nextInTrack && nextInTrack.id !== nextLesson.id}
-                  <p class="next"><a class="button secondary" href={`#/lesson/${nextInTrack.id}`}>Next in {TRACK_NAMES[lesson.track].name}: {nextInTrack.name}</a></p>
-                {/if}
-              {:else}
-                <p>You have done every Lesson. Go over any of them again, or practise with <a href="#/puzzles">Puzzles</a>.</p>
               {/if}
               <ul class="more">
                 {#if lesson.playOut}
@@ -764,9 +779,6 @@
               </ul>
             </section>
           {/if}
-          <!-- While the Player chooses, the thinking box is the one place to type; Why Questions follow
-               the Move Grade, once the answer is no longer kept back. -->
-          <CoachPanel thread={coach} onwhy={phase === 'decide' || otherMove ? undefined : why} />
           {@render notation()}
           {#if node?.notes?.credit || (lesson.statsSource && popular.length)}
             <p class="credit small">
@@ -774,6 +786,10 @@
               {#if lesson.statsSource && popular.length}Popularity: {lesson.statsSource}.{/if}
             </p>
           {/if}
+          </div>
+          <!-- Docked at the panel's foot. While the Player chooses, the thinking box is the one place
+               to type; Why Questions follow the Move Grade, once the answer is no longer kept back. -->
+          <CoachPanel thread={coach} onwhy={phase === 'decide' || otherMove ? undefined : why} />
         </div>
       </div>
     {/if}
@@ -781,9 +797,15 @@
 </section>
 
 <style>
-  .title { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.2rem 1rem; margin-bottom: 0.8rem; }
+  .title { justify-content: flex-start; }
   .title h1 { margin: 0; }
-  .back { order: 1; font-size: 0.9rem; }
+  .back { margin-left: auto; font-size: 0.9rem; white-space: nowrap; }
+  /* A phone keeps the header to one line: the link reads "← Lessons". */
+  @media (max-width: 820px) { .board-screen .back .long { display: none; } }
+  /* Under the board: the Hint button and the legend line. */
+  .board-screen { --under-board: 5.5rem; --phone-reserve: 26.5rem; }
+  /* Lesson complete: the board gives the card room, so a short phone shows the next Lesson. */
+  .board-screen:has(.done) { --phone-reserve: 29rem; }
   .intro { max-width: 42rem; display: flex; flex-direction: column; gap: 0.6rem; align-items: flex-start; }
   .intro p { margin: 0; }
   .intro h2 { margin: 0 0 0.2rem; }
@@ -819,8 +841,6 @@
   .more a { display: inline-block; padding: 0.4rem 0; }
   .credit { color: var(--muted); }
   .small { font-size: 0.8rem; }
-  .center { text-align: center; }
-  .progress { margin: 0.2rem 0 0; }
   .typed { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.9rem; }
   /* Two lines that wrap, so the example and the Player's own words show whole on any phone's font. */
   .typed textarea { width: 100%; box-sizing: border-box; resize: vertical; }
@@ -833,12 +853,10 @@
   .bar span { display: block; height: 0.7rem; background: var(--accent); border-radius: 3px; min-width: 2px; }
   tr.mine td { font-weight: 700; }
   .row { display: flex; gap: 0.5rem; margin-top: 0.6rem; flex-wrap: wrap; }
-  /* On a phone the board and the side panel stack: put the Player's choice, Continue and the Coach's
-     reply straight under the board, before the position's text, so no decision needs scrolling. A
-     Hint's answer comes there too, under the Hint button. */
+  /* On a phone the panel scrolls under the board: put the Player's choice and Continue first, before
+     the position's text, so no decision needs scrolling. The Coach's reply is docked at the foot. */
   @media (max-width: 820px) {
-    .side.feedback > .choice { order: -2; }
-    .side.feedback > :global(.coach), .side.hinted > :global(.coach) { order: -1; }
+    .panel-body.feedback > .choice { order: -2; }
     /* The buttons straight after the first line, then the rest, the popularity table last: so the
        way on shows on a phone even with Safari's bars. */
     .choice { display: flex; flex-direction: column; gap: 0.5rem; }

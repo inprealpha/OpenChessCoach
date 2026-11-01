@@ -144,7 +144,7 @@ test('offline, a Review says it needs the desktop, and opens once the desktop is
     await expect(connection(page)).toHaveText(/Desktop offline/);
     await expect(page.getByRole('note')).toHaveText('Reviews live on your desktop, which can’t be reached right now. This one opens here once it is back.');
     // The game as this device kept it, so the Player knows which one it is.
-    await expect(page.getByText('bijean vs ikatsca · 0-1 · Italian Game: Giuoco Piano, Greco\'s Attack · 2013-01-05')).toBeVisible();
+    await expect(page.getByText('You had White · Lost 0-1 · vs ikatsca · Italian Game: Giuoco Piano, Greco\'s Attack · 2013-01-05')).toBeVisible();
     await expect(page.getByText('Loading the game…')).toHaveCount(0);
 
     app = await startVerifyInstance({ dataDir, port });
@@ -209,7 +209,7 @@ test('a Review being made rides out a dropped connection and finishes when the d
     app = await startVerifyInstance({ dataDir, port });
     const first = page.getByRole('region', { name: 'Key moments' }).getByRole('listitem').first();
     await expect(first).toBeVisible({ timeout: 90_000 });
-    await expect(first.getByRole('button')).toHaveAttribute('aria-pressed', 'true');
+    await expect(first.getByRole('button', { name: /^Show moment/ })).toHaveAttribute('aria-pressed', 'true');
     await expect(page.getByRole('alert')).toHaveCount(0);
     expect(app.app.db.prepare('SELECT game_id FROM reviews').all()).toEqual([{ game_id: 1 }]);
   } finally {
@@ -249,7 +249,7 @@ test('a Review being made rides out a blip with the desktop still up, and the de
 
     const first = page.getByRole('region', { name: 'Key moments' }).getByRole('listitem').first();
     await expect(first).toBeVisible({ timeout: 90_000 });
-    await expect(first.getByRole('button')).toHaveAttribute('aria-pressed', 'true');
+    await expect(first.getByRole('button', { name: /^Show moment/ })).toHaveAttribute('aria-pressed', 'true');
     await expect(page.getByRole('alert')).toHaveCount(0);
     expect(await app.rows('reviews')).toHaveLength(1);
     expect(await app.rows<{ job: string }>('coach_calls').then((r) => r.filter((c) => c.job === 'review-moment'))).toHaveLength(4);

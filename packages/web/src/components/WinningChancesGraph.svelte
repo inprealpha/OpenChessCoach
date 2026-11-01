@@ -13,11 +13,13 @@
     /** The board's position: 0 for the start, n after the n-th move. */
     cursor: number;
     ongoto: (cursor: number) => void;
+    /** A low strip under the board bar, so the board keeps its size; the full height in the panel. */
+    compact?: boolean;
   }
-  let { moves, cursor, ongoto }: Props = $props();
+  let { moves, cursor, ongoto, compact = false }: Props = $props();
 
   const W = 400;
-  const H = 110;
+  const H = $derived(compact ? 64 : 110);
   const PAD = 6;
 
   const points = $derived(winningChancesGraph(moves));

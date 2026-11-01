@@ -24,6 +24,14 @@ class ProfileState {
     return { level: this.profile?.level ?? 'beginner', rating: this.profile?.rating ?? null };
   }
 
+  /**
+   * Whether evaluations (+0.65) show beside Winning Chances: at the club level only. A beginner or a
+   * casual Player reads the percentage, one number for one idea.
+   */
+  get showsEvaluations(): boolean {
+    return this.profile?.level === 'club';
+  }
+
   set(p: PlayerProfile): void {
     this.profile = p;
     void store.set('profile', p);

@@ -82,7 +82,14 @@
       <span class="conn-text">{#if api.state === 'online'}Desktop connected{:else if api.state === 'offline'}Desktop offline{:else if api.state === 'unpaired'}Not paired{:else}Connecting…{/if}</span>
     </span>
     {#if api.state !== 'unpaired'}
-      <!-- Settings and the Player Profile, on every screen once the device is paired. -->
+      <!-- The Board, Settings and the Player Profile, on every screen once the device is paired. -->
+      <a href="#/board" class="icon" aria-label="Board" title="Board" aria-current={route.name === 'board' ? 'page' : undefined}>
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
+          <rect x="3.5" y="3.5" width="17" height="17" rx="1.5" />
+          <path d="M3.5 12h17M12 3.5v17" />
+          <path d="M3.5 3.5h8.5v8.5H3.5zM12 12h8.5v8.5H12z" fill="currentColor" stroke="none" opacity="0.35" />
+        </svg>
+      </a>
       <a href="#/profile" class="icon" aria-label="Player Profile" title="Player Profile" aria-current={route.name === 'profile' ? 'page' : undefined}>
         <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="8" r="4" />
@@ -137,6 +144,7 @@
 
 <style>
   .top {
+    height: var(--app-head);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -153,6 +161,9 @@
     .conn-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   }
   .icon { display: inline-flex; padding: 0.35rem; border-radius: 8px; color: var(--muted); }
+  @media (max-width: 820px) { .icon { min-width: var(--tap); min-height: var(--tap); align-items: center; justify-content: center; } }
+  /* Three 44 px icons still fit a 320 px phone beside the name. */
+  @media (max-width: 360px) { .top { padding-inline: 0.5rem; } .end { gap: 0; } .conn { margin-right: 0; } }
   .icon:hover, .icon[aria-current='page'] { color: var(--accent); background: var(--bg); }
   .conn.online::before { content: '● '; color: #2e9b47; }
   .conn.offline::before { content: '● '; color: #c27c00; }

@@ -12,6 +12,7 @@
   import Board from '../components/Board.svelte';
   import CoachPanel from '../components/CoachPanel.svelte';
   import GradeBadge from '../components/GradeBadge.svelte';
+  import FlipButton from '../components/FlipButton.svelte';
   import { api } from '../lib/api.svelte.ts';
   import { CoachThread } from '../lib/coach.svelte.ts';
   import { lessonCatalogue, loadPuzzles } from '../lib/content.ts';
@@ -49,6 +50,8 @@
   const lesson = $derived(all.length && !all.some((p) => p.lessonId === opening) ? undefined : lessonCatalogue.find((l) => l.id === opening));
   const lessonName = $derived(lesson?.name);
   const solver = $derived(puzzle ? otherSide(turnOf(puzzle.fen)) : 'white');
+  /** The Player turned the board: it then shows the solver's side at the top. */
+  let flipped = $state(false);
   /** This screen's Puzzles: a Lesson's, or all of them. */
   const pool = $derived(all.filter((p) => !lesson || p.lessonId === lesson.id).map((p) => p.id));
   const here = $derived(progressOn(pool));
@@ -111,6 +114,7 @@
   }
 
   async function nextPuzzle(): Promise<void> {
+    flipped = false;
     done = (await store.get<string[]>('puzzlesDone')) ?? [];
     missed = (await store.get<string[]>('puzzlesMissed')) ?? [];
     const target = profile.profile?.rating ?? LEVEL_PUZZLE_RATING[profile.profile?.level ?? 'beginner'];
@@ -281,8 +285,11 @@
   }
 </script>
 
-<section class="screen">
-  <h1>{lessonName ? `${lessonName} Puzzles` : 'Puzzles'}</h1>
+<section class="screen board-screen puzzles">
+  <header class="frame-head">
+    <h1>{lessonName ? `${lessonName} Puzzles` : 'Puzzles'}</h1>
+    {#if puzzle && status !== 'empty'}<p class="head-line">Rated {puzzle.rating} · from a real Lichess game</p>{/if}
+  </header>
   {#if all.length}
     {#if opening && !lesson}
       <p role="note">There are no Puzzles for {lessonCatalogue.find((l) => l.id === opening)?.name ?? 'that link'}, so these are from every Lesson.</p>
@@ -330,10 +337,10 @@
     </section>
   {:else if puzzle}
     <div class="board-layout">
-      <div>
+      <div class="board-col">
         <Board
           fen={boardFen}
-          orientation={solver}
+          orientation={flipped ? otherSide(solver) : solver}
           movable={busy ? 'none' : finished ? 'both' : status === 'solving' ? solver : 'none'}
           lastMove={shownLast ? { from: shownLast.uci.slice(0, 2), to: shownLast.uci.slice(2, 4) } : undefined}
           arrows={explained === boardFen ? coach.arrows : []}
@@ -343,25 +350,26 @@
           refusal="One moment: the moves are being played."
           label="Puzzle board"
         />
-        {#if finished}
-          <!-- Stepping stays inside the Puzzle: its first position is the one the Player was set. -->
-          <div class="toolbar">
+        <div class="board-bar toolbar">
+          {#if finished}
+            <!-- Stepping stays inside the Puzzle: its first position is the one the Player was set. -->
             <button type="button" class="secondary" onclick={() => step('first')} aria-label="First position">⏮</button>
             <button type="button" class="secondary" onclick={() => step('previous')} aria-label="Previous move">◀</button>
             <button type="button" class="secondary" onclick={() => step('next')} aria-label="Next move">▶</button>
             <button type="button" class="secondary" onclick={() => step('last')} aria-label="Last position">⏭</button>
             {#if variation.active}<button type="button" class="secondary" onclick={() => variation.leave()}>Back to the Puzzle</button>{/if}
-          </div>
-        {/if}
+          {/if}
+          <FlipButton onflip={() => (flipped = !flipped)} />
+        </div>
       </div>
       <div class="side">
+        <div class="panel-body">
         <section class="card" aria-label="Puzzle" data-puzzle-id={puzzle.id}>
           <p>
             <strong>
               {#if status === 'solved'}You found the best move for {SIDE_NAMES[solver]}.{:else if status === 'shown'}The solution for {SIDE_NAMES[solver]} is on the board.{:else}Find the best move for {SIDE_NAMES[solver]}.{/if}
             </strong>
           </p>
-          <p class="muted small">Puzzle {puzzle.id} · rated {puzzle.rating} · from a real Lichess game</p>
           <p role="status" aria-live="polite" class:error={feedback.includes('not the move')}>{feedback}</p>
           {#if finished}
             <p class="solution">
@@ -401,19 +409,24 @@
             {/if}
           </div>
         </section>
+        <p class="muted small">Puzzles: Lichess puzzle database, CC0.</p>
+        </div>
         {#if status !== 'solving'}
           <CoachPanel thread={coach} onwhy={why} placeholder={variation.active ? (variation.line.lastMove ? `Ask why about ${variation.line.lastMove.san}` : 'Ask about this position') : 'Why is this the answer?'} />
         {/if}
-        <p class="muted small">Puzzles: Lichess puzzle database, CC0.</p>
       </div>
     </div>
   {/if}
 </section>
 
 <style>
+  /* The picker's line sits between the header line and the frame. */
+  @media (min-width: 821px) {
+    .puzzles { --frame-h: calc(100dvh - var(--app-head) - 5.6rem); }
+  }
   .row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
   .small { font-size: 0.8rem; }
-  .picker { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.35rem 1rem; margin: 0 0 1rem; }
+  .picker { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.35rem 1rem; margin: 0 0 0.5rem; min-height: 1.5rem; }
   .picker p { margin: 0; }
   /* Open, the sets take the whole width and the progress line goes under them; the summary stays where it was. */
   .picker details[open] { flex: 1 1 100%; }

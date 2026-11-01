@@ -94,8 +94,14 @@ h1 { font-size: 1.4rem; margin: 0.5rem 0 1rem; }
    first and last position step aside (Home and End still do them) and Flip board shows its arrows
    only. A desktop's bar has the room for all of them. */
 @media (max-width: 820px) {
+  .board-bar:has(> .back) { flex-wrap: nowrap; }
   .board-bar:has(> .back) > .edge { display: none; }
   .board-bar:has(> .back) .flip .words { display: none; }
+  /* Show threat says "Threat", as the sketches' bar does, and on the narrowest phones, or in a
+     wider font, Back to the game takes two short lines rather than the bar a second row. */
+  .board-bar:has(> .back) .threat-button .words-long { display: none; }
+  .board-bar:has(> .back) .threat-button .words-short { display: inline; }
+  .board-bar > .back { flex: 0 1 auto; min-width: 0; line-height: 1.15; }
 }
 /* The panel's content scrolls inside it; the Coach sits at its foot. */
 .panel-body { display: flex; flex-direction: column; gap: 0.75rem; min-width: 0; position: relative; }

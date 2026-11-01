@@ -685,10 +685,10 @@
           {#if !finished}
             <label class="toggle"><input type="checkbox" checked={game.live} onchange={toggleLive} /> Live Coaching in this game</label>
           {/if}
-          <!-- The panel stays on the game's status, its choice to take a move back above all: the
-               board shows the move just played. -->
+          <!-- During play the panel stays on the game's status, its choice to take a move back above
+               all: the board shows the move just played. A finished game's steps keep their move in view. -->
           <MoveList
-            followInPanel={false}
+            followInPanel={finished}
             moves={line.moves}
             grades={game.grades}
             cursor={line.cursor}

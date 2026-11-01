@@ -54,9 +54,15 @@ screen fills the frame's slots; it doesn't invent its own layout.
 
 ![The board frame on a phone: header line, bar, board, board bar, then the panel as a sheet with tabs, and the Ask box above the keyboard](images/frame-phone.png)
 
-- The board stays at the top and doesn't scroll away. The panel below it scrolls inside itself, like
-  a sheet. When the Player needs the full height (reading a long overview, typing a question), the
-  board shrinks to a strip (about a third of its size), and a tap on the strip brings it back.
+- The board stays at the top and doesn't scroll away. The panel below it is a sheet: one card with
+  rounded top corners and a grab handle, its tabs, its content scrolling inside it, and the Ask box
+  at its foot, with no gaps the page shows through. The page itself is exactly the screen at every
+  phone width: nothing in the header or the frame may push it wider, and heights use `dvh`, not
+  `vh`, which iOS takes as the height with its toolbars hidden.
+- When the Player needs the full height (reading a moment or the overview, asking a question), the
+  sheet comes up: a tap or a swipe on its handle, a swipe up in the panel, or a Why Question. The
+  board shrinks to a strip (about 44% of the width) beside the board bar, and a tap on the strip
+  brings it back (`lib/sheet.svelte.ts`).
 - The Winning Chances bar lies flat above the board, so the board keeps the full width.
 - The board bar sits under the board, inside thumb reach, with buttons at least 44 px square.
 - The Ask box sits at the bottom of the screen, above the keyboard while typing, and the answer
@@ -95,7 +101,7 @@ or a choice the Player must make now.
 
 | Element | Default | Why |
 | --- | --- | --- |
-| Review overview | Open on first visit, collapsed to its first sentence after | Read once, then it's in the way |
+| Review overview | Its own tab; on the first visit its first sentence heads the Moments tab, one tap from the rest | Read once, then it's in the way |
 | Key moment | The open one expanded; the others one line each: move, Move Grade, what changed ("48% → 35%") | One moment at a time |
 | "Better" moves | The best one as a move button; the others behind "More moves" | The fix, not a list |
 | Evaluations (+0.65) | Hidden at the beginner and casual levels; shown small after the percentage at the club level; a setting either way | Two numbers for one idea |
@@ -202,6 +208,8 @@ move's green.
 - Header line: opponent, the Player's side, the result, the opening.
 - Panel tabs: **Moments** (default), **Moves**, **Overview**. Moments lists the key moments as one-line
   rows; the open one expands in place with the Coach's explanation and the best move as a button.
+- The panel is one card (`.side.panel` in `app.css`): sections inside it are ruled off, not cards
+  of their own, and the Coach's name and "Coach ready" show only while it works or can't.
 - The graph sits under the board bar on desktop; a strip on a phone.
 - The board is free to move: any move starts a variation, "Back to the game" returns.
 - The Ask box is docked at the panel's foot and asks about the move on the board.

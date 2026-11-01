@@ -16,6 +16,8 @@
   import GameEnd from '../components/GameEnd.svelte';
   import MoveList from '../components/MoveList.svelte';
   import StepButtons from '../components/StepButtons.svelte';
+  import SheetHandle from '../components/SheetHandle.svelte';
+  import { Sheet } from '../lib/sheet.svelte.ts';
   import ThreatButton from '../components/ThreatButton.svelte';
   import FlipButton from '../components/FlipButton.svelte';
   import WinningChancesBar from '../components/WinningChancesBar.svelte';
@@ -65,6 +67,8 @@
   /** The Player's own moves from a position of the finished game, graded by the browser's Engine. */
   const variation = new Variation();
 
+  /** A phone's panel, pulled up or not. */
+  const sheet = new Sheet();
   let game = $state<Saved | null>(null);
   let loaded = $state(false);
   let side = $state<Side>('white');
@@ -546,7 +550,7 @@
   }
 </script>
 
-<section class="screen board-screen engine-game">
+<section class="screen board-screen engine-game" class:sheet-full={sheet.on && sheet.full}>
   <header class="frame-head">
     <h1>Engine Game</h1>
     {#if game}
@@ -574,6 +578,10 @@
     <div class="board-layout">
       <div class="board-col">
         <div class="board-and-bar">
+          {#if sheet.on && sheet.full}
+          <!-- The board as a strip: a tap brings it back full size. -->
+          <button type="button" class="strip-tap" aria-label="Show the board full size" onclick={() => (sheet.full = false)}></button>
+        {/if}
           <div class="with-bar">
             <WinningChancesBar score={position?.score ?? null} pov={position?.pov ?? 'white'} {orientation} />
             <Board
@@ -615,8 +623,9 @@
           {/if}
         </div>
       </div>
-      <div class="side">
-        <div class="panel-body">
+      <div class="side panel">
+        <SheetHandle {sheet} />
+        <div class="panel-body" {@attach sheet.gestures}>
           {#if confirmingResign && !finished}
             <ConfirmDialog
               id="resign"

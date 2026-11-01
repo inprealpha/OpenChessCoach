@@ -536,7 +536,12 @@
   }
   .legend { list-style: none; display: flex; flex-wrap: wrap; gap: 0.1rem 0.75rem; margin: 0; padding: 0; font-size: 0.8rem; color: var(--muted, #555); }
   .legend li { display: inline-flex; align-items: center; gap: 0.3rem; }
-  @media (max-width: 820px) { .legend { gap: 0 0.5rem; font-size: 0.72rem; } }
+  /* On a phone the line under the board is as short as its words: every pixel is the panel's. */
+  @media (max-width: 820px) {
+    .legend { gap: 0 0.5rem; font-size: 0.72rem; line-height: 1.2; }
+    .under { min-height: 1.2em; margin-top: 0.2rem; }
+    .board-status { font-size: 0.8rem; line-height: 1.2; }
+  }
   .swatch { display: inline-block; width: 1.1rem; height: 0.22rem; border-radius: 2px; background: var(--swatch); }
   .swatch.dashed { background: repeating-linear-gradient(90deg, var(--swatch) 0 0.3rem, transparent 0.3rem 0.45rem); }
 </style>

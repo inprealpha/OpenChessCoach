@@ -149,15 +149,18 @@
     justify-content: space-between;
     align-items: center;
     padding: 0.5rem 0.9rem;
+    gap: 0.5rem;
     border-bottom: 1px solid var(--line);
     background: var(--panel);
   }
   .engine-error { margin: 0; padding: 0.5rem 0.9rem; border-bottom: 1px solid var(--line); }
-  .brand { font-weight: 700; text-decoration: none; color: var(--text); }
+  .brand { font-weight: 700; text-decoration: none; color: var(--text); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .end { flex-shrink: 0; }
   .end { display: flex; align-items: center; gap: 0.35rem; }
   .conn { font-size: 0.8rem; color: var(--muted); margin-right: 0.4rem; white-space: nowrap; }
-  /* On a narrow phone the dot alone says it; the words stay for screen readers. */
-  @media (max-width: 400px) {
+  /* On a phone the dot alone says it; the words stay for screen readers. With the words, the three
+     icons no longer fit beside the name below about 440 px, and the page would pan sideways. */
+  @media (max-width: 560px) {
     .conn-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   }
   .icon { display: inline-flex; padding: 0.35rem; border-radius: 8px; color: var(--muted); }

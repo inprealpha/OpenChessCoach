@@ -141,7 +141,7 @@
     <section class="card phone-step" aria-labelledby="phone-step-title">
       <p class="muted small step">Step 1 of 2</p>
       <h2 id="phone-step-title">Play on your phone</h2>
-      <p>Most people play chess on their phone, and you can too. This desktop does the Coach’s work, and your phone connects to it over your Wi-Fi.</p>
+      <p>Most people play chess on their phone, and you can too. This desktop does the Coach’s work, and your phone connects to it over your Wi-Fi, or through the internet when the Wi-Fi way is blocked.</p>
       <PhonePairing info={phone.info} />
       <div class="next">
         {#if phone.info.phone.paired}

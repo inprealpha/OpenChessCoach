@@ -26,10 +26,17 @@
       el.scrollTop = 0;
       return;
     }
-    const box = el.getBoundingClientRect();
+    nearest(el, item);
+    // The panel around the list may scroll too, as a phone's short panel does: the move stays in its view as well.
+    const panel = el.closest<HTMLElement>('.panel-body');
+    if (panel && panel.scrollHeight > panel.clientHeight) nearest(panel, item);
+  }
+  /** Scrolls `box` the least that brings `item` into its view. */
+  function nearest(box: HTMLElement, item: Element): void {
+    const b = box.getBoundingClientRect();
     const at = item.getBoundingClientRect();
-    if (at.top < box.top) el.scrollTop -= box.top - at.top;
-    else if (at.bottom > box.bottom) el.scrollTop += at.bottom - box.bottom;
+    if (at.top < b.top) box.scrollTop -= b.top - at.top;
+    else if (at.bottom > b.bottom) box.scrollTop += at.bottom - b.bottom;
   }
   $effect(() => {
     if (!list || moves.length === 0) return;
@@ -46,6 +53,12 @@
     watch.observe(el);
     return () => watch.disconnect();
   });
+
+  /**
+   * Where the variation's row goes: after the game's move it replaces, as on Lichess ("11. Bxf7+
+   * (11. axb4 …)"), or after the last move when it carries on from the end. None while there is none.
+   */
+  const anchor = $derived(variation ? Math.min(variation.from + 1, moves.length) : -1);
 
   /** "11." for White, "11…" for Black, from the position the move was played in, so a game set up from a position keeps its numbers. */
   function label(m: PlayedMove): string {
@@ -69,21 +82,23 @@
   </li>
 {/snippet}
 
+{#if moves.length || variation}
 <ol class="moves" class:exploring={variation} aria-label="Moves" bind:this={list}>
-  {#if variation?.from === 0}{@render branch(variation)}{/if}
+  {#if anchor === 0 && variation}{@render branch(variation)}{/if}
   {#each moves as m, i (i)}
     {@const white = turnOf(m.fenBefore) === 'white'}
     <!-- Black's move opens its own row, in Black's column, at the start of a game set up with Black to move and after a variation. -->
-    <li class:current={cursor === i + 1} data-ply={i + 1} class:white class:black={!white} class:opens-black={!white && (i === 0 || variation?.from === i)}>
+    <li class:current={cursor === i + 1} data-ply={i + 1} class:white class:black={!white} class:opens-black={!white && (i === 0 || anchor === i)}>
       <button type="button" onclick={() => ongoto?.(i + 1)} aria-label={`Move ${label(m)} ${m.san}${grades[i] ? `, ${grades[i]}` : ''}`}>
         <span class="no" aria-hidden="true">{label(m)}</span>
         <span class="san">{m.san}</span>
         {#if grades[i]}<GradeBadge grade={grades[i] as MoveGrade} />{/if}
       </button>
     </li>
-    {#if variation && variation.from === i + 1}{@render branch(variation)}{/if}
+    {#if variation && anchor === i + 1}{@render branch(variation)}{/if}
   {/each}
 </ol>
+{/if}
 
 <style>
   .moves {

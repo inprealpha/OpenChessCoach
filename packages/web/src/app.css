@@ -106,6 +106,12 @@ h1 { font-size: 1.4rem; margin: 0.5rem 0 1rem; }
   .board-screen .side { min-height: 0; height: var(--frame-h); gap: 0.6rem; }
   .board-screen .panel-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding-right: 0.15rem; }
   .board-screen .side > .coach { flex: 0 1 auto; max-height: 60%; min-height: 0; }
+  /* The bar under the board stays one row, so a button that comes and goes (Back to the game, the
+     threat's answer) never pushes the frame taller than the screen; in a narrow window the
+     buttons' labels shorten instead. */
+  .board-screen .board-bar { flex-wrap: nowrap; }
+  .board-screen .board-bar > * { min-width: 0; }
+  .board-screen .board-bar button { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 }
 @media (max-width: 820px) {
   .board-screen .board-col { margin-inline: -0.75rem; padding: 0.2rem 0.75rem; border-bottom: 1px solid var(--line); }
@@ -120,6 +126,12 @@ h1 { font-size: 1.4rem; margin: 0.5rem 0 1rem; }
   .board-screen .side > .coach { margin-inline: -0.75rem; box-shadow: 0 -6px 16px rgb(0 0 0 / 12%); }
   .board-bar { gap: 0.3rem; }
   .board-bar button { min-width: var(--tap); min-height: var(--tap); padding-inline: 0.55rem; }
+  /* On every screen, the controls a thumb taps are at least 44 px (guidelines, Controls); links in
+     running text and the board's own squares keep their size. */
+  .screen :is(button:not(.link), a.button, summary, select):not(.board *) { min-height: var(--tap); }
+  .screen td.actions :is(a, button) { display: inline-flex; align-items: center; min-height: var(--tap); min-width: var(--tap); justify-content: center; }
+  .screen :is(input[type='checkbox'], input[type='radio']) { width: 1.25rem; height: 1.25rem; }
+  .screen label:has(> :is(input[type='checkbox'], input[type='radio'])) { min-height: var(--tap); display: inline-flex; align-items: center; gap: 0.45rem; }
 }
 /* A phone held upright: one screen tall, as on a desktop. The header line, the board, then the
    panel as a sheet that scrolls inside itself, with the Coach's Ask box docked at the foot of the
@@ -142,7 +154,7 @@ h1 { font-size: 1.4rem; margin: 0.5rem 0 1rem; }
   .board-screen .panel-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
   .board-screen .side > .coach { flex: 0 0 auto; }
   /* Typing a question: the board shrinks so it stays in view above the keyboard. */
-  .board-screen .board-layout:has(.coach input:focus) .board-col { --board-max: 48vw; }
+  .board-screen .board-layout:has(.coach input.typing) .board-col { --board-max: 48vw; }
 }
 .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 0.75rem 1rem; }
 /* The card's padding is its spacing: its first and last children add no margin of their own. */

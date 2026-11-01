@@ -5,6 +5,8 @@
   import { threatSetting, type ThreatView } from '../lib/threat.svelte.ts';
 
   let { view }: { view?: ThreatView } = $props();
+  /** On, and the Engine found no threat in the position shown. */
+  const none = $derived(threatSetting.on && Boolean(view?.checked) && !view?.threat);
 
   $effect(() => {
     void threatSetting.load();
@@ -15,14 +17,14 @@
   type="button"
   class="secondary threat-button"
   aria-pressed={threatSetting.on}
+  aria-label="Show threat"
   title="Show what your opponent wants to play next"
-  onclick={() => threatSetting.toggle()}>Show threat</button
+  onclick={() => threatSetting.toggle()}>{none ? 'No threat' : 'Show threat'}</button
 >
-<span class="no-threat" role="status">{threatSetting.on && view?.checked && !view.threat ? 'No threat' : ''}</span>
+<!-- Said on the button itself, so it takes no room beside it; announced here. -->
+<span class="visually-hidden" role="status">{none ? 'No threat' : ''}</span>
 
 <style>
-  .no-threat { font-size: 0.8rem; color: var(--muted); }
-  .no-threat:empty { display: none; }
   .threat-button[aria-pressed='true'] {
     background: var(--arrow-threat);
     border-color: var(--arrow-threat);

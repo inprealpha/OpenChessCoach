@@ -449,7 +449,9 @@
           <FlipButton onflip={() => (flipped = !flipped)} />
           <ThreatButton view={threats} />
         </div>
-        {#if review && !narrow.on}
+        <!-- The game's graph steps aside while the Player tries a variation, leaving its bar the room
+             Back to the game takes, so the frame stays one screen tall. -->
+        {#if review && !narrow.on && !variation.active}
           <WinningChancesGraph moves={review.moves} cursor={variation.from ?? shownIndex} ongoto={goto} compact />
         {/if}
       </div>

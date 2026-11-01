@@ -58,6 +58,8 @@ export class CoachService {
     this.clock = clock;
     this.coach = coach;
     this.onStatus = onStatus;
+    // Passed on as this service's own status, which also knows about the usage limit.
+    coach.watch?.(() => void this.status().then((status) => this.onStatus(status), () => {}));
   }
 
   async status(): Promise<CoachStatus> {

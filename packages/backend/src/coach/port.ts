@@ -30,6 +30,8 @@ export interface CoachPort {
   readonly name: 'real' | 'fake';
   ask(call: CoachCall, onText: (delta: string) => void): Promise<CoachRawReply>;
   status(): Promise<CoachStatus>;
+  /** Hears the Coach become available again on its own, such as once the owner logs back in to Claude. */
+  watch?(listener: (status: CoachStatus) => void): void;
 }
 
 /** The owner's Claude limits are used up. */

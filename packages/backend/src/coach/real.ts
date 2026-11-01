@@ -2,13 +2,13 @@
 // (ADR 0001). It has no built-in tools, no file access, no MCP servers of its own or from the
 // claude.ai account's connectors, and no settings from disk. Its only possible tool is the
 // desktop's Engine, as an in-process MCP server, with Think deeper on (ADR 0010).
-import { createSdkMcpServer, query, tool, type McpServerConfig, type SDKMessage } from '@anthropic-ai/claude-agent-sdk';
+import { createSdkMcpServer, query, tool, type McpServerConfig, type Options, type SDKMessage } from '@anthropic-ai/claude-agent-sdk';
 import type { CoachRawReply, CoachUsage } from '@chess-coach/shared/coach/types';
 import { MAX_QUESTION_PLIES } from '@chess-coach/shared/coach/engine-tool';
 import { z } from 'zod';
 import type { CoachStatus } from '@chess-coach/shared/protocol';
 import { tmpdir } from 'node:os';
-import { checkClaude, isWindowsShim } from '../claude-check.ts';
+import { checkClaude, isWindowsShim, refusedLogin } from '../claude-check.ts';
 import { CoachDeadlineError, CoachLimitError, CoachUnavailableError, type CoachCall, type CoachEngine, type CoachPort } from './port.ts';
 import { engineToolPrompt, REPLY_SCHEMA, SYSTEM_PROMPT, userPrompt } from './prompts.ts';
 
@@ -45,6 +45,25 @@ function engineServer(engine: CoachEngine): McpServerConfig {
   return createSdkMcpServer({ name: ENGINE_SERVER, version: '1.0.0', tools: [ask], alwaysLoad: true });
 }
 
+/** What a short call to Claude says about the desktop's login (see {@link RealCoach.checkLogin}). */
+export type LoginCheck =
+  /** Claude answered: the Coach can answer too. */
+  | { state: 'ok' }
+  /** Claude turned the login down; `message` says how the owner fixes it. */
+  | { state: 'refused'; message: string }
+  /** The login works, but the owner's Claude usage limit is reached. */
+  | { state: 'limit'; resetsAt?: Date }
+  /** No answer either way: the desktop is offline, Claude is down or too slow. */
+  | { state: 'unknown'; message: string };
+
+/** How long the login check waits for Claude's answer. */
+export const LOGIN_CHECK_MS = 30_000;
+/** While Claude turns the login down, how often the Coach checks again, so it comes back once the owner logs in. */
+export const LOGIN_RECHECK_MS = 30_000;
+/** Said after a turned-down login while the app runs: the owner doesn't need to restart it. */
+export const COMES_BACK = 'The Coach comes back on its own once you have.';
+const CHECK_PROMPT = 'Reply with OK.';
+
 export interface RealCoachOptions {
   /** Path to the `claude` executable the owner logged in with. */
   claudePath?: string;
@@ -52,6 +71,10 @@ export interface RealCoachOptions {
   deadlineMs?: number;
   /** The Agent SDK's `query`; tests pass their own to see the options the Coach sends. */
   query?: typeof query;
+  /** How long the login check waits for Claude. */
+  loginCheckMs?: number;
+  /** How often the login is checked again while Claude turns it down. */
+  loginRecheckMs?: number;
 }
 
 export class RealCoach implements CoachPort {
@@ -59,16 +82,118 @@ export class RealCoach implements CoachPort {
   private readonly claudePath: string | undefined;
   private readonly deadlineMs: number;
   private readonly query: typeof query;
+  private readonly loginCheckMs: number;
+  private readonly loginRecheckMs: number;
+  /** Set while Claude turns the desktop's login down: why, and when that was last checked. */
+  private refused: { message: string; at: number } | undefined;
+  private checking: Promise<LoginCheck> | undefined;
+  private recheck: NodeJS.Timeout | undefined;
+  private listener: ((status: CoachStatus) => void) | undefined;
 
   constructor(options: RealCoachOptions = {}) {
     this.claudePath = options.claudePath;
     this.deadlineMs = options.deadlineMs ?? THINK_DEEPER_DEADLINE_MS;
     this.query = options.query ?? query;
+    this.loginCheckMs = options.loginCheckMs ?? LOGIN_CHECK_MS;
+    this.loginRecheckMs = options.loginRecheckMs ?? LOGIN_RECHECK_MS;
   }
 
   async status(): Promise<CoachStatus> {
     const check = await checkClaude(this.claudePath);
-    return check.ok ? { state: 'ready' } : { state: 'unavailable', reason: check.message };
+    if (!check.ok) return { state: 'unavailable', reason: check.message };
+    // `claude auth status` still says "logged in" for a login Claude turned down: ask Claude again
+    // when the last answer is old enough, so a reload after logging in finds the Coach at once.
+    if (this.refused && Date.now() - this.refused.at >= this.loginRecheckMs) await this.checkLogin();
+    if (this.refused) return { state: 'unavailable', reason: `${this.refused.message} ${COMES_BACK}` };
+    return { state: 'ready' };
+  }
+
+  watch(listener: (status: CoachStatus) => void): void {
+    this.listener = listener;
+  }
+
+  /**
+   * Whether Claude takes the desktop's login, from one short call on the smallest model, set up
+   * like every Coach call. `claude auth status` only reads the login saved on the desktop, so it
+   * can't tell a login that has expired or was signed out elsewhere; this can.
+   */
+  checkLogin(): Promise<LoginCheck> {
+    this.checking ??= this.askClaude().then((check) => {
+      if (check.state === 'refused') this.refuse(check.message);
+      else if (check.state !== 'unknown') this.accept();
+      else if (this.refused) this.refused.at = Date.now();
+      return check;
+    }).finally(() => (this.checking = undefined));
+    return this.checking;
+  }
+
+  private async askClaude(): Promise<LoginCheck> {
+    const abort = new AbortController();
+    const timer = setTimeout(() => abort.abort(), this.loginCheckMs);
+    try {
+      const stream = this.query({
+        prompt: CHECK_PROMPT,
+        options: { ...this.callOptions(abort), model: 'haiku', systemPrompt: CHECK_PROMPT, maxTurns: 1 },
+      });
+      for await (const message of stream) {
+        if (message.type === 'rate_limit_event' && message.rate_limit_info.status === 'rejected') {
+          const resets = message.rate_limit_info.resetsAt;
+          return { state: 'limit', ...(resets ? { resetsAt: new Date(resets * 1000) } : {}) };
+        }
+        if (message.type === 'assistant' && message.error) {
+          const refused = refusedLogin(message.error);
+          if (refused) return { state: 'refused', message: refused };
+          if (message.error === 'rate_limit') return { state: 'limit' };
+          return { state: 'unknown', message: `Claude answered with an error (${message.error}).` };
+        }
+        if (message.type === 'result') {
+          return message.subtype === 'success' && !message.is_error ? { state: 'ok' } : { state: 'unknown', message: `Claude stopped early (${message.subtype}).` };
+        }
+      }
+      return { state: 'unknown', message: 'Claude didn’t answer.' };
+    } catch (err) {
+      if (abort.signal.aborted) return { state: 'unknown', message: `Claude didn’t answer within ${Math.round(this.loginCheckMs / 1000)} seconds.` };
+      return { state: 'unknown', message: err instanceof Error ? err.message : String(err) };
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  /** Claude turned the login down: the Coach says so until a check finds it works again. */
+  private refuse(message: string): void {
+    this.refused = { message, at: Date.now() };
+    this.recheck ??= setInterval(() => void this.checkLogin(), this.loginRecheckMs).unref();
+  }
+
+  private accept(): void {
+    const was = this.refused;
+    this.refused = undefined;
+    clearInterval(this.recheck);
+    this.recheck = undefined;
+    if (was) this.listener?.({ state: 'ready' });
+  }
+
+  /** What every call to Claude shares: no tools, no settings from disk, the owner's login. */
+  private callOptions(abort: AbortController): Options {
+    return {
+      tools: [],
+      allowedTools: [],
+      mcpServers: {},
+      strictMcpConfig: true,
+      settingSources: [],
+      persistSession: false,
+      cwd: tmpdir(),
+      env: {
+        ...process.env,
+        // mcpServers: {} doesn't stop the claude.ai account's connectors, which add ~88,000 tokens to a call.
+        ENABLE_CLAUDEAI_MCP_SERVERS: 'false',
+        // A ceiling on each response, so an answer that runs away can't spend the owner's limits.
+        CLAUDE_CODE_MAX_OUTPUT_TOKENS: String(COACH_OUTPUT_TOKENS),
+      },
+      abortController: abort,
+      // npm's claude.cmd can't be launched directly, so the SDK's own build runs on the same login.
+      ...(this.claudePath && !isWindowsShim(this.claudePath) ? { pathToClaudeCodeExecutable: this.claudePath } : {}),
+    };
   }
 
   async ask(call: CoachCall, onText: (delta: string) => void): Promise<CoachRawReply> {
@@ -87,31 +212,17 @@ export class RealCoach implements CoachPort {
     const stream = this.query({
       prompt: userPrompt(call.brief),
       options: {
+        ...this.callOptions(abort),
         model: call.model,
         systemPrompt: engine ? SYSTEM_PROMPT + engineToolPrompt(engine.maxQuestions, call.brief.summary !== undefined, call.brief.job) : SYSTEM_PROMPT,
         // No built-in tools, and no MCP servers but the Engine's: the Engine tool is the only one allowed to run.
-        tools: [],
         allowedTools: engine ? [ENGINE_TOOL_NAME] : [],
         mcpServers: engine ? { [ENGINE_SERVER]: engineServer(engine) } : {},
-        strictMcpConfig: true,
-        settingSources: [],
-        persistSession: false,
         includePartialMessages: true,
         // A turn for every call the tool takes, refused ones included; the tool refuses any past
         // them, telling the Coach to answer, before this stops the call.
         maxTurns: BASE_TURNS + (engine ? engine.maxCalls : 0),
-        cwd: tmpdir(),
-        env: {
-          ...process.env,
-          // mcpServers: {} doesn't stop the claude.ai account's connectors, which add ~88,000 tokens to a call.
-          ENABLE_CLAUDEAI_MCP_SERVERS: 'false',
-          // A ceiling on each response, so an answer that runs away can't spend the owner's limits.
-          CLAUDE_CODE_MAX_OUTPUT_TOKENS: String(COACH_OUTPUT_TOKENS),
-        },
-        abortController: abort,
         outputFormat: { type: 'json_schema', schema: REPLY_SCHEMA as unknown as Record<string, unknown> },
-        // npm's claude.cmd can't be launched directly, so the SDK's own build runs on the same login.
-        ...(this.claudePath && !isWindowsShim(this.claudePath) ? { pathToClaudeCodeExecutable: this.claudePath } : {}),
       },
     });
     let text = '';
@@ -155,8 +266,11 @@ export class RealCoach implements CoachPort {
         }
         if (message.type === 'assistant' && message.error) {
           if (message.error === 'rate_limit') throw new CoachLimitError('Your Claude usage limit has been reached.');
-          if (message.error === 'authentication_failed') {
-            throw new CoachUnavailableError('Claude Code is not logged in on the desktop. Run `claude` there and log in.');
+          const refused = refusedLogin(message.error);
+          if (refused) {
+            // Remembered, so the Coach stays unavailable rather than looking ready to the next Player.
+            this.refuse(refused);
+            throw new CoachUnavailableError(`${refused} ${COMES_BACK}`);
           }
         }
         if (message.type === 'result') {

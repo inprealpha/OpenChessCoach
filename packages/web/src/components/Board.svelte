@@ -70,21 +70,15 @@
     message = '';
   });
 
-  // A board that stops taking moves (a finished game, the Engine thinking) drops a piece picked up
-  // before, so the next click on it is not read as a move.
+  // A board whose rules change drops a piece picked up under the old ones, so the next click is not
+  // read as a move: one that stops taking moves (the Engine thinking), or a finished game whose board
+  // is now free to explore. What it said goes too, such as a refusal whose reason has passed.
   $effect(() => {
-    if (canMove) return;
+    void movable;
+    void refusal;
     selected = null;
     promotion = null;
     message = '';
-  });
-
-  // A board whose rules change (a game that ends and leaves its board free to explore) drops a
-  // piece picked up under the old ones, so the next click starts afresh.
-  $effect(() => {
-    void movable;
-    selected = null;
-    promotion = null;
   });
 
   /** How long a piece takes to slide to its new square, as on Lichess. */

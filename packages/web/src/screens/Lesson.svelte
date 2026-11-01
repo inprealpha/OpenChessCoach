@@ -45,7 +45,7 @@
   import { profile } from '../lib/profile.svelte.ts';
   import { router } from '../lib/router.svelte.ts';
   import { store } from '../lib/storage.ts';
-  import { Variation } from '../lib/variation.svelte.ts';
+  import { stepLine, Variation, type Step } from '../lib/variation.svelte.ts';
 
   let { lessonId }: { lessonId: string } = $props();
 
@@ -446,11 +446,10 @@
     if (variation.play(uci, { cursor: line.cursor, fen: line.fen })) coach.clearAnnotations();
   }
 
-  function stepVariation(where: 'first' | 'previous' | 'next' | 'last'): void {
-    const v = variation.line;
-    const before = v.cursor;
-    v.goTo({ first: 0, previous: v.cursor - 1, next: v.cursor + 1, last: v.moves.length }[where]);
-    if (v.cursor !== before) coach.clearAnnotations();
+  function stepVariation(where: Step): void {
+    const before = variation.line.cursor;
+    stepLine(variation.line, where);
+    if (variation.line.cursor !== before) coach.clearAnnotations();
   }
 
   function backToLesson(): void {
@@ -467,18 +466,10 @@
   });
 
   async function why(question: string): Promise<void> {
-    const played = variation.line.lastMove;
     if (phase === 'done' && variation.active) {
-      // About the Player's own move in the variation, or its first position: only the moves go,
-      // and the desktop's Engine works out the facts (ADR 0007).
-      const recentMoves = variation.movesSoFar(line.moves);
-      const grade = variation.grades[variation.line.cursor - 1];
-      await coach.ask(
-        played
-          ? { job: 'why', fen: played.fenBefore, recentMoves: recentMoves.slice(0, -1), ...whyContext(), moveUci: played.uci, ...(question ? { question } : {}) }
-          : { job: 'why', fen: variation.fen, recentMoves, ...whyContext(), ...(question ? { question } : {}) },
-        question || (played ? (grade ? `Why is ${played.san} graded ${grade}?` : `Why ${played.san}?`) : 'What are the ideas in this position?'),
-      );
+      // About the Player's own variation: only the moves go, and the desktop's Engine works out the facts (ADR 0007).
+      const { label, ...asked } = variation.question(line.moves);
+      await coach.ask({ job: 'why', ...asked, ...whyContext(), ...(question ? { question } : {}) }, question || label);
       return;
     }
     const cursor = line.cursor;
@@ -511,12 +502,16 @@
   const boardFen = $derived(variation.active ? variation.fen : line.fen);
   const shownLast = $derived(variation.active ? variation.line.lastMove : line.lastMove);
   /** The Coach's arrows, less any other move for the Player (`lessonArrows`), then Show the move's. */
+  // Once the Lesson is complete there is no next decision to keep back: the Coach's arrows show as they are.
   const arrows = $derived.by(() => {
+    if (phase === 'done') return coach.arrows;
     const shown = lessonArrows(coach.arrows, boardFen, shownLast?.uci, playerSide);
     return hintArrow ? [...shown, hintArrow] : shown;
   });
   /** The Coach's highlights, less any square a move of the Player's could go to (`lessonHighlights`). */
-  const highlights = $derived(lessonHighlights(coach.highlights, boardFen, shownLast?.uci, playerSide, otherMove ? node?.fen : undefined));
+  const highlights = $derived(
+    phase === 'done' ? coach.highlights : lessonHighlights(coach.highlights, boardFen, shownLast?.uci, playerSide, otherMove ? node?.fen : undefined),
+  );
 </script>
 
 <section class="screen">

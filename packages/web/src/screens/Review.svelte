@@ -6,7 +6,7 @@
   import { untrack } from 'svelte';
   import { moveLabel } from '@chess-coach/shared/chess';
   import type { MoveGrade } from '@chess-coach/shared/grader';
-  import { finishedScore, scoreAfterPly } from '@chess-coach/shared/position-score';
+  import { scoreAfterPly } from '@chess-coach/shared/position-score';
   import { winningChancesFor, type WinningChances } from '@chess-coach/shared/winning-chances';
   import { overviewSegments } from '@chess-coach/shared/overview';
   import type { GameDetail, GameSummary, KeyMoment, OverviewMove, Review } from '@chess-coach/shared/protocol';
@@ -29,7 +29,7 @@
   import { threatSetting, ThreatView } from '../lib/threat.svelte.ts';
   import { gradeMark } from '../lib/grades.ts';
   import { titleFrom } from '../lib/page-title.svelte.ts';
-  import { Variation } from '../lib/variation.svelte.ts';
+  import { stepLine, Variation, type Step } from '../lib/variation.svelte.ts';
 
   let { gameId }: { gameId: number } = $props();
 
@@ -221,33 +221,27 @@
    * the position they were drawn on.
    */
   function explore(uci: string): void {
-    // Back at the variation's first position, the game's own move returns to the game.
-    const atGame = !variation.active || variation.line.cursor === 0;
-    const from = variation.from ?? shownIndex;
-    if (atGame && line.moves[from]?.uci === uci) {
-      goto(from + 1);
-      return;
-    }
-    if (variation.play(uci, { cursor: shownIndex, fen: boardFen })) coach.clearAnnotations();
+    const to = variation.gameStep(uci, line.moves, shownIndex);
+    if (to !== null) goto(to);
+    else if (variation.play(uci, { cursor: shownIndex, fen: boardFen })) coach.clearAnnotations();
   }
 
   /** Steps through the variation while the board shows one, otherwise through the game. */
-  function step(where: 'first' | 'previous' | 'next' | 'last'): void {
+  function step(where: Step): void {
     if (!variation.active) {
       goto({ first: 0, previous: shownIndex - 1, next: shownIndex + 1, last: line.moves.length }[where]);
       return;
     }
-    const v = variation.line;
-    const before = v.cursor;
-    v.goTo({ first: 0, previous: v.cursor - 1, next: v.cursor + 1, last: v.moves.length }[where]);
-    if (v.cursor !== before) coach.clearAnnotations();
+    showVariationMove(where, false);
   }
 
-  /** A move picked in the variation's row of the move list. */
-  function showVariationMove(cursor: number): void {
-    if (variation.line.cursor !== cursor) coach.clearAnnotations();
-    variation.line.goTo(cursor);
-    showBoard();
+  /** Moves through the variation: a step, or a move picked in its row of the move list. */
+  function showVariationMove(to: Step | number, bringBoard = true): void {
+    const before = variation.line.cursor;
+    if (typeof to === 'number') variation.line.goTo(to);
+    else stepLine(variation.line, to);
+    if (variation.line.cursor !== before) coach.clearAnnotations();
+    if (bringBoard) showBoard();
   }
 
   /** Drops the variation: the board shows the game where the Player left it, an open key moment too. */
@@ -256,36 +250,14 @@
     coach.clearAnnotations();
   }
 
-  /** A Why Question about the variation's move on the board, or its first position: only the moves go, and the desktop's Engine works out the facts (ADR 0007). */
-  async function whyInVariation(question: string): Promise<void> {
-    if (!game) return;
-    const v = variation.line;
-    const move = v.lastMove;
-    const recentMoves = variation.movesSoFar(line.moves);
-    if (!move) {
-      await coach.ask(
-        { job: 'why', fen: v.fen, recentMoves, playerSide: game.playerSide, opening: game.opening, ...(question ? { question } : {}) },
-        question || 'What are the options in this position?',
-      );
+  async function why(question: string): Promise<void> {
+    if (variation.active && game) {
+      // Only the moves go, and the desktop's Engine works out the facts (ADR 0007). No gameId: the
+      // Review has no score for a position the game never reached.
+      const { label, ...asked } = variation.question(line.moves);
+      await coach.ask({ job: 'why', ...asked, playerSide: game.playerSide, opening: game.opening, ...(question ? { question } : {}) }, question || label);
       return;
     }
-    const grade = variation.grades[v.cursor - 1];
-    await coach.ask(
-      {
-        job: 'why',
-        fen: move.fenBefore,
-        recentMoves: recentMoves.slice(0, -1),
-        playerSide: game.playerSide,
-        moveUci: move.uci,
-        opening: game.opening,
-        ...(question ? { question } : {}),
-      },
-      question || (grade ? `Why is ${move.san} graded ${grade}?` : `Why ${move.san}?`),
-    );
-  }
-
-  async function why(question: string): Promise<void> {
-    if (variation.active) return whyInVariation(question);
     const cursor = line.cursor;
     const move = line.moves[cursor - 1];
     if (!move || !game) return;
@@ -354,9 +326,19 @@
     if (!variation.active) return review ? scoreAfterPly(review.moves, shownIndex) : null;
     const v = variation.line;
     if (v.cursor === 0) return review ? scoreAfterPly(review.moves, variation.from ?? 0) : null;
-    const g = variation.graded[v.cursor - 1];
-    return g ? (finishedScore(g.fenAfter) ?? { score: g.playedScore, pov: g.side }) : null;
+    const g = variation.shownGrade;
+    return g ? scoreAfterPly([g], 1) : null;
   });
+  /** What the bar says while it has no score: a variation's move waits for the browser's Engine, unless it can't be graded. */
+  const barWaiting = $derived(
+    variation.active && variation.line.cursor > 0
+      ? variation.shownGrade === null
+        ? 'not graded in this variation'
+        : 'the Engine is thinking'
+      : review
+        ? 'not graded in this Review'
+        : 'shown once the Review is done',
+  );
   const gameFen = $derived(momentFen ?? line.fen);
   const boardFen = $derived(variation.active ? variation.fen : gameFen);
   /** The move that reached the position on the board: none on an open key moment, which shows the position before its move. */
@@ -380,7 +362,7 @@
             score={position?.score ?? null}
             pov={position?.pov ?? 'white'}
             orientation={game.playerSide}
-            waiting={variation.active ? 'the Engine is thinking' : review ? 'not graded in this Review' : 'shown once the Review is done'}
+            waiting={barWaiting}
           />
           <!-- Opening or closing a key moment is not a move: a fresh Board shows it at once. -->
           {#key momentFen}

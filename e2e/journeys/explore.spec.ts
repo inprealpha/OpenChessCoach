@@ -120,10 +120,13 @@ test('a complete Lesson’s final board takes moves; during the Lesson a refused
   const board = paired.getByRole('group', { name: BOARD });
   const piece = (await board.getByRole('button', { name: /, (white|black) / }).first().getAttribute('data-square')) ?? '';
   await square(paired, piece, BOARD).click();
-  await expect(board.locator('..').getByRole('status')).toHaveText('Press Continue for the Lesson’s next move.');
+  const said = board.locator('..').getByRole('status');
+  await expect(said).toHaveText('Press Continue for the Lesson’s next move.');
 
   await paired.getByRole('button', { name: 'Continue', exact: true }).click();
   await expect(paired.getByRole('region', { name: 'Lesson complete' })).toBeVisible();
+  // The reason went with the state that caused it.
+  await expect(said).toHaveText('');
   const final = await fenOf(paired, BOARD);
   const move = anotherMove(final);
   await play(paired, move, BOARD);

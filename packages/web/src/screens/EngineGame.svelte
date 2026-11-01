@@ -29,7 +29,7 @@
   import { router } from '../lib/router.svelte.ts';
   import { store } from '../lib/storage.ts';
   import { threatSetting, ThreatView } from '../lib/threat.svelte.ts';
-  import { Variation } from '../lib/variation.svelte.ts';
+  import { stepLine, Variation, type Step } from '../lib/variation.svelte.ts';
 
   /** Strength levels, mapped to Stockfish's Skill Level and a short search. */
   const LEVELS = [
@@ -216,20 +216,16 @@
    * variation from the position shown, or carries on the one shown.
    */
   function explore(uci: string): void {
-    const atGame = !variation.active || variation.line.cursor === 0;
-    const from = variation.from ?? line.cursor;
-    if (atGame && line.moves[from]?.uci === uci) {
+    const to = variation.gameStep(uci, line.moves, line.cursor);
+    if (to !== null) {
       variation.leave();
-      line.goTo(from + 1);
-      return;
-    }
-    variation.play(uci, { cursor: line.cursor, fen: line.fen });
+      line.goTo(to);
+    } else variation.play(uci, { cursor: line.cursor, fen: line.fen });
   }
 
   /** Steps through the variation while the board shows one, otherwise through the finished game. */
-  function step(where: 'first' | 'previous' | 'next' | 'last'): void {
-    const l = variation.active ? variation.line : line;
-    l.goTo({ first: 0, previous: l.cursor - 1, next: l.cursor + 1, last: l.moves.length }[where]);
+  function step(where: Step): void {
+    stepLine(variation.active ? variation.line : line, where);
   }
 
   /** A move picked in the move list: the board leaves any variation for it. */

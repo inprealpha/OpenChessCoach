@@ -24,7 +24,7 @@
   import { router } from '../lib/router.svelte.ts';
   import { threatSetting, ThreatView } from '../lib/threat.svelte.ts';
   import { scoreFromAnalysis } from '../lib/position-score.ts';
-  import { Variation } from '../lib/variation.svelte.ts';
+  import { stepLine, Variation, type Step } from '../lib/variation.svelte.ts';
 
   /** A FEN to open on, from #/board?fen=…. */
   let { fen: openAt }: { fen?: string } = $props();
@@ -161,22 +161,16 @@
     if (!m) return;
     known.add(m.fenBefore).add(m.fenAfter);
     coach.clearAnnotations();
-    if (variation.active) {
-      // Back at the variation's first position, the line's own move returns to the line.
-      const from = variation.from ?? 0;
-      if (variation.line.cursor === 0 && line.moves[from]?.uci === m.uci) {
-        variation.leave();
-        line.goTo(from + 1);
-      } else variation.play(uci, { cursor: line.cursor, fen: line.fen });
-      return;
-    }
-    // The line's own next move steps to it, as on Lichess, so a set-up game keeps the rest of its moves.
-    if (line.moves[line.cursor]?.uci === m.uci) {
-      line.forward();
+    // The line's own next move steps to it, as on Lichess, so a set-up game keeps the rest of its
+    // moves; from the variation's first position too, which leaves it.
+    const to = variation.gameStep(m.uci, line.moves, line.cursor);
+    if (to !== null) {
+      variation.leave();
+      line.goTo(to);
       return;
     }
     // Another move where the line goes on starts a variation, rather than deleting the rest of the line.
-    if (!line.atEnd) {
+    if (variation.active || !line.atEnd) {
       variation.play(uci, { cursor: line.cursor, fen: line.fen });
       return;
     }
@@ -187,11 +181,17 @@
   }
 
   /** Steps through the variation while the board shows one, otherwise through the line. */
-  function step(where: 'first' | 'previous' | 'next' | 'last'): void {
+  function step(where: Step): void {
     const l = variation.active ? variation.line : line;
     const before = l.cursor;
-    l.goTo({ first: 0, previous: l.cursor - 1, next: l.cursor + 1, last: l.moves.length }[where]);
+    stepLine(l, where);
     if (l.cursor !== before) coach.clearAnnotations();
+  }
+
+  /** A move picked in the variation's row of the move list. */
+  function pickVariationMove(cursor: number): void {
+    if (variation.line.cursor !== cursor) coach.clearAnnotations();
+    variation.line.goTo(cursor);
   }
 
   /** A move picked in the line's move list: the board leaves any variation for it. */
@@ -209,15 +209,8 @@
   async function why(question: string): Promise<void> {
     if (variation.active) {
       // Only the moves go: the desktop's Engine works out the facts (ADR 0007).
-      const played = variation.line.lastMove;
-      const recentMoves = variation.movesSoFar(line.moves);
-      const grade = variation.grades[variation.line.cursor - 1];
-      await coach.ask(
-        played
-          ? { job: 'why', fen: played.fenBefore, recentMoves: recentMoves.slice(0, -1), moveUci: played.uci, ...(question ? { question } : {}) }
-          : { job: 'why', fen: variation.fen, recentMoves, ...(question ? { question } : {}) },
-        question || (played ? (grade ? `Why is ${played.san} graded ${grade}?` : `Why ${played.san}?`) : 'What are the options in this position?'),
-      );
+      const { label, ...asked } = variation.question(line.moves);
+      await coach.ask({ job: 'why', ...asked, ...(question ? { question } : {}) }, question || label);
       return;
     }
     const cursor = line.cursor;
@@ -377,7 +370,7 @@
         cursor={line.cursor}
         ongoto={pickMove}
         variation={variation.active
-          ? { from: variation.from ?? 0, moves: variation.line.moves, grades: variation.grades, cursor: variation.line.cursor, ongoto: (c) => variation.line.goTo(c) }
+          ? { from: variation.from ?? 0, moves: variation.line.moves, grades: variation.grades, cursor: variation.line.cursor, ongoto: pickVariationMove }
           : undefined}
       />
       <button type="button" class="secondary" aria-pressed={showLines} onclick={() => (showLines = !showLines)}>

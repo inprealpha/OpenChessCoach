@@ -20,7 +20,7 @@
   import { arrivedByChoosing, markChosen } from '../lib/puzzle-choice.ts';
   import { profile } from '../lib/profile.svelte.ts';
   import { store } from '../lib/storage.ts';
-  import { Variation } from '../lib/variation.svelte.ts';
+  import { stepLine, Variation, type Step } from '../lib/variation.svelte.ts';
 
   let { opening }: { opening?: string | undefined } = $props();
 
@@ -220,24 +220,17 @@
    * variation from the position shown, or carries on the one shown.
    */
   function explore(uci: string): void {
-    const atSolution = !variation.active || variation.line.cursor === 0;
-    const from = variation.from ?? line.cursor;
-    if (atSolution && line.moves[from]?.uci === uci) {
+    const to = variation.gameStep(uci, line.moves, line.cursor);
+    if (to !== null) {
       variation.leave();
-      line.goTo(from + 1);
-      return;
-    }
-    variation.play(uci, { cursor: line.cursor, fen: line.fen });
+      line.goTo(to);
+    } else variation.play(uci, { cursor: line.cursor, fen: line.fen });
   }
 
   /** Steps through the variation while the board shows one, otherwise through the Puzzle, whose first position is the one the Player was set. */
-  function step(where: 'first' | 'previous' | 'next' | 'last'): void {
-    if (variation.active) {
-      const v = variation.line;
-      v.goTo({ first: 0, previous: v.cursor - 1, next: v.cursor + 1, last: v.moves.length }[where]);
-      return;
-    }
-    line.goTo({ first: 1, previous: Math.max(1, line.cursor - 1), next: line.cursor + 1, last: line.moves.length }[where]);
+  function step(where: Step): void {
+    if (variation.active) stepLine(variation.line, where);
+    else stepLine(line, where, 1);
   }
 
   /** A move of the solution picked in its list: the board leaves any variation for it. */
@@ -248,26 +241,23 @@
 
   async function why(question: string): Promise<void> {
     if (!puzzle) return;
-    const asked = variation.line.lastMove;
-    if (variation.active && asked) {
-      // About the Player's own move in the variation: only the moves go, and the desktop's Engine works out the facts (ADR 0007).
+    if (variation.active) {
+      // About the Player's own variation: only the moves go, and the desktop's Engine works out the facts (ADR 0007).
+      const { label, ...asked } = variation.question(line.moves);
       explained = variation.fen;
       await coach.ask(
         {
           job: 'why',
-          fen: asked.fenBefore,
-          recentMoves: variation.movesSoFar(line.moves).slice(0, -1),
+          ...asked,
           playerSide: solver,
-          moveUci: asked.uci,
           hideWinningChances: true,
           ...(question ? { question } : {}),
           ...(lesson?.kind === 'opening' ? { opening: lesson.name } : {}),
         },
-        question || `Why ${asked.san}?`,
+        question || label,
       );
       return;
     }
-    variation.leave();
     const setup = playUci(puzzle.fen, puzzle.moves[0] as string);
     const answer = setup && playUci(setup.fenAfter, puzzle.moves[1] as string);
     if (!setup || !answer) return;
@@ -412,7 +402,7 @@
           </div>
         </section>
         {#if status !== 'solving'}
-          <CoachPanel thread={coach} onwhy={why} placeholder={variation.active && variation.line.lastMove ? `Ask why about ${variation.line.lastMove.san}` : 'Why is this the answer?'} />
+          <CoachPanel thread={coach} onwhy={why} placeholder={variation.active ? (variation.line.lastMove ? `Ask why about ${variation.line.lastMove.san}` : 'Ask about this position') : 'Why is this the answer?'} />
         {/if}
         <p class="muted small">Puzzles: Lichess puzzle database, CC0.</p>
       </div>

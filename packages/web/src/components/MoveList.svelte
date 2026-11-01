@@ -5,6 +5,7 @@
   import type { MoveGrade } from '@chess-coach/shared/grader';
   import { moveNumberOf, turnOf, type PlayedMove } from '@chess-coach/shared/chess';
   import GradeBadge from './GradeBadge.svelte';
+  import { reveal } from '../lib/reveal.ts';
 
   interface Props {
     moves: PlayedMove[];
@@ -26,17 +27,11 @@
       el.scrollTop = 0;
       return;
     }
-    nearest(el, item);
-    // The panel around the list may scroll too, as a phone's short panel does: the move stays in its view as well.
+    reveal(el, item, 'nearest');
+    // The panel around the list may scroll too, as a phone's short panel does: the move stays in its
+    // view as well, clear of the tabs stuck at the panel's top.
     const panel = el.closest<HTMLElement>('.panel-body');
-    if (panel && panel.scrollHeight > panel.clientHeight) nearest(panel, item);
-  }
-  /** Scrolls `box` the least that brings `item` into its view. */
-  function nearest(box: HTMLElement, item: Element): void {
-    const b = box.getBoundingClientRect();
-    const at = item.getBoundingClientRect();
-    if (at.top < b.top) box.scrollTop -= b.top - at.top;
-    else if (at.bottom > b.bottom) box.scrollTop += at.bottom - b.bottom;
+    if (panel && panel.scrollHeight > panel.clientHeight) reveal(panel, item, 'nearest');
   }
   $effect(() => {
     if (!list || moves.length === 0) return;

@@ -751,6 +751,40 @@ test('the board never scrolls away: on a phone it stays at the top while the pan
   await expect(paired.getByRole('textbox', { name: 'Your Why Question' })).toBeInViewport();
 });
 
+test('on a phone, an opened key moment and the current move show clear of the tabs', async ({ paired, app }) => {
+  await paired.setViewportSize({ width: 390, height: 844 });
+  await paired.goto(`${app.url}/#/review/1`);
+  await paired.getByRole('button', { name: 'Start the Review' }).click();
+  const moments = paired.getByRole('region', { name: 'Key moments' }).getByRole('listitem');
+  await expect(moments.first()).toBeVisible({ timeout: 90_000 });
+  /** The element's top edge and its middle are on top where they are drawn: nothing, such as the sticky tabs, covers them. */
+  const uncovered = (el: Locator) =>
+    el.evaluate((node) => {
+      const r = node.getBoundingClientRect();
+      const x = r.left + r.width / 2;
+      return [r.top + 2, r.top + r.height / 2].every((y) => {
+        const hit = document.elementFromPoint(x, y);
+        return Boolean(hit && (node === hit || node.contains(hit)));
+      });
+    });
+
+  // The first moment opens by itself; each next one opens with the one above it closing.
+  for (const i of [1, 2, 3]) {
+    const show = moments.nth(i).getByRole('button', { name: /^Show moment/ });
+    await show.click();
+    await expect(show).toHaveAttribute('aria-pressed', 'true');
+    await expect.poll(() => uncovered(show)).toBe(true);
+  }
+
+  // Stepping back through the moves, the current one stays in sight, under the tabs as well.
+  await pickMove(paired, 'Move 24. Bxc5, Inaccuracy');
+  const current = paired.getByRole('list', { name: 'Moves' }).locator('li.current');
+  for (let step = 0; step < 24; step++) {
+    await paired.getByRole('button', { name: 'Previous move' }).click();
+    await expect.poll(() => uncovered(current), { message: `after ${step + 1} steps back` }).toBe(true);
+  }
+});
+
 test('a game set up from a position numbers its moves from that position', async ({ paired, app }) => {
   await paired.goto(`${app.url}/#/games`);
   await paired

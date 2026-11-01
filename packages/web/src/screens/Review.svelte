@@ -33,6 +33,7 @@
   import { router } from '../lib/router.svelte.ts';
   import { threatSetting, ThreatView } from '../lib/threat.svelte.ts';
   import { firstSentence } from '../lib/first-sentence.ts';
+  import { reveal } from '../lib/reveal.ts';
   import { foldFromNextVisit, foldOpen, rememberFold } from '../lib/folds.ts';
   import { gradeMark } from '../lib/grades.ts';
   import { narrow } from '../lib/narrow.svelte.ts';
@@ -168,16 +169,14 @@
   }
 
   /**
-   * Scrolls the panel so an opened key moment's row is at its top: closing the one above can
-   * leave the panel scrolled past it, above all in a phone's short panel.
+   * Scrolls the panel so an opened key moment's row is at its top, under the tabs: closing the one
+   * above can leave the panel scrolled past it, above all in a phone's short panel.
    */
   function revealMoment(ply: number): void {
     const row = document.querySelector<HTMLElement>(`.moment[data-ply="${ply}"]`);
     const body = row?.closest<HTMLElement>('.panel-body');
     if (!row || !body) return;
-    const box = body.getBoundingClientRect();
-    const at = row.getBoundingClientRect();
-    if (at.top < box.top || at.bottom > box.bottom) body.scrollTop += at.top - box.top;
+    reveal(body, row, 'start');
   }
 
   /** A move the overview names: the board goes to the position after it, as the move list does. */

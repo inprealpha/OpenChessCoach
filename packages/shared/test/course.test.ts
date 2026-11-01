@@ -1,7 +1,7 @@
 // Which Lesson the app suggests next (ADR 0012): nothing is locked, the suggestion only orders what
 // to do first. Each rule of suggestNext, on a small made-up catalogue in course order.
 import { describe, expect, it } from 'vitest';
-import { suggestNext, type CatalogueItem } from '../src/content/course.ts';
+import { decisionsMade, suggestNext, type CatalogueItem } from '../src/content/course.ts';
 import { decisionAfter } from '../src/content/lessons.ts';
 import type { LessonProgress, PlayerLevel } from '../src/protocol.ts';
 
@@ -136,5 +136,20 @@ describe('the decision after a move in a Lesson', () => {
 
   it('is the next part’s first after a checkmate, which makes the rest of its part needless, and the end after the last part', () => {
     expect([0, 1, 2, 3, 4, 5].map((s) => decisionAfter(list, s, true))).toEqual([2, 2, 5, 5, 5, 6]);
+  });
+});
+
+describe('decisions made, for "3 of 7 decisions"', () => {
+  it('counts the decisions made so far', () => {
+    expect(decisionsMade(0, 7)).toBe(0);
+    expect(decisionsMade(3, 7)).toBe(3);
+    expect(decisionsMade(6, 7)).toBe(6);
+  });
+
+  it('never counts past a Lesson shortened after the progress was saved', () => {
+    // Open files went from 11 decisions to 9: progress saved at step 10 resumes at the last decision.
+    expect(decisionsMade(10, 9)).toBe(8);
+    expect(decisionsMade(9, 9)).toBe(8);
+    expect(decisionsMade(5, 1)).toBe(0);
   });
 });

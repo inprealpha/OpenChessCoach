@@ -176,7 +176,9 @@ test('the Engine lines lead with the side to move’s Winning Chances, the evalu
 
   await play(paired, 'e2e4');
   await expect(section.getByText('Depth 10')).toBeVisible();
-  await expect(section.getByRole('listitem').first()).toHaveAccessibleName('Engine line 1: e6, Black’s winning chances: 47%, -0.37');
+  // The evaluation stays from White's point of view, as most chess sites show it (#32).
+  await expect(section.getByRole('listitem').first()).toHaveAccessibleName('Engine line 1: e6, Black’s winning chances: 47%, +0.37');
+  await expect(section.getByRole('listitem').first().getByTestId('evaluation')).toHaveText('+0.37');
   await expect(section).toContainText('Black’s winning chances');
 });
 
@@ -201,7 +203,7 @@ test('the Winning Chances bar beside the board matches the Engine lines, follows
   await expect(section.getByRole('listitem').first()).toHaveAccessibleName('Engine line 1: e4, White’s winning chances: 53%, +0.38');
 
   await play(paired, 'e2e4');
-  await expect(section.getByRole('listitem').first()).toHaveAccessibleName('Engine line 1: e6, Black’s winning chances: 47%, -0.37');
+  await expect(section.getByRole('listitem').first()).toHaveAccessibleName('Engine line 1: e6, Black’s winning chances: 47%, +0.37');
   await expect(bar).toHaveAccessibleName('Winning Chances bar: White’s winning chances: 53%');
 
   // It follows the board as the Player steps through moves, with no Coach call.
@@ -764,16 +766,13 @@ test('a Why Question names a tempting move that fails, graded by the Engine (ADR
   expect(logged?.source).toBe('fake');
 });
 
-test('with Think deeper on in Settings, the Coach asks the Engine while it answers a Why Question', async ({ paired, app }) => {
+test('Think deeper is on by default (#32): the Coach asks the Engine while it answers a Why Question, and the Player can turn it off', async ({ paired, app }) => {
   await paired.goto(`${app.url}/#/settings`);
   const deeper = paired.getByRole('region', { name: 'Think deeper' });
   const box = deeper.getByRole('checkbox', { name: 'Let the Coach check its explanations with the Engine' });
-  await expect(box).not.toBeChecked();
-  // The cost is said before the Player turns it on.
-  await expect(deeper).toContainText('Answers take longer and use more of your Claude limits than usual.');
-  await box.check();
-  await expect(deeper.getByRole('status')).toHaveText('Saved.');
-  expect((await app.rows<{ key: string; value: string }>('settings')).find((r) => r.key === 'thinkDeeper')?.value).toBe('true');
+  await expect(box).toBeChecked();
+  // The cost is said, and how to avoid it.
+  await expect(deeper).toContainText('use a little more of your Claude limits. Turn it off for quicker answers.');
 
   await paired.goto(`${app.url}/#/board`);
   for (const uci of ['e2e4', 'e7e5', 'd1h5']) await play(paired, uci);
@@ -787,6 +786,14 @@ test('with Think deeper on in Settings, the Coach asks the Engine while it answe
   const questions = await app.rows<{ question: string; answer: string }>('coach_questions');
   expect(questions).toHaveLength(1);
   expect(JSON.parse(questions[0]?.answer ?? '{}')).toMatchObject({ sideToMove: 'black', questionsLeft: 2 });
+
+  // Turned off, it stays off.
+  await paired.goto(`${app.url}/#/settings`);
+  await box.uncheck();
+  await expect(deeper.getByRole('status')).toHaveText('Saved.');
+  expect((await app.rows<{ key: string; value: string }>('settings')).find((r) => r.key === 'thinkDeeper')?.value).toBe('false');
+  await paired.reload();
+  await expect(box).not.toBeChecked();
 });
 
 test('the Coach quotes the Winning Chances the bar shows either side of the move', async ({ paired, app }) => {

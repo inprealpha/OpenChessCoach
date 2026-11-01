@@ -342,9 +342,9 @@ test('a Review lists key moments with Move Grades, and reopening it makes no Coa
   // Each moment shows the Player's Winning Chances before and after their move, with the
   // evaluation beside them: 11. Bxf7+ (Mistake) took White from 48% to 35%.
   await expectBxf7Chances(moments.first());
-  // The Coach is told those Winning Chances in the same words, and the fake Coach repeats them.
+  // The Coach is told the same numbers, without the screen's label (#32), and the fake Coach repeats them.
   const bxf7 = calls.find((c) => c.job === 'review-moment');
-  expect(JSON.parse(bxf7?.brief ?? '{}').winningChances).toEqual({ before: 'White’s winning chances: 48%', after: 'White’s winning chances: 35%' });
+  expect(JSON.parse(bxf7?.brief ?? '{}').winningChances).toEqual({ side: 'white', before: '48%', after: '35%' });
   await expect(moments.first()).toContainText('Before it, White’s winning chances: 48%. After it, White’s winning chances: 35%.');
 
   // Jump to a moment: the board shows the position before the move.

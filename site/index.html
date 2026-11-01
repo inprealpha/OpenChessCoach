@@ -328,7 +328,7 @@ footer { font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--li
       <p>OpenChessCoach is probably already running in another terminal window: use that one. Otherwise start it on another port, for example <code class="inline">npx openchesscoach@latest --port 8738</code>.</p>
     </div></details>
     <details><summary>Windows: running scripts is disabled on this system</summary><div>
-      <p>PowerShell blocked <code class="inline">npx</code>. Type <code class="inline">npx.cmd</code> instead of <code class="inline">npx</code>, exactly as in step 4.</p>
+      <p>PowerShell blocked <code class="inline">npx</code>. Type <code class="inline">npx.cmd</code> instead of <code class="inline">npx</code>, exactly as in step 4. Or let PowerShell run the scripts Node.js installed, once, with <code class="inline">Set-ExecutionPolicy -Scope CurrentUser RemoteSigned</code> (type <kbd>Y</kbd> if it asks); then <code class="inline">npx</code> works too. It still blocks unsigned scripts downloaded from the internet, and needs no administrator.</p>
     </div></details>
     <details><summary>My phone can't connect</summary><div>
       <p>Check the phone is on the same Wi-Fi as the desktop, and that you allowed the firewall prompt (see step 4). On guest or office Wi-Fi, devices often can't see each other: use <strong>away-from-home access</strong> in Settings instead.</p>

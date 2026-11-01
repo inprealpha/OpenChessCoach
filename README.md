@@ -77,8 +77,9 @@ Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 If it asks whether to change the execution policy, type `Y` and press Enter. `RemoteSigned` runs
 scripts installed on your computer, such as the ones Node.js brings, and still blocks unsigned
 scripts downloaded from the internet. `-Scope CurrentUser` changes it only for your Windows account,
-so you don't need to run PowerShell as an administrator. Check it with
-`Get-ExecutionPolicy -Scope CurrentUser`, which should print `RemoteSigned`.
+so you don't need to run PowerShell as an administrator. Check it with `Get-ExecutionPolicy`,
+which should print `RemoteSigned`. If it prints something else, a policy your organization set wins
+over yours: type `npx.cmd` instead.
 
 If you'd rather leave the policy as it is, type `npx.cmd` instead of `npx` in every command here.
 

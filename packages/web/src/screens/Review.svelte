@@ -382,7 +382,7 @@
         <div class="toolbar">
           <!-- Steps from the position on the board: an open key moment shows the one before its move. -->
           <StepButtons onfirst={() => step('first')} onprevious={() => step('previous')} onnext={() => step('next')} onlast={() => step('last')} />
-          {#if variation.active}<button type="button" onclick={backToGame}>Back to the game</button>{/if}
+          {#if variation.active}<button type="button" class="secondary" onclick={backToGame}>Back to the game</button>{/if}
           <ThreatButton />
         </div>
         {#if review}

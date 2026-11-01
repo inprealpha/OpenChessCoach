@@ -343,7 +343,7 @@
       </div>
       <div class="toolbar">
         <StepButtons onfirst={() => step('first')} onprevious={() => step('previous')} onnext={() => step('next')} onlast={() => step('last')} />
-        {#if variation.active}<button type="button" onclick={backToLine}>Back to the main line</button>{/if}
+        {#if variation.active}<button type="button" class="secondary" onclick={backToLine}>Back to the main line</button>{/if}
         <button type="button" class="secondary" onclick={flip}>Flip board</button>
         <button type="button" class="secondary" onclick={newBoard}>New board</button>
         <button type="button" class="secondary" aria-expanded={settingUp} onclick={openSetUp} bind:this={setupButton}>Set up a position</button>

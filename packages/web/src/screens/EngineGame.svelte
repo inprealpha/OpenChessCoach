@@ -563,7 +563,7 @@
           {#if finished}
             <!-- Only a finished game steps back: while it is on, the board shows the position to play from. -->
             <StepButtons onfirst={() => step('first')} onprevious={() => step('previous')} onnext={() => step('next')} onlast={() => step('last')} />
-            {#if variation.active}<button type="button" onclick={() => variation.leave()}>Back to the game</button>{/if}
+            {#if variation.active}<button type="button" class="secondary" onclick={() => variation.leave()}>Back to the game</button>{/if}
           {:else}
             <button type="button" class="secondary" onclick={hint} disabled={!playerToMove || coach.busy}>{hintLevel === 0 ? 'Hint' : 'Show the move'}</button>
             <button type="button" class="secondary" onclick={offerDraw} disabled={thinking || awaitingChoice}>Offer a draw</button>

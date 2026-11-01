@@ -350,7 +350,7 @@
             <button type="button" class="secondary" onclick={() => step('previous')} aria-label="Previous move">◀</button>
             <button type="button" class="secondary" onclick={() => step('next')} aria-label="Next move">▶</button>
             <button type="button" class="secondary" onclick={() => step('last')} aria-label="Last position">⏭</button>
-            {#if variation.active}<button type="button" onclick={() => variation.leave()}>Back to the Puzzle</button>{/if}
+            {#if variation.active}<button type="button" class="secondary" onclick={() => variation.leave()}>Back to the Puzzle</button>{/if}
           </div>
         {/if}
       </div>

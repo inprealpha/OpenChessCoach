@@ -646,7 +646,7 @@
           {:else if phase === 'done' && variation.active}
             <div class="toolbar">
               <StepButtons onfirst={() => stepVariation('first')} onprevious={() => stepVariation('previous')} onnext={() => stepVariation('next')} onlast={() => stepVariation('last')} />
-              <button type="button" onclick={backToLesson}>Back to the Lesson</button>
+              <button type="button" class="secondary" onclick={backToLesson}>Back to the Lesson</button>
             </div>
           {/if}
           <p class="muted center progress" aria-live="polite">

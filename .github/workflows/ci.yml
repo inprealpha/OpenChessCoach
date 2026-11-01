@@ -59,6 +59,8 @@ jobs:
         run: |
           git fetch --no-tags --depth=1 origin "$BASE"
           node data-prep/engine-check.ts --deep --changed-since="$BASE"
+      - name: TEMPORARY (reverted before review) deep check of every Lesson with tablebase positions
+        run: node data-prep/engine-check.ts --deep king-and-pawn queen-mate two-rook-mate rook-endgames pawn-promotion rook-mate draws passed-pawns check pawn-races zugzwang active-king minor-piece-endgames skewers pins mate-in-one
 
   journeys:
     name: Player journeys

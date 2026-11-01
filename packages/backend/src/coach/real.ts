@@ -101,9 +101,10 @@ export class RealCoach implements CoachPort {
   async status(): Promise<CoachStatus> {
     const check = await checkClaude(this.claudePath);
     if (!check.ok) return { state: 'unavailable', reason: check.message };
-    // `claude auth status` still says "logged in" for a login Claude turned down: ask Claude again
-    // when the last answer is old enough, so a reload after logging in finds the Coach at once.
-    if (this.refused && Date.now() - this.refused.at >= this.loginRecheckMs) await this.checkLogin();
+    // `claude auth status` still says "logged in" for a login Claude turned down. When the last
+    // answer is old enough, ask Claude again without waiting for it (it can take the check's whole
+    // timeout offline): a reload after logging in hears the Coach is back as soon as Claude answers.
+    if (this.refused && Date.now() - this.refused.at >= this.loginRecheckMs) void this.checkLogin();
     if (this.refused) return { state: 'unavailable', reason: `${this.refused.message} ${COMES_BACK}` };
     return { state: 'ready' };
   }

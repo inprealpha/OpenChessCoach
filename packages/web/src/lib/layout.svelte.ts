@@ -4,11 +4,12 @@
 // `data-layout`, which `layouts.css` keys every trial's rules on. "current" is the frame as
 // released in 0.5.1, which the journeys and the guidelines describe.
 
-export const LAYOUTS = ['current', 'doop', 'rail', 'dock', 'focus', 'peek'] as const;
+export const LAYOUTS = ['current', 'sketch', 'doop', 'rail', 'dock', 'focus', 'peek'] as const;
 export type Layout = (typeof LAYOUTS)[number];
 
 export const LAYOUT_TEXT: Record<Layout, { name: string; detail: string }> = {
   current: { name: '0.5.1 (as released)', detail: 'The frame as it shipped: the board sized to leave the panel room.' },
+  sketch: { name: 'Doop look, Safari fit', detail: 'The sketch’s type, buttons and spacing, with the app’s header folded into the screen’s line so it fits under Safari’s toolbars.' },
   doop: { name: '1 · Doop, as drawn', detail: 'The full-width board, the step bar under it, tabs and the Ask box in the sheet.' },
   rail: { name: '2 · Side rail', detail: 'The step buttons in a column right of the board, so the panel gets the bar’s row.' },
   dock: { name: '3 · Thumb dock', detail: 'Steps, tools and Ask in one bar at the foot of the screen; the Ask box opens on demand.' },
@@ -17,13 +18,15 @@ export const LAYOUT_TEXT: Record<Layout, { name: string; detail: string }> = {
 };
 
 const KEY = 'layout';
+/** The demo build opens on the candidate; the app keeps the released frame until one is chosen. */
+const FALLBACK: Layout = import.meta.env.VITE_DEMO === '1' ? 'sketch' : 'current';
 
 function read(): Layout {
   try {
     const v = localStorage.getItem(KEY);
-    return (LAYOUTS as readonly string[]).includes(v ?? '') ? (v as Layout) : 'current';
+    return (LAYOUTS as readonly string[]).includes(v ?? '') ? (v as Layout) : FALLBACK;
   } catch {
-    return 'current';
+    return FALLBACK;
   }
 }
 

@@ -357,10 +357,10 @@
       {#if variation.active}<VariationBar place="header" back="Back to the main line" onback={backToLine} />{/if}
       <!-- "Set up" and "New" on a phone, where the header line is short of room; the names stay whole. -->
       <button type="button" class="secondary board-action" aria-label="Set up a position" aria-expanded={settingUp} onclick={openSetUp} bind:this={setupButton}
-        >Set up<span class="wide">{' '}a position</span></button
+        >Set up <span class="wide">a position</span></button
       >
       <button type="button" class="secondary board-action" aria-label="New board" onclick={askNewBoard} aria-expanded={confirmingNew} bind:this={newButton}
-        >New<span class="wide">{' '}board</span></button
+        >New <span class="wide">board</span></button
       >
       <ThreatButton view={threats} />
       <FlipButton onflip={flip} />

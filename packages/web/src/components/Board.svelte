@@ -420,7 +420,7 @@
 <style>
   .wrap {
     width: 100%;
-    max-width: min(92vw, var(--board-max, 560px));
+    max-width: min(100%, var(--board-max, 560px));
     margin: 0 auto;
     position: relative;
   }
@@ -548,9 +548,9 @@
   .legend li { display: inline-flex; align-items: center; gap: 0.3rem; }
   /* On a phone the line under the board is as short as its words: every pixel is the panel's. */
   @media (max-width: 820px) {
-    .legend { gap: 0 0.5rem; font-size: 0.72rem; line-height: 1.2; }
-    /* One legend line's height, kept while there are no arrows, so the bar under it doesn't jump. */
-    .under { min-height: calc(0.72rem * 1.2); margin-top: 0.15rem; }
+    .legend { gap: 0 0.5rem; font-size: 0.68rem; line-height: 1.2; }
+    /* One legend line's height, kept while there are no arrows, so the panel under it doesn't jump. */
+    .under { min-height: calc(0.68rem * 1.2); margin-top: 0.1rem; }
     .board-status { font-size: 0.8rem; line-height: 1.2; }
   }
   .swatch { display: inline-block; width: 1.1rem; height: 0.22rem; border-radius: 2px; background: var(--swatch); }

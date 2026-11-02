@@ -22,9 +22,9 @@ back. A Hint first asks the Coach for the idea; a second press shows the Engine'
 - Live Coaching on a Mistake or Blunder: one Coach comment, and `Take the move back` or `Carry on`
   in `Game status`, right under the board, so a 390×844 phone shows them without scrolling. The
   offer is saved with the game: after a reload it is still showing and the Engine waits.
-- The header line says "You play White · Engine strength: Casual". The board bar under the board
-  holds `Hint`, `Show threat` and the menu `Game options` (`⋯ Game`: `Offer a draw`, `Resign`,
-  `New game`). The Coach panel is docked at the foot of the panel (on a phone, at the bottom of
+- The header line says "You play White · Engine strength: Casual". The header line's end
+  holds `Hint`, `Show threat`, `Flip board` and the menu `Game options` (`⋯ Game`: `Offer a draw`,
+  `Resign`, `New game`), which opens downwards. The Coach panel is docked at the foot of the panel (on a phone, at the bottom of
   the screen), so its comment shows with the board in view. While Live Coaching offers to take a
   Mistake back, a dashed red arrow shows the Engine's punishing reply. Until the Coach has said
   something it says what it is for ("The Coach speaks up when a move is a Mistake or Blunder. Press Hint for a nudge.").

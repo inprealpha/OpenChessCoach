@@ -884,7 +884,7 @@ test('on a phone with Safari’s bars (390×664), the Hint and Continue need no 
   await paired.setViewportSize({ width: 390, height: 664 });
   await paired.goto(`${app.url}/#/lesson/${lesson.id}`);
   await paired.getByRole('button', { name: 'Start the Lesson' }).click();
-  // While choosing, the Hint sits under the board, and the arrow Show the move draws is in view with it.
+  // While choosing, the Hint sits in the header line, and the arrow Show the move draws is in view with it.
   await expect(paired.getByRole('button', { name: 'Hint' })).toBeInViewport({ ratio: 1 });
   await paired.getByRole('button', { name: 'Hint' }).click();
   await coachIdle(paired);

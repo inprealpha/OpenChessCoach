@@ -21,6 +21,8 @@
   import { sheet } from '../lib/sheet.svelte.ts';
   import ThreatButton from '../components/ThreatButton.svelte';
   import FlipButton from '../components/FlipButton.svelte';
+  import ThumbBar from '../components/ThumbBar.svelte';
+  import VariationBar from '../components/VariationBar.svelte';
   import WinningChancesBar from '../components/WinningChancesBar.svelte';
   import { api } from '../lib/api.svelte.ts';
   import { punishingArrow, threatArrows } from '../lib/arrows.ts';
@@ -553,6 +555,28 @@
     <h1>Engine Game</h1>
     {#if game}
       <p class="head-line">You play {SIDE_NAMES[game.playerSide]} · Engine strength: {LEVELS.find((l) => l.value === game?.strength)?.name}</p>
+      <div class="frame-tools">
+        {#if finished && variation.active}<VariationBar place="header" back="Back to the game" onback={() => variation.leave()} />{/if}
+        {#if !finished}
+          <button
+            type="button"
+            class="secondary"
+            onclick={hint}
+            disabled={!playerToMove || coach.busy}
+            title={awaitingChoice ? 'Hint comes back once you’ve decided on the take-back' : undefined}>{hintLevel === 0 ? 'Hint' : 'Show the move'}</button
+          >
+          <ThreatButton view={threats} />
+        {/if}
+        <FlipButton onflip={() => (flipped = !flipped)} />
+        {#if !finished}
+          <!-- What ends or abandons the game sits behind a menu, away from Hint; each still asks first. -->
+          <MenuButton text="⋯ Game" label="Game options" bind:this={gameMenu}>
+            <button type="button" role="menuitem" onclick={offerDraw} disabled={thinking || awaitingChoice}>Offer a draw</button>
+            <button type="button" role="menuitem" class="danger" onclick={askResign}>Resign</button>
+            <button type="button" role="menuitem" onclick={askNewGame}>New game</button>
+          </MenuButton>
+        {/if}
+      </div>
     {/if}
   </header>
   {#if !loaded}
@@ -593,33 +617,10 @@
             />
           </div>
         </div>
-        <div class="board-bar toolbar">
-          {#if finished}
-            <!-- Only a finished game steps back: while it is on, the board shows the position to play from. -->
-            <StepButtons onfirst={() => step('first')} onprevious={() => step('previous')} onnext={() => step('next')} onlast={() => step('last')} />
-            {#if variation.active}<button type="button" class="back" onclick={() => variation.leave()}>Back to the game</button>{/if}
-            <FlipButton onflip={() => (flipped = !flipped)} />
-          {:else}
-            <button
-              type="button"
-              class="secondary"
-              onclick={hint}
-              disabled={!playerToMove || coach.busy}
-              title={awaitingChoice ? 'Hint comes back once you’ve decided on the take-back' : undefined}>{hintLevel === 0 ? 'Hint' : 'Show the move'}</button
-            >
-            <ThreatButton view={threats} />
-            <FlipButton onflip={() => (flipped = !flipped)} />
-            <!-- What ends or abandons the game sits behind a menu, away from Hint; each still asks first. -->
-            <MenuButton text="⋯ Game" label="Game options" bind:this={gameMenu}>
-              <button type="button" role="menuitem" onclick={offerDraw} disabled={thinking || awaitingChoice}>Offer a draw</button>
-              <button type="button" role="menuitem" class="danger" onclick={askResign}>Resign</button>
-              <button type="button" role="menuitem" onclick={askNewGame}>New game</button>
-            </MenuButton>
-          {/if}
-        </div>
       </div>
       <div class="side panel">
         <SheetHandle />
+        {#if finished && variation.active}<VariationBar place="panel" back="Back to the game" onback={() => variation.leave()} />{/if}
         <div class="panel-body" {@attach sheet.gestures}>
           {#if confirmingResign && !finished}
             <ConfirmDialog
@@ -700,13 +701,20 @@
         </div>
         <!-- Docked at the panel's foot, as beside every other board. Once the game is over it stays
              only if it said something worth rereading. -->
+        <!-- Only a finished game steps back: while it is on, the board shows the position to play from. -->
+        {#snippet steps(part: 'back' | 'on')}
+          <StepButtons only={part} onfirst={() => step('first')} onprevious={() => step('previous')} onnext={() => step('next')} onlast={() => step('last')} />
+        {/snippet}
         {#if !finished || coach.entries.length}
           <CoachPanel
             thread={coach}
             empty={game.live
               ? 'The Coach speaks up when a move is a Mistake or Blunder. Press Hint for a nudge.'
               : 'Live Coaching is off in this game. Press Hint for a nudge.'}
+            steps={finished ? steps : undefined}
           />
+        {:else}
+          <ThumbBar {steps} />
         {/if}
       </div>
     </div>

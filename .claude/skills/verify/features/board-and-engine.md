@@ -89,8 +89,9 @@ ADR 0007). Move Grades use the Lichess formula (Best, Good, Inaccuracy, Mistake,
   chances. With it on and no arrow, the status "No threat" says the Engine found none. The same
   button and arrow are on the Engine Game and Review boards.
 - Every board screen is one frame (`docs/design/interface-guidelines.md`): the header names the
-  screen and one line of context ("White to move"), the board bar under the board holds the step
-  buttons, `Flip board` (F) and `Show threat`, the panel beside the board scrolls inside itself on
+  screen and one line of context ("White to move") with the board's tools at its end (`Flip board`
+  (F), `Show threat`, and on the Board `Set up a position` and `New board`), the thumb bar at the
+  panel's foot holds the step buttons either side of the Ask box, the panel beside the board scrolls inside itself on
   a desktop and under it on a phone, and the Coach's Ask box is docked at its foot: the page
   itself is one screen tall and never scrolls, so a choice at the panel's top (Continue, Take the
   move back) is never under the board or the Ask box. Phone controls are at least 44 px tall. Each arrow colour has one meaning (ink played, green best,

@@ -34,6 +34,7 @@
   import CoachPanel from '../components/CoachPanel.svelte';
   import GradeBadge from '../components/GradeBadge.svelte';
   import StepButtons from '../components/StepButtons.svelte';
+  import VariationBar from '../components/VariationBar.svelte';
   import SheetHandle from '../components/SheetHandle.svelte';
   import SheetStrip from '../components/SheetStrip.svelte';
   import { sheet } from '../lib/sheet.svelte.ts';
@@ -601,6 +602,14 @@
           {#if phase === 'done'}Lesson complete{:else}Decision {step + 1} of {decisionList.length}{/if}
         </p>
       {/if}
+      {#if phase === 'decide' && part}
+        <!-- In the header line, so on a phone the Hint and the arrow Show the move draws are both in view. -->
+        <div class="frame-tools">
+          <button type="button" class="secondary" bind:this={hintButton} onclick={hint} disabled={coach.busy || grading}>{hintLevel === 0 ? 'Hint' : 'Show the move'}</button>
+        </div>
+      {:else if phase === 'done' && variation.active}
+        <div class="frame-tools"><VariationBar place="header" back="Back to the Lesson" onback={backToLesson} /></div>
+      {/if}
       <a class="back" href="#/lessons" aria-label="Back to the Lessons"><span aria-hidden="true">←</span> <span class="long">Back to the</span> Lessons</a>
     </header>
     {#if phase === 'intro'}
@@ -667,20 +676,10 @@
             label={`${lesson.name} Lesson board`}
           />
           </div>
-          <!-- Straight under the board, so on a phone the Hint and the arrow Show the move draws are both in view. -->
-          {#if phase === 'decide'}
-            <div class="board-bar toolbar">
-              <button type="button" class="secondary" bind:this={hintButton} onclick={hint} disabled={coach.busy || grading}>{hintLevel === 0 ? 'Hint' : 'Show the move'}</button>
-            </div>
-          {:else if phase === 'done' && variation.active}
-            <div class="board-bar toolbar">
-              <StepButtons onfirst={() => stepVariation('first')} onprevious={() => stepVariation('previous')} onnext={() => stepVariation('next')} onlast={() => stepVariation('last')} />
-              <button type="button" class="back" onclick={backToLesson}>Back to the Lesson</button>
-            </div>
-          {/if}
         </div>
         <div class="side panel">
           <SheetHandle />
+          {#if phase === 'done' && variation.active}<VariationBar place="panel" back="Back to the Lesson" onback={backToLesson} />{/if}
           <div class="panel-body" {@attach sheet.gestures} bind:this={panelBody} class:feedback={phase === 'feedback' || phase === 'shown'}>
           {#if !isOpening && phase !== 'done'}
             <section class="card" aria-label="Position">
@@ -749,7 +748,7 @@
             </section>
           {/if}
           {#if phase === 'shown' && node}
-            <section class="card choice" aria-label="The Lesson’s move">
+            <section class="card choice shown" aria-label="The Lesson’s move">
               <p>The Lesson continues with <strong>{node.mainSan}</strong>, the move it teaches. {#if ending}<strong>{ending}</strong>{/if}</p>
               {#if node.notes?.text}<p>{node.notes.text}</p>{/if}
               {#if popular.length}{@render popularity(node.main)}{/if}
@@ -803,7 +802,10 @@
           </div>
           <!-- Docked at the panel's foot. While the Player chooses, the thinking box is the one place
                to type; Why Questions follow the Move Grade, once the answer is no longer kept back. -->
-          <CoachPanel thread={coach} onwhy={phase === 'decide' || otherMove ? undefined : why} />
+          {#snippet variationSteps(part: 'back' | 'on')}
+            <StepButtons only={part} onfirst={() => stepVariation('first')} onprevious={() => stepVariation('previous')} onnext={() => stepVariation('next')} onlast={() => stepVariation('last')} />
+          {/snippet}
+          <CoachPanel thread={coach} onwhy={phase === 'decide' || otherMove ? undefined : why} steps={phase === 'done' && variation.active ? variationSteps : undefined} />
         </div>
       </div>
     {/if}
@@ -814,12 +816,15 @@
   .title { justify-content: flex-start; }
   .title h1 { margin: 0; }
   .back { margin-left: auto; font-size: 0.9rem; white-space: nowrap; }
+  .frame-tools + .back { margin-left: 0.3rem; }
   /* A phone keeps the header to one line: the link reads "← Lessons". */
   @media (max-width: 820px) { .board-screen .back .long { display: none; } }
-  /* Under the board: the Hint button and the legend line. */
-  .board-screen { --under-board: 5.5rem; --phone-reserve: 26.5rem; }
-  /* Lesson complete: the board gives the card room, so a short phone shows the next Lesson. */
-  .board-screen:has(.done) { --phone-reserve: 29rem; }
+  /* Under the board: the legend line. On a phone the panel keeps room for the part's title and the
+     decision's prompt. */
+  .board-screen { --under-board: 2.5rem; --phone-reserve: 20.5rem; }
+  /* Lesson complete, and the Lesson's move (its note and popularity table come before Continue):
+     the board gives the card room, so a short phone shows the next Lesson or Continue in any font. */
+  .board-screen:has(.done, .choice.shown) { --phone-reserve: 22rem; }
   .intro { max-width: 42rem; display: flex; flex-direction: column; gap: 0.6rem; align-items: flex-start; }
   .intro p { margin: 0; }
   .intro h2 { margin: 0 0 0.2rem; }

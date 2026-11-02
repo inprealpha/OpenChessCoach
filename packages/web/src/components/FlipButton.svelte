@@ -15,7 +15,7 @@
 
 <svelte:window {onkeydown} />
 
-<!-- On a phone the arrows alone, so the board bar keeps to one row; the name stays "Flip board". -->
+<!-- On a phone the arrows alone, so the header line keeps to one row; the name stays "Flip board". -->
 <button type="button" class="secondary flip" onclick={onflip} aria-label="Flip board" aria-keyshortcuts="F" title="Flip board (F)"
   ><span aria-hidden="true" class="icon">⇅</span><span aria-hidden="true" class="words">Flip board</span></button
 >

@@ -758,7 +758,7 @@ test('the board never scrolls away: on a phone it stays at the top while the pan
   await expect(paired.getByRole('textbox', { name: 'Your Why Question' })).toBeInViewport();
 });
 
-/** A variation's bar beside the strip board: no page wider than the screen, Back to the game whole. */
+/** A variation with the sheet up: no page wider than the screen, Back to the game and the header line's tools whole. */
 async function expectBarBesideStripFits(page: Page, width: number): Promise<void> {
   await expect.poll(() => page.evaluate(() => [document.documentElement.scrollWidth, document.documentElement.clientWidth])).toEqual([width, width]);
   const back = page.getByRole('button', { name: 'Back to the game' });
@@ -808,7 +808,7 @@ test('on an iPhone the page fits the screen, and the panel is a sheet: pulled up
   await expect(handle).toHaveAttribute('aria-expanded', 'false');
   await expect(handle).toHaveAccessibleName('Pull the panel up');
 
-  // Pulled up: the board is a strip beside its bar, still whole on screen, and the panel takes the height.
+  // Pulled up: the board is a strip, still whole on screen, and the panel takes the height.
   await handle.click();
   await expect(handle).toHaveAttribute('aria-expanded', 'true');
   await expect(handle).toHaveAccessibleName('Let the panel down');
@@ -838,19 +838,20 @@ test('on an iPhone the page fits the screen, and the panel is a sheet: pulled up
   await expect(handle).toHaveAttribute('aria-expanded', 'false');
   await expect(paired.getByRole('button', { name: 'Back to the game' })).toBeVisible();
   await expect.poll(async () => (await board.boundingBox())!.width).toBe(wide);
-  // The moment stays open on its tab and says what the board shows, with the bar on one row.
+  // The moment stays open on its tab and says what the board shows; the way back sits on the header line's row.
   await expect(paired.getByRole('tab', { name: 'Moments' })).toHaveAttribute('aria-selected', 'true');
   await expect(first.getByRole('status')).toContainText(/^Trying 11\. axb4.*instead of Bxf7\+ · 48%/);
   await expect(first.getByRole('status')).toBeInViewport();
-  const bar = paired.locator('.board-bar');
-  expect((await bar.boundingBox())!.height).toBeLessThan(60);
+  const back = (await paired.getByRole('button', { name: 'Back to the game' }).boundingBox())!;
+  const heading = (await paired.getByRole('heading', { name: 'Review', level: 1 }).boundingBox())!;
+  expect(Math.abs(back.y + back.height / 2 - (heading.y + heading.height / 2))).toBeLessThan(8);
 
   // A Why Question about it pulls the sheet up so its answer has room above the Ask box.
   await paired.getByRole('button', { name: 'Ask the Coach why' }).click();
   await expect(handle).toHaveAttribute('aria-expanded', 'true');
   const conversation = paired.getByLabel('Coach conversation');
   await expect(conversation).not.toBeEmpty();
-  // Beside the strip, the bar wraps rather than squeeze Back to the game or run off the screen.
+  // With the strip, Back to the game stays whole rather than squeeze or run off the screen.
   await expectBarBesideStripFits(paired, 440);
   // Back to the game: the moment is back, and the answer about the variation is put away.
   await paired.getByRole('button', { name: 'Back to the game' }).click();
@@ -1132,4 +1133,45 @@ test.describe('a Player with more games than one page', () => {
     await expect(username).toBeFocused();
     await expect(username).toBeInViewport();
   });
+});
+
+test('the thumb bar: the board edge to edge on a phone, its tools in the header line, and the step buttons either side of the Ask box', async ({ paired, app }) => {
+  const board = paired.getByRole('group', { name: 'Review board' });
+  const box = async (name: string) => (await paired.getByRole('button', { name, exact: true }).boundingBox())!;
+  /** The step buttons sit left and right of the Ask box, on its row, under the board. */
+  const stepsBesideAsk = async () => {
+    const ask = (await paired.getByRole('textbox', { name: 'Your Why Question' }).boundingBox())!;
+    const [previous, next, under] = [await box('Previous move'), await box('Next move'), (await board.boundingBox())!];
+    expect(previous.x + previous.width).toBeLessThanOrEqual(ask.x);
+    expect(next.x).toBeGreaterThanOrEqual(ask.x + ask.width);
+    for (const b of [previous, next]) {
+      expect(Math.abs(b.y + b.height / 2 - (ask.y + ask.height / 2))).toBeLessThan(6);
+      expect(b.y).toBeGreaterThan(under.y + under.height);
+    }
+    return previous;
+  };
+  // Safari's page on an iPhone 15 or 16, and on a Pro Max.
+  for (const [width, height] of [[393, 659], [430, 739]] as const) {
+    await paired.setViewportSize({ width, height });
+    await paired.goto(`${app.url}/#/review/1`);
+    await expect(board).toBeVisible();
+    // As wide as the screen; a short screen takes a little off so the panel keeps its first row.
+    await expect.poll(async () => (await board.boundingBox())!.width).toBeGreaterThanOrEqual(width === 393 ? 360 : width - 1);
+    expect(await paired.evaluate(() => [document.documentElement.scrollWidth, document.documentElement.scrollHeight])).toEqual([width, height]);
+    // Show threat and Flip board on the header line's row, beside the screen's name.
+    const heading = (await paired.getByRole('heading', { name: 'Review', level: 1 }).boundingBox())!;
+    for (const name of ['Show threat', 'Flip board']) {
+      const b = await box(name);
+      expect(Math.abs(b.y + b.height / 2 - (heading.y + heading.height / 2))).toBeLessThan(8);
+      expect(b.height).toBeGreaterThanOrEqual(44);
+    }
+    expect((await stepsBesideAsk()).height).toBeGreaterThanOrEqual(44);
+    // ⏮ and ⏭ step aside on a phone; Home and End still jump.
+    await expect(paired.getByRole('button', { name: 'First position' })).toBeHidden();
+  }
+  // A desktop keeps them all, at the foot of the panel beside the board.
+  await paired.setViewportSize({ width: 1280, height: 800 });
+  await expect(paired.getByRole('button', { name: 'First position' })).toBeVisible();
+  const previous = await stepsBesideAsk();
+  expect((await box('First position')).x + (await box('First position')).width).toBeLessThanOrEqual(previous.x);
 });

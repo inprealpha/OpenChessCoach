@@ -33,11 +33,14 @@ screen fills the frame's slots; it doesn't invent its own layout.
 
 | Slot | What goes in it | Always visible |
 | --- | --- | --- |
-| **Header line** | What this is, in words: "Review · You had Black · Lost 1-0", "Lesson · Forks · 2 of 5" | Yes |
+| **Header line** | What this is, in words: "Review · You had Black · Lost 1-0", "Lesson · Forks · 2 of 5"; at its end the board's tools: Flip board and the screen's one or two others (Show threat, Hint, the "⋯ Game" menu, Next Puzzle) | Yes |
 | **Board** | The board, with the Winning Chances bar beside it on desktop and above it on a phone | Yes |
-| **Board bar** | Step buttons (⏮ ◀ ▶ ⏭), Flip board, and the screen's one or two board tools (Threat, Hint) | Yes |
-| **Panel** | The screen's content: the Coach, the moves, the key moments, the Lesson text | Its top and its Ask box |
-| **Ask box** | The Why Question box, docked at the bottom of the panel, naming the move it asks about | Yes, where the screen allows a Why Question |
+| **Panel** | The screen's content: the Coach, the moves, the key moments, the Lesson text; **Back to the …** at its top while the Player tries their own line | Its top and its thumb bar |
+| **Thumb bar** | The panel's foot: ◀ and ▶ either side of the Ask box (⏮ ◀ … ▶ ⏭ on a desktop), the Ask box naming the move it asks about; the step buttons alone where the screen takes no Why Question | Yes, where the screen has steps or a Why Question |
+
+Nothing stands between the board and the panel: the tools sit on the header line, out of the way
+of the squares, and the step buttons at the foot of the screen, where a thumb rests (the "Thumb
+bar" layout the owner picked from three mockups for 0.5.2).
 
 ### Desktop (from 821 px wide)
 
@@ -46,13 +49,15 @@ screen fills the frame's slots; it doesn't invent its own layout.
 - The board column is sticky: it stays put while the panel scrolls.
 - The panel is as tall as the board column (the viewport less the header) and scrolls inside
   itself. The page itself doesn't scroll on a board screen at 1280 by 800.
-- The Ask box is docked at the foot of the panel, never after the panel's content.
+- The thumb bar is docked at the foot of the panel, never after the panel's content.
 - The move list is in the panel, not under it: a "Moves" tab, or a section at the top of the panel
   on screens that have no tabs.
 
 ### Phone (up to 820 px wide)
 
-![The board frame on a phone: header line, bar, board, board bar, then the panel as a sheet with tabs, and the Ask box above the keyboard](images/frame-phone.png)
+![The board frame on a phone, as sketched before the thumb bar: header line, bar, board, board bar, then the panel as a sheet with tabs, and the Ask box above the keyboard](images/frame-phone.png)
+
+![The Review on a 393 by 659 phone with the thumb bar: the header line with Show threat and Flip board, the thin Winning Chances bar, the board edge to edge, the panel's tabs and first key moment, and ◀ Ask ▶ at the foot](images/frame-phone-thumb-bar.png)
 
 - The board stays at the top and doesn't scroll away. The panel below it is a sheet: one card with
   rounded top corners and a grab handle, its tabs, its content scrolling inside it, and the Ask box
@@ -61,12 +66,18 @@ screen fills the frame's slots; it doesn't invent its own layout.
   `vh`, which iOS takes as the height with its toolbars hidden.
 - When the Player needs the full height (reading a moment or the overview, asking a question), the
   sheet comes up: a tap or a swipe on its handle, a swipe up in the panel, or a Why Question. The
-  board shrinks to a strip (about 44% of the width) beside the board bar, and a tap on the strip
-  brings it back (`lib/sheet.svelte.ts`).
-- The Winning Chances bar lies flat above the board, so the board keeps the full width.
-- The board bar sits under the board, inside thumb reach, with buttons at least 44 px square.
-- The Ask box sits at the bottom of the screen, above the keyboard while typing, and the answer
-  appears right above it, not in a log further down.
+  board shrinks to a strip (about 40% of the width), and a tap on the strip brings it back
+  (`lib/sheet.svelte.ts`).
+- The board runs edge to edge, as wide as the screen; on a short screen (Safari's 393 by 659) it
+  gives up a little so the panel keeps its tabs and first row. The Winning Chances bar lies flat
+  above it as a thin band, its two numbers small inside it.
+- The header line keeps the screen's name whole, cuts its context short, and shows Flip board and
+  Show threat as icons (their names stay). Every tool is at least 44 px square.
+- The thumb bar sits at the bottom of the screen: ◀ Ask box ▶, above the keyboard while typing,
+  and the answer appears right above it, not in a log further down. ⏮ and ⏭ step aside on a phone
+  (Home and End still jump).
+- Type is smaller on a phone's board screens (14 px; the Ask box keeps 16 px so iOS doesn't zoom),
+  and rules are one device pixel on a retina screen (`--hair`).
 - A choice the Player must make on this move (Take the move back or Carry on, Continue, Try another
   move) is shown with its reason in the first screen, never below the fold.
 
@@ -78,8 +89,8 @@ progress: the next decision's answer stays kept back (ADR 0012), so no free boar
 arrow there may show a move the Lesson will ask for.
 
 - A move on such a board starts a **variation**. The move list shows it indented under the move it
-  branches from, and the board bar shows **Back to the game**, which drops the variation and returns
-  to where the Player left the game line.
+  branches from, and the top of the panel shows **Back to the game**, which drops the variation and
+  returns to where the Player left the game line.
 - The browser's Engine grades variation moves on screen, as it does in play (ADR 0007). A Why
   Question about a variation sends only the moves; the desktop's Engine works out the Coach's facts,
   as for every Coach call. While the desktop can't be reached, the Ask box says so instead of
@@ -96,7 +107,7 @@ arrow there may show a move the Lesson will ask for.
 
 ## Collapsing and density
 
-Collapse what the Player needs only sometimes. Never collapse the board, the board bar, the Ask box
+Collapse what the Player needs only sometimes. Never collapse the board, its tools, the thumb bar
 or a choice the Player must make now.
 
 | Element | Default | Why |
@@ -210,7 +221,7 @@ move's green.
   rows; the open one expands in place with the Coach's explanation and the best move as a button.
 - The panel is one card (`.side.panel` in `app.css`): sections inside it are ruled off, not cards
   of their own, and the Coach's name and "Coach ready" show only while it works or can't.
-- The graph sits under the board bar on desktop; a strip on a phone.
+- The graph sits under the board on desktop; a strip on a phone.
 - The board is free to move: any move starts a variation, "Back to the game" returns.
 - The Ask box is docked at the panel's foot and asks about the move on the board.
 
@@ -225,7 +236,8 @@ move's green.
 
 ### Engine Game
 
-- Board bar: step buttons, Hint, Show threat, and the "⋯ Game" menu (Offer a draw, Resign, New game).
+- Header line tools: Hint, Show threat, Flip board and the "⋯ Game" menu (Offer a draw, Resign, New
+  game), which opens downwards. Once the game is over, the step buttons in the thumb bar.
 - The Blunder pause appears in the panel's first screen on a phone, with the punishing move drawn on
   the board.
 - During play the step buttons and arrow keys show earlier positions; the board says "You're looking

@@ -58,7 +58,7 @@ the order. `#/lessons?track=<track>` opens the catalogue at a track. Play it out
   `Back to the Lessons`; the board stays in view and the Ask box is docked under the Lesson's
   panel (see `board-and-engine.md`). Arrow names end in their kind: `(best)`, `(other good move)`,
   `(threat)`, `(went wrong)`, `(reply)` or `(played)`.
-- `Hint` then `Show the move`, in a toolbar straight under the board, so on a phone the arrow is in
+- `Hint` then `Show the move`, at the end of the header line, so on a phone the arrow is in
   view with it. After a Hint the focus stays on the button, now Show the move. Show the move gives the Lesson's move ("The Lesson’s move here is X." with a green
   arrow), never another move the Engine likes as well; it is said once per decision: another click
   only brings the arrow back. After a Hint, on a phone the Coach panel comes under the board too.
@@ -119,7 +119,7 @@ the order. `#/lessons?track=<track>` opens the catalogue at a track. Play it out
   it and after `Try another move` the focus goes to the board. An opening's prompt says whose move
   it is ("Move 4, Black to play. What are your options here?").
 - Once the Lesson is complete its final board is free to explore: a move starts a variation, with
-  the step buttons and `Back to the Lesson` under the board (see `explore.md`). Before that the
+  the step buttons in the thumb bar and `Back to the Lesson` at the panel's top (see `explore.md`). Before that the
   next decision's answer stays kept back (ADR 0012), so the board takes only the decision's move,
   and a refused move says why beside it ("Press Continue for the Lesson’s next move.").
 - The region `Lesson complete` at the end, with the Move Grades of the Player's first tries

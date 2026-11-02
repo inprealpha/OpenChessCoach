@@ -26,7 +26,7 @@ Lesson's board once `Lesson complete` shows, on the `Puzzle board` after solving
   grade reads `Winning Chances bar: not graded in this variation`.
 - The step buttons and their keys walk the variation while it shows. `Back to the game` (in the
   Review and a finished Engine Game; `Back to the main line` on the Board, `Back to the Puzzle`,
-  `Back to the Lesson`) drops it and puts the board back where the Player left the game, an open key
+  `Back to the Lesson`), in the group `Your own line` at the top of the panel, drops it and puts the board back where the Player left the game, an open key
   moment included. Picking a move in the game's list, a key moment, an overview move or the graph
   leaves the variation for that position.
 - A Why Question (in the Review, on the Board, a complete Lesson and a finished Puzzle; a finished

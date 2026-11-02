@@ -9,7 +9,7 @@ import './lib/layout.svelte.ts';
 void api.init();
 mount(App, { target: document.getElementById('app') as HTMLElement });
 
-if ('serviceWorker' in navigator && import.meta.env.PROD) {
+if ('serviceWorker' in navigator && import.meta.env.PROD && import.meta.env.VITE_DEMO !== '1') {
   navigator.serviceWorker.register('/sw.js').catch(() => undefined);
 }
 

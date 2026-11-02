@@ -336,7 +336,7 @@
             onpointerdown={(e) => pointerDown(e, sq)}
           >
             {#if p && !(drag?.moved && drag.from === sq)}
-              <img src={`/pieces/${p.color === 'white' ? 'w' : 'b'}${ROLE_CHAR[p.role]}.svg`} alt="" draggable="false" />
+              <img src={`${import.meta.env.BASE_URL}pieces/${p.color === 'white' ? 'w' : 'b'}${ROLE_CHAR[p.role]}.svg`} alt="" draggable="false" />
             {/if}
             {#if col === 0}<span class="coord rank" aria-hidden="true">{sq[1]}</span>{/if}
             {#if row === 7}<span class="coord file" aria-hidden="true">{sq[0]}</span>{/if}
@@ -387,7 +387,7 @@
     {#if drag?.moved}
       <img
         class="ghost"
-        src={`/pieces/${drag.piece.color === 'white' ? 'w' : 'b'}${ROLE_CHAR[drag.piece.role]}.svg`}
+        src={`${import.meta.env.BASE_URL}pieces/${drag.piece.color === 'white' ? 'w' : 'b'}${ROLE_CHAR[drag.piece.role]}.svg`}
         alt=""
         style:left={`${drag.x}px`}
         style:top={`${drag.y}px`}
@@ -399,7 +399,7 @@
     <div class="promotion" role="dialog" aria-label="Choose a piece to promote to">
       {#each [['q', 'queen'], ['r', 'rook'], ['b', 'bishop'], ['n', 'knight']] as [code, name] (code)}
         <button type="button" onclick={() => promote(code as string)} aria-label={`Promote to ${name}`}>
-          <img src={`/pieces/${toMove === 'white' ? 'w' : 'b'}${ROLE_CHAR[name as string]}.svg`} alt="" />
+          <img src={`${import.meta.env.BASE_URL}pieces/${toMove === 'white' ? 'w' : 'b'}${ROLE_CHAR[name as string]}.svg`} alt="" />
         </button>
       {/each}
       <button type="button" class="cancel" onclick={() => (promotion = null)}>Cancel</button>

@@ -4,7 +4,7 @@ import { UciEngine, type UciEngineOptions } from '@chess-coach/shared/uci-engine
 export class BrowserEngine extends UciEngine {
   constructor(options: UciEngineOptions) {
     const file = options.threads > 1 ? 'stockfish-18-lite.js' : 'stockfish-18-lite-single.js';
-    const worker = new Worker(`/engine/${file}`);
+    const worker = new Worker(`${import.meta.env.BASE_URL}engine/${file}`);
     super(
       {
         send: (cmd) => worker.postMessage(cmd),

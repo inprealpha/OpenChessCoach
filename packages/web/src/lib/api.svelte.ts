@@ -38,6 +38,10 @@ interface Pending {
   onProgress?: (done: number, total: number) => void;
 }
 
+/** A demo build (VITE_DEMO=1) runs with no desktop: demo/demo.ts stands in for it. */
+const DEMO = import.meta.env.VITE_DEMO === '1';
+type DemoTransport = typeof import('../demo/demo.ts').demo;
+
 const OFFLINE_REASON = 'Your desktop can’t be reached, so the Coach is unavailable. The board and the Engine still work.';
 
 /** How long the connection may stay quiet before the app checks that the desktop is still there. */
@@ -61,6 +65,7 @@ class Api {
   /** Hears whether a phone is paired each time a device pairs, so a screen showing the QR code says when the phone has paired. */
   onDevicePaired: ((phone: PhoneStatus) => void) | null = null;
 
+  private demo: DemoTransport | null = null;
   private token: string | null = null;
   private ws: WebSocket | null = null;
   private pending = new Map<string, Pending>();
@@ -79,6 +84,16 @@ class Api {
   }
 
   async init(): Promise<void> {
+    if (DEMO) {
+      this.demo = (await import('../demo/demo.ts')).demo;
+      this.engine = { depth: 12, multiPv: 3, singleThread: true };
+      this.state = 'online';
+      const hello = await this.request('hello', { client: 'web' });
+      this.coach = hello.coach;
+      this.reconnects++;
+      this.onlineWaiters.splice(0).forEach((w) => w());
+      return;
+    }
     await this.loadConfig();
     // A pairing link opened in a tab that is already showing the app arrives as a hash change.
     window.addEventListener('hashchange', () => {
@@ -300,6 +315,7 @@ class Api {
     onDelta?: (text: string, part?: ReviewPart, status?: string) => void,
     onProgress?: (done: number, total: number) => void,
   ): Promise<ResponseBody<K>> {
+    if (DEMO && this.demo) return this.demo.request(type, body, onDelta, onProgress);
     const ws = this.ws;
     if (!ws || ws.readyState !== WebSocket.OPEN) return Promise.reject(new ApiError('offline', OFFLINE_REASON));
     const id = String(this.nextId++);

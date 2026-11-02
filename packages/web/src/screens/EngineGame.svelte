@@ -3,7 +3,7 @@
   // speaks up only on a Mistake or Blunder, and the Player may then take the move back. Hint gives
   // the idea first and the Engine's move second. The game in progress survives a reload. Once the
   // game is over its board is free: a move on it starts a variation, which Back to the game drops.
-  import { tick } from 'svelte';
+  import { tick, untrack } from 'svelte';
   import { candidatesFrom, type GradedMove } from '@chess-coach/shared/analysis';
   import { otherSide, outcomeOfLine, SIDE_NAMES, turnOf, type PlayedMove, type Side } from '@chess-coach/shared/chess';
   import type { Analysis, Score } from '@chess-coach/shared/engine';
@@ -16,6 +16,7 @@
   import GameEnd from '../components/GameEnd.svelte';
   import MoveList from '../components/MoveList.svelte';
   import StepButtons from '../components/StepButtons.svelte';
+  import { layout } from '../lib/layout.svelte.ts';
   import SheetHandle from '../components/SheetHandle.svelte';
   import SheetStrip from '../components/SheetStrip.svelte';
   import { sheet } from '../lib/sheet.svelte.ts';
@@ -101,10 +102,32 @@
   const orientation = $derived<Side>(game ? (flipped ? otherSide(game.playerSide) : game.playerSide) : 'white');
   const playerToMove = $derived(game !== null && !finished && !thinking && !awaitingChoice && turnOf(line.fen) === game.playerSide);
   /** The position on the board: the game's, or the Player's variation from a finished game. */
-  const boardFen = $derived(variation.active ? variation.fen : line.fen);
-  const shownLast = $derived(variation.active ? variation.line.lastMove : line.lastMove);
+  /**
+   * In the trial layouts (lib/layout.svelte.ts), the step buttons stay beside the board while the
+   * game is on: they show an earlier position without changing the game, which goes on from its
+   * last position. The position shown, as a count of moves, or null for the game's own.
+   */
+  let peek = $state<number | null>(null);
+  const peekFen = $derived(peek === null ? null : peek === 0 ? line.startFen : (line.moves[peek - 1]?.fenAfter ?? null));
+  const boardFen = $derived(variation.active ? variation.fen : (peekFen ?? line.fen));
+  const shownLast = $derived(variation.active ? variation.line.lastMove : peek !== null ? line.moves[peek - 1] : line.lastMove);
   /** Why the board takes no move while the game is on, in one line beside it. */
-  const refusal = $derived(thinking ? 'It’s the Engine’s move.' : awaitingChoice ? 'Take the move back or carry on first.' : '');
+  const refusal = $derived(
+    peek !== null ? `You’re looking at move ${Math.ceil(peek / 2) || 1}: ▶ back to the game first.` : thinking ? 'It’s the Engine’s move.' : awaitingChoice ? 'Take the move back or carry on first.' : '',
+  );
+
+  $effect(() => {
+    // A finished or new game shows its own positions again.
+    if (finished || !game) untrack(() => (peek = null));
+  });
+
+  /** A step while the game is on: an earlier position, the game itself untouched. */
+  function peekStep(where: Step): void {
+    const end = line.moves.length;
+    const at = peek ?? end;
+    const next = where === 'first' ? 0 : where === 'last' ? end : where === 'previous' ? Math.max(0, at - 1) : Math.min(end, at + 1);
+    peek = next >= end ? null : next;
+  }
   // The Player's last graded move keeps its symbol through the Engine's reply, unless the reply
   // landed on that square. A finished game steps through its moves, so this follows the step shown.
   const mark = $derived.by(() => {
@@ -582,7 +605,7 @@
             <Board
               fen={boardFen}
               {orientation}
-              movable={finished ? 'both' : playerToMove ? game.playerSide : 'none'}
+              movable={finished ? 'both' : playerToMove && peek === null ? game.playerSide : 'none'}
               lastMove={shownLast ? { from: shownLast.uci.slice(0, 2), to: shownLast.uci.slice(2, 4) } : undefined}
               {arrows}
               highlights={coach.highlights}
@@ -600,9 +623,13 @@
             {#if variation.active}<button type="button" class="back" onclick={() => variation.leave()}>Back to the game</button>{/if}
             <FlipButton onflip={() => (flipped = !flipped)} />
           {:else}
+            {#if layout.trial}
+              <StepButtons onfirst={() => peekStep('first')} onprevious={() => peekStep('previous')} onnext={() => peekStep('next')} onlast={() => peekStep('last')} />
+              {#if peek !== null}<button type="button" class="back" onclick={() => (peek = null)}>Back to the game</button>{/if}
+            {/if}
             <button
               type="button"
-              class="secondary"
+              class="secondary hint"
               onclick={hint}
               disabled={!playerToMove || coach.busy}
               title={awaitingChoice ? 'Hint comes back once you’ve decided on the take-back' : undefined}>{hintLevel === 0 ? 'Hint' : 'Show the move'}</button

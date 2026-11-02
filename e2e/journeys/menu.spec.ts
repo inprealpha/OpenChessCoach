@@ -326,3 +326,15 @@ test('Back returns to the place the Player left a screen at, even when they left
   await expect(paired.getByRole('heading', { name: 'Settings', level: 1 })).toBeVisible();
   await expect.poll(() => paired.evaluate(() => scrollY)).toBe(y);
 });
+
+test('Settings switch the board screens between the trial layouts, kept on this device', async ({ paired, app }) => {
+  await paired.goto(`${app.url}/#/settings`);
+  const layouts = paired.getByRole('group', { name: 'Screen layout' });
+  await expect(layouts.getByRole('radio', { name: /0\.5\.1/ })).toBeChecked();
+  await layouts.getByRole('radio', { name: /Side rail/ }).check();
+  await expect(paired.locator('html')).toHaveAttribute('data-layout', 'rail');
+  await paired.reload();
+  await expect(paired.locator('html')).toHaveAttribute('data-layout', 'rail');
+  await paired.getByRole('group', { name: 'Screen layout' }).getByRole('radio', { name: /0\.5\.1/ }).check();
+  await expect(paired.locator('html')).not.toHaveAttribute('data-layout', /./);
+});

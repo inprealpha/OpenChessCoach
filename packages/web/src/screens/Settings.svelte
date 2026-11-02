@@ -13,6 +13,7 @@
   import { api, ApiError } from '../lib/api.svelte.ts';
   import { pairingCode } from '../lib/pairing-code.ts';
   import { router } from '../lib/router.svelte.ts';
+  import { LAYOUTS, LAYOUT_TEXT, layout, type Layout } from '../lib/layout.svelte.ts';
 
   /** A card on this screen, where the outcome of a change made in it is shown. */
   type Card = 'pairing' | 'tunnel' | 'live' | 'review' | 'quality' | 'deeper';
@@ -288,6 +289,20 @@
     <p class="muted">Loading…</p>
   {/if}
   {#if message}<p class="error" role="alert">{message}</p>{/if}
+  <!-- A trial of five board-frame layouts, chosen here so the choice costs the board screens no room.
+       Kept on this device, not the desktop: each phone can try its own. -->
+  <fieldset class="card" aria-label="Screen layout">
+    <legend>Screen layout (trial)</legend>
+    <p class="small muted">How the board screens are laid out on this device. Pick one, then open a Review, a Lesson or a game.</p>
+    <div>
+    {#each LAYOUTS as l (l)}
+      <label class="option">
+        <input type="radio" name="layout" value={l} checked={layout.value === l} onchange={() => layout.set(l as Layout)} />
+        <span><strong>{LAYOUT_TEXT[l].name}</strong> <span class="small muted cost">{LAYOUT_TEXT[l].detail}</span></span>
+      </label>
+    {/each}
+    </div>
+  </fieldset>
   <!-- Shown even when the desktop can't be reached: the AGPL asks that everyone using the app over
        a network, on the Wi-Fi or through the tunnel, is offered its source (ADR 0011). -->
   <section class="card" aria-label="About">

@@ -23,6 +23,7 @@
   import SheetHandle from '../components/SheetHandle.svelte';
   import SheetStrip from '../components/SheetStrip.svelte';
   import StepButtons from '../components/StepButtons.svelte';
+  import AskButton from '../components/AskButton.svelte';
   import ThreatButton from '../components/ThreatButton.svelte';
   import WinningChancesBar from '../components/WinningChancesBar.svelte';
   import WinningChancesGraph from '../components/WinningChancesGraph.svelte';
@@ -218,13 +219,16 @@
    * under the tabs in a phone's short sheet, whatever moved the panel while the move was played.
    */
   function keepTryingInView(el: HTMLElement): void {
-    requestAnimationFrame(() => {
+    const show = () => {
       const row = el.closest<HTMLElement>('.moment');
       const body = el.closest<HTMLElement>('.panel-body');
       if (!row || !body) return;
       reveal(body, row, 'start');
       reveal(body, el, 'nearest');
-    });
+    };
+    requestAnimationFrame(show);
+    // Again once a phone's sheet has settled at its new height, which moves the row under the tabs.
+    setTimeout(show, 300);
   }
 
   /** A move the overview names: the board goes to the position after it, as the move list does. */
@@ -526,6 +530,7 @@
           {#if variation.active}<button type="button" class="back" onclick={backToGame}>Back to the game</button>{/if}
           <FlipButton onflip={() => (flipped = !flipped)} />
           <ThreatButton view={threats} />
+          <AskButton />
         </div>
         <!-- The game's graph steps aside while the Player tries a variation, leaving its bar the room
              Back to the game takes, so the frame stays one screen tall. -->

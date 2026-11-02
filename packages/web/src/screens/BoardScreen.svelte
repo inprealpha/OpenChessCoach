@@ -18,6 +18,7 @@
   import SheetHandle from '../components/SheetHandle.svelte';
   import SheetStrip from '../components/SheetStrip.svelte';
   import StepButtons from '../components/StepButtons.svelte';
+  import AskButton from '../components/AskButton.svelte';
   import ThreatButton from '../components/ThreatButton.svelte';
   import { threatArrows } from '../lib/arrows.ts';
   import { gradeMark } from '../lib/grades.ts';
@@ -382,6 +383,7 @@
         {#if variation.active}<button type="button" class="back" onclick={backToLine}>Back to the main line</button>{/if}
         <FlipButton onflip={flip} />
         <ThreatButton view={threats} />
+        <AskButton />
       </div>
       <p class="visually-hidden" role="status">{setupNote}</p>
       <p class="result" role="status" aria-label="Result">{result}</p>

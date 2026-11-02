@@ -1,7 +1,10 @@
 import { mount } from 'svelte';
 import './app.css';
+import './layouts.css';
 import App from './App.svelte';
 import { api } from './lib/api.svelte.ts';
+// Sets the trial layout on <html> before the first paint.
+import './lib/layout.svelte.ts';
 
 void api.init();
 mount(App, { target: document.getElementById('app') as HTMLElement });

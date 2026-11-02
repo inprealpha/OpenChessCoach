@@ -683,3 +683,18 @@ test('the Winning Chances bar follows an Engine Game from the browser Engine, th
   await expect(bar).toHaveAccessibleName(/^Winning Chances bar: Black’s winning chances: \d+%$/);
   await expect(bar.getByTestId('bar-fill')).toHaveAttribute('data-side', 'black');
 });
+
+test('in a trial layout the step buttons show earlier positions while the game is on, and the game goes on from its own', async ({ paired, app }) => {
+  await paired.evaluate(() => localStorage.setItem('layout', 'doop'));
+  await resumeGame(paired, app.url, 'white', ['e2e4', 'e7e5']);
+  const now = await fenOf(paired, BOARD);
+  await paired.getByRole('button', { name: 'Previous move' }).click();
+  await expect(paired.getByRole('group', { name: BOARD })).toHaveAttribute('data-fen', playUci(INITIAL_FEN, 'e2e4')?.fenAfter ?? '');
+  // Looking back takes no move: the game's own position is one tap away.
+  await square(paired, 'g1', BOARD).click();
+  await square(paired, 'f3', BOARD).click();
+  await expect(paired.getByRole('list', { name: 'Moves' }).getByRole('button')).toHaveCount(2);
+  await paired.getByRole('button', { name: 'Back to the game' }).click();
+  await expect(paired.getByRole('group', { name: BOARD })).toHaveAttribute('data-fen', now);
+  await moveAndWaitForReply(paired, 'g1f3', 4);
+});

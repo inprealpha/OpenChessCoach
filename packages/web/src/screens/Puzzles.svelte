@@ -14,6 +14,7 @@
   import GradeBadge from '../components/GradeBadge.svelte';
   import FlipButton from '../components/FlipButton.svelte';
   import StepButtons from '../components/StepButtons.svelte';
+  import AskButton from '../components/AskButton.svelte';
   import SheetHandle from '../components/SheetHandle.svelte';
   import SheetStrip from '../components/SheetStrip.svelte';
   import { sheet } from '../lib/sheet.svelte.ts';
@@ -366,6 +367,7 @@
           {/if}
           <FlipButton onflip={() => (flipped = !flipped)} />
           <!-- On a phone, Next Puzzle sits in the bar under the board, where the resting sheet can't hide it. -->
+          <AskButton />
           {#if finished && nextInBar}<button type="button" class="next" onclick={nextPuzzle}>Next Puzzle</button>{/if}
         </div>
       </div>

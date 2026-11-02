@@ -34,3 +34,18 @@ export function foldFromNextVisit(name: string): void {
     // Storage is blocked: the section opens on every visit instead.
   }
 }
+
+/**
+ * Carries a section's memory over from an older name: a section the Player has met under `old`
+ * (opened, closed, or folded after a first visit) counts as met under `name`, closed, and the old
+ * name is dropped.
+ */
+export function renameFold(old: string, name: string): void {
+  try {
+    if (localStorage.getItem(PREFIX + old) === null) return;
+    if (localStorage.getItem(PREFIX + name) === null) localStorage.setItem(PREFIX + name, '0');
+    localStorage.removeItem(PREFIX + old);
+  } catch {
+    // Storage is blocked: nothing was remembered under either name.
+  }
+}

@@ -13,6 +13,10 @@
   import CoachPanel from '../components/CoachPanel.svelte';
   import GradeBadge from '../components/GradeBadge.svelte';
   import FlipButton from '../components/FlipButton.svelte';
+  import StepButtons from '../components/StepButtons.svelte';
+  import SheetHandle from '../components/SheetHandle.svelte';
+  import SheetStrip from '../components/SheetStrip.svelte';
+  import { sheet } from '../lib/sheet.svelte.ts';
   import { api } from '../lib/api.svelte.ts';
   import { CoachThread } from '../lib/coach.svelte.ts';
   import { lessonCatalogue, loadPuzzles } from '../lib/content.ts';
@@ -22,7 +26,6 @@
   import { profile } from '../lib/profile.svelte.ts';
   import { store } from '../lib/storage.ts';
   import { stepLine, Variation, type Step } from '../lib/variation.svelte.ts';
-
   let { opening }: { opening?: string | undefined } = $props();
 
   let all = $state<PuzzleData[]>([]);
@@ -58,6 +61,8 @@
   // Every Lesson's Puzzles, whatever Lesson the address names.
   titleFrom(() => (opening && all.length && !lesson ? 'Puzzles' : null));
   const finished = $derived(status === 'solved' || status === 'shown');
+  /** Next Puzzle goes in the board bar on a phone, unless the bar holds Back to the Puzzle. */
+  const nextInBar = $derived(sheet.on && !variation.active);
   const boardFen = $derived(variation.active ? variation.fen : line.fen);
   const shownLast = $derived(variation.active ? variation.line.lastMove : line.lastMove);
 
@@ -285,7 +290,7 @@
   }
 </script>
 
-<section class="screen board-screen puzzles">
+<section class="screen board-screen puzzles" class:sheet-full={sheet.shown}>
   <header class="frame-head">
     <h1>{lessonName ? `${lessonName} Puzzles` : 'Puzzles'}</h1>
     {#if puzzle && status !== 'empty'}<p class="head-line">Rated {puzzle.rating} · from a real Lichess game</p>{/if}
@@ -338,6 +343,8 @@
   {:else if puzzle}
     <div class="board-layout">
       <div class="board-col">
+        <div class="board-and-bar">
+        <SheetStrip />
         <Board
           fen={boardFen}
           orientation={flipped ? otherSide(solver) : solver}
@@ -350,20 +357,21 @@
           refusal="One moment: the moves are being played."
           label="Puzzle board"
         />
+        </div>
         <div class="board-bar toolbar">
           {#if finished}
             <!-- Stepping stays inside the Puzzle: its first position is the one the Player was set. -->
-            <button type="button" class="secondary" onclick={() => step('first')} aria-label="First position">⏮</button>
-            <button type="button" class="secondary" onclick={() => step('previous')} aria-label="Previous move">◀</button>
-            <button type="button" class="secondary" onclick={() => step('next')} aria-label="Next move">▶</button>
-            <button type="button" class="secondary" onclick={() => step('last')} aria-label="Last position">⏭</button>
-            {#if variation.active}<button type="button" class="secondary" onclick={() => variation.leave()}>Back to the Puzzle</button>{/if}
+            <StepButtons onfirst={() => step('first')} onprevious={() => step('previous')} onnext={() => step('next')} onlast={() => step('last')} />
+            {#if variation.active}<button type="button" class="back" onclick={() => variation.leave()}>Back to the Puzzle</button>{/if}
           {/if}
           <FlipButton onflip={() => (flipped = !flipped)} />
+          <!-- On a phone, Next Puzzle sits in the bar under the board, where the resting sheet can't hide it. -->
+          {#if finished && nextInBar}<button type="button" class="next" onclick={nextPuzzle}>Next Puzzle</button>{/if}
         </div>
       </div>
-      <div class="side">
-        <div class="panel-body">
+      <div class="side panel">
+        <SheetHandle />
+        <div class="panel-body" {@attach sheet.gestures}>
         <section class="card" aria-label="Puzzle" data-puzzle-id={puzzle.id}>
           <p>
             <strong>
@@ -371,6 +379,14 @@
             </strong>
           </p>
           <p role="status" aria-live="polite" class:error={feedback.includes('not the move')}>{feedback}</p>
+          <!-- Before the solution, so a phone's resting sheet shows Next Puzzle without scrolling. -->
+          <div class="row">
+            {#if status === 'solving'}
+              <button type="button" class="secondary" onclick={showSolution} disabled={busy}>Show the solution</button>
+            {:else if !nextInBar}
+              <button type="button" onclick={nextPuzzle}>Next Puzzle</button>
+            {/if}
+          </div>
           {#if finished}
             <p class="solution">
               Solution:
@@ -401,13 +417,6 @@
               </p>
             {/if}
           {/if}
-          <div class="row">
-            {#if status === 'solving'}
-              <button type="button" class="secondary" onclick={showSolution} disabled={busy}>Show the solution</button>
-            {:else}
-              <button type="button" onclick={nextPuzzle}>Next Puzzle</button>
-            {/if}
-          </div>
         </section>
         <p class="muted small">Puzzles: Lichess puzzle database, CC0.</p>
         </div>

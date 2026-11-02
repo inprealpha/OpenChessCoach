@@ -9,8 +9,9 @@ the Coach, explains why in plain words, on your own Claude subscription.
 npx openchesscoach@latest
 ```
 
-In Windows PowerShell, type `npx.cmd` instead of `npx`. You need Node.js 22.18 or later and Claude
-Code, logged in: see [What you need](#what-you-need).
+You need Node.js 22.18 or later and Claude Code, logged in: see [What you need](#what-you-need).
+On Windows, let PowerShell run `npx` once first: see
+[Letting PowerShell run npx](#letting-powershell-run-npx-windows).
 
 - **Review your own games** from Lichess, chess.com or a PGN: every move gets a Move Grade, a graph
   shows where the game turned, and the Coach sums up the whole game, then walks you through the
@@ -46,7 +47,7 @@ On Windows:
 winget install OpenJS.NodeJS.LTS
 ```
 
-Then close PowerShell and open a new one, so it finds `node`.
+Then close PowerShell and open a new one, so it finds `node`, and let it run `npx` (next section).
 
 On macOS or Linux:
 
@@ -63,14 +64,34 @@ nvm install --lts
 Check that it worked with `node --version`. If you prefer an installer you click through, download
 the LTS version from <https://nodejs.org/en/download>.
 
+### Letting PowerShell run npx (Windows)
+
+`npx` and `npm` are PowerShell scripts on Windows, and PowerShell doesn't run scripts until you
+allow them, so `npx` stops with "running scripts is disabled on this system". Allow them once, in
+PowerShell:
+
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+```
+
+If it asks whether to change the execution policy, type `Y` and press Enter. `RemoteSigned` runs
+scripts installed on your computer, such as the ones Node.js brings, and still blocks unsigned
+scripts downloaded from the internet. `-Scope CurrentUser` changes it only for your Windows account,
+so you don't need to run PowerShell as an administrator. Check it with `Get-ExecutionPolicy`,
+which should print `RemoteSigned`. If it prints something else, a policy your organization set wins
+over yours: type `npx.cmd` instead.
+
+If you'd rather leave the policy as it is, type `npx.cmd` instead of `npx` in every command here.
+
 ## Start
 
 ```bash
 npx openchesscoach@latest
 ```
 
-In Windows PowerShell, type `npx.cmd` instead of `npx`. `@latest` picks up the newest release
-each time you start the app.
+`@latest` picks up the newest release each time you start the app. In Windows PowerShell, if it
+says running scripts is disabled, see
+[Letting PowerShell run npx](#letting-powershell-run-npx-windows).
 
 The desktop checks Claude Code, starts the app and opens your browser already paired. The first
 thing the browser shows is a QR code: scan it with your phone on the same Wi-Fi to open the app

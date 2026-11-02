@@ -48,12 +48,25 @@ call.
   `data-testid="review-summary"`), the board never scrolls away, and the Ask box is docked. On a
   desktop and on a phone the page is one screen tall and never scrolls: the panel beside (or under)
   the board scrolls inside itself, with the Ask box docked at its foot. `Flip board` (or the F key) turns the board, the bar and the graph with it.
-- The panel has two tabs, `Moments` (the overview and the key moments) and `Moves` (the move
-  list; on a phone the graph too). The overview is open on the first visit to a Review and folded on later
-  visits unless the Player opens it again (remembered per game); folded, it shows its first sentence.
+- The panel is one card with three tabs, `Moments` (the key moments, the default), `Moves` (the move
+  list; on a phone the graph too) and `Overview` (when the Review has one). Until the Player opens
+  it on a first visit to a Review, the tab is `Overview, not read yet`, with a dot; on later visits
+  (remembered per game) just `Overview`.
+- Opening a key moment's row on a phone pulls the sheet up to read it. Its better move's button,
+  "Try axb4 48%" (its name is what it shows), lets the sheet down, plays the move as a variation and keeps the moment open with
+  "Trying 11. axb4 … instead of Bxf7+ · 48%"; `Back to the game` returns to the moment and puts the
+  Coach's answer about the variation behind `Earlier`. An open moment draws the move played and the
+  best (all its arrows when it has neither); `Show all N arrows` adds the others, and steps aside
+  while the Coach's own arrows are on the board. What was said before the variation stays.
+- On a phone held upright the panel is a sheet under the board: the grab handle `Pull the panel up`
+  / `Let the panel down` (`aria-expanded`), a swipe up in the panel or a wheel turned down pulls it up, the board
+  shrinks to a strip beside its bar, and the strip, the button `Show the board full size`, brings it
+  back. Asking a Why Question pulls it up so the answer has room, on every board screen; trying a
+  better move lets it down so the move shows on the full board. At Safari's sizes (402×714 to
+  440×790) the page is exactly the screen: nothing pans sideways or scrolls behind the panel.
 - The move list numbers moves from the game's start position, so a game set up from a position
   (`[SetUp "1"]`, `[FEN …]`) reads `40… Kd3`, `41. Ra3+`, as the key moments and the graph do.
-- The overview, the region `Overview` above `Key moments`: how the Player played, where it went
+- The overview, the region `Overview` on its tab: how the Player played, where it went
   wrong, how the opponent played and the moves that stood out on both sides. Its brief (job
   `review-overview`, on the Review moments' model) holds each side's Move Grade counts, the key
   moments with the Engine's best move instead, and up to eight standout moves
@@ -78,7 +91,9 @@ call.
   `data-testid="chances-change"`; evaluations only at the club level, a forced mate as a mate
   phrase). The visually hidden `chances-before` / `chances-after` lines keep the long form
   ("Before: White’s winning chances: 48%"). The open row shows the Coach's explanation,
-  "Better: <best> 48%" and the Engine's other options behind `More moves`. The first moment is
+  "Better" with the best move as a button ("Try axb4 48%", its name the same), which plays it on
+  the board as a variation from the position before the moment, and the Engine's other options
+  behind `More moves`. The first moment is
   open on load.
   Winning Chances come from the Review's own graded moves: no new data and no Engine run. The
   `Show moment` button opens the moment on the board (the position before the move, with the
@@ -182,7 +197,7 @@ Mistake` in the list `Moves`, then `Next move`. A Review without the overview:
   edge goes back to `Start: White’s winning chances: 53%` (`imported-game.spec.ts`, "a Review
   lists key moments …"). Marks for Black, mates and huge evaluations are covered on real games in
   `packages/shared/test/winning-chances-graph.test.ts`.
-- The moment 11. Bxf7+ shows `48% → 35%` with no evaluations (Beginner), `Better: axb4 48%` and,
+- The moment 11. Bxf7+ shows `48% → 35%` with no evaluations (Beginner), the button "Try axb4 48%" and,
   under `More moves`, `Ng5 44%, Ne5 44%`, before and after a reopen
   (`imported-game.spec.ts`, "a Review lists key moments with Move Grades, …").
 - On the `Review board`: `Move 11. Bxf7+` shows the image `Mistake on f7`; `Next move` shows

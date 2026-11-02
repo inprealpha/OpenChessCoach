@@ -14,14 +14,18 @@
     ongoto?: (cursor: number) => void;
     /** The Player's variation: the game's cursor it branches from, its moves and Move Grades, and the move shown in it. */
     variation?: { from: number; moves: PlayedMove[]; grades: (MoveGrade | undefined)[]; cursor: number; ongoto: (cursor: number) => void } | undefined;
+    /** The panel around the list scrolls to keep the current move in view (the default). */
+    followInPanel?: boolean;
   }
-  let { moves, grades = [], cursor, ongoto, variation }: Props = $props();
+  let { moves, grades = [], cursor, ongoto, variation, followInPanel = true }: Props = $props();
   let list = $state<HTMLOListElement>();
 
   // Keep the current move in view: the list scrolls in its own box, never the page, and jumps
   // rather than glides, so reduced motion needs nothing more. It looks again when the current
   // move's Move Grade arrives, since the badge widens the move and can wrap it onto a new row.
   function keepInView(el: HTMLOListElement): void {
+    // A list on a tab that isn't shown has no box to scroll to: leave the panel where it is.
+    if (el.getClientRects().length === 0) return;
     const item = variation ? el.querySelector('.variation .current') ?? el.querySelector('.variation') : el.querySelector(`[data-ply="${cursor}"]`);
     if (!item) {
       el.scrollTop = 0;
@@ -29,8 +33,9 @@
     }
     reveal(el, item, 'nearest');
     // The panel around the list may scroll too, as a phone's short panel does: the move stays in its
-    // view as well, clear of the tabs stuck at the panel's top.
-    const panel = el.closest<HTMLElement>('.panel-body');
+    // view as well, clear of the tabs stuck at the panel's top. Not where the screen keeps the panel
+    // for something the Player must read first (the Engine Game's choice to take a move back).
+    const panel = followInPanel ? el.closest<HTMLElement>('.panel-body') : null;
     if (panel && panel.scrollHeight > panel.clientHeight) reveal(panel, item, 'nearest');
   }
   $effect(() => {

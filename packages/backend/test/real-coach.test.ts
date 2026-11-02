@@ -1,10 +1,19 @@
 // What the real Coach hands the Claude Agent SDK, checked with a stand-in for the SDK's query:
 // no tools but the Engine's, and only with Think deeper on, with ceilings on its time and output
 // (ADR 0001, ADR 0010). No real model is called.
+import { chmodSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import type { Options, query } from '@anthropic-ai/claude-agent-sdk';
 import type { Brief } from '@chess-coach/shared/coach/brief';
-import { ENGINE_TOOL_NAME, RealCoach, COACH_OUTPUT_TOKENS } from '../src/coach/real.ts';
+import { ENGINE_TOOL_NAME, RealCoach, COACH_OUTPUT_TOKENS, COMES_BACK } from '../src/coach/real.ts';
+import { EXPIRED_FIX } from '../src/claude-check.ts';
+import { CoachUnavailableError } from '../src/coach/port.ts';
+import { CoachService } from '../src/coach/service.ts';
+import { systemClock } from '../src/clock.ts';
+import type { Db } from '../src/db.ts';
+import type { CoachStatus } from '@chess-coach/shared/protocol';
 import { EngineTool } from '../src/coach/engine-tool.ts';
 import type { EngineService } from '../src/engine/service.ts';
 import type { CoachEngine } from '../src/coach/port.ts';
@@ -178,3 +187,141 @@ describe('the real Coach', () => {
   });
 });
 
+
+/** A stand-in for the SDK's query that yields what `answer` says Claude sends, or throws it. */
+function claudeSays(seen: Options[], answer: () => unknown[] | Error | 'never'): typeof query {
+  return ((params: { options?: Options }) => {
+    const options = params.options ?? {};
+    seen.push(options);
+    return (async function* () {
+      const said = answer();
+      if (said === 'never') {
+        await new Promise((_, reject) => options.abortController?.signal.addEventListener('abort', () => reject(new Error('aborted'))));
+      }
+      if (said instanceof Error) throw said;
+      for (const message of said as unknown[]) yield message;
+    })();
+  }) as unknown as typeof query;
+}
+
+const ok = [{ type: 'assistant', message: { content: [{ type: 'text', text: 'OK' }] } }, { ...result, structured_output: undefined }];
+// What Claude Code sent when its saved login had a token Claude no longer took (checked on 0.3.296).
+const turnedDown = [
+  { type: 'assistant', error: 'authentication_failed', message: { content: [{ type: 'text', text: 'Failed to authenticate. API Error: 401 OAuth access token is invalid.' }] } },
+  { ...result, is_error: true, result: 'Failed to authenticate. API Error: 401 OAuth access token is invalid.' },
+];
+
+/** A `claude` whose `auth status` says it is logged in, as it does for a login that has expired. */
+function loggedInClaude(): string {
+  const path = join(mkdtempSync(join(tmpdir(), 'fake-claude-')), 'claude');
+  writeFileSync(path, `#!/bin/sh\necho '{"loggedIn":true,"authMethod":"claude.ai"}'\n`);
+  chmodSync(path, 0o755);
+  return path;
+}
+
+describe('the login check', () => {
+  it('is one short call on the smallest model, set up like every Coach call', async () => {
+    const seen: Options[] = [];
+    expect(await new RealCoach({ query: claudeSays(seen, () => ok) }).checkLogin()).toEqual({ state: 'ok' });
+    expect(seen[0]).toMatchObject({ model: 'haiku', maxTurns: 1, tools: [], allowedTools: [], mcpServers: {}, strictMcpConfig: true, settingSources: [], persistSession: false });
+    expect(seen[0]?.env?.ENABLE_CLAUDEAI_MCP_SERVERS).toBe('false');
+    expect(seen[0]?.env?.PATH).toBe(process.env.PATH);
+  });
+
+  it('finds a login Claude turns down and names the fix', async () => {
+    expect(await new RealCoach({ query: claudeSays([], () => turnedDown) }).checkLogin()).toEqual({ state: 'refused', message: EXPIRED_FIX });
+    const org = [{ type: 'assistant', error: 'oauth_org_not_allowed', message: { content: [] } }];
+    expect(await new RealCoach({ query: claudeSays([], () => org) }).checkLogin()).toMatchObject({ state: 'refused', message: expect.stringContaining('/login') });
+  });
+
+  it('tells a usage limit and an unreachable Claude apart from a turned-down login', async () => {
+    const limit = [{ type: 'rate_limit_event', rate_limit_info: { status: 'rejected', resetsAt: 1_800_000_000 } }];
+    expect(await new RealCoach({ query: claudeSays([], () => limit) }).checkLogin()).toEqual({ state: 'limit', resetsAt: new Date(1_800_000_000_000) });
+    expect(await new RealCoach({ query: claudeSays([], () => new Error('getaddrinfo ENOTFOUND api.anthropic.com')) }).checkLogin()).toEqual({
+      state: 'unknown',
+      message: 'getaddrinfo ENOTFOUND api.anthropic.com',
+    });
+    const overloaded = [{ type: 'assistant', error: 'overloaded', message: { content: [] } }];
+    expect(await new RealCoach({ query: claudeSays([], () => overloaded) }).checkLogin()).toMatchObject({ state: 'unknown' });
+    expect(await new RealCoach({ query: claudeSays([], () => 'never'), loginCheckMs: 20 }).checkLogin()).toEqual({
+      state: 'unknown',
+      message: expect.stringMatching(/^Claude didn’t answer within \d+ seconds\.$/),
+    });
+  });
+
+  it.skipIf(process.platform === 'win32')('keeps the Coach unavailable while Claude turns the login down, though Claude Code says it is logged in', async () => {
+    const coach = new RealCoach({ claudePath: loggedInClaude(), query: claudeSays([], () => turnedDown) });
+    expect(await coach.status()).toEqual({ state: 'ready' });
+    await expect(coach.ask({ job: 'why', model: 'haiku', brief }, () => {})).rejects.toThrow(CoachUnavailableError);
+    // Before this, the next status was "ready" again, so the next Player met the same error.
+    expect(await coach.status()).toEqual({ state: 'unavailable', reason: `${EXPIRED_FIX} ${COMES_BACK}` });
+  });
+
+  it.skipIf(process.platform === 'win32')('comes back on its own once the owner logs in again', async () => {
+    let loggedIn = false;
+    const coach = new RealCoach({ claudePath: loggedInClaude(), query: claudeSays([], () => (loggedIn ? ok : turnedDown)), loginRecheckMs: 20 });
+    const heard: unknown[] = [];
+    coach.watch((status) => heard.push(status));
+    expect(await coach.checkLogin()).toMatchObject({ state: 'refused' });
+    expect((await coach.status()).state).toBe('unavailable');
+    loggedIn = true;
+    await expect.poll(() => heard, { timeout: 2000 }).toEqual([{}]);
+    expect(await coach.status()).toEqual({ state: 'ready' });
+  });
+
+  it.skipIf(process.platform === 'win32')('keeps a Coach call Claude turned down over a check that started before it', async () => {
+    const answers: ((said: unknown[]) => void)[] = [];
+    const held = (() =>
+      (async function* () {
+        for (const m of await new Promise<unknown[]>((r) => answers.push(r))) yield m;
+      })()) as unknown as typeof query;
+    const coach = new RealCoach({ claudePath: loggedInClaude(), query: held });
+    const check = coach.checkLogin();
+    await new Promise((r) => setTimeout(r, 5));
+    const call = coach.ask({ job: 'why', model: 'haiku', brief }, () => {}).catch((err: unknown) => err);
+    await expect.poll(() => answers.length).toBe(2);
+    // The Coach call is turned down while the check waits; then the check hears "OK".
+    answers[1]!(turnedDown);
+    expect(await call).toBeInstanceOf(CoachUnavailableError);
+    answers[0]!(ok);
+    expect(await check).toEqual({ state: 'ok' });
+    expect(await coach.status()).toMatchObject({ state: 'unavailable' });
+  });
+
+  it.skipIf(process.platform === 'win32')('keeps a Coach call turned down in the same millisecond the check started', async () => {
+    const answers: ((said: unknown[]) => void)[] = [];
+    const held = (() =>
+      (async function* () {
+        for (const m of await new Promise<unknown[]>((r) => answers.push(r))) yield m;
+      })()) as unknown as typeof query;
+    const coach = new RealCoach({ claudePath: loggedInClaude(), query: held });
+    // Both start at once, so they share a millisecond: only the order of the answers decides.
+    const check = coach.checkLogin();
+    const call = coach.ask({ job: 'why', model: 'haiku', brief }, () => {}).catch((err: unknown) => err);
+    await expect.poll(() => answers.length).toBe(2);
+    answers[1]!(turnedDown);
+    expect(await call).toBeInstanceOf(CoachUnavailableError);
+    answers[0]!(ok);
+    await check;
+    expect(await coach.status()).toMatchObject({ state: 'unavailable' });
+  });
+
+  it.skipIf(process.platform === 'win32')('says the usage limit, not ready, when the owner logs back in out of limits', async () => {
+    let answer = turnedDown as unknown[];
+    const coach = new RealCoach({ claudePath: loggedInClaude(), query: claudeSays([], () => answer), loginRecheckMs: 20 });
+    const heard: CoachStatus[] = [];
+    const service = new CoachService({} as Db, systemClock, coach, (status) => heard.push(status));
+    expect(await coach.checkLogin()).toMatchObject({ state: 'refused' });
+    answer = [{ type: 'rate_limit_event', rate_limit_info: { status: 'rejected', resetsAt: Math.floor(Date.now() / 1000) + 3600 } }];
+    await expect.poll(() => heard.map((s) => s.state), { timeout: 2000 }).toEqual(['limit-reached']);
+    expect((await service.status()).state).toBe('limit-reached');
+  });
+
+  it('tells a service that starts after the check about a usage limit the check found', async () => {
+    const limit = [{ type: 'rate_limit_event', rate_limit_info: { status: 'rejected' } }];
+    const coach = new RealCoach({ query: claudeSays([], () => limit) });
+    expect(await coach.checkLogin()).toMatchObject({ state: 'limit' });
+    const service = new CoachService({} as Db, systemClock, coach);
+    expect((await service.status()).state).toBe('limit-reached');
+  });
+});

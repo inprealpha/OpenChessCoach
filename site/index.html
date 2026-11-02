@@ -321,11 +321,14 @@ footer { font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--li
     <details><summary>Claude Code is installed but not logged in</summary><div>
       <p>Run <code class="inline">claude</code>, type <code class="inline">/login</code> and sign in. A free Claude plan can't log in to Claude Code; you need Pro or Max.</p>
     </div></details>
+    <details><summary>Claude turned the login down, so it has probably expired</summary><div>
+      <p>OpenChessCoach asks Claude once when it starts, because Claude Code can still say it is logged in after its login has expired or was signed out elsewhere. Run <code class="inline">claude</code>, type <code class="inline">/login</code> and sign in again, then run the start command again. If it happens while the app runs, the Coach says so and comes back on its own once you have logged in again.</p>
+    </div></details>
     <details><summary>Port 8737 is already in use</summary><div>
       <p>OpenChessCoach is probably already running in another terminal window: use that one. Otherwise start it on another port, for example <code class="inline">npx openchesscoach@latest --port 8738</code>.</p>
     </div></details>
     <details><summary>Windows: running scripts is disabled on this system</summary><div>
-      <p>PowerShell blocked <code class="inline">npx</code>. Type <code class="inline">npx.cmd</code> instead of <code class="inline">npx</code>, exactly as in step 4.</p>
+      <p>PowerShell blocked <code class="inline">npx</code>. Type <code class="inline">npx.cmd</code> instead of <code class="inline">npx</code>, exactly as in step 4. Or let PowerShell run the scripts Node.js installed, once, with <code class="inline">Set-ExecutionPolicy -Scope CurrentUser RemoteSigned</code> (type <kbd>Y</kbd> if it asks); then <code class="inline">npx</code> works too. It still blocks unsigned scripts downloaded from the internet, and needs no administrator.</p>
     </div></details>
     <details><summary>My phone can't connect</summary><div>
       <p>Check the phone is on the same Wi-Fi as the desktop, and that you allowed the firewall prompt (see step 4). On guest or office Wi-Fi, devices often can't see each other: use <strong>away-from-home access</strong> in Settings instead.</p>

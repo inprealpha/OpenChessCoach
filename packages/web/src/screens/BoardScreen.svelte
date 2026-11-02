@@ -15,6 +15,8 @@
   import FlipButton from '../components/FlipButton.svelte';
   import EngineLines from '../components/EngineLines.svelte';
   import MoveList from '../components/MoveList.svelte';
+  import SheetHandle from '../components/SheetHandle.svelte';
+  import SheetStrip from '../components/SheetStrip.svelte';
   import StepButtons from '../components/StepButtons.svelte';
   import ThreatButton from '../components/ThreatButton.svelte';
   import { threatArrows } from '../lib/arrows.ts';
@@ -28,6 +30,7 @@
   import { scoreFromAnalysis } from '../lib/position-score.ts';
   import { stepLine, Variation, type Step } from '../lib/variation.svelte.ts';
   import { foldOpen, rememberFold } from '../lib/folds.ts';
+  import { sheet } from '../lib/sheet.svelte.ts';
 
   /** A FEN to open on, from #/board?fen=…. */
   let { fen: openAt }: { fen?: string } = $props();
@@ -345,7 +348,7 @@
   });
 </script>
 
-<section class="screen board-screen board-free">
+<section class="screen board-screen board-free" class:sheet-full={sheet.shown}>
   <header class="frame-head">
     <h1>Board</h1>
     <p class="head-line">{outcomeOf(boardFen) ? 'Game over' : `${SIDE_NAMES[turnOf(boardFen)]} to move`}</p>
@@ -357,6 +360,7 @@
   <div class="board-layout">
     <div class="board-col">
       <div class="board-and-bar">
+        <SheetStrip />
         <div class="with-bar">
           <WinningChancesBar score={position?.score ?? null} pov={position?.pov ?? 'white'} {orientation} />
           {#key boards}
@@ -375,15 +379,16 @@
       </div>
       <div class="board-bar toolbar">
         <StepButtons onfirst={() => step('first')} onprevious={() => step('previous')} onnext={() => step('next')} onlast={() => step('last')} />
-        {#if variation.active}<button type="button" class="secondary" onclick={backToLine}>Back to the main line</button>{/if}
+        {#if variation.active}<button type="button" class="back" onclick={backToLine}>Back to the main line</button>{/if}
         <FlipButton onflip={flip} />
         <ThreatButton view={threats} />
       </div>
       <p class="visually-hidden" role="status">{setupNote}</p>
       <p class="result" role="status" aria-label="Result">{result}</p>
     </div>
-    <div class="side">
-      <div class="panel-body">
+    <div class="side panel">
+      <SheetHandle />
+      <div class="panel-body" {@attach sheet.gestures}>
         {#if confirmingNew}
           <ConfirmDialog
             id="new-board"

@@ -5,6 +5,7 @@
   import type { Snippet } from 'svelte';
   import { MAX_QUESTION_LENGTH } from '@chess-coach/shared/protocol';
   import { api } from '../lib/api.svelte.ts';
+  import { sheet } from '../lib/sheet.svelte.ts';
   import type { CoachThread, Entry } from '../lib/coach.svelte.ts';
 
   interface Props {
@@ -32,11 +33,37 @@
   /** The latest exchange: from the Player's last question on, or the Coach's last message. */
   const latestFrom = $derived.by(() => {
     const entries = thread.entries;
-    for (let i = entries.length - 1; i >= 0; i--) if (entries[i]?.from === 'player') return i;
-    return Math.max(0, entries.length - 1);
+    // Put-away messages don't count: after Back to the game, the exchange before the variation is the latest again.
+    for (let i = entries.length - 1; i >= 0; i--) if (entries[i]?.from === 'player' && !entries[i]?.putAway) return i;
+    for (let i = entries.length - 1; i >= 0; i--) if (!entries[i]?.putAway) return i;
+    return entries.length;
   });
-  const earlier = $derived(thread.entries.slice(0, latestFrom));
-  const latest = $derived(thread.entries.slice(latestFrom));
+  // What the Player or the screen put away stays behind "Earlier", in the order it was said.
+  const earlier = $derived(thread.entries.filter((e, i) => i < latestFrom || e.putAway));
+  const latest = $derived(thread.entries.filter((e, i) => i >= latestFrom && !e.putAway));
+
+  /** The latest exchange answers the Player's own question. */
+  const answered = $derived(latest[0]?.from === 'player');
+  /** The log at rest shows less than the latest message: there is more to read with the sheet up. */
+  let cut = $state(false);
+  $effect(() => {
+    const el = log;
+    if (!el) return;
+    // The latest exchange, from the Player's question to the reply, not "Earlier" above it: the log
+    // shows its end, so the exchange is cut when it is taller than the log.
+    const measure = () => {
+      const shown = [...el.children].filter((c) => !c.matches('details.earlier'));
+      const first = shown[0]?.getBoundingClientRect();
+      const last = shown.at(-1)?.getBoundingClientRect();
+      cut = !sheet.full && Boolean(first && last) && last!.bottom - first!.top > el.clientHeight + 2;
+    };
+    void sheet.full;
+    void thread.entries[thread.entries.length - 1]?.text;
+    measure();
+    const watch = new ResizeObserver(measure);
+    watch.observe(el);
+    return () => watch.disconnect();
+  });
 
   /** The long entry the log was last scrolled to the start of: left alone after that. */
   let atStart: Element | null = null;
@@ -61,6 +88,8 @@
     const asked = question.trim();
     const calls = thread.calls;
     question = '';
+    // The answer comes right above the Ask box: on a phone the panel's sheet comes up to give it room.
+    sheet.pullUp();
     await onwhy(asked);
     // The button was disabled while the Coach answered, which drops the focus: the box takes it back.
     // Not on a touch screen, where a focused box opens the on-screen keyboard over the board.
@@ -86,7 +115,7 @@
 </script>
 
 <section class="coach" class:unavailable={!available} aria-label="Coach">
-  <header>
+  <header class:idle={available && !thread.busy}>
     <h2>Coach</h2>
     <span class="status" role="status">
       {#if !available}Coach unavailable{:else if thread.busy}Answering…{:else}Coach ready{/if}
@@ -108,15 +137,28 @@
       {/if}
       {#if entry.note}<p class="note">Added to your Player Profile: “{entry.note}”</p>{/if}
   {/snippet}
-  <div class="log" bind:this={log} aria-live="polite" aria-label="Coach conversation">
-    {#if earlier.length}
-      <details class="earlier">
-        <summary>Earlier ({earlier.length})</summary>
-        {#each earlier as entry (entry.id)}{@render message(entry)}{/each}
-      </details>
+  <div class="log-wrap">
+    <div class="log" bind:this={log} aria-live="polite" aria-label="Coach conversation">
+      {#if earlier.length}
+        <details class="earlier">
+          <summary>Earlier ({earlier.length})</summary>
+          {#each earlier as entry (entry.id)}{@render message(entry)}{/each}
+        </details>
+      {/if}
+      {#each latest as entry (entry.id)}{@render message(entry)}{/each}
+    </div>
+    {#if sheet.on && !thread.busy && cut}
+      <!-- A phone's docked log shows two lines at rest: the cut text itself is the button that pulls
+           the sheet up for the rest, marked Read all at its end, so it costs the sheet no row. -->
+      <button type="button" class="read-all" onclick={() => sheet.pullUp()}><span>Read all</span></button>
     {/if}
-    {#each latest as entry (entry.id)}{@render message(entry)}{/each}
   </div>
+  {#if sheet.on && sheet.full && !thread.busy && answered}
+    <!-- Pulled up, the answer takes the sheet's room: one tap puts it away behind "Earlier". -->
+    <div class="log-actions">
+      <button type="button" class="link" onclick={() => thread.settle()}>Put the answer away</button>
+    </div>
+  {/if}
   {#if actions}<div class="actions">{@render actions()}</div>{/if}
   {#if onwhy}
     <form onsubmit={submit}>
@@ -147,6 +189,7 @@
 
 <style>
   .coach {
+    position: relative;
     background: var(--panel);
     border: 1px solid var(--line);
     border-radius: 10px;
@@ -161,6 +204,7 @@
   .status { font-size: 0.8rem; color: var(--muted); }
   .reason { margin: 0; font-size: 0.85rem; }
   .empty { margin: 0; font-size: 0.9rem; color: var(--muted); }
+  .log-wrap { position: relative; flex: 0 1 auto; min-height: 0; display: flex; flex-direction: column; }
   .log { flex: 0 1 auto; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; }
   .log:empty { display: none; }
   .earlier { display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem; }
@@ -172,9 +216,25 @@
      and the box and its button share one row. */
   @media (max-width: 820px) {
     .coach { gap: 0.35rem; padding: 0.45rem 0.6rem; border-radius: 10px 10px 0 0; }
-    /* Docked at the foot of a phone's screen: two lines of the answer, more while typing. */
+    /* Docked at the foot of a phone's screen: two lines of the answer, more while typing, and the
+       sheet's room when it is pulled up. */
     .log { max-height: 3rem; }
     .coach:focus-within .log { max-height: 9rem; }
+    :global(.sheet-full) .log { max-height: 26dvh; }
+    /* Full-height taps, as every phone button is, but no more than one row. */
+    .log-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: -0.35rem; }
+    .log-actions button { min-height: var(--tap, 2.75rem); padding: 0 0.2rem; background: none; border: 0; color: var(--muted); font-size: 0.85rem; text-decoration: underline; }
+    /* Over the whole cut text, a tap anywhere on it reads the rest; the words sit at its end on a fade. */
+    .read-all {
+      position: absolute; inset: 0; min-height: 0 !important; padding: 0; margin: 0;
+      background: none; border: 0; display: flex; align-items: flex-end; justify-content: flex-end; cursor: pointer;
+    }
+    .read-all span {
+      padding: 0 0.2rem 0 2.5rem; font-size: 0.85rem; line-height: 1.45; color: var(--muted); text-decoration: underline;
+      background: linear-gradient(to right, transparent, var(--panel) 2rem);
+    }
+    /* Its name and "Coach ready" cost a phone a line: said only while it works or can't. */
+    header.idle { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
     h2 { font-size: 0.85rem; }
     .status { font-size: 0.75rem; }
     form { flex-wrap: nowrap; }

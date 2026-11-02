@@ -16,6 +16,9 @@
   import GameEnd from '../components/GameEnd.svelte';
   import MoveList from '../components/MoveList.svelte';
   import StepButtons from '../components/StepButtons.svelte';
+  import SheetHandle from '../components/SheetHandle.svelte';
+  import SheetStrip from '../components/SheetStrip.svelte';
+  import { sheet } from '../lib/sheet.svelte.ts';
   import ThreatButton from '../components/ThreatButton.svelte';
   import FlipButton from '../components/FlipButton.svelte';
   import WinningChancesBar from '../components/WinningChancesBar.svelte';
@@ -64,7 +67,6 @@
   const coach = new CoachThread();
   /** The Player's own moves from a position of the finished game, graded by the browser's Engine. */
   const variation = new Variation();
-
   let game = $state<Saved | null>(null);
   let loaded = $state(false);
   let side = $state<Side>('white');
@@ -546,7 +548,7 @@
   }
 </script>
 
-<section class="screen board-screen engine-game">
+<section class="screen board-screen engine-game" class:sheet-full={sheet.shown}>
   <header class="frame-head">
     <h1>Engine Game</h1>
     {#if game}
@@ -574,6 +576,7 @@
     <div class="board-layout">
       <div class="board-col">
         <div class="board-and-bar">
+          <SheetStrip />
           <div class="with-bar">
             <WinningChancesBar score={position?.score ?? null} pov={position?.pov ?? 'white'} {orientation} />
             <Board
@@ -594,7 +597,7 @@
           {#if finished}
             <!-- Only a finished game steps back: while it is on, the board shows the position to play from. -->
             <StepButtons onfirst={() => step('first')} onprevious={() => step('previous')} onnext={() => step('next')} onlast={() => step('last')} />
-            {#if variation.active}<button type="button" class="secondary" onclick={() => variation.leave()}>Back to the game</button>{/if}
+            {#if variation.active}<button type="button" class="back" onclick={() => variation.leave()}>Back to the game</button>{/if}
             <FlipButton onflip={() => (flipped = !flipped)} />
           {:else}
             <button
@@ -615,8 +618,9 @@
           {/if}
         </div>
       </div>
-      <div class="side">
-        <div class="panel-body">
+      <div class="side panel">
+        <SheetHandle />
+        <div class="panel-body" {@attach sheet.gestures}>
           {#if confirmingResign && !finished}
             <ConfirmDialog
               id="resign"
@@ -681,7 +685,10 @@
           {#if !finished}
             <label class="toggle"><input type="checkbox" checked={game.live} onchange={toggleLive} /> Live Coaching in this game</label>
           {/if}
+          <!-- During play the panel stays on the game's status, its choice to take a move back above
+               all: the board shows the move just played. A finished game's steps keep their move in view. -->
           <MoveList
+            followInPanel={finished}
             moves={line.moves}
             grades={game.grades}
             cursor={line.cursor}

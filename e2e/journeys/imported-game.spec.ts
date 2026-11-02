@@ -293,14 +293,15 @@ async function expectBxf7Chances(moment: Locator): Promise<void> {
   await expect(moment.getByTestId('chances-change')).toHaveText('48% → 35%');
   await expect(moment.getByTestId('chances-before')).toHaveText('Before: White’s winning chances: 48%');
   await expect(moment.getByTestId('chances-after')).toHaveText('After 11. Bxf7+: White’s winning chances: 35%');
-  // The best better move; the others are behind More moves.
-  await expect(moment.getByText(/^Better: /)).toHaveText('Better: axb4 48%');
+  // The best better move, as a button that tries it on the board; the others are behind More moves.
+  // The button says what it does, and its name is what it shows.
+  await expect(moment.getByRole('button', { name: 'Try axb4 48%' })).toHaveText('Try axb4 48%');
   await moment.getByText('More moves').click();
   await expect(moment.getByText('Ng5 44%, Ne5 44%')).toBeVisible();
 }
 
-/** Shows a Review panel's tab: Moments (the overview and the key moments) or Moves. */
-async function showTab(page: Page, name: 'Moments' | 'Moves'): Promise<void> {
+/** Shows a Review panel's tab: Moments (the key moments), Moves or Overview. */
+async function showTab(page: Page, name: 'Moments' | 'Moves' | 'Overview'): Promise<void> {
   await page.getByRole('tab', { name }).click();
 }
 
@@ -433,7 +434,7 @@ test.describe('a Review’s overview', () => {
   // Slow enough to see the overview stream before the key moments.
   test.use({ appOptions: { chunkDelayMs: 40 } });
 
-  test('opens the Review, streamed before the key moments; each move it names jumps the board there; it reopens with no Coach call', async ({ paired, app }) => {
+  test('is streamed before the key moments, then waits on its own tab, marked unread; each move it names jumps the board there; it reopens with no Coach call', async ({ paired, app }) => {
     await paired.goto(`${app.url}/#/review/1`);
     // Every change to the card of the Review being made, as it happens: what its first line says,
     // and what the Coach has written so far, the overview first. Read after the Review, so a slow
@@ -450,8 +451,8 @@ test.describe('a Review’s overview', () => {
       }).observe(document.body, { subtree: true, childList: true, characterData: true });
     });
     await paired.getByRole('button', { name: 'Start the Review' }).click();
-    const overview = paired.getByRole('region', { name: 'Overview' });
-    await expect(overview).toBeVisible({ timeout: 90_000 });
+    const keyMoments = paired.getByRole('region', { name: 'Key moments' });
+    await expect(keyMoments).toBeVisible({ timeout: 90_000 });
     // The overview streamed first, with the card saying so; then the key moments, under it.
     const seen = await paired.evaluate(() => (window as unknown as { madeSeen: string[] }).madeSeen);
     const writing = 'The Coach is writing an overview of the game…';
@@ -461,10 +462,15 @@ test.describe('a Review’s overview', () => {
     expect(seen).toContain(`${explaining} | overview, moment`);
     expect(seen.findIndex((e) => e.startsWith(explaining))).toBeGreaterThan(seen.indexOf(`${writing} | overview`));
     expect(seen.filter((e) => e.includes('moment')).every((e) => e.startsWith(explaining))).toBe(true);
-    // The recorded reply for game 1 (verify/recordings/coach.json), above the key moments.
+    // The recorded reply for game 1 (verify/recordings/coach.json) on its own tab, one tap away,
+    // marked unread on this first visit.
+    const overviewTab = paired.getByRole('tab', { name: /^Overview/ });
+    await expect(overviewTab).toHaveAccessibleName('Overview, not read yet');
+    await overviewTab.click();
+    await expect(overviewTab).toHaveAttribute('aria-selected', 'true');
+    await expect(overviewTab).toHaveAccessibleName('Overview');
+    const overview = paired.getByRole('region', { name: 'Overview' });
     await expect(overview).toContainText('Your opening went well, and your opponent had to find 9… d5 there');
-    const keyMoments = paired.getByRole('region', { name: 'Key moments' });
-    expect((await overview.boundingBox())!.y).toBeLessThan((await keyMoments.boundingBox())!.y);
     const calls = await app.rows<{ job: string }>('coach_calls');
     expect(calls.map((c) => c.job)).toEqual(['review-overview', 'review-moment', 'review-moment', 'review-moment', 'review-moment']);
 
@@ -478,19 +484,18 @@ test.describe('a Review’s overview', () => {
     await expect(current).toHaveAccessibleName(/^Current position: 9… d5: /);
     await showTab(paired, 'Moves');
     await expect(paired.getByRole('listitem').filter({ has: paired.getByRole('button', { name: 'Move 9… d5, Best', exact: true }) })).toHaveClass(/current/);
-    await showTab(paired, 'Moments');
+    await showTab(paired, 'Overview');
     await overview.getByRole('button', { name: 'Go to move 12. Bg5, Mistake' }).click();
     await expect(board.getByRole('img', { name: 'Mistake on g5' })).toBeVisible();
     await expect(current).toHaveAccessibleName('Current position: 12. Bg5: White’s winning chances: 19%');
 
-    // Reopened, the saved overview is folded to its first sentence, having been read once; opened,
-    // it is all there, links and all, with no Coach call.
+    // Reopened, the key moments open alone, the overview having been read once; its tab has it all,
+    // links and all, with no Coach call.
     const text = await overview.textContent();
     await paired.reload();
-    const fold = paired.getByRole('region', { name: 'Overview' }).locator('details');
-    await expect(fold).not.toHaveAttribute('open');
-    await expect(fold.locator('summary')).toContainText('Overview · Your opening went well');
-    await fold.locator('summary').click();
+    await expect(keyMoments).toBeVisible();
+    await expect(overviewTab).toHaveAccessibleName('Overview');
+    await showTab(paired, 'Overview');
     await expect(paired.getByRole('region', { name: 'Overview' })).toHaveText(text ?? '');
     await expect(paired.getByRole('region', { name: 'Overview' }).getByRole('button')).toHaveCount(5);
     expect(await app.rows('coach_calls')).toHaveLength(calls.length);
@@ -528,9 +533,11 @@ test('in a Review, the arrow keys step through the game as on Lichess', async ({
   const list = paired.getByRole('list', { name: 'Moves' });
   const current = list.locator('li.current').getByRole('button');
   const last = list.getByRole('listitem').last();
-  /** Whether the last move shows inside the move list's own scroll box. */
+  // The move list scrolls with the panel around it, as in Doop's panel: one scroll box, not two.
+  const panel = paired.locator('.panel-body').filter({ has: list });
+  /** Whether the last move shows inside the panel's scroll box. */
   const lastInView = async () => {
-    const box = await list.boundingBox();
+    const box = await panel.boundingBox();
     const item = await last.boundingBox();
     return Boolean(box && item && item.y >= box.y - 1 && item.y + item.height <= box.y + box.height + 1);
   };
@@ -749,6 +756,109 @@ test('the board never scrolls away: on a phone it stays at the top while the pan
   expect(await paired.evaluate(() => document.documentElement.scrollHeight)).toBeLessThanOrEqual(800);
   await expect.poll(() => boardOnScreen(800)).toBe(true);
   await expect(paired.getByRole('textbox', { name: 'Your Why Question' })).toBeInViewport();
+});
+
+/** A variation's bar beside the strip board: no page wider than the screen, Back to the game whole. */
+async function expectBarBesideStripFits(page: Page, width: number): Promise<void> {
+  await expect.poll(() => page.evaluate(() => [document.documentElement.scrollWidth, document.documentElement.clientWidth])).toEqual([width, width]);
+  const back = page.getByRole('button', { name: 'Back to the game' });
+  expect((await back.boundingBox())!.width).toBeGreaterThan(80);
+  await expect(back).toBeInViewport({ ratio: 1 });
+  await expect(page.getByRole('button', { name: 'Show threat' })).toBeInViewport({ ratio: 1 });
+}
+
+test('on an iPhone, a variation with the sheet pulled up keeps the page the screen’s width', async ({ paired, app }) => {
+  for (const [width, height] of [[402, 714], [440, 790]] as const) {
+    await paired.setViewportSize({ width, height });
+    await paired.goto(`${app.url}/#/review/1`);
+    if (width === 402) await paired.getByRole('button', { name: 'Start the Review' }).click();
+    const first = paired.getByRole('region', { name: 'Key moments' }).getByRole('listitem').first();
+    const show = first.getByRole('button', { name: /^Show moment/ });
+    await expect(show).toBeVisible({ timeout: 90_000 });
+    if ((await show.getAttribute('aria-expanded')) !== 'true') await show.click();
+    await first.getByRole('button', { name: 'Try axb4 48%' }).click();
+    const handle = paired.getByRole('button', { name: /^(Pull the panel up|Let the panel down)$/ });
+    await expect(handle).toHaveAttribute('aria-expanded', 'false');
+    await handle.click();
+    await expect(handle).toHaveAttribute('aria-expanded', 'true');
+    await expectBarBesideStripFits(paired, width);
+    await paired.getByRole('button', { name: 'Back to the game' }).click();
+  }
+});
+
+test('on an iPhone the page fits the screen, and the panel is a sheet: pulled up, the board is a strip a tap brings back', async ({ paired, app }) => {
+  // Safari's visible area on current iPhones, from the 402 px of a 16 Pro to the 440 px of a 16 Pro Max:
+  // the page never pans sideways or scrolls behind the panel.
+  for (const [width, height] of [[402, 714], [430, 760], [440, 790]] as const) {
+    await paired.setViewportSize({ width, height });
+    await paired.goto(`${app.url}/#/review/1`);
+    if (width === 402) await paired.getByRole('button', { name: 'Start the Review' }).click();
+    await expect(paired.getByRole('region', { name: 'Key moments' }).getByRole('listitem').first()).toBeVisible({ timeout: 90_000 });
+    const size = await paired.evaluate(() => [document.documentElement.scrollWidth, document.documentElement.scrollHeight]);
+    expect(size, `at ${width}×${height}`).toEqual([width, height]);
+    await expect(paired.getByRole('link', { name: 'Settings' })).toBeInViewport({ ratio: 1 });
+  }
+
+  const board = paired.getByRole('group', { name: 'Review board' });
+  const panel = paired.locator('.side.panel');
+  // The grab handle: its name says what a tap does, its state whether the sheet is up.
+  const handle = paired.getByRole('button', { name: /^(Pull the panel up|Let the panel down)$/ });
+  const wide = (await board.boundingBox())!.width;
+  const low = (await panel.boundingBox())!.height;
+  await expect(handle).toHaveAttribute('aria-expanded', 'false');
+  await expect(handle).toHaveAccessibleName('Pull the panel up');
+
+  // Pulled up: the board is a strip beside its bar, still whole on screen, and the panel takes the height.
+  await handle.click();
+  await expect(handle).toHaveAttribute('aria-expanded', 'true');
+  await expect(handle).toHaveAccessibleName('Let the panel down');
+  await expect.poll(async () => (await board.boundingBox())!.width).toBeLessThan(wide * 0.6);
+  expect((await panel.boundingBox())!.height).toBeGreaterThan(low + 150);
+  await expect(board).toBeInViewport({ ratio: 1 });
+  await expect(paired.getByRole('button', { name: 'Next move' })).toBeInViewport({ ratio: 1 });
+  await expect(paired.getByRole('textbox', { name: 'Your Why Question' })).toBeInViewport({ ratio: 1 });
+
+  // A tap on the strip brings the board back full size.
+  await paired.getByRole('button', { name: 'Show the board full size' }).click();
+  await expect(handle).toHaveAttribute('aria-expanded', 'false');
+  await expect.poll(async () => (await board.boundingBox())!.width).toBe(wide);
+
+  // Scrolling the panel down pulls it up first.
+  const rows = paired.getByRole('region', { name: 'Key moments' });
+  await rows.hover();
+  await paired.mouse.wheel(0, 200);
+  await expect(handle).toHaveAttribute('aria-expanded', 'true');
+
+  // The better move tries itself on the board, which comes back full size to show it.
+  const first = paired.getByRole('region', { name: 'Key moments' }).getByRole('listitem').first();
+  const show = first.getByRole('button', { name: /^Show moment/ });
+  if ((await show.getAttribute('aria-expanded')) !== 'true') await show.click();
+  await expect(show).toHaveAttribute('aria-expanded', 'true');
+  await first.getByRole('button', { name: 'Try axb4 48%' }).click();
+  await expect(handle).toHaveAttribute('aria-expanded', 'false');
+  await expect(paired.getByRole('button', { name: 'Back to the game' })).toBeVisible();
+  await expect.poll(async () => (await board.boundingBox())!.width).toBe(wide);
+  // The moment stays open on its tab and says what the board shows, with the bar on one row.
+  await expect(paired.getByRole('tab', { name: 'Moments' })).toHaveAttribute('aria-selected', 'true');
+  await expect(first.getByRole('status')).toContainText(/^Trying 11\. axb4.*instead of Bxf7\+ · 48%/);
+  await expect(first.getByRole('status')).toBeInViewport();
+  const bar = paired.locator('.board-bar');
+  expect((await bar.boundingBox())!.height).toBeLessThan(60);
+
+  // A Why Question about it pulls the sheet up so its answer has room above the Ask box.
+  await paired.getByRole('button', { name: 'Ask the Coach why' }).click();
+  await expect(handle).toHaveAttribute('aria-expanded', 'true');
+  const conversation = paired.getByLabel('Coach conversation');
+  await expect(conversation).not.toBeEmpty();
+  // Beside the strip, the bar wraps rather than squeeze Back to the game or run off the screen.
+  await expectBarBesideStripFits(paired, 440);
+  // Back to the game: the moment is back, and the answer about the variation is put away.
+  await paired.getByRole('button', { name: 'Back to the game' }).click();
+  await expect(paired.getByRole('tab', { name: 'Moments' })).toHaveAttribute('aria-selected', 'true');
+  await expect(first.getByRole('status')).toHaveCount(0);
+  await expect(conversation.locator(':scope > .entry')).toHaveCount(0);
+  await expect(conversation.getByText(/^Earlier \(\d+\)$/)).toBeVisible();
+  await expect(show).toBeInViewport();
 });
 
 test('on a phone, an opened key moment and the current move show clear of the tabs', async ({ paired, app }) => {

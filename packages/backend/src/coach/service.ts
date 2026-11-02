@@ -38,6 +38,8 @@ export interface AskOptions {
 }
 
 const MAX_THREADS = 200;
+/** How long the Coach waits out a usage limit when Claude doesn't say when it resets. */
+const LIMIT_WAIT_MS = 15 * 60_000;
 const MAX_LOGGED_CALLS = 500;
 /** Clears the questions of Coach calls older than the oldest one kept (the parameter), through the index on call_id. */
 export const QUESTION_CLEANUP = 'DELETE FROM coach_questions WHERE call_id < ?';
@@ -58,6 +60,13 @@ export class CoachService {
     this.clock = clock;
     this.coach = coach;
     this.onStatus = onStatus;
+    // Passed on as this service's own status, which also knows about the usage limit.
+    coach.watch?.((back) => {
+      if (back.limited) this.limitUntil = back.limited.resetsAt ?? new Date(this.clock.now().getTime() + LIMIT_WAIT_MS);
+      void this.status()
+        .then((status) => this.onStatus(status))
+        .catch(() => {});
+    });
   }
 
   async status(): Promise<CoachStatus> {
@@ -113,7 +122,7 @@ export class CoachService {
     } catch (err) {
       if (err instanceof CoachLimitError) {
         this.log(ask, model, brief, null, [], tool?.calls);
-        this.limitUntil = err.resetsAt ?? new Date(this.clock.now().getTime() + 15 * 60_000);
+        this.limitUntil = err.resetsAt ?? new Date(this.clock.now().getTime() + LIMIT_WAIT_MS);
         const next = await this.status();
         this.onStatus(next);
         throw new AppError('coach-limit', next.reason ?? err.message);

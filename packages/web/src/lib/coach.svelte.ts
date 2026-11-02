@@ -15,6 +15,8 @@ export interface Entry {
   engineQuestions?: number;
   /** While it streams: what the Coach is doing meanwhile, such as asking the Engine. */
   status?: string;
+  /** Put away: the Coach panel folds it behind "Earlier". */
+  putAway?: boolean;
 }
 
 let nextEntry = 1;
@@ -35,6 +37,21 @@ export class CoachThread {
    * still on its way, about an earlier move or position, never draws on the board as it is now.
    */
   private annotating = 0;
+
+  /** Where the messages said from now on begin: what `settle` can put away later. */
+  mark(): number {
+    return nextEntry;
+  }
+
+  /**
+   * Puts messages away, behind "Earlier", with the board's arrows: for when the board leaves what
+   * they were about (Back to the game, from the `mark` taken as the variation began), or the Player
+   * dismisses the answer (all of them). A reply still arriving lands where it is read.
+   */
+  settle(from = 0): void {
+    this.entries = this.entries.map((e) => (e.id >= from && !e.streaming && !e.putAway ? { ...e, putAway: true } : e));
+    this.clearAnnotations();
+  }
 
   reset(): void {
     this.entries = [];

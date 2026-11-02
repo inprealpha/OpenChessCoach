@@ -52,6 +52,14 @@ async function main(): Promise<void> {
     process.stderr.write(`\n✗ ${claude.message}\n\n`);
     process.exit(2);
   }
+  // Claude Code saying it is logged in isn't enough: a login that expired still says so. One short
+  // call finds out now, rather than when the Player first asks the Coach. It runs while the app
+  // starts, and the browser opens only once Claude has answered.
+  const coach = new RealCoach(claude.path ? { claudePath: claude.path } : {});
+  // The package check's stand-in `claude` has no login for Claude to take, so it skips the call.
+  const skip = process.env.CHESS_COACH_SKIP_LOGIN_CHECK === '1';
+  process.stdout.write(skip ? '\nSkipping the Claude login check (CHESS_COACH_SKIP_LOGIN_CHECK=1).\n' : '\nChecking your Claude login…\n');
+  const loginCheck = skip ? Promise.resolve({ state: 'ok' } as const) : coach.checkLogin();
 
   const log = (line: string) => process.stdout.write(`  ${line}\n`);
   // The moves a Player would reach for (ADR 0011): Maia-3, downloaded in the background into the
@@ -73,7 +81,7 @@ async function main(): Promise<void> {
     port,
     webRoot: webRoot(),
     verify: false,
-    coach: new RealCoach(claude.path ? { claudePath: claude.path } : {}),
+    coach,
     clock: systemClock,
     version: appVersion(),
     engine: { depth: 14, multiPv: 5, singleThread: false },
@@ -95,6 +103,21 @@ async function main(): Promise<void> {
     }
     throw err;
   });
+
+  const login = await loginCheck;
+  if (login.state === 'refused') {
+    process.stderr.write(`\n✗ ${login.message} Then start the app again.\n\n`);
+    process.exit(2);
+  }
+  if (login.state === 'limit') {
+    const until = login.resetsAt ? ` until ${login.resetsAt.toLocaleString()}` : '';
+    process.stdout.write(`  Your Claude login works, but your usage limit is reached${until}. The Coach answers again after that.\n`);
+  } else if (login.state === 'unknown') {
+    const why = /[.!?]$/.test(login.message) ? login.message : `${login.message}.`;
+    process.stdout.write(`  Couldn’t confirm your Claude login: ${why} Starting anyway; the Coach says so if Claude turns the login down.\n`);
+  } else if (!skip) {
+    process.stdout.write('  Claude Code is logged in and Claude answers.\n');
+  }
 
   writeFileSync(
     join(dataDir, 'instance.json'),

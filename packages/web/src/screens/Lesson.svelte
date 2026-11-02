@@ -34,6 +34,9 @@
   import CoachPanel from '../components/CoachPanel.svelte';
   import GradeBadge from '../components/GradeBadge.svelte';
   import StepButtons from '../components/StepButtons.svelte';
+  import SheetHandle from '../components/SheetHandle.svelte';
+  import SheetStrip from '../components/SheetStrip.svelte';
+  import { sheet } from '../lib/sheet.svelte.ts';
   import { api } from '../lib/api.svelte.ts';
   import { lessonArrows, lessonHighlights } from '../lib/arrows.ts';
   import { CoachThread } from '../lib/coach.svelte.ts';
@@ -46,7 +49,6 @@
   import { router } from '../lib/router.svelte.ts';
   import { store } from '../lib/storage.ts';
   import { stepLine, Variation, type Step } from '../lib/variation.svelte.ts';
-
   let { lessonId }: { lessonId: string } = $props();
 
   let lesson = $state<LessonData | null>(null);
@@ -343,6 +345,8 @@
    */
   async function retry(): Promise<void> {
     if (!node || phase !== 'feedback' || coach.busy) return;
+    // The next move is on the board: a phone's sheet comes down so the first tap moves a piece.
+    sheet.full = false;
     line.takeBack();
     result = null;
     typed = '';
@@ -356,6 +360,8 @@
   /** Continue with the Lesson's move: the board shows it, with its note, before the Lesson moves on. */
   async function showLessonMove(): Promise<void> {
     if (!node || phase !== 'feedback' || lessonMove) return;
+    // The Lesson's move plays on the board: a phone's sheet comes down to show it.
+    sheet.full = false;
     line.takeBack();
     line.play(node.main);
     coach.clearAnnotations();
@@ -369,6 +375,8 @@
     // step the first one has just advanced, and skip a decision.
     if (!node || !lesson || advancing || !(phase === 'shown' || (phase === 'feedback' && lessonMove))) return;
     advancing = true;
+    // The next decision is on the board: a phone's sheet comes down so the first tap moves a piece.
+    sheet.full = false;
     const from = step;
     // A checkmate ends its part: the decisions left in it are needless.
     const mated = phase === 'feedback' && mates;
@@ -407,6 +415,8 @@
 
   async function hint(): Promise<void> {
     if (!node || phase !== 'decide' || hinting || grading) return;
+    // The Hint's arrow is on the board: a phone's sheet comes down to show it full size.
+    sheet.full = false;
     // Show the move once per decision: another click (after Try another move, say) brings the
     // arrow back, with no new line.
     if (shownMove?.fen === node.fen) {
@@ -525,7 +535,7 @@
   );
 </script>
 
-<section class="screen" class:board-screen={lesson && phase !== 'intro' && part}>
+<section class="screen" class:board-screen={lesson && phase !== 'intro' && part} class:sheet-full={sheet.shown}>
   {#if missing}
     <h1>Lesson not found</h1>
     <p><a href="#/lessons">Back to the Lessons</a></p>
@@ -641,6 +651,8 @@
     {:else if part}
       <div class="board-layout">
         <div class="board-col">
+          <div class="board-and-bar">
+          <SheetStrip />
           <Board
             bind:this={board}
             fen={boardFen}
@@ -654,6 +666,7 @@
             {refusal}
             label={`${lesson.name} Lesson board`}
           />
+          </div>
           <!-- Straight under the board, so on a phone the Hint and the arrow Show the move draws are both in view. -->
           {#if phase === 'decide'}
             <div class="board-bar toolbar">
@@ -662,12 +675,13 @@
           {:else if phase === 'done' && variation.active}
             <div class="board-bar toolbar">
               <StepButtons onfirst={() => stepVariation('first')} onprevious={() => stepVariation('previous')} onnext={() => stepVariation('next')} onlast={() => stepVariation('last')} />
-              <button type="button" class="secondary" onclick={backToLesson}>Back to the Lesson</button>
+              <button type="button" class="back" onclick={backToLesson}>Back to the Lesson</button>
             </div>
           {/if}
         </div>
-        <div class="side">
-          <div class="panel-body" bind:this={panelBody} class:feedback={phase === 'feedback' || phase === 'shown'}>
+        <div class="side panel">
+          <SheetHandle />
+          <div class="panel-body" {@attach sheet.gestures} bind:this={panelBody} class:feedback={phase === 'feedback' || phase === 'shown'}>
           {#if !isOpening && phase !== 'done'}
             <section class="card" aria-label="Position">
               <h2>{lesson.parts.length > 1 ? `${(current?.partIndex ?? 0) + 1} of ${lesson.parts.length}: ` : ''}{part.title}</h2>

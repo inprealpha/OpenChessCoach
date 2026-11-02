@@ -104,8 +104,8 @@
   }
   .percent.start { top: auto; bottom: 0.25rem; }
 
-  /* Above the board on a phone-sized screen: a horizontal bar, the bottom side filling from the left. */
-  @container (max-width: 520px) {
+  /* Above the board on a phone: a horizontal bar, the bottom side filling from the left. */
+  @media (max-width: 820px) {
     .wc-bar {
       width: min(var(--board-max, 560px), 92vw, 100cqw);
       height: 1.1rem;

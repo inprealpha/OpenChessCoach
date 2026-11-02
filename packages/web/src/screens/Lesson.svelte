@@ -748,7 +748,7 @@
             </section>
           {/if}
           {#if phase === 'shown' && node}
-            <section class="card choice" aria-label="The Lesson’s move">
+            <section class="card choice shown" aria-label="The Lesson’s move">
               <p>The Lesson continues with <strong>{node.mainSan}</strong>, the move it teaches. {#if ending}<strong>{ending}</strong>{/if}</p>
               {#if node.notes?.text}<p>{node.notes.text}</p>{/if}
               {#if popular.length}{@render popularity(node.main)}{/if}
@@ -822,8 +822,9 @@
   /* Under the board: the legend line. On a phone the panel keeps room for the part's title and the
      decision's prompt. */
   .board-screen { --under-board: 2.5rem; --phone-reserve: 20.5rem; }
-  /* Lesson complete: the board gives the card room, so a short phone shows the next Lesson. */
-  .board-screen:has(.done) { --phone-reserve: 22rem; }
+  /* Lesson complete, and the Lesson's move (its note and popularity table come before Continue):
+     the board gives the card room, so a short phone shows the next Lesson or Continue in any font. */
+  .board-screen:has(.done, .choice.shown) { --phone-reserve: 22rem; }
   .intro { max-width: 42rem; display: flex; flex-direction: column; gap: 0.6rem; align-items: flex-start; }
   .intro p { margin: 0; }
   .intro h2 { margin: 0 0 0.2rem; }

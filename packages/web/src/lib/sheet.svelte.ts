@@ -1,6 +1,6 @@
 // The panel of a phone's board frame as a sheet (docs/design/interface-guidelines.md, Phone): under
 // the board it shows its first lines; pulled up it takes the height and the board shrinks to a strip
-// beside the board bar, which a tap brings back. Only a phone held upright has the sheet: a
+// that a tap brings back. Only a phone held upright has the sheet: a
 // desktop's panel sits beside the board, and a phone on its side scrolls as a page.
 // One sheet for the app, as one board screen shows at a time: its handle lets it down as a screen
 // opens, and the Coach's Ask box pulls it up for the answer on every screen.

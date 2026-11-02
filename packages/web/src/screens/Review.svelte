@@ -527,8 +527,8 @@
             {/key}
           </div>
         </div>
-        <!-- The game's graph steps aside while the Player tries a variation, leaving its bar the room
-             Back to the game takes, so the frame stays one screen tall. -->
+        <!-- The game's graph steps aside while the Player tries a variation: its cursor is the game's,
+             not the line on the board. -->
         {#if review && !narrow.on && !variation.active}
           <WinningChancesGraph moves={review.moves} cursor={variation.from ?? shownIndex} ongoto={goto} compact />
         {/if}
@@ -688,9 +688,9 @@
           placeholder={askedMove ? `Ask why about ${moveLabel(askedMove.fenBefore, askedMove.san)}` : 'Ask why about this move'}
           closed={askedMove ? undefined : 'Step to a move to ask why about it'}
         >
-          {#snippet steps()}
+          {#snippet steps(part: 'back' | 'on')}
             <!-- Steps from the position on the board: an open key moment shows the one before its move. -->
-            <StepButtons onfirst={() => step('first')} onprevious={() => step('previous')} onnext={() => step('next')} onlast={() => step('last')} />
+            <StepButtons only={part} onfirst={() => step('first')} onprevious={() => step('previous')} onnext={() => step('next')} onlast={() => step('last')} />
           {/snippet}
         </CoachPanel>
       </div>

@@ -356,10 +356,10 @@
     <div class="frame-tools">
       <!-- "Set up" and "New" on a phone, where the header line is short of room; the names stay whole. -->
       <button type="button" class="secondary" aria-label="Set up a position" aria-expanded={settingUp} onclick={openSetUp} bind:this={setupButton}
-        >Set up<span class="wide"> a position</span></button
+        >Set up<span class="wide">{' '}a position</span></button
       >
       <button type="button" class="secondary" aria-label="New board" onclick={askNewBoard} aria-expanded={confirmingNew} bind:this={newButton}
-        >New<span class="wide"> board</span></button
+        >New<span class="wide">{' '}board</span></button
       >
       <ThreatButton view={threats} />
       <FlipButton onflip={flip} />
@@ -433,8 +433,8 @@
         onwhy={why}
         placeholder={shownLast ? `Ask why about ${moveLabel(shownLast.fenBefore, shownLast.san)}` : 'Ask about this position'}
       >
-        {#snippet steps()}
-          <StepButtons onfirst={() => step('first')} onprevious={() => step('previous')} onnext={() => step('next')} onlast={() => step('last')} />
+        {#snippet steps(part: 'back' | 'on')}
+          <StepButtons only={part} onfirst={() => step('first')} onprevious={() => step('previous')} onnext={() => step('next')} onlast={() => step('last')} />
         {/snippet}
       </CoachPanel>
     </div>

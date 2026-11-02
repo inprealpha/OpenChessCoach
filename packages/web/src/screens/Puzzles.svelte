@@ -420,9 +420,9 @@
         </div>
         {#if status !== 'solving'}
           <CoachPanel thread={coach} onwhy={why} placeholder={variation.active ? (variation.line.lastMove ? `Ask why about ${variation.line.lastMove.san}` : 'Ask about this position') : 'Why is this the answer?'}>
-            {#snippet steps()}
+            {#snippet steps(part: 'back' | 'on')}
               <!-- Stepping stays inside the Puzzle: its first position is the one the Player was set. -->
-              <StepButtons onfirst={() => step('first')} onprevious={() => step('previous')} onnext={() => step('next')} onlast={() => step('last')} />
+              <StepButtons only={part} onfirst={() => step('first')} onprevious={() => step('previous')} onnext={() => step('next')} onlast={() => step('last')} />
             {/snippet}
           </CoachPanel>
         {/if}
@@ -436,7 +436,7 @@
   .puzzles { --phone-reserve: 22.5rem; }
   /* The picker's line sits between the header line and the frame. */
   @media (min-width: 821px) {
-    .puzzles { --frame-h: calc(100dvh - var(--app-head) - 5.6rem); }
+    .puzzles { --frame-h: calc(100dvh - var(--app-head) - 6rem); }
   }
   .row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
   .small { font-size: 0.8rem; }

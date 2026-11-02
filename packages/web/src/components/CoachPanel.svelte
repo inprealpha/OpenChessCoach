@@ -19,8 +19,8 @@
     empty?: string;
     /** Why the Ask box takes no question right now, said in the box: it stays in its place, closed. */
     closed?: string;
-    /** The screen's step buttons (StepButtons): the thumb bar puts them either side of the Ask box. */
-    steps?: Snippet;
+    /** The screen's step buttons (StepButtons, by half): the thumb bar puts them either side of the Ask box. */
+    steps?: Snippet<['back' | 'on']>;
   }
   let { thread, onwhy, whyLabel = 'Ask the Coach why', placeholder = 'Why is this move good or bad?', actions, empty, closed, steps }: Props = $props();
 
@@ -164,7 +164,7 @@
   {#if actions}<div class="actions">{@render actions()}</div>{/if}
   {#if onwhy || steps}
   <div class="thumb-row">
-  {@render steps?.()}
+  {@render steps?.('back')}
   {#if onwhy}
     <form onsubmit={submit}>
       <label class="visually-hidden" for="why-input">Your Why Question</label>
@@ -187,6 +187,7 @@
       >
     </form>
   {/if}
+  {@render steps?.('on')}
   </div>
   {/if}
   {#if onwhy}
@@ -207,7 +208,8 @@
     flex-direction: column;
     gap: 0.5rem;
   }
-  .unavailable { opacity: 0.6; filter: grayscale(1); }
+  /* The Coach's own parts look unavailable; the step buttons beside its box still step the board. */
+  .unavailable > :not(.thumb-row), .unavailable .thumb-row > form { opacity: 0.6; filter: grayscale(1); }
   header { display: flex; justify-content: space-between; align-items: baseline; }
   h2 { margin: 0; font-size: 1rem; }
   .status { font-size: 0.8rem; color: var(--muted); }

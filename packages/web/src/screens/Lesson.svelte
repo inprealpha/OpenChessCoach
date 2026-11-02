@@ -800,8 +800,8 @@
           </div>
           <!-- Docked at the panel's foot. While the Player chooses, the thinking box is the one place
                to type; Why Questions follow the Move Grade, once the answer is no longer kept back. -->
-          {#snippet variationSteps()}
-            <StepButtons onfirst={() => stepVariation('first')} onprevious={() => stepVariation('previous')} onnext={() => stepVariation('next')} onlast={() => stepVariation('last')} />
+          {#snippet variationSteps(part: 'back' | 'on')}
+            <StepButtons only={part} onfirst={() => stepVariation('first')} onprevious={() => stepVariation('previous')} onnext={() => stepVariation('next')} onlast={() => stepVariation('last')} />
           {/snippet}
           <CoachPanel thread={coach} onwhy={phase === 'decide' || otherMove ? undefined : why} steps={phase === 'done' && variation.active ? variationSteps : undefined} />
         </div>

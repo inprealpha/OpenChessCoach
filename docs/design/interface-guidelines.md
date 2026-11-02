@@ -40,7 +40,7 @@ screen fills the frame's slots; it doesn't invent its own layout.
 
 Nothing stands between the board and the panel: the tools sit on the header line, out of the way
 of the squares, and the step buttons at the foot of the screen, where a thumb rests (the "Thumb
-bar" layout the owner picked from three mockups for 0.6.0).
+bar" layout the owner picked from three mockups for 0.5.2).
 
 ### Desktop (from 821 px wide)
 

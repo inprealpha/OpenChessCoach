@@ -13,7 +13,7 @@
     /** The board's position: 0 for the start, n after the n-th move. */
     cursor: number;
     ongoto: (cursor: number) => void;
-    /** A low strip under the board bar, so the board keeps its size; the full height in the panel. */
+    /** A low strip under the board, so the board keeps its size; the full height in the panel. */
     compact?: boolean;
   }
   let { moves, cursor, ongoto, compact = false }: Props = $props();

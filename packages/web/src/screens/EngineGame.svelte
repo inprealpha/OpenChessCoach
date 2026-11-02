@@ -701,8 +701,8 @@
         <!-- Docked at the panel's foot, as beside every other board. Once the game is over it stays
              only if it said something worth rereading. -->
         <!-- Only a finished game steps back: while it is on, the board shows the position to play from. -->
-        {#snippet steps()}
-          <StepButtons onfirst={() => step('first')} onprevious={() => step('previous')} onnext={() => step('next')} onlast={() => step('last')} />
+        {#snippet steps(part: 'back' | 'on')}
+          <StepButtons only={part} onfirst={() => step('first')} onprevious={() => step('previous')} onnext={() => step('next')} onlast={() => step('last')} />
         {/snippet}
         {#if !finished || coach.entries.length}
           <CoachPanel
@@ -713,7 +713,7 @@
             steps={finished ? steps : undefined}
           />
         {:else}
-          <ThumbBar>{@render steps()}</ThumbBar>
+          <ThumbBar {steps} />
         {/if}
       </div>
     </div>

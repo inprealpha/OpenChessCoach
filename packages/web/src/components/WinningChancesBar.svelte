@@ -107,13 +107,16 @@
   /* Above the board on a phone: a horizontal bar, the bottom side filling from the left. */
   @media (max-width: 820px) {
     .wc-bar {
-      width: min(var(--board-max, 560px), 92vw, 100cqw);
-      height: 1.1rem;
+      width: min(var(--board-max, 560px), 100cqw);
+      height: 0.8rem;
       justify-self: center;
-      /* Above the board, so the board keeps the full width and the bar reads before it. */
+      /* Above the board, so the board keeps the full width and the bar reads before it: a thin
+         band flush with the board's top edge, its two numbers small inside it. */
       order: -1;
-      margin-bottom: 0.3rem;
+      margin-bottom: 0;
     }
+    .track { border-radius: 0; box-shadow: none; }
+    .percent { font-size: 0.6rem; }
     .fill { height: 100%; width: var(--share); }
     .percent { top: 50%; transform: translateY(-50%); left: auto; right: 0.35rem; width: auto; }
     .percent.start { top: 50%; bottom: auto; right: auto; left: 0.35rem; }

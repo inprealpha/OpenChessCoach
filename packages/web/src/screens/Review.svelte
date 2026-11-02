@@ -24,6 +24,7 @@
   import SheetStrip from '../components/SheetStrip.svelte';
   import StepButtons from '../components/StepButtons.svelte';
   import ThreatButton from '../components/ThreatButton.svelte';
+  import VariationBar from '../components/VariationBar.svelte';
   import WinningChancesBar from '../components/WinningChancesBar.svelte';
   import WinningChancesGraph from '../components/WinningChancesGraph.svelte';
   import { api, ApiError } from '../lib/api.svelte.ts';
@@ -490,6 +491,12 @@
   <header class="frame-head">
     <h1>Review</h1>
     {#if game}<p class="head-line" data-testid="review-summary">{summaryOf(game)}</p>{:else if kept}<p class="head-line">{summaryOf(kept)}</p>{/if}
+    {#if game}
+      <div class="frame-tools">
+        <ThreatButton view={threats} />
+        <FlipButton onflip={() => (flipped = !flipped)} />
+      </div>
+    {/if}
   </header>
   {#if error}<p class="error" role="alert">{error}</p>{/if}
   {#if game}
@@ -520,13 +527,6 @@
             {/key}
           </div>
         </div>
-        <div class="board-bar toolbar">
-          <!-- Steps from the position on the board: an open key moment shows the one before its move. -->
-          <StepButtons onfirst={() => step('first')} onprevious={() => step('previous')} onnext={() => step('next')} onlast={() => step('last')} />
-          {#if variation.active}<button type="button" class="back" onclick={backToGame}>Back to the game</button>{/if}
-          <FlipButton onflip={() => (flipped = !flipped)} />
-          <ThreatButton view={threats} />
-        </div>
         <!-- The game's graph steps aside while the Player tries a variation, leaving its bar the room
              Back to the game takes, so the frame stays one screen tall. -->
         {#if review && !narrow.on && !variation.active}
@@ -535,6 +535,7 @@
       </div>
       <div class="side panel">
         <SheetHandle />
+        {#if variation.active}<VariationBar back="Back to the game" onback={backToGame} />{/if}
         <div class="panel-body" {@attach sheet.gestures}>
           {#if game.source === 'sample'}<p class="muted small" role="note">A sample game: it doesn’t count towards your Player Profile.</p>{/if}
           {#if phase === 'ready'}
@@ -686,7 +687,12 @@
           onwhy={why}
           placeholder={askedMove ? `Ask why about ${moveLabel(askedMove.fenBefore, askedMove.san)}` : 'Ask why about this move'}
           closed={askedMove ? undefined : 'Step to a move to ask why about it'}
-        />
+        >
+          {#snippet steps()}
+            <!-- Steps from the position on the board: an open key moment shows the one before its move. -->
+            <StepButtons onfirst={() => step('first')} onprevious={() => step('previous')} onnext={() => step('next')} onlast={() => step('last')} />
+          {/snippet}
+        </CoachPanel>
       </div>
     </div>
   {:else if !error && api.state === 'offline'}
@@ -700,10 +706,10 @@
 </section>
 
 <style>
-  /* Under the board on desktop: the bar, the legend line and the graph's strip. On a phone, what the
-     frame keeps under and above the board: the header, the bar, the legend, the panel's tabs and its
-     first lines, and the Ask box. */
-  .review { --under-board: 12.75rem; --phone-reserve: 25.25rem; }
+  /* Under the board on desktop: the legend line and the graph's strip. On a phone, what the frame
+     keeps around the board: the header line, the legend, the panel's tabs and its first row, and
+     the thumb bar. */
+  .review { --under-board: 9.75rem; --phone-reserve: 18rem; }
   .tabs { display: flex; gap: 0.25rem; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--panel); z-index: 1; margin-inline: calc(-1 * var(--panel-pad)); padding-inline: calc(var(--panel-pad) - 0.25rem); }
   .tabs button { background: none; color: var(--muted); border-radius: 0; padding: 0.45rem 0.75rem; min-height: 2.5rem; border-bottom: 2px solid transparent; margin-bottom: -1px; }
   .tabs button.on { color: var(--text); font-weight: 600; border-bottom-color: var(--accent); }

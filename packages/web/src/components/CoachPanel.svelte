@@ -19,8 +19,10 @@
     empty?: string;
     /** Why the Ask box takes no question right now, said in the box: it stays in its place, closed. */
     closed?: string;
+    /** The screen's step buttons (StepButtons): the thumb bar puts them either side of the Ask box. */
+    steps?: Snippet;
   }
-  let { thread, onwhy, whyLabel = 'Ask the Coach why', placeholder = 'Why is this move good or bad?', actions, empty, closed }: Props = $props();
+  let { thread, onwhy, whyLabel = 'Ask the Coach why', placeholder = 'Why is this move good or bad?', actions, empty, closed, steps }: Props = $props();
 
   let question = $state('');
   let log: HTMLDivElement | undefined = $state();
@@ -160,6 +162,9 @@
     </div>
   {/if}
   {#if actions}<div class="actions">{@render actions()}</div>{/if}
+  {#if onwhy || steps}
+  <div class="thumb-row">
+  {@render steps?.()}
   {#if onwhy}
     <form onsubmit={submit}>
       <label class="visually-hidden" for="why-input">Your Why Question</label>
@@ -181,6 +186,10 @@
         ><span class="long" aria-hidden="true">{whyLabel}</span><span class="short" aria-hidden="true">Ask</span></button
       >
     </form>
+  {/if}
+  </div>
+  {/if}
+  {#if onwhy}
     <p id="why-chars-left" class="chars-left" data-testid="why-chars-left" aria-live="polite" hidden={charsLeft > COUNT_FROM}>
       {charsLeft} {charsLeft === 1 ? 'character' : 'characters'} left
     </p>
@@ -212,10 +221,15 @@
   .earlier summary { cursor: pointer; color: var(--muted); font-size: 0.8rem; }
   .earlier > :global(p) { margin-top: 0.4rem; }
   .short { display: none; }
+  /* Between the step buttons, the box and its button keep to one row, the button a short "Ask". */
+  .thumb-row:has(> :global(.step)) form { flex-wrap: nowrap; }
+  .thumb-row:has(> :global(.step)) input { flex-basis: auto; }
+  .thumb-row:has(> :global(.step)) .long { display: none; }
+  .thumb-row:has(> :global(.step)) .short { display: inline; }
   /* Docked at the foot of the screen on a phone: the log keeps to a few lines above the Ask box,
      and the box and its button share one row. */
   @media (max-width: 820px) {
-    .coach { gap: 0.35rem; padding: 0.45rem 0.6rem; border-radius: 10px 10px 0 0; }
+    .coach { gap: 0.3rem; padding: 0.3rem 0.5rem; border-radius: 10px 10px 0 0; }
     /* Docked at the foot of a phone's screen: two lines of the answer, more while typing, and the
        sheet's room when it is pulled up. */
     .log { max-height: 3rem; }

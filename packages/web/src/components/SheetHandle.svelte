@@ -57,7 +57,7 @@
     align-items: center;
     justify-content: center;
     width: 100%;
-    height: 1.1rem;
+    height: 0.9rem;
     /* A full-width strip, not a small target: the phone's 44 px floor for buttons (app.css) doesn't apply. */
     min-height: 0 !important;
     padding: 0;

@@ -13,6 +13,7 @@
   import CoachPanel from '../components/CoachPanel.svelte';
   import GradeBadge from '../components/GradeBadge.svelte';
   import FlipButton from '../components/FlipButton.svelte';
+  import VariationBar from '../components/VariationBar.svelte';
   import StepButtons from '../components/StepButtons.svelte';
   import SheetHandle from '../components/SheetHandle.svelte';
   import SheetStrip from '../components/SheetStrip.svelte';
@@ -61,7 +62,7 @@
   // Every Lesson's Puzzles, whatever Lesson the address names.
   titleFrom(() => (opening && all.length && !lesson ? 'Puzzles' : null));
   const finished = $derived(status === 'solved' || status === 'shown');
-  /** Next Puzzle goes in the board bar on a phone, unless the bar holds Back to the Puzzle. */
+  /** Next Puzzle goes in the header line on a phone, where the resting sheet can't hide it, unless the Player is trying a line. */
   const nextInBar = $derived(sheet.on && !variation.active);
   const boardFen = $derived(variation.active ? variation.fen : line.fen);
   const shownLast = $derived(variation.active ? variation.line.lastMove : line.lastMove);
@@ -294,6 +295,12 @@
   <header class="frame-head">
     <h1>{lessonName ? `${lessonName} Puzzles` : 'Puzzles'}</h1>
     {#if puzzle && status !== 'empty'}<p class="head-line">Rated {puzzle.rating} · from a real Lichess game</p>{/if}
+    {#if puzzle && status !== 'empty' && status !== 'loading'}
+      <div class="frame-tools">
+        {#if finished && nextInBar}<button type="button" class="next" onclick={nextPuzzle}>Next Puzzle</button>{/if}
+        <FlipButton onflip={() => (flipped = !flipped)} />
+      </div>
+    {/if}
   </header>
   {#if all.length}
     {#if opening && !lesson}
@@ -358,19 +365,10 @@
           label="Puzzle board"
         />
         </div>
-        <div class="board-bar toolbar">
-          {#if finished}
-            <!-- Stepping stays inside the Puzzle: its first position is the one the Player was set. -->
-            <StepButtons onfirst={() => step('first')} onprevious={() => step('previous')} onnext={() => step('next')} onlast={() => step('last')} />
-            {#if variation.active}<button type="button" class="back" onclick={() => variation.leave()}>Back to the Puzzle</button>{/if}
-          {/if}
-          <FlipButton onflip={() => (flipped = !flipped)} />
-          <!-- On a phone, Next Puzzle sits in the bar under the board, where the resting sheet can't hide it. -->
-          {#if finished && nextInBar}<button type="button" class="next" onclick={nextPuzzle}>Next Puzzle</button>{/if}
-        </div>
       </div>
       <div class="side panel">
         <SheetHandle />
+        {#if finished && variation.active}<VariationBar back="Back to the Puzzle" onback={() => variation.leave()} />{/if}
         <div class="panel-body" {@attach sheet.gestures}>
         <section class="card" aria-label="Puzzle" data-puzzle-id={puzzle.id}>
           <p>
@@ -421,7 +419,12 @@
         <p class="muted small">Puzzles: Lichess puzzle database, CC0.</p>
         </div>
         {#if status !== 'solving'}
-          <CoachPanel thread={coach} onwhy={why} placeholder={variation.active ? (variation.line.lastMove ? `Ask why about ${variation.line.lastMove.san}` : 'Ask about this position') : 'Why is this the answer?'} />
+          <CoachPanel thread={coach} onwhy={why} placeholder={variation.active ? (variation.line.lastMove ? `Ask why about ${variation.line.lastMove.san}` : 'Ask about this position') : 'Why is this the answer?'}>
+            {#snippet steps()}
+              <!-- Stepping stays inside the Puzzle: its first position is the one the Player was set. -->
+              <StepButtons onfirst={() => step('first')} onprevious={() => step('previous')} onnext={() => step('next')} onlast={() => step('last')} />
+            {/snippet}
+          </CoachPanel>
         {/if}
       </div>
     </div>
@@ -429,6 +432,8 @@
 </section>
 
 <style>
+  /* On a phone the set picker sits above the board: the board gives it room, and the panel keeps the task and Show the solution. */
+  .puzzles { --phone-reserve: 22.5rem; }
   /* The picker's line sits between the header line and the frame. */
   @media (min-width: 821px) {
     .puzzles { --frame-h: calc(100dvh - var(--app-head) - 5.6rem); }

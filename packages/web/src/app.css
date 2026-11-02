@@ -15,6 +15,8 @@
   --app-head: 3rem;
   --board-cap: 560px;
   --tap: 44px;
+  /* The frame's rules and borders: one device pixel on a retina screen, crisp rather than heavy. */
+  --hair: 1px;
   /* One arrow colour per meaning, on every board. The played move is ink: its Move Grade is the
      badge on its square, not the arrow's colour. */
   --arrow-played: #262421;
@@ -40,6 +42,7 @@
     --danger: #ff8a8a;
   }
 }
+@media (min-resolution: 2dppx) { :root { --hair: 0.5px; } }
 @media (min-width: 1400px) and (min-height: 900px) {
   :root { --board-max: min(760px, calc(100vh - 280px)); --board-cap: 760px; --screen-max: 1360px; }
 }
@@ -78,7 +81,6 @@ h1 { font-size: 1.4rem; margin: 0.5rem 0 1rem; }
 .board-layout { display: grid; gap: 1rem; grid-template-columns: minmax(0, var(--board-max)) minmax(0, 1fr); align-items: start; }
 @media (max-width: 820px) { .board-layout { grid-template-columns: 1fr; } }
 .side { display: flex; flex-direction: column; gap: 0.75rem; min-width: 0; }
-.toolbar { display: flex; gap: 0.4rem; flex-wrap: wrap; justify-content: center; margin-top: 0.4rem; }
 
 /* The board frame, on every screen with a board (Board, Engine Game, Lesson, Puzzle, Review):
    a header line, the board with its bar and legend, and the panel, with the Coach's Ask box docked
@@ -88,22 +90,36 @@ h1 { font-size: 1.4rem; margin: 0.5rem 0 1rem; }
 .frame-head h1 { font-size: 1.15rem; margin: 0; }
 .head-line { margin: 0; color: var(--muted); font-size: 0.9rem; min-width: 0; }
 .board-col { min-width: 0; }
-.board-bar { display: flex; gap: 0.4rem; flex-wrap: wrap; justify-content: center; align-items: center; margin-top: 0.4rem; }
-.board-bar button { min-height: 2.5rem; }
-/* With "Back to the …" in it, the bar keeps to one row in any font, as in the sketches: Flip board
-   shows its arrows only, Show threat says "Threat", and Back to the game, the bar's filled button,
-   takes two short lines before the bar would wrap. A phone's bar also lets the jumps to the first
-   and last position step aside (Home and End still do them). */
-.board-bar:has(> .back) { flex-wrap: nowrap; }
-.board-bar:has(> .back) .flip .words { display: none; }
-.board-bar:has(> .back) .threat-button .words-long { display: none; }
-.board-bar:has(> .back) .threat-button .words-short { display: inline; }
-.board-bar > .back { flex: 0 1 auto; min-width: 0; line-height: 1.15; }
-@media (max-width: 820px) {
-  .board-bar:has(> .back) > .edge { display: none; }
-  /* Next Puzzle in the bar: the jumps to the first and last position step aside for it too. */
-  .board-bar:has(> .next) > .edge { display: none; }
+/* The board's tools (Flip board, Show threat, Hint, the game's menu) sit at the end of the header
+   line, out of the way of the board's squares; nothing stands between the board and the panel. */
+.frame-tools { margin-left: auto; display: flex; align-items: center; gap: 0.3rem; flex: 0 0 auto; }
+.frame-tools button { padding: 0.3rem 0.7rem; font-size: 0.9rem; }
+/* A menu in the header line (the Engine Game's ⋯ Game) opens downwards, over the board. */
+.frame-tools .menu-button .menu { top: calc(100% + 0.3rem); bottom: auto; }
+/* The thumb bar: the step buttons either side of the Ask box at the panel's foot, where a thumb
+   rests and far from the pieces; alone where the screen takes no Why Question. */
+.thumb-row { display: flex; align-items: center; gap: 0.3rem; }
+.thumb-row > form { flex: 1 1 auto; min-width: 0; }
+.thumb-row > .step {
+  flex: 0 0 auto; min-width: 2.5rem; min-height: 2.5rem; padding: 0 0.5rem;
+  background: none; border: 0; color: var(--text); border-radius: 8px;
 }
+.thumb-row > .step:hover { background: var(--bg); }
+.thumb-row > .first { order: -2; }
+.thumb-row > .previous { order: -1; }
+.thumb-row > .next { order: 1; }
+.thumb-row > .last { order: 2; }
+/* Steps alone: wide targets, the way back on the left and the way on on the right. */
+.thumb-row:not(:has(> form)) > .step { flex: 1 1 0; background: var(--bg); }
+.thumb-bar { border-top: var(--hair) solid var(--line); padding: 0.4rem 0.6rem; background: var(--panel); }
+/* While the Player tries their own line: the way back, at the top of the panel, never scrolled away. */
+.variation-bar {
+  display: flex; align-items: center; gap: 0.6rem; padding: 0.35rem var(--panel-pad, 0.75rem);
+  background: color-mix(in srgb, var(--accent) 9%, var(--panel)); border-bottom: var(--hair) solid var(--line);
+  font-size: 0.85rem;
+}
+.variation-bar > span { flex: 1 1 auto; min-width: 0; color: var(--muted); }
+.variation-bar > .back { flex: 0 0 auto; padding: 0.3rem 0.8rem; font-size: 0.9rem; }
 /* The panel's content scrolls inside it; the Coach sits at its foot. */
 .panel-body { display: flex; flex-direction: column; gap: 0.75rem; min-width: 0; position: relative; }
 /* The panel as one card, as in the guidelines' sketches: its tabs at the top, its content
@@ -137,10 +153,11 @@ h1 { font-size: 1.4rem; margin: 0.5rem 0 1rem; }
 @media (min-width: 821px) {
   /* One screen tall: the header line on one row, and the board sized to fit under it with its bar. */
   .board-screen {
-    --frame-h: calc(100dvh - var(--app-head) - 3.6rem);
+    --frame-h: calc(100dvh - var(--app-head) - 4rem);
     --board-max: min(var(--board-cap), calc(var(--frame-h) - var(--under-board, 6.5rem)));
   }
-  .board-screen .frame-head { flex-wrap: nowrap; height: 2.1rem; overflow: hidden; }
+  .board-screen .frame-head { flex-wrap: nowrap; align-items: center; height: 2.5rem; }
+  .board-screen .frame-head > h1 { flex: 0 0 auto; }
   .board-screen .head-line { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .board-screen .board-layout { height: var(--frame-h); align-items: stretch; }
   .board-screen .side { min-height: 0; height: var(--frame-h); gap: 0.6rem; }
@@ -148,18 +165,34 @@ h1 { font-size: 1.4rem; margin: 0.5rem 0 1rem; }
   .board-screen .side > .coach { flex: 0 1 auto; max-height: 60%; min-height: 0; }
 }
 @media (max-width: 820px) {
-  .board-screen .board-col { margin-inline: -0.75rem; padding: 0.2rem 0.75rem; border-bottom: 1px solid var(--line); }
+  /* Smaller, crisper type on a phone's board screens: the board is the screen, the words serve it. */
+  .board-screen { font-size: 0.875rem; padding-top: 0; }
+  .board-screen h1 { font-size: 1.05rem; }
+  /* The board edge to edge, as wide as the screen: the biggest squares to tap. */
+  .board-screen .board-col { margin-inline: -0.75rem; padding: 0; border-bottom: var(--hair) solid var(--line); }
+  .board-screen .board-col .board { border-radius: 0; box-shadow: none; }
   .board-screen .board-layout > .side { gap: 0.5rem; padding-top: 0.5rem; }
   /* Every control a thumb can reach: at least 44 px tall. */
-  .board-screen :is(.panel-body, .board-bar, .side > .coach) :is(button:not(.link), summary, select) { min-height: var(--tap); }
+  .board-screen :is(.panel-body, .frame-tools, .variation-bar, .side > .coach) :is(button:not(.link), summary, select) { min-height: var(--tap); }
   .board-screen .frame-head a { display: inline-flex; align-items: center; gap: 0.25rem; min-height: var(--tap); }
   /* The header line on one row: the screen's name whole, its context cut short if need be. */
-  .board-screen .frame-head { flex-wrap: nowrap; align-items: center; margin-bottom: 0.2rem; }
+  .board-screen .frame-head { flex-wrap: nowrap; align-items: center; gap: 0 0.5rem; margin: 0; min-height: var(--tap); }
   .board-screen .frame-head > * { flex-shrink: 0; }
-  .board-screen .frame-head > .head-line { flex: 1 1 auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .board-screen .frame-head > h1 { flex: 0 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .board-screen .frame-head > .head-line { flex: 1 1 0; min-width: 0; font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .board-screen .frame-head > .frame-tools { margin-left: 0; margin-right: -0.4rem; }
   .board-screen .side > .coach { margin-inline: -0.75rem; box-shadow: 0 -6px 16px rgb(0 0 0 / 12%); }
-  .board-bar { gap: 0.25rem; }
-  .board-bar button { min-width: var(--tap); min-height: var(--tap); padding-inline: 0.5rem; }
+  /* The header line is the tools' row: the screen's name whole, its context cut short, the tools
+     as small as a thumb allows (Flip board and Show threat as icons). */
+  .frame-tools { gap: 0.1rem; }
+  .frame-tools button { min-width: var(--tap); min-height: var(--tap); padding-inline: 0.55rem; font-size: 0.85rem; }
+  .frame-tools :is(.flip, .threat-button) { background: none; border: 0; padding-inline: 0.4rem; }
+  .frame-tools .threat-button:not([aria-pressed='true']) { color: var(--text); }
+  .frame-tools .threat-button .words-long { display: none; }
+  .frame-tools .threat-button .t-icon { display: block; }
+  .frame-tools .threat-button:has(.t-icon) .words-short { display: none; }
+  .thumb-row > .step.edge { display: none; }
+  .thumb-row > .step { min-width: var(--tap); min-height: var(--tap); }
   /* On every screen, the controls a thumb taps are at least 44 px (guidelines, Controls); links in
      running text and the board's own squares keep their size. */
   .screen :is(button:not(.link), a.button, summary, select):not(.board *) { min-height: var(--tap); }
@@ -181,7 +214,7 @@ h1 { font-size: 1.4rem; margin: 0.5rem 0 1rem; }
   .board-screen .board-col {
     /* Small enough on a short phone to leave the panel's first lines, such as a choice to make,
        and the Ask box room under it. */
-    --board-max: min(var(--board-cap), calc(100dvh - var(--phone-reserve, 25rem)));
+    --board-max: min(var(--board-cap), calc(100dvh - var(--phone-reserve, 18rem)));
     flex: 0 0 auto;
   }
   .board-screen .board-layout > .side { flex: 1 1 auto; min-height: 0; }
@@ -191,24 +224,18 @@ h1 { font-size: 1.4rem; margin: 0.5rem 0 1rem; }
   html:has(.board-screen > .board-layout) { overscroll-behavior: none; }
   /* The panel as a sheet: a full-width card from the board's foot to the screen's, with rounded top
      corners, its grab handle and no gaps the page shows through. */
-  .board-screen:has(> .board-layout) .board-col { border-bottom: 0; padding-bottom: 0.5rem; }
+  .board-screen:has(> .board-layout) .board-col { border-bottom: 0; padding-bottom: 0.3rem; }
   .board-screen .board-layout > .side.panel {
     --panel-pad: 0.75rem;
-    margin-inline: -0.75rem; border-width: 1px 0 0; border-radius: 14px 14px 0 0; gap: 0; padding-top: 0;
-    box-shadow: 0 -4px 14px rgb(0 0 0 / 10%);
+    margin-inline: -0.75rem; border-width: var(--hair) 0 0; border-radius: 12px 12px 0 0; gap: 0; padding-top: 0;
+    box-shadow: 0 -2px 10px rgb(0 0 0 / 8%);
   }
   .board-screen .side.panel > .coach { margin-inline: 0; box-shadow: none; border-radius: 0; }
-  /* Pulled up (lib/sheet.svelte.ts), or typing a question: the board is a strip beside its bar,
-     and the panel takes the rest of the height. A tap on the strip brings the board back. */
+  /* Pulled up (lib/sheet.svelte.ts), or typing a question: the board is a strip, and the panel
+     takes the rest of the height. A tap on the strip brings the board back. */
   .board-screen:is(.sheet-full, :has(.coach input.typing)) .board-col {
-    --strip: min(44vw, 34dvh);
-    --board-max: var(--strip);
-    display: grid; grid-template-columns: var(--strip) minmax(0, 1fr); gap: 0.6rem; align-items: start;
-  }
-  /* Beside the strip the bar has half the width: it wraps, Back to the … included, rather than
-     squeeze its buttons or run off the screen. */
-  .board-screen:is(.sheet-full, :has(.coach input.typing)) .board-bar {
-    margin-top: 0; justify-content: flex-start; align-content: flex-start; gap: 0.3rem; flex-wrap: wrap;
+    --board-max: min(40vw, 30dvh);
+    padding-block: 0.4rem;
   }
 }
 .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 0.75rem 1rem; }

@@ -19,6 +19,7 @@
   import SheetStrip from '../components/SheetStrip.svelte';
   import StepButtons from '../components/StepButtons.svelte';
   import ThreatButton from '../components/ThreatButton.svelte';
+  import VariationBar from '../components/VariationBar.svelte';
   import { threatArrows } from '../lib/arrows.ts';
   import { gradeMark } from '../lib/grades.ts';
   import WinningChancesBar from '../components/WinningChancesBar.svelte';
@@ -352,9 +353,16 @@
   <header class="frame-head">
     <h1>Board</h1>
     <p class="head-line">{outcomeOf(boardFen) ? 'Game over' : `${SIDE_NAMES[turnOf(boardFen)]} to move`}</p>
-    <div class="head-actions">
-      <button type="button" class="secondary" aria-expanded={settingUp} onclick={openSetUp} bind:this={setupButton}>Set up a position</button>
-      <button type="button" class="secondary" onclick={askNewBoard} aria-expanded={confirmingNew} bind:this={newButton}>New board</button>
+    <div class="frame-tools">
+      <!-- "Set up" and "New" on a phone, where the header line is short of room; the names stay whole. -->
+      <button type="button" class="secondary" aria-label="Set up a position" aria-expanded={settingUp} onclick={openSetUp} bind:this={setupButton}
+        >Set up<span class="wide"> a position</span></button
+      >
+      <button type="button" class="secondary" aria-label="New board" onclick={askNewBoard} aria-expanded={confirmingNew} bind:this={newButton}
+        >New<span class="wide"> board</span></button
+      >
+      <ThreatButton view={threats} />
+      <FlipButton onflip={flip} />
     </div>
   </header>
   <div class="board-layout">
@@ -377,17 +385,12 @@
           {/key}
         </div>
       </div>
-      <div class="board-bar toolbar">
-        <StepButtons onfirst={() => step('first')} onprevious={() => step('previous')} onnext={() => step('next')} onlast={() => step('last')} />
-        {#if variation.active}<button type="button" class="back" onclick={backToLine}>Back to the main line</button>{/if}
-        <FlipButton onflip={flip} />
-        <ThreatButton view={threats} />
-      </div>
       <p class="visually-hidden" role="status">{setupNote}</p>
       <p class="result" role="status" aria-label="Result">{result}</p>
     </div>
     <div class="side panel">
       <SheetHandle />
+      {#if variation.active}<VariationBar back="Back to the main line" onback={backToLine} />{/if}
       <div class="panel-body" {@attach sheet.gestures}>
         {#if confirmingNew}
           <ConfirmDialog
@@ -429,14 +432,17 @@
         thread={coach}
         onwhy={why}
         placeholder={shownLast ? `Ask why about ${moveLabel(shownLast.fenBefore, shownLast.san)}` : 'Ask about this position'}
-      />
+      >
+        {#snippet steps()}
+          <StepButtons onfirst={() => step('first')} onprevious={() => step('previous')} onnext={() => step('next')} onlast={() => step('last')} />
+        {/snippet}
+      </CoachPanel>
     </div>
   </div>
 </section>
 
 <style>
-  .head-actions { margin-left: auto; display: flex; gap: 0.4rem; flex-shrink: 0; }
-  .head-actions button { padding: 0.3rem 0.7rem; font-size: 0.9rem; }
+  @media (max-width: 820px) { .wide { display: none; } }
   .lines-toggle { align-self: flex-start; }
   .result { margin: 0.5rem 0 0; text-align: center; font-weight: 600; }
   .result:empty { margin: 0; }

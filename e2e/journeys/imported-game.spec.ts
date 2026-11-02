@@ -758,7 +758,7 @@ test('the board never scrolls away: on a phone it stays at the top while the pan
   await expect(paired.getByRole('textbox', { name: 'Your Why Question' })).toBeInViewport();
 });
 
-/** A variation with the sheet up: no page wider than the screen, Back to the game whole at the panel's top, the header line's tools whole. */
+/** A variation with the sheet up: no page wider than the screen, Back to the game and the header line's tools whole. */
 async function expectBarBesideStripFits(page: Page, width: number): Promise<void> {
   await expect.poll(() => page.evaluate(() => [document.documentElement.scrollWidth, document.documentElement.clientWidth])).toEqual([width, width]);
   const back = page.getByRole('button', { name: 'Back to the game' });
@@ -838,12 +838,13 @@ test('on an iPhone the page fits the screen, and the panel is a sheet: pulled up
   await expect(handle).toHaveAttribute('aria-expanded', 'false');
   await expect(paired.getByRole('button', { name: 'Back to the game' })).toBeVisible();
   await expect.poll(async () => (await board.boundingBox())!.width).toBe(wide);
-  // The moment stays open on its tab and says what the board shows, with the way back on one row above it.
+  // The moment stays open on its tab and says what the board shows; the way back sits on the header line's row.
   await expect(paired.getByRole('tab', { name: 'Moments' })).toHaveAttribute('aria-selected', 'true');
   await expect(first.getByRole('status')).toContainText(/^Trying 11\. axb4.*instead of Bxf7\+ · 48%/);
   await expect(first.getByRole('status')).toBeInViewport();
-  const bar = paired.getByRole('group', { name: 'Your own line' });
-  expect((await bar.boundingBox())!.height).toBeLessThan(60);
+  const back = (await paired.getByRole('button', { name: 'Back to the game' }).boundingBox())!;
+  const heading = (await paired.getByRole('heading', { name: 'Review', level: 1 }).boundingBox())!;
+  expect(Math.abs(back.y + back.height / 2 - (heading.y + heading.height / 2))).toBeLessThan(8);
 
   // A Why Question about it pulls the sheet up so its answer has room above the Ask box.
   await paired.getByRole('button', { name: 'Ask the Coach why' }).click();

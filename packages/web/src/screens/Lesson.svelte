@@ -607,6 +607,8 @@
         <div class="frame-tools">
           <button type="button" class="secondary" bind:this={hintButton} onclick={hint} disabled={coach.busy || grading}>{hintLevel === 0 ? 'Hint' : 'Show the move'}</button>
         </div>
+      {:else if phase === 'done' && variation.active}
+        <div class="frame-tools"><VariationBar place="header" back="Back to the Lesson" onback={backToLesson} /></div>
       {/if}
       <a class="back" href="#/lessons" aria-label="Back to the Lessons"><span aria-hidden="true">←</span> <span class="long">Back to the</span> Lessons</a>
     </header>
@@ -677,7 +679,7 @@
         </div>
         <div class="side panel">
           <SheetHandle />
-          {#if phase === 'done' && variation.active}<VariationBar back="Back to the Lesson" onback={backToLesson} />{/if}
+          {#if phase === 'done' && variation.active}<VariationBar place="panel" back="Back to the Lesson" onback={backToLesson} />{/if}
           <div class="panel-body" {@attach sheet.gestures} bind:this={panelBody} class:feedback={phase === 'feedback' || phase === 'shown'}>
           {#if !isOpening && phase !== 'done'}
             <section class="card" aria-label="Position">

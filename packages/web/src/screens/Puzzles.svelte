@@ -297,6 +297,7 @@
     {#if puzzle && status !== 'empty'}<p class="head-line">Rated {puzzle.rating} · from a real Lichess game</p>{/if}
     {#if puzzle && status !== 'empty' && status !== 'loading'}
       <div class="frame-tools">
+        {#if finished && variation.active}<VariationBar place="header" back="Back to the Puzzle" onback={() => variation.leave()} />{/if}
         {#if finished && nextInBar}<button type="button" class="next" onclick={nextPuzzle}>Next Puzzle</button>{/if}
         <FlipButton onflip={() => (flipped = !flipped)} />
       </div>
@@ -368,7 +369,7 @@
       </div>
       <div class="side panel">
         <SheetHandle />
-        {#if finished && variation.active}<VariationBar back="Back to the Puzzle" onback={() => variation.leave()} />{/if}
+        {#if finished && variation.active}<VariationBar place="panel" back="Back to the Puzzle" onback={() => variation.leave()} />{/if}
         <div class="panel-body" {@attach sheet.gestures}>
         <section class="card" aria-label="Puzzle" data-puzzle-id={puzzle.id}>
           <p>

@@ -354,11 +354,12 @@
     <h1>Board</h1>
     <p class="head-line">{outcomeOf(boardFen) ? 'Game over' : `${SIDE_NAMES[turnOf(boardFen)]} to move`}</p>
     <div class="frame-tools">
+      {#if variation.active}<VariationBar place="header" back="Back to the main line" onback={backToLine} />{/if}
       <!-- "Set up" and "New" on a phone, where the header line is short of room; the names stay whole. -->
-      <button type="button" class="secondary" aria-label="Set up a position" aria-expanded={settingUp} onclick={openSetUp} bind:this={setupButton}
+      <button type="button" class="secondary board-action" aria-label="Set up a position" aria-expanded={settingUp} onclick={openSetUp} bind:this={setupButton}
         >Set up<span class="wide">{' '}a position</span></button
       >
-      <button type="button" class="secondary" aria-label="New board" onclick={askNewBoard} aria-expanded={confirmingNew} bind:this={newButton}
+      <button type="button" class="secondary board-action" aria-label="New board" onclick={askNewBoard} aria-expanded={confirmingNew} bind:this={newButton}
         >New<span class="wide">{' '}board</span></button
       >
       <ThreatButton view={threats} />
@@ -390,7 +391,7 @@
     </div>
     <div class="side panel">
       <SheetHandle />
-      {#if variation.active}<VariationBar back="Back to the main line" onback={backToLine} />{/if}
+      {#if variation.active}<VariationBar place="panel" back="Back to the main line" onback={backToLine} />{/if}
       <div class="panel-body" {@attach sheet.gestures}>
         {#if confirmingNew}
           <ConfirmDialog
@@ -443,6 +444,8 @@
 
 <style>
   @media (max-width: 820px) { .wide { display: none; } }
+  /* A phone's header line with Back to the main line in it: Set up and New wait until the Player is back. */
+  @media (max-width: 820px) and (min-height: 560px) { .frame-tools:has(> :global(.back)) > .board-action { display: none; } }
   .lines-toggle { align-self: flex-start; }
   .result { margin: 0.5rem 0 0; text-align: center; font-weight: 600; }
   .result:empty { margin: 0; }

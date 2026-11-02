@@ -191,6 +191,9 @@ h1 { font-size: 1.4rem; margin: 0.5rem 0 1rem; }
   .frame-tools .threat-button .t-icon { display: block; }
   .frame-tools .threat-button:has(.t-icon) .words-short { display: none; }
   .thumb-row > .step.edge { display: none; }
+  /* Back to the … in the header line (VariationBar) takes the context's place while it shows. */
+  .board-screen .frame-head:has(.frame-tools > .back) > .head-line { visibility: hidden; }
+  .frame-tools > .back { white-space: nowrap; }
   .thumb-row > .step { min-width: var(--tap); min-height: var(--tap); }
   /* On every screen, the controls a thumb taps are at least 44 px (guidelines, Controls); links in
      running text and the board's own squares keep their size. */

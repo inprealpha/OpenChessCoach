@@ -493,6 +493,7 @@
     {#if game}<p class="head-line" data-testid="review-summary">{summaryOf(game)}</p>{:else if kept}<p class="head-line">{summaryOf(kept)}</p>{/if}
     {#if game}
       <div class="frame-tools">
+        {#if variation.active}<VariationBar place="header" back="Back to the game" onback={backToGame} />{/if}
         <ThreatButton view={threats} />
         <FlipButton onflip={() => (flipped = !flipped)} />
       </div>
@@ -535,7 +536,7 @@
       </div>
       <div class="side panel">
         <SheetHandle />
-        {#if variation.active}<VariationBar back="Back to the game" onback={backToGame} />{/if}
+        {#if variation.active}<VariationBar place="panel" back="Back to the game" onback={backToGame} />{/if}
         <div class="panel-body" {@attach sheet.gestures}>
           {#if game.source === 'sample'}<p class="muted small" role="note">A sample game: it doesn’t count towards your Player Profile.</p>{/if}
           {#if phase === 'ready'}

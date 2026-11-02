@@ -556,6 +556,7 @@
     {#if game}
       <p class="head-line">You play {SIDE_NAMES[game.playerSide]} · Engine strength: {LEVELS.find((l) => l.value === game?.strength)?.name}</p>
       <div class="frame-tools">
+        {#if finished && variation.active}<VariationBar place="header" back="Back to the game" onback={() => variation.leave()} />{/if}
         {#if !finished}
           <button
             type="button"
@@ -619,7 +620,7 @@
       </div>
       <div class="side panel">
         <SheetHandle />
-        {#if finished && variation.active}<VariationBar back="Back to the game" onback={() => variation.leave()} />{/if}
+        {#if finished && variation.active}<VariationBar place="panel" back="Back to the game" onback={() => variation.leave()} />{/if}
         <div class="panel-body" {@attach sheet.gestures}>
           {#if confirmingResign && !finished}
             <ConfirmDialog

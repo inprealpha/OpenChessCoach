@@ -178,7 +178,7 @@ const JOB_INSTRUCTIONS: Record<CoachJob, string> = {
     'This is one key moment of a Review of the Player\'s finished game. Say the main reason the Player\'s move was wrong, what the better move was, and why it is better.',
   'lesson-turn':
     'This is one decision in a Lesson: an opening, a Theme such as a fork or a pin, a basic endgame, or a way of thinking during a game, such as a blunder check, a plan or the opening principles (lesson.opening names it). The Player chose "move" (and may have typed their reasoning as "question"). Say why the move is good or bad, mention how often players at their level choose each option (the popularity list, when there is one), what the opponent\'s options are next (the replies), and what complications it creates. Outside an opening Lesson, name the idea the position shows. Use the Lesson notes. End by inviting them to continue, or to retry if the Move Grade is Inaccuracy or worse; when lesson.isLessonMove is false, follow its rule instead.',
-  hint: 'Give a Hint: point the Player towards the idea behind the Engine\'s best move without naming or showing any move. If a tempting move is graded Mistake or Blunder, you may warn about that trap in words, still without naming or hinting at the move.',
+  hint: 'Give a Hint in one or two short sentences: point the Player towards the idea behind the Engine\'s best move without naming or showing any move. If a tempting move is graded Mistake or Blunder, one of those sentences may warn about that trap in words, still without naming or hinting at the move.',
   live: 'This is Live Coaching during an Engine Game. The Player\'s move was graded Mistake or Blunder. In one or two short sentences, say what it allows and what the better move was.',
 };
 

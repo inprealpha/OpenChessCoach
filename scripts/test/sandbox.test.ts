@@ -1,12 +1,13 @@
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { existsSync, mkdtempSync, readdirSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, readdirSync, rmSync, symlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import { fetchModel } from '../sandbox/fetch-model.ts';
 
 const script = new URL('../sandbox/prepare.sh', import.meta.url).pathname;
+const sandbox = new URL('../sandbox/', import.meta.url).pathname;
 const bytes = new TextEncoder().encode('a small stand-in for the model file');
 const asset = { name: 'test-model', url: 'https://models.invalid/test-model.onnx', bytes: bytes.byteLength, sha256: createHash('sha256').update(bytes).digest('hex') };
 const dirs: string[] = [];
@@ -52,6 +53,13 @@ describe('the model download for a new machine', () => {
     expect(state.model).toBe('failed');
     expect(state.detail).toContain('checksum');
     expect(readdirSync(dir).filter((f) => f.endsWith('.onnx'))).toEqual([]);
+  });
+  it('runs from a folder reached through a symlink, and fails out loud when it cannot write the model', () => {
+    const link = join(folder(), 'linked-sandbox');
+    symlinkSync(sandbox, link);
+    const run = spawnSync(process.execPath, [join(link, 'fetch-model.ts')], { encoding: 'utf8', env: { ...process.env, CHESS_COACH_DATA_DIR: '/dev/null/no-folder' } });
+    expect(run.status).toBe(1);
+    expect(run.stdout).toContain('The model download failed');
   });
 });
 

@@ -23,21 +23,31 @@ fail() {
 cd "$(dirname "${BASH_SOURCE[0]}")/../.." || { echo "prepare: could not find the repository"; exit "$strict"; }
 echo "prepare: OpenChessCoach in $(pwd)"
 
-if ! node -e 'const [a, b] = process.versions.node.split(".").map(Number); process.exit(a > 22 || (a === 22 && b >= 18) ? 0 : 1)' 2>/dev/null; then
-  echo "prepare: needs Node.js 22.18 or later; found $(node --version 2>/dev/null || echo none)"
+# The minimum Node.js version is package.json's engines.node (">=22.18").
+if ! node -e '
+  const want = require("./package.json").engines.node.replace(/^>=\s*/, "").split(".").map(Number);
+  const have = process.versions.node.split(".").map(Number);
+  const older = (have[0] - want[0] || have[1] - (want[1] ?? 0) || have[2] - (want[2] ?? 0)) < 0;
+  if (older) { console.log("prepare: needs Node.js " + want.join(".") + " or later; found " + process.version); process.exit(1); }
+' 2>/dev/null; then
+  command -v node >/dev/null || echo "prepare: needs Node.js; none found"
   exit "$strict"
 fi
 
-npm ci --no-audit --no-fund || fail "npm ci"
-
-# A sandbox image with browsers already in /opt/pw-browsers (Claude Code cloud) keeps them there;
-# elsewhere Playwright uses its own cache folder.
-if [ -z "${PLAYWRIGHT_BROWSERS_PATH:-}" ] && [ -d /opt/pw-browsers ]; then
-  export PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers
+if npm ci --no-audit --no-fund; then
+  # A sandbox image with browsers already in /opt/pw-browsers (Claude Code cloud) keeps them there;
+  # elsewhere Playwright uses its own cache folder.
+  if [ -z "${PLAYWRIGHT_BROWSERS_PATH:-}" ] && [ -d /opt/pw-browsers ]; then
+    export PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers
+    echo "prepare: Chromium goes in /opt/pw-browsers; Playwright finds it there only with PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers"
+  fi
+  # --no-install: only the Playwright version the lockfile pins, never the newest from the registry.
+  npx --no-install playwright install chromium || fail "the Chromium install"
+  npm run build -w @chess-coach/web || fail "the web build"
+else
+  fail "npm ci"
+  echo "prepare: skipped the Chromium install and the web build, which need the dependencies"
 fi
-npx playwright install chromium || fail "the Chromium install"
-
-npm run build -w @chess-coach/web || fail "the web build"
 
 node scripts/sandbox/fetch-model.ts || fail "the Maia-3 model download"
 

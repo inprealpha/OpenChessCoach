@@ -1,6 +1,6 @@
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { existsSync, mkdtempSync, readdirSync, rmSync, symlinkSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -60,6 +60,16 @@ describe('the model download for a new machine', () => {
     const run = spawnSync(process.execPath, [join(link, 'fetch-model.ts')], { encoding: 'utf8', env: { ...process.env, CHESS_COACH_DATA_DIR: '/dev/null/no-folder' } });
     expect(run.status).toBe(1);
     expect(run.stdout).toContain('The model download failed');
+  });
+
+  it('is not a failure when another copy of the app on this machine is downloading the model', () => {
+    const data = folder();
+    mkdirSync(join(data, 'models'));
+    // A live process other than the script holds the lock: this test's own.
+    writeFileSync(join(data, 'models', 'maia3-5m.lock'), String(process.pid));
+    const run = spawnSync(process.execPath, [join(sandbox, 'fetch-model.ts')], { encoding: 'utf8', env: { ...process.env, CHESS_COACH_DATA_DIR: data } });
+    expect(run.status).toBe(0);
+    expect(run.stdout).toContain('will be in place when that download finishes');
   });
 });
 

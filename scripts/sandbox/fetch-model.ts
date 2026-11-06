@@ -24,6 +24,9 @@ if (process.argv[1] && realpathSync(fileURLToPath(import.meta.url)) === realpath
     const state = await fetchModel({ log: (line) => process.stdout.write(`${line}\n`) });
     if (state.model === 'ready') {
       process.stdout.write(`${state.detail}: ${state.path}\n`);
+    } else if (state.model === 'downloading') {
+      // Another copy of the app on this machine holds the download lock and will finish it.
+      process.stdout.write(`${state.detail}; it will be in place when that download finishes: ${state.path}\n`);
     } else {
       process.stdout.write(`The model is not in place (${state.model}). Run node scripts/sandbox/fetch-model.ts again to retry.\n`);
       process.exitCode = 1;

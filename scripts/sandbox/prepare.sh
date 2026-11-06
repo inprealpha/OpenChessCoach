@@ -29,8 +29,11 @@ if ! node -e '
   const have = process.versions.node.split(".").map(Number);
   const older = (have[0] - want[0] || have[1] - (want[1] ?? 0) || have[2] - (want[2] ?? 0)) < 0;
   if (older) { console.log("prepare: needs Node.js " + want.join(".") + " or later; found " + process.version); process.exit(1); }
-' 2>/dev/null; then
+'; then
+  # The check prints why when Node.js is too old, and Node.js prints its own error when the check
+  # itself fails (no node, or a package.json it can't read).
   command -v node >/dev/null || echo "prepare: needs Node.js; none found"
+  echo "prepare: stopped before installing anything"
   exit "$strict"
 fi
 

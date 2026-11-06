@@ -204,7 +204,8 @@ npm run verify                    # a disposable verify-mode copy of the app for
 
 To set up a whole machine in one step (a new computer, or a sandbox where agents work), run
 `bash scripts/sandbox/prepare.sh`: it installs the dependencies and the browser, builds the web app
-and downloads the Maia-3 model.
+and downloads the Maia-3 model. On a Linux machine that has never run a browser, Chromium also needs
+its system libraries, which take root: `sudo npx playwright install-deps chromium`.
 
 Read `CLAUDE.md` and `.claude/skills/verify/SKILL.md` before opening a PR: changes merge on
 evidence from the running app (`docs/adr/0006-merge-on-evidence.md`).

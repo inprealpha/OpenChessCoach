@@ -36,6 +36,7 @@ scripts/glossary-allowlist.json
 scripts/real-coach-check.ts
 scripts/verdict.ts
 scripts/before-after.ts
+scripts/pr-description.ts
 
 # The verification skills and feature map
 .claude/skills/verify/

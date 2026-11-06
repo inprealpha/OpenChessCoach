@@ -23,6 +23,10 @@ verdict at all.
    feature-map entries in `.claude/skills/verify/features/` for every feature the diff touches.
 2. Read the diff and the issues. Write down what must be true if the PR is right: its "Done means"
    checks, plus anything the rules table says about the paths it touches.
+   The PR's "How this was made" section is a claim too: for each testing method it ticks, find the
+   proof in its Evidence section. A ticked box with no proof goes under Notes; it is a FAIL only when
+   the rules table requires that proof (a Coach change ticked as tested on the real Coach, with no
+   real-Coach result).
 3. Launch a verify-mode instance (`npm run verify`) and prove each point by driving the app with
    `coachctl` the way a Player would, as the verify skill and the feature map say. Read back the
    database for every side effect. Save screenshots at desktop (1280×800) and phone (390×844) sizes

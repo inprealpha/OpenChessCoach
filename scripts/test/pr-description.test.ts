@@ -73,6 +73,13 @@ describe('the "How this was made" section', () => {
     expect(testingRecordProblems(hidden)).toHaveLength(3);
   });
 
+  it('finds a heading with more words after it, and ignores headings inside code fences', () => {
+    expect(hasEvidence('## Evidence (desktop and phone)\n\n![shot](x.png)\n')).toBe(true);
+    const fenced = '## Evidence\n\n```markdown\n## Review notes\n```\n\nScreenshots below.\n';
+    expect(section(fenced, 'Evidence')).toContain('Screenshots below.');
+    expect(testingRecordProblems('## Evidence\n\n```\n## How this was made\nMade with X\n- [x] a\nNot tested: y\n```\n')).toEqual(['There is no "How this was made" section.']);
+  });
+
   it('ends at the next "##" heading, not at a "###" one', () => {
     expect(section(body(made, evidence), 'How this was made')).not.toContain('coachctl doctor');
     expect(section('## Evidence\n\n### Board after 1. e4\n\n![shot](x.png)\n', 'Evidence')).toContain('![shot]');

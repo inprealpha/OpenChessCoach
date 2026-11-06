@@ -17,14 +17,23 @@ export function withoutComments(text: string): string {
   return text.replace(/<!--[\s\S]*?(?:-->|$)/g, '');
 }
 
-/** The text under a `## <heading>` line, up to the next `## ` heading, or undefined when there is no such heading. */
+/**
+ * The text under the first `## <heading>` line (a heading that starts with those words, such as
+ * "## Evidence (desktop and phone)"), up to the next `## ` heading, or undefined when there is none.
+ * Lines inside fenced code blocks are never headings.
+ */
 export function section(body: string, heading: string): string | undefined {
   const lines = withoutComments(body).replace(/\r\n/g, '\n').split('\n');
-  const start = lines.findIndex((l) => /^## /.test(l) && l.slice(3).trim().toLowerCase() === heading.toLowerCase());
+  let fenced = false;
+  const isHeading = lines.map((l) => {
+    if (/^\s*(```|~~~)/.test(l)) fenced = !fenced;
+    return !fenced && /^## /.test(l);
+  });
+  const wanted = heading.toLowerCase();
+  const start = lines.findIndex((l, i) => isHeading[i] && l.slice(3).trim().toLowerCase().startsWith(wanted));
   if (start < 0) return undefined;
-  const rest = lines.slice(start + 1);
-  const end = rest.findIndex((l) => /^## /.test(l));
-  return (end < 0 ? rest : rest.slice(0, end)).join('\n');
+  const end = isHeading.findIndex((h, i) => h && i > start);
+  return lines.slice(start + 1, end < 0 ? undefined : end).join('\n');
 }
 
 export function hasEvidence(body: string): boolean {

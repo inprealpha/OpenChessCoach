@@ -840,9 +840,10 @@
     .away-bar p { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
     .away-actions { flex: none; }
     .roomy { display: none; }
-    /* The end-of-game card whole in the first screen, down to a 390×664 iPhone in Safari: its lines
-       closer together, and on a short phone the board a little smaller. Tap targets keep their size. */
-    .engine-game:has(.game-status.ended) { --phone-reserve: 19.5rem; }
+    /* The end-of-game card whole in the first screen, down to a 390×664 iPhone in Safari, with room
+       to spare when a wider font wraps the result and the summary onto two lines each: its lines
+       closer together, and on a short phone the board smaller. Tap targets keep their size. */
+    .engine-game:has(.game-status.ended) { --phone-reserve: 22rem; }
     .game-status.ended, .game-status.ended > .live { gap: 0.35rem; }
     .game-status.ended .end-actions { margin-top: 0.2rem; }
   }

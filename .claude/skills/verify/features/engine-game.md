@@ -48,8 +48,9 @@ back. A Hint first asks the Coach for the idea; a second press shows the Engine'
   board but not saved as over (the app closed in between) ends when it is opened, with no page
   error.
 - A finished game ends on one card right under the board, all of it in the first screen on a phone
-  at 390×664 (an iPhone 13 in Safari), 402×714, 440×790 and 390×844; on the shortest the board
-  gives up a little room for it. `Game status` holds the result ("The Engine won by resignation.")
+  at 390×664 (an iPhone 13 in Safari), 402×714, 440×790 and 390×844, in a wider font too
+  (DejaVu Sans, as on a Linux runner) and with the result and the summary wrapped onto two lines
+  each; on the shorter phones the board gives up room for it (312 px wide at 390×664). `Game status` holds the result ("The Engine won by resignation.")
   and one line: the moves played and the Move Grades that need a look, the worst first, counting
   the Player's Move Grades already shown in the move list ("11 moves · 1 Mistake, 1 Inaccuracy",
   "5 moves · 2 Blunders, 1 Mistake, 1 Inaccuracy", "2 moves · no Mistakes"; a move that never got
@@ -134,7 +135,8 @@ journeys hold the browser's Engine (`holdBrowserEngine` in `engine-game.spec.ts`
   with no new call (`engine-game.spec.ts`).
 - After resigning at move 11 the card reads "The Engine won by resignation." and "11 moves · 1
   Mistake, 1 Inaccuracy", with `Review this game` and `New game` fully on screen at 390×664,
-  402×714, 440×790 and 390×844; after a Live Coaching comment and a take-back, nothing the Coach
+  402×714, 440×790 and 390×844, also for "The Engine won by checkmate." and "Draw by threefold
+  repetition.", in a wide font and with both lines wrapped; after a Live Coaching comment and a take-back, nothing the Coach
   said is left once the game ends, after a reload too (`engine-game.spec.ts`).
 - With Threat on, 1.e4 (the Engine answers 1...d5) shows `Threat: Black threatens dxe4 (d5 to e4)`,
   and 2.exd5 Nf6 shows `Threat: Black threatens Nxd5 (f6 to d5)` (`engine-game.spec.ts`).

@@ -319,32 +319,84 @@ test('a finished game ends on one card: the result, how the Player’s moves wer
   await expect(paired.getByRole('button', { name: 'Start the Review' })).toBeVisible();
 });
 
-// Safari's visible area on current iPhones: an iPhone 13 (390×664), 16 Pro (402×714), 16 Pro Max (440×790) and a taller 390×844.
+/** Ways a game ends, each with the Move Grades that make its summary line long. */
+const ENDINGS = [
+  {
+    // Eleven moves in, so the move list under the card has rows to scroll to; the Player resigns.
+    moves: ['e2e4', 'e7e5', 'g1f3', 'b8c6', 'f1c4', 'f8c5', 'c2c3', 'g8f6', 'd2d3', 'd7d6', 'e1g1', 'e8g8', 'f1e1', 'a7a6', 'c4b3', 'c5a7', 'h2h3', 'h7h6', 'b1d2', 'f8e8', 'd2f1', 'c8e6'],
+    playerGrades: ['Blunder', 'Best', 'Mistake', 'Best', 'Good', 'Inaccuracy', 'Blunder', 'Good', 'Mistake', 'Inaccuracy', 'Best'],
+    resign: true,
+    headline: 'The Engine won by resignation.',
+    summary: '11 moves · 2 Blunders, 2 Mistakes, 2 Inaccuracies',
+  },
+  {
+    // 1. f3 e5 2. g4 Qh4#: over on the board when it is opened.
+    moves: ['f2f3', 'e7e5', 'g2g4', 'd8h4'],
+    playerGrades: ['Inaccuracy', 'Blunder'],
+    resign: false,
+    headline: 'The Engine won by checkmate.',
+    summary: '2 moves · 1 Blunder, 1 Inaccuracy',
+  },
+  {
+    // Both knights out and back twice: the starting position a third time.
+    moves: ['g1f3', 'g8f6', 'f3g1', 'f6g8', 'g1f3', 'g8f6', 'f3g1', 'f6g8'],
+    playerGrades: ['Blunder', 'Mistake', 'Mistake', 'Inaccuracy'],
+    resign: false,
+    headline: 'Draw by threefold repetition.',
+    summary: '4 moves · 1 Blunder, 2 Mistakes, 1 Inaccuracy',
+  },
+] as const;
+
+/** How the end-of-game card's text is set: the app's fonts, a wider one, and the wider one with the result and the summary forced onto two lines each. */
+const CARD_TEXT = {
+  'the app’s font': '',
+  'a wide font': '* { font-family: "DejaVu Sans", Verdana, sans-serif !important; }',
+  'a wide font, the result and the summary on two lines each':
+    '* { font-family: "DejaVu Sans", Verdana, sans-serif !important; } .game-status .live > p::after { content: "\\A ·"; white-space: pre; }',
+} as const;
+
+// Safari's visible area on current iPhones: an iPhone 13 (390×664), 16 Pro (402×714), 16 Pro Max
+// (440×790) and a taller 390×844. The longest results and summaries, in the app's fonts and in a
+// wider one (DejaVu Sans, as on a Linux runner, where the card once came out 20 px too tall), and
+// with room to spare when a font wraps the result and the summary onto two lines each.
 for (const [width, height] of [[390, 664], [402, 714], [440, 790], [390, 844]] as const) {
-  test(`on a phone at ${width}×${height}, the end-of-game card sits under the board, all of it in the first screen`, async ({ paired, app }) => {
-    await paired.setViewportSize({ width, height });
-    // Eleven moves in, so the move list under the card has rows to scroll to.
-    const moves = ['e2e4', 'e7e5', 'g1f3', 'b8c6', 'f1c4', 'f8c5', 'c2c3', 'g8f6', 'd2d3', 'd7d6', 'e1g1', 'e8g8', 'f1e1', 'a7a6', 'c4b3', 'c5a7', 'h2h3', 'h7h6', 'b1d2', 'f8e8', 'd2f1', 'c8e6'];
-    const grades = moves.map((_, i) => (i % 2 ? undefined : (['Best', 'Best', 'Good', 'Best', 'Good', 'Inaccuracy', 'Best', 'Good', 'Mistake', 'Good', 'Best'] as const)[i / 2]));
-    await putGameOnDevice(paired, app.url, 'white', moves, grades);
-    const status = paired.getByRole('status', { name: 'Game status' });
-    await expect(status).toContainText('Your move');
-    await resign(paired);
-    await expect(paired.getByRole('link', { name: 'Review this game' })).toBeVisible();
-    const card = status.locator('xpath=..');
-    for (const part of [
-      status.getByText('The Engine won by resignation.'),
-      status.getByText('11 moves · 1 Mistake, 1 Inaccuracy'),
-      card.getByRole('link', { name: 'Review this game' }),
-      card.getByRole('button', { name: 'New game' }),
-    ]) {
-      await expect(part).toBeInViewport({ ratio: 1 });
-    }
-    expect(await paired.evaluate(() => window.scrollY)).toBe(0);
-    const board = await paired.getByRole('group', { name: BOARD }).boundingBox();
-    const shown = await status.boundingBox();
-    expect(shown && board && shown.y > board.y + board.height).toBe(true);
-  });
+  for (const [text, css] of Object.entries(CARD_TEXT)) {
+    test(`on a phone at ${width}×${height} in ${text}, the end-of-game card sits under the board, all of it in the first screen`, async ({ paired, app }) => {
+      await paired.setViewportSize({ width, height });
+      if (css)
+        await paired.addInitScript((rules) => {
+          document.addEventListener('DOMContentLoaded', () => {
+            const style = document.createElement('style');
+            style.textContent = rules;
+            document.head.append(style);
+          });
+        }, css);
+      for (const ending of ENDINGS) {
+        const grades = ending.moves.map((_, i) => (i % 2 ? undefined : ending.playerGrades[i / 2]));
+        await putGameOnDevice(paired, app.url, 'white', [...ending.moves], grades);
+        const status = paired.getByRole('status', { name: 'Game status' });
+        if (ending.resign) {
+          await expect(status).toContainText('Your move');
+          await resign(paired);
+        }
+        await expect(status).toContainText(ending.headline);
+        await expect(paired.getByRole('link', { name: 'Review this game' })).toBeVisible();
+        const card = status.locator('xpath=..');
+        for (const part of [
+          status.getByText(ending.headline),
+          status.getByText(ending.summary),
+          card.getByRole('link', { name: 'Review this game' }),
+          card.getByRole('button', { name: 'New game' }),
+        ]) {
+          await expect(part, `${ending.headline} ${part}`).toBeInViewport({ ratio: 1 });
+        }
+        expect(await paired.evaluate(() => window.scrollY)).toBe(0);
+        const board = await paired.getByRole('group', { name: BOARD }).boundingBox();
+        const shown = await status.boundingBox();
+        expect(shown && board && shown.y > board.y + board.height).toBe(true);
+      }
+    });
+  }
 }
 
 test('a finished game still offers its Review after a reload, and its New game starts a fresh one', async ({ paired, app }) => {

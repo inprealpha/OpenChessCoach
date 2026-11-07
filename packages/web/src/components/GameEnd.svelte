@@ -37,4 +37,8 @@
 <style>
   p { margin: 0; }
   .headline { font-size: 1.3rem; font-weight: 700; line-height: 1.25; }
+  /* On a phone the card shares the first screen with the board: the result a little smaller. */
+  @media (max-width: 820px) {
+    .headline { font-size: 1.15rem; line-height: 1.2; }
+  }
 </style>

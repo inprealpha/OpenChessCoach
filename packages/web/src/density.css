@@ -1,0 +1,111 @@
+/* PROTOTYPE (not for merging): three densities for the phone's screens, to try on a phone before
+   deciding. Settings, Size picks one per device (lib/density.ts), which sets `data-density` on the
+   root; `?density=compact|tight` in the address forces one. No attribute is Today, the app as
+   built. Everything here is under `max-width: 820px`: the desktop stays as it is.
+
+   Compact: every tap area stays 44 px except move-list rows (34 px). Controls are drawn smaller
+            inside their 44 px tap area (a transparent box with a `::before` pill), and the board's
+            reserve (`--phone-reserve`) comes down so the saved room goes to the board.
+   Tight:   Compact, plus secondary tap areas (header icons, the header line's tools) at 40 px,
+            checkbox and fold rows at 36 px, pills at 30 px and move rows at 28 px. Primary controls
+            (step buttons, Ask, Back to the game, Review this game, New game, Take back, Carry on,
+            Show the solution) keep 44 px.
+
+   Compact's 34 px rows and Tight's 40/36 px controls go below the interface guidelines' 44 px rule;
+   adopting either means the owner changing that rule first.
+
+   `!important` only because this sheet sits over scoped Svelte styles and app.css's phone rules;
+   a real build would read these tokens in the components instead. */
+
+:root { --ctl-vis: 44px; --row-h: var(--tap); --tap-2: var(--tap); --tap-3: var(--tap); }
+:root[data-density='compact'] { --ctl-vis: 32px; --row-h: 34px; }
+:root[data-density='tight'] { --ctl-vis: 30px; --row-h: 28px; --tap-2: 40px; --tap-3: 36px; }
+
+@media (max-width: 820px) {
+  /* ---------- The app header: 48 -> 44 (Compact) / 40 (Tight) ---------- */
+  :root[data-density='compact'] { --app-head: 2.75rem; }
+  :root[data-density='tight'] { --app-head: 2.5rem; }
+  :root[data-density] header.top { padding-block: 0 !important; }
+  :root[data-density='tight'] header.top .icon { min-width: var(--tap-2) !important; min-height: var(--tap-2) !important; }
+
+  /* ---------- The board's room ----------
+     The board's size on a phone is the page's height less a fixed reserve for what's above and
+     under it (app.css). Slimmer controls give the board nothing unless the reserve comes down too. */
+  :root[data-density='compact'] :is(.engine-game, .review, .board-free) .board-col { --phone-reserve: 17rem; }
+  :root[data-density='tight'] :is(.engine-game, .review, .board-free) .board-col { --phone-reserve: 16rem; }
+  /* A Lesson keeps room for its prompt (today 20.5rem, 22rem when done or showing the choice). */
+  :root[data-density='compact'] .board-screen:not(.puzzles, .engine-game, .review, .board-free) .board-col { --phone-reserve: 18.5rem; }
+  :root[data-density='compact'] .board-screen:not(.puzzles, .engine-game, .review, .board-free):has(.done, .choice.shown) .board-col { --phone-reserve: 20rem; }
+  :root[data-density='tight'] .board-screen:not(.puzzles, .engine-game, .review, .board-free) .board-col { --phone-reserve: 17.5rem; }
+  :root[data-density='tight'] .board-screen:not(.puzzles, .engine-game, .review, .board-free):has(.done, .choice.shown) .board-col { --phone-reserve: 19rem; }
+  /* Puzzles: today 22.5rem. */
+  :root[data-density='compact'] .puzzles .board-col { --phone-reserve: 19.5rem; }
+  :root[data-density='tight'] .puzzles .board-col { --phone-reserve: 18rem; }
+
+  /* ---------- The header line ----------
+     Hint and ⋯ Game drawn without a box, like Show threat and Flip board beside them; the 44 px tap
+     area stays (40 px in Tight). */
+  :root[data-density] .frame-tools > button:not(.flip, .threat-button, .back),
+  :root[data-density] .frame-tools > .menu-button > button {
+    background: none !important; border: 0 !important; color: var(--text) !important; padding-inline: 0.5rem !important;
+  }
+  :root[data-density] .frame-tools > button.secondary:not(.flip, .threat-button, .back) { color: var(--accent) !important; font-weight: 600; }
+  :root[data-density='tight'] .board-screen .frame-head { min-height: var(--tap-2) !important; }
+  :root[data-density='tight'] .frame-tools > button,
+  :root[data-density='tight'] .frame-tools > .menu-button > button,
+  :root[data-density='tight'] .board-screen .frame-head a { min-height: var(--tap-2) !important; min-width: var(--tap-2) !important; }
+
+  /* ---------- Winning Chances band: 13 -> 10 px (Tight) ---------- */
+  :root[data-density='tight'] .wc-bar { height: 0.625rem !important; }
+  :root[data-density='tight'] .wc-bar .percent { font-size: 0.55rem !important; }
+
+  /* ---------- The thumb bar: 58 -> 44 ----------
+     The step buttons alone (no Ask box) keep their 44 px tap area, drawn as a pill, not a slab. */
+  :root[data-density] .thumb-bar { padding: 0 0.5rem !important; }
+  :root[data-density] .thumb-row:not(:has(> form)) > .step { background: none !important; position: relative; isolation: isolate; }
+  :root[data-density] .thumb-row:not(:has(> form)) > .step::before {
+    content: ''; position: absolute; inset: calc((100% - var(--ctl-vis)) / 2) 0.25rem; border-radius: 999px;
+    background: var(--bg); z-index: -1;
+  }
+
+  /* ---------- Filled and outlined buttons in the panel ----------
+     A 44 px tap area with a 32 px pill drawn inside it (30 px in Tight). */
+  :root[data-density] :is(.variation-bar, .end-actions, .game-status .row) > :is(button, a),
+  :root[data-density] .frame-tools > .back,
+  :root[data-density] .board-screen .panel-body > .card > button,
+  :root[data-density] .board-screen .panel-body button.secondary:not(.step) {
+    position: relative; isolation: isolate; background: none !important; border: 0 !important;
+    padding-block: 0 !important; display: inline-flex; align-items: center; justify-content: center;
+    min-height: var(--tap) !important;
+  }
+  :root[data-density] :is(.variation-bar, .end-actions, .game-status .row) > :is(button, a)::before,
+  :root[data-density] .frame-tools > .back::before,
+  :root[data-density] .board-screen .panel-body > .card > button::before,
+  :root[data-density] .board-screen .panel-body button.secondary:not(.step)::before {
+    content: ''; position: absolute; inset: calc((100% - var(--ctl-vis)) / 2) 0; border-radius: 8px; z-index: -1;
+    background: var(--accent);
+  }
+  :root[data-density] :is(.variation-bar, .end-actions, .game-status .row) > .secondary::before,
+  :root[data-density] .board-screen .panel-body button.secondary:not(.step)::before {
+    background: var(--panel); box-shadow: inset 0 0 0 1px var(--line);
+  }
+  :root[data-density] :is(.variation-bar, .end-actions, .game-status .row) > .secondary { color: var(--text) !important; }
+  :root[data-density] :is(.variation-bar, .end-actions, .game-status .row) > :is(button, a):disabled::before { opacity: 0.5; }
+  :root[data-density] .variation-bar { padding-block: 0 !important; }
+
+  /* ---------- Move-list rows: 44 -> 34 (Compact) / 28 (Tight) ----------
+     The one Compact exception to the 44 px floor. A row is about 176 px wide, so even 28 px is
+     over WCAG 2.5.8's 24 by 24. */
+  :root[data-density] .board-screen .moves button { min-height: var(--row-h) !important; padding-block: 0 !important; }
+  :root[data-density] .board-screen .moves { row-gap: 0 !important; }
+  :root[data-density] .board-screen .moves .grade { font-size: 0.72rem !important; padding: 0 0.35rem !important; }
+
+  /* ---------- Checkbox and fold rows: 44 -> 36 (Tight; secondary) ---------- */
+  :root[data-density='tight'] .screen label:has(> :is(input[type='checkbox'], input[type='radio'])) { min-height: var(--tap-3) !important; }
+  :root[data-density='tight'] .board-screen summary { min-height: var(--tap-3) !important; }
+
+  /* ---------- End of game: headline 20.8 -> 16.8 px, tally pills 30 -> 22 px ---------- */
+  :root[data-density] .game-status .headline { font-size: 1.05rem !important; }
+  :root[data-density] .game-status .tally li { padding: 0 0.5rem !important; font-size: 0.8rem !important; }
+  :root[data-density] .game-status .tally strong { font-size: 0.9rem !important; }
+}

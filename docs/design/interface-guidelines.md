@@ -241,7 +241,7 @@ move's green.
 - The Blunder pause appears in the panel's first screen on a phone, with the punishing move drawn on
   the board; it takes the step buttons' row until the Player chooses.
 - During play the step buttons and arrow keys show earlier positions while the game waits at its
-  latest. A bar at the top of the panel says "Looking at move 8", where there is room what the
+  latest. A bar at the top of the panel says "Looking at 8. Bb3", where there is room what the
   Engine played meanwhile, and offers Back to the game; the board stays put when the Engine moves.
   Hint and Show threat go until the Player is back.
 - A move on an earlier position starts the Player's own line. It shows no Move Grades and no Winning

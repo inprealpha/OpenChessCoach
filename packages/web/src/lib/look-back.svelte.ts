@@ -1,7 +1,7 @@
 // Looking back during an Engine Game: the step buttons, the arrow keys and the move list show an
 // earlier position of the game, while the game itself stays at its latest position, where its next
 // move is played. If the Engine moves meanwhile, the board stays where the Player is looking.
-import { turnOf, type PlayedMove } from '@chess-coach/shared/chess';
+import { moveLabel, type PlayedMove } from '@chess-coach/shared/chess';
 import type { Line } from './game.svelte.ts';
 import type { Step } from './variation.svelte.ts';
 
@@ -36,16 +36,16 @@ export class LookBack {
     return this.#game.moves[this.cursor - 1];
   }
 
-  /** The move shown, in the move list's words: "move 8". */
+  /** The position shown, named by the move that reached it as the move list writes it: "8. Bb3", or "the start". */
   get where(): string {
-    return `move ${moveNumber(this.cursor)}`;
+    return positionName(this.#game.moves, this.cursor);
   }
 
   /** The game's latest move, in words ("12… d5"), when it was played after the Player stepped back. */
   get playedSince(): string | null {
     const latest = this.#game.moves.at(-1);
     if (this.at === null || !latest || this.#game.moves.length <= this.#since) return null;
-    return `${moveNumber(this.#game.moves.length)}${turnOf(latest.fenBefore) === 'black' ? '…' : '.'} ${latest.san}`;
+    return moveLabel(latest.fenBefore, latest.san);
   }
 
   /** Shows the position after `cursor` of the game's moves; the latest position ends the look back. */
@@ -67,7 +67,8 @@ export class LookBack {
   }
 }
 
-/** The move number a count of moves ends on, as the move list numbers them: 15 moves end on move 8. */
-export function moveNumber(plies: number): number {
-  return Math.max(1, Math.ceil(plies / 2));
+/** A position of a line, named by the move that reached it ("1… e5"), or "the start" before its first move. */
+export function positionName(moves: readonly PlayedMove[], cursor: number): string {
+  const m = moves[cursor - 1];
+  return m ? moveLabel(m.fenBefore, m.san) : 'the start';
 }

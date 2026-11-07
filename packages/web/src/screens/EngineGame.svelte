@@ -33,7 +33,7 @@
   import { analyse, analyseForCoach, bestMove, gradeMove, threat } from '../lib/engine/engine.svelte.ts';
   import { Line } from '../lib/game.svelte.ts';
   import { gradeMark } from '../lib/grades.ts';
-  import { LookBack, moveNumber } from '../lib/look-back.svelte.ts';
+  import { LookBack, positionName } from '../lib/look-back.svelte.ts';
   import { saveFinishedEngineGame } from '../lib/offline.ts';
   import { scoreFromAnalysis } from '../lib/position-score.ts';
   import { profile } from '../lib/profile.svelte.ts';
@@ -71,6 +71,12 @@
   const KEY = 'engineGame';
   const line = new Line();
   const coach = new CoachThread();
+  /**
+   * The Coach on the Player's own line, a thread of its own: what it says about a line the game never
+   * played stays out of the game's thread and its briefs (ADR 0009), and an answer still on its way
+   * when the Player leaves the line is dropped with it.
+   */
+  const lineCoach = new CoachThread();
   /** The Player's own moves from a position of the game, graded by the browser's Engine (during play, once they press Analyze). */
   const variation = new Variation();
   /** During play, the earlier position the Player is looking at; the game stays at its latest. */
@@ -102,6 +108,7 @@
   let gameMenu = $state<ReturnType<typeof MenuButton>>();
   let endActions = $state<HTMLDivElement>();
   let setupForm = $state<HTMLFormElement>();
+  let screen = $state<HTMLElement>();
 
   const finished = $derived(Boolean(game?.result));
   /** The Player turned the board; the Winning Chances bar turns with it. */
@@ -119,12 +126,12 @@
   const shownLast = $derived(variation.active ? variation.line.lastMove : look.active ? look.lastMove : line.lastMove);
   /** Why the board takes no move while the game is on, in one line beside it. Away from the latest position every move is the Player's own line. */
   const refusal = $derived(away ? '' : thinking ? 'It’s the Engine’s move.' : awaitingChoice ? 'Take the move back or carry on first.' : '');
-  /** Where the Player's own line branches from the game, in words: "move 8". */
-  const lineFrom = $derived(`move ${moveNumber((variation.from ?? 0) + 1)}`);
+  /** Where the Player's own line branches from the game, in words: "after 8. Bb3", or "from the start". */
+  const lineFrom = $derived(variation.from ? `after ${positionName(line.moves, variation.from)}` : 'from the start');
   /** The position the Coach last explained on the Player's own line: Analyze asks once per position. */
   let explained = $state<string | null>(null);
-  /** Where the Coach's words on the Player's own line begin, so Back to the game puts them away. */
-  let explainedFrom: number | null = null;
+  /** The Coach panel's thread: the line's own while the board shows the Player's own line during play. */
+  const shownCoach = $derived(away && variation.active ? lineCoach : coach);
   /** Analyze is offered until the line is graded and the Coach has explained the position shown. */
   const analyzeOffered = $derived(variation.active && (!variation.analyzed || (api.coachReady && explained !== variation.fen)));
   // The Player's last graded move keeps its symbol through the Engine's reply, unless the reply
@@ -284,21 +291,22 @@
 
   /** Steps through the Player's own line while the board shows one, otherwise through the game's moves. */
   function step(where: Step): void {
+    if (awaitingChoice) return;
     if (variation.active) stepLine(variation.line, where);
     else if (finished) stepLine(line, where);
     else look.step(where);
   }
 
-  /** A move picked in the move list: the board leaves the Player's own line for it. */
+  /** A move picked in the move list: the board leaves the Player's own line for it. The take-back choice keeps the board on the move it is about. */
   function pickMove(cursor: number): void {
+    if (awaitingChoice) return;
     leaveLine();
     showGameAt(cursor);
   }
 
-  /** Drops the Player's own line, and puts away what the Coach said about it. */
+  /** Drops the Player's own line, with what the Coach said about it, an answer still on its way included. */
   function leaveLine(): void {
-    if (explainedFrom !== null) coach.settle(explainedFrom);
-    explainedFrom = null;
+    lineCoach.reset();
     explained = null;
     variation.leave();
   }
@@ -310,18 +318,36 @@
   }
 
   /**
+   * The game's status card at the panel's top, from its first line: a phone's short panel may be
+   * scrolled past it, to a move looked back at, when the game ends or asks for a choice.
+   */
+  async function statusInView(): Promise<void> {
+    await tick();
+    const card = screen?.querySelector<HTMLElement>('.game-status');
+    const panel = card?.closest<HTMLElement>('.panel-body');
+    if (card && panel) panel.scrollTop += card.getBoundingClientRect().top - panel.getBoundingClientRect().top;
+  }
+
+  /** The bar's Back to the game, which goes with the bar: the game's status in view, and the focus on the board, where the next move is played. */
+  async function backFromBar(): Promise<void> {
+    backToGame();
+    await statusInView();
+    const focusLost = !document.activeElement || document.activeElement === document.body;
+    if (focusLost) screen?.querySelector<HTMLElement>('.board')?.focus({ preventScroll: true });
+  }
+
+  /**
    * Analyze on the Player's own line during play: the browser Engine grades its moves and draws its
    * best move (ADR 0007), and the Coach answers one Why Question about the position shown, as in a
    * Review. Moving pieces on the line never calls the Coach; only this does.
    */
   async function analyze(): Promise<void> {
-    if (!game || !variation.active || coach.busy) return;
+    if (!game || !variation.active || lineCoach.busy) return;
     variation.analyze();
     if (!api.coachReady || explained === variation.fen) return;
     explained = variation.fen;
-    explainedFrom ??= coach.mark();
     const { label, ...asked } = variation.question(line.moves);
-    await coach.ask({ job: 'why', ...asked, playerSide: game.playerSide }, label);
+    await lineCoach.ask({ job: 'why', ...asked, playerSide: game.playerSide }, label);
   }
 
   async function onmove(uci: string): Promise<void> {
@@ -369,7 +395,12 @@
     if (offer) game.offer = { san: m.san, grade: g.grade };
     await persist();
     if (offer) {
+      // The choice is about the move just played: a look back taken while it was graded ends, so the
+      // board shows that move and the choice is at the top of the panel, in its first screen.
+      const wasAway = away;
+      backToGame();
       awaitingChoice = true;
+      if (wasAway) void statusInView();
       // The browser's Move Grade triggers Live Coaching; the desktop's Engine supplies the facts (ADR 0007).
       const reply = await coach.ask({
         job: 'live',
@@ -453,19 +484,16 @@
     confirmingResign = false;
     awaitingChoice = false;
     notice = '';
-    // The finished game's card says how it went: the Coach's lines from during play go, with any
-    // look back or line of the Player's own, so the board shows how it ended.
+    // The finished game's card says how it went: the Coach's lines from during play go, and so do a
+    // look back and a line of the Player's own. The one time the board doesn't stay where the Player
+    // is looking: when the Engine's reply ends the game, it shows the final position the card is about.
     backToGame();
     coach.reset();
     await persist();
     await save(recordOf(game));
     // Resign and an agreed draw take away the button that ended the game: carry on from the card's
     // first action, Review this game (or New game while the game waits on this device).
-    await tick();
-    // The card from its result line, at the panel's top: a phone's short panel may be scrolled past it.
-    const card = endActions?.closest<HTMLElement>('.game-status');
-    const panel = card?.closest<HTMLElement>('.panel-body');
-    if (card && panel) panel.scrollTop += card.getBoundingClientRect().top - panel.getBoundingClientRect().top;
+    await statusInView();
     const focusLost = !document.activeElement || document.activeElement === document.body;
     if (focusLost) endActions?.querySelector<HTMLElement>('a, button')?.focus({ preventScroll: true });
   }
@@ -623,7 +651,7 @@
   }
 </script>
 
-<section class="screen board-screen engine-game" class:sheet-full={sheet.shown}>
+<section class="screen board-screen engine-game" class:sheet-full={sheet.shown} bind:this={screen}>
   <header class="frame-head">
     <h1>Engine Game</h1>
     {#if game}
@@ -683,7 +711,7 @@
               movable={finished || away ? 'both' : playerToMove ? game.playerSide : 'none'}
               lastMove={shownLast ? { from: shownLast.uci.slice(0, 2), to: shownLast.uci.slice(2, 4) } : undefined}
               {arrows}
-              highlights={coach.highlights}
+              highlights={away ? [] : coach.highlights}
               gradeMark={variation.active ? variation.mark : mark}
               {onmove}
               {refusal}
@@ -702,14 +730,14 @@
           <div class="away-bar" role="group" aria-label="Away from the game">
             <p>
               {#if variation.active}
-                <strong>Your own line</strong><span class="roomy">{` from ${lineFrom}`}</span>
+                <strong>Your own line</strong><span class="roomy">{` ${lineFrom}`}</span>
               {:else}
                 <strong>Looking at {look.where}</strong>{#if look.playedSince}<span class="roomy muted">{` · The Engine has played ${look.playedSince}`}</span>{/if}
               {/if}
             </p>
             <div class="away-actions">
-              {#if analyzeOffered}<button type="button" class="secondary" onclick={analyze} disabled={coach.busy}>Analyze</button>{/if}
-              <button type="button" onclick={backToGame}>Back to the game</button>
+              {#if analyzeOffered}<button type="button" class="secondary" onclick={analyze} disabled={lineCoach.busy}>Analyze</button>{/if}
+              <button type="button" onclick={backFromBar}>Back to the game</button>
             </div>
           </div>
         {/if}
@@ -761,7 +789,7 @@
                    summary once, and not the whole card again when the Review link arrives. -->
               <div class="end-actions" bind:this={endActions}>
                 {#if saved === 'queued'}
-                  <p class="muted">Saved on this device. It goes to your game list when your desktop is reachable.</p>
+                  <p class="muted queued">Saved on this device.</p>
                 {:else if saved}
                   <a class="button" href={`#/review/${saved.id}`}>Review this game</a>
                 {/if}
@@ -779,7 +807,7 @@
             moves={line.moves}
             grades={game.grades}
             cursor={gameCursor}
-            ongoto={pickMove}
+            ongoto={awaitingChoice ? undefined : pickMove}
             variation={variation.active
               ? { from: variation.from ?? 0, moves: variation.line.moves, grades: variation.grades, cursor: variation.line.cursor, ongoto: (c) => variation.line.goTo(c) }
               : undefined}
@@ -794,7 +822,7 @@
         {/snippet}
         {#if !finished}
           <CoachPanel
-            thread={coach}
+            thread={shownCoach}
             empty={away ? undefined : game.live
               ? 'The Coach speaks up when a move is a Mistake or Blunder. Press Hint for a nudge.'
               : 'Live Coaching is off in this game. Press Hint for a nudge.'}
@@ -819,6 +847,11 @@
   .game-status.ended { border-left: 6px solid var(--outcome); }
   .game-status.ended, .game-status.ended > .live { gap: 0.55rem; }
   .end-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-top: 0.3rem; }
+  /* While the game waits on this device, the note takes Review this game's place beside New game,
+     so the card is no taller than when it is saved. */
+  .end-actions:has(.queued) { flex-wrap: nowrap; }
+  .end-actions > :is(button, .button) { flex: none; white-space: nowrap; }
+  .queued { flex: 1 1 auto; min-width: 0; font-size: 0.85rem; line-height: 1.3; }
   .button {
     display: inline-block; background: var(--accent); color: var(--accent-text); border-radius: 8px;
     padding: 0.55rem 1.1rem; text-decoration: none; font-weight: 600;

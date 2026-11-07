@@ -3,7 +3,7 @@ import type { Page } from '@playwright/test';
 import { INITIAL_FEN, playUci, turnOf } from '../../packages/shared/src/chess.ts';
 import { winningChancesFor } from '../../packages/shared/src/winning-chances.ts';
 import { CoachClient } from '../../packages/backend/src/client.ts';
-import { coachIdle, connection, expect, fenOf, gameMenu, play, resign, square, storedOnDevice, test } from '../fixtures/app.ts';
+import { coachIdle, connection, engineGate, expect, fenOf, gameMenu, play, resign, square, storedOnDevice, test } from '../fixtures/app.ts';
 
 const BOARD = 'Engine Game board';
 /** A Move Grade symbol on the board, named like "Mistake on g4". */
@@ -399,6 +399,40 @@ for (const [width, height] of [[390, 664], [402, 714], [440, 790], [390, 844]] a
   }
 }
 
+// The end-of-game card while the game waits on this device, the desktop away (independent review, R4):
+// the note takes Review this game's place, and the card fits as it does online, its lines wrapped too.
+for (const [width, height] of [[390, 664], [402, 714], [440, 790], [390, 844]] as const) {
+  test(`on a phone at ${width}×${height} with the desktop away, the end-of-game card and its note fit the first screen`, async ({ paired, app }) => {
+    await paired.setViewportSize({ width, height });
+    await paired.addInitScript((rules) => {
+      document.addEventListener('DOMContentLoaded', () => {
+        const style = document.createElement('style');
+        style.textContent = rules;
+        document.head.append(style);
+      });
+    }, CARD_TEXT['a wide font, the result and the summary on two lines each']);
+    const [ending] = ENDINGS;
+    await putGameOnDevice(paired, app.url, 'white', [...ending.moves], ending.moves.map((_, i) => (i % 2 ? undefined : ending.playerGrades[i / 2])));
+    const status = paired.getByRole('status', { name: 'Game status' });
+    await expect(status).toContainText('Your move');
+    // The offline app shell in control of the page, as on a phone that has used the app before.
+    await paired.evaluate(() => navigator.serviceWorker.ready);
+    await paired.reload();
+    await expect.poll(() => paired.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true);
+    await expect(status).toContainText('Your move');
+    await expect(paired.getByRole('meter', { name: /^Winning Chances bar/ })).toHaveAccessibleName(/\d+%/);
+    await app.stop({ keepData: true });
+    await expect(connection(paired)).toHaveText(/Desktop offline/);
+    await resign(paired);
+    const card = status.locator('xpath=..');
+    await expect(card.getByText(/^Saved on this device\./)).toBeVisible();
+    for (const part of [status.getByText(ending.headline), status.getByText(ending.summary), card.getByText(/^Saved on this device\./), card.getByRole('button', { name: 'New game' })]) {
+      await expect(part).toBeInViewport({ ratio: 1 });
+    }
+    expect(await paired.evaluate(() => window.scrollY)).toBe(0);
+  });
+}
+
 test('a finished game still offers its Review after a reload, and its New game starts a fresh one', async ({ paired, app }) => {
   await startGame(paired, app.url);
   await moveAndWaitForReply(paired, 'e2e4', 2);
@@ -480,13 +514,15 @@ test('an Engine Game steps through its moves during play and once it is over, wi
   // During play the steps show earlier positions; the game stays where it is.
   await paired.keyboard.press('ArrowLeft');
   await expect(board).toHaveAttribute('data-fen', afterE4Now);
-  await expect(awayBar(paired)).toContainText('Looking at move 1');
+  // The bar names the position by the move that reached it, as the move list does.
+  await expect(awayBar(paired)).toContainText('Looking at 1. e4');
   await paired.getByRole('button', { name: 'First position' }).click();
   await expect(board).toHaveAttribute('data-fen', INITIAL_FEN);
+  await expect(awayBar(paired)).toContainText('Looking at the start');
   // The game's own next move, played on an earlier position, steps to it: no line of the Player's own.
   await play(paired, 'e2e4', BOARD);
   await expect(board).toHaveAttribute('data-fen', afterE4Now);
-  await expect(awayBar(paired)).toContainText('Looking at move 1');
+  await expect(awayBar(paired)).toContainText('Looking at 1. e4');
   await paired.keyboard.press('End');
   await expect(board).toHaveAttribute('data-fen', live);
   await expect(awayBar(paired)).toHaveCount(0);
@@ -529,7 +565,7 @@ test('the arrow keys leave the board alone while the Game options menu is open',
   // Closed, the keys step again.
   await paired.keyboard.press('Escape');
   await paired.keyboard.press('ArrowLeft');
-  await expect(paired.getByRole('group', { name: 'Away from the game' })).toContainText('Looking at move 2');
+  await expect(paired.getByRole('group', { name: 'Away from the game' })).toContainText('Looking at 2. Nf3');
 });
 
 /** The bar at the top of the panel while the board is away from the game's latest position. */
@@ -596,7 +632,7 @@ test('if the Engine moves while the Player looks back, the board stays put and t
   const looked = fenAfter(ITALIAN.slice(0, 2));
   const board = paired.getByRole('group', { name: BOARD });
   await expect(board).toHaveAttribute('data-fen', looked);
-  await expect(awayBar(paired)).toHaveText(/^Looking at move 1\s*Back to the game$/);
+  await expect(awayBar(paired)).toHaveText(/^Looking at 1… e5\s*Back to the game$/);
   await engine.release();
   await expect(paired.getByRole('button', { name: /^Move 3… / })).toBeVisible();
   await expect(paired.getByRole('status', { name: 'Game status' })).toContainText('Your move');
@@ -605,7 +641,7 @@ test('if the Engine moves while the Player looks back, the board stays put and t
   const reply = ((await storedOnDevice(paired, 'engineGame')) as { moves: string[] }).moves;
   expect(reply.slice(0, 5)).toEqual([...ITALIAN, 'f1c4']);
   const san = playUci(fenAfter(reply.slice(0, 5)), reply[5] as string)?.san;
-  await expect(awayBar(paired)).toContainText(`Looking at move 1 · The Engine has played 3… ${san}`);
+  await expect(awayBar(paired)).toContainText(`Looking at 1… e5 · The Engine has played 3… ${san}`);
   // Away from the position to play from: no Hint, no Show threat and no arrows.
   await expect(paired.getByRole('button', { name: 'Hint' })).toHaveCount(0);
   await expect(paired.getByRole('button', { name: 'Threat' })).toHaveCount(0);
@@ -613,7 +649,7 @@ test('if the Engine moves while the Player looks back, the board stays put and t
   await expect(paired.getByText('Press Hint for a nudge')).toHaveCount(0);
   // On a phone the bar keeps to one row: which move it is, and the way back.
   await paired.setViewportSize({ width: 390, height: 664 });
-  await expect(awayBar(paired).getByText('Looking at move 1')).toBeInViewport({ ratio: 1 });
+  await expect(awayBar(paired).getByText('Looking at 1… e5')).toBeInViewport({ ratio: 1 });
   await expect(awayBar(paired).getByRole('button', { name: 'Back to the game' })).toBeInViewport({ ratio: 1 });
   await expect(awayBar(paired).getByText(/The Engine has played/)).toBeHidden();
   await paired.setViewportSize({ width: 1200, height: 900 });
@@ -636,7 +672,7 @@ test('a move on an earlier position during play starts the Player’s own line: 
   await play(paired, 'e5d4', BOARD);
   const board = paired.getByRole('group', { name: BOARD });
   await expect(board).toHaveAttribute('data-fen', fenAfter(['e2e4', 'e7e5', 'd2d4', 'e5d4']));
-  await expect(awayBar(paired)).toContainText('Your own line from move 2');
+  await expect(awayBar(paired)).toContainText('Your own line after 1… e5');
   await engine.release();
   // The game's Engine still replies, and the board stays on the Player's line.
   await expect(paired.getByRole('button', { name: /^Move 3… / })).toBeVisible();
@@ -694,10 +730,75 @@ test('Analyze on the Player’s own line shows its Move Grades, the Engine’s b
   await play(paired, 'd1d4', BOARD);
   await expect(variation.getByRole('button', { name: /^Variation move 3\. Qxd4, (Best|Good|Inaccuracy|Mistake|Blunder)$/ })).toBeVisible();
   expect(await app.rows('coach_calls')).toHaveLength(1);
-  // Back to the game puts the Coach's word on the line away with it.
+  // Back to the game drops the Coach's word on the line with it.
   await awayBar(paired).getByRole('button', { name: 'Back to the game' }).click();
   await expect(board.getByRole('img', { name: /^Engine’s best: / })).toHaveCount(0);
-  await expect(paired.getByLabel('Coach conversation').getByText('Why exd4?')).toBeHidden();
+  await expect(paired.getByLabel('Coach conversation')).not.toContainText('exd4');
+});
+
+test('an Analyze answer still on its way when the Player goes back to the game never shows in the game’s Coach panel', async ({ paired, app }) => {
+  // Found by the independent review (R2): the answer landed in the game's panel after Back to the game.
+  await resumeGame(paired, app.url, 'white', ITALIAN);
+  await paired.keyboard.press('ArrowLeft');
+  await paired.keyboard.press('ArrowLeft');
+  await play(paired, 'd2d4', BOARD);
+  await play(paired, 'e5d4', BOARD);
+  const desktop = engineGate(app);
+  desktop.hold();
+  await awayBar(paired).getByRole('button', { name: 'Analyze' }).click();
+  await expect(paired.getByRole('region', { name: 'Coach' }).getByRole('status')).toHaveText('Answering…');
+  await awayBar(paired).getByRole('button', { name: 'Back to the game' }).click();
+  await expect(awayBar(paired)).toHaveCount(0);
+  desktop.release();
+  // The answer is written down once the Coach has given it; by then it would be on its way to the page.
+  await expect.poll(async () => (await app.rows('coach_calls')).length).toBe(1);
+  await paired.waitForTimeout(1500);
+  await expect(paired.getByLabel('Coach conversation')).not.toContainText('exd4');
+  await expect(paired.getByRole('region', { name: 'Coach' }).getByRole('status')).toHaveText('Coach ready');
+});
+
+test('what the Coach said about the Player’s own line stays out of the next brief about the game', async ({ paired, app }) => {
+  // Found by the independent review (R10): the Hint's brief carried "Coach said: exd4 is graded …",
+  // about a position the game never reached (ADR 0009).
+  await resumeGame(paired, app.url, 'white', ITALIAN);
+  await paired.keyboard.press('ArrowLeft');
+  await paired.keyboard.press('ArrowLeft');
+  await play(paired, 'd2d4', BOARD);
+  await play(paired, 'e5d4', BOARD);
+  await awayBar(paired).getByRole('button', { name: 'Analyze' }).click();
+  await coachIdle(paired);
+  await awayBar(paired).getByRole('button', { name: 'Back to the game' }).click();
+  await paired.getByRole('button', { name: 'Hint' }).click();
+  await coachIdle(paired);
+  const calls = await app.rows<{ job: string; brief: string }>('coach_calls');
+  expect(calls.map((c) => c.job)).toEqual(['why', 'hint']);
+  // The Hint's brief has no summary of an earlier answer: the game's thread had none.
+  expect((JSON.parse(calls[1]?.brief ?? '{}') as { summary?: string }).summary).toBeUndefined();
+});
+
+test('Back to the game leaves the focus on the board, where the next move is played', async ({ paired, app }) => {
+  // Found by the independent review (R3): the button went with the bar and the focus dropped to the page.
+  await resumeGame(paired, app.url, 'white', ITALIAN);
+  await paired.keyboard.press('ArrowLeft');
+  await awayBar(paired).getByRole('button', { name: 'Back to the game' }).focus();
+  await paired.keyboard.press('Enter');
+  await expect(awayBar(paired)).toHaveCount(0);
+  await expect(paired.getByRole('group', { name: BOARD })).toBeFocused();
+});
+
+test('when the Engine’s reply ends the game while the Player looks back, the board shows how it ended', async ({ paired, app }) => {
+  // The one time the board doesn't stay where the Player is looking (independent review, R9): the
+  // game is over, and the end-of-game card is about the final position.
+  await resumeGame(paired, app.url, 'white', ['f2f3', 'e7e5']);
+  const engine = await holdBrowserEngine(paired);
+  await play(paired, 'g2g4', BOARD);
+  await paired.keyboard.press('Home');
+  const board = paired.getByRole('group', { name: BOARD });
+  await expect(board).toHaveAttribute('data-fen', INITIAL_FEN);
+  await engine.release();
+  await expect(paired.getByRole('status', { name: 'Game status' })).toContainText('The Engine won by checkmate.');
+  await expect(board).toHaveAttribute('data-fen', fenAfter(['f2f3', 'e7e5', 'g2g4', 'd8h4']));
+  await expect(awayBar(paired)).toHaveCount(0);
 });
 
 test.describe('Live Coaching', () => {
@@ -759,6 +860,36 @@ test.describe('Live Coaching', () => {
       expect(await paired.evaluate(() => window.scrollY)).toBe(0);
     });
   }
+
+  test('during the choice to take a Mistake back, the board stays on the move it is about and the choice stays in view', async ({ paired, app }) => {
+    // Found by the independent review (R7, R7b): a tap on the move list looked back and scrolled the
+    // choice out of view, and a look back taken while the move was graded kept the board away from it.
+    await paired.setViewportSize({ width: 390, height: 664 });
+    await startGame(paired, app.url);
+    await moveAndWaitForReply(paired, 'e2e4', 2);
+    await coachIdle(paired);
+    // Ba6 gives the bishop away; the Player looks back while it is graded.
+    const engine = await holdBrowserEngine(paired);
+    await play(paired, 'f1a6', BOARD);
+    await paired.keyboard.press('ArrowLeft');
+    await paired.keyboard.press('ArrowLeft');
+    await expect(awayBar(paired)).toBeVisible();
+    await engine.release();
+    const status = paired.getByRole('status', { name: 'Game status' });
+    await expect(status).toContainText('Take the move back, or carry on?');
+    await coachIdle(paired);
+    const afterBa6 = fenAfter([...(((await storedOnDevice(paired, 'engineGame')) as { moves: string[] }).moves)]);
+    const board = paired.getByRole('group', { name: BOARD });
+    await expect(awayBar(paired)).toHaveCount(0);
+    await expect(board).toHaveAttribute('data-fen', afterBa6);
+    // The move list doesn't look back while the choice waits (tapped where it is, without scrolling to it).
+    await paired.getByRole('list', { name: 'Moves' }).getByRole('button', { name: /^Move 1\. e4/ }).dispatchEvent('click');
+    await play(paired, 'e7e5', BOARD);
+    await expect(awayBar(paired)).toHaveCount(0);
+    await expect(board).toHaveAttribute('data-fen', afterBa6);
+    await expect(status.getByRole('button', { name: 'Take the move back' })).toBeInViewport({ ratio: 1 });
+    await expect(status.getByRole('button', { name: 'Carry on' })).toBeInViewport({ ratio: 1 });
+  });
 
   test('on a phone, the choice to take a Mistake back is on screen without scrolling', async ({ paired, app }) => {
     await paired.setViewportSize({ width: 390, height: 844 });

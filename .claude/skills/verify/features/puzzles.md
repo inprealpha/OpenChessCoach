@@ -17,9 +17,7 @@ by Lesson: an opening's Puzzles by the opening, a Theme's or endgame's by Liches
   Puzzles that are done. Lessons without Puzzles are not offered. Beside it, this set's progress on
   the device: "Pins: 2 of 25 done (1 missed)." Only following a link changes the set (arrow keys
   don't), and focus comes back to `Choose what to practise` on the new set. On a phone the links
-  wrap their names, and the progress line shares the choice's row (the set's name, which the
-  heading gives, is left to screen readers: "2 of 25 done (1 missed)."), so the board starts right
-  under it at 390×664, 402×714, 440×790 and 390×844, even for Mixed and the longest names.
+  wrap their names.
 - A link to a Lesson without Puzzles (`#/puzzles/queen-mate`) or to no Lesson serves every Lesson's
   Puzzles, with the note "There are no Puzzles for Mate with king and queen, so these are from every
   Lesson."
@@ -28,17 +26,7 @@ by Lesson: an opening's Puzzles by the opening, a Theme's or endgame's by Liches
   it reads "You found the best move for <side>."; after `Show the solution`, "The solution for
   <side> is on the board."
 - A wrong move: "<move> is not the move. Try again." and it is taken back.
-- `Hint` then `Show the solution`, one button at the end of the header line, as a Lesson's Hint then
-  Show the move. The Hint is the Coach's `hint` job: the desktop's Engine works out the facts of the
-  Puzzle's position (its best move is the solution's), the brief has `hideMoves: true` and no
-  `winningChances`, and the reply names and draws no move (the guard strips any). The Coach panel
-  shows it under the board, with no Ask box while the answer is still to find, and the board takes
-  no move while the Coach answers. The button reads `Show the solution` until the Player finds the
-  move; at the Puzzle's next move to find it is `Hint` again. Without the Coach, the Hint says
-  "Hints need the Coach, which is unavailable. Press Show the solution to see the moves."
-- `Next Puzzle`; a Why Question after solving. The Ask box names the move it asks about: "Ask why
-  about 19. Bxc6", the solution's first move, wherever the Player steps; in a variation, the
-  variation's move shown.
+- `Show the solution`; `Next Puzzle`; a Why Question after solving.
 - Once solved or shown, the region writes out the solution ("Solution: 19. Bxc6 Qxc6 20. Nxa7+ …",
   numbered from the Puzzle's own move number), each move a button (`Move 19. Bxc6`) that shows its
   position, and `First position` / `Previous move` / `Next move` / `Last position` step through it;

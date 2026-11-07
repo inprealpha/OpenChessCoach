@@ -41,6 +41,7 @@
   import { api } from '../lib/api.svelte.ts';
   import { lessonArrows, lessonHighlights } from '../lib/arrows.ts';
   import { askAbout } from '../lib/ask.ts';
+  import { narrow } from '../lib/narrow.svelte.ts';
   import { CoachThread } from '../lib/coach.svelte.ts';
   import { lessonCatalogue, loadLesson } from '../lib/content.ts';
   import { gradeForCoach } from '../lib/engine/engine.svelte.ts';
@@ -525,7 +526,8 @@
    * shows only once the decision's move is on the board.
    */
   const askedMove = $derived(phase === 'done' ? (variation.active ? variation.line.lastMove : undefined) : phase === 'feedback' || phase === 'shown' ? line.lastMove : undefined);
-  const askPlaceholder = $derived(askAbout(askedMove));
+  // Shorter on a phone, where the box sits between the step buttons.
+  const askPlaceholder = $derived(askAbout(askedMove, narrow.on));
 
   /** The side the Player plays in this part. */
   const playerSide = $derived(part?.side ?? lesson?.side ?? 'white');

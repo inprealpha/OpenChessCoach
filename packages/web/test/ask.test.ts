@@ -11,5 +11,9 @@ describe('askAbout', () => {
   });
   it('asks about the position when there is no move', () => {
     expect(askAbout(undefined)).toBe('Ask about this position');
+    expect(askAbout(undefined, true)).toBe('Ask about this position');
+  });
+  it('is shorter on a phone', () => {
+    expect(askAbout(e5, true)).toBe('Why 1… e5?');
   });
 });

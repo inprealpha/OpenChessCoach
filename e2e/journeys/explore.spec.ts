@@ -5,7 +5,7 @@
 // its moves, and Back to the game drops it and puts the board back where the Player left the game.
 // A board that refuses a move says why.
 import { readFileSync } from 'node:fs';
-import { INITIAL_FEN, legalMoves, playLine, playUci, turnOf } from '../../packages/shared/src/chess.ts';
+import { INITIAL_FEN, legalMoves, moveLabel, playLine, playUci, turnOf } from '../../packages/shared/src/chess.ts';
 import { decisions, type LessonData } from '../../packages/shared/src/content/lessons.ts';
 import type { PuzzleFile } from '../../packages/shared/src/content/puzzles.ts';
 import { coachIdle, coachPanel, expect, fenOf, play, resign, square, test } from '../fixtures/app.ts';
@@ -128,13 +128,23 @@ test('a complete Lesson’s final board takes moves; during the Lesson a refused
   // The reason went with the state that caused it.
   await expect(said).toHaveText('');
   const final = await fenOf(paired, BOARD);
+  // The Ask box names the move a Why Question asks about: none on the final position, then the variation's move.
+  const ask = paired.getByLabel('Your Why Question');
+  await expect(ask).toHaveAttribute('placeholder', 'Ask about this position');
   const move = anotherMove(final);
   await play(paired, move, BOARD);
   await expect(board).toHaveAttribute('data-fen', playUci(final, move)!.fenAfter);
+  const tried = playUci(final, move)!;
+  await expect(ask).toHaveAttribute('placeholder', `Ask why about ${moveLabel(tried.fenBefore, tried.san)}`);
+  await paired.getByRole('button', { name: 'Ask the Coach why' }).click();
+  await coachIdle(paired);
+  const why = (await app.rows<{ job: string; brief: string }>('coach_calls')).filter((c) => c.job === 'why').at(-1);
+  expect((JSON.parse(why!.brief) as { move?: { uci: string } }).move?.uci).toBe(tried.uci);
   const back = paired.getByRole('button', { name: 'Back to the Lesson' });
   await expect(back).toBeVisible();
   await paired.getByRole('button', { name: 'Previous move' }).click();
   await expect(board).toHaveAttribute('data-fen', final);
+  await expect(ask).toHaveAttribute('placeholder', 'Ask about this position');
   await back.click();
   await expect(back).toHaveCount(0);
   await expect(board).toHaveAttribute('data-fen', final);

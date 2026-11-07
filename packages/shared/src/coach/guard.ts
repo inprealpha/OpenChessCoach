@@ -1,8 +1,9 @@
 // The Coach move guard (ADR 0002): before a Coach reply reaches any client, every move and
 // arrow is checked against the Engine's candidates in that call's brief, and the answers the
 // desktop's Engine gave the Coach's questions in that call (ADR 0010), or, for a Review's overview,
-// against the graded moves of the game its brief lists. Anything else is stripped.
-import { playSan, playUci, positionKey } from '../chess.ts';
+// against the graded moves of the game its brief lists. Anything else is stripped. A Hint names no
+// move at all, in its words either (`namedMove`).
+import { legalMoves, playSan, playUci, positionKey } from '../chess.ts';
 import { threatFen, type Brief } from './brief.ts';
 import type { EngineMove } from './engine-tool.ts';
 import type { Arrow, CoachRawReply } from './types.ts';
@@ -13,6 +14,8 @@ const MAX_HIGHLIGHTS = 4;
 const MAX_NOTE = 140;
 
 export interface GuardResult {
+  /** The reply's words: a Hint's that name a move become `HINT_FALLBACK`. */
+  text: string;
   moves: string[];
   arrows: Arrow[];
   highlights: string[];
@@ -94,6 +97,44 @@ export function answeredMoves(brief: Brief, answered: readonly EngineMove[]): { 
   return { drawn, named };
 }
 
+/**
+ * What a Hint says instead of words that name a move: the brief asked for the idea alone, and the
+ * guard can't cut the move out of a sentence and keep it true.
+ */
+export const HINT_FALLBACK = 'Look at every check, capture and threat in this position, for both sides, before you choose your move.';
+
+/** How a move may be written: its SAN with or without x, = and + or #, the piece and square alone, or its UCI. */
+function spellings(san: string, uci: string): { exact: string[]; anyCase: string[] } {
+  const base = san.replace(/[+#!?]+$/, '');
+  const exact = new Set([base, base.replace('x', ''), base.replace('=', ''), base.replace('x', '').replace('=', '')]);
+  // A piece move without the letter or number that tells two pieces apart: Rd1 for Rdd1.
+  const piece = /^([KQRBN])[a-h]?[1-8]?(x?)([a-h][1-8])$/.exec(base);
+  if (piece) for (const x of ['', 'x']) exact.add(`${piece[1]}${x}${piece[3]}`);
+  if (base.startsWith('O-O')) exact.add(base.replace(/O/g, '0'));
+  return { exact: [...exact], anyCase: [uci, `${uci.slice(0, 2)}-${uci.slice(2)}`] };
+}
+
+/**
+ * The first move `text` names in `fen`, as `spellings` writes it, or undefined. A pawn's move to a
+ * square is written as the square alone ("e5"), so that counts only for the Engine's own moves
+ * (`engineMoves`): any other square ("your rook on g7", "the rook takes on g7") says where pieces
+ * stand, which a Hint may, and the prompt keeps the move itself out of the words.
+ */
+export function namedMove(text: string, fen: string, engineMoves: ReadonlySet<string>): string | undefined {
+  const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\=-]/g, '\\$&');
+  for (const uci of legalMoves(fen)) {
+    const played = playUci(fen, uci);
+    if (!played) continue;
+    const { exact, anyCase } = spellings(played.san, played.uci);
+    const words = exact.filter((s) => !SQUARE.test(s) || engineMoves.has(played.uci));
+    const found =
+      words.some((s) => new RegExp(`(?<![A-Za-z0-9])${escape(s)}(?![A-Za-z0-9])`).test(text)) ||
+      anyCase.some((s) => new RegExp(`(?<![A-Za-z0-9])${escape(s)}(?![A-Za-z0-9])`, 'i').test(text));
+    if (found) return played.san;
+  }
+  return undefined;
+}
+
 export function guardReply(brief: Brief, raw: CoachRawReply, answered: readonly EngineMove[] = []): GuardResult {
   const allowed = brief.hideMoves ? new Set<string>() : allowedMoves(brief);
   const named = brief.hideMoves ? new Set<string>() : askedLineMoves(brief);
@@ -135,5 +176,15 @@ export function guardReply(brief: Brief, raw: CoachRawReply, answered: readonly 
     const line = raw.note.replace(/\s+/g, ' ').trim();
     if (line) note = line.length > MAX_NOTE ? `${line.slice(0, MAX_NOTE - 1)}…` : line;
   }
-  return { moves, arrows, highlights, note, stripped };
+  // A Hint's words name no move either: one that does is not passed on (ADR 0002).
+  let text = raw.text;
+  if (brief.hideMoves) {
+    const engineMoves = new Set([...brief.candidates, ...(brief.tempting ?? [])].map((c) => c.uci));
+    const leak = namedMove(text, brief.fen, engineMoves);
+    if (leak) {
+      stripped.push(`text names ${leak}, which a Hint keeps back`);
+      text = HINT_FALLBACK;
+    }
+  }
+  return { text, moves, arrows, highlights, note, stripped };
 }

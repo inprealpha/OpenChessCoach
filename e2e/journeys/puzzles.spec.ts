@@ -4,14 +4,16 @@ import { readFileSync } from 'node:fs';
 import type { Page } from '@playwright/test';
 import { legalMoves, moveLabel, outcomeOf, piecesOf, playLine, playUci, turnOf, type PlayedMove } from '../../packages/shared/src/chess.ts';
 import type { Brief } from '../../packages/shared/src/coach/brief.ts';
+import { HINT_FALLBACK, namedMove } from '../../packages/shared/src/coach/guard.ts';
 import type { CatalogueItem } from '../../packages/shared/src/content/course.ts';
-import { TRACKS } from '../../packages/shared/src/content/lessons.ts';
+import { decisions, TRACKS, type LessonData } from '../../packages/shared/src/content/lessons.ts';
 import type { PuzzleFile } from '../../packages/shared/src/content/puzzles.ts';
 import { coachIdle, expect, fenOf, play, storedOnDevice, test } from '../fixtures/app.ts';
 
 const load = (file: string) => (JSON.parse(readFileSync(new URL(`../../data/${file}`, import.meta.url), 'utf8')) as PuzzleFile).puzzles;
 const puzzles = [...load('puzzles.json'), ...load('theme-puzzles.json')];
 const lessons = JSON.parse(readFileSync(new URL('../../data/lessons/index.json', import.meta.url), 'utf8')) as CatalogueItem[];
+const readLesson = (id: string) => JSON.parse(readFileSync(new URL(`../../data/lessons/${id}.json`, import.meta.url), 'utf8')) as LessonData;
 /** The first Lesson offered after Mixed: the sets come by track, in the Lessons' order. */
 const firstSet = TRACKS.flatMap((t) => lessons.filter((l) => l.track === t)).find((l) => puzzles.some((p) => p.lessonId === l.id))!;
 const BOARD = 'Puzzle board';
@@ -404,9 +406,152 @@ test('on a phone the progress line shares the choice’s row, so the board start
       await expect(progress).toHaveText(/\d+ of \d+ done/);
       expect(await progress.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
       expect(await paired.evaluate(() => document.documentElement.scrollWidth)).toBe(width);
+      // The set's name, which the progress line leaves out, shows whole in the heading, within the header line's row.
+      const heading = paired.getByRole('heading', { level: 1 });
+      expect(await heading.evaluate((el) => el.scrollHeight <= el.clientHeight + 1 && el.scrollWidth <= el.clientWidth + 1), `${route} at ${width}×${height}`).toBe(true);
+      expect((await paired.locator('header.frame-head').boundingBox())!.height).toBeLessThanOrEqual(44);
     }
   }
 });
+
+test('a Hint whose words name the solution reaches the Player as a general Hint, and no word of it streams first', async ({ paired, app }) => {
+  // Every frame the desktop sends, from a fresh connection.
+  const received: string[] = [];
+  paired.on('websocket', (ws) => ws.on('framereceived', (f) => received.push(String(f.payload))));
+  await paired.goto(`${app.url}/#/puzzles/italian-game`);
+  await paired.reload();
+  const puzzle = await current(paired);
+  const [, answer] = playLine(puzzle.fen, puzzle.moves);
+  const said = `Play ${answer!.san} now, it wins.`;
+  await app.script({ kind: 'reply', reply: { text: said, moves: [answer!.uci], arrows: [{ uci: answer!.uci, brush: 'green' }], highlights: [answer!.uci.slice(2, 4)] } });
+  await paired.getByRole('button', { name: 'Hint', exact: true }).click();
+  await coachIdle(paired);
+  const conversation = paired.getByLabel('Coach conversation');
+  await expect(conversation).toContainText(HINT_FALLBACK);
+  await expect(conversation).not.toContainText(answer!.san);
+  await expect(paired.getByRole('group', { name: BOARD }).getByRole('img', { name: /^Arrow / })).toHaveCount(0);
+  expect(received.filter((f) => f.includes(answer!.san) || f.includes(answer!.uci))).toEqual([]);
+  // The log keeps what the Coach said, and why it was kept back.
+  const [call] = await app.rows<{ job: string; raw_reply: string; stripped: string }>('coach_calls');
+  expect(JSON.parse(call!.raw_reply).text).toBe(said);
+  expect(JSON.parse(call!.stripped)).toContain(`text names ${answer!.san}, which a Hint keeps back`);
+});
+
+test('a Hint without the Coach says why, names no move, and Show the solution still works', async ({ paired, app }) => {
+  await paired.goto(`${app.url}/#/puzzles/italian-game`);
+  const puzzle = await current(paired);
+  const set = playUci(puzzle.fen, puzzle.moves[0] as string)!.fenAfter;
+  await fetch(`${app.url}/__verify/coach/status`, { method: 'POST', headers: { authorization: `Bearer ${app.token}`, 'content-type': 'application/json' }, body: JSON.stringify({ unavailable: 'The Coach is off for this test.' }) });
+  await paired.getByRole('button', { name: 'Hint', exact: true }).click();
+  const coach = paired.getByRole('region', { name: 'Coach' });
+  const message = 'Hints need the Coach, which is unavailable. Press Show the solution to see the moves.';
+  await expect(coach).toContainText(message);
+  // Every legal move counts here, a pawn's move to a bare square too.
+  expect(namedMove(await coach.innerText(), set, new Set(legalMoves(set)))).toBeUndefined();
+  expect(await app.rows('coach_calls')).toEqual([]);
+  await paired.getByRole('button', { name: 'Show the solution' }).click();
+  await expect(paired.getByText('Here is the solution.')).toBeVisible();
+});
+
+test.describe('while the Coach gives a Hint', () => {
+  // Slow enough to try a move while the Hint is on its way.
+  test.use({ appOptions: { chunkDelayMs: 300 } });
+
+  test('the board takes no move and says why; once the Hint is in, it does', async ({ paired, app }) => {
+    await paired.goto(`${app.url}/#/puzzles/italian-game`);
+    const puzzle = await current(paired);
+    const set = playUci(puzzle.fen, puzzle.moves[0] as string)!.fenAfter;
+    const board = paired.getByRole('group', { name: BOARD });
+    await paired.getByRole('button', { name: 'Hint', exact: true }).click();
+    await expect(paired.getByRole('region', { name: 'Coach' }).getByText('Answering…')).toBeAttached();
+    await play(paired, puzzle.moves[1] as string, BOARD);
+    await expect(board.locator('..').getByRole('status')).toHaveText('One moment: the Coach is giving a Hint.');
+    await expect(board).toHaveAttribute('data-fen', set);
+    await coachIdle(paired);
+    await expect(paired.getByRole('region', { name: 'Coach' }).getByText('Coach ready')).toBeAttached();
+    await solveStepwise(paired, puzzle.moves);
+    await expect(paired.getByText('Solved first time!')).toBeVisible();
+  });
+});
+
+test('another mate on the last move: the Ask box and the Why Question both take the move on the board', async ({ paired, app }) => {
+  // Puzzle zwIo0 (Discovered check): 30. fxe8=Q# is the solution, and fxe8=R# mates too.
+  await onlyPuzzle(paired, app.url, 'zwIo0');
+  const puzzle = await current(paired);
+  const set = playUci(puzzle.fen, puzzle.moves[0] as string)!.fenAfter;
+  await play(paired, 'f7e8r', BOARD);
+  await expect(paired.getByText('Solved first time!')).toBeVisible();
+  const mine = playUci(set, 'f7e8r')!;
+  expect(mine.san).toBe('fxe8=R#');
+  const ask = paired.getByLabel('Your Why Question');
+  await expect(ask).toHaveAttribute('placeholder', `Ask why about ${moveLabel(set, mine.san)}`);
+  await paired.getByRole('button', { name: 'Ask the Coach why' }).click();
+  await coachIdle(paired);
+  const why = (await app.rows<{ job: string; brief: string }>('coach_calls')).find((c) => c.job === 'why');
+  expect((JSON.parse(why!.brief) as Brief).move?.uci).toBe('f7e8r');
+});
+
+test('on a phone the Ask box fits the longest move it can name, in Puzzles and in Lessons', async ({ paired, app }) => {
+  const short = (fenBefore: string, san: string) => `Why ${moveLabel(fenBefore, san)}?`;
+  const puzzleLabels = puzzles.map((p) => playLine(p.fen, p.moves)[1]!).map((m) => short(m.fenBefore, m.san));
+  const lessonLabels = lessons.flatMap((l) => decisions(readLesson(l.id)).map((d) => short(d.node.fen, d.node.mainSan)));
+  const longest = (labels: string[]) => [...labels].sort((a, b) => b.length - a.length).slice(0, 12);
+  const labels = [...longest(puzzleLabels), ...longest(lessonLabels)];
+  expect(labels).toContain('Why 30. fxe8=Q#?');
+  /** How much room the box leaves beside each label, in its own font. */
+  const rooms = (texts: string[]) =>
+    paired.getByRole('textbox', { name: 'Your Why Question' }).evaluate((el: HTMLInputElement, all: string[]) => {
+      const style = getComputedStyle(el);
+      const ctx = document.createElement('canvas').getContext('2d');
+      if (!ctx) throw new Error('No canvas');
+      ctx.font = style.font;
+      const room = el.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+      return { size: parseFloat(style.fontSize), cut: all.filter((t) => ctx.measureText(t).width > room) };
+    }, texts);
+  for (const [width, height] of [[390, 664], [402, 714], [440, 790], [390, 844]] as const) {
+    await paired.setViewportSize({ width, height });
+    // A Puzzle's box sits between the step buttons: the narrowest it gets.
+    await paired.goto(`${app.url}/#/puzzles/italian-game`);
+    const puzzle = await current(paired);
+    await showSolution(paired);
+    const answer = playLine(puzzle.fen, puzzle.moves)[1]!;
+    await expect(paired.getByLabel('Your Why Question')).toHaveAttribute('placeholder', short(answer.fenBefore, answer.san));
+    // 16 px, so iOS doesn't zoom in, and every label whole.
+    expect(await rooms(labels), `${width}×${height}`).toEqual({ size: 16, cut: [] });
+    await paired.getByRole('button', { name: 'Next Puzzle' }).click();
+  }
+  // A Lesson's box, after the Player's move.
+  await paired.setViewportSize({ width: 390, height: 664 });
+  await paired.goto(`${app.url}/#/lesson/italian-game`);
+  await paired.getByRole('button', { name: 'Start the Lesson' }).click();
+  await play(paired, 'e2e4', 'Italian Game Lesson board');
+  await coachIdle(paired);
+  await expect(paired.getByLabel('Your Why Question')).toHaveAttribute('placeholder', 'Why 1. e4?');
+  expect(await rooms(labels)).toEqual({ size: 16, cut: [] });
+});
+
+/** Opens a Puzzle's Lesson with every other Puzzle of it done on this device, so `id` comes next. */
+async function onlyPuzzle(page: Page, url: string, id: string): Promise<void> {
+  const lessonId = puzzles.find((p) => p.id === id)!.lessonId;
+  const others = puzzles.filter((p) => p.lessonId === lessonId && p.id !== id).map((p) => p.id);
+  await page.goto(`${url}/#/puzzles/${lessonId}`);
+  await current(page);
+  await page.evaluate(
+    (done) =>
+      new Promise<void>((resolve, reject) => {
+        const open = indexedDB.open('ai-chess-coach', 1);
+        open.onerror = () => reject(open.error);
+        open.onsuccess = () => {
+          const tx = open.result.transaction('kv', 'readwrite');
+          tx.objectStore('kv').put(done, 'puzzlesDone');
+          tx.oncomplete = () => resolve();
+          tx.onerror = () => reject(tx.error);
+        };
+      }),
+    others,
+  );
+  await page.reload();
+}
 
 /** Shows a Puzzle's solution: a Hint first, then the same button shows the solution. */
 async function showSolution(page: Page): Promise<void> {

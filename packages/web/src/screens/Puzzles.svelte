@@ -29,6 +29,7 @@
   import { profile } from '../lib/profile.svelte.ts';
   import { store } from '../lib/storage.ts';
   import { askAbout } from '../lib/ask.ts';
+  import { narrow } from '../lib/narrow.svelte.ts';
   import { stepLine, Variation, type Step } from '../lib/variation.svelte.ts';
   let { opening }: { opening?: string | undefined } = $props();
 
@@ -74,8 +75,11 @@
   const shownLast = $derived(variation.active ? variation.line.lastMove : line.lastMove);
   /** The Hint was given for the move to find now: the next press shows the solution. */
   const hinted = $derived(hintedAt === index);
-  /** The Ask box names the move a Why Question asks about: the solution's first move, or the variation's move shown. */
-  const askPlaceholder = $derived(variation.active ? askAbout(variation.line.lastMove) : askAbout(line.moves[1]));
+  /**
+   * The Ask box names the move a Why Question asks about: the Puzzle's answer as played on the board (the solution's
+   * move, or another mate the Player found), or the variation's move shown. Shorter on a phone, so it fits.
+   */
+  const askPlaceholder = $derived(askAbout(variation.active ? variation.line.lastMove : line.moves[1], narrow.on));
 
   /** What the Player can practise: every Lesson mixed, then each Lesson that has Puzzles, with this device's progress on them. */
   const mixed = $derived({ id: '', name: 'Mixed: every Lesson', ...progressOn(all.map((p) => p.id)) });
@@ -217,8 +221,9 @@
   }
 
   /**
-   * A nudge towards the move to find: the Coach's Hint job, whose facts the desktop's Engine works out and whose reply
-   * names and draws no move (the guard strips any). Pressed again for the same move, it shows the solution.
+   * A nudge towards the move to find: the Coach's Hint job, whose facts the desktop's Engine works out. Its reply
+   * names and draws no move: the guard strips every move, arrow and square, and a text that names a move becomes a
+   * general Hint (`namedMove` in shared/coach/guard.ts). Pressed again for the same move, it shows the solution.
    */
   async function hint(): Promise<void> {
     if (!puzzle || status !== 'solving' || busy || coach.busy) return;
@@ -310,8 +315,8 @@
       );
       return;
     }
-    const setup = playUci(puzzle.fen, puzzle.moves[0] as string);
-    const answer = setup && playUci(setup.fenAfter, puzzle.moves[1] as string);
+    // The answer as the board shows it: the solution's move, or another mate the Player found on the last move.
+    const [setup, answer] = line.moves;
     if (!setup || !answer) return;
     // The answer is about the Puzzle's position: show it, so the Coach's arrows start on its pieces.
     line.goTo(1);
@@ -492,6 +497,9 @@
   /* One row on a phone: the progress line takes what the choice leaves and never a row of its own, so the board
      starts higher. The set's name is the heading's; the count stays whole. Open, the sets push it under them. */
   @media (max-width: 820px) {
+    /* The progress line leaves the set's name to the heading, so the heading shows it whole: two lines fit in the
+       header line's 44 px, where one would cut a long name short. */
+    .frame-head > h1 { white-space: normal; line-height: 1.15; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
     .picker { column-gap: 0.75rem; }
     #puzzle-progress { flex: 1 1 0; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: right; }
     .set-name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

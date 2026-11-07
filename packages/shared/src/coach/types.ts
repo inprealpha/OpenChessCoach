@@ -49,6 +49,11 @@ export interface CoachRequest {
    * Puzzle do: the brief then leaves them out as well.
    */
   hideWinningChances?: boolean;
+  /**
+   * The side whose Winning Chances the screen's bar names, when it isn't the Player's: White on the
+   * Board, as on Lichess (#52). The brief quotes that side's, so the Coach quotes the bar.
+   */
+  chancesSide?: Side;
 }
 
 /** A move of a reviewed game, as a Review's overview names it. */
@@ -166,6 +171,8 @@ export interface CoachAsk {
   pitch?: GamePitch;
   /** The screen hides the Winning Chances bar (a Lesson or a Puzzle), so the brief leaves them out. */
   hideWinningChances?: boolean;
+  /** The side whose Winning Chances the screen's bar names, when it isn't `playerSide` (the Board: White). */
+  chancesSide?: Side;
 }
 
 /** What a Coach implementation returns before the guard. Moves are always data, never only prose. */

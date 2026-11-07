@@ -52,10 +52,12 @@ Optional lines: `Preview seed: NAME` when another seed shows the change better, 
   own process list, so it can't read other programs' environments. Docker's socket and other container
   engines' are covered up, and the bubble runs with none of the user's extra groups (on InstaBox the
   user is in `docker`, which works like root). Its environment is cleared, except the proxy's
-  certificate settings, and `CLAUDE_CODE_OAUTH_TOKEN` with `--real-coach`. bwrap needs sudo without a
-  password to give the bubble its own process list (InstaBox boxes mount over a file in `/proc`, which
-  stops an unprivileged bubble doing that); everything inside runs as the machine's user, with no
-  capabilities and no way back to root. Before the branch's code runs, the bubble checks all of this
+  certificate settings, and `CLAUDE_CODE_OAUTH_TOKEN` with `--real-coach`. It needs sudo without a
+  password, for one step: root gives the bubble its own process list with a fresh `/proc` (InstaBox
+  boxes mount over a file in `/proc`, which stops a bubble without root doing that) and drops the
+  user's extra groups. Then bwrap itself runs as the machine's user, in a user namespace, so a
+  machine's AppArmor rules for bwrap (as on Ubuntu 24.04) apply as meant; everything inside has no
+  capabilities, no way back to root and no way to make another namespace. Before the branch's code runs, the bubble checks all of this
   itself and the preview stops if anything is wrong (`preview.sh --check-bubble` runs only that check).
   The bubble stays open with the preview in it until `clean.sh` ends it, and with it everything the
   branch started.

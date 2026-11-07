@@ -14,8 +14,9 @@
 #                    none of this user's extra groups (such as docker). It shares the machine's
 #                    network, so it can reach services on localhost. It needs sudo without a
 #                    password: Linux lets only root give the bubble its own process list on a machine
-#                    that mounts over files in /proc, as InstaBox boxes do. The branch's code still
-#                    runs as this user, with no way back to root.
+#                    that mounts over files in /proc, as InstaBox boxes do. Root does only that and
+#                    drops the extra groups; bwrap and the branch's code run as this user, with no
+#                    way back to root.
 #     --real-coach   verify mode uses the real Coach: the bubble gets CLAUDE_CODE_OAUTH_TOKEN (on
 #                    InstaBox, a Secret's placeholder) and nothing else of the machine's. Real usage.
 #     --check-bubble only build the bubble and run its self-check (no install, no preview): the last
@@ -83,7 +84,16 @@ if [ "$sandbox" = 1 ]; then
   # environments. It keeps the network (npm installs, and the real Coach). Sockets that give root
   # (Docker's and other container engines') and the user's runtime folder (/run/user: its session bus
   # and any rootless engine) are covered up; the user's extra groups are dropped below as well.
-  bubble=(sudo -n bwrap --ro-bind / / --dev /dev --proc /proc
+  #
+  # Root does only what needs root: a process list of its own with a fresh /proc (InstaBox mounts over a
+  # file in /proc, and Linux then refuses a bubble without root a /proc of its own), and dropping the
+  # user's extra groups (such as docker, which works like root). Then setpriv switches to this user, and
+  # bwrap runs as this user in a user namespace, as bwrap normally does: it never runs as root, so a
+  # machine's AppArmor rules for bwrap (as on Ubuntu 24.04) apply as they were meant to. --kill-child:
+  # ending unshare ends everything inside. --disable-userns: nothing inside can make another one.
+  bubble=(sudo -n unshare --pid --fork --kill-child --mount-proc --
+    setpriv "--reuid=$(id -u)" "--regid=$(id -g)" --clear-groups --inh-caps=-all --bounding-set=-all --
+    bwrap --unshare-user --disable-userns --ro-bind / / --dev /dev --proc /proc
     --bind "$sb/home" "$HOME" --bind "$sb/tmp" /tmp --bind "$repo" "$repo"
     --unshare-pid --unshare-ipc --unshare-uts --unshare-cgroup-try --new-session --die-with-parent
     --clearenv --setenv PATH /usr/local/bin:/usr/bin:/bin --setenv HOME "$HOME" --setenv TMPDIR /tmp
@@ -92,7 +102,8 @@ if [ "$sandbox" = 1 ]; then
   [ ! -d /run/user ] || bubble+=(--tmpfs /run/user)
   hidden=" "
   for s in /run/docker.sock /var/run/docker.sock /run/containerd/containerd.sock /run/podman/podman.sock /run/buildkit/buildkitd.sock; do
-    [ -S "$s" ] || continue
+    # Only the ones this user could use: the rest the bubble can't reach anyway.
+    [ -S "$s" ] && [ -w "$s" ] || continue
     real=$(realpath "$s")
     case "$hidden" in *" $real "*) continue ;; esac
     hidden="$hidden$real "
@@ -106,10 +117,9 @@ if [ "$sandbox" = 1 ]; then
     [ -z "${!v:-}" ] || bubble+=(--setenv "$v" "${!v}")
   done
   [ "$coach" != real ] || bubble+=(--setenv CLAUDE_CODE_OAUTH_TOKEN "$CLAUDE_CODE_OAUTH_TOKEN")
-  # bwrap runs as root to set the bubble up; everything inside runs as this user, in its own group
-  # only (no docker or other extra groups), with no capabilities and no new privileges (bwrap sets that
-  # flag, so sudo inside refuses).
-  bubble+=(-- setpriv "--reuid=$(id -u)" "--regid=$(id -g)" --clear-groups --inh-caps=-all --bounding-set=-all)
+  # Everything inside runs as this user, in its own group only, with no capabilities and no new
+  # privileges (bwrap sets that flag, so sudo inside refuses).
+  bubble+=(--)
   in_bubble() { "${bubble[@]}" bash -c "$1"; }
 
   # The self-check: the bubble is what it should be, or the branch's code never runs. It prints the
@@ -119,7 +129,7 @@ if [ "$sandbox" = 1 ]; then
     grep -q "^NoNewPrivs:[[:space:]]*1" /proc/self/status || { echo "the bubble can gain privileges"; exit 1; }
     grep -q "^CapEff:[[:space:]]*0*$" /proc/self/status || { echo "the bubble has capabilities"; exit 1; }
     for s in /run/docker.sock /var/run/docker.sock /run/containerd/containerd.sock /run/podman/podman.sock /run/buildkit/buildkitd.sock; do
-      [ ! -S "$s" ] || { echo "the bubble can reach $s"; exit 1; }
+      ! { [ -S "$s" ] && [ -w "$s" ]; } || { echo "the bubble can reach $s"; exit 1; }
     done
     [ -z "$(ls -A /run/user 2>/dev/null)" ] || { echo "the bubble sees /run/user"; exit 1; }
     [ -z "$(ls -A /run/instabox/secrets 2>/dev/null | grep -v "^ca-bundle.pem$")" ] || { echo "the bubble sees the Secret placeholders"; exit 1; }

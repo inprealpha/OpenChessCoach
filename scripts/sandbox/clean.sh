@@ -38,16 +38,17 @@ used() { df -P . | awk 'NR == 2 { sub("%", "", $5); print $5 }'; }
 say "disk $(used)% full before"
 
 # The preview's bubble: only the process preview.sh recorded, and only when its command line is the
-# bubble's (sudo bwrap … occ-preview-bubble). It runs as root, so ending it takes sudo; ending it ends
-# every process inside, since the bubble has its own process list.
+# bubble's (sudo unshare … bwrap … occ-preview-bubble). Its top runs as root, so ending it takes sudo;
+# ending it ends every process inside, since the bubble has its own process list.
 sb=$HOME/.occ-preview-sandbox
 pid=$(cat "$sb/bubble.pid" 2>/dev/null)
 if [[ "$pid" =~ ^[0-9]+$ ]] && tr '\0\n' '  ' < "/proc/$pid/cmdline" 2>/dev/null | grep -q 'bwrap .*occ-preview-bubble'; then
-  # The recorded process is sudo; the bubble is the bwrap under it. Ending bwrap ends the bubble (the
-  # process inside dies with it), and then sudo exits.
-  for bw in $(pgrep -P "$pid" -x bwrap) "$pid"; do sudo -n kill "$bw" 2>/dev/null; done
+  # The recorded process is sudo; the bubble's top is the unshare under it. Ending unshare ends the
+  # bubble (--kill-child ends the first process inside, and with it its process list), and then sudo
+  # exits.
+  for top in $(pgrep -P "$pid" -x unshare) "$pid"; do sudo -n kill "$top" 2>/dev/null; done
   for _ in $(seq 1 20); do [ -d "/proc/$pid" ] || break; sleep 0.5; done
-  [ ! -d "/proc/$pid" ] || { for bw in $(pgrep -P "$pid" -x bwrap) "$pid"; do sudo -n kill -9 "$bw" 2>/dev/null; done; }
+  [ ! -d "/proc/$pid" ] || { for top in $(pgrep -P "$pid" -x unshare) "$pid"; do sudo -n kill -9 "$top" 2>/dev/null; done; }
 fi
 rm -f "$sb/bubble.pid"
 # Verify-mode runs of this checkout started outside a bubble (by hand, or before previews used one):

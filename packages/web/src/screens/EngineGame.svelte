@@ -70,6 +70,37 @@
   /** The Player's own moves from a position of the finished game, graded by the browser's Engine. */
   const variation = new Variation();
   let game = $state<Saved | null>(null);
+  // PROTOTYPE (#53): which layout to show, from ?proto=a|b|c. Removed once the owner picks one.
+  const proto = (new URLSearchParams(location.search).get('proto') ?? 'a') as 'a' | 'b' | 'c';
+  /** During play, the earlier position the Player is looking at (a ply count), or null at the latest position. */
+  let look = $state<number | null>(null);
+  /** How many moves the game had when the Player stepped back, so the note can say the Engine has moved since. */
+  let lookedAway = $state(0);
+  /** The Player pressed Analyze on their own line during play: grades, the Engine's line and the Coach show. */
+  let analyzed = $state(false);
+  let analysis = $state<Analysis | null>(null);
+  /** The engine's best move in the position on the board, drawn once the Player asked for Analyze. */
+  const bestHere = $derived.by(() => (analyzed && analysis && analysis.fen === boardFen ? candidatesFrom(analysis)[0] : undefined));
+  /** Away from the latest position during play: looking back, or trying a line of their own. */
+  const away = $derived(!game?.result && (look !== null || variation.active));
+  const lookFen = $derived(look === null ? line.fen : look === 0 ? line.startFen : (line.moves[look - 1] as PlayedMove).fenAfter);
+  const engineMoved = $derived(look !== null && line.moves.length > lookedAway);
+  const latestMove = $derived(line.moves.at(-1));
+  const moveNo = (ply: number): number => Math.max(1, Math.ceil(ply / 2));
+  /** The move the board shows, in words: "move 8". */
+  const awayWhere = $derived(variation.active ? `move ${moveNo((variation.from ?? 0) + 1)}` : `move ${moveNo(look ?? 0)}`);
+  function backToGame(): void {
+    variation.leave();
+    look = null;
+    analyzed = false;
+  }
+  async function analyze(): Promise<void> {
+    if (!game || !variation.active) return;
+    analyzed = true;
+    const { label, ...asked } = variation.question(line.moves);
+    void label;
+    await coach.ask({ job: 'why', ...asked, playerSide: game.playerSide }, 'Analyze this line, please.');
+  }
   let loaded = $state(false);
   let side = $state<Side>('white');
   let strength = $state(2);
@@ -103,8 +134,8 @@
   const orientation = $derived<Side>(game ? (flipped ? otherSide(game.playerSide) : game.playerSide) : 'white');
   const playerToMove = $derived(game !== null && !finished && !thinking && !awaitingChoice && turnOf(line.fen) === game.playerSide);
   /** The position on the board: the game's, or the Player's variation from a finished game. */
-  const boardFen = $derived(variation.active ? variation.fen : line.fen);
-  const shownLast = $derived(variation.active ? variation.line.lastMove : line.lastMove);
+  const boardFen = $derived(variation.active ? variation.fen : look !== null ? lookFen : line.fen);
+  const shownLast = $derived(variation.active ? variation.line.lastMove : look !== null ? line.moves[look - 1] : line.lastMove);
   /** Why the board takes no move while the game is on, in one line beside it. */
   const refusal = $derived(thinking ? 'It’s the Engine’s move.' : awaitingChoice ? 'Take the move back or carry on first.' : '');
   // The Player's last graded move keeps its symbol through the Engine's reply, unless the reply
@@ -131,14 +162,14 @@
     return punishingArrow(reply?.uci, reply?.san, otherSide(game.playerSide));
   });
   // A finished game's board shows only the final position: no Hint, Coach or threat arrows left over.
-  const arrows = $derived(finished ? [] : [...threatArrows(threats.threat), ...punishing, ...coach.arrows, ...(hintArrow ? [hintArrow] : [])]);
+  const arrows = $derived(away ? (bestHere ? [{ from: bestHere.uci.slice(0, 2), to: bestHere.uci.slice(2, 4), brush: 'green' as const }] : []) : finished ? [] : [...threatArrows(threats.threat), ...punishing, ...coach.arrows, ...(hintArrow ? [hintArrow] : [])]);
 
   $effect(() => {
-    threats.follow(threatSetting.on && playerToMove ? line.fen : null);
+    threats.follow(threatSetting.on && playerToMove && !away ? line.fen : null);
   });
 
   /** The browser Engine's analysis of the position on the board, for the Winning Chances bar (ADR 0007). */
-  let analysis = $state<Analysis | null>(null);
+  // (analysis is declared above, with the prototype's state)
   // A drawn game reads level: a repetition or an agreed draw is one the position alone doesn't show.
   const position = $derived(game?.result === '1/2-1/2' && !variation.active ? { score: { cp: 0 }, pov: turnOf(line.fen) } : scoreFromAnalysis(boardFen, analysis));
   $effect(() => {
@@ -248,7 +279,26 @@
 
   /** Steps through the variation while the board shows one, otherwise through the finished game. */
   function step(where: Step): void {
-    stepLine(variation.active ? variation.line : line, where);
+    if (variation.active || finished) return stepLine(variation.active ? variation.line : line, where);
+    // During play the game's own line stays at its latest position: the steps move a view of it.
+    const end = line.moves.length;
+    const at = look ?? end;
+    const to = Math.max(0, Math.min(end, { first: 0, previous: at - 1, next: at + 1, last: end }[where]));
+    if (look === null && to !== end) lookedAway = end;
+    look = to === end ? null : to;
+  }
+
+  /** A move on the board while the Player looks back during play: the game's next move steps, any other starts their own line. */
+  function exploreDuringPlay(uci: string): void {
+    const at = look ?? line.moves.length;
+    const to = variation.gameStep(uci, line.moves, at);
+    if (to !== null) {
+      variation.leave();
+      look = to === line.moves.length ? null : to;
+      return;
+    }
+    if (!variation.active) analyzed = false;
+    variation.play(uci, { cursor: at, fen: lookFen });
   }
 
   /** A move picked in the move list: the board leaves any variation for it. */
@@ -259,6 +309,7 @@
 
   async function onmove(uci: string): Promise<void> {
     if (finished) return explore(uci);
+    if (away) return exploreDuringPlay(uci);
     if (!game || !playerToMove) return;
     const ply = line.moves.length + 1;
     const m = line.play(uci);
@@ -384,6 +435,9 @@
     confirmingResign = false;
     awaitingChoice = false;
     notice = '';
+    // Nothing the Coach said during play stays once the game is over (#53).
+    coach.reset();
+    backToGame();
     await persist();
     await save(recordOf(game));
     // Resign and an agreed draw take away the button that ended the game: carry on from the card's
@@ -538,6 +592,16 @@
     await persist();
   }
 
+  /** PROTOTYPE (#53, option c): the Move Grades that need a look, in one line. */
+  function shortTally(grades: (MoveGrade | undefined)[]): string {
+    const n = (g: MoveGrade) => grades.filter((x) => x === g).length;
+    const parts = ([['Blunder', 'Blunders'], ['Mistake', 'Mistakes'], ['Inaccuracy', 'Inaccuracies']] as const)
+      .map(([one, many]) => ({ k: n(one), one, many }))
+      .filter((p) => p.k)
+      .map((p) => `${p.k} ${p.k === 1 ? p.one : p.many}`);
+    return parts.length ? parts.join(', ') : 'no Mistakes';
+  }
+
   function resultText(g: Saved): string {
     if (g.result === '1/2-1/2') return g.termination === 'draw agreed' ? 'Draw agreed.' : `Draw by ${g.termination}.`;
     return `${outcomeOf(g) === 'won' ? 'You won' : 'The Engine won'} by ${g.termination}.`;
@@ -554,10 +618,21 @@
   <header class="frame-head">
     <h1>Engine Game</h1>
     {#if game}
-      <p class="head-line">You play {SIDE_NAMES[game.playerSide]} · Engine strength: {LEVELS.find((l) => l.value === game?.strength)?.name}</p>
+      {#if proto === 'b' && away}
+        <p class="head-line away-head">{variation.active ? `Your line from ${awayWhere}` : `Looking at ${awayWhere}`}{engineMoved && !variation.active ? ' · the Engine has moved' : ''}</p>
+      {:else}
+        <p class="head-line">You play {SIDE_NAMES[game.playerSide]} · Engine strength: {LEVELS.find((l) => l.value === game?.strength)?.name}</p>
+      {/if}
       <div class="frame-tools">
+        {#if proto === 'b' && away}
+          {#if variation.active}<button type="button" class="secondary" onclick={analyze} disabled={coach.busy}>Analyze</button>{/if}
+          <button type="button" onclick={backToGame}>Back to the game</button>
+        {/if}
+        {#if proto === 'b' && finished && saved && saved !== 'queued'}
+          <a class="button head-review" href={`#/review/${saved.id}`}>Review this game</a>
+        {/if}
         {#if finished && variation.active}<VariationBar place="header" back="Back to the game" onback={() => variation.leave()} />{/if}
-        {#if !finished}
+        {#if !finished && !away}
           <button
             type="button"
             class="secondary"
@@ -602,17 +677,17 @@
         <div class="board-and-bar">
           <SheetStrip />
           <div class="with-bar">
-            <WinningChancesBar score={position?.score ?? null} pov={position?.pov ?? 'white'} {orientation} />
+            <WinningChancesBar score={variation.active && !finished && !analyzed ? null : (position?.score ?? null)} pov={position?.pov ?? 'white'} {orientation} waiting={variation.active && !finished && !analyzed ? 'Analyze to see' : undefined} />
             <Board
               fen={boardFen}
               {orientation}
-              movable={finished ? 'both' : playerToMove ? game.playerSide : 'none'}
+              movable={finished || away ? 'both' : playerToMove ? game.playerSide : 'none'}
               lastMove={shownLast ? { from: shownLast.uci.slice(0, 2), to: shownLast.uci.slice(2, 4) } : undefined}
               {arrows}
               highlights={coach.highlights}
-              gradeMark={variation.active ? variation.mark : mark}
+              gradeMark={variation.active ? (finished || analyzed ? variation.mark : undefined) : look !== null ? gradeMark(line.moves[look - 1], game.grades[look - 1]) : mark}
               {onmove}
-              {refusal}
+              refusal={away ? '' : refusal}
               label="Engine Game board"
             />
           </div>
@@ -621,6 +696,18 @@
       <div class="side panel">
         <SheetHandle />
         {#if finished && variation.active}<VariationBar place="panel" back="Back to the game" onback={() => variation.leave()} />{/if}
+        {#if proto === 'a' && away}
+          <div class="away-bar" role="group" aria-label="Away from the game">
+            <p>
+              {#if variation.active}<strong>Your own line</strong><span class="long-only"> from {awayWhere}</span>{:else}<strong>Looking at {awayWhere}</strong>{/if}
+              {#if engineMoved && latestMove && !variation.active}<span class="muted long-only"> · The Engine has played {moveNo(line.moves.length)}{turnOf(latestMove.fenBefore) === 'black' ? '…' : '.'} {latestMove.san}</span>{/if}
+            </p>
+            <div class="away-actions">
+              {#if variation.active}<button type="button" class="secondary" onclick={analyze} disabled={coach.busy}>Analyze</button>{/if}
+              <button type="button" onclick={backToGame}><span class="long-only">Back to the game</span><span class="short-only">Back to game</span></button>
+            </div>
+          </div>
+        {/if}
         <div class="panel-body" {@attach sheet.gestures}>
           {#if confirmingResign && !finished}
             <ConfirmDialog
@@ -646,7 +733,12 @@
           {/if}
           <div class="card game-status" class:ended={finished} data-outcome={game.result ? outcomeOf(game) : undefined}>
             <div class="live" role="status" aria-live="polite" aria-label="Game status">
-              {#if game.result}
+              {#if game.result && proto === 'a'}
+                <p class="end-headline">{resultText(game)}</p>
+              {:else if game.result && proto === 'c'}
+                <p class="end-headline">{resultText(game)}</p>
+                <p class="muted end-short">{Math.ceil(game.moves.length / 2)} moves · {shortTally(game.grades)}</p>
+              {:else if game.result}
                 <GameEnd
                   headline={resultText(game)}
                   moves={Math.ceil(game.moves.length / 2)}
@@ -665,6 +757,8 @@
                     <button type="button" class="secondary" onclick={carryOn}>Carry on</button>
                   </div>
                 {/if}
+              {:else if away && proto === 'c' && engineMoved && latestMove}
+                <p>Your move ({SIDE_NAMES[game.playerSide]}). The Engine has played {latestMove.san}.</p>
               {:else}
                 <p>Your move ({SIDE_NAMES[game.playerSide]}).</p>
               {/if}
@@ -676,26 +770,40 @@
               <div class="end-actions" bind:this={endActions}>
                 {#if saved === 'queued'}
                   <p class="muted">Saved on this device. It goes to your game list when your desktop is reachable.</p>
-                {:else if saved}
+                {:else if saved && proto !== 'b'}
                   <a class="button" href={`#/review/${saved.id}`}>Review this game</a>
                 {/if}
                 <button type="button" class="secondary" onclick={askNewGame}>New game</button>
               </div>
+              {#if proto === 'a'}
+                <GameEnd
+                  headline=""
+                  moves={Math.ceil(game.moves.length / 2)}
+                  side={game.playerSide}
+                  level={LEVELS.find((l) => l.value === game?.strength)?.name ?? ''}
+                  grades={game.grades}
+                />
+              {/if}
             {/if}
           </div>
-          {#if !finished}
+          {#if away && analyzed && bestHere}
+            <div class="card engine-best">
+              <p><strong>The Engine’s best move here:</strong> {bestHere.san}</p>
+            </div>
+          {/if}
+          {#if !finished && !away}
             <label class="toggle"><input type="checkbox" checked={game.live} onchange={toggleLive} /> Live Coaching in this game</label>
           {/if}
           <!-- During play the panel stays on the game's status, its choice to take a move back above
                all: the board shows the move just played. A finished game's steps keep their move in view. -->
           <MoveList
-            followInPanel={finished}
+            followInPanel={finished || away}
             moves={line.moves}
             grades={game.grades}
-            cursor={line.cursor}
-            ongoto={finished ? pickMove : undefined}
+            cursor={look ?? line.cursor}
+            ongoto={finished ? pickMove : (c) => { variation.leave(); analyzed = false; if (look === null) lookedAway = line.moves.length; look = c === line.moves.length ? null : c; }}
             variation={variation.active
-              ? { from: variation.from ?? 0, moves: variation.line.moves, grades: variation.grades, cursor: variation.line.cursor, ongoto: (c) => variation.line.goTo(c) }
+              ? { from: variation.from ?? 0, moves: variation.line.moves, grades: finished || analyzed ? variation.grades : [], cursor: variation.line.cursor, ongoto: (c) => variation.line.goTo(c) }
               : undefined}
           />
         </div>
@@ -704,14 +812,24 @@
         <!-- Only a finished game steps back: while it is on, the board shows the position to play from. -->
         {#snippet steps(part: 'back' | 'on')}
           <StepButtons only={part} onfirst={() => step('first')} onprevious={() => step('previous')} onnext={() => step('next')} onlast={() => step('last')} />
+          {#if part === 'back' && proto === 'c' && away}
+            <div class="thumb-away">
+              {#if variation.active}
+                <button type="button" class="secondary" onclick={analyze} disabled={coach.busy}>Analyze</button>
+                <button type="button" onclick={backToGame}>Back to game</button>
+              {:else}
+                <button type="button" class="thumb-back" onclick={backToGame}>Move {moveNo(look ?? 0)} · Back to game</button>
+              {/if}
+            </div>
+          {/if}
         {/snippet}
         {#if !finished || coach.entries.length}
           <CoachPanel
             thread={coach}
-            empty={game.live
+            empty={away ? undefined : game.live
               ? 'The Coach speaks up when a move is a Mistake or Blunder. Press Hint for a nudge.'
               : 'Live Coaching is off in this game. Press Hint for a nudge.'}
-            steps={finished ? steps : undefined}
+            {steps}
           />
         {:else}
           <ThumbBar {steps} />
@@ -740,4 +858,26 @@
   .game-status[data-outcome='won'] { --outcome: #145c26; }
   .game-status[data-outcome='drawn'] { --outcome: #7a5a00; }
   .game-status[data-outcome='lost'] { --outcome: #7b8088; }
+  /* PROTOTYPE (#53) */
+  .away-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.4rem 0.6rem; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--accent) 8%, var(--panel)); }
+  .away-bar p { margin: 0; }
+  .away-actions { display: flex; gap: 0.4rem; }
+  .away-head { font-weight: 600; color: var(--text); }
+  .end-headline { font-size: 1.3rem; font-weight: 700; line-height: 1.25; margin: 0; }
+  .end-short { margin: 0; }
+  .engine-best p { margin: 0; }
+  .thumb-away { flex: 1; display: flex; gap: 0.4rem; justify-content: center; min-width: 0; }
+  .thumb-away button { flex: 1; white-space: nowrap; }
+  .head-review { padding: 0.4rem 0.8rem; }
+  .short-only { display: none; }
+  .engine-game :global(.thumb-row:has(.thumb-away) > .step) { flex: 0 0 3rem; }
+  @media (max-width: 820px) {
+    .long-only { display: none; }
+    .short-only { display: inline; }
+    .away-bar { flex-wrap: nowrap; padding: 0.3rem 0.5rem; font-size: 0.9rem; }
+    .away-bar p { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+    .away-actions button { padding: 0.35rem 0.7rem; }
+    .game-status.ended:has(.end-short) { padding-top: 0.4rem; padding-bottom: 0.4rem; gap: 0.3rem; }
+    .game-status.ended:has(.end-short) .end-actions { margin-top: 0; }
+  }
 </style>

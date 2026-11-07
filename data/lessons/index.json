@@ -197,11 +197,11 @@
   "track": "endgames",
   "level": "beginner",
   "side": "white",
-  "goal": "You can mate a lone king with king and rook, using your king to help and a waiting move when you need one.",
+  "goal": "You can mate a lone king with king and rook: shut it in a box, bring your king up, check when the two kings face each other, and never take its last square unless it is mate.",
   "priorKnowledge": [
    "two-rook-mate"
   ],
-  "decisions": 11,
+  "decisions": 18,
   "playOut": true
  },
  {
@@ -292,7 +292,7 @@
   "priorKnowledge": [
    "queen-mate"
   ],
-  "decisions": 11
+  "decisions": 12
  },
  {
   "id": "two-knights-defence",
@@ -436,11 +436,11 @@
   "track": "endgames",
   "level": "intermediate",
   "side": "white",
-  "goal": "You can tell whether king and pawn win against a lone king, using the opposition and the key squares in front of the pawn.",
+  "goal": "You can tell whether king and pawn win against a lone king, using the opposition and the key squares in front of the pawn, and you know why a rook pawn is often only a draw.",
   "priorKnowledge": [
    "active-king"
   ],
-  "decisions": 12,
+  "decisions": 15,
   "playOut": true
  },
  {
@@ -558,11 +558,11 @@
   "track": "endgames",
   "level": "intermediate",
   "side": "white",
-  "goal": "You can make a passed pawn from a pawn majority, use an outside passed pawn to pull the enemy king away, and stop an enemy passed pawn.",
+  "goal": "You can make a passed pawn from a pawn majority, use an outside or a protected passed pawn, stop an enemy passed pawn, and count the square of a pawn to see who wins a race.",
   "priorKnowledge": [
    "king-and-pawn"
   ],
-  "decisions": 12
+  "decisions": 20
  },
  {
   "id": "weak-pawns",

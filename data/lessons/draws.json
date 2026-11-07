@@ -16,45 +16,47 @@
  },
  "parts": [
   {
-   "title": "Mate, not stalemate",
-   "fen": "8/k7/8/1QK5/8/8/8/8 w - - 29 75",
+   "title": "Two pawns up, and careful",
+   "fen": "7k/8/6KP/8/5P2/8/8/8 w - - 5 66",
    "side": "white",
-   "keyIdea": "Against a lone king, make sure before every move that it will still have a legal move, unless your move is mate.",
-   "text": "From a game played on Lichess. You are White, with a queen against a lone king, and Black's king is stuck near the corner. In the game, White's next queen move looked natural but left Black with no legal move, and the game was only a draw. Find the mate instead.",
+   "keyIdea": "A king stuck in a corner can run out of moves: before each pawn push, check that it still has a square, and give it one if not.",
+   "text": "From a game played on Lichess. You are White, two pawns up, and Black's king is shut in the corner on h8. Your king on g6 covers g7 and h7, so Black's king has very few squares. A careless pawn move can take away its last one.",
    "credit": {
-    "source": "Lichess games database, game uxxySEvi",
-    "url": "https://lichess.org/uxxySEvi#148",
+    "source": "Lichess games database, game e5ip4fyf",
+    "url": "https://lichess.org/e5ip4fyf#130",
     "licence": "CC0 1.0",
     "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
     "authors": "Lichess; the players of the game"
    },
    "mainLine": [
-    "c5c6",
-    "a7a8",
-    "b5b7"
+    "f4f5",
+    "h8g8",
+    "f5f6",
+    "g8h8",
+    "g6f5"
    ],
    "nodes": [
     {
      "ply": 0,
-     "fen": "8/k7/8/1QK5/8/8/8/8 w - - 29 75",
+     "fen": "7k/8/6KP/8/5P2/8/8/8 w - - 5 66",
      "decision": true,
-     "main": "c5c6",
-     "mainSan": "Kc6",
+     "main": "f4f5",
+     "mainSan": "f5",
      "popular": {
       "beginner": [],
       "casual": [],
       "club": []
      },
      "notes": {
-      "text": "75.Kc6: your king steps from c5 to c6, so that it can protect the queen on b7 next move. Black's king still has a8 to go to, so this is not stalemate."
+      "text": "66.f5 brings the f-pawn up, and Black's king still has g8 to go to. Not 66.h7: then Black's king would have no legal move and would not be in check, which is stalemate."
      }
     },
     {
      "ply": 1,
-     "fen": "8/k7/2K5/1Q6/8/8/8/8 b - - 30 75",
+     "fen": "7k/8/6KP/5P2/8/8/8/8 b - - 0 66",
      "decision": false,
-     "main": "a7a8",
-     "mainSan": "Ka8",
+     "main": "h8g8",
+     "mainSan": "Kg8",
      "popular": {
       "beginner": [],
       "casual": [],
@@ -63,17 +65,44 @@
     },
     {
      "ply": 2,
-     "fen": "k7/8/2K5/1Q6/8/8/8/8 w - - 31 76",
+     "fen": "6k1/8/6KP/5P2/8/8/8/8 w - - 1 67",
      "decision": true,
-     "main": "b5b7",
-     "mainSan": "Qb7#",
+     "main": "f5f6",
+     "mainSan": "f6",
      "popular": {
       "beginner": [],
       "casual": [],
       "club": []
      },
      "notes": {
-      "text": "76.Qb7# is mate: the queen checks from b7, and your king on c6 guards it, so Black's king cannot take it. In the game White played Qb6 here instead. That gave no check, but it took away a7, b7 and b8, so Black's king had no legal move left: stalemate, and the game was drawn."
+      "text": "Black's king went to g8, and 67.f6 pushes again. Black's king can still step back to h8 or across to f8."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "6k1/8/5PKP/8/8/8/8/8 b - - 0 67",
+     "decision": false,
+     "main": "g8h8",
+     "mainSan": "Kh8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "7k/8/5PKP/8/8/8/8/8 w - - 1 68",
+     "decision": true,
+     "main": "g6f5",
+     "mainSan": "Kf5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Black's king went back to h8. In the game White played 68.f7 here, and 68.h7 would have been the same: each takes away g8, Black's last free square, and Black has no legal move. That was stalemate, and the game was drawn. 68.Kf5 steps away instead and gives Black's king g8 and h7 back, so Black has to move, and your pawns can go forward. Any king move wins here; only the two pawn moves throw the win away."
      }
     }
    ]

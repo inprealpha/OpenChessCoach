@@ -217,6 +217,53 @@ test('a Lesson resumed at its last decision sums up the one decision played', as
   );
 });
 
+// The Endgames parts #35 added or replaced, each resumed at its first decision and played through:
+// stalemate and the kings face to face in Rook mate, a pawn stalemate in Draws, the rook pawn in
+// King and pawn endgames, and a protected passed pawn and the square of the pawn in Passed pawns.
+for (const [id, title] of [
+  ['rook-mate', 'Mate, not stalemate'],
+  ['rook-mate', 'Check when the kings face each other'],
+  ['draws', 'Two pawns up, and careful'],
+  ['king-and-pawn', 'A pawn on the edge'],
+  ['passed-pawns', 'A pawn that guards a pawn'],
+  ['passed-pawns', 'Two passed pawns, two squares'],
+] as const) {
+  test(`${id}: the part "${title}" plays through, every move Best or Good, and ends on its key idea`, async ({ paired, app }) => {
+    const lesson = readLesson(id);
+    const steps = decisions(lesson);
+    const first = steps.findIndex((s) => s.part.title === title);
+    const part = steps[first]!.part;
+    const boardName = `${lesson.name} Lesson board`;
+    // A part further in is resumed there, as if the parts before it were played on another device.
+    if (first > 0) saveProgress(app, id, first, false);
+    await paired.goto(`${app.url}/#/lesson/${id}`);
+    await paired.getByRole('button', { name: first > 0 ? 'Resume the Lesson' : 'Start the Lesson' }).click();
+    const own = steps.filter((s) => s.part === part);
+    for (const [k, { node }] of own.entries()) {
+      await expect(paired.getByText(`Decision ${first + k + 1} of ${steps.length}`)).toBeVisible();
+      await expect(paired.getByRole('group', { name: boardName })).toHaveAttribute('data-fen', node.fen);
+      const position = paired.getByRole('region', { name: 'Position' });
+      await expect(position).toContainText(part.title);
+      await expect(position.getByRole('link', { name: part.credit.source }).first()).toBeVisible();
+      await play(paired, node.main, boardName);
+      const choice = paired.getByRole('region', { name: 'Your choice' });
+      await expect(choice).toContainText(`You played ${node.mainSan}`);
+      await expect(choice.getByTitle(/^Move Grade: (Best|Good)$/)).toBeVisible();
+      if (k === own.length - 1) await expect(choice).toContainText(`Key idea: ${part.keyIdea}`);
+      else await expect(choice).not.toContainText('Key idea:');
+      await coachIdle(paired);
+      // The Coach's brief for the Lesson's move carries the part's note on it and its key idea.
+      const brief = (await lessonBriefs(app)).at(-1);
+      expect(brief?.lesson?.notes).toBe(node.notes?.text ?? '');
+      expect(brief?.focus).toMatchObject({ learningGoal: lesson.goal, keyIdea: part.keyIdea });
+      await paired.getByRole('button', { name: /^Continue/ }).click();
+    }
+    // The next part's first decision, or the end of the Lesson.
+    if (first + own.length < steps.length) await expect(paired.getByText(`Decision ${first + own.length + 1} of ${steps.length}`)).toBeVisible();
+    else await expect(paired.getByRole('region', { name: 'Lesson complete' })).toBeVisible();
+  });
+}
+
 test('a double click on Continue moves on one decision, not two', async ({ paired, app }) => {
   const lesson = readLesson('caro-kann');
   const steps = decisions(lesson);

@@ -4,7 +4,7 @@
  "kind": "endgame",
  "track": "endgames",
  "level": "beginner",
- "goal": "You can mate a lone king with king and rook, using your king to help and a waiting move when you need one.",
+ "goal": "You can mate a lone king with king and rook: shut it in a box, bring your king up, check when the two kings face each other, and never take its last square unless it is mate.",
  "priorKnowledge": [
   "two-rook-mate"
  ],
@@ -12,7 +12,7 @@
  "puzzleTags": [],
  "puzzleThemes": [],
  "intro": {
-  "text": "A rook on its own cannot give mate, so your king has to join in. The rook marks out a box the lone king cannot leave, your king walks up to guard the rook, and one step at a time the two of them take squares away until the enemy king is stuck on the edge of the board. Near the end you sometimes need a waiting move: a rook move that is not a check, keeps the box as it is, and simply hands the turn to your opponent."
+  "text": "A rook on its own cannot give mate, so your king has to join in. The rook marks out a box the lone king cannot leave, your king walks up to guard the rook, and one step at a time the two of them take squares away until the enemy king is stuck on the edge of the board. The usual way to push it back is to wait until the two kings stand face to face, one square apart, and then check with the rook: the lone king has to step back. Near the end you sometimes need a waiting move, a rook move that keeps the box as it is and hands the turn to your opponent. Watch out for stalemate all the way: if the lone king is not in check and has no square to go to, the game is only a draw."
  },
  "parts": [
   {
@@ -345,6 +345,219 @@
      },
      "notes": {
       "text": "91.Rd8# checks along the back rank, the row Black's king started on, and your king on f6 guards e7, f7 and g7. Black's king has nowhere to go: checkmate."
+     }
+    }
+   ]
+  },
+  {
+   "title": "Mate, not stalemate",
+   "fen": "8/5K1k/5R2/8/8/8/8/8 w - - 62 97",
+   "side": "white",
+   "keyIdea": "Before each move against a lone king, make sure it will still have a square to go to, unless your move is checkmate.",
+   "text": "From a game played on Lichess. You are White. Black's king is shut in on the h-file, and your king on f7 keeps it off the g-file. You can mate in two moves, but there is a trap on the way: on the last move, the move that looks strongest takes away Black's last square without giving check.",
+   "credit": {
+    "source": "Lichess games database, game 4l6d3cb8",
+    "url": "https://lichess.org/4l6d3cb8#192",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "f6g6",
+    "h7h8",
+    "g6h6"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "8/5K1k/5R2/8/8/8/8/8 w - - 62 97",
+     "decision": true,
+     "main": "f6g6",
+     "mainSan": "Rg6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "97.Rg6 puts the rook right next to Black's king, on a square your king guards, and takes h6 away. Black's king has one square left, h8, so it is not stalemate. The rook could go to a6, b6, c6, d6 or e6 just as well."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "8/5K1k/6R1/8/8/8/8/8 b - - 63 97",
+     "decision": false,
+     "main": "h7h8",
+     "mainSan": "Kh8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "7k/5K2/6R1/8/8/8/8/8 w - - 64 98",
+     "decision": true,
+     "main": "g6h6",
+     "mainSan": "Rh6#",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "98.Rh6# checks down the h-file. Your king covers g7 and g8 and the rook covers h7, so Black's king cannot move: checkmate. In the game White played 98.Rg7 instead. The rook on g7, guarded by your king, covered g8 and h7, but it gave no check. Black's king had no legal move and was not in check, so it was stalemate, and the game was drawn."
+     }
+    }
+   ]
+  },
+  {
+   "title": "Check when the kings face each other",
+   "fen": "8/8/4k3/R7/4K3/8/8/8 w - - 13 80",
+   "side": "white",
+   "keyIdea": "When the two kings stand opposite each other, one square apart, a rook check drives the lone king back one row.",
+   "text": "From a game played on Lichess. You are White. Your rook on a5 keeps Black's king off the fifth rank, and the two kings stand face to face on the e-file, one square apart. This is the moment to push the king back towards the edge.",
+   "credit": {
+    "source": "Lichess games database, game ol85nile",
+    "url": "https://lichess.org/ol85nile#158",
+    "licence": "CC0 1.0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "authors": "Lichess; the players of the game"
+   },
+   "mainLine": [
+    "a5a6",
+    "e6f7",
+    "e4e5",
+    "f7e7",
+    "a6a7",
+    "e7f8",
+    "e5e6",
+    "f8e8",
+    "a7a8"
+   ],
+   "nodes": [
+    {
+     "ply": 0,
+     "fen": "8/8/4k3/R7/4K3/8/8/8 w - - 13 80",
+     "decision": true,
+     "main": "a5a6",
+     "mainSan": "Ra6+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "80.Ra6+ checks along the sixth rank. Black's king cannot come forward, because your king on e4 covers d5, e5 and f5, so it has to go back to the seventh rank."
+     }
+    },
+    {
+     "ply": 1,
+     "fen": "8/8/R3k3/8/4K3/8/8/8 b - - 14 80",
+     "decision": false,
+     "main": "e6f7",
+     "mainSan": "Kf7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 2,
+     "fen": "8/5k2/R7/8/4K3/8/8/8 w - - 15 81",
+     "decision": true,
+     "main": "e4e5",
+     "mainSan": "Ke5",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Black's king stepped to f7, away from yours. 81.Ke5 walks your king up behind the rook, which stays on the sixth rank and keeps the box shut. If Black's king steps in front of yours again, the rook checks again."
+     }
+    },
+    {
+     "ply": 3,
+     "fen": "8/5k2/R7/4K3/8/8/8/8 b - - 16 81",
+     "decision": false,
+     "main": "f7e7",
+     "mainSan": "Ke7",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 4,
+     "fen": "8/4k3/R7/4K3/8/8/8/8 w - - 17 82",
+     "decision": true,
+     "main": "a6a7",
+     "mainSan": "Ra7+",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Black's king came back to e7, face to face with yours, so 82.Ra7+ drives it to the back rank. Your king on e5 covers d6, e6 and f6, so it cannot come forward."
+     }
+    },
+    {
+     "ply": 5,
+     "fen": "8/R3k3/8/4K3/8/8/8/8 b - - 18 82",
+     "decision": false,
+     "main": "e7f8",
+     "mainSan": "Kf8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 6,
+     "fen": "5k2/R7/8/4K3/8/8/8/8 w - - 19 83",
+     "decision": true,
+     "main": "e5e6",
+     "mainSan": "Ke6",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "The king went to f8. 83.Ke6 does not face it yet: it stands a knight's jump away, and now Black has to move. If Black's king steps to e8, in front of yours, the next check is mate. If it goes to g8 instead, your king follows it along the sixth rank until the kings face each other again."
+     }
+    },
+    {
+     "ply": 7,
+     "fen": "5k2/R7/4K3/8/8/8/8/8 b - - 20 83",
+     "decision": false,
+     "main": "f8e8",
+     "mainSan": "Ke8",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     }
+    },
+    {
+     "ply": 8,
+     "fen": "4k3/R7/4K3/8/8/8/8/8 w - - 21 84",
+     "decision": true,
+     "main": "a7a8",
+     "mainSan": "Ra8#",
+     "popular": {
+      "beginner": [],
+      "casual": [],
+      "club": []
+     },
+     "notes": {
+      "text": "Black's king stepped in front of yours, and 84.Ra8# is mate: the rook checks along the back rank, and your king on e6 covers d7, e7 and f7. That is the usual finish: the kings face each other, and the rook gives check on the edge."
      }
     }
    ]

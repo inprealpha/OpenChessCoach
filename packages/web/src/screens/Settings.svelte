@@ -148,7 +148,7 @@
 <section class="screen settings">
   <h1>Settings</h1>
   <!-- PROTOTYPE: shown even when the desktop can't be reached, since it is stored on this device. -->
-  <fieldset class="card" aria-label="Size">
+  <fieldset class="card size" aria-label="Size">
     <legend>Size</legend>
     <p class="muted small">A prototype to try on a phone: how big the buttons and the board are drawn. On this device only; a desktop stays as it is.</p>
     {#each DENSITIES as d (d)}
@@ -350,6 +350,9 @@
   .option { display: flex; gap: 0.5rem; align-items: flex-start; margin: 0.5rem 0; }
   .option input { margin-top: 0.25rem; }
   .cost { display: block; }
+  /* PROTOTYPE: the Size card's radios keep their size beside two lines of text. */
+  .size .option input { flex: none; }
+  .size .option:last-child { margin-bottom: 0; }
   .advanced { margin-top: 0.8rem; }
   .advanced summary { cursor: pointer; font-weight: 600; }
   .warning { margin: 0.5rem 0 0; padding: 0.4rem 0.6rem; border-left: 3px solid #b26a00; background: color-mix(in srgb, #b26a00 10%, transparent); }

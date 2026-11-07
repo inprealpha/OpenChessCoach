@@ -1,7 +1,7 @@
 #!/bin/bash
-# Starts a preview of this checkout on the machine it runs on: prepares the machine, stops earlier
-# verify-mode runs, starts a fresh one (fake Coach, seeded data) on a fixed port and checks it with
-# coachctl doctor. The same on every sandbox; a provider's script (instabox.sh) runs it on a box and
+# Starts a preview of this checkout on the machine it runs on: cleans up earlier previews
+# (clean.sh), prepares the machine, starts a fresh verify-mode run (fake Coach, seeded data: it never
+# calls Claude) on a fixed port and checks it with coachctl doctor. The same on every sandbox; a provider's script (instabox.sh) runs it on a box and
 # gives the port a link.
 #   bash scripts/sandbox/preview.sh [--seed NAME] [--port N] [--no-prepare]
 # Progress goes to stderr. The last line on stdout is one JSON object:
@@ -32,12 +32,13 @@ cd "$(dirname "${BASH_SOURCE[0]}")/../.." || { echo '{"ok":false,"error":"could 
 commit=$(git rev-parse --short HEAD 2>/dev/null || echo unknown)
 echo "preview: OpenChessCoach $commit in $(pwd), seed $seed, port $port" >&2
 
+# Earlier previews on this machine: clean.sh stops their verify-mode runs, deletes their data and
+# evidence, and frees more space when the disk is filling up.
+bash scripts/sandbox/clean.sh || failure "the disk is too full for a preview: see the lines above"
+
 if [ "$prepare" = 1 ]; then
   bash scripts/sandbox/prepare.sh --strict >&2 || failure "prepare.sh failed: see the lines above"
 fi
-
-# Earlier previews on this machine: cleanup stops only verify-mode runs and deletes only their data.
-npm run -s coachctl -- cleanup >&2 || echo "preview: cleanup of earlier runs failed; starting anyway" >&2
 
 started=$(npm run -s verify -- --seed "$seed" --port "$port")
 run_id=$(node -e 'const r = JSON.parse(process.argv[1]); if (!r.ok) process.exit(1); console.log(r.runId)' "$started" 2>/dev/null) \

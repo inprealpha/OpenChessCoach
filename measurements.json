@@ -2,6 +2,7 @@
  "phone/engine-playing/today": {
   "level": "today",
   "density": null,
+  "keyControls": [],
   "appHead": 48,
   "frameHead": 44,
   "board": 376,
@@ -15,6 +16,22 @@
  "phone/engine-over/today": {
   "level": "today",
   "density": null,
+  "keyControls": [
+   {
+    "text": "Review this game",
+    "h": 44,
+    "pill": null,
+    "filled": true,
+    "shown": 0
+   },
+   {
+    "text": "New game",
+    "h": 44,
+    "pill": null,
+    "filled": false,
+    "shown": 0
+   }
+  ],
   "appHead": 48,
   "frameHead": 44,
   "board": 376,
@@ -28,6 +45,7 @@
  "phone/review/today": {
   "level": "today",
   "density": null,
+  "keyControls": [],
   "appHead": 48,
   "frameHead": 44,
   "board": 376,
@@ -41,6 +59,7 @@
  "phone/lesson/today": {
   "level": "today",
   "density": null,
+  "keyControls": [],
   "appHead": 48,
   "frameHead": 44,
   "board": 336,
@@ -54,6 +73,15 @@
  "phone/puzzles/today": {
   "level": "today",
   "density": null,
+  "keyControls": [
+   {
+    "text": "Show the solution",
+    "h": 44,
+    "pill": null,
+    "filled": false,
+    "shown": 1
+   }
+  ],
   "appHead": 48,
   "frameHead": 44,
   "board": 304,
@@ -67,6 +95,7 @@
  "phone/board/today": {
   "level": "today",
   "density": null,
+  "keyControls": [],
   "appHead": 48,
   "frameHead": 44,
   "board": 376,
@@ -80,6 +109,7 @@
  "phone/menu/today": {
   "level": "today",
   "density": null,
+  "keyControls": [],
   "appHead": 48,
   "frameHead": 0,
   "board": 0,
@@ -93,6 +123,7 @@
  "phone/settings/today": {
   "level": "today",
   "density": null,
+  "keyControls": [],
   "appHead": 48,
   "frameHead": 0,
   "board": 0,
@@ -103,13 +134,87 @@
   "pageScrollW": 390,
   "pageScrollH": 2722
  },
+ "phone/lesson-choice/today": {
+  "level": "today",
+  "density": null,
+  "keyControls": [
+   {
+    "text": "Try another move",
+    "h": 49.8,
+    "pill": null,
+    "filled": true,
+    "shown": 1
+   },
+   {
+    "text": "Continue with the Lesson’s move",
+    "h": 49.8,
+    "pill": null,
+    "filled": false,
+    "shown": 1
+   }
+  ],
+  "appHead": 48,
+  "frameHead": 44,
+  "board": 336,
+  "panelBody": 143,
+  "moveRow": 0,
+  "visibleMoveButtons": 0,
+  "visibleMoveRows": 0,
+  "pageScrollW": 390,
+  "pageScrollH": 664
+ },
+ "phone/lesson-finish/today": {
+  "level": "today",
+  "density": null,
+  "keyControls": [
+   {
+    "text": "Your next Lesson: Candidate move",
+    "h": 58.4,
+    "pill": null,
+    "filled": true,
+    "shown": 1
+   }
+  ],
+  "appHead": 48,
+  "frameHead": 44,
+  "board": 312,
+  "panelBody": 118,
+  "moveRow": 0,
+  "visibleMoveButtons": 0,
+  "visibleMoveRows": 0,
+  "pageScrollW": 390,
+  "pageScrollH": 664
+ },
+ "phone/puzzle-solved/today": {
+  "level": "today",
+  "density": null,
+  "keyControls": [
+   {
+    "text": "Next Puzzle",
+    "h": 44,
+    "pill": null,
+    "filled": true,
+    "shown": 1
+   }
+  ],
+  "appHead": 48,
+  "frameHead": 44,
+  "board": 304,
+  "panelBody": 98,
+  "moveRow": 0,
+  "visibleMoveButtons": 0,
+  "visibleMoveRows": 0,
+  "pageScrollW": 390,
+  "pageScrollH": 664
+ },
  "phone/engine-playing/compact": {
   "level": "compact",
   "density": "compact",
-  "appHead": 44,
+  "keyControls": [],
+  "appHead": 45,
   "frameHead": 44,
   "board": 390,
-  "panelBody": 83,
+  "panelBody": 82,
   "moveRow": 34,
   "visibleMoveButtons": 0,
   "visibleMoveRows": 0,
@@ -119,10 +224,26 @@
  "phone/engine-over/compact": {
   "level": "compact",
   "density": "compact",
-  "appHead": 44,
+  "keyControls": [
+   {
+    "text": "Review this game",
+    "h": 44,
+    "pill": 32,
+    "filled": true,
+    "shown": 0
+   },
+   {
+    "text": "New game",
+    "h": 44,
+    "pill": 32,
+    "filled": true,
+    "shown": 0
+   }
+  ],
+  "appHead": 45,
   "frameHead": 44,
   "board": 390,
-  "panelBody": 93,
+  "panelBody": 92,
   "moveRow": 34,
   "visibleMoveButtons": 0,
   "visibleMoveRows": 0,
@@ -132,10 +253,11 @@
  "phone/review/compact": {
   "level": "compact",
   "density": "compact",
-  "appHead": 44,
+  "keyControls": [],
+  "appHead": 45,
   "frameHead": 44,
   "board": 390,
-  "panelBody": 79,
+  "panelBody": 78,
   "moveRow": 34,
   "visibleMoveButtons": 4,
   "visibleMoveRows": 2,
@@ -145,10 +267,11 @@
  "phone/lesson/compact": {
   "level": "compact",
   "density": "compact",
-  "appHead": 44,
+  "keyControls": [],
+  "appHead": 45,
   "frameHead": 44,
-  "board": 368,
-  "panelBody": 122,
+  "board": 339,
+  "panelBody": 150,
   "moveRow": 0,
   "visibleMoveButtons": 0,
   "visibleMoveRows": 0,
@@ -158,10 +281,19 @@
  "phone/puzzles/compact": {
   "level": "compact",
   "density": "compact",
-  "appHead": 44,
+  "keyControls": [
+   {
+    "text": "Show the solution",
+    "h": 44,
+    "pill": 32,
+    "filled": true,
+    "shown": 1
+   }
+  ],
+  "appHead": 45,
   "frameHead": 44,
   "board": 352,
-  "panelBody": 114,
+  "panelBody": 113,
   "moveRow": 0,
   "visibleMoveButtons": 0,
   "visibleMoveRows": 0,
@@ -171,10 +303,11 @@
  "phone/board/compact": {
   "level": "compact",
   "density": "compact",
-  "appHead": 44,
+  "keyControls": [],
+  "appHead": 45,
   "frameHead": 44,
   "board": 390,
-  "panelBody": 79,
+  "panelBody": 78,
   "moveRow": 34,
   "visibleMoveButtons": 4,
   "visibleMoveRows": 2,
@@ -184,7 +317,8 @@
  "phone/menu/compact": {
   "level": "compact",
   "density": "compact",
-  "appHead": 44,
+  "keyControls": [],
+  "appHead": 45,
   "frameHead": 0,
   "board": 0,
   "panelBody": 0,
@@ -192,12 +326,13 @@
   "visibleMoveButtons": 0,
   "visibleMoveRows": 0,
   "pageScrollW": 390,
-  "pageScrollH": 695
+  "pageScrollH": 664
  },
  "phone/settings/compact": {
   "level": "compact",
   "density": "compact",
-  "appHead": 44,
+  "keyControls": [],
+  "appHead": 45,
   "frameHead": 0,
   "board": 0,
   "panelBody": 0,
@@ -205,15 +340,89 @@
   "visibleMoveButtons": 0,
   "visibleMoveRows": 0,
   "pageScrollW": 390,
-  "pageScrollH": 2718
+  "pageScrollH": 2789
+ },
+ "phone/lesson-choice/compact": {
+  "level": "compact",
+  "density": "compact",
+  "keyControls": [
+   {
+    "text": "Try another move",
+    "h": 51,
+    "pill": 39,
+    "filled": true,
+    "shown": 1
+   },
+   {
+    "text": "Continue with the Lesson’s move",
+    "h": 51,
+    "pill": 39,
+    "filled": true,
+    "shown": 1
+   }
+  ],
+  "appHead": 45,
+  "frameHead": 44,
+  "board": 339,
+  "panelBody": 143,
+  "moveRow": 0,
+  "visibleMoveButtons": 0,
+  "visibleMoveRows": 0,
+  "pageScrollW": 390,
+  "pageScrollH": 664
+ },
+ "phone/lesson-finish/compact": {
+  "level": "compact",
+  "density": "compact",
+  "keyControls": [
+   {
+    "text": "Your next Lesson: Candidate move",
+    "h": 58.4,
+    "pill": null,
+    "filled": true,
+    "shown": 1
+   }
+  ],
+  "appHead": 45,
+  "frameHead": 44,
+  "board": 315,
+  "panelBody": 118,
+  "moveRow": 0,
+  "visibleMoveButtons": 0,
+  "visibleMoveRows": 0,
+  "pageScrollW": 390,
+  "pageScrollH": 664
+ },
+ "phone/puzzle-solved/compact": {
+  "level": "compact",
+  "density": "compact",
+  "keyControls": [
+   {
+    "text": "Next Puzzle",
+    "h": 44,
+    "pill": 32,
+    "filled": true,
+    "shown": 1
+   }
+  ],
+  "appHead": 45,
+  "frameHead": 44,
+  "board": 352,
+  "panelBody": 53,
+  "moveRow": 0,
+  "visibleMoveButtons": 0,
+  "visibleMoveRows": 0,
+  "pageScrollW": 390,
+  "pageScrollH": 664
  },
  "phone/engine-playing/tight": {
   "level": "tight",
   "density": "tight",
-  "appHead": 40,
+  "keyControls": [],
+  "appHead": 41,
   "frameHead": 40,
   "board": 390,
-  "panelBody": 93,
+  "panelBody": 92,
   "moveRow": 28,
   "visibleMoveButtons": 0,
   "visibleMoveRows": 0,
@@ -223,10 +432,26 @@
  "phone/engine-over/tight": {
   "level": "tight",
   "density": "tight",
-  "appHead": 40,
+  "keyControls": [
+   {
+    "text": "Review this game",
+    "h": 44,
+    "pill": 30,
+    "filled": true,
+    "shown": 0
+   },
+   {
+    "text": "New game",
+    "h": 44,
+    "pill": 30,
+    "filled": true,
+    "shown": 0
+   }
+  ],
+  "appHead": 41,
   "frameHead": 40,
   "board": 390,
-  "panelBody": 104,
+  "panelBody": 103,
   "moveRow": 28,
   "visibleMoveButtons": 0,
   "visibleMoveRows": 0,
@@ -236,10 +461,11 @@
  "phone/review/tight": {
   "level": "tight",
   "density": "tight",
-  "appHead": 40,
+  "keyControls": [],
+  "appHead": 41,
   "frameHead": 40,
   "board": 390,
-  "panelBody": 90,
+  "panelBody": 89,
   "moveRow": 28,
   "visibleMoveButtons": 6,
   "visibleMoveRows": 3,
@@ -249,10 +475,11 @@
  "phone/lesson/tight": {
   "level": "tight",
   "density": "tight",
-  "appHead": 40,
+  "keyControls": [],
+  "appHead": 41,
   "frameHead": 40,
-  "board": 384,
-  "panelBody": 114,
+  "board": 347,
+  "panelBody": 150,
   "moveRow": 0,
   "visibleMoveButtons": 0,
   "visibleMoveRows": 0,
@@ -262,10 +489,19 @@
  "phone/puzzles/tight": {
   "level": "tight",
   "density": "tight",
-  "appHead": 40,
+  "keyControls": [
+   {
+    "text": "Show the solution",
+    "h": 44,
+    "pill": 30,
+    "filled": true,
+    "shown": 1
+   }
+  ],
+  "appHead": 41,
   "frameHead": 40,
   "board": 376,
-  "panelBody": 106,
+  "panelBody": 105,
   "moveRow": 0,
   "visibleMoveButtons": 0,
   "visibleMoveRows": 0,
@@ -275,10 +511,11 @@
  "phone/board/tight": {
   "level": "tight",
   "density": "tight",
-  "appHead": 40,
+  "keyControls": [],
+  "appHead": 41,
   "frameHead": 40,
   "board": 390,
-  "panelBody": 90,
+  "panelBody": 89,
   "moveRow": 28,
   "visibleMoveButtons": 6,
   "visibleMoveRows": 3,
@@ -288,7 +525,8 @@
  "phone/menu/tight": {
   "level": "tight",
   "density": "tight",
-  "appHead": 40,
+  "keyControls": [],
+  "appHead": 41,
   "frameHead": 0,
   "board": 0,
   "panelBody": 0,
@@ -296,12 +534,13 @@
   "visibleMoveButtons": 0,
   "visibleMoveRows": 0,
   "pageScrollW": 390,
-  "pageScrollH": 691
+  "pageScrollH": 664
  },
  "phone/settings/tight": {
   "level": "tight",
   "density": "tight",
-  "appHead": 40,
+  "keyControls": [],
+  "appHead": 41,
   "frameHead": 0,
   "board": 0,
   "panelBody": 0,
@@ -309,11 +548,85 @@
   "visibleMoveButtons": 0,
   "visibleMoveRows": 0,
   "pageScrollW": 390,
-  "pageScrollH": 2711
+  "pageScrollH": 2782
+ },
+ "phone/lesson-choice/tight": {
+  "level": "tight",
+  "density": "tight",
+  "keyControls": [
+   {
+    "text": "Try another move",
+    "h": 53,
+    "pill": 39,
+    "filled": true,
+    "shown": 1
+   },
+   {
+    "text": "Continue with the Lesson’s move",
+    "h": 53,
+    "pill": 39,
+    "filled": true,
+    "shown": 1
+   }
+  ],
+  "appHead": 41,
+  "frameHead": 40,
+  "board": 347,
+  "panelBody": 143,
+  "moveRow": 0,
+  "visibleMoveButtons": 0,
+  "visibleMoveRows": 0,
+  "pageScrollW": 390,
+  "pageScrollH": 664
+ },
+ "phone/lesson-finish/tight": {
+  "level": "tight",
+  "density": "tight",
+  "keyControls": [
+   {
+    "text": "Your next Lesson: Candidate move",
+    "h": 58.4,
+    "pill": null,
+    "filled": true,
+    "shown": 1
+   }
+  ],
+  "appHead": 41,
+  "frameHead": 40,
+  "board": 323,
+  "panelBody": 118,
+  "moveRow": 0,
+  "visibleMoveButtons": 0,
+  "visibleMoveRows": 0,
+  "pageScrollW": 390,
+  "pageScrollH": 664
+ },
+ "phone/puzzle-solved/tight": {
+  "level": "tight",
+  "density": "tight",
+  "keyControls": [
+   {
+    "text": "Next Puzzle",
+    "h": 44,
+    "pill": 30,
+    "filled": true,
+    "shown": 1
+   }
+  ],
+  "appHead": 41,
+  "frameHead": 40,
+  "board": 376,
+  "panelBody": 45,
+  "moveRow": 0,
+  "visibleMoveButtons": 0,
+  "visibleMoveRows": 0,
+  "pageScrollW": 390,
+  "pageScrollH": 664
  },
  "desktop/review/today": {
   "level": "today",
   "density": null,
+  "keyControls": [],
   "appHead": 48,
   "frameHead": 40,
   "board": 632,
@@ -327,6 +640,7 @@
  "desktop/engine-playing/today": {
   "level": "today",
   "density": null,
+  "keyControls": [],
   "appHead": 48,
   "frameHead": 40,
   "board": 740,
@@ -340,6 +654,7 @@
  "desktop/review/compact": {
   "level": "compact",
   "density": "compact",
+  "keyControls": [],
   "appHead": 48,
   "frameHead": 40,
   "board": 632,
@@ -353,6 +668,7 @@
  "desktop/engine-playing/compact": {
   "level": "compact",
   "density": "compact",
+  "keyControls": [],
   "appHead": 48,
   "frameHead": 40,
   "board": 740,
@@ -366,6 +682,7 @@
  "desktop/review/tight": {
   "level": "tight",
   "density": "tight",
+  "keyControls": [],
   "appHead": 48,
   "frameHead": 40,
   "board": 632,
@@ -379,6 +696,7 @@
  "desktop/engine-playing/tight": {
   "level": "tight",
   "density": "tight",
+  "keyControls": [],
   "appHead": 48,
   "frameHead": 40,
   "board": 740,

@@ -9,7 +9,8 @@ Closes #
 
 ## Done means
 
-<!-- Copy the ticket's "Done means" checks and tick each one you proved below. -->
+<!-- Copy the ticket's "Done means" checks and tick each one you proved below. An unticked check
+gets the unproven label, and a PR that closes no issue gets the no-spec label. -->
 
 - [ ]
 
@@ -47,7 +48,8 @@ A PR with nothing here gets the no-evidence label.
 ## Review notes
 
 <!-- Anything the owner should look at: protected paths touched, Coach changes (they need the
-real-Coach check from the desktop), deviations from the ticket, follow-ups. -->
+real-Coach check from the desktop), deviations from the ticket, follow-ups. When the owner corrected
+you, list each lesson and where you encoded it: the code's structure, a lint or test, or prose. -->
 
 <!-- New or changed Lesson text (data/lesson-sources/): say who compared it with the owner's books
 and found no copied or closely followed wording, examples or order (ADR 0012). -->

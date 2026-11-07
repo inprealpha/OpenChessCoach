@@ -5,7 +5,9 @@
 #                   Verdict job (verdict.yml) or a desktop session runs scripts/real-coach-check.ts --post
 #   no-evidence     the PR description's Evidence section is empty
 #   no-testing-record  the PR description doesn't say how it was made, how it was tested and what wasn't
-#                   (both from scripts/pr-description.ts)
+#   no-spec         the PR description closes no issue, so there is nothing agreed to prove
+#   unproven        the PR description's "Done means" section has a check that isn't ticked
+#                   (all four from scripts/pr-description.ts; an agent never merges a PR with one, ADR 0014)
 # PRs that don't touch the Coach get a passing "real Coach" status, so it can be a required check.
 # It also keeps the "Verdict" status (ADR 0013): a commit with no verdict yet gets a pending one, so a
 # push always voids the last verdict; PRs that change only docs, tests or process files pass at once.
@@ -69,6 +71,8 @@ jobs:
           gh label create touches-coach --repo "$REPO" --color 5319E7 --description "Touches the Coach: needs a passing real-Coach check from the desktop" 2>/dev/null || true
           gh label create no-evidence --repo "$REPO" --color FBCA04 --description "The PR description has no evidence from the running app" 2>/dev/null || true
           gh label create no-testing-record --repo "$REPO" --color FBCA04 --description "The PR description doesn't say how it was made and tested" 2>/dev/null || true
+          gh label create no-spec --repo "$REPO" --color FBCA04 --description "The PR description closes no issue, so there is nothing agreed to prove" 2>/dev/null || true
+          gh label create unproven --repo "$REPO" --color FBCA04 --description "A Done means check in the PR description isn't ticked" 2>/dev/null || true
           set_label() {
             if [ "$2" = yes ]; then gh api "repos/$REPO/issues/$PR/labels" -f "labels[]=$1" --silent
             else gh api -X DELETE "repos/$REPO/issues/$PR/labels/$1" --silent 2>/dev/null || true; fi
@@ -80,6 +84,8 @@ jobs:
             node scripts/pr-description.ts < body.md > description-labels.txt
             set_label no-evidence "$(grep -qx no-evidence description-labels.txt && echo yes || echo no)"
             set_label no-testing-record "$(grep -qx no-testing-record description-labels.txt && echo yes || echo no)"
+            set_label no-spec "$(grep -qx no-spec description-labels.txt && echo yes || echo no)"
+            set_label unproven "$(grep -qx unproven description-labels.txt && echo yes || echo no)"
           else
             echo "The base branch has no scripts/pr-description.ts yet; leaving the description labels as they are."
           fi

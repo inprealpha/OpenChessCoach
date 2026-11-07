@@ -11,3 +11,4 @@ A PR merges only on evidence that the change works in the running app, never on 
 - Some paths always need the owner's review, even once auto-merge is on: the ADRs, `CONTEXT.md` and `CLAUDE.md`, pairing and security code, licensing and bundled Lesson data, CI configuration, and the verification skill itself. Keeping the checks outside the agents' reach means an agent can't quietly weaken the check that judges it.
 - Every `ready-for-agent` ticket states what "done" means as checks an agent can run.
 - The research behind this decision is in `docs/research/verifiability-for-agent-merges.md`.
+- ADR 0014 takes the next step for PRs the owner approved: an agent merges them once the Verdict passes and every rule in `scripts/pr-description.ts --may-merge` holds.

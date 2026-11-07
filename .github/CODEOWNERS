@@ -30,4 +30,5 @@
 /scripts/sandbox/ @inprealpha
 /.claude/skills/verify/ @inprealpha
 /.claude/skills/real-coach-check/ @inprealpha
+/.claude/skills/build-a-feature/ @inprealpha
 /.claude/skills/sandbox/ @inprealpha

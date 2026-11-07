@@ -3,6 +3,9 @@
   // ask the Coach a Why Question about any move or position. The Player can set up any position
   // from a FEN, or a game from its PGN, and #/board?fen=… opens on a position. A move played after
   // stepping back, where the line goes on, starts a variation, so the rest of the line is kept.
+  // The panel's tabs follow the guidelines' Board recipe (#52): Lines (the Engine's lines, each move
+  // a button that previews it on the board; the best line's first move drawn as the green arrow),
+  // Moves (with variations) and Coach (the conversation, with the Ask box docked under every tab).
   import { tick, untrack } from 'svelte';
   import type { GradedMove } from '@chess-coach/shared/analysis';
   import type { Analysis } from '@chess-coach/shared/engine';
@@ -14,13 +17,15 @@
   import ConfirmDialog from '../components/ConfirmDialog.svelte';
   import FlipButton from '../components/FlipButton.svelte';
   import EngineLines from '../components/EngineLines.svelte';
+  import { BOARD_SIDE, type LinePreview } from '@chess-coach/shared/engine-lines';
+  import PanelTabs from '../components/PanelTabs.svelte';
   import MoveList from '../components/MoveList.svelte';
   import SheetHandle from '../components/SheetHandle.svelte';
   import SheetStrip from '../components/SheetStrip.svelte';
   import StepButtons from '../components/StepButtons.svelte';
   import ThreatButton from '../components/ThreatButton.svelte';
   import VariationBar from '../components/VariationBar.svelte';
-  import { threatArrows } from '../lib/arrows.ts';
+  import { bestLineArrow, threatArrows } from '../lib/arrows.ts';
   import { gradeMark } from '../lib/grades.ts';
   import WinningChancesBar from '../components/WinningChancesBar.svelte';
   import { CoachThread } from '../lib/coach.svelte.ts';
@@ -30,7 +35,7 @@
   import { threatSetting, ThreatView } from '../lib/threat.svelte.ts';
   import { scoreFromAnalysis } from '../lib/position-score.ts';
   import { stepLine, Variation, type Step } from '../lib/variation.svelte.ts';
-  import { foldOpen, rememberFold } from '../lib/folds.ts';
+  import { choiceOf, foldOpen, rememberChoice } from '../lib/folds.ts';
   import { sheet } from '../lib/sheet.svelte.ts';
 
   /** A FEN to open on, from #/board?fen=…. */
@@ -48,7 +53,23 @@
   let orientation = $state<Side>('white');
   /** The side the Player last turned the board to, which New board keeps; a set-up turns it on its own. */
   let chosenOrientation: Side = 'white';
-  let showLines = $state(foldOpen('board-lines', false));
+  type Tab = 'lines' | 'moves' | 'coach';
+  const TABS = [
+    { id: 'lines', name: 'Lines' },
+    { id: 'moves', name: 'Moves' },
+    { id: 'coach', name: 'Coach' },
+  ] as const satisfies readonly { id: Tab; name: string }[];
+  /** The panel's tab, remembered on the device; Lines for a Player who had the Engine lines open before the tabs. */
+  let tab = $state<Tab>(
+    choiceOf<Tab>(
+      'board-tab',
+      TABS.map((t) => t.id),
+      foldOpen('board-lines', false) ? 'lines' : 'moves',
+    ),
+  );
+  /** An Engine line's moves the board shows while the Player points at one. */
+  let preview = $state<LinePreview | null>(null);
+  const previewLast = $derived(preview?.moves.at(-1));
   let confirmingNew = $state(false);
   let newButton = $state<HTMLButtonElement>();
   let analysis = $state<Analysis | null>(null);
@@ -216,6 +237,8 @@
   }
 
   async function why(question: string): Promise<void> {
+    // The answer takes the Coach tab's room; the tab the Player picked stays their choice next time.
+    tab = 'coach';
     if (variation.active) {
       // Only the moves go: the desktop's Engine works out the facts (ADR 0007).
       const { label, ...asked } = variation.question(line.moves);
@@ -275,9 +298,29 @@
     newButton?.focus();
   }
 
-  function toggleLines(): void {
-    showLines = !showLines;
-    rememberFold('board-lines', showLines);
+  let panelBody = $state<HTMLDivElement>();
+
+  /** Opens a tab at its top: the panel may have scrolled through another tab's longer content. */
+  function pickTab(to: Tab): void {
+    if (tab !== to && panelBody) panelBody.scrollTop = 0;
+    tab = to;
+    rememberChoice('board-tab', to);
+  }
+
+  /**
+   * An Engine line's moves, up to the one the Player picked, tried on the board as a variation, as
+   * any move played there would be: the game's own next move steps to it instead.
+   */
+  function playLine(ucis: string[]): void {
+    preview = null;
+    coach.clearAnnotations();
+    for (const uci of ucis) {
+      const to = variation.gameStep(uci, line.moves, line.cursor);
+      if (to !== null) {
+        variation.leave();
+        line.goTo(to);
+      } else if (!variation.play(uci, { cursor: line.cursor, fen: line.fen })) return;
+    }
   }
 
   function newBoard(): void {
@@ -352,7 +395,9 @@
 <section class="screen board-screen board-free" class:sheet-full={sheet.shown}>
   <header class="frame-head">
     <h1>Board</h1>
-    <p class="head-line">{outcomeOf(boardFen) ? 'Game over' : `${SIDE_NAMES[turnOf(boardFen)]} to move`}</p>
+    <p class="head-line" class:previewing={preview}>
+      {#if preview}Engine line: {preview.text}{:else}{outcomeOf(boardFen) ? 'Game over' : `${SIDE_NAMES[turnOf(boardFen)]} to move`}{/if}
+    </p>
     <div class="frame-tools">
       {#if variation.active}<VariationBar place="header" back="Back to the main line" onback={backToLine} />{/if}
       <!-- "Set up" and "New" on a phone, where the header line is short of room; the names stay whole. -->
@@ -371,28 +416,36 @@
       <div class="board-and-bar">
         <SheetStrip />
         <div class="with-bar">
-          <WinningChancesBar score={position?.score ?? null} pov={position?.pov ?? 'white'} {orientation} />
+          <WinningChancesBar score={position?.score ?? null} pov={position?.pov ?? 'white'} {orientation} names={BOARD_SIDE} />
           {#key boards}
+            <!-- An Engine line the Player points at shows on the board for that moment, with none of
+                 the arrows or marks that belong to the position itself. -->
             <Board
-              fen={boardFen}
+              fen={previewLast?.fenAfter ?? boardFen}
               {orientation}
               movable="both"
-              lastMove={shownLast ? { from: shownLast.uci.slice(0, 2), to: shownLast.uci.slice(2, 4) } : undefined}
-              arrows={[...threatArrows(threats.threat), ...coach.arrows]}
-              highlights={coach.highlights}
-              gradeMark={mark}
+              lastMove={previewLast
+                ? { from: previewLast.uci.slice(0, 2), to: previewLast.uci.slice(2, 4) }
+                : shownLast
+                  ? { from: shownLast.uci.slice(0, 2), to: shownLast.uci.slice(2, 4) }
+                  : undefined}
+              arrows={preview ? [] : [...threatArrows(threats.threat), ...(tab === 'lines' ? bestLineArrow(boardFen, analysis) : []), ...coach.arrows]}
+              highlights={preview ? [] : coach.highlights}
+              gradeMark={preview ? undefined : mark}
               {onmove}
             />
           {/key}
         </div>
       </div>
       <p class="visually-hidden" role="status">{setupNote}</p>
+      <p class="visually-hidden" role="status">{preview ? `On the board: ${preview.text}` : ''}</p>
       <p class="result" role="status" aria-label="Result">{result}</p>
     </div>
     <div class="side panel">
       <SheetHandle />
       {#if variation.active}<VariationBar place="panel" back="Back to the main line" onback={backToLine} />{/if}
-      <div class="panel-body" {@attach sheet.gestures}>
+      <div class="panel-body" {@attach sheet.gestures} bind:this={panelBody}>
+        <PanelTabs label="Board" current={tab} onpick={pickTab} tabs={TABS} />
         {#if confirmingNew}
           <ConfirmDialog
             id="new-board"
@@ -415,21 +468,31 @@
             </div>
           </form>
         {/if}
-        <button type="button" class="secondary lines-toggle" aria-pressed={showLines} onclick={toggleLines}>
-          {showLines ? 'Hide Engine lines' : 'Show Engine lines'}
-        </button>
-        {#if showLines}<EngineLines {analysis} fen={boardFen} />{/if}
-        <MoveList
-          moves={line.moves}
-          {grades}
-          cursor={line.cursor}
-          ongoto={pickMove}
-          variation={variation.active
-            ? { from: variation.from ?? 0, moves: variation.line.moves, grades: variation.grades, cursor: variation.line.cursor, ongoto: pickVariationMove }
-            : undefined}
-        />
+        <div id="panel-lines" role="tabpanel" aria-labelledby="tab-lines" hidden={tab !== 'lines'} class="tab-panel">
+          {#if tab === 'lines'}<EngineLines {analysis} fen={boardFen} onpreview={(p) => (preview = p)} onplay={playLine} />{/if}
+        </div>
+        <div id="panel-moves" role="tabpanel" aria-labelledby="tab-moves" hidden={tab !== 'moves'} class="tab-panel">
+          <!-- Drawn when shown, so it opens scrolled to the current move. -->
+          {#if tab === 'moves'}
+            <MoveList
+              moves={line.moves}
+              {grades}
+              cursor={line.cursor}
+              ongoto={pickMove}
+              variation={variation.active
+                ? { from: variation.from ?? 0, moves: variation.line.moves, grades: variation.grades, cursor: variation.line.cursor, ongoto: pickVariationMove }
+                : undefined}
+            />
+            {#if !line.moves.length && !variation.active}<p class="muted none">Play a move on the board, or set up a position, and its moves list here.</p>{/if}
+          {/if}
+        </div>
+        <!-- The conversation itself is the Coach's, docked under every tab: on this tab it takes the panel's room. -->
+        <div id="panel-coach" role="tabpanel" aria-labelledby="tab-coach" hidden={tab !== 'coach'} class="tab-panel">
+          {#if !coach.entries.length}<p class="muted none">Ask the Coach why below: its answers show here.</p>{/if}
+        </div>
       </div>
       <CoachPanel
+        fill={tab === 'coach'}
         thread={coach}
         onwhy={why}
         placeholder={shownLast ? `Ask why about ${moveLabel(shownLast.fenBefore, shownLast.san)}` : 'Ask about this position'}
@@ -446,7 +509,14 @@
   @media (max-width: 820px) { .wide { display: none; } }
   /* A phone's header line with Back to the main line in it: Set up and New wait until the Player is back. */
   @media (max-width: 820px) and (min-height: 560px) { .frame-tools:has(> :global(.back)) > .board-action { display: none; } }
-  .lines-toggle { align-self: flex-start; }
+  .tab-panel { display: flex; flex-direction: column; gap: 0.6rem; }
+  .tab-panel[hidden] { display: none; }
+  .none { margin: 0; font-size: 0.9rem; }
+  /* An Engine line on the board for a moment: the header line says so, in the accent colour. */
+  .head-line.previewing { color: var(--accent); font-weight: 600; }
+  /* On the Coach tab the panel's body is its tabs, and the conversation takes the room below them. */
+  .side:has(> :global(.coach.fill)) > .panel-body { flex: 0 1 auto; padding-bottom: 0; }
+  .tab-panel:empty { display: none; }
   .result { margin: 0.5rem 0 0; text-align: center; font-weight: 600; }
   .result:empty { margin: 0; }
   .setup { display: grid; gap: 0.5rem; }

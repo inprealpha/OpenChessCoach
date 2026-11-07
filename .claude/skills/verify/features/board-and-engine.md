@@ -61,18 +61,32 @@ ADR 0007). Move Grades use the Lichess formula (Best, Good, Inaccuracy, Mistake,
   the square it landed on, named like `Blunder on f6` (none for Good moves or the start position);
   1.e4 e5 2.Qh5 Nc6 3.Bc4 Nf6 shows `Blunder on f6`, and it follows `Previous move`, `Next move` and
   `First position` (`board.spec.ts`, "a graded move on the Board shows its Move Grade symbol, …").
-- `Show Engine lines` opens the region `Engine lines` with the Engine's top lines. Each line leads
-  with the side to move's Winning Chances after it ("53%", or a mate phrase such as "White mates
-  in 3"), with the evaluation ("+0.38") smaller beside it. Only the top line shows until
-  `More lines (4)` (remembered on the device; `Fewer lines` folds them again). A line's accessible name reads
-  `Engine line 1: e4, White’s winning chances: 53%, +0.38`. Winning Chances come from the shared
-  formatter `packages/shared/src/winning-chances.ts`: the Grader's winning chances as a
-  percentage, so they always agree with the Move Grades.
+- The panel has the tabs `Lines`, `Moves` and `Coach` (the tablist `Board`, the guidelines' Board
+  recipe, #52), the one picked remembered on the device (`Moves` on a new device, or `Lines` where
+  the Player had the old `Show Engine lines` on). The Ask box is docked under every tab; asking a
+  question opens `Coach`, whose conversation then fills the panel down to the Ask box (CoachPanel's
+  `fill`). The tabs are `PanelTabs.svelte`, the same component and look as the Review's.
+- `Lines` holds the region `Engine lines` with the Engine's top lines. Each line leads with White's
+  Winning Chances after it ("53%", or a mate phrase such as "Black mates in 1"), whoever is to move,
+  as on the bar and the Review's graph, with the evaluation ("+0.38") smaller beside it, then its
+  first six moves with their numbers, as a scoresheet writes them ("14. Nxd5 Qxd5 15. c4", "14… Qxd5"
+  when Black starts; `engineLineView` in `packages/shared/src/engine-lines.ts`). Only the top line
+  shows until `More lines (4)` (remembered on the device; `Fewer lines` folds them again); under the
+  lines, "White’s winning chances · Depth 10". A line's accessible name reads
+  `Engine line 1: 1. e4, White’s winning chances: 53%, +0.38`. Each move is a button named like
+  `Try 1. e4 e5 2. Nf3 on the board`: pointing at it (or focusing it) shows the position after it on
+  the board, with the header line reading `Engine line: 1. e4 e5 2. Nf3` and no other arrows or
+  marks; a click or tap plays the line up to it as a variation (`Back to the main line`). On a phone
+  each line is one row of 44 px buttons, fading out at its end. While `Lines` is open, the best
+  line's first move is the green arrow `Engine’s best: 1. e4` (`bestLineArrow` in `lib/arrows.ts`).
+  Winning Chances come from the shared formatter `packages/shared/src/winning-chances.ts`: the
+  Grader's winning chances as a percentage, so they always agree with the Move Grades.
 - The meter `Winning Chances bar: White’s winning chances: 53%` stands beside the board: White
   and Black fill it in proportion to the position's Winning Chances, with each side's percentage
   at its end ("47%" at the top, "53%" at the bottom; a mate shows "M1" at the winner's end only).
-  Its name names the side at the bottom of the
-  board, so it flips with the board (`Flip board`: `Black’s winning chances: 47%`); a mate reads
+  On the Board and in a Review its name is always White's, as on the Engine lines and the Review's
+  graph (its `names` prop, #52), while its fill flips with the board (`Flip board`: Black fills it
+  from the bottom); an Engine Game's names the side at the bottom, the Player's; a mate reads
   `Winning Chances bar: Black mates in 1`, a checkmate on the board `Black has checkmated`. It
   comes from the browser Engine's best line for the position shown (the same as `Engine line 1`,
   ADR 0007), follows `◀ ▶ ⏮ ⏭` with no Coach call, and works with the desktop off. Where beside
@@ -130,9 +144,16 @@ ADR 0007). Move Grades use the Lichess formula (Best, Good, Inaccuracy, Mistake,
 - A threat query costs one more search at verify mode's depth (the position itself is already
   analysed): about 90 ms on average on the golden positions, single-threaded.
 - At the start position in verify mode, `Engine line 1` is named
-  `Engine line 1: e4, White’s winning chances: 53%, +0.38`; after 1. e4 it is
-  `Engine line 1: e6, Black’s winning chances: 47%, -0.37` (`board.spec.ts`, "the Engine lines
-  lead with the side to move’s Winning Chances, the evaluation beside them").
+  `Engine line 1: 1. e4, White’s winning chances: 53%, +0.38`; after 1. e4 it is
+  `Engine line 1: 1… e6, White’s winning chances: 53%, +0.37` (`board.spec.ts`, "the Engine lines
+  lead with White’s Winning Chances whoever is to move, …"). With Black to move from a `?fen=` link
+  (the board turned to Black's side) the bar and line 1 give the same White's percentage ("with
+  Black to move, the bar and the Engine lines both give White’s Winning Chances").
+- The tabs are on screen, the top line shows at rest, and the Ask box and the board stay in view at
+  1280×800, 390×844, 402×714, 440×790 and 390×664 ("the Board’s panel has Lines, Moves and Coach
+  tabs …"); a hovered, focused, clicked or tapped move shows its position ("an Engine line’s moves
+  are numbered buttons …", "on a touch phone, tapping …"); `Engine’s best: 1. e4` shows on `Lines`
+  only ("the best line’s first move is drawn as the Engine’s-best arrow …").
 - The Winning Chances bar reads `Winning Chances bar: White’s winning chances: 53%` at the start
   and after 1. e4, matches `Engine line 1` after 1. e4 g5, follows `Previous move`, `First
   position` and `Last position` with no `coach_calls` row, and after `Flip board` names Black and
@@ -144,7 +165,7 @@ ADR 0007). Move Grades use the Lichess formula (Best, Good, Inaccuracy, Mistake,
   board ("the Winning Chances bar stands beside the board, and under it on a phone").
 - With the Engine's files blocked, the alert appears and moves can still be played
   (`board.spec.ts`, "when the Engine can’t start, the Player is told instead of left waiting").
-- Setting up `6k1/5ppp/8/8/8/8/5PPP/3R2K1 w - - 0 1` shows it with `Engine line 1: Rd8#…` and the
+- Setting up `6k1/5ppp/8/8/8/8/5PPP/3R2K1 w - - 0 1` shows it with `Engine line 1: 1. Rd8#…` and the
   bar `White mates in 1`; a PGN of 1.e4 e5 2.Nf3 Nc6 3.Bb5 a6 fills six moves and → → shows the
   position after 1…e5; `#/board?fen=` with a Black-to-move FEN opens it with `data-orientation`
   black; `8/8/8/8 w - - 0 1` is refused (`board.spec.ts`, "setting up a position"). Holding →

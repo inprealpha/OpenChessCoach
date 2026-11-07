@@ -117,7 +117,8 @@ export class CoachService {
           ...(signal ? { signal } : {}),
           ...(tool ? { engine: tool, ...(options.deadlineMs !== undefined ? { deadlineMs: options.deadlineMs } : {}) } : {}),
         },
-        onText,
+        // A Hint's words reach the Player only once the guard has checked them for a move: none stream.
+        brief.hideMoves ? () => {} : onText,
       );
     } catch (err) {
       if (err instanceof CoachLimitError) {
@@ -148,9 +149,9 @@ export class CoachService {
     const guarded = guardReply(brief, raw, tool?.moves);
     this.log(ask, model, brief, raw, guarded.stripped, tool?.calls);
     const note = guarded.note && !options.holdNote ? addCoachNote(this.db, this.clock, guarded.note) : guarded.note;
-    if (ask.threadId) this.remember(ask.threadId, ask.question, raw.text);
+    if (ask.threadId) this.remember(ask.threadId, ask.question, guarded.text);
     return {
-      text: raw.text,
+      text: guarded.text,
       moves: guarded.moves,
       arrows: guarded.arrows,
       highlights: guarded.highlights,

@@ -8,11 +8,12 @@
  "puzzleThemes": [
   "advancedPawn"
  ],
- "goal": "You can make a passed pawn from a pawn majority, use an outside passed pawn to pull the enemy king away, and stop an enemy passed pawn.",
+ "goal": "You can make a passed pawn from a pawn majority, use an outside or a protected passed pawn, and stop an enemy passed pawn.",
  "priorKnowledge": [
+  "pawn-promotion",
   "king-and-pawn"
  ],
- "intro": "A passed pawn is a pawn with no enemy pawn in front of it, on its own file or on the files next to it, so only pieces can stop it. In an endgame it is often the strongest thing on the board, because the enemy king has to drop everything to stop it. Here you make one from a pawn majority (more pawns than your opponent on one side of the board), use an outside passed pawn, one far from all the other pawns, to pull the enemy king away, and stop an enemy one by putting your king in its path.",
+ "intro": "A passed pawn is a pawn with no enemy pawn in front of it, on its own file or on the files next to it, so only pieces can stop it. In an endgame it is often the strongest thing on the board, because the enemy king has to drop everything to stop it. Here you make one from a pawn majority (more pawns than your opponent on one side of the board), use an outside passed pawn, one far from all the other pawns, to pull the enemy king away, and use a protected passed pawn, one guarded by another pawn, which the enemy king cannot take while its guard stands. You also stop an enemy passed pawn by putting your king in its path.",
  "parts": [
   {
    "title": "Two against one",
@@ -68,6 +69,32 @@
      "ply": 6,
      "san": "Kxd4",
      "text": "48...Kxd4 wins the d4 pawn. Your d-pawn is now a passed pawn with your king just in front of it to lead the way, and White's king is stuck on the far side of the board, so the d-pawn will decide the game."
+    }
+   ]
+  },
+  {
+   "title": "A pawn that guards a pawn",
+   "fen": "8/3k4/1p6/3pPK2/3P4/8/8/8 w - - 3 51",
+   "side": "white",
+   "keyIdea": "A passed pawn guarded by another pawn keeps the enemy king tied to it, so your own king is free to go and win pawns.",
+   "text": "From a game played on Lichess. You are White. Your pawn on e5 is a passed pawn, and the pawn on d4 guards it: a protected passed pawn. Black's king cannot take it while the d4 pawn guards it, and it cannot leave it either. Your own king has nothing to watch, so it is free to go after Black's pawns.",
+   "url": "https://lichess.org/training/QXLny",
+   "line": "Kf6 Ke8 Ke6 b5 Kxd5",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Kf6",
+     "text": "51.Kf6 heads for e6, next to Black's pawn on d5, and it is the only move that wins. Black's king has to stay in front of your e-pawn: if it walks off to the queenside, the pawn runs up the board."
+    },
+    {
+     "ply": 2,
+     "san": "Ke6",
+     "text": "Black's king went to e8, and 52.Ke6 attacks the pawn on d5. Black's king cannot come back to defend it: your king covers d7, and your e-pawn covers d6. Again it is the only move that wins."
+    },
+    {
+     "ply": 4,
+     "san": "Kxd5",
+     "text": "53.Kxd5 wins the pawn. You are a pawn up, and the d4 pawn still guards your e-pawn, so Black's king still cannot take it."
     }
    ]
   },

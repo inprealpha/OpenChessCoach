@@ -15,6 +15,13 @@ describe('path lists', () => {
     expect(matching(files, protectedList)).toEqual(files.slice(0, 7));
   });
 
+  it('protects the sandbox setup, which runs on every agent machine, and judges it without a Verdict', () => {
+    const noVerdictList = readList(readFileSync(new URL('../../.github/no-verdict-paths.txt', import.meta.url), 'utf8'));
+    const files = ['scripts/sandbox/prepare.sh', 'scripts/sandbox/fetch-model.ts'];
+    expect(matching(files, protectedList)).toEqual(files);
+    expect(needingVerdict(files, noVerdictList)).toEqual([]);
+  });
+
   it('finds the PRs that touch the Coach', () => {
     const files = ['packages/backend/src/coach/prompts.ts', 'packages/shared/src/coach/brief.ts', 'packages/shared/src/grader.ts', 'packages/web/src/screens/Review.svelte'];
     expect(matching(files, coachList)).toEqual(files.slice(0, 2));

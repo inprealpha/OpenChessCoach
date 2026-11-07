@@ -119,7 +119,7 @@ export interface PrFacts {
   issueLabels: Readonly<Record<number, readonly string[]>>;
   /** The head commit's statuses by context (the newest of each), such as "Verdict" and "real Coach". */
   statuses: Readonly<Record<string, { state: string; description: string } | undefined>>;
-  /** The head commit's check runs by name: every run's conclusion, or null while it runs. */
+  /** The head commit's check runs by name, newest first: each run's conclusion, or null while it runs. */
   checks: Readonly<Record<string, readonly (string | null)[] | undefined>>;
   /** The changed files that are on the base branch's protected-path list. */
   protectedFiles: readonly string[];
@@ -133,11 +133,12 @@ export interface MergeDecision {
   problems: string[];
 }
 
-/** Whether a check passed: at least one run succeeded and none failed or is still running. Skipped runs don't count either way. */
+/**
+ * Whether a check passed: its newest run that counts (skipped and neutral runs don't) succeeded.
+ * Older runs don't count: a push cancels the runs it replaces, and a rerun replaces a failed one.
+ */
 function checkPassed(runs: readonly (string | null)[] | undefined): boolean {
-  if (!runs?.length) return false;
-  const counted = runs.filter((c) => c !== 'skipped' && c !== 'neutral');
-  return counted.includes('success') && counted.every((c) => c === 'success');
+  return runs?.find((c) => c !== 'skipped' && c !== 'neutral') === 'success';
 }
 
 /** Whether an agent may merge the PR (ADR 0014), with the reason for each rule. */
@@ -204,8 +205,11 @@ export function readFacts(pr: number): PrFacts & { sha: string } {
   const combined = JSON.parse(gh(['api', `repos/{owner}/{repo}/commits/${sha}/status`])) as { statuses: { context: string; state: string; description: string | null }[] };
   for (const s of combined.statuses) statuses[s.context] ??= { state: s.state, description: s.description ?? '' };
   const checks: Record<string, (string | null)[]> = {};
-  const runs = JSON.parse(gh(['api', '--paginate', '--slurp', `repos/{owner}/{repo}/commits/${sha}/check-runs?per_page=100`])) as { check_runs: { name: string; conclusion: string | null }[] }[];
-  for (const r of runs.flatMap((p) => p.check_runs)) (checks[r.name] ??= []).push(r.conclusion);
+  const runs = JSON.parse(gh(['api', '--paginate', '--slurp', `repos/{owner}/{repo}/commits/${sha}/check-runs?per_page=100`])) as {
+    check_runs: { name: string; conclusion: string | null; started_at: string | null }[];
+  }[];
+  const newestFirst = runs.flatMap((p) => p.check_runs).sort((a, b) => (b.started_at ?? '9').localeCompare(a.started_at ?? '9'));
+  for (const r of newestFirst) (checks[r.name] ??= []).push(r.conclusion);
   const list = readList(gh(['api', '-H', 'Accept: application/vnd.github.raw', `repos/{owner}/{repo}/contents/.github/protected-paths.txt?ref=${view.baseRefName}`]));
   return {
     sha,

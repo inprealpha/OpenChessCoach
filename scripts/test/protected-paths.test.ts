@@ -17,7 +17,7 @@ describe('path lists', () => {
 
   it('protects the sandbox setup, which runs on every agent machine, and judges it without a Verdict', () => {
     const noVerdictList = readList(readFileSync(new URL('../../.github/no-verdict-paths.txt', import.meta.url), 'utf8'));
-    const files = ['scripts/sandbox/prepare.sh', 'scripts/sandbox/fetch-model.ts'];
+    const files = ['scripts/sandbox/prepare.sh', 'scripts/sandbox/fetch-model.ts', 'scripts/sandbox/instabox.sh', '.claude/skills/sandbox/SKILL.md'];
     expect(matching(files, protectedList)).toEqual(files);
     expect(needingVerdict(files, noVerdictList)).toEqual([]);
   });

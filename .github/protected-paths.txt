@@ -43,3 +43,4 @@ scripts/sandbox/
 # The verification skills and feature map
 .claude/skills/verify/
 .claude/skills/real-coach-check/
+.claude/skills/sandbox/

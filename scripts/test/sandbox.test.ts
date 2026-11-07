@@ -125,7 +125,13 @@ describe('preview.sh and instabox.sh', () => {
     writeFileSync(join(repo, 'package.json'), '{}');
     const r = spawnSync('bash', [preview, '--check-bubble', '--repo', repo], { encoding: 'utf8', timeout: 170_000 });
     const groups = spawnSync('id', ['-G'], { encoding: 'utf8' }).stdout.trim();
-    expect(r.stdout.trim().split('\n').at(-1), `${r.stderr}\n(the user's groups outside: ${groups})`).toBe('{"ok":true}');
+    // When it fails, say what the machine's bubble can do, so the log shows why.
+    const diag = () =>
+      spawnSync('bash', ['-c', `command -v bwrap; ls -l "$(command -v bwrap)"; bwrap --version; cat /proc/sys/kernel/apparmor_restrict_unprivileged_userns 2>&1
+        sudo -n bwrap --ro-bind / / --dev /dev --proc /proc --unshare-pid -- sh -c 'id; grep -E "^(Cap|NoNewPrivs|Seccomp)" /proc/self/status; cat /proc/self/attr/current' 2>&1
+        sudo -n aa-status 2>/dev/null | grep -iE "bwrap|unpriv" | head`], { encoding: 'utf8' }).stdout;
+    const last = r.stdout.trim().split('\n').at(-1);
+    expect(last, `${r.stderr}\n(the user's groups outside: ${groups})\n${last === '{"ok":true}' ? '' : diag()}`).toBe('{"ok":true}');
     expect(r.status).toBe(0);
   }, 180_000);
 });

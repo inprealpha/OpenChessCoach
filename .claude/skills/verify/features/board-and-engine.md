@@ -53,26 +53,63 @@ ADR 0007). Move Grades use the Lichess formula (Best, Good, Inaccuracy, Mistake,
 - The step buttons `First position`, `Previous move`, `Next move`, `Last position`, and Lichess's
   keys for them anywhere on the page (`aria-keyshortcuts` on each button): ← and → one move, Home
   or ↑ the start, End or ↓ the end. The keys do nothing while the Player types (the Why Question
-  box), while a dialog is open or with a modifier held, and Alt+← reaches the browser unhandled
-  (`board.spec.ts`, "the arrow keys step through the moves …" and "the arrow keys do nothing while
-  the promotion dialog is open …"). One component, `StepButtons.svelte`, serves the Board, the
-  Review and a finished Engine Game.
+  box), while a dialog or a menu is open, with a modifier held, or while the Board's tabs have the
+  keyboard's focus (below), and Alt+← reaches the browser unhandled (`board.spec.ts`, "the arrow
+  keys step through the moves …" and "the arrow keys do nothing while the promotion dialog is open
+  …"). One component, `StepButtons.svelte`, serves the Board, the Review and an Engine Game, during
+  play and once it is over (see `engine-game.md`).
 - The move that reached the position on the board shows its Move Grade symbol in the corner of
   the square it landed on, named like `Blunder on f6` (none for Good moves or the start position);
   1.e4 e5 2.Qh5 Nc6 3.Bc4 Nf6 shows `Blunder on f6`, and it follows `Previous move`, `Next move` and
   `First position` (`board.spec.ts`, "a graded move on the Board shows its Move Grade symbol, …").
-- `Show Engine lines` opens the region `Engine lines` with the Engine's top lines. Each line leads
-  with the side to move's Winning Chances after it ("53%", or a mate phrase such as "White mates
-  in 3"), with the evaluation ("+0.38") smaller beside it. Only the top line shows until
-  `More lines (4)` (remembered on the device; `Fewer lines` folds them again). A line's accessible name reads
-  `Engine line 1: e4, White’s winning chances: 53%, +0.38`. Winning Chances come from the shared
-  formatter `packages/shared/src/winning-chances.ts`: the Grader's winning chances as a
-  percentage, so they always agree with the Move Grades.
+- The panel has the tabs `Lines`, `Moves` and `Coach` (the tablist `Board`, the guidelines' Board
+  recipe, #52), the one the Player picks remembered on the device (`Moves` on a new device, or
+  `Lines` where the Player had the old `Show Engine lines` on); a tab opens at its top. `Moves` holds
+  the list `Moves` ("Play a move on the board, or set up a position, and its moves list here." while
+  it is empty). The Ask box is docked under every tab; asking a question opens `Coach` (without
+  changing the tab remembered for next time), whose conversation then fills the panel down to the
+  Ask box (CoachPanel's `fill`; "Ask the Coach why below: its answers show here." before the first
+  answer). On that tab the Coach is the tab's panel (`tabpanel "Coach"`, `#panel-coach`, which the
+  tab's `aria-controls` names), on the others its own region `Coach`. The tabs are
+  `PanelTabs.svelte`, the same component and look as the Review's (its Moments, Moves and Overview
+  take the same keys): Tab reaches the picked tab only, and once the keyboard brought the focus
+  there, ← → Home End move between the tabs and pick them, wrapping at the ends, and the board
+  doesn't step; after a tab is clicked or tapped, ← → still step the board. A Why Question on the
+  Board quotes White's Winning Chances, as its bar and lines name them, after a Black move too
+  (`chancesSide: 'white'` in the Coach request; the brief's `winningChances` are then White's).
+- `Lines` holds the region `Engine lines` with the Engine's top lines. Each line leads with White's
+  Winning Chances after it ("53%", or a mate phrase such as "Black mates in 1"), whoever is to move,
+  as on the bar and the Review's graph, with the evaluation ("+0.38") smaller beside it, then its
+  first six moves with their numbers, as a scoresheet writes them ("14. Nxd5 Qxd5 15. c4", "14… Qxd5"
+  when Black starts; `engineLineView` in `packages/shared/src/engine-lines.ts`). Only the top line
+  shows until `More lines (4)` (remembered on the device; `Fewer lines` folds them again); under the
+  lines, "White’s winning chances · Depth 10". A line's accessible name reads
+  `Engine line 1: 1. e4, White’s winning chances: 53%, +0.38`. Each move is a button named like
+  `Try 1. e4 e5 2. Nf3 on the board`; the best line's first move is in green. Pointing at a move
+  with a mouse (or focusing it) shows the position after it on the board, with the header line
+  reading `Engine line: 1. e4 e5 2. Nf3`, a hidden status "On the board: 1. e4 e5 2. Nf3", and no
+  other arrows, marks or Move Grade symbol; a click, a tap or Enter plays the line up to it as a
+  variation (the group `Your own line`, `Back to the main line`), where the game's own next move
+  steps along the game instead. Under the lines: "Point at a move to see it on the board; click to
+  try the line." (on a touch screen, "Tap a move to try the line on the board."). The pointer and
+  the focus each keep their own preview: leaving a hovered move goes back to the focused one. A
+  preview ends with the position, a line the deeper search changed, or the lines leaving the screen
+  (another tab picked with the keyboard). Tabs, lines and previews make no Coach call.
+  On a phone each line is one row of 44 px buttons that scrolls sideways, every move whole, and the
+  board gives up a little (`--phone-reserve: 19.25rem`) so the top line sits whole above the Ask box
+  at 390×664. While `Lines` is open, the best line's first move is the green arrow
+  `Engine’s best: 1. e4` (`bestLineArrow` in `lib/arrows.ts`), and the Coach's arrows wait for the
+  other tabs, so one green arrow shows at a time.
+  Winning Chances come from the shared formatter `packages/shared/src/winning-chances.ts`: the
+  Grader's winning chances as a percentage, so they always agree with the Move Grades.
 - The meter `Winning Chances bar: White’s winning chances: 53%` stands beside the board: White
   and Black fill it in proportion to the position's Winning Chances, with each side's percentage
   at its end ("47%" at the top, "53%" at the bottom; a mate shows "M1" at the winner's end only).
-  Its name names the side at the bottom of the
-  board, so it flips with the board (`Flip board`: `Black’s winning chances: 47%`); a mate reads
+  On the Board its name is always White's, as on the Engine lines (its `names` prop, #52), while its
+  fill flips with the board (`Flip board`: Black fills it from the bottom, and the name stays
+  White's); a Review's and an Engine Game's names the side at the bottom of the board, the Player's
+  until `Flip board`, as their key moments and Coach do (a Review of a game the Player had as Black
+  reads `Black’s winning chances` on the bar, the key moments and the Coach); a mate reads
   `Winning Chances bar: Black mates in 1`, a checkmate on the board `Black has checkmated`. It
   comes from the browser Engine's best line for the position shown (the same as `Engine line 1`,
   ADR 0007), follows `◀ ▶ ⏮ ⏭` with no Coach call, and works with the desktop off. Where beside
@@ -114,7 +151,8 @@ ADR 0007). Move Grades use the Lichess formula (Best, Good, Inaccuracy, Mistake,
 
 - 1.e4 is graded Best; 1.e4 d5 2.Nf3 is graded Blunder; 1.g4 is graded Mistake.
 - The same line played twice (two runs, or browser and coachctl) gives identical grades
-  (`board.spec.ts`, "the Engine grades every move the same way on every run").
+  (`board.spec.ts`, "the Engine grades every move, and finds the threat, the same way on every
+  run").
 - In verify mode the board's `Engine lines` (depth, moves, evaluations, continuations) match
   `engine.analyse` from the desktop for golden positions (`board.spec.ts`, "the browser Engine
   shows the same lines as the desktop Engine for golden positions").
@@ -130,21 +168,60 @@ ADR 0007). Move Grades use the Lichess formula (Best, Good, Inaccuracy, Mistake,
 - A threat query costs one more search at verify mode's depth (the position itself is already
   analysed): about 90 ms on average on the golden positions, single-threaded.
 - At the start position in verify mode, `Engine line 1` is named
-  `Engine line 1: e4, White’s winning chances: 53%, +0.38`; after 1. e4 it is
-  `Engine line 1: e6, Black’s winning chances: 47%, -0.37` (`board.spec.ts`, "the Engine lines
-  lead with the side to move’s Winning Chances, the evaluation beside them").
+  `Engine line 1: 1. e4, White’s winning chances: 53%, +0.38`; after 1. e4 it is
+  `Engine line 1: 1… e6, White’s winning chances: 53%, +0.37` (`board.spec.ts`, "the Engine lines
+  lead with White’s Winning Chances whoever is to move, …"). With Black to move from a `?fen=` link
+  (the board turned to Black's side) the bar and line 1 give the same White's percentage ("with
+  Black to move, the bar and the Engine lines both give White’s Winning Chances").
+- At 1280×800, 390×844, 402×714, 440×790 and 390×664 the tablist `Board` reads `Lines, Moves,
+  Coach`, every tab wholly on screen; `Moves` shows the move list, `Lines` the top line on the
+  first screen with `More lines`, `Coach` the conversation with the Ask box and the board on screen,
+  the page never scrolls, and the tab picked is the one after a reload ("the Board’s panel has
+  Lines, Moves and Coach tabs at desktop and phone sizes, and remembers the one picked"). A question
+  asked from `Lines` opens `Coach`, the conversation takes over 60% of the panel, and after a reload
+  the Board opens on `Lines` again ("asking the Coach opens the Coach tab, where the answer takes the
+  panel’s room"); `Coach`'s `aria-controls` names the `tabpanel` holding the conversation, and on
+  `Moves` it is the region `Coach` again ("the Coach tab’s panel is the Coach itself, …").
+- With the focus brought by the keyboard, → on `Moves` picks `Coach`, then wraps to `Lines`, End
+  and Home jump, and the board never steps; after a mouse click on a tab, ← and → step the board
+  ("the arrow keys move between the Board’s tabs while one has the focus, and step the board
+  otherwise").
+- `Lines`' top line reads the desktop Engine's line with move numbers ("1. e4 e5 2. Nf3 …");
+  hovering the third move puts the board on the position after it and the header line on
+  `Engine line: 1. e4 e5 2. Nf3`, with no `Engine’s best` arrow, and moving away puts back the start
+  and "White to move"; focus previews too, Enter tries the line (`Your own line`), and a click on
+  the second move tries the line up to it ("an Engine line’s moves are numbered buttons: pointing at
+  one shows it on the board, and a click tries the line"). A focused move stays on the board after
+  the pointer passes over another and leaves ("a move kept in focus stays on the board …"); ← under
+  a hovered move, or → on the tabs to `Moves`, ends the preview ("a preview ends when the position
+  or the tab changes under the pointer: …"). On a 390×664 touch phone each move is at least 44 px
+  tall and a tap tries the line ("on a touch phone, tapping an Engine line’s move tries the line on
+  the board"); at 390×664 and 402×714 the top line sits whole above the Ask box and with
+  `More lines` every line's last move scrolls into reach and plays ("on a short phone the top Engine
+  line sits whole above the Ask box, …").
+- `Engine’s best: 1. e4` (`data-kind="best"`, "best" in `Arrow colours`) shows only on `Lines`, then
+  `Engine’s best: 1… e6` after 1. e4 ("the best line’s first move is drawn as the Engine’s-best arrow
+  while the Lines tab is open"). After a Why Question each tab has one green arrow: the Coach's on
+  `Coach` and `Moves`, the Engine's best on `Lines` ("after a Why Question, each tab shows at most
+  one green arrow: …").
+- After 3… Bc5 the Coach says "Bc5 is graded …. Before it, White’s winning chances: 54%. After it,
+  White’s winning chances: N%.", N the bar's, and never "Black’s winning chances" ("the Coach
+  quotes the Winning Chances the bar shows either side of the move").
 - The Winning Chances bar reads `Winning Chances bar: White’s winning chances: 53%` at the start
   and after 1. e4, matches `Engine line 1` after 1. e4 g5, follows `Previous move`, `First
-  position` and `Last position` with no `coach_calls` row, and after `Flip board` names Black and
-  fills from the bottom with Black (`board.spec.ts`, "the Winning Chances bar beside the board
-  matches the Engine lines, …"). After 1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 it reads `White’s
-  winning chances: 48%` on two separate runs ("the Engine grades every move the same way on every
-  run"). After 1. f3 e5 2. g4 it reads `Black mates in 1` with "M1" on it ("a mate shows on the
-  Winning Chances bar as a mate, …"). At 390 px wide it lies under the board, as wide as the
-  board ("the Winning Chances bar stands beside the board, and under it on a phone").
+  position` and `Last position` with no `coach_calls` row, and after `Flip board` still names
+  White's while Black fills it from the bottom (`board.spec.ts`, "the Winning Chances bar beside the
+  board matches the Engine lines, follows the moves and fills from the bottom side when flipped").
+  After 1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 it reads `White’s winning chances: 48%` on two separate
+  runs ("the Engine grades every move, and finds the threat, the same way on every run"). After
+  1. f3 e5 2. g4 it reads `Black mates in 1` with "M1" on it ("a mate shows on the Winning Chances
+  bar as a mate, …"). At 390 px wide it lies above the board, as wide as the board ("the Winning
+  Chances bar stands beside the board, and above it on a phone"). A Review of a game the Player had
+  as Black names Black's on the bar, the key moments and the Coach (`imported-game.spec.ts`, "a
+  Review of a game the Player had as Black names Black’s Winning Chances …").
 - With the Engine's files blocked, the alert appears and moves can still be played
   (`board.spec.ts`, "when the Engine can’t start, the Player is told instead of left waiting").
-- Setting up `6k1/5ppp/8/8/8/8/5PPP/3R2K1 w - - 0 1` shows it with `Engine line 1: Rd8#…` and the
+- Setting up `6k1/5ppp/8/8/8/8/5PPP/3R2K1 w - - 0 1` shows it with `Engine line 1: 1. Rd8#…` and the
   bar `White mates in 1`; a PGN of 1.e4 e5 2.Nf3 Nc6 3.Bb5 a6 fills six moves and → → shows the
   position after 1…e5; `#/board?fen=` with a Black-to-move FEN opens it with `data-orientation`
   black; `8/8/8/8 w - - 0 1` is refused (`board.spec.ts`, "setting up a position"). Holding →

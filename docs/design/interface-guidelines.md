@@ -237,11 +237,19 @@ move's green.
 ### Engine Game
 
 - Header line tools: Hint, Show threat, Flip board and the "⋯ Game" menu (Offer a draw, Resign, New
-  game), which opens downwards. Once the game is over, the step buttons in the thumb bar.
+  game), which opens downwards. The step buttons in the thumb bar, during play and after.
 - The Blunder pause appears in the panel's first screen on a phone, with the punishing move drawn on
-  the board.
-- During play the step buttons and arrow keys show earlier positions; the board says "You're looking
-  at move 12. ▶ back to the game" until the Player returns.
+  the board; it takes the step buttons' row until the Player chooses.
+- During play the step buttons and arrow keys show earlier positions while the game waits at its
+  latest. A bar at the top of the panel says "Looking at 8. Bb3", where there is room what the
+  Engine played meanwhile, and offers Back to the game; the board stays put when the Engine moves.
+  Hint and Show threat go until the Player is back.
+- A move on an earlier position starts the Player's own line. It shows no Move Grades and no Winning
+  Chances until the Player presses Analyze in the same bar, which grades it, draws the Engine's best
+  move and asks the Coach once.
+- The finished game's card: the result, one line ("12 moves · 1 Mistake, 1 Inaccuracy"), then
+  Review this game and New game, all in the first screen of a 390 by 664 phone. Nothing the Coach
+  said during play stays.
 
 ### Board
 

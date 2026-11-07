@@ -49,5 +49,8 @@ A PR with nothing here gets the no-evidence label.
 <!-- Anything the owner should look at: protected paths touched, Coach changes (they need the
 real-Coach check from the desktop), deviations from the ticket, follow-ups. -->
 
+<!-- Preview: a ready PR gets one on InstaBox, and a draft with the "preview" label; the owner gets the
+link by Telegram. For another seed, add a line "Preview seed: empty" (or many-games, no-phone). -->
+
 <!-- New or changed Lesson text (data/lesson-sources/): say who compared it with the owner's books
 and found no copied or closely followed wording, examples or order (ADR 0012). -->

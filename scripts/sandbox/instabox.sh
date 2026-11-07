@@ -3,11 +3,14 @@
 # can open on a phone. Runs where the instabox CLI is signed in (instabox login, or INSTABOX_API_KEY
 # in CI). The box gets no Secrets: previews use verify mode's fake Coach and fake data.
 #   bash scripts/sandbox/instabox.sh up [--ref BRANCH] [--seed NAME] [--box NAME] [--notify]
-#   bash scripts/sandbox/instabox.sh down [--box NAME] [--delete]
+#   bash scripts/sandbox/instabox.sh down [--box NAME] [--if-ref BRANCH] [--delete]
 #   bash scripts/sandbox/instabox.sh status [--box NAME]
 # up prints the link, with the pairing code in it, and ends with one JSON line. The link goes only to
-# the owner (--notify sends it through telegram-notify), never into a PR or anywhere public (ADR 0001).
-# The free plan has one box in all: reuse it (the default name), or delete the old one first.
+# the owner (--notify sends it with telegram-notify, or with TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID
+# in CI), never into a PR or anywhere public (ADR 0001). In GitHub Actions, whose logs are public,
+# the link is never printed and the JSON line has no link.
+# down cleans the box (clean.sh), unpublishes the port and pauses the box; with --if-ref, only when
+# the box is showing that branch. The free plan has one box in all: every preview reuses it.
 
 box=${INSTABOX_PREVIEW_BOX:-occ-preview}
 repo=${OCC_REPO_URL:-https://github.com/inprealpha/OpenChessCoach.git}
@@ -16,6 +19,10 @@ seed=default
 ref=
 notify=0
 delete=0
+if_ref=
+# GitHub Actions logs are public: the pairing code must never reach them.
+ci=0
+[ "${GITHUB_ACTIONS:-}" = true ] && ci=1
 
 usage() {
   sed -n '5,7p' "${BASH_SOURCE[0]}" | sed 's/^#  */usage: /' >&2
@@ -31,6 +38,7 @@ while [ $# -gt 0 ]; do
     --seed) [ -n "${2:-}" ] || usage; seed=$2; shift 2 ;;
     --notify) notify=1; shift ;;
     --delete) delete=1; shift ;;
+    --if-ref) [ -n "${2:-}" ] || usage; if_ref=$2; shift 2 ;;
     *) usage ;;
   esac
 done
@@ -39,8 +47,21 @@ done
 [[ "$seed" =~ ^[a-z-]+$ ]] || usage
 check_ref() { [[ "$1" =~ ^[A-Za-z0-9._/-]+$ ]] || { echo "instabox: that branch name has characters this script doesn't pass on" >&2; exit 2; }; }
 [ -z "$ref" ] || check_ref "$ref"
+[ -z "$if_ref" ] || check_ref "$if_ref"
 
 command -v instabox >/dev/null || { echo "instabox: the instabox CLI is not installed: npx instabox@latest" >&2; exit 1; }
+
+# Sends one message to the owner: telegram-notify on the desktop, the Bot API in CI.
+notify_owner() {
+  if command -v telegram-notify >/dev/null; then
+    telegram-notify "$1" >/dev/null 2>&1
+  elif [ -n "${TELEGRAM_BOT_TOKEN:-}" ] && [ -n "${TELEGRAM_CHAT_ID:-}" ]; then
+    curl -fsS -o /dev/null "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+      --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" --data-urlencode "text=$1" 2>/dev/null
+  else
+    return 1
+  fi
+}
 
 state() { instabox get "$box" --json 2>/dev/null | node -e 'let s = ""; process.stdin.on("data", (d) => (s += d)).on("end", () => { try { console.log(JSON.parse(s).state ?? "") } catch { console.log("") } })'; }
 
@@ -73,6 +94,7 @@ case "$command" in
       cd ~/OpenChessCoach
       git fetch -q --depth 1 origin '$ref'
       git checkout -q --force FETCH_HEAD
+      echo '$ref' > ~/.occ-preview-ref
       echo \"instabox: $box has $ref at \$(git rev-parse --short HEAD)\" >&2" || { echo "instabox: could not check out $ref on $box" >&2; exit 1; }
 
     preview=$(instabox exec "$box" --timeout 600 -- "cd ~/OpenChessCoach && bash scripts/sandbox/preview.sh --seed $seed --port $port" | tail -n 1)
@@ -90,16 +112,38 @@ case "$command" in
     commit=$(node -e 'console.log(JSON.parse(process.argv[1]).commit)' "$preview")
     link=$(node -e 'console.log(process.argv[2].replace(/\/$/, "") + JSON.parse(process.argv[1]).pairPath)' "$preview" "$url")
     echo "instabox: preview of $ref at $commit on $box (seed $seed), doctor passed" >&2
-    echo "instabox: open $link" >&2
-    if [ "$notify" = 1 ]; then
-      telegram-notify "OpenChessCoach preview of $ref ($commit, seed $seed): $link" >/dev/null 2>&1 \
-        || echo "instabox: telegram-notify failed; the link is above" >&2
+    if [ "$ci" = 0 ]; then
+      echo "instabox: open $link" >&2
     fi
+    if [ "$notify" = 1 ]; then
+      if notify_owner "OpenChessCoach preview of $ref ($commit, seed $seed): $link"; then
+        echo "instabox: sent the link by Telegram" >&2
+      elif [ "$ci" = 1 ]; then
+        echo "instabox: could not send the link by Telegram, and CI logs are public, so it isn't printed here either" >&2
+        exit 1
+      else
+        echo "instabox: could not send the link by Telegram; it is above" >&2
+      fi
+    fi
+    [ "$ci" = 1 ] && link=
     node -e 'const [p, box, ref, url, link] = process.argv.slice(1); const r = JSON.parse(p);
-      console.log(JSON.stringify({ ok: true, box, ref, commit: r.commit, runId: r.runId, url, link }))' "$preview" "$box" "$ref" "$url" "$link" ;;
+      console.log(JSON.stringify({ ok: true, box, ref, commit: r.commit, runId: r.runId, url, ...(link ? { link } : {}) }))' "$preview" "$box" "$ref" "$url" "$link" ;;
 
   down)
-    [ -n "$(state)" ] || { echo "instabox: no box named $box"; exit 0; }
+    current=$(state)
+    [ -n "$current" ] || { echo "instabox: no box named $box"; exit 0; }
+    if [ -n "$if_ref" ]; then
+      # exec wakes a box that paused itself when idle. One paused with down already has no preview.
+      showing=$(instabox exec "$box" --timeout 30 -- 'cat ~/.occ-preview-ref 2>/dev/null' 2>/dev/null)
+      if [ "$showing" != "$if_ref" ]; then
+        echo "instabox: $box is not showing $if_ref (it shows ${showing:-nothing}); left as it is" >&2
+        exit 0
+      fi
+    fi
+    if [ "$(state)" = running ]; then
+      instabox exec "$box" --timeout 300 -- 'rm -f ~/.occ-preview-ref; cd ~/OpenChessCoach 2>/dev/null && bash scripts/sandbox/clean.sh' >&2 \
+        || echo "instabox: cleaning $box failed; the next preview cleans it first" >&2
+    fi
     instabox port unpublish "$box" "$port" >/dev/null 2>&1 || true
     if [ "$delete" = 1 ]; then
       instabox rm --yes "$box" >&2
@@ -111,6 +155,9 @@ case "$command" in
     current=$(state)
     [ -n "$current" ] || { echo "instabox: no box named $box"; exit 0; }
     echo "instabox: $box is $current"
+    if [ "$current" = running ]; then
+      instabox exec "$box" --timeout 30 -- 'echo "instabox: showing $(cat ~/.occ-preview-ref 2>/dev/null || echo nothing); disk $(df -h --output=used,size,pcent /data | tail -1)"' 2>/dev/null
+    fi
     instabox port ls "$box" --output table 2>/dev/null ;;
 
   *) usage ;;

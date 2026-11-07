@@ -1,0 +1,131 @@
+# Previews (.claude/skills/sandbox/SKILL.md): runs a PR's branch on the owner's InstaBox box in verify
+# mode and sends the owner the link, with the pairing code, by Telegram.
+#   - A PR gets a preview when it is opened ready, marked ready for review, or labelled "preview" as a
+#     draft, and again on every push after that. It comes down, and the box is cleaned, when the PR
+#     closes. A line "Preview seed: empty" in the description picks verify mode's seed.
+#   - Verify mode's fake Coach answers from templates and never calls Claude, and the box gets no
+#     Secrets, so a preview spends none of the owner's Claude usage.
+#   - Every preview cleans the box first (scripts/sandbox/clean.sh), so its 20 GB disk doesn't fill up.
+#   - One box: previews take turns, and the newest preview replaces the one before.
+# pull_request_target, so the runner uses the base branch's scripts and holds the secrets; the PR's
+# code runs only on the box, which holds none. PRs from forks never get a preview. This log is
+# public: instabox.sh never prints the pairing code in GitHub Actions, and the PR comment has no link.
+name: Preview
+
+on:
+  pull_request_target:
+    types: [opened, reopened, ready_for_review, synchronize, labeled, closed]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Branch to preview
+        required: true
+      seed:
+        description: Verify mode's seed (default, empty, many-games or no-phone)
+        required: false
+        default: default
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+# Previews take turns on the one box; a waiting preview is replaced by a newer one (GitHub keeps one
+# waiting run per group). Taking a closed PR's preview down has a group of its own, so it never cancels
+# a waiting preview of another PR; it only acts when the box still shows that PR's branch.
+concurrency:
+  group: ${{ github.event.action == 'closed' && format('preview-down-{0}', github.event.pull_request.number) || 'preview-box' }}
+  cancel-in-progress: false
+
+jobs:
+  preview:
+    name: Preview
+    # Closing always takes the preview down. Otherwise: ready PRs, and drafts with the "preview" label;
+    # a label event counts only for that label (pr-labels.yml adds others all the time).
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.pull_request.head.repo.full_name == github.repository &&
+       (github.event.action == 'closed' ||
+        ((!github.event.pull_request.draft || contains(github.event.pull_request.labels.*.name, 'preview')) &&
+         (github.event.action != 'labeled' || github.event.label.name == 'preview'))))
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      INSTABOX_API_KEY: ${{ secrets.INSTABOX_API_KEY }}
+      INSTABOX_NO_UPDATE_CHECK: '1'
+      INSTABOX_NO_TELEMETRY: '1'
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      ACTION: ${{ github.event.action || 'dispatch' }}
+      PR: ${{ github.event.pull_request.number }}
+      REF: ${{ github.event.pull_request.head.ref || inputs.ref }}
+      BODY: ${{ github.event.pull_request.body }}
+      SEED_INPUT: ${{ inputs.seed }}
+    steps:
+      # The base branch (main): its scripts run here, never the PR's.
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Check the secrets
+        id: secrets
+        run: |
+          missing=
+          for name in INSTABOX_API_KEY TELEGRAM_BOT_TOKEN TELEGRAM_CHAT_ID; do
+            [ -n "${!name}" ] || missing="$missing $name"
+          done
+          if [ -n "$missing" ]; then
+            echo "::notice::No preview: the repository is missing the secrets:$missing (see .claude/skills/sandbox/SKILL.md)"
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # The npm package is the installer: with INSTABOX_API_KEY it signs in with no browser and puts the
+      # CLI in ~/.local/bin.
+      - name: Install the instabox CLI
+        if: steps.secrets.outputs.ok == 'true'
+        run: |
+          npx --yes instabox@0.8.196 --yes --no-skills
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Take the preview down and clean the box
+        if: steps.secrets.outputs.ok == 'true' && env.ACTION == 'closed'
+        run: bash scripts/sandbox/instabox.sh down --if-ref "$REF"
+
+      - name: Start the preview and send the link by Telegram
+        id: up
+        if: steps.secrets.outputs.ok == 'true' && env.ACTION != 'closed'
+        run: |
+          seed=$(printf '%s\n' "$BODY" | grep -oiE '^preview seed: *[a-z-]+' | head -n 1 | sed -E 's/^[^:]*: *//')
+          seed=${seed:-${SEED_INPUT:-default}}
+          echo "seed=$seed" >> "$GITHUB_OUTPUT"
+          bash scripts/sandbox/instabox.sh up --ref "$REF" --seed "$seed" --notify > up.json
+          node -e 'const r = JSON.parse(require("fs").readFileSync("up.json", "utf8")); console.log(`commit=${r.commit}`)' >> "$GITHUB_OUTPUT"
+
+      # One comment per PR, updated each time. No link: the link holds the pairing code.
+      - name: Say how the preview went on the PR
+        if: always() && env.PR != '' && steps.secrets.outputs.ok == 'true' && env.ACTION != 'closed'
+        env:
+          OUTCOME: ${{ steps.up.outcome }}
+          COMMIT: ${{ steps.up.outputs.commit }}
+          SEED: ${{ steps.up.outputs.seed }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          marker='<!-- preview -->'
+          if [ "$OUTCOME" = success ]; then
+            text="**Preview:** running \`$COMMIT\` with the \`$SEED\` seed on the InstaBox box, and doctor passed. The link, with the pairing code, went to the owner by Telegram. Verify mode's fake Coach: no Claude usage."
+          else
+            text="**Preview:** failed for \`${HEAD_SHA:0:7}\`. See [the run]($RUN_URL)."
+          fi
+          body="$marker"$'\n'"$text"
+          id=$(gh api "repos/$REPO/issues/$PR/comments" --paginate --jq ".[] | select(.body | startswith(\"$marker\")) | .id" | head -n 1)
+          if [ -n "$id" ]; then
+            gh api -X PATCH "repos/$REPO/issues/comments/$id" -f body="$body" > /dev/null
+          else
+            gh api "repos/$REPO/issues/$PR/comments" -f body="$body" > /dev/null
+          fi

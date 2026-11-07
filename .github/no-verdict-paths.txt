@@ -22,4 +22,5 @@ scripts/verdict.ts
 scripts/protected-paths.ts
 scripts/before-after.ts
 scripts/glossary-lint.ts
+scripts/pr-description.ts
 scripts/sandbox/

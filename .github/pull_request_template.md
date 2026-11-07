@@ -13,6 +13,24 @@ Closes #
 
 - [ ]
 
+## How this was made
+
+<!-- The main model and the tool it ran in (for example "Made with Claude Opus 5.5 in Claude Code (cloud)"),
+or "Made by hand". Never guess the model: write the one you are running as.
+Tick each way the change was tested; every ticked box needs its proof in Evidence below.
+"Not tested" is required: say what you left out, or "nothing".
+A PR without these gets the no-testing-record label. -->
+
+Made with
+
+Tested with:
+- [ ] Automated tests: `npm test` and the Player journeys
+- [ ] Verify mode with the fake Coach, driven by the agent (`coachctl`, Playwright)
+- [ ] The real Coach, on a real Claude subscription (the real-Coach check, or used by hand)
+- [ ] Used by hand in the running app (where: desktop browser, phone, InstaBox preview)
+
+Not tested:
+
 ## Evidence
 
 <!--

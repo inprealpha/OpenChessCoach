@@ -36,6 +36,7 @@ scripts/glossary-allowlist.json
 scripts/real-coach-check.ts
 scripts/verdict.ts
 scripts/before-after.ts
+scripts/pr-description.ts
 
 # Sandbox setup: runs on every agent machine
 scripts/sandbox/

@@ -137,6 +137,17 @@ A PR that changes what a Player sees also ticks the checklist at the end of
 A PR whose Evidence section is empty gets the `no-evidence` label. Copy the ticket's "Done means"
 checks into the PR and tick each one you proved.
 
+Fill in the template's "How this was made" section too, or the PR gets the `no-testing-record` label:
+
+- **Made with:** the main model you are running as and the tool it ran in, for example "Made with
+  Claude Opus 5.5 in Claude Code (cloud)". Never guess the model, and never link a Claude session.
+- **Tested with:** tick only what you did, and put its proof in Evidence. `npm test` and the
+  journeys tick the first box; driving verify mode with `coachctl` or Playwright ticks the second;
+  the real-Coach check ticks the third. "Used by hand" is for a person using the app, never for
+  your own driving.
+- **Not tested:** what you left out, such as the real Coach, the phone in landscape or macOS, or
+  "nothing".
+
 ### Before and after screenshots, inline in the PR
 
 A PR that changes anything a Player sees shows it in the PR itself: for each changed screen, a

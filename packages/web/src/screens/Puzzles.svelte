@@ -4,6 +4,8 @@
   // written out and can be stepped through, and the Puzzles the Player missed can be tried again. The Player picks what
   // to practise: every Lesson mixed, or one Lesson's Puzzles, grouped by track, each with this device's progress.
   // A finished Puzzle's board is free: a move on it starts a variation, which Back to the Puzzle drops.
+  // Stuck, the Player gets a Hint first, as in a Lesson: the Coach's nudge from the Engine's line, naming no move, and
+  // only then Show the solution.
   import { tick } from 'svelte';
   import { moveLabel, otherSide, outcomeOf, playUci, SIDE_NAMES, turnOf } from '@chess-coach/shared/chess';
   import { TRACK_NAMES } from '@chess-coach/shared/content/course';
@@ -26,6 +28,8 @@
   import { arrivedByChoosing, markChosen } from '../lib/puzzle-choice.ts';
   import { profile } from '../lib/profile.svelte.ts';
   import { store } from '../lib/storage.ts';
+  import { askAbout } from '../lib/ask.ts';
+  import { narrow } from '../lib/narrow.svelte.ts';
   import { stepLine, Variation, type Step } from '../lib/variation.svelte.ts';
   let { opening }: { opening?: string | undefined } = $props();
 
@@ -45,6 +49,9 @@
   /** The choice of what to practise, opened to pick another set. */
   let choosing = $state(false);
   let summary = $state<HTMLElement | undefined>();
+  /** The step of the Puzzle the Hint was given at: the button then reads Show the solution, until the next move to find. */
+  let hintedAt = $state<number | null>(null);
+  let hintButton = $state<HTMLButtonElement>();
   const line = new Line();
   const coach = new CoachThread();
   /** The Player's own moves from a position of the finished Puzzle; its solution never changes. */
@@ -66,6 +73,13 @@
   const nextInBar = $derived(sheet.on && !variation.active);
   const boardFen = $derived(variation.active ? variation.fen : line.fen);
   const shownLast = $derived(variation.active ? variation.line.lastMove : line.lastMove);
+  /** The Hint was given for the move to find now: the next press shows the solution. */
+  const hinted = $derived(hintedAt === index);
+  /**
+   * The Ask box names the move a Why Question asks about: the Puzzle's answer as played on the board (the solution's
+   * move, or another mate the Player found), or the variation's move shown. Shorter on a phone, so it fits.
+   */
+  const askPlaceholder = $derived(askAbout(variation.active ? variation.line.lastMove : line.moves[1], narrow.on));
 
   /** What the Player can practise: every Lesson mixed, then each Lesson that has Puzzles, with this device's progress on them. */
   const mixed = $derived({ id: '', name: 'Mixed: every Lesson', ...progressOn(all.map((p) => p.id)) });
@@ -128,6 +142,7 @@
     coach.reset();
     variation.leave();
     explained = null;
+    hintedAt = null;
     feedback = '';
     mistakes = 0;
     if (!p) {
@@ -205,6 +220,38 @@
     }
   }
 
+  /**
+   * A nudge towards the move to find: the Coach's Hint job, whose facts the desktop's Engine works out. Its reply
+   * names and draws no move: the guard strips every move, arrow and square, and a text that names a move becomes a
+   * general Hint (`namedMove` in shared/coach/guard.ts). Pressed again for the same move, it shows the solution.
+   */
+  async function hint(): Promise<void> {
+    if (!puzzle || status !== 'solving' || busy || coach.busy) return;
+    if (hinted) {
+      await showSolution();
+      return;
+    }
+    hintedAt = index;
+    if (!api.coachReady) {
+      coach.say('Hints need the Coach, which is unavailable. Press Show the solution to see the moves.');
+      return;
+    }
+    await coach.ask(
+      {
+        job: 'hint',
+        fen: line.fen,
+        recentMoves: line.sansUntilCursor(),
+        playerSide: solver,
+        hideWinningChances: true,
+        ...(lesson?.kind === 'opening' ? { opening: lesson.name } : {}),
+      },
+      'Hint, please.',
+    );
+    // The button was disabled while the Coach answered, which drops the focus: it is Show the solution now.
+    await tick();
+    if (document.activeElement === document.body) hintButton?.focus();
+  }
+
   async function showSolution(): Promise<void> {
     if (!puzzle) return;
     busy = true;
@@ -268,8 +315,8 @@
       );
       return;
     }
-    const setup = playUci(puzzle.fen, puzzle.moves[0] as string);
-    const answer = setup && playUci(setup.fenAfter, puzzle.moves[1] as string);
+    // The answer as the board shows it: the solution's move, or another mate the Player found on the last move.
+    const [setup, answer] = line.moves;
     if (!setup || !answer) return;
     // The answer is about the Puzzle's position: show it, so the Coach's arrows start on its pieces.
     line.goTo(1);
@@ -297,6 +344,10 @@
     {#if puzzle && status !== 'empty'}<p class="head-line">Rated {puzzle.rating} · from a real Lichess game</p>{/if}
     {#if puzzle && status !== 'empty' && status !== 'loading'}
       <div class="frame-tools">
+        {#if status === 'solving'}
+          <!-- In the header line, as in a Lesson: a Hint first, then Show the solution. -->
+          <button type="button" class="secondary" bind:this={hintButton} onclick={hint} disabled={busy || coach.busy}>{hinted ? 'Show the solution' : 'Hint'}</button>
+        {/if}
         {#if finished && variation.active}<VariationBar place="header" back="Back to the Puzzle" onback={() => variation.leave()} />{/if}
         {#if finished && nextInBar}<button type="button" class="next" onclick={nextPuzzle}>Next Puzzle</button>{/if}
         <FlipButton onflip={() => (flipped = !flipped)} />
@@ -328,8 +379,9 @@
           {/each}
         </nav>
       </details>
+      <!-- On a phone the set's name is left to screen readers, so the line shares the choice's row. -->
       <p id="puzzle-progress" class="muted small">
-        {lessonName ?? 'Every Lesson'}: {here.done.length} of {here.count} done{here.missed.length ? ` (${here.missed.length} missed)` : ''}.
+        <span class="set-name">{lessonName ?? 'Every Lesson'}:</span> {here.done.length} of {here.count} done{here.missed.length ? ` (${here.missed.length} missed)` : ''}.
       </p>
     </div>
   {/if}
@@ -356,13 +408,13 @@
         <Board
           fen={boardFen}
           orientation={flipped ? otherSide(solver) : solver}
-          movable={busy ? 'none' : finished ? 'both' : status === 'solving' ? solver : 'none'}
+          movable={busy || (status === 'solving' && coach.busy) ? 'none' : finished ? 'both' : status === 'solving' ? solver : 'none'}
           lastMove={shownLast ? { from: shownLast.uci.slice(0, 2), to: shownLast.uci.slice(2, 4) } : undefined}
           arrows={explained === boardFen ? coach.arrows : []}
           highlights={explained === boardFen ? coach.highlights : []}
           gradeMark={variation.active ? variation.mark : undefined}
           onmove={finished ? explore : onmove}
-          refusal="One moment: the moves are being played."
+          refusal={busy ? 'One moment: the moves are being played.' : 'One moment: the Coach is giving a Hint.'}
           label="Puzzle board"
         />
         </div>
@@ -379,13 +431,9 @@
           </p>
           <p role="status" aria-live="polite" class:error={feedback.includes('not the move')}>{feedback}</p>
           <!-- Before the solution, so a phone's resting sheet shows Next Puzzle without scrolling. -->
-          <div class="row">
-            {#if status === 'solving'}
-              <button type="button" class="secondary" onclick={showSolution} disabled={busy}>Show the solution</button>
-            {:else if !nextInBar}
-              <button type="button" onclick={nextPuzzle}>Next Puzzle</button>
-            {/if}
-          </div>
+          {#if finished && !nextInBar}
+            <div class="row"><button type="button" onclick={nextPuzzle}>Next Puzzle</button></div>
+          {/if}
           {#if finished}
             <p class="solution">
               Solution:
@@ -419,8 +467,11 @@
         </section>
         <p class="muted small">Puzzles: Lichess puzzle database, CC0.</p>
         </div>
-        {#if status !== 'solving'}
-          <CoachPanel thread={coach} onwhy={why} placeholder={variation.active ? (variation.line.lastMove ? `Ask why about ${variation.line.lastMove.san}` : 'Ask about this position') : 'Why is this the answer?'}>
+        {#if status === 'solving' && (coach.busy || coach.entries.length)}
+          <!-- The Hint, with no Ask box: the answer is still to find. -->
+          <CoachPanel thread={coach} />
+        {:else if status !== 'solving'}
+          <CoachPanel thread={coach} onwhy={why} placeholder={askPlaceholder}>
             {#snippet steps(part: 'back' | 'on')}
               <!-- Stepping stays inside the Puzzle: its first position is the one the Player was set. -->
               <StepButtons only={part} onfirst={() => step('first')} onprevious={() => step('previous')} onnext={() => step('next')} onlast={() => step('last')} />
@@ -433,7 +484,7 @@
 </section>
 
 <style>
-  /* On a phone the set picker sits above the board: the board gives it room, and the panel keeps the task and Show the solution. */
+  /* On a phone the set picker sits above the board: the board gives it room, and the panel keeps the task and the Hint. */
   .puzzles { --phone-reserve: 22.5rem; }
   /* The picker's line sits between the header line and the frame. */
   @media (min-width: 821px) {
@@ -443,6 +494,16 @@
   .small { font-size: 0.8rem; }
   .picker { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.35rem 1rem; margin: 0 0 0.5rem; min-height: 1.5rem; }
   .picker p { margin: 0; }
+  /* One row on a phone: the progress line takes what the choice leaves and never a row of its own, so the board
+     starts higher. The set's name is the heading's; the count stays whole. Open, the sets push it under them. */
+  @media (max-width: 820px) {
+    /* The progress line leaves the set's name to the heading, so the heading shows it whole: two lines fit in the
+       header line's 44 px, where one would cut a long name short. */
+    .frame-head > h1 { white-space: normal; line-height: 1.15; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
+    .picker { column-gap: 0.75rem; }
+    #puzzle-progress { flex: 1 1 0; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: right; }
+    .set-name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  }
   /* Open, the sets take the whole width and the progress line goes under them; the summary stays where it was. */
   .picker details[open] { flex: 1 1 100%; }
   .picker summary { cursor: pointer; font-weight: 600; color: var(--accent); }

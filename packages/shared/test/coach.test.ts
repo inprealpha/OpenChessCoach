@@ -15,11 +15,11 @@ import {
   TRIM_STEPS,
   type Brief,
 } from '../src/coach/brief.ts';
-import { allowedMoves, askedLineMoves, guardReply } from '../src/coach/guard.ts';
+import { allowedMoves, askedLineMoves, guardReply, HINT_FALLBACK } from '../src/coach/guard.ts';
 import type { CoachAsk, CoachRawReply, GameFacts } from '../src/coach/types.ts';
 import { MAX_KEY_MOMENTS, MAX_STANDOUTS, pickKeyMoments } from '../src/key-moments.ts';
 import { gameFacts } from '../src/overview.ts';
-import { legalMoves, playUci, turnOf } from '../src/chess.ts';
+import { INITIAL_FEN, legalMoves, playUci, turnOf } from '../src/chess.ts';
 import { scoreAfterPly } from '../src/position-score.ts';
 import { nullMoveFen, type Threat } from '../src/threat.ts';
 import { winningChancesFor } from '../src/winning-chances.ts';
@@ -623,6 +623,48 @@ describe('the Coach-move guard', () => {
     const exd5: Brief = { ...base, move: { san: 'exd5', uci: 'e4d5', grade: 'Best', evaluationAfter: '+0.60' } };
     expect(allowedMoves(exd5).has('d5e4')).toBe(false);
     expect(guardReply(exd5, reply({ moves: ['d5e4'], arrows: [{ uci: 'd5e4', brush: 'red' }] }))).toMatchObject({ moves: [], arrows: [] });
+  });
+
+  describe('a Hint’s words', () => {
+    const hint = (fen: string, uci: string, san: string) =>
+      buildBrief({ ask: { job: 'hint', fen, recentMoves: [], candidates: [{ uci, san, score: { cp: 500 }, pv: [uci] }] }, profile });
+    const said = (b: Brief, text: string) => guardReply(b, reply({ text }));
+    // The rook takes on g7 with check: 1. Rxg7+.
+    const rook = hint('6k1/6p1/8/8/8/8/8/K5R1 w - - 0 1', 'g1g7', 'Rxg7+');
+    // The pawn takes on e8 and promotes with mate: 1. fxe8=Q#.
+    const pawn = hint('4r2k/5Ppp/8/8/8/8/8/K7 w - - 0 1', 'f7e8q', 'fxe8=Q#');
+
+    it('that name a move, in SAN or UCI, become the fallback, and the guard says why', () => {
+      for (const text of ['Play Rxg7+ now.', 'Rxg7 wins.', 'Look at Rg7!', 'Try g1g7.', 'G1-G7 is strong.', 'Rxg7# would be nice']) {
+        const out = said(rook, text);
+        expect(out.text, text).toBe(HINT_FALLBACK);
+        expect(out.stripped).toEqual(['text names Rxg7+, which a Hint keeps back']);
+      }
+      for (const text of ['fxe8=Q# ends it.', 'What about fxe8=Q?', 'fxe8Q', 'Play f7e8q.', 'xe8=Q#, fe8=Q']) expect(said(pawn, text).text, text).toBe(HINT_FALLBACK);
+    });
+
+    it('that name another legal move are kept back too, and so is castling', () => {
+      expect(said(rook, 'A king move like Kb2 changes nothing.').text).toBe(HINT_FALLBACK);
+      const castle = hint('r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1', 'a1a8', 'Rxa8+');
+      expect(said(castle, 'Not O-O yet.').text).toBe(HINT_FALLBACK);
+      expect(said(castle, 'Not 0-0-0 yet.').text).toBe(HINT_FALLBACK);
+    });
+
+    it('may say where pieces stand: a square alone names no move, unless it is the Engine’s pawn move', () => {
+      // Documented on purpose: "the rook takes on g7" says where the rook goes in words, and only the
+      // prompt keeps that out; the guard can't tell it from "your pawn on g7 is weak".
+      for (const text of ['The rook takes on g7.', 'Your king on a1 is safe; the pawn on g7 guards the king.']) expect(said(rook, text).text).toBe(text);
+      const start = hint(INITIAL_FEN, 'e2e4', 'e4');
+      expect(said(start, 'Aim for e4.').text).toBe(HINT_FALLBACK);
+      // d4 is a legal pawn move, but not one of the Engine's in the brief: a square, then.
+      expect(said(start, 'Think about the d4 square.').text).toBe('Think about the d4 square.');
+    });
+
+    it('pass when they name nothing, and other jobs may still name moves', () => {
+      expect(said(rook, 'The black king is short of squares, and a file is open.').text).toBe('The black king is short of squares, and a file is open.');
+      const why = buildBrief({ ask: { job: 'why', fen: '6k1/6p1/8/8/8/8/8/K5R1 w - - 0 1', recentMoves: [], candidates: [{ uci: 'g1g7', san: 'Rxg7+', score: { cp: 500 }, pv: ['g1g7'] }] }, profile });
+      expect(guardReply(why, reply({ text: 'Rxg7+ wins a pawn with check.' })).text).toBe('Rxg7+ wins a pawn with check.');
+    });
   });
 
   it('lets the Coach name the Engine’s line after a move the Player asked about, each move where the line plays it, but draw only the move', () => {

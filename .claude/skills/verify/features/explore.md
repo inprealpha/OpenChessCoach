@@ -2,14 +2,15 @@
 
 Every board that shows a position to learn from takes moves, so the Player can try their own idea
 and get back in one step (`docs/design/interface-guidelines.md`, "Exploring a position"): the
-Review, a Lesson once it is complete, a Puzzle once it is solved or shown, an Engine Game once it
-is over, and the Board after stepping back. The state lives in
+Review, a Lesson once it is complete, a Puzzle once it is solved or shown, an Engine Game (once it
+is over, and during play from an earlier position, as the Player's own line that waits for
+`Analyze`: see `engine-game.md`), and the Board after stepping back or from an Engine line. The state lives in
 `packages/web/src/lib/variation.svelte.ts`; the game's own line never changes.
 
 **Reached from:** a move on the `Review board` (before or after the Review is made), on a
 Lesson's board once `Lesson complete` shows, on the `Puzzle board` after solving or
-`Show the solution`, on the `Engine Game board` once the game is over, or on the Board after
-`Previous move`.
+`Show the solution`, on the `Engine Game board` once the game is over or after looking back
+during play, or on the Board after `Previous move` or a click on an Engine line's move.
 
 ## Sub-features
 
@@ -25,12 +26,13 @@ Lesson's board once `Lesson complete` shows, on the `Puzzle board` after solving
   those grades; at the variation's first position it shows the game's, and a move the Engine can't
   grade reads `Winning Chances bar: not graded in this variation`.
 - The step buttons and their keys walk the variation while it shows. `Back to the game` (in the
-  Review and a finished Engine Game; `Back to the main line` on the Board, `Back to the Puzzle`,
-  `Back to the Lesson`), in the group `Your own line` at the top of the panel, drops it and puts the board back where the Player left the game, an open key
+  Review and an Engine Game; `Back to the main line` on the Board, `Back to the Puzzle`,
+  `Back to the Lesson`), in the group `Your own line` at the top of the panel (during an Engine
+  Game, the group `Away from the game`), drops it and puts the board back where the Player left the game, an open key
   moment included. Picking a move in the game's list, a key moment, an overview move or the graph
   leaves the variation for that position.
-- A Why Question (in the Review, on the Board, a complete Lesson and a finished Puzzle; a finished
-  Engine Game's Review takes them) about a variation move sends only the moves (the game's up to the branch, then the
+- A Why Question (in the Review, on the Board, a complete Lesson and a finished Puzzle; `Analyze`
+  on an Engine Game's own line asks one; a finished Engine Game's Review takes them) about a variation move sends only the moves (the game's up to the branch, then the
   variation's) and the move: the desktop's Engine works out the Coach's facts, and a Review's
   `gameId` is left out, so no Review score is quoted for a position the game never had. While the
   desktop can't be reached, the Coach panel says so and takes no question.
@@ -38,8 +40,9 @@ Lesson's board once `Lesson complete` shows, on the `Puzzle board` after solving
   it never touches the game's line.
 - Where moving is not allowed, a refused move says why beside the board: during a Lesson
   ("Press Continue for the Lesson’s next move.", "Try another move, or continue with the Lesson’s
-  move.", "The Engine is grading your move."), while a Puzzle's reply is played, and during an
-  Engine Game ("It’s the Engine’s move.", "Take the move back or carry on first.").
+  move.", "The Engine is grading your move."), while a Puzzle's reply is played or a Hint is on its way ("One moment: the Coach is
+  giving a Hint."), and at an Engine Game's latest position during play ("It’s the Engine’s move.",
+  "Take the move back or carry on first.").
 
 ## Proof
 

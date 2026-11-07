@@ -55,9 +55,12 @@ Skip this section on the build-and-merge track.
    options. When there is one clear direction, build that one. Keep options on one branch behind a
    temporary switch (for example a query parameter or a route per option), so one running copy shows
    them all. Prove only that each option runs: no full proof yet.
-2. **Show it.** A preview link when one exists. Otherwise, for each option, a before-and-after
-   picture at desktop and phone sizes (`scripts/before-after.ts`, as in section 4 of the verify
-   skill), sent to the owner, plus the exact commands to run that option locally.
+2. **Show it.** Push the branch and give the owner a preview link they can open on a phone, as the
+   `sandbox` skill says (`.claude/skills/sandbox/SKILL.md`); the `--seed` option picks the data a
+   screen needs. Add, for each option, a before-and-after picture at desktop and phone sizes
+   (`scripts/before-after.ts`, as in section 4 of the verify skill), so the owner sees the change at
+   a glance. Never post the preview's pairing code anywhere public. When no preview can run, send the
+   pictures and the exact commands to run that option locally.
 3. **Collect the feedback and stop.** The owner says what is good, what isn't, and what is decent
    but needs work. Put each round on the issue as a comment, update its "Done means" checks to match
    what the owner asked for last, and build the next version. Repeat until the owner is happy.

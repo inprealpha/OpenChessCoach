@@ -45,3 +45,4 @@ scripts/sandbox/
 .claude/skills/verify/
 .claude/skills/real-coach-check/
 .claude/skills/build-a-feature/
+.claude/skills/sandbox/

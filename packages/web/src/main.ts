@@ -1,7 +1,12 @@
 import { mount } from 'svelte';
 import './app.css';
+// PROTOTYPE: the phone density levels (Settings, Size) and the switch that applies them.
+import './density.css';
 import App from './App.svelte';
 import { api } from './lib/api.svelte.ts';
+import { applyDensity } from './lib/density.ts';
+
+applyDensity();
 
 void api.init();
 mount(App, { target: document.getElementById('app') as HTMLElement });

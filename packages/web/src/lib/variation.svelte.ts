@@ -3,7 +3,8 @@
 // line of its own that never changes the game's. It branches from one position of the game, and
 // Back to the game drops it. The browser's Engine grades each of its moves on screen, as it does in
 // play (ADR 0007); a Why Question about one sends only the moves, and the desktop's Engine works
-// out the Coach's facts.
+// out the Coach's facts. A variation started during an Engine Game waits for Analyze before it is
+// graded: until then the Engine's searches are the game's own.
 import type { GradedMove } from '@chess-coach/shared/analysis';
 import { outcomeOf, playUci, type PlayedMove } from '@chess-coach/shared/chess';
 import type { MoveGrade } from '@chess-coach/shared/grader';
@@ -34,6 +35,8 @@ export class Variation {
   readonly line = new Line();
   /** The browser Engine's Move Grade of each of the variation's moves: null where it can't have one (the Engine failed, or the game was over). */
   graded = $state<(GradedMove | null | undefined)[]>([]);
+  /** Whether the browser's Engine grades the variation's moves: from its first move, or only once `analyze` is called. */
+  analyzed = $state(true);
   /** Counts the variations started and dropped, so a Move Grade for one already gone is dropped too. */
   #runs = 0;
 
@@ -72,17 +75,19 @@ export class Variation {
   }
 
   /**
-   * Plays a move on the board. Away from a variation it starts one in the game's position `at`;
-   * in one, it plays from the position shown, stepping forward where the variation already has
-   * that move, as on Lichess, and otherwise replacing the variation's later moves (never the game's).
+   * Plays a move on the board. Away from a variation it starts one in the game's position `at`,
+   * graded from its first move unless `at.analyzeLater` keeps the grades for `analyze`; in one, it
+   * plays from the position shown, stepping forward where the variation already has that move, as
+   * on Lichess, and otherwise replacing the variation's later moves (never the game's).
    */
-  play(uci: string, at: { cursor: number; fen: string }): PlayedMove | undefined {
+  play(uci: string, at: { cursor: number; fen: string; analyzeLater?: boolean }): PlayedMove | undefined {
     if (this.from === null) {
       if (!playUci(at.fen, uci)) return undefined;
       this.#runs++;
       this.from = at.cursor;
       this.line.reset(at.fen);
       this.graded = [];
+      this.analyzed = !at.analyzeLater;
     } else if (this.line.moves[this.line.cursor]?.uci === uci) {
       this.line.forward();
       return this.line.lastMove;
@@ -91,8 +96,15 @@ export class Variation {
     const m = this.line.play(uci);
     if (!m) return undefined;
     this.graded = this.graded.slice(0, index);
-    this.#grade(index, m);
+    if (this.analyzed) this.#grade(index, m);
     return m;
+  }
+
+  /** Grades the variation's moves so far, and every move played on it from now on. */
+  analyze(): void {
+    if (this.from === null || this.analyzed) return;
+    this.analyzed = true;
+    this.line.moves.forEach((m, index) => this.#grade(index, m));
   }
 
   /** A Why Question about the position shown: the game's moves up to the branch, then the variation's, and the move that reached it. */
@@ -117,6 +129,7 @@ export class Variation {
     this.from = null;
     this.line.reset();
     this.graded = [];
+    this.analyzed = true;
   }
 
   #grade(index: number, m: PlayedMove): void {

@@ -3,7 +3,7 @@ import type { Page } from '@playwright/test';
 import { INITIAL_FEN, playUci, turnOf } from '../../packages/shared/src/chess.ts';
 import { winningChancesFor } from '../../packages/shared/src/winning-chances.ts';
 import { CoachClient } from '../../packages/backend/src/client.ts';
-import { coachIdle, connection, expect, fenOf, gameMenu, play, resign, square, test } from '../fixtures/app.ts';
+import { coachIdle, connection, expect, fenOf, gameMenu, play, resign, square, storedOnDevice, test } from '../fixtures/app.ts';
 
 const BOARD = 'Engine Game board';
 /** A Move Grade symbol on the board, named like "Mistake on g4". */
@@ -176,8 +176,9 @@ test('the Engine’s shown move does not stay on the board once the game ends', 
   await resign(paired);
   await expect(paired.getByRole('status', { name: 'Game status' })).toContainText('The Engine won by resignation.');
   await expect(board.getByRole('img', { name: /^Arrow / })).toHaveCount(0);
-  // The Coach said something in this game, so its panel stays to be read.
-  await expect(paired.getByLabel('Coach conversation')).toContainText('The Engine’s move:');
+  // Nothing the Coach said during play stays once the game is over: the card says how it went.
+  await expect(paired.getByRole('region', { name: 'Coach' })).toHaveCount(0);
+  await expect(paired.getByText('The Engine’s move:')).toHaveCount(0);
 });
 
 test('the game list and the Review name the Engine by the level the Player chose', async ({ paired, app }) => {
@@ -236,7 +237,7 @@ test('a game over on the board but not yet saved as over (the app closed in betw
   await putGameOnDevice(paired, app.url, 'black', ['f2f3', 'e7e5', 'g2g4', 'd8h4'], [undefined, undefined, undefined, 'Best']);
   const status = paired.getByRole('status', { name: 'Game status' });
   await expect(status).toContainText('You won by checkmate.');
-  await expect(tally(paired).first()).toHaveText('★ 1 Best');
+  await expect(status).toContainText('2 moves · no Mistakes');
   await expect(paired.getByRole('link', { name: 'Review this game' })).toBeVisible();
   await expect
     .poll(async () => (await app.rows<{ kind: string; result: string }>('games')).filter((g) => g.kind === 'engine').map((g) => g.result))
@@ -266,59 +267,17 @@ test('the move that ends the game gets its Move Grade too', async ({ paired, app
   await expect(paired.getByRole('status', { name: 'Game status' })).toContainText('You won by checkmate.');
   await expect(paired.getByRole('button', { name: 'Move 2… Qh4#, Best' })).toBeVisible();
   await expect(paired.getByRole('group', { name: BOARD }).getByRole('img', { name: 'Best on h4' })).toBeVisible();
-  // The end-of-game card counts only the Move Grades the game has: 1…e5 came in ungraded.
-  await expect(paired.getByRole('status', { name: 'Game status' })).toContainText('2 moves · You played Black · Engine: Beginner');
-  await expect(tally(paired)).toHaveText(['★ 1 Best', '✓ 0 Good', '?! 0 Inaccuracies', '? 0 Mistakes', '?? 0 Blunders']);
-  // The symbols are in the page, so every browser draws them, but hidden from screen readers: the words say the same.
-  await expect(tally(paired).locator('[aria-hidden="true"]')).toHaveText(['★', '✓', '?!', '?', '??']);
+  await expect(paired.getByRole('status', { name: 'Game status' })).toContainText('2 moves · no Mistakes');
 });
 
-/** The end-of-game card's count of the Player's Move Grades, one item per grade. */
-function tally(page: Page) {
-  return page.getByRole('list', { name: 'Your Move Grades in this game' }).getByRole('listitem');
-}
-
-/** Each tally item's contrast ratio (WCAG): its text against its pill, or against the card where the pill is clear. */
-function tallyContrast(page: Page): Promise<{ text: string; ratio: number }[]> {
-  return tally(page).evaluateAll((items) => {
-    const rgba = (css: string) => {
-      const [r = 0, g = 0, b = 0, a = 1] = (css.match(/[\d.]+/g) ?? []).map(Number);
-      return { rgb: [r, g, b], a };
-    };
-    const over = (top: number[], alpha: number, under: number[]) => top.map((v, i) => alpha * v + (1 - alpha) * under[i]!);
-    const luminance = (rgb: number[]) =>
-      rgb
-        .map((v) => (v / 255 <= 0.03928 ? v / 255 / 12.92 : ((v / 255 + 0.055) / 1.055) ** 2.4))
-        .reduce((sum, c, i) => sum + c * [0.2126, 0.7152, 0.0722][i]!, 0);
-    return items.map((li) => {
-      let behind = li.parentElement;
-      while (behind && rgba(getComputedStyle(behind).backgroundColor).a === 0) behind = behind.parentElement;
-      const card = rgba(getComputedStyle(behind ?? document.body).backgroundColor).rgb;
-      const style = getComputedStyle(li);
-      const pill = rgba(style.backgroundColor);
-      const text = rgba(style.color);
-      const opacity = Number(style.opacity);
-      const pillOnCard = over(pill.rgb, pill.a, card);
-      const bg = over(pillOnCard, opacity, card);
-      const fg = over(over(text.rgb, text.a, pillOnCard), opacity, card);
-      const [hi, lo] = [luminance(fg), luminance(bg)].sort((x, y) => y - x);
-      return { text: li.textContent?.trim() ?? '', ratio: Math.round(((hi! + 0.05) / (lo! + 0.05)) * 100) / 100 };
-    });
-  });
-}
-
-test('the end-of-game card’s counts read clearly in light and dark: zero counts too meet WCAG AA contrast', async ({ paired, app }) => {
-  await startGame(paired, app.url);
-  await moveAndWaitForReply(paired, 'e2e4', 2);
+test('the end-of-game card sums the game up in one line: the Move Grades that need a look, the worst first', async ({ paired, app }) => {
+  // Four of the Player's moves graded as given, one never graded (a reload came first), then resign.
+  const moves = ['g2g4', 'e7e5', 'f2f4', 'd7d5', 'a2a3', 'b8c6', 'h2h3', 'g8f6', 'b2b3', 'c8e6'];
+  await putGameOnDevice(paired, app.url, 'white', moves, ['Mistake', undefined, 'Blunder', undefined, undefined, undefined, 'Blunder', undefined, 'Inaccuracy']);
+  await expect(paired.getByRole('status', { name: 'Game status' })).toContainText('Your move');
   await resign(paired);
-  await expect(tally(paired)).toHaveCount(5);
-  await expect(tally(paired).filter({ hasText: /\b0\b/ })).toHaveCount(4);
-  for (const colorScheme of ['light', 'dark'] as const) {
-    await paired.emulateMedia({ colorScheme });
-    for (const { text, ratio } of await tallyContrast(paired)) {
-      expect.soft(ratio, `${colorScheme}: "${text}" against its background`).toBeGreaterThanOrEqual(4.5);
-    }
-  }
+  // Only the Move Grades the game has are counted (ADR 0002); nothing is judged anew.
+  await expect(paired.getByRole('status', { name: 'Game status' })).toHaveText('The Engine won by resignation. 5 moves · 2 Blunders, 1 Mistake, 1 Inaccuracy');
 });
 
 test('a finished game ends on one card: the result, how the Player’s moves were graded, Review this game and New game', async ({ paired, app }) => {
@@ -332,41 +291,61 @@ test('a finished game ends on one card: the result, how the Player’s moves wer
   const count = (g: string) => graded.filter((x) => x === g).length;
   await resign(paired);
   const status = paired.getByRole('status', { name: 'Game status' });
-  await expect(status).toContainText('The Engine won by resignation.');
-  await expect(status).toContainText('2 moves · You played White · Engine: Beginner');
+  // The result, then one line: the moves played and the Move Grades that need a look, as the move list shows them.
   const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
-  await expect(tally(paired)).toHaveText([
-    `★ ${count('Best')} Best`,
-    `✓ ${count('Good')} Good`,
-    `?! ${plural(count('Inaccuracy'), 'Inaccuracy', 'Inaccuracies')}`,
-    `? ${plural(count('Mistake'), 'Mistake', 'Mistakes')}`,
-    `?? ${plural(count('Blunder'), 'Blunder', 'Blunders')}`,
-  ]);
-  // One New game, on the card; the toolbar keeps the step buttons.
+  const needLook = (
+    [
+      ['Blunder', 'Blunders'],
+      ['Mistake', 'Mistakes'],
+      ['Inaccuracy', 'Inaccuracies'],
+    ] as const
+  )
+    .filter(([one]) => count(one))
+    .map(([one, many]) => plural(count(one), one, many));
+  await expect(status).toHaveText(`The Engine won by resignation. 2 moves · ${needLook.length ? needLook.join(', ') : 'no Mistakes'}`);
+  // One New game, on the card under Review this game; the thumb bar keeps the step buttons.
   const card = status.locator('xpath=..');
   await expect(paired.getByRole('button', { name: 'New game' })).toHaveCount(1);
   await expect(card.getByRole('button', { name: 'New game' })).toBeVisible();
   await expect(card.getByRole('link', { name: 'Review this game' })).toBeVisible();
+  const top = async (l: ReturnType<typeof card.getByRole>) => (await l.boundingBox())?.y ?? NaN;
+  const order = [await top(status.getByText('The Engine won by resignation.')), await top(status.getByText(/^2 moves · /)), await top(card.getByRole('link', { name: 'Review this game' }))];
+  expect(order).toEqual([...order].sort((a, b) => a - b));
   // The card's actions sit outside the status region: a screen reader reads the result and the
-  // tally once, and not the whole card again when the Review link arrives.
+  // summary once, and not the whole card again when the Review link arrives.
   await expect(status.getByRole('link')).toHaveCount(0);
   await expect(status.getByRole('button')).toHaveCount(0);
   await card.getByRole('link', { name: 'Review this game' }).click();
   await expect(paired.getByRole('button', { name: 'Start the Review' })).toBeVisible();
 });
 
-test('on a phone, the end-of-game card sits right under the board, Review this game in view', async ({ paired, app }) => {
-  await paired.setViewportSize({ width: 390, height: 844 });
-  await startGame(paired, app.url);
-  await moveAndWaitForReply(paired, 'e2e4', 2);
-  await resign(paired);
-  await expect(paired.getByRole('status', { name: 'Game status' })).toContainText('The Engine won by resignation.');
-  await expect(paired.getByRole('link', { name: 'Review this game' })).toBeInViewport();
-  await expect(tally(paired).last()).toBeInViewport();
-  const board = await paired.getByRole('group', { name: BOARD }).boundingBox();
-  const card = await paired.getByRole('status', { name: 'Game status' }).boundingBox();
-  expect(card && board && card.y > board.y + board.height).toBe(true);
-});
+// Safari's visible area on current iPhones: an iPhone 13 (390×664), 16 Pro (402×714), 16 Pro Max (440×790) and a taller 390×844.
+for (const [width, height] of [[390, 664], [402, 714], [440, 790], [390, 844]] as const) {
+  test(`on a phone at ${width}×${height}, the end-of-game card sits under the board, all of it in the first screen`, async ({ paired, app }) => {
+    await paired.setViewportSize({ width, height });
+    // Eleven moves in, so the move list under the card has rows to scroll to.
+    const moves = ['e2e4', 'e7e5', 'g1f3', 'b8c6', 'f1c4', 'f8c5', 'c2c3', 'g8f6', 'd2d3', 'd7d6', 'e1g1', 'e8g8', 'f1e1', 'a7a6', 'c4b3', 'c5a7', 'h2h3', 'h7h6', 'b1d2', 'f8e8', 'd2f1', 'c8e6'];
+    const grades = moves.map((_, i) => (i % 2 ? undefined : (['Best', 'Best', 'Good', 'Best', 'Good', 'Inaccuracy', 'Best', 'Good', 'Mistake', 'Good', 'Best'] as const)[i / 2]));
+    await putGameOnDevice(paired, app.url, 'white', moves, grades);
+    const status = paired.getByRole('status', { name: 'Game status' });
+    await expect(status).toContainText('Your move');
+    await resign(paired);
+    await expect(paired.getByRole('link', { name: 'Review this game' })).toBeVisible();
+    const card = status.locator('xpath=..');
+    for (const part of [
+      status.getByText('The Engine won by resignation.'),
+      status.getByText('11 moves · 1 Mistake, 1 Inaccuracy'),
+      card.getByRole('link', { name: 'Review this game' }),
+      card.getByRole('button', { name: 'New game' }),
+    ]) {
+      await expect(part).toBeInViewport({ ratio: 1 });
+    }
+    expect(await paired.evaluate(() => window.scrollY)).toBe(0);
+    const board = await paired.getByRole('group', { name: BOARD }).boundingBox();
+    const shown = await status.boundingBox();
+    expect(shown && board && shown.y > board.y + board.height).toBe(true);
+  });
+}
 
 test('a finished game still offers its Review after a reload, and its New game starts a fresh one', async ({ paired, app }) => {
   await startGame(paired, app.url);
@@ -389,7 +368,7 @@ test('a finished game still offers its Review after a reload, and its New game s
   await expect(paired.getByRole('group', { name: BOARD })).toHaveAttribute('data-fen', INITIAL_FEN);
   await expect(paired.getByRole('list', { name: 'Moves' }).getByRole('button')).toHaveCount(0);
   await expect(paired.getByRole('link', { name: 'Review this game' })).toHaveCount(0);
-  await expect(tally(paired)).toHaveCount(0);
+  await expect(paired.getByText(/^\d+ moves? · /)).toHaveCount(0);
 });
 
 test('a finished game deleted from the game list: Review this game says so and leads back to the menu', async ({ paired, app }) => {
@@ -440,20 +419,39 @@ test('a finished game’s board drops a piece picked up during the game, and a m
   await expect(paired.getByRole('group', { name: BOARD })).toHaveAttribute('data-fen', INITIAL_FEN);
 });
 
-test('a finished game steps through its moves, with the buttons or the arrow keys; a game in progress stays on the board', async ({ paired, app }) => {
+test('an Engine Game steps through its moves during play and once it is over, with the buttons or the arrow keys', async ({ paired, app }) => {
   await startGame(paired, app.url);
   await moveAndWaitForReply(paired, 'e2e4', 2);
   const live = await fenOf(paired, BOARD);
-  // While the game is on, the board always shows the position to play from.
-  await expect(paired.getByRole('button', { name: 'Previous move' })).toHaveCount(0);
+  const board = paired.getByRole('group', { name: BOARD });
+  const afterE4Now = playUci(INITIAL_FEN, 'e2e4')?.fenAfter as string;
+  // During play the steps show earlier positions; the game stays where it is.
   await paired.keyboard.press('ArrowLeft');
-  await paired.keyboard.press('Home');
-  await expect(paired.getByRole('group', { name: BOARD })).toHaveAttribute('data-fen', live);
+  await expect(board).toHaveAttribute('data-fen', afterE4Now);
+  await expect(awayBar(paired)).toContainText('Looking at move 1');
+  await paired.getByRole('button', { name: 'First position' }).click();
+  await expect(board).toHaveAttribute('data-fen', INITIAL_FEN);
+  // The game's own next move, played on an earlier position, steps to it: no line of the Player's own.
+  await play(paired, 'e2e4', BOARD);
+  await expect(board).toHaveAttribute('data-fen', afterE4Now);
+  await expect(awayBar(paired)).toContainText('Looking at move 1');
+  await paired.keyboard.press('End');
+  await expect(board).toHaveAttribute('data-fen', live);
+  await expect(awayBar(paired)).toHaveCount(0);
+  await expect(paired.getByRole('list', { name: 'Moves' }).getByRole('button')).toHaveCount(2);
+  expect(((await storedOnDevice(paired, 'engineGame')) as { moves: string[] }).moves).toHaveLength(2);
+  // Stepping back and on again leaves the game to carry on from its latest position.
+  await paired.getByRole('button', { name: 'Previous move' }).click();
+  await paired.getByRole('button', { name: 'Next move' }).click();
+  await expect(awayBar(paired)).toHaveCount(0);
+  await moveAndWaitForReply(paired, 'e4d5', 4);
+  const finalFen = await fenOf(paired, BOARD);
 
   await resign(paired);
   await expect(paired.getByRole('status', { name: 'Game status' })).toContainText('The Engine won by resignation.');
-  const afterE4 = playUci(INITIAL_FEN, 'e2e4')?.fenAfter as string;
-  await paired.keyboard.press('ArrowLeft');
+  const afterE4 = afterE4Now;
+  await paired.keyboard.press('Home');
+  await paired.keyboard.press('ArrowRight');
   await expect(paired.getByRole('group', { name: BOARD })).toHaveAttribute('data-fen', afterE4);
   // The Move Grade symbol follows the steps too: 1.e4 is the Engine's best in verify mode.
   await expect(paired.getByRole('group', { name: BOARD }).getByRole('img', { name: 'Best on e4' })).toBeVisible();
@@ -461,9 +459,192 @@ test('a finished game steps through its moves, with the buttons or the arrow key
   await expect(paired.getByRole('group', { name: BOARD })).toHaveAttribute('data-fen', INITIAL_FEN);
   await expect(paired.getByRole('group', { name: BOARD }).getByRole('img', { name: GRADE_SYMBOL })).toHaveCount(0);
   await paired.getByRole('button', { name: 'Last position' }).click();
-  await expect(paired.getByRole('group', { name: BOARD })).toHaveAttribute('data-fen', live);
+  await expect(paired.getByRole('group', { name: BOARD })).toHaveAttribute('data-fen', finalFen);
   await paired.getByRole('button', { name: /^Move 1\. e4/ }).click();
   await expect(paired.getByRole('group', { name: BOARD })).toHaveAttribute('data-fen', afterE4);
+});
+
+test('the arrow keys leave the board alone while the Game options menu is open', async ({ paired, app }) => {
+  // Found by the break-it pass: ← with the menu open stepped the board back behind it.
+  await resumeGame(paired, app.url, 'white', ['e2e4', 'e7e5', 'g1f3', 'b8c6']);
+  const live = await fenOf(paired, BOARD);
+  await paired.getByRole('button', { name: 'Game options' }).click();
+  await expect(paired.getByRole('menu', { name: 'Game options' })).toBeVisible();
+  for (const key of ['ArrowLeft', 'Home', 'ArrowUp']) await paired.keyboard.press(key);
+  await expect(paired.getByRole('menu', { name: 'Game options' })).toBeVisible();
+  await expect(paired.getByRole('group', { name: BOARD })).toHaveAttribute('data-fen', live);
+  await expect(paired.getByRole('group', { name: 'Away from the game' })).toHaveCount(0);
+  // Closed, the keys step again.
+  await paired.keyboard.press('Escape');
+  await paired.keyboard.press('ArrowLeft');
+  await expect(paired.getByRole('group', { name: 'Away from the game' })).toContainText('Looking at move 2');
+});
+
+/** The bar at the top of the panel while the board is away from the game's latest position. */
+function awayBar(page: Page) {
+  return page.getByRole('group', { name: 'Away from the game' });
+}
+
+/**
+ * Holds the browser's Engine: while held, the commands to its Worker wait, and `release` sends them
+ * in order. A journey can then look back or try a line while the Engine is still to reply.
+ */
+async function holdBrowserEngine(page: Page): Promise<{ release: () => Promise<void> }> {
+  await page.evaluate(() => {
+    const w = window as unknown as { engineHeld: [Worker, unknown[]][] | null };
+    w.engineHeld = [];
+    const post = Worker.prototype.postMessage as (this: Worker, ...args: unknown[]) => void;
+    Worker.prototype.postMessage = function (this: Worker, ...args: unknown[]) {
+      if (w.engineHeld) w.engineHeld.push([this, args]);
+      else post.apply(this, args);
+    } as Worker['postMessage'];
+    (window as unknown as { releaseEngine: () => void }).releaseEngine = () => {
+      const held = w.engineHeld ?? [];
+      w.engineHeld = null;
+      for (const [worker, args] of held) post.apply(worker, args);
+    };
+  });
+  return { release: () => page.evaluate(() => (window as unknown as { releaseEngine: () => void }).releaseEngine()) };
+}
+
+/** The position after the given moves from the start. */
+function fenAfter(moves: string[]): string {
+  return moves.reduce((fen, uci) => playUci(fen, uci)?.fenAfter ?? fen, INITIAL_FEN);
+}
+
+/** Records each position the browser Engine is asked to search, from the commands sent to its Worker. */
+async function recordSearches(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const searched: string[] = [];
+    (window as unknown as { searched: string[] }).searched = searched;
+    const post = Worker.prototype.postMessage as (this: Worker, ...args: unknown[]) => void;
+    Worker.prototype.postMessage = function (this: Worker, ...args: unknown[]) {
+      const [command] = args;
+      if (typeof command === 'string' && command.startsWith('position fen ')) searched.push(command.slice('position fen '.length));
+      post.apply(this, args);
+    } as Worker['postMessage'];
+  });
+}
+
+/** The positions searched since recording began, in order. */
+async function searches(page: Page): Promise<string[]> {
+  return page.evaluate(() => [...(window as unknown as { searched: string[] }).searched]);
+}
+
+const ITALIAN = ['e2e4', 'e7e5', 'g1f3', 'b8c6'];
+
+test('if the Engine moves while the Player looks back, the board stays put and the bar says what it played', async ({ paired, app }) => {
+  await resumeGame(paired, app.url, 'white', ITALIAN);
+  await paired.getByRole('button', { name: 'Threat' }).click();
+  const engine = await holdBrowserEngine(paired);
+  await play(paired, 'f1c4', BOARD);
+  await expect(paired.getByRole('status', { name: 'Game status' })).toContainText('The Engine is thinking');
+  // Back to the position after 1… e5, while the Engine is still to reply to 3. Bc4.
+  for (let i = 0; i < 3; i++) await paired.keyboard.press('ArrowLeft');
+  const looked = fenAfter(ITALIAN.slice(0, 2));
+  const board = paired.getByRole('group', { name: BOARD });
+  await expect(board).toHaveAttribute('data-fen', looked);
+  await expect(awayBar(paired)).toHaveText(/^Looking at move 1\s*Back to the game$/);
+  await engine.release();
+  await expect(paired.getByRole('button', { name: /^Move 3… / })).toBeVisible();
+  await expect(paired.getByRole('status', { name: 'Game status' })).toContainText('Your move');
+  // The board stays where the Player is looking; the bar says what the Engine played.
+  await expect(board).toHaveAttribute('data-fen', looked);
+  const reply = ((await storedOnDevice(paired, 'engineGame')) as { moves: string[] }).moves;
+  expect(reply.slice(0, 5)).toEqual([...ITALIAN, 'f1c4']);
+  const san = playUci(fenAfter(reply.slice(0, 5)), reply[5] as string)?.san;
+  await expect(awayBar(paired)).toContainText(`Looking at move 1 · The Engine has played 3… ${san}`);
+  // Away from the position to play from: no Hint, no Show threat and no arrows.
+  await expect(paired.getByRole('button', { name: 'Hint' })).toHaveCount(0);
+  await expect(paired.getByRole('button', { name: 'Threat' })).toHaveCount(0);
+  await expect(board.getByRole('img', { name: /^(Threat: |Arrow |Engine’s best)/ })).toHaveCount(0);
+  // On a phone the bar keeps to one row: which move it is, and the way back.
+  await paired.setViewportSize({ width: 390, height: 664 });
+  await expect(awayBar(paired).getByText('Looking at move 1')).toBeInViewport({ ratio: 1 });
+  await expect(awayBar(paired).getByRole('button', { name: 'Back to the game' })).toBeInViewport({ ratio: 1 });
+  await expect(awayBar(paired).getByText(/The Engine has played/)).toBeHidden();
+  await paired.setViewportSize({ width: 1200, height: 900 });
+
+  await awayBar(paired).getByRole('button', { name: 'Back to the game' }).click();
+  await expect(board).toHaveAttribute('data-fen', fenAfter(reply));
+  await expect(awayBar(paired)).toHaveCount(0);
+  await expect(paired.getByRole('button', { name: 'Hint' })).toBeVisible();
+  await expect(board.getByRole('img', { name: /^Threat: / })).toHaveCount(1);
+});
+
+test('a move on an earlier position during play starts the Player’s own line: the game is unchanged and the line shows no Move Grades or Winning Chances', async ({ paired, app }) => {
+  await resumeGame(paired, app.url, 'white', ITALIAN);
+  await recordSearches(paired);
+  const engine = await holdBrowserEngine(paired);
+  await play(paired, 'f1c4', BOARD);
+  for (let i = 0; i < 3; i++) await paired.keyboard.press('ArrowLeft');
+  // 2. d4 exd4 instead of the game's 2. Nf3 Nc6, while the Engine is still to reply to 3. Bc4.
+  await play(paired, 'd2d4', BOARD);
+  await play(paired, 'e5d4', BOARD);
+  const board = paired.getByRole('group', { name: BOARD });
+  await expect(board).toHaveAttribute('data-fen', fenAfter(['e2e4', 'e7e5', 'd2d4', 'e5d4']));
+  await expect(awayBar(paired)).toContainText('Your own line from move 2');
+  await engine.release();
+  // The game's Engine still replies, and the board stays on the Player's line.
+  await expect(paired.getByRole('button', { name: /^Move 3… / })).toBeVisible();
+  await expect(paired.getByRole('status', { name: 'Game status' })).toContainText('Your move');
+  await expect(board).toHaveAttribute('data-fen', fenAfter(['e2e4', 'e7e5', 'd2d4', 'e5d4']));
+  // No Move Grades and no Winning Chances on the line until the Player asks for them.
+  const variation = paired.getByRole('list', { name: /^Variation from / });
+  await expect(variation.getByRole('button')).toHaveCount(2);
+  await expect(variation.getByRole('button', { name: 'Variation move 2. d4', exact: true })).toBeVisible();
+  await expect(variation.getByRole('button', { name: 'Variation move 2… exd4', exact: true })).toBeVisible();
+  await expect(board.getByRole('img', { name: GRADE_SYMBOL })).toHaveCount(0);
+  await expect(paired.getByRole('meter', { name: /^Winning Chances bar/ })).toHaveAccessibleName('Winning Chances bar: press Analyze to see them');
+  await expect(paired.getByRole('meter', { name: /^Winning Chances bar/ }).getByTestId('bar-percent')).toHaveCount(0);
+  // The browser's Engine searched none of the line's positions, and the Coach was never called.
+  const lineFens = [fenAfter(['e2e4', 'e7e5', 'd2d4']), fenAfter(['e2e4', 'e7e5', 'd2d4', 'e5d4'])];
+  expect((await searches(paired)).filter((f) => lineFens.includes(f))).toEqual([]);
+  expect(await app.rows('coach_calls')).toHaveLength(0);
+  // The game and its saved record are unchanged: the Player's moves are not in it.
+  const saved = (await storedOnDevice(paired, 'engineGame')) as { moves: string[]; grades: (string | null)[] };
+  expect(saved.moves).toHaveLength(6);
+  expect(saved.moves.slice(0, 5)).toEqual([...ITALIAN, 'f1c4']);
+  await expect(paired.getByRole('list', { name: 'Moves' }).getByRole('button', { name: /^Move / })).toHaveCount(6);
+
+  await awayBar(paired).getByRole('button', { name: 'Back to the game' }).click();
+  await expect(board).toHaveAttribute('data-fen', fenAfter(saved.moves));
+  await expect(variation).toHaveCount(0);
+  // The game carries on from its latest position.
+  await moveAndWaitForReply(paired, 'e1g1', 8);
+});
+
+test('Analyze on the Player’s own line shows its Move Grades, the Engine’s best move as an arrow, and makes one Coach call', async ({ paired, app }) => {
+  await resumeGame(paired, app.url, 'white', ITALIAN);
+  await paired.keyboard.press('ArrowLeft');
+  await paired.keyboard.press('ArrowLeft');
+  // 2. d4 exd4 instead of the game's 2. Nf3 Nc6.
+  await play(paired, 'd2d4', BOARD);
+  await play(paired, 'e5d4', BOARD);
+  const board = paired.getByRole('group', { name: BOARD });
+  const variation = paired.getByRole('list', { name: /^Variation from / });
+  await awayBar(paired).getByRole('button', { name: 'Analyze' }).click();
+  await coachIdle(paired);
+  // The browser Engine's Move Grades on the line, the symbol of the move shown on its square.
+  await expect(variation.getByRole('button', { name: /^Variation move 2\. d4, (Best|Good|Inaccuracy|Mistake|Blunder)$/ })).toBeVisible();
+  await expect(variation.getByRole('button', { name: /^Variation move 2… exd4, (Best|Good|Inaccuracy|Mistake|Blunder)$/ })).toBeVisible();
+  // The Engine's best move here in green, with the board's legend, and the Winning Chances back.
+  await expect(board.getByRole('img', { name: /^Engine’s best: / })).toHaveCount(1);
+  await expect(paired.getByRole('meter', { name: /^Winning Chances bar/ })).toHaveAccessibleName(/^Winning Chances bar: White’s winning chances: \d+%$/);
+  // One Coach call, a Why Question about the line's move shown, with the line's moves.
+  const calls = await app.rows<{ job: string; brief: string }>('coach_calls');
+  expect(calls.map((c) => c.job)).toEqual(['why']);
+  expect(calls[0]?.brief).toContain('exd4');
+  await expect(paired.getByLabel('Coach conversation')).toContainText('Why exd4?');
+  // Analyze is done for this position: it asks no more, and moving on the line never calls the Coach.
+  await expect(awayBar(paired).getByRole('button', { name: 'Analyze' })).toHaveCount(0);
+  await play(paired, 'd1d4', BOARD);
+  await expect(variation.getByRole('button', { name: /^Variation move 3\. Qxd4, (Best|Good|Inaccuracy|Mistake|Blunder)$/ })).toBeVisible();
+  expect(await app.rows('coach_calls')).toHaveLength(1);
+  // Back to the game puts the Coach's word on the line away with it.
+  await awayBar(paired).getByRole('button', { name: 'Back to the game' }).click();
+  await expect(board.getByRole('img', { name: /^Engine’s best: / })).toHaveCount(0);
+  await expect(paired.getByLabel('Coach conversation').getByText('Why exd4?')).toBeHidden();
 });
 
 test.describe('Live Coaching', () => {
@@ -487,6 +668,24 @@ test.describe('Live Coaching', () => {
     await expect(paired.getByRole('group', { name: BOARD }).getByRole('img', { name: 'Best on e4' })).toBeVisible();
     calls = await app.rows('coach_calls');
     expect(calls).toHaveLength(1);
+  });
+
+  test('once the game ends, nothing the Coach said during play is left in the panel', async ({ paired, app }) => {
+    await paired.setViewportSize({ width: 402, height: 714 });
+    await startGame(paired, app.url);
+    await play(paired, 'g2g4', BOARD);
+    await coachIdle(paired);
+    await paired.getByRole('button', { name: 'Take the move back' }).click();
+    await expect(paired.getByLabel('Coach conversation')).toContainText('Move taken back. Have another look.');
+    await resign(paired);
+    await expect(paired.getByRole('status', { name: 'Game status' })).toContainText('The Engine won by resignation.');
+    // The card says how the game went, and the thumb bar keeps only the steps.
+    await expect(paired.getByRole('region', { name: 'Coach' })).toHaveCount(0);
+    await expect(paired.getByText(/Move taken back|g4 is graded/)).toHaveCount(0);
+    await expect(paired.getByRole('link', { name: 'Review this game' })).toBeInViewport({ ratio: 1 });
+    await paired.reload();
+    await expect(paired.getByRole('status', { name: 'Game status' })).toContainText('The Engine won by resignation.');
+    await expect(paired.getByText(/Move taken back|g4 is graded/)).toHaveCount(0);
   });
 
   // Safari's visible area on current iPhones too: a short sheet must still show the choice, not the move list under it.

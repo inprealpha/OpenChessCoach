@@ -133,11 +133,12 @@ journeys hold the browser's Engine (`holdBrowserEngine` in `engine-game.spec.ts`
   holds its six moves. After `Analyze`: both moves graded, one `Engine’s best: …` arrow, the
   bar's percentage, and `coach_calls` holds exactly one `why` call; 3. Qxd4 afterwards is graded
   with no new call (`engine-game.spec.ts`).
-- After resigning at move 11 the card reads "The Engine won by resignation." and "11 moves · 1
-  Mistake, 1 Inaccuracy", with `Review this game` and `New game` fully on screen at 390×664,
-  402×714, 440×790 and 390×844, also for "The Engine won by checkmate." and "Draw by threefold
-  repetition.", in a wide font and with both lines wrapped; after a Live Coaching comment and a take-back, nothing the Coach
-  said is left once the game ends, after a reload too (`engine-game.spec.ts`).
+- After resigning at move 11 the card reads "The Engine won by resignation." and "11 moves · 2
+  Blunders, 2 Mistakes, 2 Inaccuracies", with `Review this game` and `New game` fully on screen at
+  390×664, 402×714, 440×790 and 390×844; so do "The Engine won by checkmate." and "Draw by
+  threefold repetition.", in the app's font, in DejaVu Sans and with both lines wrapped. After a
+  Live Coaching comment and a take-back, nothing the Coach said is left once the game ends, after a
+  reload too (`engine-game.spec.ts`).
 - With Threat on, 1.e4 (the Engine answers 1...d5) shows `Threat: Black threatens dxe4 (d5 to e4)`,
   and 2.exd5 Nf6 shows `Threat: Black threatens Nxd5 (f6 to d5)` (`engine-game.spec.ts`).
 

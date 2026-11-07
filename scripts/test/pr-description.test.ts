@@ -229,10 +229,21 @@ describe('the merge decision', () => {
     expect(decide({ labels: ['touches-coach'] }).mayMerge).toBe(true);
   });
 
-  it('needs every required check to pass on the head commit', () => {
-    expect(decide({ checks: { ...ready.checks, 'Player journeys': [null] } }).problems).toEqual(["Player journeys hasn't passed on this commit."]);
-    expect(decide({ checks: { ...ready.checks, Checks: ['success', 'failure'] } }).problems).toEqual(["Checks hasn't passed on this commit."]);
+  it('needs every required check\'s newest run to pass on the head commit', () => {
+    expect(decide({ checks: { ...ready.checks, 'Player journeys': [null, 'success'] } }).problems).toEqual(["Player journeys hasn't passed on this commit."]);
+    expect(decide({ checks: { ...ready.checks, Checks: ['failure', 'success'] } }).problems).toEqual(["Checks hasn't passed on this commit."]);
     expect(decide({ checks: { ...ready.checks, Checks: ['skipped'] } }).problems).toEqual(["Checks hasn't passed on this commit."]);
+    expect(decide({ checks: { ...ready.checks, Checks: ['cancelled'] } }).problems).toEqual(["Checks hasn't passed on this commit."]);
+  });
+
+  it('ignores the older runs a push cancelled or a rerun replaced', () => {
+    // The runs PR #64's head commit had when it merged, newest first.
+    const checks = {
+      Checks: ['success', 'cancelled', 'skipped'],
+      'Player journeys': ['success', 'skipped', 'cancelled'],
+      'Label for review': ['success', 'success', 'cancelled', 'cancelled'],
+    };
+    expect(decide({ checks }).mayMerge).toBe(true);
     expect(decide({ checks: { Checks: ['success'], 'Player journeys': ['success'] } }).problems).toEqual(["Label for review hasn't passed on this commit."]);
   });
 

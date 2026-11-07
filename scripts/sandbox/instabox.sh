@@ -12,10 +12,11 @@
 # down stops the preview, cleans the box (clean.sh) and unpublishes the port; with --if-ref, only when
 # the box is showing that branch. It leaves the box running for whatever else uses it (InstaBox pauses
 # it after 30 idle minutes); --pause pauses it, --delete deletes it.
-# The box is shared: the free plan has one box in all, and the owner uses it for other work too. So
-# up clears the box's Secrets (PR code must never reach the owner's credentials) and says which.
+# The box may be shared with other work (InstaBox's free plan has one box in all): pick it with --box
+# or INSTABOX_PREVIEW_BOX (default occ-preview). up clears the box's Secrets, since PR code must never
+# reach the owner's credentials, and says which it removed.
 
-box=${INSTABOX_PREVIEW_BOX:-my-instabox}
+box=${INSTABOX_PREVIEW_BOX:-occ-preview}
 repo=${OCC_REPO_URL:-https://github.com/inprealpha/OpenChessCoach.git}
 port=8790
 seed=default

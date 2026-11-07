@@ -8,6 +8,29 @@ description: Set up a sandbox (Claude Code cloud, InstaBox, a Mac or any other m
 Two layers. Layer 1 is the same on every machine and lives in `scripts/sandbox/`. Layer 2 is one
 small script per provider that starts a machine, runs layer 1 on it and gives it a link.
 
+## Off by default; each owner turns it on outside the repository
+
+The files here are neutral: nothing in them names anyone's provider, box or account, and previews
+are off. Whoever runs the repository turns them on in places a fork or a clone doesn't copy:
+
+| Where | What it holds |
+| --- | --- |
+| The repository's GitHub settings (Actions variables and secrets) | `PREVIEW_PROVIDER` (`instabox`), `PREVIEW_BOX` (the box's name, default `occ-preview`), and the provider's and Telegram's secrets: the preview workflow reads them |
+| The owner's Claude Code cloud environment (its setup script) | Running `prepare.sh`, and the owner's own instructions for their sessions, such as a `~/.claude/CLAUDE.md` saying they want previews |
+| The owner's desktop | `INSTABOX_PREVIEW_BOX` and `telegram-notify`, for running the scripts by hand |
+
+A fork or a clone without these gets the plain behaviour: no previews, and agents send screenshots.
+
+## When the owner asks to see a change
+
+- **If the owner's own instructions say previews are set up for them** (their `~/.claude/CLAUDE.md`
+  or what they tell you): push your branch and open a draft PR with a line `Preview: on` in its
+  description (and `Preview seed: NAME` if another seed shows the change better). The preview
+  workflow sends them the link by Telegram, usually within a few minutes. Tell them it is on its
+  way. Never ask for, print or forward the pairing code.
+- **Otherwise:** take before and after screenshots, desktop and phone (`scripts/before-after.ts`),
+  and show them those. Don't open a PR just to ask for a preview nobody has set up.
+
 ## Layer 1: any machine
 
 - **Prepare:** `bash scripts/sandbox/prepare.sh` installs the dependencies and the Chromium build the
@@ -38,7 +61,8 @@ small script per provider that starts a machine, runs layer 1 on it and gives it
   end up in snapshots.
 - **Working means doctor passes.** `preview.sh` reports `ok: false` when any doctor check fails, with
   the failed checks' names.
-- **Previews run only branches of this repository** (they clone from GitHub), never code from a fork.
+- **Previews run only branches of the repository the workflow runs in** (they clone from GitHub),
+  never a PR from a fork.
 
 ## Layer 2: providers
 
@@ -53,16 +77,16 @@ bash scripts/sandbox/instabox.sh down [--box NAME] [--delete]
 ```
 
 - `up` previews a branch as it is on GitHub (the current branch by default, so push first). It
-  creates the box `my-instabox` or wakes it, checks the branch out, runs `preview.sh`, publishes port
+  creates the box (`--box`, else `INSTABOX_PREVIEW_BOX`, else `occ-preview`) or wakes it, checks the branch out, runs `preview.sh`, publishes port
   8790 and prints the link. `--notify` sends the link with `telegram-notify`. Its last line on stdout
   is JSON with `link`, which holds the pairing code.
 - Running `up` again on the same box replaces the preview and keeps the same link host.
 - `down` stops the preview, cleans the box and unpublishes the port; `--if-ref BRANCH` does it only
-  when the box is showing that branch. It leaves the box on, because the owner uses `my-instabox` for
-  other work too; `--pause` pauses it and `--delete` deletes it.
-- The box is shared, so `up` removes any Secrets selected on it and says which: a preview runs PR
-  code, which must never reach the owner's credentials. Select them again afterwards when needed. `status` shows the branch it is showing
+  when the box is showing that branch. It leaves the box on, since the owner may use it for other
+  work; `--pause` pauses it and `--delete` deletes it. `status` shows the branch the box is showing
   and how full its disk is.
+- `up` removes any Secrets selected on the box and says which: a preview runs PR code, which must
+  never reach the owner's credentials. Select them again afterwards when the box needs them.
 - `--notify` uses `telegram-notify` when it is installed, else `TELEGRAM_BOT_TOKEN` and
   `TELEGRAM_CHAT_ID`. In GitHub Actions (`GITHUB_ACTIONS=true`) the link is never printed, and the
   JSON line has no `link`: the logs are public.
@@ -73,12 +97,15 @@ bash scripts/sandbox/instabox.sh down [--box NAME] [--delete]
 
 ### The preview workflow
 
-`.github/workflows/preview.yml` runs `instabox.sh up --notify` for every ready PR, every draft with
-the `preview` label, and every push to those; `down --if-ref` when the PR closes. A line
+`.github/workflows/preview.yml` runs only in a repository whose settings say
+`PREVIEW_PROVIDER=instabox`, on the box `PREVIEW_BOX`, cloning that repository. It runs
+`instabox.sh up --notify` for every ready PR, every draft with the `preview` label or a line
+`Preview: on` in its description, and every push to those; `down --if-ref` when the PR closes. A line
 `Preview seed: empty` in the PR description picks the seed. It keeps one comment on the PR with the
 commit, the seed and whether doctor passed, never the link. It needs three repository secrets:
 `INSTABOX_API_KEY` (an InstaBox API key with the machine scopes), `TELEGRAM_BOT_TOKEN` and
-`TELEGRAM_CHAT_ID`; without them it skips with a notice. It runs the base branch's scripts
+`TELEGRAM_CHAT_ID`; without them it skips with a notice. Another provider would add its own value
+of `PREVIEW_PROVIDER`, with its adapter script and secrets. It runs the base branch's scripts
 (`pull_request_target`) and never previews a fork. To preview any branch by hand:
 `gh workflow run preview.yml -f ref=BRANCH [-f seed=empty]`.
 

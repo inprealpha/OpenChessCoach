@@ -1,8 +1,13 @@
-# Previews (.claude/skills/sandbox/SKILL.md): runs a PR's branch on the owner's InstaBox box in verify
-# mode and sends the owner the link, with the pairing code, by Telegram.
-#   - A PR gets a preview when it is opened ready, marked ready for review, or labelled "preview" as a
-#     draft, and again on every push after that. It comes down, and the box is cleaned, when the PR
-#     closes. A line "Preview seed: empty" in the description picks verify mode's seed.
+# Previews (.claude/skills/sandbox/SKILL.md): runs a PR's branch on a sandbox in verify mode and sends
+# the repository's owner the link, with the pairing code, by Telegram.
+#   - Off unless the repository turns it on: its settings (Settings > Secrets and variables > Actions >
+#     Variables), not its files, say PREVIEW_PROVIDER=instabox and, optionally, PREVIEW_BOX (the box's
+#     name, default occ-preview). Forks don't get a repository's variables or secrets, so a fork or a
+#     clone runs nothing until its owner sets up a provider of their own.
+#   - A PR gets a preview when it is opened ready, marked ready for review, labelled "preview" as a
+#     draft, or opened with a line "Preview: on" in its description, and again on every push after
+#     that. It comes down, and the box is cleaned, when the PR closes. A line "Preview seed: empty" in
+#     the description picks verify mode's seed.
 #   - Verify mode's fake Coach answers from templates and never calls Claude, and the box gets no
 #     Secrets, so a preview spends none of the owner's Claude usage.
 #   - Every preview cleans the box first (scripts/sandbox/clean.sh), so its 20 GB disk doesn't fill up.
@@ -40,14 +45,18 @@ concurrency:
 jobs:
   preview:
     name: Preview
-    # Closing always takes the preview down. Otherwise: ready PRs, and drafts with the "preview" label;
-    # a label event counts only for that label (pr-labels.yml adds others all the time).
+    # Only where the repository's settings turn previews on (PREVIEW_PROVIDER). Closing always takes the
+    # preview down. Otherwise: ready PRs, and drafts with the "preview" label or "Preview: on"; a label
+    # event counts only for that label (pr-labels.yml adds others all the time).
     if: >-
-      github.event_name == 'workflow_dispatch' ||
-      (github.event.pull_request.head.repo.full_name == github.repository &&
-       (github.event.action == 'closed' ||
-        ((!github.event.pull_request.draft || contains(github.event.pull_request.labels.*.name, 'preview')) &&
-         (github.event.action != 'labeled' || github.event.label.name == 'preview'))))
+      vars.PREVIEW_PROVIDER == 'instabox' &&
+      (github.event_name == 'workflow_dispatch' ||
+       (github.event.pull_request.head.repo.full_name == github.repository &&
+        (github.event.action == 'closed' ||
+         ((!github.event.pull_request.draft ||
+           contains(github.event.pull_request.labels.*.name, 'preview') ||
+           contains(github.event.pull_request.body, 'Preview: on')) &&
+          (github.event.action != 'labeled' || github.event.label.name == 'preview')))))
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -57,6 +66,9 @@ jobs:
       INSTABOX_API_KEY: ${{ secrets.INSTABOX_API_KEY }}
       INSTABOX_NO_UPDATE_CHECK: '1'
       INSTABOX_NO_TELEMETRY: '1'
+      # The repository's own settings: its box, and its own address, so a fork previews its branches.
+      INSTABOX_PREVIEW_BOX: ${{ vars.PREVIEW_BOX || 'occ-preview' }}
+      OCC_REPO_URL: ${{ github.server_url }}/${{ github.repository }}.git
       TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
       ACTION: ${{ github.event.action || 'dispatch' }}
@@ -79,7 +91,7 @@ jobs:
             [ -n "${!name}" ] || missing="$missing $name"
           done
           if [ -n "$missing" ]; then
-            echo "::notice::No preview: the repository is missing the secrets:$missing (see .claude/skills/sandbox/SKILL.md)"
+            echo "::notice::No preview: PREVIEW_PROVIDER is instabox, but the repository is missing the secrets:$missing (see .claude/skills/sandbox/SKILL.md)"
             echo "ok=false" >> "$GITHUB_OUTPUT"
           else
             echo "ok=true" >> "$GITHUB_OUTPUT"

@@ -19,7 +19,7 @@
    "title": "Two pawns up, and careful",
    "fen": "7k/8/6KP/8/5P2/8/8/8 w - - 5 66",
    "side": "white",
-   "keyIdea": "A king stuck in a corner can run out of moves: before each pawn push, check that it still has a square, and give it one if not.",
+   "keyIdea": "Pawns can give stalemate too: when a pawn push would take a cornered king's last square, move your own king first to give it room.",
    "text": "From a game played on Lichess. You are White, two pawns up, and Black's king is shut in the corner on h8. Your king on g6 covers g7 and h7, so Black's king has very few squares. A careless pawn move can take away its last one.",
    "credit": {
     "source": "Lichess games database, game e5ip4fyf",
@@ -102,7 +102,7 @@
       "club": []
      },
      "notes": {
-      "text": "Black's king went back to h8. In the game White played 68.f7 here, and 68.h7 would have been the same: each takes away g8, Black's last free square, and Black has no legal move. That was stalemate, and the game was drawn. 68.Kf5 steps away instead and gives Black's king g8 and h7 back, so Black has to move, and your pawns can go forward. Any king move wins here; only the two pawn moves throw the win away."
+      "text": "Black's king went back to h8. In the game White played 68.f7 here, and 68.h7 would have been the same: each takes away g8, Black's last free square, and Black has no legal move. That was stalemate, and the game was drawn. 68.Kf5 steps away instead and gives Black's king g8 and h7 back, so Black has to move, and your pawns can go forward."
      }
     }
    ]

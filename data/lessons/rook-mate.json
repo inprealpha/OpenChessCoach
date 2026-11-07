@@ -353,7 +353,7 @@
    "title": "Mate, not stalemate",
    "fen": "8/5K1k/5R2/8/8/8/8/8 w - - 62 97",
    "side": "white",
-   "keyIdea": "Before each move against a lone king, make sure it will still have a square to go to, unless your move is checkmate.",
+   "keyIdea": "In the corner, a guarded rook right next to the lone king can take its last square without giving check: give the mate from further away.",
    "text": "From a game played on Lichess. You are White. Black's king is shut in on the h-file, and your king on f7 keeps it off the g-file. You can mate in two moves, but there is a trap on the way: on the last move, the move that looks strongest takes away Black's last square without giving check.",
    "credit": {
     "source": "Lichess games database, game 4l6d3cb8",
@@ -380,7 +380,7 @@
       "club": []
      },
      "notes": {
-      "text": "97.Rg6 puts the rook right next to Black's king, on a square your king guards, and takes h6 away. Black's king has one square left, h8, so it is not stalemate. The rook could go to a6, b6, c6, d6 or e6 just as well."
+      "text": "97.Rg6 is a waiting move. Black's king already had only h8 to go to, and the rook on g6, guarded by your king, still keeps it off the sixth rank. Now Black has to move, and h8 is its only square, so it is not stalemate."
      }
     },
     {

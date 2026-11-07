@@ -558,11 +558,12 @@
   "track": "endgames",
   "level": "intermediate",
   "side": "white",
-  "goal": "You can make a passed pawn from a pawn majority, use an outside or a protected passed pawn, stop an enemy passed pawn, and count the square of a pawn to see who wins a race.",
+  "goal": "You can make a passed pawn from a pawn majority, use an outside or a protected passed pawn, and stop an enemy passed pawn.",
   "priorKnowledge": [
+   "pawn-promotion",
    "king-and-pawn"
   ],
-  "decisions": 20
+  "decisions": 15
  },
  {
   "id": "weak-pawns",

@@ -219,14 +219,13 @@ test('a Lesson resumed at its last decision sums up the one decision played', as
 
 // The Endgames parts #35 added or replaced, each resumed at its first decision and played through:
 // stalemate and the kings face to face in Rook mate, a pawn stalemate in Draws, the rook pawn in
-// King and pawn endgames, and a protected passed pawn and the square of the pawn in Passed pawns.
+// King and pawn endgames, and a protected passed pawn in Passed pawns.
 for (const [id, title] of [
   ['rook-mate', 'Mate, not stalemate'],
   ['rook-mate', 'Check when the kings face each other'],
   ['draws', 'Two pawns up, and careful'],
   ['king-and-pawn', 'A pawn on the edge'],
   ['passed-pawns', 'A pawn that guards a pawn'],
-  ['passed-pawns', 'Two passed pawns, two squares'],
 ] as const) {
   test(`${id}: the part "${title}" plays through, every move Best or Good, and ends on its key idea`, async ({ paired, app }) => {
     const lesson = readLesson(id);

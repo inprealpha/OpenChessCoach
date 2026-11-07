@@ -4,8 +4,9 @@
  "kind": "endgame",
  "track": "endgames",
  "level": "intermediate",
- "goal": "You can make a passed pawn from a pawn majority, use an outside or a protected passed pawn, stop an enemy passed pawn, and count the square of a pawn to see who wins a race.",
+ "goal": "You can make a passed pawn from a pawn majority, use an outside or a protected passed pawn, and stop an enemy passed pawn.",
  "priorKnowledge": [
+  "pawn-promotion",
   "king-and-pawn"
  ],
  "side": "white",
@@ -14,7 +15,7 @@
   "advancedPawn"
  ],
  "intro": {
-  "text": "A passed pawn is a pawn with no enemy pawn in front of it, on its own file or on the files next to it, so only pieces can stop it. In an endgame it is often the strongest thing on the board, because the enemy king has to drop everything to stop it. Here you make one from a pawn majority (more pawns than your opponent on one side of the board), use an outside passed pawn, one far from all the other pawns, to pull the enemy king away, and use a protected passed pawn, one guarded by another pawn, which the enemy king can never take. You also stop an enemy passed pawn by putting your king in its path, and use the square of the pawn to tell whether a king is still in time to catch it."
+  "text": "A passed pawn is a pawn with no enemy pawn in front of it, on its own file or on the files next to it, so only pieces can stop it. In an endgame it is often the strongest thing on the board, because the enemy king has to drop everything to stop it. Here you make one from a pawn majority (more pawns than your opponent on one side of the board), use an outside passed pawn, one far from all the other pawns, to pull the enemy king away, and use a protected passed pawn, one guarded by another pawn, which the enemy king cannot take while its guard stands. You also stop an enemy passed pawn by putting your king in its path."
  },
  "parts": [
   {
@@ -232,46 +233,46 @@
   },
   {
    "title": "A pawn that guards a pawn",
-   "fen": "8/8/4k1p1/4P3/5P1p/5K2/8/8 w - - 3 51",
+   "fen": "8/3k4/1p6/3pPK2/3P4/8/8/8 w - - 3 51",
    "side": "white",
-   "keyIdea": "A passed pawn guarded by another pawn holds the enemy king back on its own, so your king is free to win pawns elsewhere.",
-   "text": "From a game played on Lichess. You are White. Your pawn on e5 is a passed pawn, and the pawn on f4 guards it: a protected passed pawn. Black's king cannot take it, and it cannot wander far from it either, or the pawn runs. Your own king is free to go after Black's pawns.",
+   "keyIdea": "A passed pawn guarded by another pawn keeps the enemy king tied to it, so your own king is free to go and win pawns.",
+   "text": "From a game played on Lichess. You are White. Your pawn on e5 is a passed pawn, and the pawn on d4 guards it: a protected passed pawn. Black's king cannot take it while the d4 pawn guards it, and it cannot leave it either. Your own king has nothing to watch, so it is free to go after Black's pawns.",
    "credit": {
-    "source": "Lichess puzzle database, puzzle R4gBh",
-    "url": "https://lichess.org/training/R4gBh",
+    "source": "Lichess puzzle database, puzzle QXLny",
+    "url": "https://lichess.org/training/QXLny",
     "licence": "CC0 1.0",
     "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
     "authors": "Lichess; the position is from a game played there"
    },
    "mainLine": [
-    "f3g4",
-    "g6g5",
-    "f4g5",
-    "h4h3",
-    "g4h3"
+    "f5f6",
+    "d7e8",
+    "f6e6",
+    "b6b5",
+    "e6d5"
    ],
    "nodes": [
     {
      "ply": 0,
-     "fen": "8/8/4k1p1/4P3/5P1p/5K2/8/8 w - - 3 51",
+     "fen": "8/3k4/1p6/3pPK2/3P4/8/8/8 w - - 3 51",
      "decision": true,
-     "main": "f3g4",
-     "mainSan": "Kg4",
+     "main": "f5f6",
+     "mainSan": "Kf6",
      "popular": {
       "beginner": [],
       "casual": [],
       "club": []
      },
      "notes": {
-      "text": "51.Kg4 goes after the pawn on h4, and it is the only move that wins. Black's king has to stay near your e-pawn, so it cannot come over to help."
+      "text": "51.Kf6 heads for e6, next to Black's pawn on d5, and it is the only move that wins. Black's king has to stay in front of your e-pawn: if it walks off to the queenside, the pawn runs up the board."
      }
     },
     {
      "ply": 1,
-     "fen": "8/8/4k1p1/4P3/5PKp/8/8/8 b - - 4 51",
+     "fen": "8/3k4/1p3K2/3pP3/3P4/8/8/8 b - - 4 51",
      "decision": false,
-     "main": "g6g5",
-     "mainSan": "g5",
+     "main": "d7e8",
+     "mainSan": "Ke8",
      "popular": {
       "beginner": [],
       "casual": [],
@@ -280,25 +281,25 @@
     },
     {
      "ply": 2,
-     "fen": "8/8/4k3/4P1p1/5PKp/8/8/8 w - - 0 52",
+     "fen": "4k3/8/1p3K2/3pP3/3P4/8/8/8 w - - 5 52",
      "decision": true,
-     "main": "f4g5",
-     "mainSan": "fxg5",
+     "main": "f6e6",
+     "mainSan": "Ke6",
      "popular": {
       "beginner": [],
       "casual": [],
       "club": []
      },
      "notes": {
-      "text": "Black tried 51...g5, giving up a pawn to break up yours. 52.fxg5 takes it. The e-pawn is no longer guarded, but now your g-pawn is a passed pawn too. If Black's king takes the e-pawn, yours takes the h4 pawn and walks the g-pawn up the board."
+      "text": "Black's king went to e8, and 52.Ke6 attacks the pawn on d5. Black's king cannot come back to defend it: your king covers d7, and your e-pawn covers d6. Again it is the only move that wins."
      }
     },
     {
      "ply": 3,
-     "fen": "8/8/4k3/4P1P1/6Kp/8/8/8 b - - 0 52",
+     "fen": "4k3/8/1p2K3/3pP3/3P4/8/8/8 b - - 6 52",
      "decision": false,
-     "main": "h4h3",
-     "mainSan": "h3",
+     "main": "b6b5",
+     "mainSan": "b5",
      "popular": {
       "beginner": [],
       "casual": [],
@@ -307,17 +308,17 @@
     },
     {
      "ply": 4,
-     "fen": "8/8/4k3/4P1P1/6K1/7p/8/8 w - - 0 53",
+     "fen": "4k3/8/4K3/1p1pP3/3P4/8/8/8 w - - 0 53",
      "decision": true,
-     "main": "g4h3",
-     "mainSan": "Kxh3",
+     "main": "e6d5",
+     "mainSan": "Kxd5",
      "popular": {
       "beginner": [],
       "casual": [],
       "club": []
      },
      "notes": {
-      "text": "Black pushed 52...h3, and 53.Kxh3 takes it. Black has no pawns left, and you have two passed pawns: Black's king cannot stop both of them."
+      "text": "53.Kxd5 wins the pawn. You are a pawn up, and the d4 pawn still guards your e-pawn, so Black's king still cannot take it."
      }
     }
    ]
@@ -468,156 +469,6 @@
      },
      "notes": {
       "text": "Black's king went after the h-pawn, so 59.Kxd3 takes the d3 pawn. Next your king heads for the a5 pawn, and Black's king, busy on the kingside, is too far away to save it."
-     }
-    }
-   ]
-  },
-  {
-   "title": "Two passed pawns, two squares",
-   "fen": "8/8/8/k7/3K2P1/1p6/8/8 w - - 0 62",
-   "side": "white",
-   "keyIdea": "When both sides have a passed pawn, count both squares: a king inside the square of a pawn can still catch it, a king outside cannot.",
-   "text": "From a game played on Lichess. You are White. Each side has one passed pawn: yours on g4, Black's on b3. Black's pawn needs two moves to promote and yours needs four, so do not start the race yet. Picture the square of each pawn: a square with one side running from the pawn to the square where it promotes.",
-   "credit": {
-    "source": "Lichess puzzle database, puzzle gNSZo",
-    "url": "https://lichess.org/training/gNSZo",
-    "licence": "CC0 1.0",
-    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
-    "authors": "Lichess; the position is from a game played there"
-   },
-   "mainLine": [
-    "d4c3",
-    "a5a4",
-    "c3b2",
-    "a4b5",
-    "g4g5",
-    "b5c4",
-    "g5g6",
-    "c4d5",
-    "g6g7"
-   ],
-   "nodes": [
-    {
-     "ply": 0,
-     "fen": "8/8/8/k7/3K2P1/1p6/8/8 w - - 0 62",
-     "decision": true,
-     "main": "d4c3",
-     "mainSan": "Kc3",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     },
-     "notes": {
-      "text": "62.Kc3 steps into the square of Black's pawn, the square with corners b3, b1, d1 and d3, and it is the only move that wins. From d4 your king was just outside it: after 62.g5, Black's pawn would run to b2 and b1 and promote long before yours."
-     }
-    },
-    {
-     "ply": 1,
-     "fen": "8/8/8/k7/6P1/1pK5/8/8 b - - 1 62",
-     "decision": false,
-     "main": "a5a4",
-     "mainSan": "Ka4",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 2,
-     "fen": "8/8/8/8/k5P1/1pK5/8/8 w - - 2 63",
-     "decision": true,
-     "main": "c3b2",
-     "mainSan": "Kb2",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     },
-     "notes": {
-      "text": "Black's king came to a4 to protect the pawn, so you cannot take it. 63.Kb2 blocks it instead: your king stands right in front of the pawn, and it cannot move any more."
-     }
-    },
-    {
-     "ply": 3,
-     "fen": "8/8/8/8/k5P1/1p6/1K6/8 b - - 3 63",
-     "decision": false,
-     "main": "a4b5",
-     "mainSan": "Kb5",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 4,
-     "fen": "8/8/8/1k6/6P1/1p6/1K6/8 w - - 4 64",
-     "decision": true,
-     "main": "g4g5",
-     "mainSan": "g5",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     },
-     "notes": {
-      "text": "Black's king set off for your g-pawn, but it is too late. On b5 it is outside the square of your pawn, the square with corners g4, g8, c8 and c4, so 64.g5 starts the race."
-     }
-    },
-    {
-     "ply": 5,
-     "fen": "8/8/8/1k4P1/8/1p6/1K6/8 b - - 0 64",
-     "decision": false,
-     "main": "b5c4",
-     "mainSan": "Kc4",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 6,
-     "fen": "8/8/8/6P1/2k5/1p6/1K6/8 w - - 1 65",
-     "decision": true,
-     "main": "g5g6",
-     "mainSan": "g6",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     },
-     "notes": {
-      "text": "The square gets smaller with every step the pawn takes, and Black's king on c4 is still outside it. 65.g6."
-     }
-    },
-    {
-     "ply": 7,
-     "fen": "8/8/6P1/8/2k5/1p6/1K6/8 b - - 0 65",
-     "decision": false,
-     "main": "c4d5",
-     "mainSan": "Kd5",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     }
-    },
-    {
-     "ply": 8,
-     "fen": "8/8/6P1/3k4/8/1p6/1K6/8 w - - 1 66",
-     "decision": true,
-     "main": "g6g7",
-     "mainSan": "g7",
-     "popular": {
-      "beginner": [],
-      "casual": [],
-      "club": []
-     },
-     "notes": {
-      "text": "66.g7: the pawn promotes next move, and Black's king on d5 is far away. Black's b-pawn cannot move either, because your king stands in front of it."
      }
     }
    ]

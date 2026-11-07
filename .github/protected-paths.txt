@@ -37,6 +37,7 @@ scripts/real-coach-check.ts
 scripts/verdict.ts
 scripts/before-after.ts
 scripts/pr-description.ts
+scripts/wait-ci.ts
 
 # Sandbox setup: runs on every agent machine
 scripts/sandbox/
@@ -46,3 +47,7 @@ scripts/sandbox/
 .claude/skills/real-coach-check/
 .claude/skills/build-a-feature/
 .claude/skills/sandbox/
+
+# The Claude Code settings and hooks every session in this repository runs
+.claude/settings.json
+.claude/hooks/

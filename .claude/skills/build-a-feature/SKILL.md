@@ -114,6 +114,16 @@ Human review is the last resort. List each lesson and where it went under "Revie
 3. When CI is green and the evidence is complete, mark it ready once, on the final commit
    (`gh pr ready <pr>`). That starts the Verdict (ADR 0013).
 
+   To know when CI is done, never wait for every check (`gh pr checks --watch`): the Verdict and
+   real Coach statuses stay pending until a judge runs, so that wait never ends, and a hook blocks
+   it. In the Claude desktop app, where Auto-fix watches the PR, don't wait at all: Auto-fix wakes
+   the session when CI fails, and a passing CI wakes nothing, so check once when you come back.
+   Anywhere else, wait for CI only, in the background:
+
+   ```bash
+   npm run -s wait:ci -- <pr>   # 0 passed; 1 failed, or a merge conflict; 3 timed out (30 minutes), or another push
+   ```
+
 ## 8. Merge, only what the owner approved
 
 When the Verdict has posted on the head commit:

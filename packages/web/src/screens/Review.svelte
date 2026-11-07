@@ -26,7 +26,6 @@
   import ThreatButton from '../components/ThreatButton.svelte';
   import VariationBar from '../components/VariationBar.svelte';
   import PanelTabs from '../components/PanelTabs.svelte';
-  import { BOARD_SIDE } from '@chess-coach/shared/engine-lines';
   import WinningChancesBar from '../components/WinningChancesBar.svelte';
   import WinningChancesGraph from '../components/WinningChancesGraph.svelte';
   import { api, ApiError } from '../lib/api.svelte.ts';
@@ -513,7 +512,6 @@
               pov={position?.pov ?? 'white'}
               {orientation}
               waiting={barWaiting}
-              names={BOARD_SIDE}
             />
             <!-- Opening or closing a key moment is not a move: a fresh Board shows it at once. -->
             {#key momentFen}

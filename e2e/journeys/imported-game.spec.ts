@@ -579,6 +579,25 @@ test('in a Review, the Threat button shows the desktop Engine’s threat for the
   }
 });
 
+test('a Review of a game the Player had as Black names Black’s Winning Chances on the bar, the key moments and the Coach', async ({ paired, app }) => {
+  // In a Review the numbers are the Player's own (guidelines, Numbers and words); only the Board's are White's (#52).
+  app.app.db.prepare(`UPDATE games SET player_side = 'black'`).run();
+  await paired.goto(`${app.url}/#/review/1`);
+  await paired.getByRole('button', { name: 'Start the Review' }).click();
+  const moments = paired.getByRole('region', { name: 'Key moments' });
+  await expect(moments.getByRole('listitem').first()).toBeVisible({ timeout: 90_000 });
+  await expect(moments.getByTestId('chances-before').first()).toHaveText(/^Before: Black’s winning chances: \d+%$/);
+  const bar = paired.getByRole('meter', { name: /^Winning Chances bar/ });
+  await expect(bar).toHaveAccessibleName(/^Winning Chances bar: Black’s winning chances: \d+%$/);
+  await moments.getByRole('listitem').first().getByRole('button').first().click();
+  await expect(bar).toHaveAccessibleName(/^Winning Chances bar: Black’s winning chances: \d+%$/);
+  await paired.getByRole('button', { name: 'Last position' }).click();
+  await paired.getByRole('button', { name: 'Ask the Coach why' }).click();
+  await coachIdle(paired);
+  await expect(paired.getByLabel('Coach conversation')).toContainText('Black’s winning chances');
+  await expect(paired.getByLabel('Coach conversation')).not.toContainText('White’s winning chances');
+});
+
 test('a Review shows one number per position, and an open key moment shows its position everywhere', async ({ paired, app }) => {
   const bar = paired.getByRole('meter', { name: /^Winning Chances bar/ });
   const current = paired.getByRole('figure', { name: 'Winning Chances graph' }).getByRole('img', { name: /^Current position: / });
@@ -612,11 +631,6 @@ test('a Review shows one number per position, and an open key moment shows its p
   await expect(paired.getByLabel('Coach conversation')).toContainText('Before it, White’s winning chances: 35%. After it, White’s winning chances: 19%.');
   await pickMove(paired, 'Move 11… Rxf7, Best');
   await expectShown('11… Rxf7', '35%');
-  // Turned to Black's side, the bar still names White's, as the graph does (#52); only its fill turns.
-  await paired.getByRole('button', { name: 'Flip board' }).click();
-  await expectShown('11… Rxf7', '35%');
-  await expect(bar.getByTestId('bar-fill')).toHaveAttribute('data-side', 'black');
-  await paired.getByRole('button', { name: 'Flip board' }).click();
 
   // The position after 10… dxe4: its symbol, and Black's threat with Threat on.
   await pickMove(paired, 'Move 10… dxe4, Best');

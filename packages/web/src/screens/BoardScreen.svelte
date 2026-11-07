@@ -120,6 +120,12 @@
   let setupButton = $state<HTMLButtonElement>();
 
   const threats = new ThreatView(threat);
+  /**
+   * The board's arrows: the threat, then the Lines tab's Engine's best or, on the other tabs, the
+   * Coach's, never both, so at most one green arrow shows (guidelines, Arrows and marks). None over
+   * a previewed line, which isn't the position they belong to.
+   */
+  const shownArrows = $derived(preview ? [] : [...threatArrows(threats.threat), ...(tab === 'lines' ? bestLineArrow(boardFen, analysis) : coach.arrows)]);
 
   /** What ends the game in the position shown: the free board has nobody else to say so. */
   const result = $derived.by(() => {
@@ -242,7 +248,7 @@
     if (variation.active) {
       // Only the moves go: the desktop's Engine works out the facts (ADR 0007).
       const { label, ...asked } = variation.question(line.moves);
-      await coach.ask({ job: 'why', ...asked, ...(question ? { question } : {}) }, question || label);
+      await coach.ask({ job: 'why', ...asked, chancesSide: BOARD_SIDE, ...(question ? { question } : {}) }, question || label);
       return;
     }
     const cursor = line.cursor;
@@ -252,6 +258,8 @@
       await coach.ask(
         {
           job: 'why',
+          // The Coach quotes White's Winning Chances, as the bar and the lines show them (#52).
+          chancesSide: BOARD_SIDE,
           fen: move.fenBefore,
           recentMoves: line.moves.slice(0, cursor - 1).map((m) => m.san),
           moveUci: move.uci,
@@ -260,7 +268,7 @@
         question || (grade ? `Why is ${move.san} graded ${grade}?` : `Why ${move.san}?`),
       );
     } else {
-      await coach.ask({ job: 'why', fen: line.fen, recentMoves: [], ...(question ? { question } : {}) }, question || 'What are the options in this position?');
+      await coach.ask({ job: 'why', fen: line.fen, recentMoves: [], chancesSide: BOARD_SIDE, ...(question ? { question } : {}) }, question || 'What are the options in this position?');
     }
   }
 
@@ -429,7 +437,7 @@
                 : shownLast
                   ? { from: shownLast.uci.slice(0, 2), to: shownLast.uci.slice(2, 4) }
                   : undefined}
-              arrows={preview ? [] : [...threatArrows(threats.threat), ...(tab === 'lines' ? bestLineArrow(boardFen, analysis) : []), ...coach.arrows]}
+              arrows={shownArrows}
               highlights={preview ? [] : coach.highlights}
               gradeMark={preview ? undefined : mark}
               {onmove}
@@ -486,13 +494,12 @@
             {#if !line.moves.length && !variation.active}<p class="muted none">Play a move on the board, or set up a position, and its moves list here.</p>{/if}
           {/if}
         </div>
-        <!-- The conversation itself is the Coach's, docked under every tab: on this tab it takes the panel's room. -->
-        <div id="panel-coach" role="tabpanel" aria-labelledby="tab-coach" hidden={tab !== 'coach'} class="tab-panel">
-          {#if !coach.entries.length}<p class="muted none">Ask the Coach why below: its answers show here.</p>{/if}
-        </div>
       </div>
+      <!-- The Coach is docked under every tab; on the Coach tab it is that tab's panel and takes the panel's room. -->
       <CoachPanel
         fill={tab === 'coach'}
+        tab={{ panel: 'panel-coach', ...(tab === 'coach' ? { selected: 'tab-coach' } : {}) }}
+        empty={tab === 'coach' ? 'Ask the Coach why below: its answers show here.' : undefined}
         thread={coach}
         onwhy={why}
         placeholder={shownLast ? `Ask why about ${moveLabel(shownLast.fenBefore, shownLast.san)}` : 'Ask about this position'}
@@ -507,6 +514,9 @@
 
 <style>
   @media (max-width: 820px) { .wide { display: none; } }
+  /* On a short phone the board gives up a little more, so the sheet at rest keeps the tabs and the
+     top Engine line whole (44 px moves) above the Ask box. */
+  .board-free { --phone-reserve: 19.25rem; }
   /* A phone's header line with Back to the main line in it: Set up and New wait until the Player is back. */
   @media (max-width: 820px) and (min-height: 560px) { .frame-tools:has(> :global(.back)) > .board-action { display: none; } }
   .tab-panel { display: flex; flex-direction: column; gap: 0.6rem; }
@@ -516,7 +526,6 @@
   .head-line.previewing { color: var(--accent); font-weight: 600; }
   /* On the Coach tab the panel's body is its tabs, and the conversation takes the room below them. */
   .side:has(> :global(.coach.fill)) > .panel-body { flex: 0 1 auto; padding-bottom: 0; }
-  .tab-panel:empty { display: none; }
   .result { margin: 0.5rem 0 0; text-align: center; font-weight: 600; }
   .result:empty { margin: 0; }
   .setup { display: grid; gap: 0.5rem; }

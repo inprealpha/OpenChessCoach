@@ -23,8 +23,13 @@
     steps?: Snippet<['back' | 'on']>;
     /** The conversation takes the panel's room above the Ask box, rather than a few lines: the Board's Coach tab. */
     fill?: boolean;
+    /**
+     * A screen whose panel has a Coach tab (the Board): the id its tab controls, and while that tab is
+     * picked, the tab's id. The Coach is then that tab's panel, so the tab leads to the conversation.
+     */
+    tab?: { panel: string; selected?: string };
   }
-  let { thread, onwhy, whyLabel = 'Ask the Coach why', placeholder = 'Why is this move good or bad?', actions, empty, closed, steps, fill = false }: Props = $props();
+  let { thread, onwhy, whyLabel = 'Ask the Coach why', placeholder = 'Why is this move good or bad?', actions, empty, closed, steps, fill = false, tab }: Props = $props();
 
   let question = $state('');
   let log: HTMLDivElement | undefined = $state();
@@ -118,7 +123,15 @@
   $effect(() => () => clearTimeout(stopping));
 </script>
 
-<section class="coach" class:unavailable={!available} class:fill aria-label="Coach">
+<section
+  class="coach"
+  class:unavailable={!available}
+  class:fill
+  aria-label="Coach"
+  id={tab?.panel}
+  role={tab?.selected ? 'tabpanel' : undefined}
+  aria-labelledby={tab?.selected}
+>
   <header class:idle={available && !thread.busy}>
     <h2>Coach</h2>
     <span class="status" role="status">

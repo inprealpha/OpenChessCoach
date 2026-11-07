@@ -412,6 +412,177 @@ test('an Engine line’s moves are numbered buttons: pointing at one shows it on
   await expect(paired.getByRole('list', { name: 'Moves' }).getByRole('button')).toHaveCount(2);
 });
 
+test('a move kept in focus stays on the board when the pointer passes over another and leaves (#52 review)', async ({ paired, app }) => {
+  await paired.goto(`${app.url}/#/board`);
+  await paired.getByRole('tab', { name: 'Lines' }).click();
+  const moves = paired.getByRole('region', { name: 'Engine lines' }).getByRole('listitem').first().getByRole('button');
+  await expect(paired.getByRole('region', { name: 'Engine lines' }).getByText('Depth 10')).toBeAttached();
+  await expect(moves).toHaveCount(6);
+  await moves.nth(2).focus();
+  await expect(paired.locator('.frame-head .head-line')).toHaveText(/^Engine line: /);
+  const focused = await fenOf(paired, 'Chess board');
+  expect(focused).not.toBe(INITIAL_FEN);
+  await moves.nth(4).hover();
+  await expect(board(paired, 'Chess board')).not.toHaveAttribute('data-fen', focused);
+  await paired.mouse.move(0, 0);
+  await expect(board(paired, 'Chess board')).toHaveAttribute('data-fen', focused);
+  await expect(paired.locator('.frame-head .head-line')).toHaveText(/^Engine line: 1\. \S+ \S+ 2\. \S+$/);
+});
+
+test('a preview ends when the position or the tab changes under the pointer: the board shows the position on it', async ({ paired, app }) => {
+  await paired.goto(`${app.url}/#/board`);
+  await play(paired, 'e2e4');
+  await play(paired, 'e7e5');
+  await paired.getByRole('tab', { name: 'Lines' }).click();
+  const moves = paired.getByRole('region', { name: 'Engine lines' }).getByRole('listitem').first().getByRole('button');
+  await expect(paired.getByRole('region', { name: 'Engine lines' }).getByText('Depth 10')).toBeAttached();
+  const stepped = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1';
+  // The pointer previews the line; ← steps the game back under it. Its button goes with the old
+  // position's lines without the pointer ever leaving it, so only the new position ends the preview.
+  await moves.nth(3).hover();
+  await expect(paired.locator('.frame-head .head-line')).toHaveText(/^Engine line: 2\. /);
+  const previewed = await fenOf(paired, 'Chess board');
+  await paired.keyboard.press('ArrowLeft');
+  // The old line's preview is gone with its position (the new position's lines may preview one of
+  // their own under the pointer, as hovering does).
+  await expect(board(paired, 'Chess board')).not.toHaveAttribute('data-fen', previewed);
+  await expect(paired.locator('.frame-head .head-line')).not.toHaveText(/^Engine line: 2\. /);
+  // The new position's lines may come up under the pointer and preview one of theirs; leaving them puts the position back.
+  await paired.mouse.move(0, 0);
+  await expect(board(paired, 'Chess board')).toHaveAttribute('data-fen', stepped);
+  await expect(paired.locator('.frame-head .head-line')).toHaveText('Black to move');
+
+  // The lines leaving the screen under the pointer: another tab picked with the keyboard.
+  await expect(paired.getByRole('region', { name: 'Engine lines' }).getByText('Depth 10')).toBeAttached();
+  await paired.getByRole('textbox', { name: 'Your Why Question' }).focus();
+  await paired.getByRole('tab', { name: 'Lines' }).focus();
+  await moves.nth(2).hover();
+  await expect(paired.locator('.frame-head .head-line')).toHaveText(/^Engine line: /);
+  await paired.keyboard.press('ArrowRight');
+  await expect(paired.getByRole('tab', { name: 'Moves' })).toHaveAttribute('aria-selected', 'true');
+  await expect(board(paired, 'Chess board')).toHaveAttribute('data-fen', stepped);
+  await expect(paired.locator('.frame-head .head-line')).toHaveText('Black to move');
+});
+
+test('after a Why Question, each tab shows at most one green arrow: the Engine’s best on Lines, the Coach’s on the others (#52 review)', async ({ paired, app }) => {
+  await paired.goto(`${app.url}/#/board`);
+  for (const uci of MOVES.slice(0, 5)) await play(paired, uci);
+  await paired.getByRole('button', { name: 'Ask the Coach why' }).click();
+  await coachIdle(paired);
+  const green = board(paired, 'Chess board').locator('[data-kind="best"]');
+  const engineBest = paired.getByRole('img', { name: /^Engine’s best: / });
+  const coachArrows = paired.getByRole('img', { name: /^Arrow / });
+  // The Coach tab, which the question opened: the Coach's arrows, among them its green one.
+  await expect(paired.getByRole('tab', { name: 'Coach' })).toHaveAttribute('aria-selected', 'true');
+  await expect(coachArrows.first()).toBeVisible();
+  await expect(green).toHaveCount(1);
+  await expect(engineBest).toHaveCount(0);
+  // Lines: the Engine's best only.
+  await paired.getByRole('tab', { name: 'Lines' }).click();
+  await expect(engineBest).toHaveCount(1);
+  await expect(coachArrows).toHaveCount(0);
+  await expect(green).toHaveCount(1);
+  // Moves: the Coach's again.
+  await paired.getByRole('tab', { name: 'Moves' }).click();
+  await expect(engineBest).toHaveCount(0);
+  await expect(coachArrows.first()).toBeVisible();
+  await expect(green).toHaveCount(1);
+});
+
+test('the Coach tab’s panel is the Coach itself, with the conversation in it (#52 review)', async ({ paired, app }) => {
+  await paired.goto(`${app.url}/#/board`);
+  await play(paired, 'e2e4');
+  const tab = paired.getByRole('tab', { name: 'Coach' });
+  await paired.getByRole('button', { name: 'Ask the Coach why' }).click();
+  await coachIdle(paired);
+  await expect(tab).toHaveAttribute('aria-selected', 'true');
+  const controls = await tab.getAttribute('aria-controls');
+  const panel = paired.locator(`#${controls}`);
+  await expect(panel).toHaveAttribute('role', 'tabpanel');
+  await expect(paired.getByRole('tabpanel', { name: 'Coach' }).getByLabel('Coach conversation')).toContainText('e4 is graded');
+  // On another tab the Coach is docked under it as its own region, not a tab panel.
+  await paired.getByRole('tab', { name: 'Moves' }).click();
+  await expect(paired.getByRole('tabpanel', { name: 'Coach' })).toHaveCount(0);
+  await expect(paired.getByRole('region', { name: 'Coach' }).getByLabel('Coach conversation')).toContainText('e4 is graded');
+});
+
+test('the arrow keys move between the Board’s tabs while one has the focus, and step the board otherwise (#52 review)', async ({ paired, app }) => {
+  await paired.goto(`${app.url}/#/board`);
+  await play(paired, 'e2e4');
+  const after = await fenOf(paired, 'Chess board');
+  const tabs = paired.getByRole('tablist', { name: 'Board' }).getByRole('tab');
+  // Tab reaches the picked tab only.
+  await expect(tabs).toHaveCount(3);
+  expect(await tabs.evaluateAll((els) => els.map((e) => e.getAttribute('tabindex')))).toEqual(['-1', '0', '-1']);
+  // A tab clicked with the mouse keeps the focus, but ← → still step the board there.
+  await paired.getByRole('tab', { name: 'Moves' }).click();
+  await paired.keyboard.press('ArrowLeft');
+  await expect(board(paired, 'Chess board')).toHaveAttribute('data-fen', INITIAL_FEN);
+  await expect(paired.getByRole('tab', { name: 'Moves' })).toHaveAttribute('aria-selected', 'true');
+  await paired.keyboard.press('ArrowRight');
+  await expect(board(paired, 'Chess board')).toHaveAttribute('data-fen', after);
+  // Reached with the keyboard, the tablist takes the keys.
+  await paired.getByRole('textbox', { name: 'Your Why Question' }).focus();
+  await paired.keyboard.press('Shift+Tab');
+  await paired.keyboard.press('Shift+Tab');
+  await paired.getByRole('tab', { name: 'Moves' }).focus();
+  await paired.keyboard.press('ArrowRight');
+  await expect(paired.getByRole('tab', { name: 'Coach' })).toBeFocused();
+  await expect(paired.getByRole('tab', { name: 'Coach' })).toHaveAttribute('aria-selected', 'true');
+  await paired.keyboard.press('ArrowRight');
+  await expect(paired.getByRole('tab', { name: 'Lines' })).toBeFocused();
+  await paired.keyboard.press('End');
+  await expect(paired.getByRole('tab', { name: 'Coach' })).toBeFocused();
+  await paired.keyboard.press('Home');
+  await expect(paired.getByRole('tab', { name: 'Lines' })).toHaveAttribute('aria-selected', 'true');
+  await paired.keyboard.press('ArrowLeft');
+  await expect(paired.getByRole('tab', { name: 'Coach' })).toBeFocused();
+  // The board never stepped while the tablist had the keys.
+  await expect(board(paired, 'Chess board')).toHaveAttribute('data-fen', after);
+  expect(await tabs.evaluateAll((els) => els.map((e) => e.getAttribute('tabindex')))).toEqual(['-1', '-1', '0']);
+  // Out of the tablist, ← steps the board again.
+  await paired.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+  await paired.keyboard.press('ArrowLeft');
+  await expect(board(paired, 'Chess board')).toHaveAttribute('data-fen', INITIAL_FEN);
+});
+
+test('on a short phone the top Engine line sits whole above the Ask box, and every move of every line can be reached (#52 review)', async ({ browser, app }) => {
+  for (const viewport of [{ width: 390, height: 664 }, { width: 402, height: 714 }]) {
+    const ctx = await browser.newContext({ viewport, isMobile: true, hasTouch: true });
+    const page = await ctx.newPage();
+    try {
+      await page.goto(`${app.url}/#pair=${app.code}`);
+      await expect(connection(page)).toHaveText(/Desktop connected/);
+      await page.goto(`${app.url}/#/board`);
+      await page.getByRole('tab', { name: 'Lines' }).tap();
+      const lines = page.getByRole('region', { name: 'Engine lines' }).getByRole('listitem');
+      await expect(lines.first().getByRole('button').first()).toBeVisible();
+      const first = (await lines.first().boundingBox())!;
+      const body = (await page.locator('.panel-body').boundingBox())!;
+      const ask = (await page.getByRole('textbox', { name: 'Your Why Question' }).boundingBox())!;
+      expect(first.y + first.height, `${viewport.width}×${viewport.height}`).toBeLessThanOrEqual(body.y + body.height + 0.5);
+      expect(first.y + first.height).toBeLessThanOrEqual(ask.y);
+      // More lines open: each line's last move scrolls into reach, whole, and plays.
+      await page.getByRole('button', { name: /^More lines/ }).tap();
+      await expect(lines).toHaveCount(5);
+      for (let i = 0; i < 5; i++) {
+        const last = lines.nth(i).getByRole('button').last();
+        await last.scrollIntoViewIfNeeded();
+        const b = (await last.boundingBox())!;
+        const row = (await lines.nth(i).locator('.moves').boundingBox())!;
+        expect(b.x, `line ${i + 1}`).toBeGreaterThanOrEqual(row.x - 0.5);
+        expect(b.x + b.width, `line ${i + 1}`).toBeLessThanOrEqual(row.x + row.width + 0.5);
+      }
+      const label = (await lines.nth(4).getByRole('button').last().getAttribute('aria-label')) ?? '';
+      await lines.nth(4).getByRole('button').last().tap();
+      await expect(page.getByRole('button', { name: 'Back to the main line' })).toBeVisible();
+      expect(label).toMatch(/^Try 1\. /);
+    } finally {
+      await ctx.close();
+    }
+  }
+});
+
 test('on a touch phone, tapping an Engine line’s move tries the line on the board', async ({ browser, app }) => {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 664 }, isMobile: true, hasTouch: true });
   const page = await ctx.newPage();
@@ -1020,6 +1191,21 @@ test('the Coach quotes the Winning Chances the bar shows either side of the move
   await coachIdle(paired);
   // The fake Coach repeats the brief's Winning Chances word for word, as the real Coach is told to.
   await expect(paired.getByLabel('Coach conversation')).toContainText('Bc4 is graded Good. Before it, White’s winning chances: 54%. After it, White’s winning chances: 54%.');
+
+  // A Black move: the Coach still quotes White's, as the bar and the Engine lines name them (#52).
+  await play(paired, MOVES[5]!);
+  await paired.getByRole('tab', { name: 'Moves' }).click();
+  await expect(paired.getByRole('button', { name: /Move 3… Bc5, / })).toBeVisible();
+  await expect(bar).toHaveAccessibleName(/^Winning Chances bar: White’s winning chances: \d+%$/);
+  const after = Number(/(\d+)%$/.exec((await bar.getAttribute('aria-label')) ?? '')?.[1]);
+  await paired.getByRole('button', { name: 'Previous move' }).click();
+  await expect(bar).toHaveAccessibleName('Winning Chances bar: White’s winning chances: 54%');
+  await paired.getByRole('button', { name: 'Last position' }).click();
+  await expect(bar).toHaveAccessibleName(`Winning Chances bar: White’s winning chances: ${after}%`);
+  await paired.getByRole('button', { name: 'Ask the Coach why' }).click();
+  await coachIdle(paired);
+  await expect(paired.getByLabel('Coach conversation')).toContainText(new RegExp(`Bc5 is graded \\w+\\. Before it, White’s winning chances: 54%\\. After it, White’s winning chances: ${after}%\\.`));
+  await expect(paired.getByLabel('Coach conversation')).not.toContainText('Black’s winning chances');
 });
 
 test('a Why Question stops at 300 characters, and the Player sees how many are left', async ({ paired, app }) => {

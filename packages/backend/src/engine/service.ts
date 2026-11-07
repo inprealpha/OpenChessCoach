@@ -173,6 +173,7 @@ export class EngineService {
       ...(req.lessonFocus !== undefined ? { lessonFocus: lessonFocusOf(req.lessonFocus) } : {}),
       ...(typeof req.opening === 'string' ? { opening: req.opening } : {}),
       ...(req.hideWinningChances === true ? { hideWinningChances: true } : {}),
+      ...(req.chancesSide === 'white' || req.chancesSide === 'black' ? { chancesSide: req.chancesSide } : {}),
     };
     // The opponent's threat in the position: it reuses the analysis of `fen` and costs one
     // more search, after the null move. After a move, the brief keeps it only when the Engine's

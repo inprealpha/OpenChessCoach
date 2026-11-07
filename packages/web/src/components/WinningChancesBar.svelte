@@ -3,9 +3,9 @@
   // position's Winning Chances, with each side's percentage at its end. The side at the bottom of
   // the board fills it from the bottom, or from the left where the bar lies above the board on a
   // phone. Its value comes from the shared formatter, so it agrees with the Engine lines and the
-  // Move Grades (ADR 0002). Its name and value are the side `names` says: White's on the Board and
-  // in the Review, whoever is at the bottom or to move, as their Engine lines and graph and Lichess
-  // show them (#52); the side at the bottom where a screen doesn't say.
+  // Move Grades (ADR 0002). Its name and value are the side `names` says: White's on the Board,
+  // whoever is at the bottom or to move, as its Engine lines and Lichess show them (#52); the side
+  // at the bottom where a screen doesn't say, which is the Player's in a Review and an Engine Game.
   import { otherSide, type Side } from '@chess-coach/shared/chess';
   import type { Score } from '@chess-coach/shared/engine';
   import { winningChancesFor } from '@chess-coach/shared/winning-chances';

@@ -6,6 +6,7 @@
   // it on the board, and a click or tap tries the line up to it as a variation (#52).
   import type { Analysis } from '@chess-coach/shared/engine';
   import { engineLineView, type LineMove, type LinePreview } from '@chess-coach/shared/engine-lines';
+  import { untrack } from 'svelte';
   import { foldOpen, rememberFold } from '../lib/folds.ts';
 
   interface Props {
@@ -20,8 +21,16 @@
   let { analysis, fen, onpreview, onplay }: Props = $props();
 
   let more = $state(foldOpen('engine-lines-more', false));
-  /** The move the board previews now, as "line,move". */
-  let previewing = $state<string | null>(null);
+
+  /** A move the Player points at or has focused, as "line,move", with the line's moves up to it. */
+  interface Pointed {
+    key: string;
+    moves: LineMove[];
+  }
+  /** The move under the pointer, and the move with the keyboard's focus: either can preview, the pointer's first. */
+  let hovered = $state<Pointed | null>(null);
+  let focused = $state<Pointed | null>(null);
+  const previewing = $derived((hovered ?? focused)?.key ?? null);
 
   const views = $derived(analysis && analysis.fen === fen ? analysis.lines.map((line) => engineLineView(fen, line)) : null);
 
@@ -30,29 +39,53 @@
     rememberFold('engine-lines-more', more);
   }
 
-  function preview(moves: LineMove[], key: string): void {
-    previewing = key;
-    onpreview?.({ moves, text: moves.map((m) => m.label).join(' ') });
+  /** Shows the move pointed at, else the focused one, else the position itself. */
+  function show(): void {
+    const p = hovered ?? focused;
+    onpreview?.(p ? { moves: p.moves, text: p.moves.map((m) => m.label).join(' ') } : null);
   }
 
-  function unpreview(key: string): void {
-    if (previewing !== key) return;
-    previewing = null;
+  function clear(): void {
+    hovered = focused = null;
     onpreview?.(null);
   }
 
-  // A new position, or the lines leaving the screen, puts the board back.
+  // The Engine's deeper search can change a line under the pointer, removing or changing its button
+  // without a pointerleave: a preview whose moves the lines no longer show ends.
   $effect(() => {
-    void fen;
-    return () => {
-      if (previewing === null) return;
-      previewing = null;
-      onpreview?.(null);
+    const lines = views;
+    const still = (p: Pointed | null) => {
+      if (!p) return true;
+      const [i, k] = p.key.split(',').map(Number);
+      const now = lines?.[i ?? -1]?.moves.slice(0, (k ?? -1) + 1).map((m) => m.uci).join(' ');
+      return now === p.moves.map((m) => m.uci).join(' ');
     };
+    const [h, f] = untrack(() => [hovered, focused]);
+    if (still(h) && still(f)) return;
+    untrack(() => {
+      if (!still(h)) hovered = null;
+      if (!still(f)) focused = null;
+      show();
+    });
+  });
+
+  // The lines leaving the screen (another tab picked with the keyboard while the pointer rests on a
+  // move) put the board back: a button removed under the pointer never says the pointer left it.
+  $effect(() => () => {
+    if (untrack(() => hovered || focused)) clear();
   });
 </script>
 
-<section class="lines" aria-label="Engine lines">
+<!-- The pointer leaving the lines ends its preview, even where the button it was on has gone. -->
+<section
+  class="lines"
+  aria-label="Engine lines"
+  onpointerleave={() => {
+    if (!hovered) return;
+    hovered = null;
+    show();
+  }}
+>
   {#if !views}
     <p class="muted">The Engine is thinking…</p>
   {:else if views.length === 0}
@@ -76,13 +109,27 @@
                 class:first={k === 0}
                 class:on={previewing === key}
                 aria-label={`Try ${upTo.map((x) => x.label).join(' ')} on the board`}
-                onpointerenter={(e) => e.pointerType === 'mouse' && preview(upTo, key)}
-                onpointerleave={() => unpreview(key)}
-                onfocus={() => preview(upTo, key)}
-                onblur={() => unpreview(key)}
+                onpointerenter={(e) => {
+                  if (e.pointerType !== 'mouse') return;
+                  hovered = { key, moves: upTo };
+                  show();
+                }}
+                onpointerleave={() => {
+                  if (hovered?.key !== key) return;
+                  hovered = null;
+                  show();
+                }}
+                onfocus={() => {
+                  focused = { key, moves: upTo };
+                  show();
+                }}
+                onblur={() => {
+                  if (focused?.key !== key) return;
+                  focused = null;
+                  show();
+                }}
                 onclick={() => {
-                  previewing = null;
-                  onpreview?.(null);
+                  clear();
                   onplay?.(upTo.map((x) => x.uci));
                 }}
                 >{#if m.number}<span class="number">{`${m.number} `}</span>{/if}{m.san}</button
@@ -132,10 +179,12 @@
     .by-hover { display: none; }
     .by-touch { display: inline; }
   }
-  /* A phone: each move a full thumb's height, one row per line; a long line fades out at its end. */
+  /* A phone: each move a full thumb's height, one row per line. */
   @media (max-width: 820px) {
     .score { min-width: 4.6rem; }
-    .moves { gap: 0; flex-wrap: nowrap; overflow: hidden; mask-image: linear-gradient(to right, #000 85%, transparent); }
+    /* One row per line: a long line scrolls sideways, every move whole and in reach. */
+    .moves { flex: 1 1 auto; gap: 0; flex-wrap: nowrap; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; }
+    .moves::-webkit-scrollbar { display: none; }
     .move { min-height: var(--tap); padding-inline: 0.3rem; }
     li { align-items: center; padding: 0; gap: 0.3rem; }
   }

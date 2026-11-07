@@ -786,15 +786,16 @@
           />
         </div>
         <!-- Docked at the panel's foot, as beside every other board, with the step buttons either
-             side. The Blunder pause takes their row, so the choice and its reason stay in a phone's
-             first screen. Once the game is over the Coach's lines are gone and the thumb bar keeps the steps. -->
+             side. Away from the latest position Hint is gone, so the panel doesn't suggest it. The
+             Blunder pause takes the steps' row, so the choice and its reason stay in a phone's first
+             screen. Once the game is over the Coach's lines are gone and the thumb bar keeps the steps. -->
         {#snippet steps(part: 'back' | 'on')}
           <StepButtons only={part} onfirst={() => step('first')} onprevious={() => step('previous')} onnext={() => step('next')} onlast={() => step('last')} />
         {/snippet}
         {#if !finished}
           <CoachPanel
             thread={coach}
-            empty={game.live
+            empty={away ? undefined : game.live
               ? 'The Coach speaks up when a move is a Mistake or Blunder. Press Hint for a nudge.'
               : 'Live Coaching is off in this game. Press Hint for a nudge.'}
             steps={awaitingChoice ? undefined : steps}

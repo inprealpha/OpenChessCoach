@@ -558,6 +558,7 @@ test('if the Engine moves while the Player looks back, the board stays put and t
   await expect(paired.getByRole('button', { name: 'Hint' })).toHaveCount(0);
   await expect(paired.getByRole('button', { name: 'Threat' })).toHaveCount(0);
   await expect(board.getByRole('img', { name: /^(Threat: |Arrow |Engine’s best)/ })).toHaveCount(0);
+  await expect(paired.getByText('Press Hint for a nudge')).toHaveCount(0);
   // On a phone the bar keeps to one row: which move it is, and the way back.
   await paired.setViewportSize({ width: 390, height: 664 });
   await expect(awayBar(paired).getByText('Looking at move 1')).toBeInViewport({ ratio: 1 });

@@ -237,6 +237,12 @@ describe('the review findings', () => {
     expect(problems(lessonAt('4k3/8/8/8/8/8/3R4/3QK3 w - - 0 1', 'Your queen on d1 guards d5.', 'e1f1'))).toEqual(['the white queen on d1 does not reach d5']);
   });
 
+  it('reads "once …" as the future, and "at once" as now', () => {
+    expect(problems(lessonAt(INITIAL_FEN, 'Once that pawn has taken on d4, your queen on d1 attacks d4.'))).toEqual([]);
+    expect(problems(lessonAt(INITIAL_FEN, 'Your bishop waits, so once the pawn moves, your bishop on c1 attacks h6.'))).toEqual([]);
+    expect(problems(lessonAt(INITIAL_FEN, 'The knight moves at once, and your knight on g1 guards h4.'))).toEqual(['the white knight on g1 does not reach h4']);
+  });
+
   it('reads a move with its number as that move, not a later one with the same name', () => {
     // blunder-check part 1: "after 10...exd4" is the move Black doesn't get to play, not the line's 11...exd4.
     expect(noteClaims(byId('blunder-check')).claims.filter((c) => /bishop on e3/.test(c.phrase))).toEqual([]);

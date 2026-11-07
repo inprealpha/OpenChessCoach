@@ -11,7 +11,7 @@
     type SettingsPatch,
   } from '@chess-coach/shared/protocol';
   import { api, ApiError } from '../lib/api.svelte.ts';
-  import { chooseDensity, currentDensity, DENSITIES, type Density } from '../lib/density.ts';
+  import { chooseDensity, DENSITIES, forcedDensity, storedDensity, type Density } from '../lib/density.ts';
   import { pairingCode } from '../lib/pairing-code.ts';
   import { router } from '../lib/router.svelte.ts';
 
@@ -26,7 +26,10 @@
   let confirmReset = $state(false);
 
   // PROTOTYPE: the phone density levels to try (lib/density.ts, density.css). On this device only.
-  let density = $state<Density>(currentDensity());
+  // The card shows the stored choice, so picking any level, the one a link forced included, stores it.
+  let density = $state<Density>(storedDensity());
+  /** The level a `?density=` link forces on this page, until a level is picked here. */
+  let forced = $state<Density | null>(forcedDensity());
   const DENSITY_TEXT: Record<Density, { name: string; detail: string }> = {
     today: { name: 'Today', detail: 'As the app is now.' },
     compact: { name: 'Compact', detail: 'Slimmer buttons and a bigger board; every tap area stays 44 px, except the move list’s rows.' },
@@ -34,6 +37,7 @@
   };
   function pickDensity(level: Density): void {
     density = level;
+    forced = null;
     chooseDensity(level);
   }
 
@@ -151,9 +155,14 @@
   <fieldset class="card size" aria-label="Size">
     <legend>Size</legend>
     <p class="muted small">A prototype to try on a phone: how big the buttons and the board are drawn. On this device only; a desktop stays as it is.</p>
+    {#if forced && forced !== density}
+      <p class="small warning" data-testid="density-from-link">
+        This page shows {DENSITY_TEXT[forced].name} because the link asked for it. Your choice below is kept; pick one to use it.
+      </p>
+    {/if}
     {#each DENSITIES as d (d)}
       <label class="option">
-        <input type="radio" name="density" value={d} checked={density === d} onchange={() => pickDensity(d)} />
+        <input type="radio" name="density" value={d} checked={density === d} onclick={() => pickDensity(d)} />
         <span>
           <strong>{DENSITY_TEXT[d].name}</strong>
           <span class="muted small cost">{DENSITY_TEXT[d].detail}</span>

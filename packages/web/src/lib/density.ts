@@ -14,8 +14,8 @@ function isDensity(v: unknown): v is Density {
   return typeof v === 'string' && (DENSITIES as readonly string[]).includes(v);
 }
 
-/** The level the address asks for, if any. */
-function fromAddress(): Density | null {
+/** The level the address asks for for this page, if any. */
+export function forcedDensity(): Density | null {
   try {
     const v = new URLSearchParams(location.search).get('density');
     return isDensity(v) ? v : null;
@@ -24,16 +24,19 @@ function fromAddress(): Density | null {
   }
 }
 
-/** The level this device draws at: the address's, else the stored one, else Today. */
-export function currentDensity(): Density {
-  const forced = fromAddress();
-  if (forced) return forced;
+/** The level this device keeps, chosen in Settings: Today until one is chosen. */
+export function storedDensity(): Density {
   try {
     const v = localStorage.getItem(KEY);
     return isDensity(v) ? v : 'today';
   } catch {
     return 'today';
   }
+}
+
+/** The level this page draws at: the address's, else the stored one. */
+export function currentDensity(): Density {
+  return forcedDensity() ?? storedDensity();
 }
 
 function apply(level: Density): void {
@@ -53,7 +56,7 @@ export function chooseDensity(level: Density): void {
   } catch {
     // Storage is blocked: the level applies until the page is reloaded.
   }
-  if (fromAddress()) {
+  if (forcedDensity()) {
     try {
       const url = new URL(location.href);
       url.searchParams.delete('density');

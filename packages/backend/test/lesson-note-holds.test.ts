@@ -1,4 +1,5 @@
-// "The only move that holds" in a Lesson note, against the Engine at verify mode's depth (issue #37).
+// "The only move that holds" and "any other move loses" in a Lesson note, against the Engine at
+// verify mode's depth (issue #37), single-threaded so the same position always gets the same lines.
 // The board checks of the notes (material, guards, the only legal move) are in
 // packages/shared/test/note-claims.test.ts; this is the one kind of claim only the Engine can judge:
 // the note's move holds, and every other legal move loses. "Loses" is the Lesson grades' own line:
@@ -16,6 +17,7 @@ import { VERIFY_ENGINE } from '../src/verify/instance.ts';
 const read = <T>(path: string): T => JSON.parse(readFileSync(new URL(`../../../data/lessons/${path}`, import.meta.url), 'utf8')) as T;
 const lessons = read<{ id: string }[]>('index.json').map(({ id }) => read<LessonData>(`${id}.json`));
 const holds = lessons.flatMap((l) => noteClaims(l).holds);
+const START = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
 /** Why the claim is false at `depth`, or undefined when the note's move is the only one that doesn't lose. */
 async function holdProblem(engine: Engine, claim: HoldClaim, depth: number): Promise<string | undefined> {
@@ -35,7 +37,16 @@ async function holdProblem(engine: Engine, claim: HoldClaim, depth: number): Pro
 
 describe('"the only move that holds" in Lesson notes', () => {
   it('finds the claims', () => {
-    expect(holds.map((h) => h.at)).toEqual(['minor-piece-endgames part 3 Bd3', 'minor-piece-endgames part 4 Kb1']);
+    expect(holds.map((h) => `${h.at}: ${h.phrase}`)).toEqual([
+      'pawn-promotion part 3 hxg6: Any other move loses',
+      'king-and-pawn part 3 Ke3: Any other move loses',
+      'decoy part 1 Rxg7: any other move allows mate',
+      'rook-endgames part 2 Rf8+: any other move here loses',
+      'minor-piece-endgames part 3 Bd3: It is the only move that holds',
+      'minor-piece-endgames part 4 Kd3: Any other move here loses',
+      'minor-piece-endgames part 4 Kb1: 53.Kb1 is the only move that holds',
+      'defending part 1 g3: It is the only good move',
+    ]);
   });
 
   it.each(holds.map((h) => [h.at, h] as const))('%s: every other move loses', async (_at, claim) => {
@@ -46,6 +57,14 @@ describe('"the only move that holds" in Lesson notes', () => {
     // The starting position: 1.e4 is far from the only move that doesn't lose.
     const claim: HoldClaim = { at: 'golden', phrase: '1.e4 is the only move that holds', fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1', uci: 'e2e4' };
     expect(await holdProblem(await createNodeEngine(1), claim, VERIFY_ENGINE.depth)).toMatch(/also hold$/);
+  });
+
+  it('fails on "any other move loses" where other moves hold', async () => {
+    const [claim] = noteClaims({
+      id: 'golden',
+      parts: [{ title: '', fen: START, side: 'white', keyIdea: '', credit: {}, mainLine: ['e2e4'], nodes: [{ ply: 0, fen: START, decision: true, main: 'e2e4', mainSan: 'e4', popular: {}, notes: { text: '1.e4 takes the centre. Any other move loses.' } }] }],
+    } as unknown as LessonData).holds;
+    expect(await holdProblem(await createNodeEngine(1), claim as HoldClaim, VERIFY_ENGINE.depth)).toMatch(/also hold$/);
   });
 
   it('fails on a real note whose move is not the one that holds', async () => {

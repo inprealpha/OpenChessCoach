@@ -53,12 +53,23 @@ A rule that only lives in a document gets broken. When agents repeat a mistake, 
 | Coach changes are checked against the real Coach before merging | `.github/coach-paths.txt`, the `touches-coach` label and the `real Coach` status (posted by the Verdict job, or from the desktop) |
 | Tests that call a real model use the latest Haiku (the `haiku` alias), never the app's per-job models | `scripts/test/real-coach-check.test.ts` (`CHECK_MODEL`) |
 | Typecheck, lint, tests, Player journeys and the build pass on every PR | `.github/workflows/ci.yml` |
+| A preview's pairing code never reaches a public log, a PR or a comment (ADR 0001) | `scripts/test/sandbox.test.ts` (`instabox.sh` in GitHub Actions mode, against a fake CLI) |
+| A preview runs the branch's code inside a bubble that can't see the box's home folder, temp folder, Secrets or other programs, can't reach Docker, and has none of the user's extra groups | `scripts/sandbox/preview.sh --sandbox` (bubblewrap) checks itself before the branch's code runs; `scripts/test/sandbox.test.ts` runs that check on CI's runner, whose user is in the docker group |
 | Work is verified in the running app before it is called done | Only this file and `.claude/skills/verify/SKILL.md`: read the skill before you open a PR |
 | Commits, PRs and comments carry no links to Claude sessions | Only this file (see below) |
 
 ## Verifying your work
 
 Read `.claude/skills/verify/SKILL.md` before calling anything done: it launches a disposable copy of the app (`npm run verify`), drives it with `coachctl`, and says what evidence a PR needs. Every PR that changes what a Player sees embeds, for each changed screen, a heading and one before-and-after picture, desktop and phone, inline in its description; section 4 of the skill says how to capture, upload and embed them. The feature map in `.claude/skills/verify/features/` says what proves each Player-facing feature works.
+
+## Previews
+
+When the owner would rather try a change than read about it (a screen, a flow, a Coach reply), ask
+for a preview: push the branch and add a line `Preview: on` to the PR's description, plus
+`Preview coach: real` when the Coach is the change. Where the repository has previews set up, the
+owner gets a link on their phone; where it doesn't, a comment on the PR says so, and screenshots
+show the change instead. Never ask for, print or pass on a preview's pairing code. The sandbox skill
+(`.claude/skills/sandbox/SKILL.md`) has the details.
 
 ## Closing an issue
 

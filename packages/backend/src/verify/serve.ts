@@ -17,7 +17,10 @@ if (!run) {
 }
 
 try {
+  // The real Coach only when the run asked for it (npm run verify -- --real-coach).
+  const coachPort = run.coach === 'real' ? new (await import('../coach/real.ts')).RealCoach() : undefined;
   const instance = await startVerifyInstance({
+    ...(coachPort ? { coachPort } : {}),
     seed: run.seed as Seed,
     dataDir: run.dataDir,
     ...(flags.port ? { port: Number(flags.port) } : {}),

@@ -51,9 +51,9 @@ A PR with nothing here gets the no-evidence label.
 real-Coach check from the desktop), deviations from the ticket, follow-ups. When the owner corrected
 you, list each lesson and where you encoded it: the code's structure, a lint or test, or prose. -->
 
-<!-- Preview, where the repository turns previews on (.claude/skills/sandbox/SKILL.md): ready PRs get
-one, and drafts with the "preview" label or a line "Preview: on". For another seed, add a line
-"Preview seed: empty" (or many-games, no-phone). -->
+<!-- Preview (.claude/skills/sandbox/SKILL.md): to ask for one, add a line "Preview: on" outside this
+comment, or the "preview" label. Optional lines: "Preview seed: empty" (or many-games, no-phone), and
+"Preview coach: real" when the Coach is the change (it spends the owner's Claude usage). -->
 
 <!-- New or changed Lesson text (data/lesson-sources/): say who compared it with the owner's books
 and found no copied or closely followed wording, examples or order (ADR 0012). -->

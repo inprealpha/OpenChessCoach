@@ -18,6 +18,9 @@ Options:
                       "many-games" adds 60 games, more than one page of the game list;
                       "no-phone" has no phone paired, so the main menu asks for one.
   --port <n>          Port to use (default: a free one, never the owner's 8737)
+  --real-coach        Use the real Coach instead of the fake one, through the Claude login or
+                      CLAUDE_CODE_OAUTH_TOKEN of the machine it runs on: it spends real usage. For
+                      a preview where the Coach is the change (.claude/skills/sandbox/SKILL.md).
   --state-dir <path>  Where run files go (default: .verify)
   --help              Show this help
 
@@ -29,7 +32,8 @@ function fail(error: string, fix: string): never {
   process.exit(1);
 }
 
-const { flags } = parseArgs(process.argv.slice(2), ['help']);
+const { flags } = parseArgs(process.argv.slice(2), ['help', 'real-coach']);
+const coach = flags['real-coach'] ? 'real' : 'fake';
 if (flags.help) {
   process.stdout.write(HELP);
   process.exit(0);
@@ -56,6 +60,7 @@ writeRun(runFile, {
   dataDir,
   evidenceDir,
   seed,
+  coach,
   startedAt: new Date().toISOString(),
   logFile,
 });
@@ -78,6 +83,7 @@ for (;;) {
           ok: true,
           runId,
           url: run.url,
+          coach,
           pairUrl: run.pairUrl,
           code: run.code,
           token: run.token,

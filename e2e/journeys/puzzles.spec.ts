@@ -401,23 +401,36 @@ test('on a phone the progress line shares the choice’s row, so the board start
       await current(paired, first.id);
       await expect(progress).toHaveText(/1 of \d+ done \(1 missed\)\./);
     }
-    for (const [width, height] of [[402, 714], [440, 790], [390, 844], [390, 664]] as const) {
-      await paired.setViewportSize({ width, height });
-      await expect(progress).toBeVisible();
-      const [c, p, b] = [await choice.boundingBox(), await progress.boundingBox(), await board.boundingBox()];
-      // One row: the progress line's middle is inside the choice's box, and the board starts under that row.
-      expect(p!.y + p!.height / 2, `${route} at ${width}×${height}`).toBeGreaterThan(c!.y);
-      expect(p!.y + p!.height / 2, `${route} at ${width}×${height}`).toBeLessThan(c!.y + c!.height);
-      expect(b!.y - (c!.y + c!.height), `${route} at ${width}×${height}`).toBeLessThan(12);
-      // The count shows whole, and the page never scrolls sideways.
-      await expect(progress).toHaveText(/\d+ of \d+ done/);
-      expect(await progress.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
-      expect(await paired.evaluate(() => document.documentElement.scrollWidth)).toBe(width);
-      // The set's name, which the progress line leaves out, shows whole in the heading, within the header line's row.
-      const heading = paired.getByRole('heading', { level: 1 });
-      expect(await heading.evaluate((el) => el.scrollHeight <= el.clientHeight + 1 && el.scrollWidth <= el.clientWidth + 1), `${route} at ${width}×${height}`).toBe(true);
-      expect((await paired.locator('header.frame-head').boundingBox())!.height).toBeLessThanOrEqual(44);
+    // In the app's font and in a wider one, as on GitHub's runner, where the count once overflowed.
+    for (const font of [null, WIDE_FONT]) {
+      await useFont(paired, font);
+      for (const [width, height] of [[402, 714], [440, 790], [390, 844], [390, 664]] as const) {
+        const where = `${route} at ${width}×${height}${font ? ' in a wide font' : ''}`;
+        await paired.setViewportSize({ width, height });
+        await expect(progress).toBeVisible();
+        const [c, p, b] = [await choice.boundingBox(), await progress.boundingBox(), await board.boundingBox()];
+        // One row: the progress line's middle is inside the choice's box, and the board starts under that row.
+        expect(p!.y + p!.height / 2, where).toBeGreaterThan(c!.y);
+        expect(p!.y + p!.height / 2, where).toBeLessThan(c!.y + c!.height);
+        expect(b!.y - (c!.y + c!.height), where).toBeLessThan(12);
+        expect(b!.y, where).toBeLessThanOrEqual(144);
+        // The choice keeps its tap target.
+        expect(c!.height, where).toBeGreaterThanOrEqual(44);
+        // The count shows whole, and the page never scrolls sideways.
+        await expect(progress).toHaveText(/\d+ of \d+ done/);
+        expect(await progress.evaluate((el) => el.scrollWidth <= el.clientWidth && el.scrollHeight <= el.clientHeight), where).toBe(true);
+        // With headroom: each of its phrases leaves a fifth of the slot, so a longer count or a wider font still fits.
+        const { slot, phrases } = await progress.evaluate((el) => ({ slot: el.clientWidth, phrases: [...el.querySelectorAll('.phrase')].map((s) => s.getBoundingClientRect().width) }));
+        expect(phrases.length, where).toBeGreaterThan(0);
+        expect(Math.max(...phrases) / slot, where).toBeLessThanOrEqual(0.8);
+        expect(await paired.evaluate(() => document.documentElement.scrollWidth), where).toBe(width);
+        // The set's name, which the progress line leaves out, shows whole in the heading, within the header line's row.
+        const heading = paired.getByRole('heading', { level: 1 });
+        expect(await heading.evaluate((el) => el.scrollHeight <= el.clientHeight + 1 && el.scrollWidth <= el.clientWidth + 1), where).toBe(true);
+        expect((await paired.locator('header.frame-head').boundingBox())!.height, where).toBeLessThanOrEqual(44);
+      }
     }
+    await useFont(paired, null);
   }
 });
 
@@ -610,3 +623,15 @@ async function solveStepwise(page: Page, moves: string[]): Promise<void> {
   }
 }
 
+/** A wider fallback font, like the ones on GitHub's runner, where the app's font names none that is installed. */
+const WIDE_FONT = '"DejaVu Sans", Verdana, sans-serif';
+
+/** Shows the page in a font, or back in the app's own with null. */
+async function useFont(page: Page, font: string | null): Promise<void> {
+  await page.evaluate((f) => {
+    document.getElementById('journey-font')?.remove();
+    if (!f) return;
+    const style = Object.assign(document.createElement('style'), { id: 'journey-font', textContent: `* { font-family: ${f} !important; }` });
+    document.head.append(style);
+  }, font);
+}

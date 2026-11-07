@@ -379,9 +379,10 @@
           {/each}
         </nav>
       </details>
-      <!-- On a phone the set's name is left to screen readers, so the line shares the choice's row. -->
+      <!-- On a phone the set's name is left to screen readers, so the line shares the choice's row; where the count is
+           too wide for what the choice leaves, the missed count goes under it, within the same row. -->
       <p id="puzzle-progress" class="muted small">
-        <span class="set-name">{lessonName ?? 'Every Lesson'}:</span> {here.done.length} of {here.count} done{here.missed.length ? ` (${here.missed.length} missed)` : ''}.
+        <span class="set-name">{lessonName ?? 'Every Lesson'}:</span> <span class="phrase">{here.done.length} of {here.count} done{here.missed.length ? '' : '.'}</span>{here.missed.length ? ' ' : ''}{#if here.missed.length}<span class="phrase">({here.missed.length} missed).</span>{/if}
       </p>
     </div>
   {/if}
@@ -500,8 +501,11 @@
     /* The progress line leaves the set's name to the heading, so the heading shows it whole: two lines fit in the
        header line's 44 px, where one would cut a long name short. */
     .frame-head > h1 { white-space: normal; line-height: 1.15; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
-    .picker { column-gap: 0.75rem; }
-    #puzzle-progress { flex: 1 1 0; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: right; }
+    .picker { column-gap: 0.75rem; align-items: center; }
+    /* The count takes what the choice leaves. It breaks only between its phrases, so a wide font or a long count takes
+       a second line, which still fits the choice's 44 px row. */
+    #puzzle-progress { flex: 1 1 0; min-width: 0; overflow: hidden; text-align: right; line-height: 1.25; }
+    #puzzle-progress .phrase { white-space: nowrap; }
     .set-name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   }
   /* Open, the sets take the whole width and the progress line goes under them; the summary stays where it was. */

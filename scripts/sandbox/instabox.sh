@@ -22,7 +22,7 @@ usage() {
   exit 2
 }
 command=${1:-}
-[ -n "$command" ] || usage
+case "$command" in up | down | status) ;; *) usage ;; esac
 shift
 while [ $# -gt 0 ]; do
   case "$1" in

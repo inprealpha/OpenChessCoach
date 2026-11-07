@@ -3,7 +3,7 @@
 // desktop's Engine gave the Coach's questions in that call (ADR 0010), or, for a Review's overview,
 // against the graded moves of the game its brief lists. Anything else is stripped. A Hint names no
 // move at all, in its words either (`namedMove`).
-import { legalMoves, playSan, playUci, positionKey } from '../chess.ts';
+import { legalMoves, piecesOf, playSan, playUci, positionKey } from '../chess.ts';
 import { threatFen, type Brief } from './brief.ts';
 import type { EngineMove } from './engine-tool.ts';
 import type { Arrow, CoachRawReply } from './types.ts';
@@ -114,23 +114,62 @@ function spellings(san: string, uci: string): { exact: string[]; anyCase: string
   return { exact: [...exact], anyCase: [uci, `${uci.slice(0, 2)}-${uci.slice(2)}`] };
 }
 
+/** Figurines read as SAN's letters: ♗xc6 is Bxc6, and a pawn's ♙e4 is e4. */
+const FIGURINES: Record<string, string> = { '♔': 'K', '♚': 'K', '♕': 'Q', '♛': 'Q', '♖': 'R', '♜': 'R', '♗': 'B', '♝': 'B', '♘': 'N', '♞': 'N', '♙': '', '♟': '' };
+const PIECE_WORDS: Record<string, RegExp> = {
+  king: /\bkings?\b/i,
+  queen: /\bqueens?\b/i,
+  rook: /\brooks?\b/i,
+  bishop: /\bbishops?\b/i,
+  knight: /\bknights?\b/i,
+  // "the c-pawn" too.
+  pawn: /\bpawns?\b/i,
+};
+const SAN_PIECES: Record<string, string> = { K: 'king', Q: 'queen', R: 'rook', B: 'bishop', N: 'knight' };
+const CAPTURE_WORDS = /\b(take|takes|taking|took|taken|capture|captures|capturing|captured|grab|grabs|grabbing|snap|snaps|snapping)\b/i;
+const CASTLE_WORDS = /\bcastl(e|es|ed|ing)\b/i;
+
 /**
- * The first move `text` names in `fen`, as `spellings` writes it, or undefined. A pawn's move to a
- * square is written as the square alone ("e5"), so that counts only for the Engine's own moves
- * (`engineMoves`): any other square ("your rook on g7", "the rook takes on g7") says where pieces
- * stand, which a Hint may, and the prompt keeps the move itself out of the words.
+ * The first move `text` names in `fen`, or undefined. A Hint keeps the move back, however it is written:
+ * - **Notation**: as `spellings` writes it, figurines included. A pawn's move to a square is written as
+ *   the square alone ("e5"), so that counts only for the Engine's own moves (`engineMoves`).
+ * - **Words**: a sentence that names a piece and a square that piece can legally move to here ("the
+ *   knight goes to f5", "the bishop can take on c6"), or a capture word, the piece it would take and
+ *   the square it stands on ("take the knight on c6"), or castling ("castle") when it is legal.
+ *
+ * What it leaves to the prompt, because the words carry no square: "the piece on the long diagonal",
+ * "a quiet king move". What it flags although it may only say where a piece stands: a sentence that
+ * names a piece and a square another piece of that kind could move to ("the bishop on c6" when one of
+ * the Player's bishops could take on c6). The Hint then says the general one, which gives nothing away.
+ * A square that only the piece named stands on ("watch your bishop on c6") is no move of it, so passes.
  */
 export function namedMove(text: string, fen: string, engineMoves: ReadonlySet<string>): string | undefined {
   const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\=-]/g, '\\$&');
+  const plain = text.replace(/[♔♕♖♗♘♙♚♛♜♝♞♟]/g, (f) => FIGURINES[f] ?? f);
+  const sentences = plain.split(/(?<=[.!?;:])\s+/);
+  const board = new Map(piecesOf(fen).map((p) => [p.square, p.role]));
   for (const uci of legalMoves(fen)) {
     const played = playUci(fen, uci);
     if (!played) continue;
     const { exact, anyCase } = spellings(played.san, played.uci);
     const words = exact.filter((s) => !SQUARE.test(s) || engineMoves.has(played.uci));
-    const found =
-      words.some((s) => new RegExp(`(?<![A-Za-z0-9])${escape(s)}(?![A-Za-z0-9])`).test(text)) ||
-      anyCase.some((s) => new RegExp(`(?<![A-Za-z0-9])${escape(s)}(?![A-Za-z0-9])`, 'i').test(text));
-    if (found) return played.san;
+    const written =
+      words.some((s) => new RegExp(`(?<![A-Za-z0-9])${escape(s)}(?![A-Za-z0-9])`).test(plain)) ||
+      anyCase.some((s) => new RegExp(`(?<![A-Za-z0-9])${escape(s)}(?![A-Za-z0-9])`, 'i').test(plain));
+    if (written) return played.san;
+    if (played.san.startsWith('O-O')) {
+      if (CASTLE_WORDS.test(plain)) return played.san;
+      continue;
+    }
+    const to = played.uci.slice(2, 4);
+    const mover = SAN_PIECES[played.san[0] ?? ''] ?? 'pawn';
+    const taken = board.get(to);
+    const said = sentences.some(
+      (s) =>
+        new RegExp(`(?<![A-Za-z0-9])${to}(?![A-Za-z0-9])`).test(s) &&
+        (PIECE_WORDS[mover]!.test(s) || (taken !== undefined && CAPTURE_WORDS.test(s) && PIECE_WORDS[taken]!.test(s))),
+    );
+    if (said) return played.san;
   }
   return undefined;
 }

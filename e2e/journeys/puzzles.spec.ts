@@ -390,10 +390,17 @@ test('on a phone the progress line shares the choice’s row, so the board start
   const board = paired.getByRole('group', { name: BOARD });
   const { choice } = picker(paired);
   const progress = paired.locator('#puzzle-progress');
-  // Every Lesson's Puzzles, the default, and the Lesson with the longest name.
-  for (const route of ['#/puzzles', '#/puzzles/rook-endgames']) {
+  // Every Lesson's Puzzles, the default, the Lesson with the longest name, and the Italian Game once a
+  // Puzzle is missed ("Italian Game: 1 of 28 done (1 missed).", which took a row of its own on main).
+  for (const route of ['#/puzzles', '#/puzzles/rook-endgames', '#/puzzles/italian-game']) {
     await paired.goto(`${app.url}/${route}`);
-    await current(paired);
+    const first = await current(paired);
+    if (route.endsWith('italian-game')) {
+      await showSolution(paired);
+      await paired.getByRole('button', { name: 'Next Puzzle' }).click();
+      await current(paired, first.id);
+      await expect(progress).toHaveText(/1 of \d+ done \(1 missed\)\./);
+    }
     for (const [width, height] of [[402, 714], [440, 790], [390, 844], [390, 664]] as const) {
       await paired.setViewportSize({ width, height });
       await expect(progress).toBeVisible();
@@ -435,6 +442,27 @@ test('a Hint whose words name the solution reaches the Player as a general Hint,
   const [call] = await app.rows<{ job: string; raw_reply: string; stripped: string }>('coach_calls');
   expect(JSON.parse(call!.raw_reply).text).toBe(said);
   expect(JSON.parse(call!.stripped)).toContain(`text names ${answer!.san}, which a Hint keeps back`);
+});
+
+test('a Hint that says the solution in words, or with a figurine, reaches the Player as a general Hint', async ({ paired, app }) => {
+  await paired.goto(`${app.url}/#/puzzles/italian-game`);
+  let puzzle = await current(paired);
+  const pieces: Record<string, [string, string]> = { K: ['king', '♔'], Q: ['queen', '♕'], R: ['rook', '♖'], B: ['bishop', '♗'], N: ['knight', '♘'] };
+  for (const style of ['words', 'figurine'] as const) {
+    const [, answer] = playLine(puzzle.fen, puzzle.moves);
+    const [word, figurine] = pieces[answer!.san[0] ?? ''] ?? ['pawn', ''];
+    const to = answer!.uci.slice(2, 4);
+    const said = style === 'words' ? `The ${word} belongs on ${to}, so look there.` : `Try ${figurine}${answer!.san.slice(word === 'pawn' ? 0 : 1)} now.`;
+    await app.script({ kind: 'reply', reply: { text: said, moves: [], arrows: [], highlights: [] } });
+    await paired.getByRole('button', { name: 'Hint', exact: true }).click();
+    await coachIdle(paired);
+    const conversation = paired.getByLabel('Coach conversation');
+    await expect(conversation, said).toContainText(HINT_FALLBACK);
+    await expect(conversation).not.toContainText(said);
+    await paired.getByRole('button', { name: 'Show the solution' }).click();
+    await paired.getByRole('button', { name: 'Next Puzzle' }).click();
+    puzzle = await current(paired, puzzle.id);
+  }
 });
 
 test('a Hint without the Coach says why, names no move, and Show the solution still works', async ({ paired, app }) => {

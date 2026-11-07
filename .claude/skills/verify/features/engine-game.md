@@ -47,57 +47,28 @@ back. A Hint first asks the Coach for the idea; a second press shows the Engine'
   saved; one saved only on the device is sent again once the desktop is back). A game over on the
   board but not saved as over (the app closed in between) ends when it is opened, with no page
   error.
-- A finished game ends on one card right under the board, all of it in the first screen on a phone
-  at 390×664 (an iPhone 13 in Safari), 402×714, 440×790 and 390×844, in a wider font too
-  (DejaVu Sans, as on a Linux runner) and with the result and the summary wrapped onto two lines
-  each; on the shorter phones the board gives up room for it (312 px wide at 390×664). `Game status` holds the result ("The Engine won by resignation.")
-  and one line: the moves played and the Move Grades that need a look, the worst first, counting
-  the Player's Move Grades already shown in the move list ("11 moves · 1 Mistake, 1 Inaccuracy",
-  "5 moves · 2 Blunders, 1 Mistake, 1 Inaccuracy", "2 moves · no Mistakes"; a move that never got
-  one isn't counted). Under it, on the card but outside `Game status` so a screen reader doesn't
-  read the card again when the link arrives: `Review this game` (or, while the desktop is away,
-  "Saved on this device." beside it, fitting the same first screen) and
-  `New game`, which starts a fresh game (the `Game options` menu goes once the game is over).
+- A finished game ends on one card right under the board (a 390×844 phone shows all of it).
+  `Game status` holds the result ("The Engine won by resignation."), "N moves · You played White ·
+  Engine: Beginner" and the list `Your Move Grades in this game`, counting the Player's Move Grades
+  already shown in the move list (`★ 3 Best`, `✓ 4 Good`, `?! 0 Inaccuracies`, `? 0 Mistakes`,
+  `?? 0 Blunders`; the symbols are hidden from screen readers, zero counts are in the muted text
+  colour and still meet WCAG AA, and a move that never got one isn't counted). Under it, on the
+  card but outside `Game status` so a screen reader doesn't read the card again when the link
+  arrives: `Review this game` (or "Saved on this device…") and `New game`, which starts a fresh
+  game (the `Game options` menu goes once the game is over).
 - Focus never drops to the page: after `Yes, resign` or an agreed draw it is on `Review this game`
   (`New game` while the game waits on the device); after New game, on the form's checked colour.
 - A game deleted from the game list still shows its card on the device that played it; its
   `Review this game` then says "That game is not in your game list." with `Back to the menu`.
-- The game steps through its moves, during play and once it is over: the step buttons in the thumb
-  bar (◀ ▶ on a phone, ⏮ ◀ ▶ ⏭ on a desktop), the keys ← → Home End ↑ ↓ (see
+- A finished game steps through its moves: the step buttons, the keys ← → Home End ↑ ↓ (see
   `board-and-engine.md`) and the move list's buttons, with the Move Grade symbol following the
-  step. During the Blunder pause the choice takes the steps' row, the keys and the move list wait
-  for it, and a look back taken while the move was graded ends, so the board shows the move the
-  choice is about and the choice is at the top of the panel.
-- Looking back during play changes nothing in the game: it stays at its latest position, where
-  its next move is played. A bar at the top of the panel, the group `Away from the game`, names
-  the position by the move that reached it ("Looking at 8. Bb3", "Looking at the start"), on a
-  desktop also "· The Engine has played 12… d5" once the Engine has replied meanwhile, and offers
-  `Back to the game`, after which the game's status is in view and the focus is on the board. If
-  the Engine moves while the Player looks back, the board stays where they are, except when that
-  move ends the game: then the board shows the final position the end-of-game card is about. The
-  game's own next move played on the board steps to it.
-  Away from the latest position the header line has no `Hint` or `Show threat`, and the board no
-  Hint, Coach or threat arrows.
-- Any other move on an earlier position during play starts the Player's own line (a variation,
-  the list `Variation from …`); the game's moves and its saved record are unchanged, and the
-  Engine's reply to the game still comes. The bar says "Your own line" ("after 8. Bb3" on a
-  desktop) with `Analyze` and `Back to the game`. Until `Analyze` the line shows no Move Grades
-  and no Winning Chances (the meter reads `Winning Chances bar: press Analyze to see them`), and
-  the browser's Engine searches none of its positions, so the game's search never waits behind
-  them. `Analyze` grades the line's moves (and those played on it afterwards), draws the
-  Engine's best move in green (`Engine’s best: …`), brings the bar back, and asks the Coach one
-  Why Question about the move shown, as a Review's variation does; then the button goes until the
-  board shows another position of the line. Moving pieces never calls the Coach. The line has a
-  Coach thread of its own, shown in the Coach panel while the board is on it: `Back to the game`
-  drops it, an answer still on its way included, and nothing said about the line reaches a brief
-  about the game (ADR 0009).
+  step. While the game is on there are no step buttons and the keys do nothing: the board always
+  shows the position to play from (`engine-game.spec.ts`, "a finished game steps through …").
 - A finished game's board is free to explore: a move there starts a variation (see
   `explore.md`), a piece picked up during the game is dropped when it ends, and a declined draw is
   no longer reported once the game ends. While the game is on, a refused move says why ("It’s the
   Engine’s move.", "Take the move back or carry on first."). It shows no arrows (Hint, Coach
-  or threat), the `Show threat` button goes, and so does the Coach panel: nothing the Coach said
-  during play (a Live Coaching comment, a Hint, "Move taken back.") is left, and the thumb bar
-  keeps the steps.
+  or threat), the `Show threat` button goes, and the Coach panel stays only if the Coach said something.
 - The game list, the Review and the PGN name the Engine by its level: `Engine (Beginner)`. Games
   saved as `Engine (level 1)` before levels were named read the same way.
 - Settings → Coach quality → Advanced chooses the Coach model per job; the chosen model is what the
@@ -107,10 +78,6 @@ back. A Hint first asks the Coach for the idea; a second press shows the Engine'
 
 Browser: `#/engine-game`, `Start the Engine Game` as White, play `g2g4` (a Mistake) to see Live
 Coaching, reload (the offer is still there), `Take the move back`, then `Game options` → `Resign` → `Yes, resign`. coachctl: `$C play --moves "e4 Nf3" --resign`.
-
-Looking back: a few moves in, press ← a few times, play a move that isn't the game's, then
-`Analyze`; `Back to the game` returns. To have the Engine reply while the Player looks back, the
-journeys hold the browser's Engine (`holdBrowserEngine` in `engine-game.spec.ts`).
 
 ## Proof
 
@@ -130,27 +97,6 @@ journeys hold the browser's Engine (`holdBrowserEngine` in `engine-game.spec.ts`
   desktop Engine's verdict on the position after 1. e4 and the Engine's reply; as Black it names
   Black and Black fills it from the bottom (`engine-game.spec.ts`, "the Winning Chances bar
   follows an Engine Game …").
-- During play, ← shows the position before the last move ("Looking at 1. e4"), Home the start
-  ("Looking at the start"), and End brings the game back, with its move list and saved moves
-  unchanged. Looking back at 1… e5 while the Engine replies to 3. Bc4, the board stays there and
-  the bar reads "Looking at 1… e5 · The Engine has played 3… Nf6"; on a 390×664 phone the bar's
-  first words and `Back to the game` are fully on screen. When the Engine's reply mates instead,
-  the board shows the final position (`engine-game.spec.ts`).
-- An `Analyze` answer that arrives after `Back to the game` never shows, and a Hint after it has
-  no summary of the line in its brief (`coach_calls`); during the Blunder pause a tap on the move
-  list doesn't look back (`engine-game.spec.ts`).
-- 2. d4 exd4 played on the position after 1… e5 shows `Variation move 2. d4` with no Move Grade,
-  no grade symbol and the meter `Winning Chances bar: press Analyze to see them`; no search of
-  those positions reached the browser's Engine, `coach_calls` is empty, and the saved game still
-  holds its six moves. After `Analyze`: both moves graded, one `Engine’s best: …` arrow, the
-  bar's percentage, and `coach_calls` holds exactly one `why` call; 3. Qxd4 afterwards is graded
-  with no new call (`engine-game.spec.ts`).
-- After resigning at move 11 the card reads "The Engine won by resignation." and "11 moves · 2
-  Blunders, 2 Mistakes, 2 Inaccuracies", with `Review this game` and `New game` fully on screen at
-  390×664, 402×714, 440×790 and 390×844; so do "The Engine won by checkmate." and "Draw by
-  threefold repetition.", in the app's font, in DejaVu Sans and with both lines wrapped. After a
-  Live Coaching comment and a take-back, nothing the Coach said is left once the game ends, after a
-  reload too (`engine-game.spec.ts`).
 - With Threat on, 1.e4 (the Engine answers 1...d5) shows `Threat: Black threatens dxe4 (d5 to e4)`,
   and 2.exd5 Nf6 shows `Threat: Black threatens Nxd5 (f6 to d5)` (`engine-game.spec.ts`).
 

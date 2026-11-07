@@ -20,7 +20,8 @@
     "lint": "eslint . && node scripts/glossary-lint.ts",
     "test": "vitest run",
     "test:journeys": "playwright test",
-    "check:paths": "node scripts/protected-paths.ts --check"
+    "check:paths": "node scripts/protected-paths.ts --check",
+    "wait:ci": "node scripts/wait-ci.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

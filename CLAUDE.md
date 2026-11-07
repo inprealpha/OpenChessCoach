@@ -37,6 +37,9 @@ A rule that only lives in a document gets broken. When agents repeat a mistake, 
 | The built Lesson data matches its sources | `.github/workflows/ci.yml` (rebuilds `data/lessons/` and fails on any difference) |
 | PRs merge on evidence from the running app (ADR 0006) | `.github/pull_request_template.md`, the `no-evidence` label (`scripts/pr-description.ts`), `.claude/skills/verify/` |
 | Every PR says which model made it, how it was tested and what wasn't; every ticked testing method has its proof in the Evidence section (ADR 0006) | `.github/pull_request_template.md`, the `no-testing-record` label (`scripts/pr-description.ts`, `scripts/test/pr-description.test.ts`), `.github/verdict-prompt.md` |
+| An agent merges a PR only when the owner approved it (`merge-approved` on every issue it closes, with the owner's words quoted), the Verdict on its head commit is `PASS`, CI passed, its record is complete and it touches no protected path; everything else waits for the owner (ADR 0014) | `scripts/pr-description.ts --may-merge` (`scripts/test/pr-description.test.ts`), `.claude/skills/build-a-feature/` |
+| Every PR names the issue it closes and proves every "Done means" check in its description | the `no-spec` and `unproven` labels (`scripts/pr-description.ts`, `scripts/test/pr-description.test.ts`) |
+| Review findings count only when a run shows them; no rounds of agents reading the diff (ADR 0014) | Only this file and `.claude/skills/build-a-feature/SKILL.md` (section 5) |
 | A PR that changes the app merges only with a Verdict on its head commit from a judge that didn't write it; a push voids it (ADR 0013) | `.github/workflows/verdict.yml`, the `Verdict` status `main` requires, `pr-labels.yml` (pending after a push), `scripts/test/verdict.test.ts` |
 | The judge runs once per finished PR: never on a draft or on a push, and within its run limits (ADR 0013) | `.github/workflows/verdict.yml` (its triggers, `MAX_RUNS_PER_PR`, `MAX_RUNS_PER_DAY`), `.github/no-verdict-paths.txt` (`scripts/test/protected-paths.test.ts`) |
 | Screens follow the interface guidelines: the board stays in view, every board that shows a position to learn from can be explored, the Ask box is docked beside the board, and one idea shows once | The guidelines' checklist in `docs/design/interface-guidelines.md`, which `.github/pull_request_template.md` and `.claude/skills/verify/SKILL.md` (section 4) ask every PR that changes what a Player sees to tick; otherwise only this file |
@@ -63,10 +66,14 @@ Read `.claude/skills/verify/SKILL.md` before calling anything done: it launches 
 
 1. Think: read the issue, `CONTEXT.md` and the ADRs it names.
 2. Implement it on a branch, with its tests.
-3. Review the branch against `main` with the `code-review` skill, and fix what holds up.
-4. Open the PR as a draft. Review again, verify in the running app (the verify skill), read CI, and fix. Repeat until a round finds nothing worth fixing and CI is green.
+3. Prove every "Done means" check in the running app (the verify skill). Review only what a run can show: act on a review finding, yours or the `code-review` skill's, only after a run confirms it (ADR 0014).
+4. Open the PR as a draft. Read CI and fix, until the evidence is complete and CI is green.
 5. Mark the PR ready for review. That starts the Verdict (ADR 0013), which costs the owner's Claude limits, so do it once, on the final commit. If the Verdict fails, fix it, push, and comment `/verdict` once.
-6. After a `PASS` or `PASS+NOTES`, the owner merges by hand (ADR 0006), unless they told you to merge.
+6. After a `PASS` or `PASS+NOTES`, the owner merges by hand (ADR 0006), unless the owner approved the merge: then follow section 8 of the `build-a-feature` skill (ADR 0014).
+
+## Building a feature
+
+When the owner says to go ahead with a feature you discussed ("build it out and merge it", "build it out and show me"), follow `.claude/skills/build-a-feature/SKILL.md`. The owner's words pick the track: merge once proven, or show a running copy first and merge only when the owner says so. When the words are unclear, show first.
 
 ## Commits and PRs
 

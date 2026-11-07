@@ -11,6 +11,7 @@
     type SettingsPatch,
   } from '@chess-coach/shared/protocol';
   import { api, ApiError } from '../lib/api.svelte.ts';
+  import { chooseDensity, DENSITIES, forcedDensity, storedDensity, type Density } from '../lib/density.ts';
   import { pairingCode } from '../lib/pairing-code.ts';
   import { router } from '../lib/router.svelte.ts';
 
@@ -23,6 +24,22 @@
   /** What came of the last change, shown in the card where the Player made it rather than at the foot of the page. */
   let outcome = $state<{ card: Card; text: string; failed: boolean } | null>(null);
   let confirmReset = $state(false);
+
+  // PROTOTYPE: the phone density levels to try (lib/density.ts, density.css). On this device only.
+  // The card shows the stored choice, so picking any level, the one a link forced included, stores it.
+  let density = $state<Density>(storedDensity());
+  /** The level a `?density=` link forces on this page, until a level is picked here. */
+  let forced = $state<Density | null>(forcedDensity());
+  const DENSITY_TEXT: Record<Density, { name: string; detail: string }> = {
+    today: { name: 'Today', detail: 'As the app is now.' },
+    compact: { name: 'Compact', detail: 'Slimmer buttons and a bigger board; every tap area stays 44 px, except the move list’s rows.' },
+    tight: { name: 'Tight', detail: 'Compact, plus smaller header and board tools and denser move rows. Main buttons keep 44 px.' },
+  };
+  function pickDensity(level: Density): void {
+    density = level;
+    forced = null;
+    chooseDensity(level);
+  }
 
   const code = $derived(pairing ? pairingCode(pairing.pairUrl) : '');
   const canCopy = typeof navigator !== 'undefined' && Boolean(navigator.clipboard);
@@ -134,6 +151,25 @@
 
 <section class="screen settings">
   <h1>Settings</h1>
+  <!-- PROTOTYPE: shown even when the desktop can't be reached, since it is stored on this device. -->
+  <fieldset class="card size" aria-label="Size">
+    <legend>Size</legend>
+    <p class="muted small">A prototype to try on a phone: how big the buttons and the board are drawn. On this device only; a desktop stays as it is.</p>
+    {#if forced && forced !== density}
+      <p class="small warning" data-testid="density-from-link">
+        This page shows {DENSITY_TEXT[forced].name} because the link asked for it. Your choice below is kept; pick one to use it.
+      </p>
+    {/if}
+    {#each DENSITIES as d (d)}
+      <label class="option">
+        <input type="radio" name="density" value={d} checked={density === d} onclick={() => pickDensity(d)} />
+        <span>
+          <strong>{DENSITY_TEXT[d].name}</strong>
+          <span class="muted small cost">{DENSITY_TEXT[d].detail}</span>
+        </span>
+      </label>
+    {/each}
+  </fieldset>
   {#if api.state !== 'online'}
     <p class="card">Settings live on your desktop, which can’t be reached right now.</p>
   {:else if settings && pairing}
@@ -323,6 +359,9 @@
   .option { display: flex; gap: 0.5rem; align-items: flex-start; margin: 0.5rem 0; }
   .option input { margin-top: 0.25rem; }
   .cost { display: block; }
+  /* PROTOTYPE: the Size card's radios keep their size beside two lines of text. */
+  .size .option input { flex: none; }
+  .size .option:last-child { margin-bottom: 0; }
   .advanced { margin-top: 0.8rem; }
   .advanced summary { cursor: pointer; font-weight: 600; }
   .warning { margin: 0.5rem 0 0; padding: 0.4rem 0.6rem; border-left: 3px solid #b26a00; background: color-mix(in srgb, #b26a00 10%, transparent); }

@@ -154,6 +154,8 @@ test('a finished Puzzleâ€™s board takes moves as a variation, and its solutionâ€
   const board = paired.getByRole('group', { name: BOARD });
   await expect(board).toHaveAttribute('data-fen', line[0]!.fenAfter);
 
+  // A Hint first, then the same button shows the solution.
+  await paired.getByRole('button', { name: 'Hint', exact: true }).click();
   await paired.getByRole('button', { name: 'Show the solution' }).click();
   await expect(paired.getByText('Here is the solution.')).toBeVisible();
   await paired.getByRole('button', { name: 'First position' }).click();

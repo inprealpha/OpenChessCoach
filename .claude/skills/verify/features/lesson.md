@@ -94,7 +94,11 @@ the order. `#/lessons?track=<track>` opens the catalogue at a track. Play it out
   buttons after another move.
 - While choosing, the one place to type is `Explain your thinking (optional)` (sent with the move;
   its example fits the Lesson, e.g. a pin in Pins, else its kind), a two-line box that wraps so the example shows
-  whole on any phone; the Coach's Why Question box appears once the move is graded.
+  whole on any phone; the Coach's Why Question box appears once the move is graded. It names the
+  move it asks about, the one just played on the board ("Ask why about 1. e4", or the Lesson's move
+  after `Continue with the Lesson’s move`), and once the Lesson is complete the variation's move or
+  "Ask about this position". It never names the Lesson's next move: there is no Ask box while a
+  decision waits or after another move.
 - While the Player's choice is shown, the board carries its Move Grade symbol on the square the
   move landed on (`Mistake on g4`, `Best on e4`; none for Good); `Try another move` and
   `Continue` clear it.

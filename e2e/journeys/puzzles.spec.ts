@@ -1,7 +1,9 @@
-// Feature map: Puzzles. Solve one, fail another and retry it, and read the attempts back.
+// Feature map: Puzzles. Solve one, fail another and retry it, and read the attempts back. A Hint
+// before Show the solution, the Ask box naming the move, and the phone's one row above the board.
 import { readFileSync } from 'node:fs';
 import type { Page } from '@playwright/test';
 import { legalMoves, moveLabel, outcomeOf, piecesOf, playLine, playUci, turnOf, type PlayedMove } from '../../packages/shared/src/chess.ts';
+import type { Brief } from '../../packages/shared/src/coach/brief.ts';
 import type { CatalogueItem } from '../../packages/shared/src/content/course.ts';
 import { TRACKS } from '../../packages/shared/src/content/lessons.ts';
 import type { PuzzleFile } from '../../packages/shared/src/content/puzzles.ts';
@@ -73,7 +75,7 @@ test('solve one Puzzle, then fail a second and retry it', async ({ paired, app }
   // A shown solution says so instead of still asking for the move.
   await paired.getByRole('button', { name: 'Next Puzzle' }).click();
   await current(paired, second.id);
-  await paired.getByRole('button', { name: 'Show the solution' }).click();
+  await showSolution(paired);
   await expect(paired.getByText('Here is the solution.')).toBeVisible();
   await expect(region).not.toContainText('Find the best move');
   await expect(region).toContainText(/The solution for (White|Black) is on the board\./);
@@ -96,7 +98,7 @@ test('on an iPhone, Next Puzzle shows under the board once the solution is shown
   await paired.goto(`${app.url}/#/puzzles/italian-game`);
   for (const [width, height] of [[402, 714], [440, 790]] as const) {
     await paired.setViewportSize({ width, height });
-    await paired.getByRole('button', { name: 'Show the solution' }).click();
+    await showSolution(paired);
     await expect(paired.getByText('Here is the solution.')).toBeAttached();
     const next = paired.getByRole('button', { name: 'Next Puzzle' });
     await expect(next).toBeInViewport({ ratio: 1 });
@@ -108,7 +110,7 @@ test('on an iPhone, Next Puzzle shows under the board once the solution is shown
 test('a shown Puzzle writes out its solution, and the Player can step through it', async ({ paired, app }) => {
   await paired.goto(`${app.url}/#/puzzles/italian-game`);
   const puzzle = await current(paired);
-  await paired.getByRole('button', { name: 'Show the solution' }).click();
+  await showSolution(paired);
   await expect(paired.getByText('Here is the solution.')).toBeVisible();
   const line = playLine(puzzle.fen, puzzle.moves);
   const region = paired.getByRole('region', { name: 'Puzzle' });
@@ -128,7 +130,7 @@ test('a shown Puzzle writes out its solution, and the Player can step through it
 test('a Why Question after a Puzzle shows the position it explains, with its arrows', async ({ paired, app }) => {
   await paired.goto(`${app.url}/#/puzzles/italian-game`);
   const puzzle = await current(paired);
-  await paired.getByRole('button', { name: 'Show the solution' }).click();
+  await showSolution(paired);
   await expect(paired.getByText('Here is the solution.')).toBeVisible();
   await paired.getByRole('button', { name: 'Ask the Coach why' }).click();
   await coachIdle(paired);
@@ -151,7 +153,7 @@ test('when a Lesson’s Puzzles run out, the missed ones can be tried again', as
   for (let i = 0; i < count; i++) {
     const p = await current(paired, missed.at(-1));
     missed.push(p.id);
-    await paired.getByRole('button', { name: 'Show the solution' }).click();
+    await showSolution(paired);
     await expect(paired.getByText('Here is the solution.')).toBeVisible();
     await paired.getByRole('button', { name: 'Next Puzzle' }).click();
   }
@@ -212,7 +214,7 @@ test('the Player chooses what to practise: every Lesson mixed, or one Theme, ope
   await paired.getByRole('button', { name: 'Next Puzzle' }).click();
   const second = await current(paired, puzzle.id);
   expect(second.lessonId).toBe('pins');
-  await paired.getByRole('button', { name: 'Show the solution' }).click();
+  await showSolution(paired);
   await expect(paired.getByText(`Pins: 2 of ${count('pins')} done (1 missed).`)).toBeVisible();
   await choice.click();
   await expect(sets.locator('[aria-current="page"]')).toHaveText(`Pins ${count('pins')} Puzzles · 2 done (1 missed)`);
@@ -313,6 +315,104 @@ test('a link to a Lesson without Puzzles, or to none, serves every Lesson’s Pu
     await expect(sets.locator('[aria-current="page"]')).toHaveText(`Mixed: every Lesson ${puzzles.length} Puzzles`);
   }
 });
+
+test('a Puzzle offers a Hint before Show the solution, from the Engine’s line, naming no move', async ({ paired, app }) => {
+  await paired.goto(`${app.url}/#/puzzles/italian-game`);
+  const puzzle = await current(paired);
+  const line = playLine(puzzle.fen, puzzle.moves);
+  const set = line[0]!.fenAfter;
+  const answer = line[1]!;
+  const boardEl = paired.getByRole('group', { name: BOARD });
+  const ask = paired.getByLabel('Your Why Question');
+  // A Hint first: Show the solution comes only after it, and no Ask box while the answer is still to find.
+  const hint = paired.getByRole('button', { name: 'Hint', exact: true });
+  await expect(hint).toBeVisible();
+  await expect(paired.getByRole('button', { name: 'Show the solution' })).toHaveCount(0);
+  await expect(ask).toHaveCount(0);
+  await hint.click();
+  await coachIdle(paired);
+  const said = paired.getByLabel('Coach conversation');
+  await expect(said).toContainText('Hint, please.');
+  // The Hint names and draws no move: not the answer's, nor any other.
+  const text = (await said.innerText()).replace('Hint, please.', '');
+  for (const m of legalMoves(set)) expect(text).not.toContain(playUci(set, m)!.san);
+  await expect(boardEl.getByRole('img', { name: /^Arrow / })).toHaveCount(0);
+  // The desktop's brief: a Hint about the Puzzle as set, from the Engine's line, whose best move is the solution's.
+  const calls = await app.rows<{ job: string; brief: string; raw_reply: string }>('coach_calls');
+  expect(calls.map((c) => c.job)).toEqual(['hint']);
+  const brief = JSON.parse(calls[0]!.brief) as Brief;
+  expect(brief).toMatchObject({ job: 'hint', fen: set, hideMoves: true, playerSide: turnOf(set) });
+  expect(brief).not.toHaveProperty('winningChances');
+  expect(brief.candidates[0]?.uci).toBe(answer.uci);
+  expect(JSON.parse(calls[0]!.raw_reply)).toMatchObject({ moves: [], arrows: [] });
+  await expect(ask).toHaveCount(0);
+
+  // The same button now shows the solution.
+  const show = paired.getByRole('button', { name: 'Show the solution' });
+  await expect(show).toBeFocused();
+  await show.click();
+  await expect(paired.getByText('Here is the solution.')).toBeVisible();
+  await expect.poll(async () => (await app.rows<{ solved: number }>('puzzle_attempts')).map((r) => r.solved)).toEqual([0]);
+
+  // The Ask box names the move a Why Question asks about: the solution's first move.
+  await expect(ask).toHaveAttribute('placeholder', `Ask why about ${moveLabel(answer.fenBefore, answer.san)}`);
+  await paired.getByRole('button', { name: 'Ask the Coach why' }).click();
+  await coachIdle(paired);
+  const why = (await app.rows<{ job: string; brief: string }>('coach_calls')).find((c) => c.job === 'why');
+  expect((JSON.parse(why!.brief) as Brief).move?.uci).toBe(answer.uci);
+  // In the Player's own variation, the move on the board.
+  await paired.getByRole('button', { name: 'First position' }).click();
+  const other = legalMoves(set).find((m) => m !== answer.uci)!;
+  await play(paired, other, BOARD);
+  const tried = playUci(set, other)!;
+  await expect(ask).toHaveAttribute('placeholder', `Ask why about ${moveLabel(tried.fenBefore, tried.san)}`);
+});
+
+test('a Puzzle of several moves offers a Hint again for each move to find', async ({ paired, app }) => {
+  await paired.goto(`${app.url}/#/puzzles/italian-game`);
+  let puzzle = await current(paired);
+  // The first Italian Game Puzzle with more than one move to find.
+  while (puzzle.moves.length < 4) {
+    await showSolution(paired);
+    await paired.getByRole('button', { name: 'Next Puzzle' }).click();
+    puzzle = await current(paired, puzzle.id);
+  }
+  await paired.getByRole('button', { name: 'Hint', exact: true }).click();
+  await expect(paired.getByRole('button', { name: 'Show the solution' })).toBeEnabled();
+  await solveStepwise(paired, puzzle.moves.slice(0, 3));
+  await expect(paired.getByRole('button', { name: 'Hint', exact: true })).toBeEnabled();
+  await expect(paired.getByRole('button', { name: 'Show the solution' })).toHaveCount(0);
+});
+
+test('on a phone the progress line shares the choice’s row, so the board starts right under it', async ({ paired, app }) => {
+  const board = paired.getByRole('group', { name: BOARD });
+  const { choice } = picker(paired);
+  const progress = paired.locator('#puzzle-progress');
+  // Every Lesson's Puzzles, the default, and the Lesson with the longest name.
+  for (const route of ['#/puzzles', '#/puzzles/rook-endgames']) {
+    await paired.goto(`${app.url}/${route}`);
+    await current(paired);
+    for (const [width, height] of [[402, 714], [440, 790], [390, 844], [390, 664]] as const) {
+      await paired.setViewportSize({ width, height });
+      await expect(progress).toBeVisible();
+      const [c, p, b] = [await choice.boundingBox(), await progress.boundingBox(), await board.boundingBox()];
+      // One row: the progress line's middle is inside the choice's box, and the board starts under that row.
+      expect(p!.y + p!.height / 2, `${route} at ${width}×${height}`).toBeGreaterThan(c!.y);
+      expect(p!.y + p!.height / 2, `${route} at ${width}×${height}`).toBeLessThan(c!.y + c!.height);
+      expect(b!.y - (c!.y + c!.height), `${route} at ${width}×${height}`).toBeLessThan(12);
+      // The count shows whole, and the page never scrolls sideways.
+      await expect(progress).toHaveText(/\d+ of \d+ done/);
+      expect(await progress.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
+      expect(await paired.evaluate(() => document.documentElement.scrollWidth)).toBe(width);
+    }
+  }
+});
+
+/** Shows a Puzzle's solution: a Hint first, then the same button shows the solution. */
+async function showSolution(page: Page): Promise<void> {
+  await page.getByRole('button', { name: 'Hint', exact: true }).click();
+  await page.getByRole('button', { name: 'Show the solution' }).click();
+}
 
 /** The choice of what to practise: a disclosure holding a link per set. */
 function picker(page: Page) {

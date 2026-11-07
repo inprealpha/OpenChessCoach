@@ -40,6 +40,7 @@
   import { sheet } from '../lib/sheet.svelte.ts';
   import { api } from '../lib/api.svelte.ts';
   import { lessonArrows, lessonHighlights } from '../lib/arrows.ts';
+  import { askAbout } from '../lib/ask.ts';
   import { CoachThread } from '../lib/coach.svelte.ts';
   import { lessonCatalogue, loadLesson } from '../lib/content.ts';
   import { gradeForCoach } from '../lib/engine/engine.svelte.ts';
@@ -518,6 +519,14 @@
     }
   }
 
+  /**
+   * The Ask box names the move `why` asks about: the move just played on the board (the Player's, or the Lesson's once
+   * shown), or the variation's move once the Lesson is complete. Never the Lesson's next move (ADR 0012): the box
+   * shows only once the decision's move is on the board.
+   */
+  const askedMove = $derived(phase === 'done' ? (variation.active ? variation.line.lastMove : undefined) : phase === 'feedback' || phase === 'shown' ? line.lastMove : undefined);
+  const askPlaceholder = $derived(askAbout(askedMove));
+
   /** The side the Player plays in this part. */
   const playerSide = $derived(part?.side ?? lesson?.side ?? 'white');
   /** The position on the board: the Lesson's, or the Player's variation once the Lesson is complete. */
@@ -805,7 +814,7 @@
           {#snippet variationSteps(part: 'back' | 'on')}
             <StepButtons only={part} onfirst={() => stepVariation('first')} onprevious={() => stepVariation('previous')} onnext={() => stepVariation('next')} onlast={() => stepVariation('last')} />
           {/snippet}
-          <CoachPanel thread={coach} onwhy={phase === 'decide' || otherMove ? undefined : why} steps={phase === 'done' && variation.active ? variationSteps : undefined} />
+          <CoachPanel thread={coach} onwhy={phase === 'decide' || otherMove ? undefined : why} placeholder={askPlaceholder} steps={phase === 'done' && variation.active ? variationSteps : undefined} />
         </div>
       </div>
     {/if}

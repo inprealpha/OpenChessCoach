@@ -9,7 +9,7 @@
 // or Good). Goals and key ideas are read from the data, never written here.
 import { readFileSync } from 'node:fs';
 import type { Page } from '@playwright/test';
-import { legalMoves, piecesOf, playUci, sanLine } from '../../packages/shared/src/chess.ts';
+import { legalMoves, moveLabel, piecesOf, playUci, sanLine } from '../../packages/shared/src/chess.ts';
 import type { Brief } from '../../packages/shared/src/coach/brief.ts';
 import { LEVEL_NAMES, suggestNext, TRACK_NAMES, type CatalogueItem } from '../../packages/shared/src/content/course.ts';
 import { BANDS, decisions, TRACKS, type LessonData } from '../../packages/shared/src/content/lessons.ts';
@@ -598,6 +598,30 @@ async function lessonBriefs(app: { rows<T>(table: string): Promise<T[]> }): Prom
   return (await app.rows<{ job: string; brief: string }>('coach_calls')).filter((c) => c.job === 'lesson-turn').map((c) => JSON.parse(c.brief) as Brief);
 }
 
+test('the Ask box names the move the Player just played, and shows only once the decision is made', async ({ paired, app }) => {
+  const lesson = readLesson('italian-game');
+  const [first] = decisions(lesson);
+  const boardName = `${lesson.name} Lesson board`;
+  await paired.goto(`${app.url}/#/lesson/${lesson.id}`);
+  await paired.getByRole('button', { name: 'Start the Lesson' }).click();
+  const ask = paired.getByLabel('Your Why Question');
+  // While the Player decides there is no Ask box, so nothing can name the Lesson's move (ADR 0012).
+  await expect(paired.getByText('What are your options here?')).toBeVisible();
+  await expect(ask).toHaveCount(0);
+  await play(paired, first!.node.main, boardName);
+  await coachIdle(paired);
+  const label = moveLabel(first!.node.fen, first!.node.mainSan);
+  await expect(ask).toHaveAttribute('placeholder', `Ask why about ${label}`);
+  // The Why Question asks about the move the box names.
+  await paired.getByRole('button', { name: 'Ask the Coach why' }).click();
+  await coachIdle(paired);
+  const why = (await app.rows<{ job: string; brief: string }>('coach_calls')).find((c) => c.job === 'why');
+  expect((JSON.parse(why!.brief) as Brief).move?.uci).toBe(first!.node.main);
+  await paired.getByRole('button', { name: 'Continue', exact: true }).click();
+  await expect(paired.getByText(`Decision 2 of ${decisions(lesson).length}`)).toBeVisible();
+  await expect(ask).toHaveCount(0);
+});
+
 test('a poor move that isn’t the Lesson’s keeps the answer back, and Continue with the Lesson’s move then shows it with its note', async ({ paired, app }) => {
   const lesson = readLesson('italian-game');
   const steps = decisions(lesson);
@@ -633,7 +657,8 @@ test('a poor move that isn’t the Lesson’s keeps the answer back, and Continu
   if (node.popular.casual.length) await expect(shown.getByRole('table', { name: 'Move popularity at your level' })).toBeVisible();
   await expect(paired.getByRole('group', { name: boardName })).toHaveAttribute('data-fen', playUci(node.fen, node.main)!.fenAfter);
   await expect(paired.getByRole('group', { name: boardName }).getByRole('img', { name: /^(Best|Inaccuracy|Mistake|Blunder) on / })).toHaveCount(0);
-  await expect(paired.getByLabel('Your Why Question')).toBeVisible();
+  // The Ask box names the Lesson's move, now on the board.
+  await expect(paired.getByLabel('Your Why Question')).toHaveAttribute('placeholder', `Ask why about ${moveLabel(node.fen, node.mainSan)}`);
   const go = shown.getByRole('button', { name: 'Continue', exact: true });
   await expect(go).toBeFocused();
   await go.click();

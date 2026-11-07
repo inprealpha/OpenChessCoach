@@ -38,6 +38,9 @@ scripts/verdict.ts
 scripts/before-after.ts
 scripts/pr-description.ts
 
+# Sandbox setup: runs on every agent machine
+scripts/sandbox/
+
 # The verification skills and feature map
 .claude/skills/verify/
 .claude/skills/real-coach-check/

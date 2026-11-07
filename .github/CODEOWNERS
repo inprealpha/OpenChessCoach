@@ -27,5 +27,6 @@
 /scripts/verdict.ts @inprealpha
 /scripts/before-after.ts @inprealpha
 /scripts/pr-description.ts @inprealpha
+/scripts/sandbox/ @inprealpha
 /.claude/skills/verify/ @inprealpha
 /.claude/skills/real-coach-check/ @inprealpha

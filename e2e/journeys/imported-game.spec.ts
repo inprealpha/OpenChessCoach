@@ -612,6 +612,11 @@ test('a Review shows one number per position, and an open key moment shows its p
   await expect(paired.getByLabel('Coach conversation')).toContainText('Before it, White’s winning chances: 35%. After it, White’s winning chances: 19%.');
   await pickMove(paired, 'Move 11… Rxf7, Best');
   await expectShown('11… Rxf7', '35%');
+  // Turned to Black's side, the bar still names White's, as the graph does (#52); only its fill turns.
+  await paired.getByRole('button', { name: 'Flip board' }).click();
+  await expectShown('11… Rxf7', '35%');
+  await expect(bar.getByTestId('bar-fill')).toHaveAttribute('data-side', 'black');
+  await paired.getByRole('button', { name: 'Flip board' }).click();
 
   // The position after 10… dxe4: its symbol, and Black's threat with Threat on.
   await pickMove(paired, 'Move 10… dxe4, Best');

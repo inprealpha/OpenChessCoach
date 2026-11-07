@@ -49,3 +49,22 @@ export function renameFold(old: string, name: string): void {
     // Storage is blocked: nothing was remembered under either name.
   }
 }
+
+/** Which of `options` the Player last picked for `name` (a panel's tab) on this device, or `fallback`. */
+export function choiceOf<T extends string>(name: string, options: readonly T[], fallback: T): T {
+  try {
+    const v = localStorage.getItem(`choice:${name}`);
+    return options.find((o) => o === v) ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+/** Remembers the Player's pick for `name`. */
+export function rememberChoice(name: string, value: string): void {
+  try {
+    localStorage.setItem(`choice:${name}`, value);
+  } catch {
+    // Storage is blocked: the pick still holds, it just isn't remembered.
+  }
+}

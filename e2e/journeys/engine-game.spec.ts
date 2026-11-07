@@ -399,6 +399,39 @@ for (const [width, height] of [[390, 664], [402, 714], [440, 790], [390, 844]] a
   }
 }
 
+// A finished game reopened shows its whole card too (the Verdict's note on #72): after a reload, and
+// coming back to it with Back, Forward and the main menu. The move list once scrolled the panel to the
+// last move as the screen opened, which hid the result under the sheet's top edge.
+for (const [width, height] of [[390, 664], [402, 714], [440, 790], [390, 844]] as const) {
+  test(`on a phone at ${width}×${height}, a finished game reopened shows its whole end-of-game card`, async ({ paired, app }) => {
+    await paired.setViewportSize({ width, height });
+    const [ending] = ENDINGS;
+    await putGameOnDevice(paired, app.url, 'white', [...ending.moves], ending.moves.map((_, i) => (i % 2 ? undefined : ending.playerGrades[i / 2])));
+    const status = paired.getByRole('status', { name: 'Game status' });
+    await expect(status).toContainText('Your move');
+    await resign(paired);
+    const card = status.locator('xpath=..');
+    const wholeCard = async (how: string) => {
+      await expect(status).toContainText(ending.headline);
+      await expect(card.getByRole('link', { name: 'Review this game' })).toBeVisible();
+      for (const part of [status.getByText(ending.headline), status.getByText(ending.summary), card.getByRole('link', { name: 'Review this game' }), card.getByRole('button', { name: 'New game' })]) {
+        await expect(part, how).toBeInViewport({ ratio: 1 });
+      }
+    };
+    await wholeCard('when the game ends');
+    await paired.reload();
+    await wholeCard('after a reload');
+    await paired.evaluate(() => (location.hash = '#/'));
+    await expect(paired.getByRole('navigation', { name: 'Main menu' })).toBeVisible();
+    await paired.goBack();
+    await wholeCard('after Back');
+    await paired.goForward();
+    await expect(paired.getByRole('navigation', { name: 'Main menu' })).toBeVisible();
+    await paired.getByRole('navigation', { name: 'Main menu' }).getByRole('link', { name: /Play a game/ }).click();
+    await wholeCard('from the main menu');
+  });
+}
+
 // The end-of-game card while the game waits on this device, the desktop away (independent review, R4):
 // the note takes Review this game's place, and the card fits as it does online, its lines wrapped too.
 for (const [width, height] of [[390, 664], [402, 714], [440, 790], [390, 844]] as const) {

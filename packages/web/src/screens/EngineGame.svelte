@@ -800,10 +800,11 @@
           {#if !finished && !away}
             <label class="toggle"><input type="checkbox" checked={game.live} onchange={toggleLive} /> Live Coaching in this game</label>
           {/if}
-          <!-- At the game's latest position the panel stays on the game's status, its choice to take a
-               move back above all: the board shows the move just played. Steps keep their move in view. -->
+          <!-- At the game's latest position the panel stays on the game's status: its choice to take a
+               move back above all during play, and once it is over the end-of-game card, whole, also
+               when the finished game is reopened. Steps away from it keep their move in view. -->
           <MoveList
-            followInPanel={finished || away}
+            followInPanel={away || (finished && (variation.active || line.cursor < line.moves.length))}
             moves={line.moves}
             grades={game.grades}
             cursor={gameCursor}

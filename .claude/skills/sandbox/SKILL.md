@@ -53,12 +53,15 @@ bash scripts/sandbox/instabox.sh down [--box NAME] [--delete]
 ```
 
 - `up` previews a branch as it is on GitHub (the current branch by default, so push first). It
-  creates the box `occ-preview` or wakes it, checks the branch out, runs `preview.sh`, publishes port
+  creates the box `my-instabox` or wakes it, checks the branch out, runs `preview.sh`, publishes port
   8790 and prints the link. `--notify` sends the link with `telegram-notify`. Its last line on stdout
   is JSON with `link`, which holds the pairing code.
 - Running `up` again on the same box replaces the preview and keeps the same link host.
-- `down` cleans the box, unpublishes the port and pauses the box; `--if-ref BRANCH` does it only when
-  the box is showing that branch; `--delete` deletes the box. `status` shows the branch it is showing
+- `down` stops the preview, cleans the box and unpublishes the port; `--if-ref BRANCH` does it only
+  when the box is showing that branch. It leaves the box on, because the owner uses `my-instabox` for
+  other work too; `--pause` pauses it and `--delete` deletes it.
+- The box is shared, so `up` removes any Secrets selected on it and says which: a preview runs PR
+  code, which must never reach the owner's credentials. Select them again afterwards when needed. `status` shows the branch it is showing
   and how full its disk is.
 - `--notify` uses `telegram-notify` when it is installed, else `TELEGRAM_BOT_TOKEN` and
   `TELEGRAM_CHAT_ID`. In GitHub Actions (`GITHUB_ACTIONS=true`) the link is never printed, and the

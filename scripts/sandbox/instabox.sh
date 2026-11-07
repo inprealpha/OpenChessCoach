@@ -3,22 +3,26 @@
 # can open on a phone. Runs where the instabox CLI is signed in (instabox login, or INSTABOX_API_KEY
 # in CI). The box gets no Secrets: previews use verify mode's fake Coach and fake data.
 #   bash scripts/sandbox/instabox.sh up [--ref BRANCH] [--seed NAME] [--box NAME] [--notify]
-#   bash scripts/sandbox/instabox.sh down [--box NAME] [--if-ref BRANCH] [--delete]
+#   bash scripts/sandbox/instabox.sh down [--box NAME] [--if-ref BRANCH] [--pause | --delete]
 #   bash scripts/sandbox/instabox.sh status [--box NAME]
 # up prints the link, with the pairing code in it, and ends with one JSON line. The link goes only to
 # the owner (--notify sends it with telegram-notify, or with TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID
 # in CI), never into a PR or anywhere public (ADR 0001). In GitHub Actions, whose logs are public,
 # the link is never printed and the JSON line has no link.
-# down cleans the box (clean.sh), unpublishes the port and pauses the box; with --if-ref, only when
-# the box is showing that branch. The free plan has one box in all: every preview reuses it.
+# down stops the preview, cleans the box (clean.sh) and unpublishes the port; with --if-ref, only when
+# the box is showing that branch. It leaves the box running for whatever else uses it (InstaBox pauses
+# it after 30 idle minutes); --pause pauses it, --delete deletes it.
+# The box is shared: the free plan has one box in all, and the owner uses it for other work too. So
+# up clears the box's Secrets (PR code must never reach the owner's credentials) and says which.
 
-box=${INSTABOX_PREVIEW_BOX:-occ-preview}
+box=${INSTABOX_PREVIEW_BOX:-my-instabox}
 repo=${OCC_REPO_URL:-https://github.com/inprealpha/OpenChessCoach.git}
 port=8790
 seed=default
 ref=
 notify=0
 delete=0
+pause=0
 if_ref=
 # GitHub Actions logs are public: the pairing code must never reach them.
 ci=0
@@ -38,6 +42,7 @@ while [ $# -gt 0 ]; do
     --seed) [ -n "${2:-}" ] || usage; seed=$2; shift 2 ;;
     --notify) notify=1; shift ;;
     --delete) delete=1; shift ;;
+    --pause) pause=1; shift ;;
     --if-ref) [ -n "${2:-}" ] || usage; if_ref=$2; shift 2 ;;
     *) usage ;;
   esac
@@ -87,7 +92,11 @@ case "$command" in
       *) instabox resume "$box" >&2 || instabox wake "$box" >&2 || exit 1 ;;
     esac
     # Previews never hold the owner's credentials, even on a box that had a Secret selected before.
+    selected=$(instabox secrets show "$box" 2>/dev/null | sed -n 's/^Selection: //p')
     instabox secrets select "$box" --secrets none >/dev/null || { echo "instabox: could not clear the box's Secrets" >&2; exit 1; }
+    if [ -n "$selected" ] && [ "$selected" != "[]" ]; then
+      echo "instabox: removed the Secrets $selected from $box, since a preview runs PR code; select them again after the preview if you need them" >&2
+    fi
 
     instabox exec "$box" --timeout 300 -- "set -e
       [ -d ~/OpenChessCoach/.git ] || git clone -q '$repo' ~/OpenChessCoach
@@ -147,8 +156,10 @@ case "$command" in
     instabox port unpublish "$box" "$port" >/dev/null 2>&1 || true
     if [ "$delete" = 1 ]; then
       instabox rm --yes "$box" >&2
-    else
+    elif [ "$pause" = 1 ]; then
       instabox suspend "$box" >&2
+    else
+      echo "instabox: the preview on $box is down; the box stays on for other work and pauses itself when idle" >&2
     fi ;;
 
   status)

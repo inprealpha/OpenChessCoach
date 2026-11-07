@@ -45,15 +45,24 @@ Optional lines: `Preview seed: NAME` when another seed shows the change better, 
   `port`, `coach`, `commit`, `doctor`, and `pairPath` (`/#pair=<code>`) only when `ok` is true. A
   failed run is stopped, and the JSON then has only `error` and the failed doctor checks.
 - **The bubble (`--sandbox`):** the branch's code (the install, the build, verify mode, doctor) runs
-  inside a bubblewrap bubble, installed when missing. It sees the system's programs read-only, the
+  inside a bubblewrap bubble, installed when missing. It sees the system's files read-only, the
   checkout, and a home folder and `/tmp` of its own (`~/.occ-preview-sandbox`). It doesn't see the
-  machine's other files, its temp folder, its Secrets' placeholders (`/run/instabox/secrets`) or its
-  other programs: it has its own process list, so it can't read other programs' environments. Its
-  environment is cleared, except the proxy's certificate settings, and `CLAUDE_CODE_OAUTH_TOKEN` with
-  `--real-coach`. bwrap needs sudo without a password to give the bubble its own process list (InstaBox
-  boxes mount over a file in `/proc`, which stops an unprivileged bubble doing that); everything inside
-  runs as the machine's user, with no capabilities and no way back to root. The bubble stays open with
-  the preview in it until `clean.sh` ends it, and with it everything the branch started.
+  user's home folder, the machine's temp folder (`/data/tmp`), its Secrets' placeholders
+  (`/run/instabox/secrets`), the user's runtime folder (`/run/user`) or its other programs: it has its
+  own process list, so it can't read other programs' environments. Docker's socket and other container
+  engines' are covered up, and the bubble runs with none of the user's extra groups (on InstaBox the
+  user is in `docker`, which works like root). Its environment is cleared, except the proxy's
+  certificate settings, and `CLAUDE_CODE_OAUTH_TOKEN` with `--real-coach`. bwrap needs sudo without a
+  password to give the bubble its own process list (InstaBox boxes mount over a file in `/proc`, which
+  stops an unprivileged bubble doing that); everything inside runs as the machine's user, with no
+  capabilities and no way back to root. Before the branch's code runs, the bubble checks all of this
+  itself and the preview stops if anything is wrong (`preview.sh --check-bubble` runs only that check).
+  The bubble stays open with the preview in it until `clean.sh` ends it, and with it everything the
+  branch started.
+- **What the bubble doesn't stop:** it shares the machine's network, since it serves the preview's
+  port, so it can reach services listening on the machine's localhost. And it can read the system's
+  world-readable files (`/etc`, other users' public folders). Keep nothing secret in those on a box
+  that previews branches.
 - **`--real-coach`:** verify mode's real Coach (`npm run verify -- --real-coach`), through
   `CLAUDE_CODE_OAUTH_TOKEN`. It spends real Claude usage. The preview fails unless doctor reports the
   Coach ready, which means Claude Code is found in the bubble and a token is there; whether the token

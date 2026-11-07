@@ -115,6 +115,19 @@ describe('preview.sh and instabox.sh', () => {
     expect(badRef.status).toBe(2);
     expect(badRef.stderr).toContain('branch name');
   });
+
+  // The bubble needs sudo without a password, as on InstaBox and GitHub's runners, whose user is in
+  // the docker group: the case where a bubble that kept the user's groups could start a container
+  // and read everything it hides. On a desktop that asks for a password, this skips.
+  const canSudo = process.platform === 'linux' && spawnSync('sudo', ['-n', 'true']).status === 0;
+  it.skipIf(!canSudo)('seal the bubble: no extra groups, no Docker socket, no home folder, no way to root', () => {
+    const repo = folder();
+    writeFileSync(join(repo, 'package.json'), '{}');
+    const r = spawnSync('bash', [preview, '--check-bubble', '--repo', repo], { encoding: 'utf8', timeout: 170_000 });
+    const groups = spawnSync('id', ['-G'], { encoding: 'utf8' }).stdout.trim();
+    expect(r.stdout.trim().split('\n').at(-1), `${r.stderr}\n(the user's groups outside: ${groups})`).toBe('{"ok":true}');
+    expect(r.status).toBe(0);
+  }, 180_000);
 });
 
 describe('clean.sh', () => {

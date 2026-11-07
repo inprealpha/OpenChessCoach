@@ -3,17 +3,24 @@
 # (seeded data, the fake Coach unless --real-coach) on a fixed port and checks it with coachctl
 # doctor. A provider's script (instabox.sh) runs it on a box and gives the port a link.
 #   bash scripts/sandbox/preview.sh [--repo DIR] [--sandbox] [--seed NAME] [--port N] [--real-coach]
+#   bash scripts/sandbox/preview.sh --check-bubble [--repo DIR]
 #     --repo DIR     the checkout to preview (default: the one this script is in). instabox.sh runs
 #                    the base branch's copy of this script against the PR's checkout.
 #     --sandbox      this machine is a sandbox: clean up earlier previews first (clean.sh), and run the
-#                    branch's code inside a bubblewrap bubble (installed when missing) that sees only
-#                    the checkout, an empty home of its own and the system's programs: none of the
-#                    machine's other files, its Secrets' placeholders or its other programs. It needs
-#                    sudo without a password: Linux lets only root give the bubble its own process
-#                    list on a machine that mounts over files in /proc, as InstaBox boxes do. The
-#                    branch's code still runs as this user, with no way back to root.
+#                    branch's code inside a bubblewrap bubble (installed when missing). The bubble
+#                    sees the checkout, an empty home and /tmp of its own, and the system's files
+#                    read-only. It doesn't see this user's home folder, the machine's temp folder, its
+#                    Secrets' placeholders, its other programs or the Docker socket, and it runs with
+#                    none of this user's extra groups (such as docker). It shares the machine's
+#                    network, so it can reach services on localhost. It needs sudo without a
+#                    password: Linux lets only root give the bubble its own process list on a machine
+#                    that mounts over files in /proc, as InstaBox boxes do. The branch's code still
+#                    runs as this user, with no way back to root.
 #     --real-coach   verify mode uses the real Coach: the bubble gets CLAUDE_CODE_OAUTH_TOKEN (on
 #                    InstaBox, a Secret's placeholder) and nothing else of the machine's. Real usage.
+#     --check-bubble only build the bubble and run its self-check (no install, no preview): the last
+#                    line is {"ok":true} or {"ok":false,"error":"…"}. Every --sandbox preview runs the
+#                    same check first.
 # Progress goes to stderr. The last line on stdout is one JSON object:
 #   {"ok":true,"runId":"run-…","port":8790,"coach":"fake","pairPath":"/#pair=CODE","commit":"…","doctor":{"ok":true,"failed":[]}}
 # pairPath holds the pairing code: it goes only to the owner, never anywhere public (ADR 0001). It is
@@ -25,7 +32,8 @@ sandbox=0
 seed=default
 port=8790
 coach=fake
-usage() { echo "usage: bash scripts/sandbox/preview.sh [--repo DIR] [--sandbox] [--seed NAME] [--port N] [--real-coach]" >&2; exit 2; }
+check_only=0
+usage() { echo "usage: bash scripts/sandbox/preview.sh [--repo DIR] [--sandbox] [--seed NAME] [--port N] [--real-coach] | --check-bubble [--repo DIR]" >&2; exit 2; }
 while [ $# -gt 0 ]; do
   case "$1" in
     --repo) [ -n "${2:-}" ] || usage; repo=$2; shift 2 ;;
@@ -33,6 +41,7 @@ while [ $# -gt 0 ]; do
     --seed) [[ "${2:-}" =~ ^[a-z-]+$ ]] || usage; seed=$2; shift 2 ;;
     --port) [[ "${2:-}" =~ ^[0-9]+$ ]] || usage; port=$2; shift 2 ;;
     --real-coach) coach=real; shift ;;
+    --check-bubble) check_only=1; sandbox=1; shift ;;
     *) usage ;;
   esac
 done
@@ -58,7 +67,7 @@ fi
 
 # What runs the branch's code: directly on a desktop, inside a bubble on a sandbox.
 if [ "$sandbox" = 1 ]; then
-  bash "$here/clean.sh" --sandbox --repo "$repo" || failure "the disk is too full for a preview: see the lines above"
+  [ "$check_only" = 1 ] || bash "$here/clean.sh" --sandbox --repo "$repo" || failure "the disk is too full for a preview: see the lines above"
   if ! command -v bwrap >/dev/null; then
     echo "preview: installing bubblewrap" >&2
     { sudo -n apt-get install -y -q bubblewrap || { sudo -n apt-get update -q && sudo -n apt-get install -y -q bubblewrap; }; } >/dev/null 2>&1 \
@@ -71,13 +80,24 @@ if [ "$sandbox" = 1 ]; then
   # The bubble: the whole system read-only; the home folder replaced by the bubble's own; the checkout
   # writable; its own /tmp; the box's temp folder and Secret placeholders hidden, but the proxy's CA
   # certificate kept, so HTTPS works; its own process list, so it can't read other programs'
-  # environments. It keeps the network (npm installs, and the real Coach).
+  # environments. It keeps the network (npm installs, and the real Coach). Sockets that give root
+  # (Docker's and other container engines') and the user's runtime folder (/run/user: its session bus
+  # and any rootless engine) are covered up; the user's extra groups are dropped below as well.
   bubble=(sudo -n bwrap --ro-bind / / --dev /dev --proc /proc
-    --bind "$sb/home" "$HOME" --bind "$repo" "$repo" --bind "$sb/tmp" /tmp
+    --bind "$sb/home" "$HOME" --bind "$sb/tmp" /tmp --bind "$repo" "$repo"
     --unshare-pid --unshare-ipc --unshare-uts --unshare-cgroup-try --new-session --die-with-parent
     --clearenv --setenv PATH /usr/local/bin:/usr/bin:/bin --setenv HOME "$HOME" --setenv TMPDIR /tmp
     --setenv LANG C.UTF-8 --setenv CI true --chdir "$repo")
   [ ! -d /data/tmp ] || bubble+=(--tmpfs /data/tmp)
+  [ ! -d /run/user ] || bubble+=(--tmpfs /run/user)
+  hidden=" "
+  for s in /run/docker.sock /var/run/docker.sock /run/containerd/containerd.sock /run/podman/podman.sock /run/buildkit/buildkitd.sock; do
+    [ -S "$s" ] || continue
+    real=$(realpath "$s")
+    case "$hidden" in *" $real "*) continue ;; esac
+    hidden="$hidden$real "
+    bubble+=(--ro-bind /dev/null "$real")
+  done
   if [ -d /run/instabox/secrets ]; then
     bubble+=(--tmpfs /run/instabox/secrets)
     [ -z "${SSL_CERT_FILE:-}" ] || [ ! -f "$SSL_CERT_FILE" ] || bubble+=(--ro-bind "$SSL_CERT_FILE" "$SSL_CERT_FILE")
@@ -86,10 +106,28 @@ if [ "$sandbox" = 1 ]; then
     [ -z "${!v:-}" ] || bubble+=(--setenv "$v" "${!v}")
   done
   [ "$coach" != real ] || bubble+=(--setenv CLAUDE_CODE_OAUTH_TOKEN "$CLAUDE_CODE_OAUTH_TOKEN")
-  # bwrap runs as root to set the bubble up; everything inside runs as this user, with no capabilities
-  # and no new privileges (bwrap sets that flag, so sudo inside refuses).
-  bubble+=(-- setpriv "--reuid=$(id -u)" "--regid=$(id -g)" --init-groups --inh-caps=-all --bounding-set=-all)
+  # bwrap runs as root to set the bubble up; everything inside runs as this user, in its own group
+  # only (no docker or other extra groups), with no capabilities and no new privileges (bwrap sets that
+  # flag, so sudo inside refuses).
+  bubble+=(-- setpriv "--reuid=$(id -u)" "--regid=$(id -g)" --clear-groups --inh-caps=-all --bounding-set=-all)
   in_bubble() { "${bubble[@]}" bash -c "$1"; }
+
+  # The self-check: the bubble is what it should be, or the branch's code never runs. It prints the
+  # first thing that is wrong.
+  check="gid=$(id -g); home='$HOME'"'
+    [ "$(id -G)" = "$gid" ] || { echo "the bubble kept extra groups: $(id -G)"; exit 1; }
+    grep -q "^NoNewPrivs:[[:space:]]*1" /proc/self/status || { echo "the bubble can gain privileges"; exit 1; }
+    grep -q "^CapEff:[[:space:]]*0*$" /proc/self/status || { echo "the bubble has capabilities"; exit 1; }
+    for s in /run/docker.sock /var/run/docker.sock /run/containerd/containerd.sock /run/podman/podman.sock /run/buildkit/buildkitd.sock; do
+      [ ! -S "$s" ] || { echo "the bubble can reach $s"; exit 1; }
+    done
+    [ -z "$(ls -A /run/user 2>/dev/null)" ] || { echo "the bubble sees /run/user"; exit 1; }
+    [ -z "$(ls -A /run/instabox/secrets 2>/dev/null | grep -v "^ca-bundle.pem$")" ] || { echo "the bubble sees the Secret placeholders"; exit 1; }
+    [ -z "$(ls -A /data/tmp 2>/dev/null)" ] || { echo "the bubble sees /data/tmp"; exit 1; }
+    [ ! -e "$home/.occ-preview-sandbox" ] || { echo "the bubble sees the home folder"; exit 1; }
+    exit 0'
+  why=$(in_bubble "$check" 2>&1) || failure "the bubble is not sealed: ${why:-bwrap failed to start it}"
+  [ "$check_only" = 0 ] || result '{"ok":true}'
 else
   out=$(mktemp -d)
   inner_out=$out

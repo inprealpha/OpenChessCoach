@@ -54,7 +54,7 @@ A rule that only lives in a document gets broken. When agents repeat a mistake, 
 | Tests that call a real model use the latest Haiku (the `haiku` alias), never the app's per-job models | `scripts/test/real-coach-check.test.ts` (`CHECK_MODEL`) |
 | Typecheck, lint, tests, Player journeys and the build pass on every PR | `.github/workflows/ci.yml` |
 | A preview's pairing code never reaches a public log, a PR or a comment (ADR 0001) | `scripts/test/sandbox.test.ts` (`instabox.sh` in GitHub Actions mode, against a fake CLI) |
-| A preview runs the branch's code inside a bubble that sees none of the box's other files, Secrets or programs | `scripts/sandbox/preview.sh --sandbox` (bubblewrap); checked on a box, not in CI |
+| A preview runs the branch's code inside a bubble that can't see the box's home folder, temp folder, Secrets or other programs, can't reach Docker, and has none of the user's extra groups | `scripts/sandbox/preview.sh --sandbox` (bubblewrap) checks itself before the branch's code runs; `scripts/test/sandbox.test.ts` runs that check on CI's runner, whose user is in the docker group |
 | Work is verified in the running app before it is called done | Only this file and `.claude/skills/verify/SKILL.md`: read the skill before you open a PR |
 | Commits, PRs and comments carry no links to Claude sessions | Only this file (see below) |
 

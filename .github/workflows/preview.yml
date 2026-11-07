@@ -1,25 +1,25 @@
-# Previews (.claude/skills/sandbox/SKILL.md): runs a PR's branch on a sandbox in verify mode and sends
-# the repository's owner the link, with the pairing code, by Telegram.
-#   - Off unless the repository turns it on: its settings (Settings > Secrets and variables > Actions >
-#     Variables), not its files, say PREVIEW_PROVIDER=instabox and, optionally, PREVIEW_BOX (the box's
-#     name, default occ-preview). Forks don't get a repository's variables or secrets, so a fork or a
-#     clone runs nothing until its owner sets up a provider of their own.
-#   - A PR gets a preview when it is opened ready, marked ready for review, labelled "preview" as a
-#     draft, or opened with a line "Preview: on" in its description, and again on every push after
-#     that. It comes down, and the box is cleaned, when the PR closes. A line "Preview seed: empty" in
-#     the description picks verify mode's seed.
-#   - Verify mode's fake Coach answers from templates and never calls Claude, and the box gets no
-#     Secrets, so a preview spends none of the owner's Claude usage.
+# Previews (.claude/skills/sandbox/SKILL.md): runs a PR's branch on a sandbox in verify mode, inside a
+# bubble that sees none of the box's other files, Secrets or programs, and sends the repository's
+# owner the link, with the pairing code, by Telegram.
+#   - Only on request: the "preview" label, or a line "Preview: on" in the PR's description (outside
+#     HTML comments, so the template's hints don't ask). A PR that asks gets a preview then and on
+#     every push after; closing it takes the preview down and cleans the box. "Preview seed: NAME"
+#     picks verify mode's seed; "Preview coach: real" uses the real Coach, through the box's Claude
+#     Secret (real usage). Every other preview uses the fake Coach and spends nothing.
+#   - Off unless the repository turns it on in its settings (Settings > Secrets and variables >
+#     Actions > Variables), not its files: PREVIEW_PROVIDER=instabox, and optionally PREVIEW_BOX (the
+#     box's name, default occ-preview) and PREVIEW_CLAUDE_SECRET. Forks and clones copy none of these,
+#     so a request there gets a comment saying previews aren't set up, and nothing else runs.
 #   - Every preview cleans the box first (scripts/sandbox/clean.sh), so its 20 GB disk doesn't fill up.
-#   - One box: previews take turns, and the newest preview replaces the one before.
+#   - One box: previews take turns, and the newest waiting preview replaces an older waiting one.
 # pull_request_target, so the runner uses the base branch's scripts and holds the secrets; the PR's
-# code runs only on the box, which holds none. PRs from forks never get a preview. This log is
-# public: instabox.sh never prints the pairing code in GitHub Actions, and the PR comment has no link.
+# code runs only on the box, in the bubble. PRs from forks never get a preview. This log is public:
+# instabox.sh never prints the pairing code in GitHub Actions, and the PR comment has no link.
 name: Preview
 
 on:
   pull_request_target:
-    types: [opened, reopened, ready_for_review, synchronize, labeled, closed]
+    types: [opened, reopened, synchronize, edited, labeled, closed]
   workflow_dispatch:
     inputs:
       ref:
@@ -29,36 +29,66 @@ on:
         description: Verify mode's seed (default, empty, many-games or no-phone)
         required: false
         default: default
+      coach:
+        description: The Coach (fake, or real, which spends the owner's Claude usage)
+        required: false
+        default: fake
 
 permissions:
   contents: read
   pull-requests: write
   issues: write
 
-# Previews take turns on the one box; a waiting preview is replaced by a newer one (GitHub keeps one
-# waiting run per group). Taking a closed PR's preview down has a group of its own, so it never cancels
-# a waiting preview of another PR; it only acts when the box still shows that PR's branch.
-concurrency:
-  group: ${{ github.event.action == 'closed' && format('preview-down-{0}', github.event.pull_request.number) || 'preview-box' }}
-  cancel-in-progress: false
-
 jobs:
+  # Cheap and in no queue: decides whether this event needs a preview, so a run that needs none never
+  # waits in (or cancels anything in) the preview job's queue. It says so on the PR when a preview was
+  # asked for where previews aren't set up.
+  decide:
+    name: Decide
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      action: ${{ steps.decide.outputs.action }}
+      seed: ${{ steps.decide.outputs.seed }}
+      coach: ${{ steps.decide.outputs.coach }}
+    steps:
+      # The base branch (main), for scripts/sandbox/preview-decide.sh.
+      - uses: actions/checkout@v4
+      - id: decide
+        env:
+          EVENT: ${{ github.event_name }}
+          ACTION: ${{ github.event.action }}
+          LABELLED: ${{ contains(github.event.pull_request.labels.*.name, 'preview') }}
+          LABEL: ${{ github.event.label.name }}
+          BODY: ${{ github.event.pull_request.body }}
+          BODY_CHANGED: ${{ github.event.changes.body != null }}
+          BODY_BEFORE: ${{ github.event.changes.body.from }}
+          SEED_INPUT: ${{ inputs.seed }}
+          COACH_INPUT: ${{ inputs.coach }}
+          ENABLED: ${{ vars.PREVIEW_PROVIDER == 'instabox' }}
+        run: bash scripts/sandbox/preview-decide.sh | tee -a "$GITHUB_OUTPUT"
+      - name: Say previews aren't set up here
+        if: steps.decide.outputs.action == 'unavailable' && github.event.pull_request.number
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+        run: bash scripts/sandbox/pr-comment.sh "**Preview:** previews aren't set up in this repository (.claude/skills/sandbox/SKILL.md), so there is no link. Screenshots show the change instead."
+
   preview:
     name: Preview
-    # Only where the repository's settings turn previews on (PREVIEW_PROVIDER). Closing always takes the
-    # preview down. Otherwise: ready PRs, and drafts with the "preview" label or "Preview: on"; a label
-    # event counts only for that label (pr-labels.yml adds others all the time).
-    if: >-
-      vars.PREVIEW_PROVIDER == 'instabox' &&
-      (github.event_name == 'workflow_dispatch' ||
-       (github.event.pull_request.head.repo.full_name == github.repository &&
-        (github.event.action == 'closed' ||
-         ((!github.event.pull_request.draft ||
-           contains(github.event.pull_request.labels.*.name, 'preview') ||
-           contains(github.event.pull_request.body, 'Preview: on')) &&
-          (github.event.action != 'labeled' || github.event.label.name == 'preview')))))
+    needs: decide
+    if: needs.decide.outputs.action == 'up' || needs.decide.outputs.action == 'down'
+    # Previews take turns on the one box. A closed PR's take-down has a queue of its own, so it never
+    # replaces another PR's waiting preview; a lock on the box keeps the two from overlapping there.
+    concurrency:
+      group: ${{ needs.decide.outputs.action == 'down' && format('preview-down-{0}', github.event.pull_request.number) || 'preview-box' }}
+      cancel-in-progress: false
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
       GH_TOKEN: ${{ github.token }}
       REPO: ${{ github.repository }}
@@ -71,11 +101,12 @@ jobs:
       OCC_REPO_URL: ${{ github.server_url }}/${{ github.repository }}.git
       TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-      ACTION: ${{ github.event.action || 'dispatch' }}
+      ACTION: ${{ needs.decide.outputs.action }}
+      SEED: ${{ needs.decide.outputs.seed }}
+      COACH: ${{ needs.decide.outputs.coach }}
+      PREVIEW_CLAUDE_SECRET: ${{ vars.PREVIEW_CLAUDE_SECRET || 'CLAUDE_CODE_OAUTH_TOKEN' }}
       PR: ${{ github.event.pull_request.number }}
       REF: ${{ github.event.pull_request.head.ref || inputs.ref }}
-      BODY: ${{ github.event.pull_request.body }}
-      SEED_INPUT: ${{ inputs.seed }}
     steps:
       # The base branch (main): its scripts run here, never the PR's.
       - uses: actions/checkout@v4
@@ -106,38 +137,32 @@ jobs:
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       - name: Take the preview down and clean the box
-        if: steps.secrets.outputs.ok == 'true' && env.ACTION == 'closed'
+        if: steps.secrets.outputs.ok == 'true' && env.ACTION == 'down'
         run: bash scripts/sandbox/instabox.sh down --if-ref "$REF"
 
       - name: Start the preview and send the link by Telegram
         id: up
-        if: steps.secrets.outputs.ok == 'true' && env.ACTION != 'closed'
+        if: steps.secrets.outputs.ok == 'true' && env.ACTION == 'up'
         run: |
-          seed=$(printf '%s\n' "$BODY" | grep -oiE '^preview seed: *[a-z-]+' | head -n 1 | sed -E 's/^[^:]*: *//')
-          seed=${seed:-${SEED_INPUT:-default}}
-          echo "seed=$seed" >> "$GITHUB_OUTPUT"
-          bash scripts/sandbox/instabox.sh up --ref "$REF" --seed "$seed" --notify > up.json
-          node -e 'const r = JSON.parse(require("fs").readFileSync("up.json", "utf8")); console.log(`commit=${r.commit}`)' >> "$GITHUB_OUTPUT"
+          coach=; [ "$COACH" != real ] || coach=--real-coach
+          bash scripts/sandbox/instabox.sh up --ref "$REF" --seed "$SEED" $coach --notify > up.txt
+          # instabox.sh checks the commit before it prints it; checked again, since it lands in outputs.
+          commit=$(tail -n 1 up.txt | node -e 'let s = ""; process.stdin.on("data", (d) => (s += d)).on("end", () => { const c = String(JSON.parse(s).commit); if (/^[0-9a-f]{7,40}$/.test(c)) console.log(c) })')
+          echo "commit=$commit" >> "$GITHUB_OUTPUT"
 
-      # One comment per PR, updated each time. No link: the link holds the pairing code.
+      # One comment per PR from this workflow, updated each time (scripts/sandbox/pr-comment.sh). No link:
+      # the link holds the pairing code.
       - name: Say how the preview went on the PR
-        if: always() && env.PR != '' && steps.secrets.outputs.ok == 'true' && env.ACTION != 'closed'
+        if: always() && env.PR != '' && steps.secrets.outputs.ok == 'true' && env.ACTION == 'up'
         env:
           OUTCOME: ${{ steps.up.outcome }}
           COMMIT: ${{ steps.up.outputs.commit }}
-          SEED: ${{ steps.up.outputs.seed }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
-          marker='<!-- preview -->'
-          if [ "$OUTCOME" = success ]; then
-            text="**Preview:** running \`$COMMIT\` with the \`$SEED\` seed on the InstaBox box, and doctor passed. The link, with the pairing code, went to the owner by Telegram. Verify mode's fake Coach: no Claude usage."
+          if [ "$OUTCOME" = success ] && [ -n "$COMMIT" ]; then
+            if [ "$COACH" = real ]; then coach="the real Coach (it spends the owner's Claude usage)"; else coach="verify mode's fake Coach (no Claude usage)"; fi
+            text="**Preview:** running \`$COMMIT\` with the \`$SEED\` seed and $coach, and doctor passed. The link, with the pairing code, went to the owner by Telegram."
           else
             text="**Preview:** failed for \`${HEAD_SHA:0:7}\`. See [the run]($RUN_URL)."
           fi
-          body="$marker"$'\n'"$text"
-          id=$(gh api "repos/$REPO/issues/$PR/comments" --paginate --jq ".[] | select(.body | startswith(\"$marker\")) | .id" | head -n 1)
-          if [ -n "$id" ]; then
-            gh api -X PATCH "repos/$REPO/issues/comments/$id" -f body="$body" > /dev/null
-          else
-            gh api "repos/$REPO/issues/$PR/comments" -f body="$body" > /dev/null
-          fi
+          bash scripts/sandbox/pr-comment.sh "$text"

@@ -17,6 +17,8 @@ export interface RunFile {
   dataDir: string;
   evidenceDir: string;
   seed: string;
+  /** Which Coach answers: the fake one (the default), or the real one for a real-Coach preview. */
+  coach?: 'fake' | 'real';
   startedAt: string;
   logFile: string;
   error?: string;

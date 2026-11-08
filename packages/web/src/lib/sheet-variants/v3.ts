@@ -1,34 +1,42 @@
 // PROTOTYPE (#80): version 3 of the phone's panel sheet, an overlay like Apple Maps'. The board keeps
 // its size and never moves: the sheet is a card that slides up over the board's lower part, moved
 // only by `transform`, following the finger exactly and settling with a critically damped spring
-// seeded with the finger's speed (spring-v3.ts). Up, it leaves a band of the board, dimmed, that a
-// tap or a drag down brings back.
+// seeded with the finger's speed (spring-v3.ts).
 //
-// The card is laid out once at its "up" size, so nothing is laid out again while it moves: at rest it
-// is translated down by `rest` px, and the Coach's Ask box at its foot is translated back up by the
-// same amount, so it stays docked at the foot of the screen in every position. The content shows
-// above the Ask box at rest as it does today, and fades out where it is cut.
+// Nothing is laid out again while the sheet moves. The card is laid out once, from the middle of the
+// board to the foot of the screen, with the Coach at its pulled-up size; every position is a
+// transform of that:
+// - the card is translated down: to the board's foot at rest, and up only as far as its content
+//   needs, so a short reply leaves most of the board in view and none leaves less than half;
+// - the Coach is translated back up so its Ask row stays at the foot of the screen, and it shows
+//   only its first two lines at rest (as today's sheet does), growing to its full size with the
+//   sheet's progress rather than in one frame;
+// - `sheet.full` (which the app re-renders on) changes only once the sheet has settled, never on the
+//   frame it starts moving.
 //
 // At rest nothing scrolls (`touch-action: pan-x`, and `preventDefault` from the first move): any
 // vertical drag moves the sheet. Up, the content scrolls natively; a drag down that starts with it at
-// its top moves the sheet, and a scroll that reaches the top hands over to the sheet mid-gesture.
-// Its CSS is src/sheet-v3.css, scoped under :root[data-sheet="v3"].
+// its top moves the sheet, and a scroll that reaches the top hands over to the sheet mid-gesture. A
+// pull down on the board above the sheet peeks at the whole board and springs back, the text where
+// it was; a tap there lets the sheet down. Its CSS is src/sheet-v3.css, under :root[data-sheet="v3"].
 import { untrack } from 'svelte';
 import type { Sheet } from '../sheet.svelte.ts';
-import { bounded, endsUp, launchVelocity, settled, SLOP, step, velocity } from './spring-v3.ts';
+import { bounded, endsUp, launchVelocity, progress, settled, SLOP, step, upDetent, velocity } from './spring-v3.ts';
 import type { SheetDriver } from './types.ts';
 
 const PHONE = '(max-width: 820px) and (min-height: 560px)';
 /** Where a touch never drags: a box to type in. */
 const TEXT = 'input, textarea, select, [contenteditable]:not([contenteditable="false"])';
-/** How dark the covered board gets with the sheet up. */
-const DIM = 0.25;
-/** The band of the board left showing above the sheet when it is up: a quarter of the board, in bounds. */
-const BAND = { share: 0.25, min: 64, max: 140 };
+/** How dark the board above the sheet gets with it up: a hint that a tap there brings it back. */
+const DIM = 0.1;
+/** The highest the sheet goes: this much of the board stays in view, from its top. */
+const BOARD_KEPT = 0.5;
+/** The Coach's log at rest, as today's sheet has it (CoachPanel's 3rem): two lines. */
+const REST_LOG_REM = 3;
 
 const reduced = (): boolean => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-type Source = 'sheet' | 'strip' | 'handle';
+type Source = 'sheet' | 'strip';
 
 interface Gesture {
   id: number;
@@ -38,7 +46,7 @@ interface Gesture {
   lastY: number;
   /** pending: under the slop; sheet: the sheet follows; scroll: the content scrolls natively; ignore: not ours. */
   mode: 'pending' | 'sheet' | 'scroll' | 'ignore';
-  /** The sheet was up when the finger came down. */
+  /** The sheet was up (or on its way) when the finger came down. */
   wasUp: boolean;
   /** The content box under the finger, if it can scroll. */
   scroller: HTMLElement | null;
@@ -66,20 +74,28 @@ class Overlay {
   readonly #scrim: HTMLElement;
   readonly #phone = typeof matchMedia === 'function' ? matchMedia(PHONE) : null;
   readonly #undo: (() => void)[] = [];
+  /** The Coach and the parts of it that move on their own. */
   #coach: HTMLElement | null = null;
+  #log: HTMLElement | null = null;
+  #ask: HTMLElement[] = [];
 
-  /** The sheet's offset down from its "up" detent, px. */
+  /** The sheet's offset down from the card's laid-out top (the middle of the board), px. */
   #y = 0;
-  /** The offset at rest: the board's height less the band. */
+  /** The detents: at rest (the board's foot) and up (as high as the content needs). */
   #rest = 0;
-  #band = 0;
+  #up = 0;
+  /** How much taller the Coach is up than at rest, and how far into its log the latest reply starts. */
+  #coachExtra = 0;
+  #replyAt = 0;
+  /** Where the sheet is going: what `sheet.full` will be once it settles. */
+  #heading = false;
+  /** This overlay is setting `sheet.full` itself: the listener has nothing to do. */
+  #committing = false;
   /** The spring: its target, velocity (px/s) and last frame. */
   #target: number | null = null;
   #v = 0;
   #last = 0;
   #raf = 0;
-  /** The velocity the next change of `sheet.full` starts the spring with: the finger's, on release. */
-  #releaseV = 0;
   /** Scrolling the content back to its top while the sheet goes down: from where, and what was last set. */
   #unscroll: { from: number; y0: number; set: number } | null = null;
   #gesture: Gesture | null = null;
@@ -105,21 +121,33 @@ class Overlay {
     layout.append(this.#scrim);
     this.#undo.push(() => this.#scrim.remove());
 
+    this.#heading = sheet.full;
+    this.#find();
     this.#measure();
-    this.#y = sheet.full ? 0 : this.#rest;
-    this.#state(sheet.full);
+    this.#y = this.#heading ? this.#up : this.#rest;
+    this.#state();
+    this.#mark();
     this.#render();
     const frame = requestAnimationFrame(() => (this.#live = true));
     this.#undo.push(() => cancelAnimationFrame(frame));
 
+    // Sizes: the board, the frame, the content and the Coach. None changes while the sheet moves.
     const resize = new ResizeObserver(() => this.#resized());
-    resize.observe(col);
-    resize.observe(layout);
+    const observe = () => {
+      resize.disconnect();
+      for (const el of [col, layout, ...body.children, this.#coach, this.#coach?.querySelector('.log')]) if (el) resize.observe(el);
+    };
+    observe();
     this.#undo.push(() => resize.disconnect());
-    // A Coach that comes later (a Puzzle's, once it is solved) is docked at the screen's foot at once.
-    const children = new MutationObserver(() => this.#render());
-    children.observe(side, { childList: true });
-    this.#undo.push(() => children.disconnect());
+    // Parts that come and go: the content's sections, a Coach that comes later (a Puzzle's, once it is
+    // solved), the Coach's own rows. Each is found and placed at once.
+    const parts = new MutationObserver(() => {
+      this.#find();
+      observe();
+      this.#resized();
+    });
+    parts.observe(side, { childList: true, subtree: true });
+    this.#undo.push(() => parts.disconnect());
     const phone = () => this.#resized();
     this.#phone?.addEventListener('change', phone);
     this.#undo.push(() => this.#phone?.removeEventListener('change', phone));
@@ -130,9 +158,19 @@ class Overlay {
     this.#on(side, 'touchend', (e) => this.touchEnd(e as TouchEvent), { passive: false });
     this.#on(side, 'touchcancel', (e) => this.touchEnd(e as TouchEvent), { passive: false });
     this.#on(side, 'wheel', (e) => this.#wheel(e as WheelEvent), { passive: false });
+    this.#on(side, 'click', (e) => this.#click(e as MouseEvent));
     this.#on(side, 'focusin', (e) => this.#focusIn(e));
     this.#on(side, 'focusout', () => this.#focusOut());
     this.#on(side, 'submit', () => (this.#raisedByKeyboard = false));
+    // The board above the sheet, up: a tap brings the board back, a pull down peeks at all of it.
+    const scrim = this.#scrim;
+    this.#on(scrim, 'click', (e) => {
+      if (!this.justDragged(e)) this.lower();
+    });
+    this.#on(scrim, 'touchstart', (e) => this.touchStart(e as TouchEvent, 'strip'), { passive: true });
+    this.#on(scrim, 'touchmove', (e) => this.touchMove(e as TouchEvent), { passive: false });
+    this.#on(scrim, 'touchend', (e) => this.touchEnd(e as TouchEvent), { passive: false });
+    this.#on(scrim, 'touchcancel', (e) => this.touchEnd(e as TouchEvent), { passive: false });
   }
 
   #on(node: EventTarget, type: string, fn: (e: Event) => void, opts?: AddEventListenerOptions): void {
@@ -153,24 +191,53 @@ class Overlay {
     return this.#sheet.on && (this.#phone?.matches ?? false);
   }
 
-  /** The board's height and the band: read only when something was resized, never while moving. */
+  #find(): void {
+    this.#coach = this.#side.querySelector<HTMLElement>(':scope > .coach');
+    this.#log = this.#coach?.querySelector<HTMLElement>(':scope > .log-wrap > .log') ?? null;
+    this.#ask = [...(this.#coach?.querySelectorAll<HTMLElement>(':scope > .thumb-row, :scope > .chars-left') ?? [])];
+  }
+
+  /**
+   * The board's height, the card's top, both detents and the Coach's sizes. Read when something was
+   * resized, never while the sheet moves (transforms resize nothing).
+   */
   #measure(): void {
     if (!this.#active) return;
     // Exact (fractional) heights, so the sheet at rest meets the board's foot to the sub-pixel.
     const col = this.#col.getBoundingClientRect();
-    const colH = col.height;
     const board = this.#col.querySelector<HTMLElement>('.board')?.getBoundingClientRect();
-    const raw = (board ? board.top - col.top : 0) + (board?.height ?? colH) * BAND.share;
-    const band = Math.round(Math.max(BAND.min, Math.min(BAND.max, raw, colH)));
-    if (band !== this.#band) {
-      this.#band = band;
-      this.#layout.style.setProperty('--v3-band', `${band}px`);
+    const keep = (board ? board.top - col.top : 0) + (board?.height ?? col.height) * BOARD_KEPT;
+    const band = Math.round(Math.max(48, Math.min(keep, col.height)));
+    if (this.#layout.style.getPropertyValue('--v3-band') !== `${band}px`) this.#layout.style.setProperty('--v3-band', `${band}px`);
+    this.#rest = Math.max(0, col.height - band);
+
+    // The Coach: up, its log takes its full size; at rest, two lines of it, from the latest reply's start.
+    const coach = this.#coach;
+    const log = coach?.querySelector<HTMLElement>('.log');
+    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+    const logH = log && log.offsetParent ? log.offsetHeight : 0;
+    this.#coachExtra = Math.min(this.#rest, Math.max(0, logH - REST_LOG_REM * rem));
+    if (log && this.#coachExtra > 0) {
+      const entries = log.querySelectorAll<HTMLElement>(':scope > .entry');
+      const last = entries[entries.length - 1];
+      const at = last ? last.getBoundingClientRect().top - log.getBoundingClientRect().top : 0;
+      this.#replyAt = Math.max(0, Math.min(this.#coachExtra, at));
+    } else this.#replyAt = 0;
+    // What focus may scroll the content to at rest: above the Coach, not behind it.
+    const hidden = Math.max(0, this.#rest - this.#coachExtra);
+    if (this.#layout.style.getPropertyValue('--v3-rest') !== `${hidden}px`) this.#layout.style.setProperty('--v3-rest', `${hidden}px`);
+
+    // Up: as high as the content and the whole Coach need, no higher.
+    const card = this.#side.offsetHeight;
+    let bottom = 0;
+    for (const child of this.#body.children) {
+      if (!(child instanceof HTMLElement) || child.offsetParent === null) continue;
+      bottom = Math.max(bottom, child.offsetTop + child.offsetHeight);
     }
-    const rest = Math.max(0, colH - band);
-    if (rest !== this.#rest) {
-      this.#rest = rest;
-      this.#layout.style.setProperty('--v3-rest', `${rest}px`);
-    }
+    const pad = parseFloat(getComputedStyle(this.#body).paddingBottom) || 0;
+    const need = this.#body.offsetTop + bottom + pad + 0.6 * rem + (coach?.offsetHeight ?? 0);
+    this.#up = upDetent(card, need, this.#rest);
+    this.#layout.dataset.v3Up = this.#up.toFixed(3);
   }
 
   #resized(): void {
@@ -179,52 +246,108 @@ class Overlay {
       return;
     }
     this.#measure();
-    if (this.#gesture?.mode === 'sheet') return;
-    if (this.#target !== null) this.#target = this.#sheet.full ? 0 : this.#rest;
-    else this.#y = this.#sheet.full ? 0 : this.#rest;
+    // Back on a phone held upright (it only writes what changed).
+    this.#state();
+    if (this.#gesture?.mode === 'sheet' || (this.#gesture?.mode === 'scroll' && this.#gesture.handover !== null)) return;
+    const target = this.#heading ? this.#up : this.#rest;
+    if (this.#target !== null) this.#target = target;
+    else if (this.#live && !reduced() && Math.abs(this.#y - target) > 0.5) this.#animateTo(target, 0);
+    else this.#y = target;
     this.#render();
   }
 
   /** Back to the plain panel: off a phone held upright. */
   #clear(): void {
     this.#side.style.transform = '';
-    if (this.#coach) this.#coach.style.transform = '';
+    for (const el of [this.#coach, this.#log, ...this.#ask]) if (el) el.style.transform = '';
     this.#scrim.style.opacity = '0';
+    this.#side.style.touchAction = '';
+    this.#body.style.overscrollBehaviorY = '';
+    this.#body.style.scrollPaddingBottom = '';
+    this.#scrim.style.pointerEvents = '';
     this.#layout.style.removeProperty('--v3-band');
     this.#layout.style.removeProperty('--v3-rest');
-    this.#band = 0;
     this.#rest = 0;
+    this.#up = 0;
   }
 
-  /** The state the sheet is headed for: what touches do (scroll or drag) and what focus may scroll. */
-  #state(full: boolean): void {
-    this.#side.dataset.v3 = full ? 'up' : 'rest';
+  /**
+   * Where the sheet is heading: what touches do (scroll or drag), what focus may scroll to, and what
+   * the board above the sheet does with a tap. Inline styles on those few elements, not an attribute
+   * the screen's selectors would have to match again (its `:has()` rules make that a long frame).
+   */
+  #state(): void {
+    const up = this.#heading;
+    const set = (el: HTMLElement | null, prop: 'touchAction' | 'overscrollBehaviorY' | 'scrollPaddingBottom' | 'pointerEvents', value: string) => {
+      if (el && el.style[prop] !== value) el.style[prop] = value;
+    };
+    // At rest nothing scrolls: a vertical drag is the sheet's (sideways ones are left alone). Up, the
+    // content scrolls, and its top doesn't bounce: a pull down there moves the sheet instead.
+    set(this.#side, 'touchAction', up ? '' : 'pan-x');
+    set(this.#body, 'overscrollBehaviorY', up ? 'none' : '');
+    // At rest, focus that scrolls the content to show a control keeps it above the Coach, not behind it.
+    set(this.#body, 'scrollPaddingBottom', up ? '' : 'var(--v3-rest, 0px)');
+    // Up (and on its way), the board above the sheet is the dim's: a tap brings the board back, a pull
+    // peeks at it. One element with nothing in it, not the board, whose restyling would be a long frame.
+    // On its way down the board takes its taps again at once.
+    set(this.#scrim, 'pointerEvents', up ? 'auto' : 'none');
+  }
+
+  /** The settled state, for anyone reading the page (the journeys): set when nothing moves. */
+  #mark(): void {
+    const s = this.#heading ? 'up' : 'rest';
+    if (this.#side.dataset.v3 !== s) this.#side.dataset.v3 = s;
   }
 
   /** Transforms and the scrim's opacity: nothing that lays the page out again. */
   #render(): void {
     if (!this.#active) return;
-    if (!this.#coach?.isConnected) this.#coach = this.#side.querySelector<HTMLElement>(':scope > .coach');
+    if (!this.#coach?.isConnected) this.#find();
     const y = this.#y;
+    const p = progress(y, this.#rest, this.#up);
+    // The Coach, laid out at its up size, shows only two lines at rest: moved down by what it has
+    // extra, its Ask row moved back to the foot of the screen, and its log moved so the latest reply's
+    // start is in the window. All three follow the sheet's progress.
+    const extra = this.#coachExtra * (1 - p);
     this.#side.style.transform = `translate3d(0, ${y}px, 0)`;
-    if (this.#coach) this.#coach.style.transform = `translate3d(0, ${-y}px, 0)`;
-    const up = this.#rest > 0 ? Math.min(1, Math.max(0, 1 - y / this.#rest)) : 0;
-    this.#scrim.style.opacity = (up * DIM).toFixed(3);
+    if (this.#coach) this.#coach.style.transform = `translate3d(0, ${extra - y}px, 0)`;
+    if (this.#log) this.#log.style.transform = this.#replyAt ? `translate3d(0, ${-this.#replyAt * (1 - p)}px, 0)` : '';
+    for (const el of this.#ask) el.style.transform = extra ? `translate3d(0, ${-extra}px, 0)` : '';
+    this.#scrim.style.opacity = (p * DIM).toFixed(3);
   }
 
-  /** `sheet.full` changed, by a gesture, a tap or the app itself: the spring takes the sheet there. */
+  /** `sheet.full` changed. By this overlay once settled: nothing to do. By the app: the spring goes there. */
   #changed(full: boolean): void {
+    if (this.#committing) return;
     if (!full) this.#raisedByKeyboard = false;
-    this.#state(full);
-    const v = this.#releaseV;
-    this.#releaseV = 0;
-    if (this.#gesture?.mode === 'sheet') return;
-    this.#animateTo(full ? 0 : this.#rest, v);
+    this.#heading = full;
+    if (this.#gesture?.mode !== 'sheet') this.#animateTo(full ? this.#up : this.#rest, 0);
+    this.#state();
+  }
+
+  /** The sheet goes up or down by the spring; the app hears of it once it has settled. */
+  #go(up: boolean, v: number): void {
+    if (!up) this.#raisedByKeyboard = false;
+    this.#heading = up;
+    // Reads first (the spring's start reads the content's scroll), then the attributes: no style is
+    // worked out twice in the frame the sheet starts moving.
+    this.#animateTo(up ? this.#up : this.#rest, v);
+    this.#state();
+  }
+
+  /** Settled: `sheet.full` follows, and the app re-renders now that nothing moves. */
+  #commit(): void {
+    this.#mark();
+    if (this.#sheet.full === this.#heading) return;
+    this.#committing = true;
+    try {
+      this.#sheet.full = this.#heading;
+    } finally {
+      this.#committing = false;
+    }
   }
 
   #animateTo(target: number, v: number): void {
-    // No measuring here: the ResizeObserver keeps `rest` current, and retargets a running spring.
-    if (target !== 0) target = this.#rest;
     // Going down: the content scrolls back to its top on the way, as Maps does, unless the app scrolls it.
     this.#unscroll = target === this.#rest && this.#body.scrollTop > 0 ? { from: this.#body.scrollTop, y0: this.#y, set: this.#body.scrollTop } : null;
     if (!this.#live || reduced() || !this.#active) {
@@ -235,12 +358,15 @@ class Overlay {
       if (this.#unscroll) this.#body.scrollTop = 0;
       this.#unscroll = null;
       this.#render();
+      this.#commit();
       return;
     }
     this.#target = target;
     this.#v = launchVelocity(this.#y - target, v);
     this.#last = performance.now();
-    if (!this.#raf) this.#raf = requestAnimationFrame(this.#tick);
+    // Whatever frame was waiting (the spring's next step, or a settled spring's commit) gives way.
+    cancelAnimationFrame(this.#raf);
+    this.#raf = requestAnimationFrame(this.#tick);
   }
 
   #tick = (now: number): void => {
@@ -264,6 +390,11 @@ class Overlay {
     this.#syncScroll();
     this.#render();
     if (!done) this.#raf = requestAnimationFrame(this.#tick);
+    // The app's re-render for the new state waits for a frame with nothing moving.
+    else this.#raf = requestAnimationFrame(() => {
+      this.#raf = 0;
+      if (this.#target === null && !this.#gesture) this.#commit();
+    });
   };
 
   #syncScroll(): void {
@@ -318,7 +449,6 @@ class Overlay {
       target?.removeEventListener('touchend', end);
       target?.removeEventListener('touchcancel', end);
     };
-    const wasUp = this.#sheet.full;
     const text = Boolean(target?.closest(TEXT));
     this.#gesture = {
       id: t.identifier,
@@ -327,7 +457,7 @@ class Overlay {
       y0: t.clientY,
       lastY: t.clientY,
       mode: text ? 'ignore' : 'pending',
-      wasUp,
+      wasUp: this.#heading,
       scroller: source === 'sheet' && target ? this.#scrollerAt(target) : null,
       prevented: false,
       fromY: 0,
@@ -406,15 +536,16 @@ class Overlay {
       if (g.handover === null && y > prevY && s.scrollTop <= 0) {
         if (this.#keyboardDown(1, e)) return;
         g.handover = y;
+        g.fromSheet = this.#y;
         this.#stopSpring();
       }
       if (g.handover !== null) {
         const raw = y - g.handover;
         if (raw < 0) {
           g.handover = null;
-          this.#y = 0;
+          this.#y = g.fromSheet;
         } else {
-          this.#y = bounded(raw, this.#rest);
+          this.#y = bounded(g.fromSheet + raw, this.#rest, this.#up);
           if (e.cancelable) e.preventDefault();
         }
         g.samples.push({ t: e.timeStamp, y });
@@ -430,15 +561,17 @@ class Overlay {
       let raw = g.fromSheet + (y - g.fromY);
       // Up past the top detent, the content takes the rest of the drag, as it would have scrolled.
       const s = g.source === 'sheet' ? (g.scroller ?? this.#body) : null;
-      if (raw < 0 && s) {
+      if (raw < this.#up && s) {
         const room = s.scrollHeight - s.clientHeight;
-        const want = g.fromScroll - raw;
-        s.scrollTop = Math.min(room, want);
-        raw = want > room ? -(want - room) : 0;
-      } else if (s && s.scrollTop !== g.fromScroll && raw >= 0) {
+        const want = g.fromScroll + (this.#up - raw);
+        if (room > 0) {
+          s.scrollTop = Math.min(room, want);
+          raw = want > room ? this.#up - (want - room) : this.#up;
+        }
+      } else if (s && s.scrollTop !== g.fromScroll && raw >= this.#up) {
         s.scrollTop = g.fromScroll;
       }
-      this.#y = bounded(raw, this.#rest);
+      this.#y = bounded(raw, this.#rest, this.#up);
       this.#render();
     }
   }
@@ -460,14 +593,14 @@ class Overlay {
     const g = this.#gesture;
     const focused = document.activeElement;
     if (!g || dy <= 0 || !(focused instanceof HTMLElement) || !focused.matches(TEXT) || !this.#side.contains(focused)) return false;
+    const lower = this.#raisedByKeyboard;
     focused.blur();
     g.mode = 'ignore';
     g.prevented = true;
     if (e.cancelable) e.preventDefault();
-    if (this.#raisedByKeyboard) {
+    if (lower) {
       clearTimeout(this.#blurTimer);
-      this.#raisedByKeyboard = false;
-      this.#sheet.full = false;
+      this.#go(false, 0);
     }
     return true;
   }
@@ -485,6 +618,8 @@ class Overlay {
     const dragged = g.mode === 'sheet' || (g.mode === 'scroll' && g.handover !== null);
     if (!dragged) {
       if (g.mode === 'ignore' && g.prevented && e.cancelable) e.preventDefault();
+      // A spring that waited for the finger to commit its state can do it now.
+      if (this.#target === null && !this.#raf) this.#commit();
       return;
     }
     // A drag is not a tap: no click on whatever is under the finger. Cancelling the touch's end does
@@ -492,25 +627,36 @@ class Overlay {
     if (e.cancelable) e.preventDefault();
     this.#noClickUntil = e.timeStamp + 60;
     const v = e.type === 'touchcancel' ? 0 : velocity(g.samples, e.timeStamp);
+    // A pull on the board above the sheet is a peek: the sheet springs back up, the text where it was.
+    if (g.source === 'strip') {
+      this.#go(true, v);
+      return;
+    }
     // Decided on the finger's whole travel, the slop included: where the sheet would be had it moved
     // from the first touch (a browser may not report the moves under the slop at all).
-    const travelled = g.mode === 'sheet' ? Math.max(0, Math.min(this.#rest, g.fromSheet + (g.lastY - g.y0))) : this.#y;
-    this.#release(v, g.wasUp, travelled);
+    const travelled = g.mode === 'sheet' ? Math.max(this.#up, Math.min(this.#rest, g.fromSheet + (g.lastY - g.y0))) : this.#y;
+    this.#go(endsUp(travelled, v, this.#rest, g.wasUp, this.#up), v);
   }
 
-  /** Let go: the spring takes the sheet where it is heading. */
-  #release(v: number, wasUp: boolean, at = this.#y): void {
-    const up = endsUp(at, v, this.#rest, wasUp);
-    if (this.#sheet.full !== up) {
-      this.#releaseV = v;
-      this.#sheet.full = up;
-    } else this.#animateTo(up ? 0 : this.#rest, v);
+  /** A click that ends a drag is not a tap. */
+  justDragged(e: Event): boolean {
+    return e.timeStamp < this.#noClickUntil;
+  }
+
+  /** The handle's tap: the other way from where the sheet is heading. */
+  toggle(): void {
+    this.#go(!this.#heading, 0);
+  }
+
+  /** The band's tap: the board back. */
+  lower(): void {
+    this.#go(false, 0);
   }
 
   /** The handle's own mouse drag (a touch on it is the sheet's). */
   mouseDown(e: PointerEvent, node: HTMLElement): void {
     if (!this.#active || e.pointerType !== 'mouse' || e.button !== 0) return;
-    const wasUp = this.#sheet.full;
+    const wasUp = this.#heading;
     const y0 = e.clientY;
     let dragging = false;
     let fromSheet = 0;
@@ -525,7 +671,7 @@ class Overlay {
         node.setPointerCapture?.(m.pointerId);
       }
       samples.push({ t: m.timeStamp, y: m.clientY });
-      this.#y = bounded(fromSheet + dy, this.#rest);
+      this.#y = bounded(fromSheet + dy, this.#rest, this.#up);
       this.#render();
     };
     const up = (u: PointerEvent) => {
@@ -535,23 +681,26 @@ class Overlay {
       if (!dragging) return;
       // The mouse's click follows its release.
       this.#noClickUntil = u.timeStamp + 400;
-      this.#release(velocity(samples, u.timeStamp), wasUp);
+      const v = velocity(samples, u.timeStamp);
+      this.#go(endsUp(this.#y, v, this.#rest, wasUp, this.#up), v);
     };
     node.addEventListener('pointermove', move);
     node.addEventListener('pointerup', up);
     node.addEventListener('pointercancel', up);
   }
 
-  /** A click that ends a drag is not a tap. */
-  justDragged(e: Event): boolean {
-    return e.timeStamp < this.#noClickUntil;
-  }
-
   #wheel(e: WheelEvent): void {
-    if (!this.#active || this.#sheet.full) return;
+    if (!this.#active || this.#heading) return;
     // At rest the content doesn't scroll: a wheel turned down pulls the sheet up instead.
     e.preventDefault();
-    if (e.deltaY > 0) this.#sheet.pullUp();
+    if (e.deltaY > 0) this.#go(true, 0);
+  }
+
+  /** At rest the Coach's two lines are cut: a tap on them reads the rest, as Read all does today. */
+  #click(e: MouseEvent): void {
+    if (!this.#active || this.#heading || !(e.target instanceof Element)) return;
+    if (!e.target.closest('.coach .log') || e.target.closest('a, button, summary, input, details')) return;
+    this.#go(true, 0);
   }
 
   #focusIn(e: Event): void {
@@ -559,9 +708,9 @@ class Overlay {
     const t = e.target;
     if (!this.#active || !(t instanceof HTMLElement) || !t.matches('.coach input')) return;
     // The keyboard comes up for the Ask box: the sheet comes up with it, over the board.
-    if (!this.#sheet.full) {
+    if (!this.#heading) {
       this.#raisedByKeyboard = true;
-      this.#sheet.pullUp();
+      this.#go(true, 0);
     }
   }
 
@@ -572,32 +721,26 @@ class Overlay {
     this.#blurTimer = setTimeout(() => {
       const focused = document.activeElement;
       if (!this.#raisedByKeyboard || (focused instanceof HTMLElement && focused.matches('.coach input'))) return;
-      this.#raisedByKeyboard = false;
-      this.#sheet.full = false;
+      this.#go(false, 0);
     }, 400);
-  }
-
-  /** The handle's tap: the user takes over from the keyboard. */
-  toggle(): void {
-    this.#raisedByKeyboard = false;
-    this.#sheet.toggle();
   }
 }
 
 export const v3: SheetDriver = {
   // Untracked: an attachment that read `sheet.full` would be torn down and made again on every change.
-  panel: (sheet, node) => untrack(() => {
-    const side = node.closest<HTMLElement>('.side.panel');
-    const layout = node.closest<HTMLElement>('.board-layout');
-    const col = layout?.querySelector<HTMLElement>(':scope > .board-col');
-    if (!side || !layout || !col) return () => undefined;
-    const overlay = new Overlay(sheet, side, node, layout, col);
-    current = overlay;
-    return () => {
-      overlay.destroy();
-      if (current === overlay) current = null;
-    };
-  }),
+  panel: (sheet, node) =>
+    untrack(() => {
+      const side = node.closest<HTMLElement>('.side.panel');
+      const layout = node.closest<HTMLElement>('.board-layout');
+      const col = layout?.querySelector<HTMLElement>(':scope > .board-col');
+      if (!side || !layout || !col) return () => undefined;
+      const overlay = new Overlay(sheet, side, node, layout, col);
+      current = overlay;
+      return () => {
+        overlay.destroy();
+        if (current === overlay) current = null;
+      };
+    }),
   handle: (sheet, node) => {
     const click = (e: MouseEvent) => {
       // A keyboard's Enter or Space (no pointer, detail 0) always toggles.
@@ -614,10 +757,11 @@ export const v3: SheetDriver = {
     };
   },
   strip: (sheet, node) => {
-    // The band of the board above the sheet: a tap brings the board back, a drag down pulls the sheet down.
+    // The board above the sheet: a tap brings the board back, a pull down peeks at all of it.
     const click = (e: MouseEvent) => {
       if (current?.justDragged(e)) return;
-      sheet.full = false;
+      if (current) current.lower();
+      else sheet.full = false;
     };
     const start = (e: TouchEvent) => current?.touchStart(e, 'strip');
     const move = (e: TouchEvent) => current?.touchMove(e);

@@ -103,6 +103,12 @@ interface Geo {
   colTop: number;
   colBottom: number;
   band: number;
+  /** Where the up detent is, below the card's top (the middle of the board): as high as the content needs. */
+  upAt: number;
+  boardTop: number;
+  boardH: number;
+  /** The Ask row's foot, if the Coach has one now (the Engine Game's take-back choice has none). */
+  askBottom: number | null;
   board: string;
   scrollTop: number;
   room: number;
@@ -130,6 +136,10 @@ const geo = (page: Page): Promise<Geo> =>
       colTop: c.top,
       colBottom: c.bottom,
       band: parseFloat(layout.style.getPropertyValue('--v3-band')),
+      upAt: Number(layout.dataset.v3Up ?? 0),
+      boardTop: b.top,
+      boardH: b.height,
+      askBottom: side.querySelector<HTMLElement>(':scope > .coach > .thumb-row')?.getBoundingClientRect().bottom ?? null,
       board: [b.x, b.y, b.width, b.height].map((n) => n.toFixed(1)).join(','),
       scrollTop: body.scrollTop,
       room: body.scrollHeight - body.clientHeight,
@@ -144,26 +154,38 @@ const geo = (page: Page): Promise<Geo> =>
 
 const handle = (page: Page) => page.getByRole('button', { name: /^(Pull the panel up|Let the panel down)$/ });
 
+/** The Ask row at the foot of the screen, whole; without one, the Coach's first lines show above the foot. */
+function expectAskDocked(g: Geo): void {
+  if (g.askBottom === null) {
+    // (A Puzzle has no Coach in its sheet until there is something to ask.)
+    if (g.coachTop < g.layoutBottom) expect(g.layoutBottom - g.coachTop).toBeGreaterThan(30);
+    return;
+  }
+  expect(g.layoutBottom - g.askBottom).toBeGreaterThanOrEqual(-0.5);
+  expect(g.layoutBottom - g.askBottom).toBeLessThanOrEqual(8);
+}
+
 async function expectRest(page: Page): Promise<Geo> {
   await expect(handle(page)).toHaveAttribute('aria-expanded', 'false');
   // Settled: exactly at the board's foot, nothing dimmed.
-  await expect.poll(async () => { const g = await geo(page); return Math.abs(g.sheetTop - g.colBottom) <= 0.1 && g.dim === 0; }).toBe(true);
+  // (The settled state is marked a frame after the sheet arrives, when the app hears of it.)
+  await expect.poll(async () => { const g = await geo(page); return Math.abs(g.sheetTop - g.colBottom) <= 0.1 && g.dim === 0 && g.state === 'rest'; }).toBe(true);
   const g = await geo(page);
-  expect(g.state).toBe('rest');
   // The Ask box stays docked at the foot of the screen.
-  expect(Math.abs(g.coachBottom - g.layoutBottom)).toBeLessThanOrEqual(1);
+  expectAskDocked(g);
   expect(g.dim).toBe(0);
   return g;
 }
 
 async function expectUp(page: Page): Promise<Geo> {
   await expect(handle(page)).toHaveAttribute('aria-expanded', 'true');
-  await expect.poll(async () => { const g = await geo(page); return Math.abs(g.sheetTop - (g.colTop + g.band)); }).toBeLessThanOrEqual(0.1);
+  await expect.poll(async () => { const g = await geo(page); return Math.abs(g.sheetTop - (g.colTop + g.band + g.upAt)) <= 0.1 && g.state === 'up'; }).toBe(true);
   const g = await geo(page);
-  expect(g.state).toBe('up');
-  expect(g.band).toBeGreaterThanOrEqual(64);
-  expect(Math.abs(g.coachBottom - g.layoutBottom)).toBeLessThanOrEqual(1);
-  expect(g.dim).toBeCloseTo(0.25, 2);
+  // At least the top half of the board stays in view, the sheet no higher than its content needs.
+  expect(g.sheetTop - g.boardTop).toBeGreaterThanOrEqual(g.boardH / 2 - 1);
+  expect(g.sheetTop).toBeLessThanOrEqual(g.colBottom - 119);
+  expectAskDocked(g);
+  expect(g.dim).toBeCloseTo(0.1, 2);
   return g;
 }
 
@@ -328,7 +350,7 @@ const SCREENS: Record<string, Screen> = {
       if (was !== 'true') {
         // Opening a moment pulls the sheet up for it: by the same spring.
         const g = await expectUp(page);
-        await expectAnimated(page, from, g.colTop + g.band, least);
+        await expectAnimated(page, from, g.sheetTop, least);
       }
     },
   },
@@ -423,24 +445,25 @@ async function journeys(kind: Kind, page: Page, finger: Finger, screen: Screen, 
   await record(page);
   await finger.up();
   let up = await expectUp(page);
-  await expectAnimated(page, before, up.colTop + up.band, least);
+  await expectAnimated(page, before, up.sheetTop, least);
   expect(up.board).toBe(board);
   expect(up.scrollTop).toBe(rest.scrollTop);
 
-  // Up, the board shows as a band at the top: a touch there is the strip's. The rest of the board
-  // is under the sheet: every point of it is the sheet's, so no touch reaches a square through it.
+  // Up, at least the top half of the board shows above the sheet: a touch there is the dim's (a tap
+  // brings the board back, a pull peeks). The rest of it is under the sheet: every point of it is the
+  // sheet's, so no touch reaches a square.
   const hits = await page.evaluate(({ band, top, bottom }) => {
     const out = { band: 0, covered: 0, points: 0 };
     for (const fx of [0.05, 0.3, 0.5, 0.7, 0.95]) {
       const px = innerWidth * fx;
-      if (document.elementFromPoint(px, band)?.classList.contains('strip-tap')) out.band++;
+      if (document.elementFromPoint(px, band)?.classList.contains('v3-scrim')) out.band++;
       for (let py = top; py < bottom; py += 40) {
         out.points++;
         if (document.elementFromPoint(px, py)?.closest('.side.panel')) out.covered++;
       }
     }
     return out;
-  }, { band: up.colTop + up.band / 2, top: up.colTop + up.band + 2, bottom: up.colBottom - 1 });
+  }, { band: (up.colTop + up.sheetTop) / 2, top: up.sheetTop + 2, bottom: up.colBottom - 1 });
   expect(hits.band).toBe(5);
   expect(hits.covered).toBe(hits.points);
   // A real tap on the covered board, where the sheet has nothing to press there: the board doesn't move.
@@ -452,7 +475,7 @@ async function journeys(kind: Kind, page: Page, finger: Finger, screen: Screen, 
       }
     }
     return null;
-  }, { top: up.colTop + up.band + 20, bottom: up.colBottom });
+  }, { top: up.sheetTop + 20, bottom: up.colBottom });
   if (quiet) {
     const fenBefore = await page.locator('.board[role="group"]').getAttribute('data-fen');
     await tapAt(page, quiet.x, quiet.y);
@@ -542,12 +565,12 @@ async function journeys(kind: Kind, page: Page, finger: Finger, screen: Screen, 
   await record(page);
   await tap(page, handle(page));
   up = await expectUp(page);
-  await expectAnimated(page, down.sheetTop, up.colTop + up.band, least);
+  await expectAnimated(page, down.sheetTop, up.sheetTop, least);
   // The band of the board: a tap brings the board back, animated.
   await record(page);
-  await tapAt(page, x, up.colTop + up.band / 2);
+  await tapAt(page, x, (up.colTop + up.sheetTop) / 2);
   await expectRest(page);
-  await expectAnimated(page, up.colTop + up.band, down.colBottom, least);
+  await expectAnimated(page, up.sheetTop, down.colBottom, least);
   await tap(page, handle(page));
   await expectUp(page);
   await tap(page, handle(page));
@@ -619,6 +642,181 @@ test('Version 3: a drag that starts on a button moves the sheet and doesn’t pr
   await context.close();
 });
 
+/** Per frame, from now for `ms`: the sheet's top, the Coach's visible top, the frame's time and the state the app sees. */
+async function watch(page: Page, ms = 900): Promise<void> {
+  await page.evaluate((ms) => {
+    const w = window as unknown as { __w: { dt: number; sheet: number; coach: number; full: boolean }[] };
+    w.__w = [];
+    const side = document.querySelector<HTMLElement>('.side.panel')!;
+    const t0 = performance.now();
+    let last = t0;
+    const tick = (now: number) => {
+      w.__w.push({
+        dt: now - last,
+        sheet: side.getBoundingClientRect().top,
+        coach: side.querySelector<HTMLElement>(':scope > .coach')!.getBoundingClientRect().top,
+        full: document.querySelector('.board-screen')!.classList.contains('sheet-full'),
+      });
+      last = now;
+      if (now - t0 < ms) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }, ms);
+}
+
+async function watched(page: Page): Promise<{ dt: number; sheet: number; coach: number; full: boolean }[]> {
+  await page.waitForTimeout(1000);
+  return page.evaluate(() => (window as unknown as { __w: { dt: number; sheet: number; coach: number; full: boolean }[] }).__w);
+}
+
+/** The Coach's box and log: their laid-out heights, which no move of the sheet may change. */
+const coachSize = (page: Page) =>
+  page.evaluate(() => {
+    const coach = document.querySelector<HTMLElement>('.side.panel > .coach')!;
+    return { coach: coach.offsetHeight, log: coach.querySelector<HTMLElement>('.log')!.offsetHeight };
+  });
+
+test('Version 3: the Coach never changes size; its first lines at rest grow into its whole reply with the sheet, frame by frame', async ({ browser, app }) => {
+  const { page, finger, context } = await phone('chromium', browser, app);
+  await SCREENS.Lesson!.open(page, app, true);
+  const rest = await expectRest(page);
+  const size = await coachSize(page);
+  // A long reply: the log is much taller than its two lines at rest.
+  expect(size.log).toBeGreaterThan(80);
+  // At rest the Coach shows its first lines above the Ask row, as today's sheet does, and Continue above it.
+  expect(rest.layoutBottom - rest.coachTop).toBeLessThan(size.coach - 40);
+  await expectShownAtRest(page, page.getByRole('button', { name: 'Continue' }));
+
+  const check = (frames: { dt: number; coach: number }[], label: string) => {
+    for (let i = 2; i < frames.length; i++) {
+      // The Coach's top edge moves with the sheet, never by a one-frame jump of its size.
+      if (Math.max(frames[i]!.dt, frames[i - 1]!.dt) < 20) {
+        expect(Math.abs(frames[i]!.coach - frames[i - 1]!.coach), `${label}: ${frames.map((f) => f.coach.toFixed(0)).join(' ')}`).toBeLessThan(40);
+      }
+    }
+  };
+  // Released after a drag up.
+  await drag(page, finger, 120, Math.round(rest.sheetTop + 30), -90, 10, 16, false);
+  await watch(page);
+  await finger.up();
+  check(await watched(page), 'release');
+  await expectUp(page);
+  expect(await coachSize(page)).toEqual(size);
+  // A tap on the handle, down and up.
+  for (const label of ['tap down', 'tap up']) {
+    await watch(page);
+    await tap(page, handle(page));
+    check(await watched(page), label);
+    expect(await coachSize(page)).toEqual(size);
+  }
+  await expectUp(page);
+  await context.close();
+});
+
+test('Version 3: the app hears of a move only once the sheet has settled, never on the frame it starts', async ({ browser, app }) => {
+  const { page, finger, context } = await phone('chromium', browser, app);
+  await SCREENS.Lesson!.open(page, app, true);
+  const rest = await expectRest(page);
+  const settledFirst = (frames: { sheet: number; full: boolean }[], target: number, full: boolean) => {
+    const flipped = frames.findIndex((f) => f.full === full);
+    const trace = JSON.stringify(frames.map((f) => [Math.round(f.sheet), f.full]));
+    expect(flipped, trace).toBeGreaterThan(2);
+    // The sheet moved first, and arrived, before the app re-rendered for its new state.
+    expect(frames.slice(0, flipped).some((f) => Math.abs(f.sheet - target) > 20), trace).toBe(true);
+    expect(Math.abs(frames[flipped - 1]!.sheet - target), trace).toBeLessThan(0.6);
+  };
+  await watch(page);
+  await tap(page, handle(page));
+  let frames = await watched(page);
+  const up = await expectUp(page);
+  settledFirst(frames, up.sheetTop, true);
+  await watch(page);
+  await tap(page, handle(page));
+  frames = await watched(page);
+  await expectRest(page);
+  settledFirst(frames, rest.sheetTop, false);
+  // A drag's release too.
+  await drag(page, finger, 120, Math.round(rest.sheetTop + 30), -90, 10, 16, false);
+  await watch(page);
+  await finger.up();
+  frames = await watched(page);
+  await expectUp(page);
+  settledFirst(frames, up.sheetTop, true);
+  await context.close();
+});
+
+test('Version 3: up, a pull down on the board peeks at all of it and springs back, the text where it was', async ({ browser, app }) => {
+  const { page, finger, context } = await phone('chromium', browser, app);
+  await SCREENS.Review!.open(page, app, true);
+  await tap(page, handle(page));
+  const up = await expectUp(page);
+  // Reading on: the moments scrolled a little.
+  await page.evaluate(() => (document.querySelector<HTMLElement>('.panel-body')!.scrollTop += 60));
+  const scrolled = (await geo(page)).scrollTop;
+  expect(scrolled).toBeGreaterThan(0);
+  // A pull down from the board above the sheet: the sheet follows the finger and the whole board shows.
+  const y0 = Math.round((up.colTop + up.sheetTop) / 2);
+  const frames = await drag(page, finger, 150, y0, Math.round(up.colBottom - up.sheetTop + 30), 14, 16, false);
+  expectFollowed(frames.slice(0, 10), 7);
+  const peek = await geo(page);
+  expect(peek.sheetTop).toBeGreaterThanOrEqual(peek.colBottom - 1);
+  expect(peek.board).toBe(up.board);
+  await expect(handle(page)).toHaveAttribute('aria-expanded', 'true');
+  // Let go: back up, animated, the text where it was.
+  await record(page);
+  await finger.up();
+  const back = await expectUp(page);
+  await expectAnimated(page, peek.sheetTop, up.sheetTop, 5);
+  expect(back.scrollTop).toBe(scrolled);
+  // A tap on the board above the sheet still brings the board back.
+  await tapAt(page, 150, y0);
+  await expectRest(page);
+  await context.close();
+});
+
+test('Version 3: taps on the handle in quick succession, or just as the sheet settles, always end where the last one sends it', async ({ browser, app }) => {
+  const { page, context } = await phone('chromium', browser, app);
+  await SCREENS.Board!.open(page, app, true);
+  await expectRest(page);
+  // A double tap at a person's pace (150 ms apart): up, then straight back down.
+  await tap(page, handle(page));
+  await page.waitForTimeout(150);
+  await tap(page, handle(page));
+  await expectRest(page);
+  // A tap at every moment around the end of the spring (it settles in about 400 ms) and its commit.
+  for (const ms of [330, 380, 420, 460, 520]) {
+    await tap(page, handle(page));
+    await page.waitForTimeout(ms);
+    await tap(page, handle(page));
+    await expectRest(page);
+  }
+  await context.close();
+});
+
+test('Version 3: a tap on the board while the sheet is still on its way up moves no piece and brings the board back', async ({ browser, app }) => {
+  const { page, context } = await phone('chromium', browser, app);
+  await go(page, app, '#/board');
+  await play(page, 'e2e4');
+  await expect(page.getByRole('list', { name: 'Moves' }).getByRole('button')).toHaveCount(1);
+  const rest = await expectRest(page);
+  const fen = await page.locator('.board[role="group"]').getAttribute('data-fen');
+  const centre = async (sq: string) => {
+    const b = (await page.getByRole('button', { name: new RegExp(`^${sq},`) }).boundingBox())!;
+    return [b.x + b.width / 2, b.y + b.height / 2] as const;
+  };
+  // Black to move. The handle, then at once a tap on the pawn on d7, near the board's top, as if to move it.
+  await tap(page, handle(page));
+  await page.waitForTimeout(60);
+  await tapAt(page, ...(await centre('d7')));
+  await expectRest(page);
+  // Had d7 been picked up, this tap would play d5: it doesn't.
+  await tapAt(page, ...(await centre('d5')));
+  await page.waitForTimeout(300);
+  await expect(page.locator('.board[role="group"]')).toHaveAttribute('data-fen', fen ?? '');
+  expect((await geo(page)).board).toBe(rest.board);
+  await context.close();
+});
+
 test('Version 3: with less motion asked for, the sheet still follows the finger but settles at once', async ({ browser, app }) => {
   const { page, finger, context } = await phone('chromium', browser, app);
   await page.emulateMedia({ reducedMotion: 'reduce' });
@@ -630,7 +828,7 @@ test('Version 3: with less motion asked for, the sheet still follows the finger 
   await frame(page);
   await frame(page);
   let g = await geo(page);
-  expect(g.sheetTop).toBeCloseTo(g.colTop + g.band, 0);
+  expect(g.sheetTop).toBeCloseTo(g.colTop + g.band + g.upAt, 0);
   await handle(page).click();
   await frame(page);
   g = await geo(page);

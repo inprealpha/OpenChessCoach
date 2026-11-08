@@ -1,13 +1,14 @@
 /* PROTOTYPE (#80): version 3 of the phone panel sheet. Every rule is scoped under :root[data-sheet="v3"].
    An overlay, as in Apple Maps: the board keeps its size, and the sheet is a card over its lower part,
-   moved only by `transform` (lib/sheet-variants/v3.ts). Laid out once at its "up" size, from the band
-   of the board left showing (--v3-band) to the foot of the screen; at rest it is translated down to the
-   board's foot, and its Coach is translated back up to stay docked at the foot of the screen. */
+   moved only by `transform` (lib/sheet-variants/v3.ts). Laid out once, from the middle of the board
+   (--v3-band) to the foot of the screen, with the Coach at its pulled-up size; at rest it is translated
+   down to the board's foot, and its Coach translated back up so the Ask row stays at the foot of the
+   screen. Nothing here changes size when the sheet goes up or down. */
 @media (max-width: 820px) and (min-height: 560px) {
   /* The sheet's part below the screen at rest is clipped, not scrolled to: the page stays one screen. */
   :root[data-sheet='v3'] .board-screen > .board-layout { position: relative; overflow-y: clip; }
   :root[data-sheet='v3'] .board-screen .board-layout > .side.panel {
-    position: absolute; z-index: 10; left: 0; right: 0; top: var(--v3-band, 6rem); bottom: 0;
+    position: absolute; z-index: 10; left: 0; right: 0; top: var(--v3-band, 50%); bottom: 0;
     will-change: transform;
     box-shadow: 0 -3px 14px rgb(0 0 0 / 14%);
   }
@@ -16,27 +17,56 @@
     --board-max: min(var(--board-cap), calc(100dvh - var(--phone-reserve, 18rem)));
     padding-block: 0 0.3rem;
   }
-  /* The Ask box stays at the foot of the screen, over the content's cut end, which fades out. */
-  :root[data-sheet='v3'] .board-screen .side.panel > .coach { z-index: 2; will-change: transform; }
-  :root[data-sheet='v3'] .board-screen .side.panel > .coach::before {
-    content: ''; position: absolute; left: 0; right: 0; bottom: 100%; height: 0.65rem; pointer-events: none;
+
+  /* The Coach keeps one size, its pulled-up one, whatever the sheet does: up, focused or at rest. The
+     driver shows only its first two lines at rest by moving it, never by resizing it. */
+  :root[data-sheet='v3'] .board-screen .side.panel > .coach .log,
+  :root[data-sheet='v3'] .board-screen .side.panel > .coach:focus-within .log { max-height: 26dvh; }
+  /* Its parts move on their own layers: the box down at rest (what is below the screen is clipped),
+     the log inside its frame to the latest reply's start, the Ask row back to the foot of the screen,
+     over the log. The content above it fades into it. */
+  :root[data-sheet='v3'] .board-screen .side.panel > .coach {
+    z-index: 2; will-change: transform;
+    box-shadow: 0 -0.35rem 0.35rem -0.05rem var(--panel);
+  }
+  :root[data-sheet='v3'] .board-screen .side.panel > .coach > .log-wrap { overflow: hidden; }
+  :root[data-sheet='v3'] .board-screen .side.panel > .coach .log { will-change: transform; }
+  :root[data-sheet='v3'] .board-screen .side.panel > .coach > :is(.thumb-row, .chars-left) {
+    position: relative; z-index: 2; background: var(--panel); will-change: transform;
+    /* Down to the foot of the screen, over the Coach's padding: no line of the log shows under it. */
+    box-shadow: 0 0.6rem 0 0 var(--panel);
+  }
+  :root[data-sheet='v3'] .board-screen .side.panel > .coach > .thumb-row::before {
+    content: ''; position: absolute; left: 0; right: 0; bottom: 100%; height: 0.45rem; pointer-events: none;
     background: linear-gradient(to bottom, color-mix(in srgb, var(--panel) 0%, transparent), var(--panel));
   }
+  /* Read all: the cut lines themselves are the button (a tap on them reads the rest); its words would
+     sit behind the Ask row at rest and show only while the sheet moves. */
+  :root[data-sheet='v3'] .board-screen .side.panel > .coach .read-all span { visibility: hidden; }
+  /* "Put the answer away" comes with the sheet up: on the Coach's top edge, over the content's faded
+     end rather than in a row of its own, so its coming and going moves nothing. */
+  :root[data-sheet='v3'] .board-screen .side.panel > .coach > .log-actions {
+    position: absolute; z-index: 3; bottom: calc(100% + 0.2rem); right: 0.5rem; margin: 0; padding: 0 0.6rem;
+    background: var(--panel); border: var(--hair, 1px) solid var(--line); border-radius: 99px; box-shadow: 0 1px 4px rgb(0 0 0 / 10%);
+  }
+  :root[data-sheet='v3'] .board-screen .side.panel > .coach > .log-actions button { min-height: 2rem; text-decoration: none; }
+
   /* Room under the content's last line, clear of the fade, when it is scrolled to its end. */
   :root[data-sheet='v3'] .board-screen .side.panel > .panel-body::after { content: ''; flex: 0 0 0.6rem; }
-  /* At rest nothing scrolls: a vertical drag is the sheet's (sideways ones are left alone), and focus
-     that scrolls the content to show a control keeps it above the Ask box, not under it. */
-  :root[data-sheet='v3'] .board-screen .side.panel[data-v3='rest'] { touch-action: pan-x; }
-  :root[data-sheet='v3'] .board-screen .side.panel[data-v3='rest'] > .panel-body { scroll-padding-bottom: var(--v3-rest, 0px); }
-  /* Up, the content scrolls, and its top doesn't bounce: a pull down there moves the sheet instead. */
-  :root[data-sheet='v3'] .board-screen .side.panel[data-v3='up'] > .panel-body { overscroll-behavior-y: none; }
-  /* The board under the sheet dims as the sheet comes up (v3.ts sets its opacity). Taps go through it to
-     the band's strip button, which brings the board back. */
+  /* What touches and focus do at rest and up (touch-action, overscroll, scroll padding) and the
+     board's taps while the sheet moves are set inline by v3.ts on the few elements concerned. */
+  /* The board above the sheet dims a little as the sheet comes up (v3.ts sets its opacity): a tap there
+     brings the board back, a pull down peeks at all of it. Taps go through the dim to the strip button. */
   :root[data-sheet='v3'] .v3-scrim {
     position: absolute; inset: 0; margin-inline: -0.75rem; z-index: 9; pointer-events: none;
     background: #000; opacity: 0; will-change: opacity;
   }
-  :root[data-sheet='v3'] .board-screen .strip-tap { cursor: pointer; }
+  /* Up, the dim takes the board's touches (v3.ts): the strip button stays for the keyboard and screen
+     readers, and on the sheet's way down the board takes its taps again at once. */
+  :root[data-sheet='v3'] .v3-scrim { cursor: pointer; touch-action: none; }
+  :root[data-sheet='v3'] .board-screen .strip-tap { pointer-events: none; }
+  /* No grey flash over the board or the handle when Safari sees a tap. */
+  :root[data-sheet='v3'] :is(.v3-scrim, .board-screen .sheet-handle) { -webkit-tap-highlight-color: transparent; }
 }
 /* Off a phone held upright the scrim is never shown. */
 :root[data-sheet='v3'] .v3-scrim { display: none; }

@@ -1,6 +1,6 @@
 // PROTOTYPE (#80), version 3: the overlay sheet's spring and release rules (lib/sheet-variants/spring-v3.ts).
 import { describe, expect, it } from 'vitest';
-import { bounded, COMMIT, endsUp, launchVelocity, OMEGA, PROJECT, settled, step, velocity } from '../src/lib/sheet-variants/spring-v3.ts';
+import { bounded, COMMIT, endsUp, launchVelocity, OMEGA, PROJECT, progress, settled, step, upDetent, velocity } from '../src/lib/sheet-variants/spring-v3.ts';
 
 /** Runs the spring from `x` (offset from the target) with velocity `v` at 60 frames a second. */
 function run(x: number, v: number, dt = 1 / 60): { xs: number[]; ms: number } {
@@ -96,5 +96,37 @@ describe('the finger, followed', () => {
     expect(velocity(samples, 200)).toBe(0);
     // A slow phone's samples, 50 ms apart: still a speed.
     expect(velocity([{ t: 0, y: 500 }, { t: 50, y: 491 }, { t: 100, y: 482 }, { t: 150, y: 473 }], 160)).toBeCloseTo(-180, 0);
+  });
+});
+
+describe('an up detent as high as the content needs', () => {
+  it('rises only as far as the content needs, never past the card’s top, and always some way', () => {
+    // A card 400 px tall, at rest 300 px down: content needing 300 px stops 100 px down.
+    expect(upDetent(400, 300, 300)).toBe(100);
+    // Content needing more than the card: the card's top, the content scrolling inside.
+    expect(upDetent(400, 600, 300)).toBe(0);
+    // Content that already fits at rest still rises 120 px, so pulling up always shows something.
+    expect(upDetent(400, 100, 190)).toBe(70);
+    // A slow 40 px drag (100 px/s) on such a sheet falls back; a short flick goes up.
+    expect(endsUp(190 - 40, -100, 190, false, 70)).toBe(false);
+    expect(endsUp(190 - 40, -1000, 190, false, 70)).toBe(true);
+  });
+
+  it('decides on the distance between the detents, wherever up is', () => {
+    // Up at 100, rest at 190: half the way is 45 px.
+    expect(endsUp(190 - 46, 0, 190, false, 100)).toBe(true);
+    expect(endsUp(190 - 40, 0, 190, false, 100)).toBe(false);
+    expect(endsUp(100 + 46, 0, 190, true, 100)).toBe(false);
+    expect(endsUp(100 + 40, 0, 190, true, 100)).toBe(true);
+  });
+
+  it('gives way like a rubber band past up, and tells the Coach how far up the sheet is', () => {
+    expect(bounded(80, 190, 100)).toBeGreaterThan(80);
+    expect(bounded(80, 190, 100)).toBeLessThan(100);
+    expect(progress(190, 190, 100)).toBe(0);
+    expect(progress(145, 190, 100)).toBeCloseTo(0.5);
+    expect(progress(100, 190, 100)).toBe(1);
+    expect(progress(60, 190, 100)).toBe(1);
+    expect(progress(230, 190, 100)).toBe(0);
   });
 });

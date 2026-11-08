@@ -1,6 +1,6 @@
 // PROTOTYPE (#80), version 3: the physics of the overlay sheet, kept apart from the DOM so it can be
-// tested. Positions are the sheet's offset down from its "up" detent, in px: 0 is up, `rest` is at
-// rest. Velocities are in px/s, positive downwards.
+// tested. Positions are the sheet's offset down from the highest it can go, in px; its two detents
+// are `up` (as high as its content needs) and `rest`. Velocities are in px/s, positive downwards.
 
 /** The spring's angular frequency: critically damped, it covers 95% of the way in about 240 ms. */
 export const OMEGA = 20;
@@ -52,12 +52,12 @@ export function launchVelocity(x: number, v: number, omega = OMEGA): number {
 /**
  * Whether the sheet ends up when let go at `y` with velocity `v`, having started the gesture up or
  * at rest: its position plus `PROJECT` seconds of the finger's speed decides, past `COMMIT` px or
- * half the way.
+ * half the way between the detents.
  */
-export function endsUp(y: number, v: number, rest: number, wasUp: boolean): boolean {
+export function endsUp(y: number, v: number, rest: number, wasUp: boolean, up = 0): boolean {
   const ahead = y + v * PROJECT;
-  const need = Math.min(COMMIT, rest / 2);
-  return wasUp ? ahead < need : rest - ahead > need;
+  const need = Math.min(COMMIT, (rest - up) / 2);
+  return wasUp ? ahead - up < need : rest - ahead > need;
 }
 
 /**
@@ -71,11 +71,30 @@ export function rubber(over: number, limit = 60): number {
   return sign * (1 - 1 / ((a * k) / limit + 1)) * limit;
 }
 
-/** The sheet's position for a finger at `raw` px (unbounded), with a rubber band past 0 and `rest`. */
-export function bounded(raw: number, rest: number): number {
-  if (raw < 0) return rubber(raw);
+/** The sheet's position for a finger at `raw` px (unbounded), with a rubber band past `up` and `rest`. */
+export function bounded(raw: number, rest: number, up = 0): number {
+  if (raw < up) return up + rubber(raw - up);
   if (raw > rest) return rest + rubber(raw - rest);
   return raw;
+}
+
+/**
+ * How far the sheet is from rest to up, 0 to 1: what the Coach's size, the dim and the band follow,
+ * so they change with the sheet's motion and never in one frame.
+ */
+export function progress(y: number, rest: number, up: number): number {
+  if (rest - up <= 0) return y <= up ? 1 : 0;
+  return Math.min(1, Math.max(0, (rest - y) / (rest - up)));
+}
+
+/**
+ * The up detent: as high as the content needs and no higher, never above 0 (the card's top, which
+ * leaves half the board in view), and at least `rise` above rest: a pull up always shows a move, and
+ * a slow 40 px drag (less than half of it, with what its speed carries) still falls back to rest.
+ */
+export function upDetent(card: number, need: number, rest: number, rise = 120): number {
+  const fit = card - need;
+  return Math.max(0, Math.min(rest - Math.min(rise, rest), fit));
 }
 
 /**

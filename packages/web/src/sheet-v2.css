@@ -1,1 +1,133 @@
-/* PROTOTYPE (#80): version 2 of the phone panel sheet. Every rule is scoped under :root[data-sheet="v2"]. */
+/* PROTOTYPE (#80): version 2 of the phone panel sheet. Every rule is scoped under :root[data-sheet="v2"].
+   The sheet moves by the browser's own scrolling (lib/sheet-variants/v2.ts): the panel is one
+   scroller laid over the frame under the header line, a see-through gap the resting board's height
+   and then the sheet, settling at rest or up. The board keeps its resting size in the layout and
+   shrinks by a transform the scroll drives, so a move changes no layout from frame to frame.
+   The driver adds `.v2-sheet` to the frame's `.board-layout` and keeps its sizes in custom properties:
+   --v2-rest (the resting board's height), --v2-up (the strip's), --v2-d (the scroll between them),
+   --v2-scale, --v2-hh (the handle's height), --v2-coach-h and --v2-body-min (the content's height at rest). */
+@media (max-width: 820px) and (min-height: 560px) {
+  :root[data-sheet='v2'] .board-screen > .board-layout.v2-sheet {
+    position: relative;
+    timeline-scope: --v2-sheet;
+  }
+
+  /* The board keeps its resting size, pulled up or typing: the strip is the same board, scaled. */
+  :root[data-sheet='v2'] .board-screen:is(.sheet-full, :has(.coach input.typing)) > .v2-sheet > .board-col {
+    --board-max: min(var(--board-cap), calc(100dvh - var(--phone-reserve, 18rem)));
+    padding-block: 0 0.3rem;
+  }
+  :root[data-sheet='v2'] .v2-sheet > .board-col { transform-origin: 50% 0; will-change: transform; }
+  :root[data-sheet='v2'] .v2-sheet.v2-sdt > .board-col {
+    animation: v2-board linear both;
+    animation-timeline: --v2-sheet;
+    animation-range: 0px var(--v2-d);
+  }
+
+  /* The scroller: over the whole frame, see-through where the board is, so the board takes its own touches. */
+  :root[data-sheet='v2'] .board-screen .v2-sheet > .side.panel {
+    position: absolute;
+    inset: 0 -0.75rem;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    overflow: hidden auto;
+    overscroll-behavior: contain;
+    /* The sheet's place is the scroll: the browser never shifts it to keep content in view. */
+    overflow-anchor: none;
+    /* What the browser scrolls into view (a focused button) lands between the handle and the Coach. */
+    scroll-padding: calc(var(--v2-up) + var(--v2-hh)) 0 var(--v2-coach-h);
+    scroll-timeline: --v2-sheet y;
+    scrollbar-width: none;
+    pointer-events: none;
+    /* Content scrolled up past the handle goes nowhere near the strip. */
+    clip-path: inset(var(--v2-up) 0 0 0 round 12px 12px 0 0);
+  }
+  :root[data-sheet='v2'] .board-screen .v2-sheet > .side.panel::-webkit-scrollbar { display: none; }
+  /* The gap over the board: rest is the scroller's top. */
+  :root[data-sheet='v2'] .board-screen .v2-sheet > .side.panel::before {
+    content: '';
+    flex: none;
+    height: var(--v2-rest);
+  }
+  :root[data-sheet='v2'] .board-screen .v2-sheet > .side.panel > * { pointer-events: auto; flex: none; }
+  /* Sizes change at once: with reduced motion app.css gives every property a 0.01 ms transition,
+     and the content's height growing from nothing for a frame would send the scroll back to rest. */
+  :root[data-sheet='v2'] .board-screen .v2-sheet > :is(.board-col, .side.panel),
+  :root[data-sheet='v2'] .board-screen .v2-sheet > .side.panel > * { transition-property: none; }
+
+  /* The handle: the sheet's top edge, stuck under the strip while the content scrolls. A drag on it is the sheet's scroll. */
+  :root[data-sheet='v2'] .board-screen .v2-sheet > .side.panel > .sheet-handle {
+    position: sticky;
+    top: var(--v2-up);
+    z-index: 3;
+    height: 1.1rem;
+    background: var(--panel);
+    border-top: var(--hair) solid var(--line);
+    border-radius: 12px 12px 0 0;
+    box-shadow: 0 -2px 10px rgb(0 0 0 / 8%);
+    touch-action: manipulation;
+  }
+
+  /* The content: at rest cut to the sheet's height, so a swipe moves the sheet and never the text. */
+  :root[data-sheet='v2'] .board-screen .v2-sheet > .side.panel > .panel-body {
+    height: var(--v2-body-min);
+    min-height: 0;
+    overflow: clip;
+    overscroll-behavior: auto;
+    background: var(--panel);
+  }
+  /* Up: the content whole, scrolling on in the same scroller. */
+  :root[data-sheet='v2'] .board-screen .v2-sheet > .side.panel > .panel-body.v2-open {
+    height: auto;
+    min-height: var(--v2-body-min);
+  }
+  /* Text that doesn't fit at rest fades out above the Coach; up, the fade is gone. */
+  :root[data-sheet='v2'] .board-screen .v2-sheet > .side.panel > .panel-body::after {
+    content: '';
+    display: block;
+    flex: none;
+    position: sticky;
+    bottom: var(--v2-coach-h);
+    z-index: 1;
+    height: 1rem;
+    margin: -1rem calc(-1 * var(--panel-pad, 0.75rem)) 0;
+    background: linear-gradient(to bottom, transparent, var(--panel));
+    pointer-events: none;
+  }
+  :root[data-sheet='v2'] .board-screen .v2-sheet.v2-sdt > .side.panel > .panel-body::after {
+    animation: v2-fade linear both;
+    animation-timeline: --v2-sheet;
+    animation-range: 0px var(--v2-d);
+  }
+  :root[data-sheet='v2'] .board-screen .v2-sheet:not(.v2-sdt) > .side.panel > .panel-body.v2-open::after { opacity: 0; }
+  /* The Review's tabs stick under the handle, not under the strip. */
+  :root[data-sheet='v2'] .board-screen .v2-sheet > .side.panel > .panel-body > .tabs {
+    top: calc(var(--v2-up) + var(--v2-hh));
+    z-index: 2;
+  }
+
+  /* The Coach: docked at the foot of the screen, the sheet moving behind it. */
+  :root[data-sheet='v2'] .board-screen .v2-sheet > .side.panel > .coach {
+    position: sticky;
+    bottom: 0;
+    z-index: 3;
+  }
+  /* At rest its two lines are part of the sheet: a swipe on them moves the sheet. */
+  :root[data-sheet='v2'] .board-screen:not(.sheet-full) .v2-sheet > .side.panel > .coach .log { overflow-y: hidden; }
+
+  /* A touch that starts on the Ask box or any box that takes typing never moves the sheet. */
+  :root[data-sheet='v2'] .board-screen .v2-sheet > .side.panel :is(.coach form, input, textarea, select) { touch-action: none; }
+}
+
+@keyframes v2-board {
+  from { transform: none; }
+  to { transform: scale(var(--v2-scale, 1)); }
+}
+@keyframes v2-fade {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}

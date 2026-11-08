@@ -7,22 +7,35 @@
      scroll the content itself, as the Review does to show an opened moment. */
   :root[data-sheet="v1"] .board-screen:not(.sheet-full) .side.panel { touch-action: none; }
   :root[data-sheet="v1"] .board-screen:not(.sheet-full) .side.panel :is(.panel-body, .coach:not(:focus-within) .log) { overflow-y: hidden; }
-  /* What doesn't fit at rest fades out at the foot of the content: there is more to pull up for. */
-  :root[data-sheet="v1"] .board-screen:not(.sheet-full):not(.v1-moving) .side.panel > .panel-body {
-    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 1.25rem), transparent);
-    mask-image: linear-gradient(to bottom, #000 calc(100% - 1.25rem), transparent);
+  /* What doesn't fit at rest fades out above the Coach (or at the screen's foot, with no Coach):
+     there is more to pull up for. A fade drawn over the content rather than a mask on it, so it
+     moves with the Coach's top edge and fades out as the sheet comes up. */
+  :root[data-sheet="v1"] .board-screen .side.panel > .coach::before,
+  :root[data-sheet="v1"] .board-screen:not(:has(.side.panel > .coach)) > .board-layout::after {
+    content: ''; position: absolute; left: 0; right: 0; height: 1.25rem; pointer-events: none;
+    background: linear-gradient(to bottom, transparent, var(--panel)); transition: opacity 240ms ease;
   }
+  :root[data-sheet="v1"] .board-screen .side.panel > .coach::before { bottom: 100%; }
+  :root[data-sheet="v1"] .board-screen:not(:has(.side.panel > .coach)) > .board-layout::after { bottom: 0; z-index: 7; }
+  :root[data-sheet="v1"] .board-screen:is(.sheet-full:not(.v1-moving), .v1-faded) .side.panel > .coach::before,
+  :root[data-sheet="v1"] .board-screen:is(.sheet-full:not(.v1-moving), .v1-faded) > .board-layout::after { opacity: 0; }
   /* The panel slides over the board and, moving down, past the screen's foot: neither makes the
-     page any taller. */
-  :root[data-sheet="v1"] .board-screen > .board-layout { overflow-x: visible; overflow-y: clip; }
+     page any taller. What fades out as the sheet moves is drawn over it (motion-v1.ts). */
+  :root[data-sheet="v1"] .board-screen > .board-layout { overflow-x: visible; overflow-y: clip; position: relative; }
 
   /* Measuring both ends (motion-v1.ts): each laid out at once, with no transition in between. */
   :root[data-sheet="v1"] .board-screen.v1-measuring, :root[data-sheet="v1"] .board-screen.v1-measuring * { transition: none !important; }
-  /* Moving: the parts that move get their own layers, and scale from their top left corner. */
-  :root[data-sheet="v1"] .board-screen.v1-moving :is(.side.panel, .side.panel > .coach, .side.panel > .coach > :is(.log-actions, .actions, .thumb-row), .board-col .board, .board-col .under, .board-col .wc-bar) {
+  /* The parts that move have their own layers all along, so a move doesn't start by making and
+     painting them; and they scale from where they are anchored. */
+  :root[data-sheet="v1"] .board-screen:has(> .board-layout) :is(.side.panel, .side.panel > .coach, .side.panel > .coach > .thumb-row, .board-col .board) {
     will-change: transform;
   }
   :root[data-sheet="v1"] .board-screen.v1-moving .board-col :is(.board, .under, .wc-bar) { transform-origin: 0 0; }
+  /* The coordinates keep their size, each at its corner of its square; the bar's numbers at their end. */
+  :root[data-sheet="v1"] .board-screen.v1-moving .board .coord.rank { transform-origin: 0 0; }
+  :root[data-sheet="v1"] .board-screen.v1-moving .board .coord.file { transform-origin: 100% 100%; }
+  :root[data-sheet="v1"] .board-screen.v1-moving .wc-bar .percent { transform-origin: 100% 50%; }
+  :root[data-sheet="v1"] .board-screen.v1-moving .wc-bar .percent.start { transform-origin: 0 50%; }
   /* The sliding panel stays over the board strip's button (SheetStrip.svelte, z-index 5), which
      still covers the board's laid-out place: a tap on the panel is the panel's. */
   :root[data-sheet="v1"] .board-screen.v1-moving .board-layout > .side.panel { z-index: 6; }
@@ -31,7 +44,24 @@
   :root[data-sheet="v1"] .board-screen.v1-moving .side.panel > .coach > :is(.log-actions, .actions, .thumb-row) {
     position: relative; z-index: 1; background: var(--panel); box-shadow: 0 0 0 0.3rem var(--panel);
   }
-  /* Moving to or from pulled up: the Coach laid out as it is pulled up (CoachPanel.svelte), and cut
-     back to its height at rest as the sheet comes down. */
-  :root[data-sheet="v1"] .board-screen.v1-lifted .side.panel > .coach:not(:focus-within) .log { max-height: 26dvh; }
+  /* The content and the Coach's log hold where they are scrolled while their boxes change size:
+     the room under them keeps that in reach (motion-v1.ts slides what they show). */
+  :root[data-sheet="v1"] .board-screen.v1-moving .side.panel > .panel-body { overflow-y: hidden; }
+  :root[data-sheet="v1"] .board-screen.v1-moving .side.panel > .panel-body::after { content: ''; flex: none; height: var(--v1-body-room, 0px); }
+  /* Moving to or from pulled up: the Coach's log keeps its box (CoachPanel.svelte watches it) and
+     shows the lines under it too, up to the Ask box's rows, cut only at its top. */
+  :root[data-sheet="v1"] .board-screen.v1-lifted .side.panel > .coach .log {
+    /* (!important: over the rule above that keeps the log from scrolling at rest.) */
+    max-height: var(--v1-log-box); overflow: visible !important; clip-path: inset(0 -100vw -200vh -100vw);
+  }
+  /* "Read all" fades as the sheet heads up, where the app will take it away. */
+  :root[data-sheet="v1"] .board-screen.v1-moving .side.panel > .coach .read-all { transition: opacity 180ms ease-out; }
+  :root[data-sheet="v1"] .board-screen.v1-moving.v1-faded .side.panel > .coach .read-all { opacity: 0; }
+  /* What the app adds as the sheet comes up or down fades in rather than appearing in one frame:
+     "Put the answer away" as it comes up, "Read all" when the log is cut short again at rest. */
+  :root[data-sheet="v1"] .board-screen.v1-rising .side.panel > .coach > .log-actions,
+  :root[data-sheet="v1"] .board-screen .side.panel > .coach .read-all { animation: v1-in 180ms ease-out; }
+  /* "Put the answer away" fades out as the sheet comes down, before the app takes it away. */
+  :root[data-sheet="v1"] .board-screen.v1-falling .side.panel > .coach > .log-actions { opacity: 0; transition: opacity 180ms ease-out; }
 }
+@keyframes v1-in { from { opacity: 0; } }

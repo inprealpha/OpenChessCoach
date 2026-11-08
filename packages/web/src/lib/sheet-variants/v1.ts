@@ -14,7 +14,10 @@ export const v1: SheetDriver = {
   /** A wheel turned down at rest pulls the sheet up, as a swipe up does. */
   panel: (sheet, node) => {
     const wheel = (e: WheelEvent) => {
-      if (sheet.on && !sheet.full && e.deltaY > 0) sheet.full = true;
+      if (!sheet.on || sheet.full || e.deltaY <= 0) return;
+      const motion = motionOf(node);
+      if (motion) motion.raise();
+      else sheet.full = true;
     };
     node.addEventListener('wheel', wheel, { passive: true });
     return () => node.removeEventListener('wheel', wheel);
@@ -39,8 +42,11 @@ export const v1: SheetDriver = {
     };
     const click = (e: MouseEvent) => {
       // A keyboard's Enter or Space (no pointer, detail 0) always toggles; a drag's click never does.
-      if (e.detail !== 0 && motionOf(node)?.swallows()) return;
-      sheet.toggle();
+      const motion = motionOf(node);
+      if (e.detail !== 0 && motion?.swallows()) return;
+      // It slides first and tells the app once the slide is under way.
+      if (motion) motion.toggle();
+      else sheet.toggle();
     };
     node.addEventListener('pointerdown', down);
     node.addEventListener('pointermove', move);
@@ -58,7 +64,11 @@ export const v1: SheetDriver = {
 
   /** A tap on the strip brings the board back full size, sliding. */
   strip: (sheet, node) => {
-    const click = () => (sheet.full = false);
+    const click = () => {
+      const motion = motionOf(node);
+      if (motion) motion.lower();
+      else sheet.full = false;
+    };
     node.addEventListener('click', click);
     return () => node.removeEventListener('click', click);
   },
@@ -71,7 +81,22 @@ export const v1: SheetDriver = {
     const motion = new Motion(sheet, frame);
     motions.set(frame, motion);
     // A screen opens with its sheet down, as drawn: nothing slides before its first frame.
-    const first = requestAnimationFrame(() => requestAnimationFrame(() => (motion.ready = true)));
+    // Both ends are measured once it has, and again whenever the screen changes (motion-v1.ts).
+    let measure: ReturnType<typeof setTimeout> | undefined;
+    const first = requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        motion.ready = true;
+        measure = setTimeout(() => motion.refresh(), 100);
+      }),
+    );
+    // A screen that becomes a board screen (a Lesson starting), or whose sheet the app puts up or
+    // down: not the classes the motion itself sets (v1-…), nor its measuring's passing toggles.
+    const own = (c: string) => c.split(/\s+/).filter((t) => t && !t.startsWith('v1-')).sort().join(' ');
+    const screen = new MutationObserver((records) => {
+      const before = records[0]?.oldValue ?? '';
+      if (own(before) !== own(frame.className)) motion.changed();
+    });
+    screen.observe(frame, { attributes: true, attributeFilter: ['class'], attributeOldValue: true });
     const unlisten = sheet.listen((full) => motion.go('full', full));
 
     const onSheet = (e: TouchEvent) => e.target instanceof Element && Boolean(e.target.closest('.side.panel'));
@@ -103,12 +128,13 @@ export const v1: SheetDriver = {
     // The keyboard: the Ask box's `typing` class shrinks the board to a strip (app.css), and back.
     const watched = new WeakSet<Element>();
     const typing = new MutationObserver((records) => {
-      for (const r of records) {
-        const input = r.target as Element;
-        const now = input.classList.contains('typing');
-        if (now === (r.oldValue ?? '').split(/\s+/).includes('typing')) continue;
-        if (!sheet.full) motion.go('typing', now);
-      }
+      // Its class before this batch of changes and now: the motion's own measuring takes `typing`
+      // off and puts it back in one go, which is no change.
+      const input = records[0]?.target as Element | undefined;
+      if (!input) return;
+      const was = (records[0]!.oldValue ?? '').split(/\s+/).includes('typing');
+      const now = input.classList.contains('typing');
+      if (now !== was && !sheet.full) motion.go('typing', now);
     });
     const focus = (e: FocusEvent) => {
       const input = e.target instanceof Element ? e.target.closest('.coach input') : null;
@@ -126,6 +152,8 @@ export const v1: SheetDriver = {
     addEventListener('resize', turned);
     return () => {
       cancelAnimationFrame(first);
+      clearTimeout(measure);
+      screen.disconnect();
       unlisten();
       typing.disconnect();
       frame.removeEventListener('touchstart', start);

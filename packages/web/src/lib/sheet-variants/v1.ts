@@ -128,12 +128,13 @@ export const v1: SheetDriver = {
     // The keyboard: the Ask box's `typing` class shrinks the board to a strip (app.css), and back.
     const watched = new WeakSet<Element>();
     const typing = new MutationObserver((records) => {
-      for (const r of records) {
-        const input = r.target as Element;
-        const now = input.classList.contains('typing');
-        if (now === (r.oldValue ?? '').split(/\s+/).includes('typing')) continue;
-        if (!sheet.full) motion.go('typing', now);
-      }
+      // Its class before this batch of changes and now: the motion's own measuring takes `typing`
+      // off and puts it back in one go, which is no change.
+      const input = records[0]?.target as Element | undefined;
+      if (!input) return;
+      const was = (records[0]!.oldValue ?? '').split(/\s+/).includes('typing');
+      const now = input.classList.contains('typing');
+      if (now !== was && !sheet.full) motion.go('typing', now);
     });
     const focus = (e: FocusEvent) => {
       const input = e.target instanceof Element ? e.target.closest('.coach input') : null;

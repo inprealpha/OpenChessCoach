@@ -38,6 +38,8 @@ interface Layout {
   /** The Coach's height, docked at the foot, and its log's. */
   coach: number;
   log: number;
+  /** The tallest the log gets at this end (CoachPanel.svelte's rule for it). */
+  logMax: number;
   /** The content's box. */
   body: number;
   board: Box | null;
@@ -164,6 +166,11 @@ export class Motion {
   #ramps: { from: number; by: number }[] = [];
   /** The Coach's height to aim for pulled up, waiting for the sheet to head up again. */
   #later = 0;
+  /**
+   * What the Coach gained or lost at rest since the move began (the app said something new as it
+   * let the sheet down, as Continue does), from how far up the sheet was then.
+   */
+  #restRamps: { from: number; by: number }[] = [];
   #run: Run | null = null;
   #gesture: Gesture | null = null;
   /** The sheet's own `full` change: the listener leaves it to the motion that made it. */
@@ -255,15 +262,55 @@ export class Motion {
     const coach = parts?.coach;
     if (!this.#geo || !coach) return;
     parts.rows = [...coach.querySelectorAll<HTMLElement>(':scope > :is(.log-actions, .actions, .thumb-row)')];
-    const last = parts.rows.at(-1);
-    const natural = last ? last.offsetTop + last.offsetHeight + this.#pad : coach.offsetHeight;
-    if (Math.abs(natural - this.#natural) < 0.5) return;
+    // The Coach's content, laid out (its box may be laid out taller, lifted): down to its last part.
+    let bottom = 0;
+    for (const el of coach.children) if (el instanceof HTMLElement && el.offsetHeight) bottom = Math.max(bottom, el.offsetTop + el.offsetHeight);
+    const natural = bottom + this.#pad;
     const by = natural - this.#natural;
-    this.#natural = natural;
-    this.#box = this.#lifted ? Math.max(this.#box, natural) : natural;
-    // Laid out pulled up, the Coach is as tall pulled up as it is now (a row came or went).
-    if (this.#lifted && this.#kind === 'full') this.#aim(by);
-    this.#redraw();
+    const grew = Math.abs(by) >= 0.5;
+    if (grew) {
+      this.#natural = natural;
+      this.#box = this.#lifted ? Math.max(this.#box, natural) : natural;
+      // Laid out pulled up, the Coach is as tall pulled up as it is now (a row came or went).
+      if (this.#lifted && this.#kind === 'full') this.#aim(by);
+    }
+    // What the log says changed (the app replaced it as the sheet moved): its lines are placed for
+    // the end the sheet is going to straight away, as new lines are, not slid there from old ones.
+    const log = coach.querySelector<HTMLElement>('.log');
+    const said = parts.scrolls.find((x) => x.el === log);
+    let resaid = false;
+    if (log && said && (said.kids.length !== log.children.length || said.kids.some((k, i) => k !== log.children[i]))) {
+      const geo = this.#geo;
+      const content = log.scrollHeight;
+      const most = (h: number) => Math.max(0, content - h);
+      Object.assign(said, {
+        kids: [...log.children].filter((k): k is HTMLElement => k instanceof HTMLElement),
+        rest: Math.min(said.rest, most(Math.min(content, geo.rest.logMax))),
+        up: Math.min(said.up, most(Math.min(content, geo.up.logMax))),
+      });
+      if (this.#end) said.rest = said.up;
+      else said.up = said.rest;
+      resaid = true;
+    }
+    if (this.#restAgain(coach) || grew || resaid) this.#redraw();
+  }
+
+  /**
+   * What the Coach will be at rest, once more, from what its log says now: as tall as its rows and
+   * as much of the log as fits its height at rest. If that changed, its top edge heads there from
+   * where it is drawn (only on the way down: going up, the rest end is behind it).
+   */
+  #restAgain(coach: HTMLElement): boolean {
+    const geo = this.#geo!;
+    const log = coach.querySelector<HTMLElement>('.log');
+    if (!this.#lifted || this.#kind !== 'full' || !log || this.#end) return false;
+    // At rest there is no "Put the answer away".
+    const row = coach.querySelector(':scope > .log-actions') ? this.#rowGrowth || 0 : 0;
+    const restCoach = this.#natural - log.clientHeight + Math.min(log.scrollHeight, geo.rest.logMax) - row;
+    const now = geo.rest.coach + this.#restRamps.reduce((sum, r) => sum + r.by, 0);
+    if (Math.abs(restCoach - now) < 0.5) return false;
+    this.#restRamps.push({ from: this.#p(this.current()), by: restCoach - now });
+    return true;
   }
 
   /** The Coach will be `by` taller pulled up: from here, if heading up; once it heads up, if not. */
@@ -604,6 +651,9 @@ export class Motion {
     if (coach) {
       this.#coachWatch.observe(coach);
       this.#rowWatch.observe(coach, { childList: true });
+      // What it says, too: the app may say something new as the sheet moves.
+      const log = coach.querySelector('.log');
+      if (log) this.#rowWatch.observe(log, { childList: true, subtree: true, characterData: true });
     }
     this.#lifted = false;
     frame.classList.toggle('v1-rising', !this.#end);
@@ -669,6 +719,9 @@ export class Motion {
   #measure(panel: HTMLElement, col: HTMLElement, coach: HTMLElement | null): Stops {
     const frame = this.#frame;
     const hadFull = frame.classList.contains('sheet-full');
+    // The keyboard's strip (the Ask box's `typing`) is left out of both: they are the sheet's ends.
+    const typing = coach?.querySelector<HTMLElement>('input.typing') ?? null;
+    typing?.classList.remove('typing');
     const body = panel.querySelector<HTMLElement>(':scope > .panel-body');
     const log = coach?.querySelector<HTMLElement>('.log') ?? null;
     const read = (): Layout => ({
@@ -676,6 +729,7 @@ export class Motion {
       col: col.getBoundingClientRect().height,
       coach: coach?.getBoundingClientRect().height ?? 0,
       log: log?.clientHeight ?? 0,
+      logMax: log ? parseFloat(getComputedStyle(log).maxHeight) || Infinity : 0,
       body: body?.clientHeight ?? 0,
       board: box(col.querySelector('.board')),
       under: box(col.querySelector('.under')),
@@ -719,6 +773,7 @@ export class Motion {
       readUp();
     }
     frame.classList.toggle('sheet-full', hadFull);
+    typing?.classList.add('typing');
     // With those near-zero transitions, settle the restored layout before they come back.
     if (calm()) void panel.offsetTop;
     frame.classList.remove('v1-measuring');
@@ -738,7 +793,9 @@ export class Motion {
       // The Coach's top edge rises with the panel from its height at rest to its height pulled up.
       // It is laid out as tall as it gets and slid down by what it shows less (`cut`), its foot past
       // the screen's, while its rows (the Ask box) slide back up to stay docked over its words.
-      const shown = lerp(rest.coach, this.#upCoach, p) + this.#ramps.reduce((sum, r) => sum + r.by * clamp((p - r.from) / (1 - r.from || 1), 0, 1), 0);
+      const gained = this.#ramps.reduce((sum, r) => sum + r.by * clamp((p - r.from) / (1 - r.from || 1), 0, 1), 0);
+      const atRest = this.#restRamps.reduce((sum, r) => sum + r.by * clamp((r.from - p) / (r.from || 1), 0, 1), 0);
+      const shown = lerp(rest.coach, this.#upCoach, p) + gained + atRest;
       out.push({ el: parts.coach, style: { transform: `translate3d(0, ${up.top - y + this.#box - shown}px, 0)` } });
       for (const el of parts.rows) out.push({ el, style: { transform: `translate3d(0, ${shown - this.#natural}px, 0)` } });
     }
@@ -899,6 +956,7 @@ export class Motion {
     this.#geo = null;
     this.#parts = null;
     this.#ramps = [];
+    this.#restRamps = [];
     this.#later = 0;
     this.#lifted = false;
     this.#coachWatch.disconnect();

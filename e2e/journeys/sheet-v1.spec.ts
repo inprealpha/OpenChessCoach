@@ -366,7 +366,8 @@ async function dragDownFollows(p: Phone): Promise<void> {
   for (const f of held) expect(f.boardLaidOut).toBe(held[0]!.boardLaidOut);
   // Drawn without a jump: as much bigger than the strip as the sheet has come down, about.
   const first = held[0]!.top - upFrame.top;
-  expect(held[0]!.boardDrawn).toBeGreaterThan(upFrame.boardDrawn + first * 0.5);
+  // (Where nothing under the finger scrolls, it is laid out for moving as the finger touches: not moved yet.)
+  expect(held[0]!.boardDrawn).toBeGreaterThanOrEqual(upFrame.boardDrawn + first * 0.5 - 0.5);
   expect(held[0]!.boardDrawn).toBeLessThan(upFrame.boardDrawn + first * 1.5 + 1);
   const tops = await recordTops(page, watchMs(p));
   await p.finger.up();
@@ -555,16 +556,15 @@ test.describe('Version 1 of the sheet: the moves the app makes itself slide', ()
       await settled(page, true);
       const up = (await frame(page)).top;
       tops = await recordTops(page, 900);
-      // At a fifth of its speed, so the second tap surely lands mid-slide however busy the
-      // machine; `force`: Playwright would otherwise wait for the handle to stop moving.
-      const cdp = await page.context().newCDPSession(page);
-      await cdp.send('Animation.enable');
-      await cdp.send('Animation.setPlaybackRate', { playbackRate: 0.2 });
-      await page.getByRole('button', { name: 'Let the panel down' }).tap({ force: true });
-      await page.waitForTimeout(400);
-      await page.getByRole('button', { name: 'Pull the panel up' }).tap({ force: true });
+      // The two taps 90 ms apart, from the page itself: the round trips of a busy test machine
+      // would otherwise let the first slide finish before the second tap arrives.
+      await page.evaluate(async () => {
+        const handle = () => document.querySelector<HTMLElement>('.sheet-handle')!;
+        handle().click();
+        await new Promise((r) => setTimeout(r, 90));
+        handle().click();
+      });
       const turned = await tops();
-      await cdp.send('Animation.setPlaybackRate', { playbackRate: 1 });
       await settled(page, true);
       const deepest = Math.max(...turned);
       expect(deepest).toBeGreaterThan(up + 20);
@@ -659,6 +659,116 @@ test.describe('Version 1 of the sheet: the moves the app makes itself slide', ()
       await p.close();
     }
   });
+});
+
+/** One drawn frame of the sheet's insides. */
+interface Inside {
+  coachTop: number;
+  /** The Coach's latest answer, where it is drawn, and its first words (the app may replace it). */
+  answer: number;
+  said: string;
+  coord: number;
+  numbers: number;
+  row: number;
+  readAll: number;
+}
+
+/** Records what is inside the sheet on every drawn frame for `ms`, starting now. */
+async function recordInside(page: Page, ms: number): Promise<() => Promise<Inside[]>> {
+  await page.evaluate((ms) => {
+    const w = window as unknown as { __inside: Inside[] };
+    w.__inside = [];
+    const end = performance.now() + ms;
+    const q = (s: string) => document.querySelector<HTMLElement>(s);
+    // How visible it is: itself, or the copy of it that fades out where it was (Version 1).
+    const seen = (s: string) =>
+      Math.max(Number(q(`.coach ${s}`) ? getComputedStyle(q(`.coach ${s}`)!).opacity : 0), Number(q(`.v1-ghost${s}`) ? getComputedStyle(q(`.v1-ghost${s}`)!).opacity : 0));
+    const tick = () => {
+      w.__inside.push({
+        coachTop: q('.side.panel > .coach')!.getBoundingClientRect().top,
+        answer: [...document.querySelectorAll('.coach .log > .entry')].at(-1)?.getBoundingClientRect().top ?? NaN,
+        said: [...document.querySelectorAll('.coach .log > .entry')].at(-1)?.textContent?.slice(0, 24) ?? '',
+        coord: q('.board .coord')?.getBoundingClientRect().height ?? 0,
+        numbers: q('.wc-bar .percent')?.getBoundingClientRect().width ?? 0,
+        row: seen('.log-actions'),
+        readAll: seen('.read-all'),
+      });
+      if (performance.now() < end) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }, ms);
+  return async () => {
+    await page.waitForTimeout(ms + 50);
+    return page.evaluate(() => (window as unknown as { __inside: Inside[] }).__inside);
+  };
+}
+
+/**
+ * Nothing inside the sheet jumps from one drawn frame to the next: the Coach's top edge never turns
+ * back (beyond a sub-pixel), its answer moves with it, the coordinates and the bar's numbers keep
+ * their size, and "Put the answer away" and "Read all" fade rather than switch.
+ */
+function expectNoJump(frames: Inside[], what: string): void {
+  let dir = 0;
+  for (let i = 1; i < frames.length; i++) {
+    const [a, b] = [frames[i - 1]!, frames[i]!];
+    const why = `${what}, frame ${i}: ${JSON.stringify(a)} -> ${JSON.stringify(b)}`;
+    const d = b.coachTop - a.coachTop;
+    if (Math.abs(d) > 1) {
+      if (dir) expect(Math.sign(d), `${why} (the Coach's edge turned back)`).toBe(dir);
+      dir = Math.sign(d);
+    }
+    if (a.said === b.said && Number.isFinite(a.answer) && Number.isFinite(b.answer)) {
+      expect(Math.abs(b.answer - b.coachTop - (a.answer - a.coachTop)), `${why} (the answer moved under the Coach's edge)`).toBeLessThan(1);
+    }
+    expect(Math.abs(b.coord - a.coord), `${why} (a coordinate changed size)`).toBeLessThan(0.5);
+    expect(Math.abs(b.numbers - a.numbers), `${why} (the bar's number changed size)`).toBeLessThan(0.5);
+    expect(Math.abs(b.row - a.row), `${why} ("Put the answer away" switched)`).toBeLessThan(0.4);
+    expect(Math.abs(b.readAll - a.readAll), `${why} ("Read all" switched)`).toBeLessThan(0.4);
+  }
+}
+
+test('nothing inside the sheet jumps as it moves: the Coach, its answer, "Put the answer away", "Read all", the coordinates', async ({ browser, app }) => {
+  const p = await phone('chromium', browser, app, [390, 664]);
+  const page = p.page;
+  try {
+    await open(page, app, 'Lesson');
+    // A Why Question answered at length: "Read all" at rest, "Put the answer away" pulled up.
+    await app.script({ kind: 'reply', reply: { text: Array.from({ length: 9 }, (_, i) => `Line ${i + 1}: Nf3 develops a piece and attacks e5.`).join(' ') } });
+    await page.getByRole('textbox', { name: 'Your Why Question' }).fill('Why Nf3?');
+    await page.locator('.coach form').evaluate((f: HTMLFormElement) => f.requestSubmit());
+    await settled(page, true);
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+    await page.waitForTimeout(600);
+    await expect(page.getByRole('button', { name: 'Put the answer away' })).toBeVisible();
+    await page.getByRole('button', { name: 'Let the panel down' }).tap();
+    await settled(page, false);
+    await expect(page.locator('.coach .read-all')).toBeVisible();
+    await page.waitForTimeout(500);
+    // The handle, up and down.
+    let watch = await recordInside(page, 700);
+    await page.getByRole('button', { name: 'Pull the panel up' }).tap();
+    expectNoJump(await watch(), 'handle up');
+    await settled(page, true);
+    watch = await recordInside(page, 700);
+    await page.getByRole('button', { name: 'Let the panel down' }).tap();
+    expectNoJump(await watch(), 'handle down');
+    await settled(page, false);
+    await page.waitForTimeout(500);
+    // A drag up, let go.
+    watch = await recordInside(page, 1_200);
+    await drag(p, await onContent(page), -90);
+    await p.finger.up();
+    expectNoJump(await watch(), 'drag up');
+    await settled(page, true);
+    await page.waitForTimeout(500);
+    // The app's own move: Continue lets the sheet down (and moves the Lesson on: its answer goes).
+    watch = await recordInside(page, 700);
+    await page.getByRole('button', { name: 'Continue' }).tap();
+    expectNoJump(await watch(), 'Continue');
+  } finally {
+    await p.close();
+  }
 });
 
 test('on a desktop, Version 1 changes nothing: the panel is laid out and scrolls as Today', async ({ page, app }) => {

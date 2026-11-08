@@ -443,7 +443,8 @@ export class Motion {
   #slide(from: number, up: boolean, ms: number, elapsed = 0): void {
     const geo = this.#geo!;
     const to = up ? geo.up.top : geo.rest.top;
-    this.#draw(from);
+    // Where it is drawn now: its start, or, picked up part-way (the Coach changed height), there.
+    this.#draw(lerp(from, to, ease(elapsed / ms)));
     const steps = 8;
     const frames = Array.from({ length: steps + 1 }, (_, i) => this.#styles(lerp(from, to, i / steps)));
     const run = { from, to, ms, up, elapsed, anims: [] as Animation[] };

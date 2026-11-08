@@ -149,6 +149,9 @@ export const v1: SheetDriver = {
     frame.addEventListener('touchcancel', end, { passive: true });
     frame.addEventListener('click', click, { capture: true });
     frame.addEventListener('focusin', focus, { capture: true });
+    // Where the content and the Coach's log are scrolled, kept for the next move.
+    const scrolled = (e: Event) => e.target instanceof Element && motion.scrolled(e.target);
+    frame.addEventListener('scroll', scrolled, { capture: true, passive: true });
     addEventListener('resize', turned);
     return () => {
       cancelAnimationFrame(first);
@@ -162,6 +165,7 @@ export const v1: SheetDriver = {
       frame.removeEventListener('touchcancel', end);
       frame.removeEventListener('click', click, { capture: true });
       frame.removeEventListener('focusin', focus, { capture: true });
+      frame.removeEventListener('scroll', scrolled, { capture: true });
       removeEventListener('resize', turned);
       motion.detach();
       motions.delete(frame);

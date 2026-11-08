@@ -244,7 +244,9 @@ async function recordTops(page: Page, ms: number): Promise<() => Promise<Tops>> 
     w.__tick = setInterval(() => {
       const panel = document.querySelector('.side.panel')!;
       w.__tops.push(Math.round(panel.getBoundingClientRect().top * 10) / 10);
-      w.__at.push(performance.now());
+      // The time the drawing is for: the frame's (animations and the sheet's own frame callbacks
+      // draw by it), so a frame the busy machine draws late isn't read as a jump.
+      w.__at.push(Number(document.timeline.currentTime ?? performance.now()));
       // How far through its slide the panel's animation is, as the browser times it.
       // (Its own slides only: with less motion asked for, app.css gives CSS transitions 0.01 ms.)
       const p = panel.getAnimations().find((a) => !('transitionProperty' in a))?.effect?.getComputedTiming().progress;
@@ -570,7 +572,7 @@ test.describe('Version 1 of the sheet: the moves the app makes itself slide', ()
       expect(deepest).toBeGreaterThan(up + 20);
       expect(deepest).toBeLessThan(rest - 2);
       // Never faster than the slide's start (4 times its average speed, about 2.5 px/ms here):
-      // no jump. Timed by the readings' own clock, as a busy page reads less often.
+      // no jump. Timed by the frames' clock, as a busy page reads (and draws) less often.
       let last = 0;
       for (let i = 1; i < turned.length; i++) {
         if (turned[i] === turned[i - 1]) continue;
@@ -668,6 +670,8 @@ interface Inside {
   answer: number;
   said: string;
   coord: number;
+  /** How visible the coordinates are: they fade out while the board moves, and back after. */
+  coordSeen: number;
   numbers: number;
   row: number;
   readAll: number;
@@ -689,6 +693,7 @@ async function recordInside(page: Page, ms: number): Promise<() => Promise<Insid
         answer: [...document.querySelectorAll('.coach .log > .entry')].at(-1)?.getBoundingClientRect().top ?? NaN,
         said: [...document.querySelectorAll('.coach .log > .entry')].at(-1)?.textContent?.slice(0, 24) ?? '',
         coord: q('.board .coord')?.getBoundingClientRect().height ?? 0,
+        coordSeen: Number(q('.board .coord') ? getComputedStyle(q('.board .coord')!).opacity : 0),
         numbers: q('.wc-bar .percent')?.getBoundingClientRect().width ?? 0,
         row: seen('.log-actions'),
         readAll: seen('.read-all'),
@@ -705,8 +710,9 @@ async function recordInside(page: Page, ms: number): Promise<() => Promise<Insid
 
 /**
  * Nothing inside the sheet jumps from one drawn frame to the next: the Coach's top edge never turns
- * back (beyond a sub-pixel), its answer moves with it, the coordinates and the bar's numbers keep
- * their size, and "Put the answer away" and "Read all" fade rather than switch.
+ * back (beyond a sub-pixel), its answer moves with it, the bar's numbers keep their size, the
+ * coordinates keep theirs wherever they show (they go as the board starts to move, and fade back in
+ * after), and "Put the answer away" and "Read all" fade rather than switch.
  */
 function expectNoJump(frames: Inside[], what: string): void {
   let dir = 0;
@@ -721,7 +727,9 @@ function expectNoJump(frames: Inside[], what: string): void {
     if (a.said === b.said && Number.isFinite(a.answer) && Number.isFinite(b.answer)) {
       expect(Math.abs(b.answer - b.coachTop - (a.answer - a.coachTop)), `${why} (the answer moved under the Coach's edge)`).toBeLessThan(1);
     }
-    expect(Math.abs(b.coord - a.coord), `${why} (a coordinate changed size)`).toBeLessThan(0.5);
+    if (a.coordSeen > 0 && b.coordSeen > 0) expect(Math.abs(b.coord - a.coord), `${why} (a coordinate changed size where it shows)`).toBeLessThan(0.5);
+    // They go as the board starts to move, and come back fading in.
+    expect(b.coordSeen - a.coordSeen, `${why} (the coordinates came back at once)`).toBeLessThan(0.6);
     expect(Math.abs(b.numbers - a.numbers), `${why} (the bar's number changed size)`).toBeLessThan(0.5);
     expect(Math.abs(b.row - a.row), `${why} ("Put the answer away" switched)`).toBeLessThan(0.4);
     expect(Math.abs(b.readAll - a.readAll), `${why} ("Read all" switched)`).toBeLessThan(0.4);

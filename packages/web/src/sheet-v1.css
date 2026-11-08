@@ -27,13 +27,15 @@
   :root[data-sheet="v1"] .board-screen.v1-measuring, :root[data-sheet="v1"] .board-screen.v1-measuring * { transition: none !important; }
   /* The parts that move have their own layers all along, so a move doesn't start by making and
      painting them; and they scale from where they are anchored. */
-  :root[data-sheet="v1"] .board-screen:has(> .board-layout) :is(.side.panel, .side.panel > .coach, .side.panel > .coach > .thumb-row, .board-col .board) {
+  :root[data-sheet="v1"] .board-screen:has(> .board-layout) :is(.side.panel, .side.panel > .coach, .side.panel > .coach > :is(.thumb-row, .log-actions, .actions), .side.panel > .coach .log, .board-col :is(.board, .under, .wc-bar, .wc-bar .percent)) {
     will-change: transform;
   }
   :root[data-sheet="v1"] .board-screen.v1-moving .board-col :is(.board, .under, .wc-bar) { transform-origin: 0 0; }
-  /* The coordinates keep their size, each at its corner of its square; the bar's numbers at their end. */
-  :root[data-sheet="v1"] .board-screen.v1-moving .board .coord.rank { transform-origin: 0 0; }
-  :root[data-sheet="v1"] .board-screen.v1-moving .board .coord.file { transform-origin: 100% 100%; }
+  /* The board's coordinates go as the sheet starts to move (they would shrink with the board) and
+     fade back in once it stops, each on a layer of its own so the fade needs no painting; the
+     bar's numbers keep their size, at their end of the bar. */
+  :root[data-sheet="v1"] .board-screen:has(> .board-layout) .board .coord { will-change: opacity; transition: opacity 140ms ease; }
+  :root[data-sheet="v1"] .board-screen:has(> .board-layout) .board.v1-going .coord { opacity: 0; transition: none; }
   :root[data-sheet="v1"] .board-screen.v1-moving .wc-bar .percent { transform-origin: 100% 50%; }
   :root[data-sheet="v1"] .board-screen.v1-moving .wc-bar .percent.start { transform-origin: 0 50%; }
   /* The sliding panel stays over the board strip's button (SheetStrip.svelte, z-index 5), which
@@ -52,8 +54,10 @@
      shows the lines under it too, up to the Ask box's rows, cut only at its top. */
   :root[data-sheet="v1"] .board-screen.v1-lifted .side.panel > .coach .log {
     /* (!important: over the rule above that keeps the log from scrolling at rest.) */
-    max-height: var(--v1-log-box); overflow: visible !important; clip-path: inset(0 -100vw -200vh -100vw);
+    max-height: var(--v1-log-box); overflow: visible !important;
   }
+  /* The log moves as one piece (motion-v1.ts), cut at the top of the box it sits in. */
+  :root[data-sheet="v1"] .board-screen.v1-lifted .side.panel > .coach .log-wrap { clip-path: inset(0 -100vw -200vh -100vw); }
   /* "Read all" fades as the sheet heads up, where the app will take it away. */
   :root[data-sheet="v1"] .board-screen.v1-moving .side.panel > .coach .read-all { transition: opacity 180ms ease-out; }
   :root[data-sheet="v1"] .board-screen.v1-moving.v1-faded .side.panel > .coach .read-all { opacity: 0; }

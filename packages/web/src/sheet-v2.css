@@ -23,6 +23,10 @@
     animation-timeline: --v2-sheet;
     animation-range: 0px var(--v2-d);
   }
+  /* The scroll drives these, not the clock: app.css's reduced motion (0.01 ms) would make them jump.
+     They move only as far as the finger or the scroll takes them. */
+  :root[data-sheet='v2'] .v2-sheet.v2-sdt > .board-col,
+  :root[data-sheet='v2'] .board-screen .v2-sheet.v2-sdt > .side.panel > .panel-body::after { animation-duration: auto !important; }
 
   /* The scroller: over the whole frame, see-through where the board is, so the board takes its own touches. */
   :root[data-sheet='v2'] .board-screen .v2-sheet > .side.panel {

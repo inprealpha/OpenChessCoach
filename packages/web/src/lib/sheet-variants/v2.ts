@@ -185,6 +185,12 @@ function attach(sheet: Sheet, body: HTMLElement): () => void {
   let samples: { t: number; y: number }[] = [];
   let startScroll = 0;
   /**
+   * A gesture that started with the content scrolled, let go with the sheet still up: what moves on
+   * is the content's momentum, which stops at the content's top. Lowering the sheet takes a pull
+   * from there (or the finger itself carrying on past the top).
+   */
+  let coastingContent = false;
+  /**
    * The app just put the focus in the sheet without the keyboard (after a tap or by itself): the
    * scroll that brings it into view is the browser's, not the Player's. Until then, or a moment.
    */
@@ -203,7 +209,7 @@ function attach(sheet: Sheet, body: HTMLElement): () => void {
       }
     }
     // A flick down the content stops at its top: lowering the sheet takes a pull from there.
-    if (open && target === null && startScroll > d + 1 && scroller.scrollTop < d) scroller.scrollTo({ top: d, behavior: 'instant' });
+    if (open && target === null && coastingContent && scroller.scrollTop < d) scroller.scrollTo({ top: d, behavior: 'instant' });
     settleSoon();
   };
   const touchMove = (e: TouchEvent): void => {
@@ -220,7 +226,7 @@ function attach(sheet: Sheet, body: HTMLElement): () => void {
    * go at rest, up or in the content, the scroll is the browser's own.
    */
   const release = (lifted: number): void => {
-    if (d <= 0) return;
+    if (d <= 0 || coastingContent) return;
     const at = scroller.scrollTop;
     if (at <= 0.5 || at >= d - 0.5) return;
     const first = samples[0];
@@ -242,6 +248,8 @@ function attach(sheet: Sheet, body: HTMLElement): () => void {
   let closing = false;
   /** Whether the sheet was up when the Ask box took the focus: it goes back down if nothing was asked. */
   let upBeforeTyping: boolean | null = null;
+  /** That, waiting for the finger to lift. */
+  let lowerAfterTouch = false;
   let asked = false;
   const guard = (e: TouchEvent): void => {
     const t = e.touches[0];
@@ -263,6 +271,7 @@ function attach(sheet: Sheet, body: HTMLElement): () => void {
     clearTimeout(idle);
     // The finger takes over from a move under way.
     target = null;
+    coastingContent = false;
     retries = 0;
     startY = e.touches[0]?.clientY ?? 0;
     startScroll = scroller.scrollTop;
@@ -274,7 +283,13 @@ function attach(sheet: Sheet, body: HTMLElement): () => void {
     touching = false;
     if (closing && !field) guarding(false);
     closing = false;
+    if (lowerAfterTouch) {
+      lowerAfterTouch = false;
+      sheet.full = false;
+      return;
+    }
     const lifted = scroller.scrollTop;
+    coastingContent = open && startScroll > d + 1 && lifted >= d - 1;
     if (Math.abs(lifted - startScroll) > 1) requestAnimationFrame(() => release(lifted));
     settleSoon();
   };
@@ -303,7 +318,11 @@ function attach(sheet: Sheet, body: HTMLElement): () => void {
       if (now instanceof HTMLElement && scroller.contains(now) && now.matches(FIELD)) return;
       field = null;
       if (!closing) guarding(false);
-      if (upBeforeTyping === false && !asked && sheet.full) sheet.full = false;
+      // Nothing asked: the sheet goes back down, as today's board grows back, once the finger is off.
+      if (upBeforeTyping === false && !asked && sheet.full) {
+        if (touching) lowerAfterTouch = true;
+        else sheet.full = false;
+      }
       upBeforeTyping = null;
     }, 400);
   };

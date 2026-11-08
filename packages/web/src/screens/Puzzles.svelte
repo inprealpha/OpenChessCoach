@@ -291,7 +291,7 @@
   }
 </script>
 
-<section class="screen board-screen puzzles" class:sheet-full={sheet.shown}>
+<section class="screen board-screen puzzles" class:sheet-full={sheet.shown} {@attach sheet.frame}>
   <header class="frame-head">
     <h1>{lessonName ? `${lessonName} Puzzles` : 'Puzzles'}</h1>
     {#if puzzle && status !== 'empty'}<p class="head-line">Rated {puzzle.rating} · from a real Lichess game</p>{/if}

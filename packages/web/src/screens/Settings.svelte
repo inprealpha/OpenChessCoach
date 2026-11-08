@@ -13,6 +13,7 @@
   import { api, ApiError } from '../lib/api.svelte.ts';
   import { pairingCode } from '../lib/pairing-code.ts';
   import { router } from '../lib/router.svelte.ts';
+  import { chooseSheetVariant, SHEET_VARIANTS, sheetVariant, sheetVariantFromAddress } from '../lib/sheet-variant.ts';
 
   /** A card on this screen, where the outcome of a change made in it is shown. */
   type Card = 'pairing' | 'tunnel' | 'live' | 'review' | 'quality' | 'deeper';
@@ -134,6 +135,21 @@
 
 <section class="screen settings">
   <h1>Settings</h1>
+  <!-- PROTOTYPE (#80): the owner compares three versions of the phone's panel sheet. Stored on this device. -->
+  <section class="card" aria-label="Panel swipe">
+    <h2>Panel swipe (prototype)</h2>
+    <p class="muted small">How the panel under the board moves on a phone. Pick one, then try it on a Lesson, a Review and a Puzzle.</p>
+    {#if sheetVariantFromAddress}<p class="muted small">This page shows {SHEET_VARIANTS.find((v) => v.id === sheetVariant)?.name} from its link; picking one here keeps it.</p>{/if}
+    <fieldset class="sheet-variants">
+      <legend class="visually-hidden">Panel swipe</legend>
+      {#each SHEET_VARIANTS as v (v.id)}
+        <label class="check">
+          <input type="radio" name="sheet-variant" value={v.id} checked={v.id === sheetVariant} onclick={() => chooseSheetVariant(v.id)} />
+          <span><strong>{v.name}</strong> <span class="muted small">{v.about}</span></span>
+        </label>
+      {/each}
+    </fieldset>
+  </section>
   {#if api.state !== 'online'}
     <p class="card">Settings live on your desktop, which can’t be reached right now.</p>
   {:else if settings && pairing}
@@ -326,4 +342,5 @@
   .advanced { margin-top: 0.8rem; }
   .advanced summary { cursor: pointer; font-weight: 600; }
   .warning { margin: 0.5rem 0 0; padding: 0.4rem 0.6rem; border-left: 3px solid #b26a00; background: color-mix(in srgb, #b26a00 10%, transparent); }
+  .sheet-variants { border: 0; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.25rem; }
 </style>

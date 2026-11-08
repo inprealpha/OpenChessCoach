@@ -17,7 +17,10 @@
     --board-max: min(var(--board-cap), calc(100dvh - var(--phone-reserve, 18rem)));
     padding-block: 0 0.3rem;
   }
-  :root[data-sheet='v2'] .v2-sheet > .board-col { transform-origin: 50% 0; will-change: transform; }
+  /* The board above the sheet's scroller: at rest its own box covers the scroller's see-through gap,
+     so its touches are its own by plain hit-testing (nothing passes through a layer). As it shrinks,
+     its box shrinks with it (hit-testing follows the transform) and the rising sheet takes the room. */
+  :root[data-sheet='v2'] .v2-sheet > .board-col { transform-origin: 50% 0; will-change: transform; position: relative; z-index: 2; }
   :root[data-sheet='v2'] .v2-sheet.v2-sdt > .board-col {
     animation: v2-board linear both;
     animation-timeline: --v2-sheet;
@@ -26,9 +29,14 @@
   /* The scroll drives these, not the clock: app.css's reduced motion (0.01 ms) would make them jump.
      They move only as far as the finger or the scroll takes them. */
   :root[data-sheet='v2'] .v2-sheet.v2-sdt > .board-col,
-  :root[data-sheet='v2'] .board-screen .v2-sheet.v2-sdt > .side.panel > .panel-body::after { animation-duration: auto !important; }
+  :root[data-sheet='v2'] .board-screen .v2-sheet.v2-sdt > .side.panel::after,
+  :root[data-sheet='v2'] .board-screen .v2-sheet.v2-sdt > .side.panel > .coach,
+  :root[data-sheet='v2'] .board-screen .v2-sheet.v2-sdt > .side.panel > .coach::after,
+  :root[data-sheet='v2'] .board-screen .v2-sheet.v2-sdt > .side.panel > .coach .log-wrap,
+  :root[data-sheet='v2'] .board-screen .v2-sheet.v2-sdt > .side.panel > .coach .log-wrap::after { animation-duration: auto !important; }
 
-  /* The scroller: over the whole frame, see-through where the board is, so the board takes its own touches. */
+  /* The scroller: over the whole frame, under the board. Its background is the sheet's colour from
+     the sheet's top down, scrolling with it, so nothing shows through gaps in the sheet. */
   :root[data-sheet='v2'] .board-screen .v2-sheet > .side.panel {
     position: absolute;
     inset: 0 -0.75rem;
@@ -36,7 +44,8 @@
     padding: 0;
     border: 0;
     border-radius: 0;
-    background: transparent;
+    z-index: 1;
+    background: linear-gradient(transparent var(--v2-rest), var(--panel) var(--v2-rest)) local;
     box-shadow: none;
     overflow: hidden auto;
     overscroll-behavior: contain;
@@ -46,7 +55,6 @@
     scroll-padding: calc(var(--v2-up) + var(--v2-hh)) 0 var(--v2-coach-h);
     scroll-timeline: --v2-sheet y;
     scrollbar-width: none;
-    pointer-events: none;
     /* Content scrolled up past the handle goes nowhere near the strip. */
     clip-path: inset(var(--v2-up) 0 0 0 round 12px 12px 0 0);
   }
@@ -57,11 +65,12 @@
     flex: none;
     height: var(--v2-rest);
   }
-  :root[data-sheet='v2'] .board-screen .v2-sheet > .side.panel > * { pointer-events: auto; flex: none; }
+  :root[data-sheet='v2'] .board-screen .v2-sheet > .side.panel > * { flex: none; }
   /* Sizes change at once: with reduced motion app.css gives every property a 0.01 ms transition,
      and the content's height growing from nothing for a frame would send the scroll back to rest. */
   :root[data-sheet='v2'] .board-screen .v2-sheet > :is(.board-col, .side.panel),
-  :root[data-sheet='v2'] .board-screen .v2-sheet > .side.panel > * { transition-property: none; }
+  :root[data-sheet='v2'] .board-screen .v2-sheet > .side.panel > *,
+  :root[data-sheet='v2'] .board-screen .v2-sheet > .side.panel > .coach .log-wrap { transition-property: none; }
 
   /* The handle: the sheet's top edge, stuck under the strip while the content scrolls. A drag on it is the sheet's scroll. */
   :root[data-sheet='v2'] .board-screen .v2-sheet > .side.panel > .sheet-handle {
@@ -76,11 +85,13 @@
     touch-action: manipulation;
   }
 
-  /* The content: at rest cut to the sheet's height, so a swipe moves the sheet and never the text. */
+  /* The content: at rest cut to the sheet's height, so a swipe moves the sheet and never the text.
+     A box only the app scrolls (overflow hidden: no finger can), as the Review does to show an
+     opened moment under its tabs. */
   :root[data-sheet='v2'] .board-screen .v2-sheet > .side.panel > .panel-body {
     height: var(--v2-body-min);
     min-height: 0;
-    overflow: clip;
+    overflow: hidden;
     overscroll-behavior: auto;
     background: var(--panel);
   }
@@ -88,40 +99,93 @@
   :root[data-sheet='v2'] .board-screen .v2-sheet > .side.panel > .panel-body.v2-open {
     height: auto;
     min-height: var(--v2-body-min);
+    overflow: visible;
   }
-  /* Text that doesn't fit at rest fades out above the Coach; up, the fade is gone. */
-  :root[data-sheet='v2'] .board-screen .v2-sheet > .side.panel > .panel-body::after {
+  /* Text that doesn't fit at rest fades out above the Coach; up, the fade is gone. On the scroller,
+     held at the Coach's top as drawn, taking no room. */
+  :root[data-sheet='v2'] .board-screen .v2-sheet > .side.panel::after {
     content: '';
     display: block;
     flex: none;
     position: sticky;
-    bottom: var(--v2-coach-h);
-    z-index: 1;
+    bottom: calc(var(--v2-coach-h) - var(--v2-coach-clip, 0px));
+    z-index: 2;
     height: 1rem;
-    margin: -1rem calc(-1 * var(--panel-pad, 0.75rem)) 0;
+    margin-top: -1rem;
     background: linear-gradient(to bottom, transparent, var(--panel));
     pointer-events: none;
   }
-  :root[data-sheet='v2'] .board-screen .v2-sheet.v2-sdt > .side.panel > .panel-body::after {
-    animation: v2-fade linear both;
+  :root[data-sheet='v2'] .board-screen .v2-sheet.v2-sdt > .side.panel::after {
+    animation: v2-fade-edge linear both;
     animation-timeline: --v2-sheet;
     animation-range: 0px var(--v2-d);
   }
-  :root[data-sheet='v2'] .board-screen .v2-sheet:not(.v2-sdt) > .side.panel > .panel-body.v2-open::after { opacity: 0; }
-  /* The Review's tabs stick under the handle, not under the strip. */
-  :root[data-sheet='v2'] .board-screen .v2-sheet > .side.panel > .panel-body > .tabs {
-    top: calc(var(--v2-up) + var(--v2-hh));
-    z-index: 2;
-  }
+  :root[data-sheet='v2'] .board-screen .v2-sheet:not(.v2-sdt) > .side.panel.v2-up::after { opacity: 0; }
+  /* The Review's tabs: at the content box's top at rest, under the handle once the content is whole. */
+  :root[data-sheet='v2'] .board-screen .v2-sheet > .side.panel > .panel-body > .tabs { z-index: 2; }
+  :root[data-sheet='v2'] .board-screen .v2-sheet > .side.panel > .panel-body.v2-open > .tabs { top: calc(var(--v2-up) + var(--v2-hh)); }
 
-  /* The Coach: docked at the foot of the screen, the sheet moving behind it. */
+  /* The Coach: docked at the foot of the screen, the sheet moving behind it. Its log keeps its
+     pulled-up size; at rest the scroll-driven clip shows only its last lines (today's two), the
+     log covering the row under it (Put the answer away), and both open with the scroll. */
   :root[data-sheet='v2'] .board-screen .v2-sheet > .side.panel > .coach {
     position: sticky;
     bottom: 0;
     z-index: 3;
   }
-  /* At rest its two lines are part of the sheet: a swipe on them moves the sheet. */
-  :root[data-sheet='v2'] .board-screen:not(.sheet-full) .v2-sheet > .side.panel > .coach .log { overflow-y: hidden; }
+  :root[data-sheet='v2'] .board-screen .v2-sheet > .side.panel > .coach .log { max-height: 26dvh; }
+  :root[data-sheet='v2'] .board-screen .v2-sheet > .side.panel:not(.v2-up) > .coach .log { overflow-y: hidden; }
+  :root[data-sheet='v2'] .board-screen .v2-sheet > .side.panel > .coach .log-wrap { background: var(--panel); z-index: 1; }
+  /* The Coach's top edge as drawn. */
+  :root[data-sheet='v2'] .board-screen .v2-sheet > .side.panel > .coach::after {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: var(--hair, 1px);
+    background: var(--line);
+    pointer-events: none;
+    z-index: 2;
+  }
+  :root[data-sheet='v2'] .board-screen .v2-sheet.v2-sdt > .side.panel > .coach {
+    animation: v2-coach linear both;
+    animation-timeline: --v2-sheet;
+    animation-range: 0px var(--v2-d);
+  }
+  :root[data-sheet='v2'] .board-screen .v2-sheet.v2-sdt > .side.panel > .coach .log-wrap {
+    animation: v2-log linear both;
+    animation-timeline: --v2-sheet;
+    animation-range: 0px var(--v2-d);
+  }
+  :root[data-sheet='v2'] .board-screen .v2-sheet.v2-sdt > .side.panel > .coach::after {
+    animation: v2-edge linear both;
+    animation-timeline: --v2-sheet;
+    animation-range: 0px var(--v2-d);
+  }
+  /* Without scroll-driven animations: the same at rest, opened when up. */
+  :root[data-sheet='v2'] .board-screen .v2-sheet:not(.v2-sdt) > .side.panel:not(.v2-up) > .coach { clip-path: inset(var(--v2-coach-clip) 0 0 0); }
+  :root[data-sheet='v2'] .board-screen .v2-sheet:not(.v2-sdt) > .side.panel:not(.v2-up) > .coach .log-wrap { translate: 0 var(--v2-log-shift); }
+  :root[data-sheet='v2'] .board-screen .v2-sheet:not(.v2-sdt) > .side.panel:not(.v2-up) > .coach::after { translate: 0 var(--v2-coach-clip); }
+  /* More of the Coach's message than its last lines: said at their end, as today's Read all; a tap
+     on them pulls the sheet up (lib/sheet-variants/v2.ts). Gone as the sheet rises. */
+  :root[data-sheet='v2'] .board-screen .v2-sheet > .side.panel > .coach.v2-more:not(:has(.read-all)) .log-wrap::after {
+    content: 'Read all';
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    padding: 0 0.2rem 0 2.5rem;
+    font-size: 0.85rem;
+    line-height: 1.45;
+    color: var(--muted);
+    text-decoration: underline;
+    background: linear-gradient(to right, transparent, var(--panel) 2rem);
+    pointer-events: none;
+  }
+  :root[data-sheet='v2'] .board-screen .v2-sheet.v2-sdt > .side.panel > .coach.v2-more .log-wrap::after {
+    animation: v2-fade linear both;
+    animation-timeline: --v2-sheet;
+    animation-range: 0px var(--v2-d);
+  }
+  :root[data-sheet='v2'] .board-screen .v2-sheet:not(.v2-sdt) > .side.panel.v2-up > .coach .log-wrap::after { display: none; }
 
   /* A touch that starts on the Ask box or any box that takes typing never moves the sheet. */
   :root[data-sheet='v2'] .board-screen .v2-sheet > .side.panel :is(.coach form, input, textarea, select) { touch-action: none; }
@@ -134,4 +198,20 @@
 @keyframes v2-fade {
   from { opacity: 1; }
   to { opacity: 0; }
+}
+@keyframes v2-coach {
+  from { clip-path: inset(var(--v2-coach-clip, 0px) 0 0 0); }
+  to { clip-path: inset(0px 0 0 0); }
+}
+@keyframes v2-log {
+  from { translate: 0 var(--v2-log-shift, 0px); }
+  to { translate: 0 0; }
+}
+@keyframes v2-edge {
+  from { translate: 0 var(--v2-coach-clip, 0px); }
+  to { translate: 0 0; }
+}
+@keyframes v2-fade-edge {
+  from { opacity: 1; translate: 0 0; }
+  to { opacity: 0; translate: 0 calc(-1 * var(--v2-coach-clip, 0px)); }
 }

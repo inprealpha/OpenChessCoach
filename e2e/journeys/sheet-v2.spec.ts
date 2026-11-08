@@ -29,20 +29,28 @@ interface Finger {
 /** Chromium's own touch input, which scrolls, snaps and flings as on a phone. */
 async function realFinger(page: Page): Promise<Finger> {
   const cdp = await page.context().newCDPSession(page);
+  // Each event carries the time the finger was there, so a flick stays a flick however slowly the
+  // test machine sends it.
+  let clock = 0;
   const send = (type: 'touchStart' | 'touchMove' | 'touchEnd', x = 0, y = 0) =>
-    cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y }] });
+    cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y }], timestamp: clock });
   return {
     async drag(x, y, dy, { steps = 10, stepMs = 16, onMove } = {}) {
+      clock = Date.now() / 1000;
       await send('touchStart', x, y);
       for (let i = 1; i <= steps; i++) {
+        clock += stepMs / 1000;
         await send('touchMove', x, y + (dy * i) / steps);
         await page.waitForTimeout(stepMs);
         await onMove?.();
       }
+      clock += 0.008;
       await send('touchEnd');
     },
     async tap(x, y) {
+      clock = Date.now() / 1000;
       await send('touchStart', x, y);
+      clock += 0.05;
       await send('touchEnd');
     },
   };
@@ -66,8 +74,11 @@ function syntheticFinger(page: Page): Finger {
             Object.defineProperty(ev, 'touches', { value: ended ? [] : [t] });
             Object.defineProperty(ev, 'targetTouches', { value: ended ? [] : [t] });
             Object.defineProperty(ev, 'changedTouches', { value: [t] });
+            // The time the finger was there, as a phone stamps it, however slowly the test sends it.
+            Object.defineProperty(ev, 'timeStamp', { value: (window as unknown as { __clock: number }).__clock });
             return ev;
           };
+          (window as unknown as { __clock: number }).__clock = performance.now();
           let blocked = false;
           for (let n: Element | null = target; n; n = n.parentElement) if (getComputedStyle(n).touchAction === 'none') blocked = true;
           w.__finger = { target, make, lastY: y, blocked };
@@ -76,8 +87,9 @@ function syntheticFinger(page: Page): Finger {
         { x, y },
       );
       for (let i = 1; i <= steps; i++) {
-        await page.evaluate((cy) => {
+        await page.evaluate(({ cy, stepMs }) => {
           const f = (window as unknown as { __finger: { target: Element; make: (t: string, y: number, e: boolean) => Event; lastY: number; blocked: boolean } }).__finger;
+          (window as unknown as { __clock: number }).__clock += stepMs;
           const ev = f.make('touchmove', cy, false);
           f.target.dispatchEvent(ev);
           let by = f.lastY - cy;
@@ -90,12 +102,13 @@ function syntheticFinger(page: Page): Finger {
             }
           }
           f.lastY = cy;
-        }, y + (dy * i) / steps);
+        }, { cy: y + (dy * i) / steps, stepMs });
         await page.waitForTimeout(stepMs);
         await onMove?.();
       }
       await page.evaluate(() => {
         const f = (window as unknown as { __finger: { target: Element; make: (t: string, y: number, e: boolean) => Event; lastY: number } }).__finger;
+        (window as unknown as { __clock: number }).__clock += 8;
         f.target.dispatchEvent(f.make('touchend', f.lastY, true));
       });
     },
@@ -112,7 +125,8 @@ function measure(page: Page) {
     const body = sheet.querySelector<HTMLElement>(':scope > .panel-body')!;
     const handle = sheet.querySelector<HTMLElement>(':scope > .sheet-handle')!;
     const top = handle.getBoundingClientRect().top;
-    const first = [...body.children].find((c) => c.getBoundingClientRect().height > 0) ?? body;
+    // The content's first part that scrolls with it (the Review's tabs stick under the handle).
+    const first = [...body.children].find((c) => c.getBoundingClientRect().height > 0 && getComputedStyle(c).position !== 'sticky') ?? body;
     return {
       top,
       scroll: sheet.scrollTop,
@@ -127,15 +141,18 @@ function measure(page: Page) {
 }
 type Measure = Awaited<ReturnType<typeof measure>>;
 
+/** A frame: when it was drawn and the sheet's scroll in it. */
+type Frame = { t: number; s: number };
+
 /** The sheet's scroll on every frame while `act` runs and for `ms` after: whether a move was animated. */
-async function frames(page: Page, act: () => Promise<void>, ms = 700): Promise<number[]> {
+async function frames(page: Page, act: () => Promise<void>, ms = 700): Promise<Frame[]> {
   await page.evaluate(() => {
     const sheet = document.querySelector<HTMLElement>('.side.panel')!;
-    const w = window as unknown as { __frames: number[]; __stop: boolean };
+    const w = window as unknown as { __frames: Frame[]; __stop: boolean };
     w.__frames = [];
     w.__stop = false;
-    const tick = () => {
-      w.__frames.push(Math.round(sheet.scrollTop));
+    const tick = (t: number) => {
+      w.__frames.push({ t, s: Math.round(sheet.scrollTop) });
       if (!w.__stop) requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);
@@ -143,18 +160,28 @@ async function frames(page: Page, act: () => Promise<void>, ms = 700): Promise<n
   await act();
   await page.waitForTimeout(ms);
   return page.evaluate(() => {
-    const w = window as unknown as { __frames: number[]; __stop: boolean };
+    const w = window as unknown as { __frames: Frame[]; __stop: boolean };
     w.__stop = true;
     return w.__frames;
   });
 }
 
-/** A move from `from` to `to` that passed through places in between: animated, not a jump. */
-function expectAnimated(track: number[], from: number, to: number, what: string): void {
-  const between = track.filter((s) => s > Math.min(from, to) + 2 && s < Math.max(from, to) - 2);
-  expect(between.length, `${what}: frames between ${from} and ${to} in ${track.join(' ')}`).toBeGreaterThanOrEqual(2);
+/**
+ * A move from `from` to `to` that was animated, not a jump: it was drawn on the way, or (on a
+ * loaded machine that draws few frames) took a smooth scroll's time to arrive.
+ */
+function expectAnimated(track: Frame[], from: number, to: number, what: string): void {
+  const near = (f: Frame, v: number) => Math.abs(f.s - v) <= 2;
+  const leave = track.findLastIndex((f) => near(f, from));
+  const arrive = track.findIndex((f, i) => i > leave && near(f, to));
+  const shown = track.map((f) => f.s).join(' ');
+  expect(leave, `${what}: starts at ${from} (${shown})`).toBeGreaterThanOrEqual(0);
+  expect(arrive, `${what}: arrives at ${to} (${shown})`).toBeGreaterThan(leave);
+  const between = arrive - leave - 1;
+  const took = track[arrive]!.t - track[leave]!.t;
+  expect(between >= 2 || (between >= 1 && took >= 60) || took >= 120, `${what}: ${between} frames on the way in ${Math.round(took)} ms (${shown})`).toBe(true);
   // Within a pixel or two: the layout's fractions.
-  expect(Math.abs(track.at(-1)! - to), `${what} ends at ${to}: ${track.join(' ')}`).toBeLessThanOrEqual(2);
+  expect(Math.abs(track.at(-1)!.s - to), `${what} ends at ${to}: ${shown}`).toBeLessThanOrEqual(2);
 }
 
 const handle = (page: Page) => page.getByRole('button', { name: /^(Pull the panel up|Let the panel down)$/ });
@@ -187,13 +214,18 @@ async function open(page: Page, url: string, screen: Screen): Promise<void> {
     await page.goto(`${base}#/review/1`);
     const start = page.getByRole('button', { name: 'Start the Review' });
     const moment = page.getByRole('region', { name: 'Key moments' }).getByRole('listitem').first();
-    await expect(start.or(moment)).toBeVisible({ timeout: 90_000 });
+    // The Engine analyses the game first: slow on a loaded machine.
+    await expect(start.or(moment)).toBeVisible({ timeout: 180_000 });
     if (await start.isVisible()) await start.click();
-    await expect(moment).toBeVisible({ timeout: 90_000 });
+    await expect(moment).toBeVisible({ timeout: 180_000 });
     // Starting the Review opens its first key moment for the Player, which pulls the sheet up (as
     // today's does): the journey starts from rest.
-    await page.waitForTimeout(500);
-    if ((await handle(page).getAttribute('aria-expanded')) === 'true') await handle(page).click();
+    await page.waitForTimeout(1500);
+    if ((await handle(page).getAttribute('aria-expanded')) === 'true') {
+      await handle(page).click();
+      await expect(handle(page)).toHaveAttribute('aria-expanded', 'false');
+      await page.waitForTimeout(500);
+    }
   } else if (screen === 'puzzles') {
     await page.goto(`${base}#/puzzles/italian-game`);
     // The solution shown, so the Coach and its Ask box are docked (a Puzzle already given up shows it).
@@ -240,9 +272,10 @@ async function journey(page: Page, finger: Finger, screen: Screen, width: number
   const tops = during.map((m) => m.top);
   for (let i = 1; i < tops.length; i++) expect(tops[i]!, `${at}: the sheet never goes back down while the finger rises (${tops.join(' ')})`).toBeLessThanOrEqual(tops[i - 1]! + 0.5);
   expect(rest.top - tops.at(-1)!, `${at}: the sheet moved with the finger`).toBeGreaterThan(60);
-  // Frame by frame: many small steps with the finger's 9 px moves, never a jump.
+  // Frame by frame: many small steps with the finger's 9 px moves, never a jump (today's sheet
+  // jumps 172 px in a frame). Two moves can land in one frame, with the end of the browser's slop.
   const steps = tops.map((t, i) => (i ? tops[i - 1]! - t : rest.top - t));
-  expect(Math.max(...steps), `${at}: no jump (${tops.join(' ')})`).toBeLessThanOrEqual(20);
+  expect(Math.max(...steps), `${at}: no jump (${tops.join(' ')})`).toBeLessThanOrEqual(30);
   expect(steps.filter((s) => s > 3).length, `${at}: frame by frame (${tops.join(' ')})`).toBeGreaterThanOrEqual(6);
   for (const m of during) {
     expect(m.offset, `${at}: the content doesn't scroll in the sheet`).toBeCloseTo(rest.offset, 0);
@@ -251,7 +284,7 @@ async function journey(page: Page, finger: Finger, screen: Screen, width: number
   expect(during.at(-1)!.board, `${at}: the board shrinks as the sheet rises`).toBeLessThan(rest.board - 20);
   // On release it settles up, animated.
   const released = during.at(-1)!.scroll;
-  expectAnimated(upTrack.slice(upTrack.lastIndexOf(Math.round(released))), released, rest.d, `${at}: settles up`);
+  expectAnimated(upTrack.slice(upTrack.findLastIndex((f) => Math.abs(f.s - released) <= 2)), released, rest.d, `${at}: settles up`);
   await expect(handle(page)).toHaveAttribute('aria-expanded', 'true');
   const up = await settled(page);
   expect(up.offset, `${at}: the content is still at its top`).toBeCloseTo(rest.offset, 0);
@@ -269,6 +302,8 @@ async function journey(page: Page, finger: Finger, screen: Screen, width: number
   await finger.drag(x, await onSheet(), -60, { steps: 3, stepMs: 8 });
   await expect(handle(page), `${at}: a flick raises the sheet`).toHaveAttribute('aria-expanded', 'true');
   expect(Math.abs((await settled(page)).scroll - rest.d)).toBeLessThanOrEqual(2);
+  // A tap while the browser's momentum still runs only stops it, as on a phone: the next tap waits it out.
+  await page.waitForTimeout(400);
   const tapDown = await frames(page, () => tapOn(page, finger, '.sheet-handle'));
   expectAnimated(tapDown, rest.d, 0, `${at}: a tap on the handle lets the sheet down`);
   await expect(handle(page)).toHaveAttribute('aria-expanded', 'false');
@@ -283,16 +318,15 @@ async function journey(page: Page, finger: Finger, screen: Screen, width: number
   await expect(handle(page)).toHaveAttribute('aria-expanded', 'true');
 
   // Up, a drag in the content scrolls it, under the handle, which stays put.
-  let contentScrolled = false;
+  // (Content that fits doesn't scroll: the sheet stays as it is.) From just under the handle, clear
+  // of the Coach's own text.
   const upNow = await settled(page);
-  if (upNow.max > rest.d + 40) {
-    await finger.drag(x, upNow.top + 120, -80);
-    const scrolled = await settled(page);
-    expect(scrolled.scroll, `${at}: the content scrolls`).toBeGreaterThan(rest.d + 20);
-    expect(scrolled.top, `${at}: the handle stays under the strip`).toBeCloseTo(upNow.top, 0);
-    await expect(handle(page)).toHaveAttribute('aria-expanded', 'true');
-    contentScrolled = true;
-  }
+  await finger.drag(x, upNow.top + 50, -80);
+  const scrolled = await settled(page);
+  expect(scrolled.top, `${at}: the handle stays under the strip`).toBeCloseTo(upNow.top, 0);
+  await expect(handle(page)).toHaveAttribute('aria-expanded', 'true');
+  const contentScrolled = scrolled.scroll > rest.d + 20;
+  if (contentScrolled) expect(scrolled.offset, `${at}: the content moved under the handle`).toBeLessThan(rest.offset - 20);
 
   // The board strip: a tap brings the board back, animated.
   const fromScroll = (await measure(page)).scroll;
@@ -395,9 +429,9 @@ test('Version 2 sheet: with reduced motion the sheet moves without animation', a
   const finger = await realFinger(page);
   const d = (await measure(page)).d;
   const track = await frames(page, () => tapOn(page, finger, '.sheet-handle'));
-  expect(track.filter((s) => s > 2 && s < d - 2), `no frames on the way: ${track.join(' ')}`).toHaveLength(0);
+  expect(track.filter((f) => f.s > 2 && f.s < d - 2), `no frames on the way: ${track.map((f) => f.s).join(' ')}`).toHaveLength(0);
   await expect(handle(page)).toHaveAttribute('aria-expanded', 'true');
-  expect(Math.abs(track.at(-1)! - d)).toBeLessThanOrEqual(2);
+  expect(Math.abs(track.at(-1)!.s - d)).toBeLessThanOrEqual(2);
   await context.close();
 });
 

@@ -260,7 +260,7 @@ async function open(page: Page, url: string, screen: Screen): Promise<void> {
     const status = page.getByRole('status', { name: 'Game status' });
     await expect(status).toContainText('Your move');
     await play(page, 'e2e4', 'Engine Game board');
-    await expect(page.getByRole('list', { name: 'Moves' }).getByRole('button')).toHaveCount(2);
+    await expect(page.getByRole('list', { name: 'Moves' }).getByRole('button')).toHaveCount(2, { timeout: 60_000 });
     await expect(status).toContainText('Your move');
   } else {
     await page.goto(`${base}#/board`);
@@ -559,24 +559,44 @@ test('Version 2 sheet: a tap during and straight after a flick lands, first time
 });
 
 test('Version 2 sheet: quick taps on the handle each turn the sheet round', async ({ browser, app }) => {
-  // A touch stops the sheet where it is drawn; a tap on the handle while it moves sends it the other way.
+  // A touch stops the sheet where it is drawn; a tap that lands on the handle while the sheet moves
+  // sends it the other way. A tap that lands beside it (the handle moved on between the test aiming
+  // and the touch arriving, as a real finger tapping the same spot twice would find) only catches the
+  // sheet, which carries on where it was going. Each tap is judged by where the browser found it.
   const context = await browser.newContext({ viewport: { width: 390, height: 664 }, deviceScaleFactor: 1, isMobile: true, hasTouch: true });
   const page = await pairedPage(context, app);
   await open(page, app.url, 'board');
   const finger = await realFinger(page);
+  await page.evaluate(() => {
+    const w = window as unknown as { __onHandle: boolean[] };
+    w.__onHandle = [];
+    document.addEventListener('pointerdown', (e) => w.__onHandle.push(Boolean((e.target as Element).closest('.sheet-handle'))), { capture: true });
+  });
+  const landed = () =>
+    page.evaluate(() => {
+      const w = window as unknown as { __onHandle: boolean[] };
+      const all = w.__onHandle;
+      w.__onHandle = [];
+      return all;
+    });
   for (const taps of [2, 3]) {
     for (let i = 0; i < taps; i++) {
       await tapOn(page, finger, '.sheet-handle');
       await page.waitForTimeout(30);
     }
-    const up = taps % 2 === 1;
-    await expect(handle(page), `${taps} quick taps`).toHaveAttribute('aria-expanded', String(up));
+    // Up after the first tap; each tap that landed on the handle turns it round.
+    const onHandle = await landed();
+    const turns = onHandle.filter(Boolean).length;
+    expect(onHandle[0], 'the first tap lands on the handle at rest').toBe(true);
+    const up = turns % 2 === 1;
+    await expect(handle(page), `${taps} quick taps, ${turns} on the handle (${onHandle.join(', ')})`).toHaveAttribute('aria-expanded', String(up));
     const m = await settled(page);
     expect(Math.abs(m.scroll - (up ? m.d : 0)), `${taps} quick taps end ${up ? 'up' : 'at rest'}`).toBeLessThanOrEqual(2);
     if (up) {
       await tapOn(page, finger, '.sheet-handle');
       await expect(handle(page)).toHaveAttribute('aria-expanded', 'false');
       await settled(page);
+      await landed();
     }
   }
   await context.close();

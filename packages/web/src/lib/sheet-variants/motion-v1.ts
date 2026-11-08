@@ -64,6 +64,8 @@ interface Scroll {
   now: number;
   rest: number;
   up: number;
+  /** Its content's height when the move began, or last seen. */
+  content: number;
 }
 
 interface Parts {
@@ -80,8 +82,6 @@ interface Parts {
   bar: HTMLElement | null;
   /** The bar's two numbers, which keep their size as the bar narrows. */
   numbers: HTMLElement[];
-  /** The board's coordinates, which keep their size as the board shrinks. */
-  coords: HTMLElement[];
   scrolls: Scroll[];
 }
 
@@ -111,12 +111,44 @@ interface Run {
   up: boolean;
   elapsed: number;
   anims: Animation[];
+  /** The timeline's time on the slide's first frame (null until then). */
+  start: number | null;
+}
+
+/** What a move needs to know of the screen as it is drawn (Motion's #reads). */
+interface Reads {
+  full: boolean;
+  coach: number;
+  pad: number;
+  wrap: { left: number; top: number } | null;
+  body: { now: number; content: number; box: number } | null;
+  log: { now: number; content: number; box: number } | null;
+  /** The Coach's thumbs row: as tall as "Put the answer away" will be, where that is still to come. */
+  row: number;
 }
 
 /** A touch here is typing, never a drag. */
 const TEXT = 'input, textarea, select, [contenteditable], .coach form';
-const calm = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+let reduced: MediaQueryList | null | undefined;
+const calm = () => {
+  if (reduced === undefined) reduced = typeof matchMedia === 'function' ? matchMedia('(prefers-reduced-motion: reduce)') : null;
+  return Boolean(reduced?.matches);
+};
 const lerp = (a: number, b: number, p: number) => a + (b - a) * p;
+/** The time animations go by (CDP can slow it down in tests): the frame's own, in a frame callback. */
+const timeline = () => Number(document.timeline.currentTime ?? performance.now());
+const NUMBER = /-?\d*\.?\d+(?:e-?\d+)?/g;
+/** Values (CSS text) sampled at even steps that change in a straight line, number by number. */
+const straight = (values: string[]): boolean => {
+  const shape = values[0]!.replace(NUMBER, '#');
+  const nums = values.map((v) => (v.replace(NUMBER, '#') === shape ? (v.match(NUMBER) ?? []).map(Number) : null));
+  if (nums.some((n) => !n)) return false;
+  const first = nums[0]!;
+  const last = nums.at(-1)!;
+  // Within a twentieth of a pixel, or of a ten-thousandth of a scale.
+  const near = (x: number, a: number, b: number, p: number) => Math.abs(x - lerp(a, b, p)) <= (Math.max(Math.abs(a), Math.abs(b)) > 2 ? 0.05 : 0.0001);
+  return nums.every((n, i) => n!.every((x, k) => near(x, first[k]!, last[k]!, i / (nums.length - 1))));
+};
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 const box = (el: Element | null): Box | null => {
   if (!el) return null;
@@ -186,6 +218,10 @@ export class Motion {
   /** When the last drag ended: the click a browser may send after it is not a tap. */
   #dragEnd = -Infinity;
   #queued = false;
+  /** The drag just became the sheet's: lifted on its next frame (#own). */
+  #owned = false;
+  /** Where the inline styles last drew the sheet's top (null: not since the Coach changed). */
+  #drawn: number | null = null;
   /** The screen has been drawn once: changes before that (a screen opening) don't slide. */
   ready = false;
   readonly #coachWatch: ResizeObserver;
@@ -212,8 +248,29 @@ export class Motion {
     });
   }
 
+  /** Watches what the content and the Coach's log hold: a change calls for reading them again. */
+  readonly #contentWatch = new MutationObserver(() => {
+    if (!this.#geo) this.changed();
+  });
+
   /** The sizes the watched boxes were last seen at. */
   readonly #seen = new WeakMap<Element, string>();
+
+  /**
+   * What a move needs to know of the screen as it is drawn, read with the ends while nothing moves,
+   * so starting a move reads nothing (a read then would make the browser lay out in the event): the
+   * Coach's height and padding, where the line under the board sits, and how far the content and
+   * the Coach's log are scrolled (kept up to date as they scroll).
+   */
+  #reads: Reads | null = null;
+
+  /** The content or the Coach's log scrolled (the app scrolls the Review's to the current move). */
+  scrolled(el: Element): void {
+    const r = this.#reads;
+    if (!r || this.#geo || !(el instanceof HTMLElement)) return;
+    if (r.body && el.matches('.side.panel > .panel-body')) r.body.now = el.scrollTop;
+    else if (r.log && el.matches('.coach .log')) r.log.now = el.scrollTop;
+  }
 
   // ---- The two ends, measured ahead of time ----
 
@@ -232,7 +289,25 @@ export class Motion {
     if (!panel || !col || !this.#sheet.on) return;
     for (const el of [panel, col, coach, panel.querySelector(':scope > .panel-body'), coach?.querySelector('.log')]) if (el) this.#sizes.observe(el);
     this.#stops = this.#measure(panel, col, coach);
+    this.#contentWatch.disconnect();
+    for (const el of [panel.querySelector(':scope > .panel-body'), coach?.querySelector('.log')]) if (el) this.#contentWatch.observe(el, { childList: true, subtree: true, characterData: true });
+    this.#reads = this.#read(panel, col, coach);
     this.#dirty = false;
+  }
+
+  /** Reads what a move needs to know of the screen as it is laid out now (see #reads). */
+  #read(panel: HTMLElement, col: HTMLElement, coach: HTMLElement | null): Reads {
+    const wrap = col.querySelector('.under')?.parentElement?.getBoundingClientRect();
+    const at = (el: HTMLElement | null | undefined) => (el ? { now: el.scrollTop, content: el.scrollHeight, box: el.clientHeight } : null);
+    return {
+      full: this.#frame.classList.contains('sheet-full'),
+      coach: coach?.getBoundingClientRect().height ?? 0,
+      pad: coach ? parseFloat(getComputedStyle(coach).paddingBottom) || 0 : 0,
+      wrap: wrap ? { left: wrap.left, top: wrap.top } : null,
+      body: at(panel.querySelector<HTMLElement>(':scope > .panel-body')),
+      log: at(coach?.querySelector<HTMLElement>('.log')),
+      row: coach?.querySelector<HTMLElement>(':scope > .thumb-row')?.offsetHeight ?? 0,
+    };
   }
 
   /** The ends, measured ahead of time; or now, if the screen changed and the measure is still to come. */
@@ -253,7 +328,7 @@ export class Motion {
     if (kind === 'full' && !this.#geo) this.#fadeOut(up ? '.coach .read-all' : '.coach .log-actions');
     // The app redraws for the change right after this (a microtask of its own): the Coach's new
     // height is taken in, before anything is drawn.
-    if (this.#slideTo(kind, up)) queueMicrotask(() => this.#resync());
+    if (this.#slideTo(kind, up, true)) queueMicrotask(() => this.#resync());
   }
 
   /** The Coach changed under the moving sheet (a row came or went): drawn again for it now. */
@@ -279,17 +354,18 @@ export class Motion {
     const log = coach.querySelector<HTMLElement>('.log');
     const said = parts.scrolls.find((x) => x.el === log);
     let resaid = false;
-    if (log && said && (said.kids.length !== log.children.length || said.kids.some((k, i) => k !== log.children[i]))) {
+    if (log && said && said.content !== log.scrollHeight) {
       const geo = this.#geo;
       const content = log.scrollHeight;
       const most = (h: number) => Math.max(0, content - h);
       Object.assign(said, {
-        kids: [...log.children].filter((k): k is HTMLElement => k instanceof HTMLElement),
+        content,
         rest: Math.min(said.rest, most(Math.min(content, geo.rest.logMax))),
         up: Math.min(said.up, most(Math.min(content, geo.up.logMax))),
       });
       if (this.#end) said.rest = said.up;
       else said.up = said.rest;
+      this.#still(said);
       resaid = true;
     }
     if (this.#restAgain(coach) || grew || resaid) this.#redraw();
@@ -353,17 +429,21 @@ export class Motion {
     this.#tell(up);
   }
 
-  /** Slides from where the sheet is drawn to `up`; false where it can't (nothing to move). */
-  #slideTo(kind: 'full' | 'typing', up: boolean): boolean {
+  /**
+   * Slides from where the sheet is drawn to `up`; false where it can't (nothing to move). `app`: the
+   * app has changed `full` already, and lays the screen out for it next.
+   */
+  #slideTo(kind: 'full' | 'typing', up: boolean, app = false): boolean {
     if (this.#geo && this.#kind !== kind) this.#stop();
     let from: number;
     if (this.#geo) {
       // Retargeted while sliding or held: from where it is drawn now.
       from = this.current();
       this.#cancel();
+      if (app) this.#holdBoard();
       if (kind === 'full') this.#lift();
     } else {
-      if (!this.#enter(kind, true)) return false;
+      if (!this.#enter(kind, true, app)) return false;
       const geo = this.#geo!;
       from = up ? geo.rest.top : geo.up.top;
     }
@@ -387,7 +467,7 @@ export class Motion {
     const answered = Boolean(coach.querySelector('.log > .entry.from-player')) && !coach.querySelector('[aria-busy="true"]');
     if (up && answered && !row && this.#lifted && !this.#rowAimed) {
       this.#rowAimed = true;
-      this.#aim(this.#rowGrowth || (coach.querySelector<HTMLElement>(':scope > .thumb-row')?.offsetHeight ?? 0));
+      this.#aim(this.#rowGrowth || (this.#reads?.row ?? 0));
       this.#redraw();
     }
   }
@@ -396,8 +476,7 @@ export class Motion {
   current(): number {
     const run = this.#run;
     if (!run) return this.#y;
-    // Not started yet (it starts on the next frame): still where it starts.
-    const time = Number(run.anims[0]?.currentTime ?? run.elapsed);
+    const time = this.#time(run);
     return lerp(run.from, run.to, ease(time / run.ms));
   }
 
@@ -428,13 +507,19 @@ export class Motion {
     const g: Gesture = { x, y, from: this.#y, up, atTop, keyboard, caught, mode: 'wait', tentative: false, samples: [] };
     this.#gesture = g;
     clearTimeout(this.#idle);
-    // Laid out for moving now, while the finger rests, wherever nothing under it could scroll (the
-    // sheet at rest, the handle): the layout is done before the finger moves, and a tap changes
-    // nothing that is drawn. Where it could scroll, that waits for the drag to be the sheet's.
-    if (!keyboard && (!up || !scroller)) {
+    // Laid out for moving now, while the finger rests, at rest (a tap changes nothing that is
+    // drawn) and on the handle pulled up (a tap there moves it): the layout is done before the
+    // finger moves. Elsewhere pulled up that waits for the drag to be the sheet's (there the board is
+    // laid out again, and its coordinates go).
+    if (!keyboard && (!up || (!scroller && target.closest('.sheet-handle')))) {
       // On the next frame, with that frame's own style and layout, not forcing them in the event.
+      // Lifted on the frame after: what the Coach shows is drawn as it was, and the first move need
+      // lay nothing out. Each frame lays out one change, so neither runs over its time.
       requestAnimationFrame(() => {
-        if (this.#gesture === g && !this.#geo) this.#hold(g);
+        if (this.#gesture !== g || this.#geo || !this.#hold(g)) return;
+        requestAnimationFrame(() => {
+          if (this.#gesture === g && !this.#run) this.#lift();
+        });
       });
     }
   }
@@ -474,10 +559,20 @@ export class Motion {
         g.mode = 'none';
         return;
       }
-      this.#lift();
+      // Lifted, and the board's coordinates gone (they would shrink with it), in the frame that
+      // draws the drag: a change made in the event would have the browser lay out in it.
+      this.#owned = true;
     }
     if (e.cancelable) e.preventDefault();
     this.#follow(g, dy, e);
+  }
+
+  /** The drag is the sheet's: lifted (where it isn't yet), its coordinates gone. */
+  #own(): void {
+    if (!this.#owned) return;
+    this.#owned = false;
+    this.#lift();
+    this.#going(true);
   }
 
   /** Lays the sheet out for moving under the finger, if it isn't already. */
@@ -517,6 +612,8 @@ export class Motion {
     this.#gesture = null;
     if (!g) return;
     if (g.mode !== 'sheet') return this.#putBack(g);
+    // Let go before the drag's first frame: lifted now.
+    this.#own();
     this.#dragEnd = performance.now();
     const geo = this.#geo!;
     const speed = stillSpeed ? 0 : this.#speed(g.samples, t);
@@ -555,6 +652,7 @@ export class Motion {
     clearTimeout(this.#refreshing);
     this.#coachWatch.disconnect();
     this.#sizes.disconnect();
+    this.#contentWatch.disconnect();
   }
 
   // ---- The moving layout ----
@@ -570,7 +668,7 @@ export class Motion {
    * laid out as pulled up too (otherwise that waits for the drag to be told from a tap, so a tap
    * changes nothing in it). False where there is nothing to move.
    */
-  #enter(kind: 'full' | 'typing', lifted: boolean): boolean {
+  #enter(kind: 'full' | 'typing', lifted: boolean, app = false): boolean {
     const frame = this.#frame;
     const { panel, col, coach } = this.#find();
     const stops = panel && col ? this.#ends() : null;
@@ -578,8 +676,12 @@ export class Motion {
     // The keyboard's strip: the same ends, with the Coach as it is (it doesn't change with the board).
     // The Coach as it is drawn now, exactly, at the end the sheet is at; the keyboard's strip leaves
     // it as it is at both ends (it doesn't change with the board).
-    const now = coach?.getBoundingClientRect().height ?? 0;
     const atUp = frame.classList.contains('sheet-full');
+    // Read ahead of time where they still hold (the keyboard's move reads the Coach as it is now:
+    // the Ask box's focus has just changed it).
+    let reads = this.#reads;
+    if (!reads || reads.full !== atUp || kind === 'typing') reads = this.#read(panel, col, coach);
+    const now = reads.coach;
     const geo: Stops =
       kind === 'full'
         ? { ...stops, rest: atUp ? stops.rest : { ...stops.rest, coach: now }, up: atUp ? { ...stops.up, coach: now } : stops.up }
@@ -588,12 +690,9 @@ export class Motion {
     const under = col.querySelector<HTMLElement>('.under');
     const bar = col.querySelector<HTMLElement>('.wc-bar');
     const body = panel.querySelector<HTMLElement>(':scope > .panel-body');
-    // Read while the layout is still the one drawn (no layout to pay for): where things are and how
-    // far the content and the Coach's log are scrolled.
-    const wrap = under?.parentElement?.getBoundingClientRect();
-    const scrolled = (el: HTMLElement | null | undefined) => (el ? { now: el.scrollTop, content: el.scrollHeight, box: el.clientHeight } : null);
-    const bodyAt = scrolled(body);
-    this.#logAt = scrolled(coach?.querySelector<HTMLElement>('.log'));
+    const wrap = reads.wrap;
+    const bodyAt = reads.body ? { ...reads.body } : null;
+    this.#logAt = reads.log ? { ...reads.log } : null;
     this.#end = frame.classList.contains('sheet-full') || (kind === 'typing' && Boolean(coach?.querySelector('input.typing')));
     this.#geo = geo;
     this.#kind = kind;
@@ -607,12 +706,16 @@ export class Motion {
       underThere: null,
       bar,
       numbers: [...(bar?.querySelectorAll<HTMLElement>('.percent') ?? [])],
-      coords: [...col.querySelectorAll<HTMLElement>('.board .coord')],
       scrolls: [],
     };
     frame.classList.add('v1-moving');
     frame.classList.toggle('v1-faded', frame.classList.contains('sheet-full'));
-    col.style.setProperty('--board-max', geo.boardMax);
+    // The board's size, held at rest, where the app's rules would change it: pulled up, or about to
+    // be (at rest it is that size already, and setting it would restyle everything on the board).
+    if (atUp || app) this.#holdBoard();
+    // Pulled up, the board is laid out at its size at rest and drawn smaller: its coordinates, which
+    // keep their size, would show smaller. They go now (at rest they go as it starts to move).
+    if (atUp) this.#going(true);
     col.style.paddingTop = geo.padTop;
     col.style.paddingBottom = geo.padBottom;
     col.style.marginBottom = `${geo.up.col - geo.rest.col}px`;
@@ -640,11 +743,15 @@ export class Motion {
     }
     // The content, held where it is scrolled; the room under it keeps it there in the taller box.
     // (The keyboard's strip leaves it where it is.)
-    if (body && bodyAt) this.#parts.scrolls.push(kind === 'full' ? this.#scroll(body, bodyAt, geo.rest.body, geo.up.body, '--v1-body-room') : this.#scroll(body, bodyAt, 0, 0, '--v1-body-room'));
+    if (body && bodyAt) {
+      const s = kind === 'full' ? this.#scroll(body, bodyAt, geo.rest.body, geo.up.body, '--v1-body-room') : this.#scroll(body, bodyAt, 0, 0, '--v1-body-room');
+      this.#parts.scrolls.push(s);
+      this.#still(s);
+    }
     // The Coach laid out as it is now until it is lifted; its height pulled up, as measured.
     this.#natural = now;
     this.#box = now;
-    this.#pad = coach ? parseFloat(getComputedStyle(coach).paddingBottom) || 0 : 0;
+    this.#pad = reads.pad;
     this.#upCoach = geo.up.coach;
     this.#ramps = [];
     this.#later = 0;
@@ -686,11 +793,35 @@ export class Motion {
       // Its box held at the size it has now, whatever CoachPanel.svelte's rules say as the app
       // flips `sheet-full` during the move (the value on the log itself, not the screen).
       log.style.setProperty('--v1-log-box', `${this.#logAt.box}px`);
-      const s = this.#scroll(log, this.#logAt, geo.rest.log, geo.up.log, null);
-      parts.scrolls.push({ ...s, now: 0 });
+      // The log itself moves (its lines with it), cut at the top of the box it sits in.
+      const s = { ...this.#scroll(log, this.#logAt, geo.rest.log, geo.up.log, null), now: 0, kids: [log] };
+      parts.scrolls.push(s);
+      this.#still(s);
     }
+
     // Drawn for the new layout at once, not a frame later.
     this.#draw(this.#run ? this.current() : this.#y);
+  }
+
+  /** The board column's size held at rest, whatever `sheet-full` says (the moving layout). */
+  #holdBoard(): void {
+    const parts = this.#parts;
+    if (parts && this.#geo && !parts.col.style.getPropertyValue('--board-max')) parts.col.style.setProperty('--board-max', this.#geo.boardMax);
+  }
+
+  /**
+   * The board's coordinates go while it moves (they would shrink with it), and come back after:
+   * the class is on the board itself, so only its coordinates are styled again.
+   */
+  #going(on: boolean): void {
+    this.#frame.querySelector('.board-col .board')?.classList.toggle('v1-going', on);
+  }
+
+  /** A box scrolled the same at both ends: its content set where it is drawn, once. */
+  #still(s: Scroll): void {
+    if (s.rest !== s.up) return;
+    const shift = s.now - s.rest;
+    for (const el of s.kids) el.style.transform = shift ? `translate3d(0, ${shift}px, 0)` : '';
   }
 
   /**
@@ -708,7 +839,7 @@ export class Motion {
     const up = atUp ? now : Math.min(now, most(upBox));
     // (The browser keeps a box where it is scrolled while that stays in reach: nothing to set.)
     if (room) el.style.setProperty(room, `${Math.max(0, now + Math.max(restBox, upBox) - content) + 4}px`);
-    return { el, kids: [...el.children].filter((k): k is HTMLElement => k instanceof HTMLElement), now, rest, up };
+    return { el, kids: [...el.children].filter((k): k is HTMLElement => k instanceof HTMLElement), now, rest, up, content };
   }
 
   /**
@@ -801,6 +932,8 @@ export class Motion {
     }
     // What the content and the log show: from where they are scrolled at one end to the other.
     for (const s of parts.scrolls) {
+      // Where it is scrolled the same at both ends, it is set once (#hold), not drawn each frame.
+      if (s.rest === s.up) continue;
       const shift = s.now - lerp(s.rest, s.up, p);
       for (const el of s.kids) out.push({ el, style: { transform: `translate3d(0, ${shift}px, 0)` } });
     }
@@ -809,8 +942,6 @@ export class Motion {
     if (parts.board && a && b) {
       const k = lerp(a.width, b.width, p) / a.width;
       out.push({ el: parts.board, style: { transform: `translate3d(${lerp(a.left, b.left, p) - a.left}px, ${lerp(a.top, b.top, p) - a.top}px, 0) scale(${k})` } });
-      // The coordinates keep their size, at their corner of the square.
-      for (const el of parts.coords) out.push({ el, style: { transform: `scale(${1 / k})` } });
     }
     const ra = rest.bar;
     const rb = up.bar;
@@ -838,6 +969,7 @@ export class Motion {
   /** Draws the sheet's top at `y` now, in inline styles (while a finger holds it). */
   #draw(y: number): void {
     for (const { el, style } of this.#styles(y)) Object.assign(el.style, style);
+    this.#drawn = y;
   }
 
   /** At most one draw per frame, in the frame's own callback, whatever the touch events' rate. */
@@ -846,7 +978,9 @@ export class Motion {
     this.#queued = true;
     requestAnimationFrame(() => {
       this.#queued = false;
-      if (this.#geo && !this.#run) this.#draw(this.#y);
+      if (!this.#geo || this.#run) return;
+      this.#own();
+      this.#draw(this.#y);
     });
   }
 
@@ -854,7 +988,7 @@ export class Motion {
   #redraw(): void {
     const run = this.#run;
     if (!run) return this.#draw(this.#y);
-    const time = Number(run.anims[0]?.currentTime ?? run.elapsed);
+    const time = this.#time(run);
     this.#cancel();
     this.#slide(run.from, run.up, run.ms, time);
   }
@@ -866,13 +1000,11 @@ export class Motion {
   #slide(from: number, up: boolean, ms: number, elapsed = 0): void {
     const geo = this.#geo!;
     const to = up ? geo.up.top : geo.rest.top;
-    // Where it is drawn now: its start, or, picked up part-way (the Coach changed height), there.
-    this.#draw(lerp(from, to, ease(elapsed / ms)));
-    // The fade above the Coach goes as the sheet comes up, and comes back as it goes down.
-    this.#frame.classList.toggle('v1-faded', up);
+    // Where it is drawn now: its start, or, picked up part-way (the Coach changed height), there
+    // (a release or a tap after a touch-down has it drawn there already).
+    if (elapsed || this.#drawn !== from) this.#draw(lerp(from, to, ease(elapsed / ms)));
     const steps = 8;
-    const frames = Array.from({ length: steps + 1 }, (_, i) => this.#styles(lerp(from, to, i / steps)));
-    const run: Run = { from, to, ms, up, elapsed, anims: [] };
+    const run: Run = { from, to, ms, up, elapsed, anims: [], start: null };
     this.#end = up;
     if (up && this.#later && this.#kind === 'full') {
       this.#ramps.push({ from: this.#p(from), by: this.#later });
@@ -880,28 +1012,70 @@ export class Motion {
     }
     this.#run = run;
     this.#y = from;
-    // Started on the next frame, from the frame's own time: a browser that has drawn nothing for a
-    // while (WebKit) would otherwise date the start back to its last frame and skip the slide's
-    // first part. Until then the inline style holds the sheet where it starts.
+    // Started on the next frame, from the frame's own time (a browser that has drawn nothing for a
+    // while, WebKit, would otherwise date the start back to its last frame and skip the slide's first
+    // part), and drawn by hand until its animations are made: the event that asked for the slide,
+    // and the slide's first frame, only start it; the animations are made after that frame. On that
+    // first frame the fade above the Coach goes as the sheet comes up (and comes back as it goes
+    // down), and the board's coordinates go while it moves (they would shrink with it).
+    const tick = () => {
+      if (this.#run !== run || run.anims.length) return;
+      run.start ??= timeline();
+      const time = this.#time(run);
+      if (time >= ms) return this.#stop();
+      if (time > elapsed) this.#draw(lerp(from, to, ease(time / ms)));
+      requestAnimationFrame(tick);
+    };
     requestAnimationFrame(() => {
+      tick();
       if (this.#run !== run) return;
-      run.anims = frames[0]!.map(({ el }, j) => {
-        // Only what changes is animated: a value that stays put stays in the inline style.
-        const keys = Object.keys(frames[0]![j]!.style).filter((k) => frames.some((f) => f[j]!.style[k] !== frames[0]![j]!.style[k]));
-        const keyframes = frames.map((f, i) => ({ offset: i / steps, ...Object.fromEntries(keys.map((k) => [k, f[j]!.style[k]!])) }));
-        const anim = el.animate(keyframes, { duration: ms, easing: EASE, fill: 'forwards' });
-        anim.currentTime = elapsed;
-        return anim;
-      });
-      run.anims[0]!.onfinish = () => {
-        if (this.#run === run) this.#stop();
-      };
+      this.#frame.classList.toggle('v1-faded', up);
+      this.#going(true);
+      setTimeout(() => this.#animate(run, steps), 0);
     });
+  }
+
+  /** How far into the slide it is: by its animations, or by the clock until they are made. */
+  #time(run: Run): number {
+    if (run.anims[0]) return Number(run.anims[0].currentTime);
+    if (run.start === null) return run.elapsed;
+    return Math.min(run.ms, run.elapsed + timeline() - run.start);
+  }
+
+  /**
+   * The slide's animations, one per part that moves, on the compositor, from the slide's first
+   * frame (where it was drawn by hand till now). Keyframes are sampled from the same drawing as a
+   * drag's frames.
+   */
+  #animate(run: Run, steps: number): void {
+    if (this.#run !== run || run.start === null) return;
+    const { from, to, ms } = run;
+    // From where it was last drawn: started on their next frame, they go on from there.
+    const time = this.#time(run);
+    const frames = Array.from({ length: steps + 1 }, (_, i) => this.#styles(lerp(from, to, i / steps)));
+    frames[0]!.forEach(({ el }, j) => {
+      // Only what changes is animated: a value that stays put stays in the inline style.
+      const keys = Object.keys(frames[0]![j]!.style).filter((k) => frames.some((f) => f[j]!.style[k] !== frames[0]![j]!.style[k]));
+      if (!keys.length) return;
+      // A part that moves in step with the sheet's top needs only its two ends (fewer keyframes for
+      // the browser to read as the slide starts); the others, every step.
+      const used = keys.every((k) => straight(frames.map((f) => f[j]!.style[k]!))) ? [frames[0]!, frames[steps]!] : frames;
+      const keyframes = used.map((f, i) => ({ offset: i / (used.length - 1), ...Object.fromEntries(keys.map((k) => [k, f[j]!.style[k]!])) }));
+      const anim = el.animate(keyframes, { duration: ms, easing: EASE, fill: 'forwards' });
+      anim.currentTime = time;
+      run.anims.push(anim);
+    });
+    if (!run.anims[0]) return this.#stop();
+    run.anims[0].onfinish = () => {
+      if (this.#run === run) this.#stop();
+    };
   }
 
   #cancel(): void {
     const run = this.#run;
     this.#run = null;
+    // Whatever the slide drew, the inline styles are where they were before it.
+    if (run) this.#drawn = null;
     for (const a of run?.anims ?? []) a.cancel();
   }
 
@@ -954,16 +1128,19 @@ export class Motion {
       }
     }
     this.#geo = null;
+    this.#drawn = null;
     this.#parts = null;
     this.#ramps = [];
     this.#restRamps = [];
     this.#later = 0;
     this.#lifted = false;
+    this.#owned = false;
     this.#coachWatch.disconnect();
     this.#rowWatch.disconnect();
     clearTimeout(this.#idle);
     const frame = this.#frame;
     frame.classList.remove('v1-moving', 'v1-lifted', 'v1-faded', 'v1-rising', 'v1-falling');
+    this.#going(false);
     this.#rowAimed = false;
     // "Put the answer away", just added pulled up: it fades in over the lines it now covers.
     const rowAfter = parts?.coach?.querySelector<HTMLElement>(':scope > .log-actions');
@@ -974,7 +1151,7 @@ export class Motion {
       parts.coach.style.marginTop = '';
     }
     if (!parts) return;
-    const moved = [parts.panel, parts.coach, ...parts.rows, parts.board, parts.under, parts.bar, ...parts.numbers, ...parts.coords, ...parts.scrolls.flatMap((s) => s.kids)];
+    const moved = [parts.panel, parts.coach, ...parts.rows, parts.board, parts.under, parts.bar, ...parts.numbers, ...parts.scrolls.flatMap((s) => s.kids)];
     for (const el of moved) if (el) el.style.transform = '';
     if (parts.under) parts.under.style.opacity = '';
     parts.underThere?.remove();

@@ -1,1 +1,45 @@
-/* PROTOTYPE (#80): version 3 of the phone panel sheet. Every rule is scoped under :root[data-sheet="v3"]. */
+/* PROTOTYPE (#80): version 3 of the phone panel sheet. Every rule is scoped under :root[data-sheet="v3"].
+   An overlay, as in Apple Maps: the board keeps its size, and the sheet is a card over its lower part,
+   moved only by `transform` (lib/sheet-variants/v3.ts). Laid out once at its "up" size, from the band
+   of the board left showing (--v3-band) to the foot of the screen; at rest it is translated down to the
+   board's foot, and its Coach is translated back up to stay docked at the foot of the screen. */
+@media (max-width: 820px) and (min-height: 560px) {
+  /* The sheet's part below the screen at rest is clipped, not scrolled to: the page stays one screen. */
+  :root[data-sheet='v3'] .board-screen > .board-layout { position: relative; overflow-y: clip; }
+  :root[data-sheet='v3'] .board-screen .board-layout > .side.panel {
+    position: absolute; z-index: 10; left: 0; right: 0; top: var(--v3-band, 6rem); bottom: 0;
+    will-change: transform;
+    box-shadow: 0 -3px 14px rgb(0 0 0 / 14%);
+  }
+  /* Pulled up or typing, the board keeps its size: the sheet covers it rather than shrinks it. */
+  :root[data-sheet='v3'] .board-screen:is(.sheet-full, :has(.coach input.typing)) .board-col {
+    --board-max: min(var(--board-cap), calc(100dvh - var(--phone-reserve, 18rem)));
+    padding-block: 0 0.3rem;
+  }
+  /* The Ask box stays at the foot of the screen, over the content's cut end, which fades out. */
+  :root[data-sheet='v3'] .board-screen .side.panel > .coach { z-index: 2; will-change: transform; }
+  :root[data-sheet='v3'] .board-screen .side.panel > .coach::before {
+    content: ''; position: absolute; left: 0; right: 0; bottom: 100%; height: 0.65rem; pointer-events: none;
+    background: linear-gradient(to bottom, color-mix(in srgb, var(--panel) 0%, transparent), var(--panel));
+  }
+  /* Room under the content's last line, clear of the fade, when it is scrolled to its end. */
+  :root[data-sheet='v3'] .board-screen .side.panel > .panel-body::after { content: ''; flex: 0 0 0.6rem; }
+  /* At rest nothing scrolls: a vertical drag is the sheet's (sideways ones are left alone), and focus
+     that scrolls the content to show a control keeps it above the Ask box, not under it. */
+  :root[data-sheet='v3'] .board-screen .side.panel[data-v3='rest'] { touch-action: pan-x; }
+  :root[data-sheet='v3'] .board-screen .side.panel[data-v3='rest'] > .panel-body { scroll-padding-bottom: var(--v3-rest, 0px); }
+  /* Up, the content scrolls, and its top doesn't bounce: a pull down there moves the sheet instead. */
+  :root[data-sheet='v3'] .board-screen .side.panel[data-v3='up'] > .panel-body { overscroll-behavior-y: none; }
+  /* The board under the sheet dims as the sheet comes up (v3.ts sets its opacity). Taps go through it to
+     the band's strip button, which brings the board back. */
+  :root[data-sheet='v3'] .v3-scrim {
+    position: absolute; inset: 0; margin-inline: -0.75rem; z-index: 9; pointer-events: none;
+    background: #000; opacity: 0; will-change: opacity;
+  }
+  :root[data-sheet='v3'] .board-screen .strip-tap { cursor: pointer; }
+}
+/* Off a phone held upright the scrim is never shown. */
+:root[data-sheet='v3'] .v3-scrim { display: none; }
+@media (max-width: 820px) and (min-height: 560px) {
+  :root[data-sheet='v3'] .board-screen .v3-scrim { display: block; }
+}

@@ -665,6 +665,8 @@ function attach(sheet: Sheet, body: HTMLElement): () => void {
 
   /** Up: pulled up from the start of the move, as the app asks. */
   const raise = (): void => {
+    // A move decided now (a tap on the handle while a finger holds the sheet) replaces the one the finger caught.
+    caught = null;
     setFull(true);
     move(true);
   };
@@ -674,8 +676,11 @@ function attach(sheet: Sheet, body: HTMLElement): () => void {
    * has already hidden it, never in one frame on screen.
    */
   const lower = (): void => {
+    caught = null;
     if (scroller.scrollTop <= 0.5 && target === null) {
+      // Already at rest (a touch stopped a rise before it moved): down is where it is.
       setOpen(false);
+      setFull(false);
       return;
     }
     setFull(true);

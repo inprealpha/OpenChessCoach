@@ -32,7 +32,6 @@
   :root[data-sheet='v2'] .board-screen .v2-sheet.v2-sdt > .side.panel::after,
   :root[data-sheet='v2'] .board-screen .v2-sheet.v2-sdt > .side.panel > .coach,
   :root[data-sheet='v2'] .board-screen .v2-sheet.v2-sdt > .side.panel > .coach::after,
-  :root[data-sheet='v2'] .board-screen .v2-sheet.v2-sdt > .side.panel > .coach .log-wrap,
   :root[data-sheet='v2'] .board-screen .v2-sheet.v2-sdt > .side.panel > .coach .log-wrap::after { animation-duration: auto !important; }
 
   /* The scroller: over the whole frame, under the board. Its background is the sheet's colour from
@@ -126,8 +125,8 @@
   :root[data-sheet='v2'] .board-screen .v2-sheet > .side.panel > .panel-body.v2-open > .tabs { top: calc(var(--v2-up) + var(--v2-hh)); }
 
   /* The Coach: docked at the foot of the screen, the sheet moving behind it. Its log keeps its
-     pulled-up size; at rest the scroll-driven clip shows only its last lines (today's two), the
-     log covering the row under it (Put the answer away), and both open with the scroll. */
+     pulled-up size; at rest the scroll-driven clip shows only its last lines (today's two), and
+     opens with the scroll. */
   :root[data-sheet='v2'] .board-screen .v2-sheet > .side.panel > .coach {
     position: sticky;
     bottom: 0;
@@ -135,7 +134,18 @@
   }
   :root[data-sheet='v2'] .board-screen .v2-sheet > .side.panel > .coach .log { max-height: 26dvh; }
   :root[data-sheet='v2'] .board-screen .v2-sheet > .side.panel:not(.v2-up) > .coach .log { overflow-y: hidden; }
-  :root[data-sheet='v2'] .board-screen .v2-sheet > .side.panel > .coach .log-wrap { background: var(--panel); z-index: 1; }
+  /* Put the answer away, which the app shows only while the sheet is up: over the log's top
+     corner, taking no room, so the Coach's size never changes as it comes and goes. It fades in. */
+  :root[data-sheet='v2'] .board-screen .v2-sheet > .side.panel > .coach > .log-actions {
+    position: absolute;
+    top: 0;
+    right: var(--panel-pad, 0.75rem);
+    z-index: 2;
+    margin: 0;
+    padding-left: 2.5rem;
+    background: linear-gradient(to right, transparent, var(--panel) 2rem);
+    animation: v2-appear 0.15s ease-out both;
+  }
   /* The Coach's top edge as drawn. */
   :root[data-sheet='v2'] .board-screen .v2-sheet > .side.panel > .coach::after {
     content: '';
@@ -151,11 +161,6 @@
     animation-timeline: --v2-sheet;
     animation-range: 0px var(--v2-d);
   }
-  :root[data-sheet='v2'] .board-screen .v2-sheet.v2-sdt > .side.panel > .coach .log-wrap {
-    animation: v2-log linear both;
-    animation-timeline: --v2-sheet;
-    animation-range: 0px var(--v2-d);
-  }
   :root[data-sheet='v2'] .board-screen .v2-sheet.v2-sdt > .side.panel > .coach::after {
     animation: v2-edge linear both;
     animation-timeline: --v2-sheet;
@@ -163,7 +168,6 @@
   }
   /* Without scroll-driven animations: the same at rest, opened when up. */
   :root[data-sheet='v2'] .board-screen .v2-sheet:not(.v2-sdt) > .side.panel:not(.v2-up) > .coach { clip-path: inset(var(--v2-coach-clip) 0 0 0); }
-  :root[data-sheet='v2'] .board-screen .v2-sheet:not(.v2-sdt) > .side.panel:not(.v2-up) > .coach .log-wrap { translate: 0 var(--v2-log-shift); }
   :root[data-sheet='v2'] .board-screen .v2-sheet:not(.v2-sdt) > .side.panel:not(.v2-up) > .coach::after { translate: 0 var(--v2-coach-clip); }
   /* More of the Coach's message than its last lines: said at their end, as today's Read all; a tap
      on them pulls the sheet up (lib/sheet-variants/v2.ts). Gone as the sheet rises. */
@@ -203,9 +207,8 @@
   from { clip-path: inset(var(--v2-coach-clip, 0px) 0 0 0); }
   to { clip-path: inset(0px 0 0 0); }
 }
-@keyframes v2-log {
-  from { translate: 0 var(--v2-log-shift, 0px); }
-  to { translate: 0 0; }
+@keyframes v2-appear {
+  from { opacity: 0; }
 }
 @keyframes v2-edge {
   from { translate: 0 var(--v2-coach-clip, 0px); }

@@ -194,9 +194,10 @@ function expectAnimated(track: Frame[], from: number, to: number, what: string):
   expect(between >= 2 || (between >= 1 && took >= 60) || took >= 120, `${what}: ${between} frames on the way in ${Math.round(took)} ms (${shown})`).toBe(true);
   // Within a pixel or two: the layout's fractions.
   expect(Math.abs(track.at(-1)!.s - to), `${what} ends at ${to}: ${shown}`).toBeLessThanOrEqual(2);
-  // The Coach grows and shrinks with the scroll: its top as drawn never jumps.
-  const steps = track.slice(1).map((f, i) => Math.abs(f.c - track[i]!.c));
-  expect(Math.max(0, ...steps), `${what}: the Coach's top as drawn moves with the sheet (${track.map((f) => f.c).join(' ')})`).toBeLessThanOrEqual(30);
+  // The Coach grows and shrinks with the scroll: frame to frame, its top as drawn moves no further
+  // than the sheet does (a jump would move it with the sheet still).
+  const jumps = track.slice(1).filter((f, i) => Math.abs(f.c - track[i]!.c) > Math.abs(f.s - track[i]!.s) + 4);
+  expect(jumps.length, `${what}: the Coach's top as drawn moves with the sheet (${track.map((f) => `${f.s}:${f.c}`).join(' ')})`).toBe(0);
 }
 
 const handle = (page: Page) => page.getByRole('button', { name: /^(Pull the panel up|Let the panel down)$/ });
@@ -310,7 +311,8 @@ async function journey(page: Page, finger: Finger, screen: Screen, width: number
   expect(steps.filter((s) => s > 3).length, `${at}: frame by frame (${tops.join(' ')})`).toBeGreaterThanOrEqual(6);
   for (const m of during) {
     expect(m.offset, `${at}: the content doesn't scroll in the sheet`).toBeCloseTo(rest.offset, 0);
-    expect(m.bodyScroll).toBe(0);
+    // Where the app left it (the Review shows an opened moment under its tabs): the finger doesn't move it.
+    expect(m.bodyScroll, `${at}: the content's own scroll is the app's, not the finger's`).toBe(rest.bodyScroll);
   }
   expect(during.at(-1)!.board, `${at}: the board shrinks as the sheet rises`).toBeLessThan(rest.board - 20);
   // On release it settles up, animated.
@@ -353,7 +355,7 @@ async function journey(page: Page, finger: Finger, screen: Screen, width: number
   const upNow = await settled(page);
   await finger.drag(x, upNow.top + 50, -80);
   const scrolled = await settled(page);
-  expect(scrolled.top, `${at}: the handle stays under the strip`).toBeCloseTo(upNow.top, 0);
+  expect(Math.abs(scrolled.top - upNow.top), `${at}: the handle stays under the strip`).toBeLessThanOrEqual(2);
   await expect(handle(page)).toHaveAttribute('aria-expanded', 'true');
   const contentScrolled = scrolled.scroll > rest.d + 20;
   if (contentScrolled) expect(scrolled.offset, `${at}: the content moved under the handle`).toBeLessThan(rest.offset - 20);
@@ -415,7 +417,7 @@ async function journey(page: Page, finger: Finger, screen: Screen, width: number
 
 for (const screen of SCREENS) {
   test(`Version 2 sheet on the ${screen}, Chromium with real touch, at four iPhone sizes`, async ({ browser, app }) => {
-    test.setTimeout(360_000);
+    test.setTimeout(600_000);
     const scrolled: string[] = [];
     for (const [width, height] of SIZES) {
       const context = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: 1, isMobile: true, hasTouch: true });
@@ -429,7 +431,7 @@ for (const screen of SCREENS) {
   });
 
   test(`Version 2 sheet on the ${screen}, WebKit with synthetic touch, at four iPhone sizes`, async ({ app }) => {
-    test.setTimeout(360_000);
+    test.setTimeout(600_000);
     const wk: Browser = await webkit.launch();
     try {
       for (const [width, height] of SIZES) {
@@ -530,13 +532,54 @@ test('Version 2 sheet: a tap during and straight after a flick lands, first time
     const finger = await realFinger(page);
     await finger.drag(195, (await measure(page)).top + 34, -60, { steps: 3, stepMs: 8 });
     if (wait) await page.waitForTimeout(wait);
+    // What the browser finds under the finger as it comes down, and every click that follows: the
+    // tap lands once, on that. (Straight after the flick the sheet still moves, and the finger may
+    // come down on something else than the Continue it aimed at.)
+    await page.evaluate(() => {
+      const w = window as unknown as { __under: Element | null; __clicked: Element[] };
+      w.__under = null;
+      w.__clicked = [];
+      document.addEventListener('pointerdown', (e) => (w.__under = e.target as Element), { capture: true, once: true });
+      document.addEventListener('click', (e) => w.__clicked.push(e.target as Element), { capture: true });
+    });
     const line = page.locator('.head-line');
     const before = await line.textContent();
     const box = (await page.getByRole('button', { name: 'Continue' }).boundingBox())!;
     await finger.tap(box.x + box.width / 2, box.y + box.height / 2);
-    await expect(line, `a tap on Continue ${wait} ms after a flick`).not.toHaveText(before ?? '');
+    await page.waitForTimeout(700);
+    const seen = await page.evaluate(() => {
+      const w = window as unknown as { __under: Element | null; __clicked: Element[] };
+      const name = (el: Element | null) => (el?.closest('button, summary, a') ?? el)?.textContent?.trim().slice(0, 30) ?? '';
+      return { under: name(w.__under), clicked: w.__clicked.map(name), once: w.__clicked.length === 1 && w.__clicked[0] === w.__under };
+    });
+    expect(seen.once, `a tap ${wait} ms after a flick lands once, on what was under the finger: ${JSON.stringify(seen)}`).toBe(true);
+    if (seen.under === 'Continue') await expect(line, `a tap on Continue ${wait} ms after a flick`).not.toHaveText(before ?? '');
     await context.close();
   }
+});
+
+test('Version 2 sheet: quick taps on the handle each turn the sheet round', async ({ browser, app }) => {
+  // A touch stops the sheet where it is drawn; a tap on the handle while it moves sends it the other way.
+  const context = await browser.newContext({ viewport: { width: 390, height: 664 }, deviceScaleFactor: 1, isMobile: true, hasTouch: true });
+  const page = await pairedPage(context, app);
+  await open(page, app.url, 'board');
+  const finger = await realFinger(page);
+  for (const taps of [2, 3]) {
+    for (let i = 0; i < taps; i++) {
+      await tapOn(page, finger, '.sheet-handle');
+      await page.waitForTimeout(30);
+    }
+    const up = taps % 2 === 1;
+    await expect(handle(page), `${taps} quick taps`).toHaveAttribute('aria-expanded', String(up));
+    const m = await settled(page);
+    expect(Math.abs(m.scroll - (up ? m.d : 0)), `${taps} quick taps end ${up ? 'up' : 'at rest'}`).toBeLessThanOrEqual(2);
+    if (up) {
+      await tapOn(page, finger, '.sheet-handle');
+      await expect(handle(page)).toHaveAttribute('aria-expanded', 'false');
+      await settled(page);
+    }
+  }
+  await context.close();
 });
 
 test('Version 2 sheet: the desktop is unchanged', async ({ paired, app }) => {

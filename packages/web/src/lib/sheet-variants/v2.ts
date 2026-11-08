@@ -37,6 +37,8 @@ const SETTLE_MS = 160;
 const FIELD = 'input:not([type="checkbox"], [type="radio"], [type="button"], [type="submit"], [type="range"]), textarea, select, [contenteditable=""], [contenteditable="true"]';
 /** A finger that moved less than this is still tapping: the sheet doesn't follow it yet. */
 const JITTER = 3;
+/** The most the sheet leads the browser's scroll by: iOS's slop (its pan hysteresis, about 10 pt). */
+const LEAD_MAX = 10;
 /** A first move this far from the touch: the browser held back the ones before (its slop). */
 const SLOP_SEEN = 12;
 /** A tap: down and up within this distance and time. */
@@ -54,6 +56,39 @@ interface Geometry {
   up: number;
   /** The scale that turns the board into the strip. */
   scale: number;
+}
+
+/** What the sheet's own toggle and pull-up do while a panel of this version is on screen. */
+interface Controller {
+  toggle(): void;
+  pullUp(): void;
+}
+const controllers = new WeakMap<Sheet, Controller[]>();
+
+/**
+ * The sheet's `toggle` and `pullUp` go through the panel's driver while one is on screen: a move
+ * down keeps `sheet.full` on until it arrives (see `lower`), so the sheet's own toggle, which reads
+ * `full`, would not turn it round. Returns what undoes it.
+ */
+function patch(sheet: Sheet, controller: Controller): () => void {
+  const list = controllers.get(sheet) ?? [];
+  controllers.set(sheet, [...list, controller]);
+  if (!list.length) {
+    const own = Object.getPrototypeOf(sheet) as Sheet;
+    const current = (): Controller | undefined => (sheet.on ? controllers.get(sheet)?.at(-1) : undefined);
+    Object.defineProperties(sheet, {
+      toggle: { configurable: true, value: () => (current() ? current()!.toggle() : own.toggle.call(sheet)) },
+      pullUp: { configurable: true, value: () => (current() ? current()!.pullUp() : own.pullUp.call(sheet)) },
+    });
+  }
+  return () => {
+    const left = (controllers.get(sheet) ?? []).filter((c) => c !== controller);
+    controllers.set(sheet, left);
+    if (!left.length) {
+      delete (sheet as unknown as Record<string, unknown>).toggle;
+      delete (sheet as unknown as Record<string, unknown>).pullUp;
+    }
+  };
 }
 
 const proto = Element.prototype;
@@ -131,16 +166,12 @@ function attach(sheet: Sheet, body: HTMLElement): () => void {
     // scroller ends exactly at `d` while the content is cut.
     write('--v2-body-min', `${Math.max(0, height - up - chrome)}px`);
     // The Coach keeps its pulled-up size: at rest its log shows its last lines, as today's does,
-    // with what is above them, and the "Put the answer away" row under them, clipped and covered
-    // (sheet-v2.css). The scroll opens them.
+    // what is above them clipped (sheet-v2.css), and the scroll opens them. (Its "Put the answer
+    // away" row lies over the log's corner here, so its coming and going changes no size.)
     const wrap = coach?.querySelector<HTMLElement>('.log-wrap');
-    const actions = coach?.querySelector<HTMLElement>(':scope > .log-actions');
-    const gap = coach ? parseFloat(getComputedStyle(coach).rowGap) || 0 : 0;
     const logH = wrap?.offsetHeight ?? 0;
     const restLog = 3 * (parseFloat(getComputedStyle(document.documentElement).fontSize) || 16);
-    const shift = actions ? actions.offsetHeight + gap : 0;
-    write('--v2-log-shift', `${shift}px`);
-    write('--v2-coach-clip', `${Math.max(0, logH - restLog) + shift}px`);
+    write('--v2-coach-clip', `${Math.max(0, logH - restLog)}px`);
     coach?.classList.toggle('v2-more', logH > restLog + 2);
     paint();
   };
@@ -187,7 +218,7 @@ function attach(sheet: Sheet, body: HTMLElement): () => void {
     scrollTo: {
       configurable: true,
       value: (a?: ScrollToOptions | number, b?: number) => {
-        if (!whole) return typeof a === 'number' ? proto.scrollTo.call(body, a, b ?? 0) : proto.scrollTo.call(body, a);
+        if (!whole) return typeof a === 'number' ? proto.scrollTo.call(body, a, b ?? 0) : (proto.scrollTo as (options?: ScrollToOptions) => void).call(body, a);
         const top = typeof a === 'number' ? (b ?? 0) : (a?.top ?? body.scrollTop);
         contentTo(top, typeof a === 'object' && a?.behavior === 'smooth');
       },
@@ -287,11 +318,18 @@ function attach(sheet: Sheet, body: HTMLElement): () => void {
    * from there (or the finger itself carrying on past the top).
    */
   let coastingContent = false;
+  /** When the last finger lifted, and the last wheel turned. */
+  let liftedAt = -Infinity;
+  let wheelAt = -Infinity;
   /** Until then the sheet may still be moving or coasting: a tap is turned into a click (see `tap`). */
   let busyUntil = 0;
 
-  // Following the finger inside the browser's slop: `lead` px, by a transform, of the sheet
-  // (`sheet`) or of the content alone (`content`), until the scroll takes over.
+  // Following the finger inside the browser's slop: the finger asks for the scroll at `goal`, and the
+  // sheet (`sheet`), or the content alone (`content`), is drawn there by a transform of `lead` px
+  // until the browser's scroll takes over. The lead is never more than the slop: once the browser
+  // scrolls, it scrolls by what the finger moved past it, so lead and scroll add up to the finger
+  // even in a frame drawn before the lead is folded in.
+  let goal = 0;
   let lead = 0;
   let leadKind: 'sheet' | 'content' | null = null;
   /** This gesture may lead: one finger, not on a box that takes typing, not sideways. */
@@ -300,9 +338,6 @@ function attach(sheet: Sheet, body: HTMLElement): () => void {
   let scrolling = false;
   /** The gesture's first move is still to come. */
   let firstMove = false;
-  /** The lead has been on screen: a frame was drawn with it. */
-  let leadDrawn = false;
-  let leadFrame = 0;
   const showLead = (): void => {
     const handle = handleEl();
     const y = lead ? `0 ${-lead}px` : '';
@@ -311,21 +346,14 @@ function attach(sheet: Sheet, body: HTMLElement): () => void {
     const s = scroller.scrollTop;
     col.style.scale = leadKind === 'sheet' && lead ? String(scaleAt(s + lead) / scaleAt(s)) : '';
   };
-  /**
-   * Hands the lead to the scroll: where the finger is, now the browser's. The scroll may already
-   * hold part of the finger's travel (what it moved past the slop), so the scroll goes where the
-   * finger is rather than adding the lead to it.
-   */
+  /** Hands the lead to the scroll: where the finger is, now the browser's. */
   const fold = (): void => {
-    if (!lead) return;
-    const to = startScroll + lead;
-    const shown = leadDrawn;
+    if (!leadKind) return;
+    const to = goal;
     lead = 0;
     leadKind = null;
     showLead();
-    // A lead never drawn (the browser sent the finger's moves only as its scroll began, as Chromium
-    // does: it holds back moves inside its slop) is left out: catching up would be a jump.
-    if (shown) scroller.scrollTop = to;
+    scroller.scrollTop = to;
   };
 
   /**
@@ -352,12 +380,17 @@ function attach(sheet: Sheet, body: HTMLElement): () => void {
         scrolling = true;
         fold();
       }
-      // The finger raises the sheet: it is pulled up from now on, so the Coach is laid out for it
-      // where the scroll still hides the difference (sheet-v2.css), not when it arrives.
-      if (startScroll <= 1 && scroller.scrollTop > 1) setFull(true);
       return;
     }
     busyUntil = Math.max(busyUntil, performance.now() + 250);
+    // Up, the sheet leaves only by the Player's hand (a touch and what its momentum carries, a
+    // wheel) or a move the driver makes: a scroll below up from anything else (the browser clamping
+    // the scroll as the content is rebuilt, the Review swapping its panel) is put back at once.
+    const now = performance.now();
+    if (open && target === null && !coastingContent && now - wheelAt > 500 && now - liftedAt > 1500 && scroller.scrollTop < d - 1) {
+      scroller.scrollTo({ top: d, behavior: 'instant' });
+      return;
+    }
     // The browser bringing a focused button into view (the app moving the focus, as Puzzles does
     // after Show the solution) leaves a resting sheet at rest; focus from the keyboard raises it.
     if (quietFocus) {
@@ -403,23 +436,26 @@ function attach(sheet: Sheet, body: HTMLElement): () => void {
       showLead();
       return;
     }
-    if (Math.abs(dy) < JITTER) return;
-    if (startScroll <= 1 && dy > 0) {
+    // Where the finger asks the scroll to be, within the range this gesture moves in: the sheet
+    // from rest or from up, the content once scrolled. Recomputed on every move, so a finger that
+    // turns back takes the lead back with it.
+    const max = scroller.scrollHeight - scroller.clientHeight;
+    const near = Math.abs(dy) < JITTER ? startScroll : startScroll + dy;
+    let to: number;
+    if (startScroll <= 1) {
       leadKind = 'sheet';
-      lead = Math.min(dy, d);
-      if (lead > 1) setFull(true);
-    } else if (open && Math.abs(startScroll - d) <= 1 && dy < 0) {
-      leadKind = 'sheet';
-      lead = Math.max(dy, -d);
-    } else if (whole && startScroll >= d - 1 && dy > 0) {
+      to = Math.min(Math.max(near, 0), d);
+    } else if (open && Math.abs(startScroll - d) <= 1) {
+      // Down, the sheet; up, the content (once whole).
+      leadKind = near < startScroll ? 'sheet' : whole ? 'content' : 'sheet';
+      to = near < startScroll ? Math.max(near, 0) : whole ? Math.min(near, max) : startScroll;
+    } else if (whole && startScroll > d + 1) {
       leadKind = 'content';
-      lead = Math.min(dy, scroller.scrollHeight - scroller.clientHeight - startScroll);
-    } else if (whole && startScroll > d + 1 && dy < 0) {
-      leadKind = 'content';
-      lead = Math.max(dy, -(startScroll - d));
+      to = Math.min(Math.max(near, d), max);
     } else return;
+    goal = to;
+    lead = Math.sign(to - startScroll) * Math.min(Math.abs(to - startScroll), LEAD_MAX);
     showLead();
-    if (!leadFrame && !leadDrawn) leadFrame = requestAnimationFrame(() => (leadFrame = requestAnimationFrame(() => ((leadDrawn = lead !== 0), (leadFrame = 0)))));
   };
 
   /**
@@ -430,6 +466,8 @@ function attach(sheet: Sheet, body: HTMLElement): () => void {
    */
   const release = (lifted: number): void => {
     releasing = false;
+    // A new finger came down first: the sheet is where it caught it.
+    if (touching) return;
     try {
       decide(lifted);
     } finally {
@@ -488,7 +526,12 @@ function attach(sheet: Sheet, body: HTMLElement): () => void {
     // The finger takes over from a move under way, where it is drawn now.
     if (target !== null) {
       caught = target;
-      scroller.scrollTo({ top: scroller.scrollTop, behavior: 'instant' });
+      // A scroll to where it is doesn't stop the browser's smooth scroll (Chromium carries on): with
+      // no overflow for a frame, it stops where it is drawn.
+      const at = scroller.scrollTop;
+      scroller.style.overflowY = 'hidden';
+      scroller.scrollTop = at;
+      requestAnimationFrame(() => scroller.style.removeProperty('overflow-y'));
     } else caught = null;
     target = null;
     releasing = false;
@@ -504,10 +547,7 @@ function attach(sheet: Sheet, body: HTMLElement): () => void {
     scrolling = false;
     lead = 0;
     leadKind = null;
-    leadDrawn = false;
     firstMove = true;
-    cancelAnimationFrame(leadFrame);
-    leadFrame = 0;
     const on = e.target instanceof Element ? e.target : null;
     mayLead = e.touches.length === 1 && !on?.closest(`${FIELD}, .coach form`) && !closing;
     closing = false;
@@ -515,6 +555,7 @@ function attach(sheet: Sheet, body: HTMLElement): () => void {
   const touchEnd = (e: TouchEvent): void => {
     if (e.touches.length) return;
     touching = false;
+    liftedAt = performance.now();
     // A finger that never got past the browser's slop: its lead becomes the scroll, and the
     // release takes it from there.
     fold();
@@ -540,9 +581,14 @@ function attach(sheet: Sheet, body: HTMLElement): () => void {
   // fling and sends no click. The tap goes to what the finger landed on all the same, and the
   // browser's own click, if it comes, is not a second one.
   let tap: { id: number; x: number; y: number; t: number; on: Element; busy: boolean } | null = null;
-  /** The tapped element and until when the browser's late click on it is the same tap. */
-  let suppress: { on: Element; until: number } | null = null;
+  /**
+   * Until when the browser's own click is the same tap as the one made a click here: until the next
+   * finger comes down, and not long. Wherever it lands (the sheet may have moved under the finger),
+   * it is not a second click.
+   */
+  let suppressUntil = 0;
   const tapDown = (e: PointerEvent): void => {
+    suppressUntil = 0;
     const on = e.target instanceof Element ? e.target : null;
     // Anything in the frame: the sheet's buttons, the strip, the board's squares (a tap during the
     // browser's fling is swallowed wherever it lands).
@@ -554,7 +600,7 @@ function attach(sheet: Sheet, body: HTMLElement): () => void {
     tap = null;
     if (!was?.busy || e.pointerId !== was.id) return;
     if (Math.hypot(e.clientX - was.x, e.clientY - was.y) > TAP_PX || e.timeStamp - was.t > TAP_MS) return;
-    suppress = { on: was.on, until: performance.now() + 800 };
+    suppressUntil = performance.now() + 800;
     const typing = was.on.closest<HTMLElement>(FIELD);
     if (typing) typing.focus();
     else (was.on as HTMLElement).click?.();
@@ -563,11 +609,8 @@ function attach(sheet: Sheet, body: HTMLElement): () => void {
     tap = null;
   };
   const clickOnce = (e: MouseEvent): void => {
-    const was = suppress;
-    if (!was || !e.isTrusted) return;
-    suppress = null;
-    const at = e.target instanceof Node ? e.target : null;
-    if (performance.now() > was.until || !at || !(at === was.on || at.contains(was.on) || was.on.contains(at))) return;
+    if (!e.isTrusted || performance.now() > suppressUntil) return;
+    suppressUntil = 0;
     e.preventDefault();
     e.stopImmediatePropagation();
   };
@@ -610,6 +653,7 @@ function attach(sheet: Sheet, body: HTMLElement): () => void {
   };
   /** A wheel is a gesture of its own: it may scroll the content once the sheet is up. */
   const wheel = (): void => {
+    wheelAt = performance.now();
     coastingContent = false;
     reach();
   };
@@ -619,8 +663,39 @@ function attach(sheet: Sheet, body: HTMLElement): () => void {
     sheet.pullUp();
   };
 
+  /** Up: pulled up from the start of the move, as the app asks. */
+  const raise = (): void => {
+    setFull(true);
+    move(true);
+  };
+  /**
+   * Down: still pulled up until the sheet is at rest (settle), so what the app shows only while
+   * the sheet is up (the Coach's Put the answer away, the strip's button) goes where the scroll
+   * has already hidden it, never in one frame on screen.
+   */
+  const lower = (): void => {
+    if (scroller.scrollTop <= 0.5 && target === null) {
+      setOpen(false);
+      return;
+    }
+    setFull(true);
+    move(false);
+  };
+  /** Where the sheet is going, or is: what a tap on the handle turns round. */
+  const headingUp = (): boolean => {
+    // A finger that stopped a move under way: the move it caught is where the sheet was going.
+    const going = target ?? caught;
+    return going !== null ? going >= d - 1 : open;
+  };
+  const controller: Controller = {
+    toggle: () => (headingUp() ? lower() : raise()),
+    pullUp: () => raise(),
+  };
+  const unpatch = patch(sheet, controller);
   const stopListening = sheet.listen((full) => {
-    if (!own) move(full);
+    if (own) return;
+    if (full) move(true);
+    else lower();
   });
 
   const sizes = new ResizeObserver(() => measure());
@@ -677,6 +752,7 @@ function attach(sheet: Sheet, body: HTMLElement): () => void {
 
   return () => {
     stopListening();
+    unpatch();
     sizes.disconnect();
     children.disconnect();
     coachRows.disconnect();

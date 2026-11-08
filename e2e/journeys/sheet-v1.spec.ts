@@ -27,6 +27,8 @@ interface Finger {
   down(x: number, y: number): Promise<void>;
   move(x: number, y: number): Promise<void>;
   up(): Promise<void>;
+  /** A quick swipe: touches at (x, y), moves by each of `dys` (from the start) `gap` ms apart, lifts at once. */
+  flick(x: number, y: number, dys: number[], gap: number): Promise<void>;
 }
 
 /** Chromium: real touches through the DevTools protocol, scrolled and tapped by the browser itself. */
@@ -44,6 +46,16 @@ function cdpFinger(cdp: CDPSession): Finger {
     up: async () => {
       void last;
       await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    },
+    // Each touch carries the time it happens at, so the page hears a flick at a flick's pace
+    // however long the protocol takes to deliver it.
+    flick: async (x, y, dys, gap) => {
+      const t0 = Date.now() / 1000;
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }], timestamp: t0 });
+      for (const [i, dy] of dys.entries()) {
+        await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x, y: y + dy }], timestamp: t0 + ((i + 1) * gap) / 1000 });
+      }
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [], timestamp: t0 + ((dys.length + 1) * gap) / 1000 });
     },
   };
 }
@@ -87,6 +99,30 @@ function syntheticFinger(page: Page): Finger {
       await send('touchmove', x, y);
     },
     up: () => send('touchend', last.x, last.y),
+    // In one go in the page, so its timing is the page's own, not the test's round trips.
+    flick: async (x, y, dys, gap) => {
+      await send('touchstart', x, y);
+      await page.evaluate(
+        async ({ x, y, dys, gap }) => {
+          const s = (window as unknown as { __touch: { target: Element } }).__touch;
+          const fire = (type: string, cy: number) => {
+            const t = { identifier: 1, target: s.target, clientX: x, clientY: cy, pageX: x, pageY: cy, screenX: x, screenY: cy };
+            const ev = new Event(type, { bubbles: true, cancelable: true, composed: true });
+            const list = type === 'touchend' ? [] : [t];
+            Object.defineProperty(ev, 'touches', { value: list });
+            Object.defineProperty(ev, 'targetTouches', { value: list });
+            Object.defineProperty(ev, 'changedTouches', { value: [t] });
+            s.target.dispatchEvent(ev);
+          };
+          for (const dy of dys) {
+            await new Promise((r) => setTimeout(r, gap));
+            fire('touchmove', y + dy);
+          }
+          fire('touchend', y + dys.at(-1)!);
+        },
+        { x, y, dys, gap },
+      );
+    },
   };
 }
 
@@ -193,40 +229,55 @@ async function settled(page: Page, up: boolean): Promise<void> {
 }
 
 /**
- * Records the sheet's drawn top every 8 ms for `ms`, starting now. Read from the page on a timer
- * rather than per frame: a busy headless browser draws few frames, but where the sheet is drawn at
- * any moment is still the slide's.
+ * Records the sheet's drawn top every 8 ms from now, for at least `ms` and then until the sheet
+ * has stopped (4 s at most). Read from the page on a timer rather than per frame: a busy headless
+ * browser draws few frames, but where the sheet is drawn at any moment is still the slide's.
  */
 async function recordTops(page: Page, ms: number): Promise<() => Promise<Tops>> {
-  await page.evaluate((ms) => {
-    const w = window as unknown as { __tops: number[]; __slide: number[]; __at: number[] };
+  await page.evaluate(() => {
+    const w = window as unknown as { __tops: number[]; __slide: number[]; __at: number[]; __tick?: ReturnType<typeof setInterval> };
+    clearInterval(w.__tick);
     w.__tops = [];
     w.__slide = [];
     w.__at = [];
-    const end = performance.now() + ms;
-    const tick = setInterval(() => {
+    const end = performance.now() + 4_000;
+    w.__tick = setInterval(() => {
       const panel = document.querySelector('.side.panel')!;
       w.__tops.push(Math.round(panel.getBoundingClientRect().top * 10) / 10);
       w.__at.push(performance.now());
       // How far through its slide the panel's animation is, as the browser times it.
-      const p = panel.getAnimations()[0]?.effect?.getComputedTiming().progress;
+      // (Its own slides only: with less motion asked for, app.css gives CSS transitions 0.01 ms.)
+      const p = panel.getAnimations().find((a) => !('transitionProperty' in a))?.effect?.getComputedTiming().progress;
       if (typeof p === 'number') w.__slide.push(Math.round(p * 100) / 100);
-      if (performance.now() >= end) clearInterval(tick);
+      if (performance.now() >= end) clearInterval(w.__tick);
     }, 8);
-  }, ms);
+  });
   const read = async () => {
-    await page.waitForTimeout(ms + 50);
-    const { tops, slide, at } = await page.evaluate(() => {
-      const w = window as unknown as { __tops: number[]; __slide: number[]; __at: number[] };
-      return { tops: w.__tops, slide: w.__slide, at: w.__at };
+    await page.waitForTimeout(ms);
+    // Stopped: not moving, and drawn in the same place for the last 100 ms.
+    await expect
+      .poll(
+        () =>
+          page.evaluate(() => {
+            const w = window as unknown as { __tops: number[] };
+            const last = w.__tops.slice(-12);
+            return !document.querySelector('.board-screen.v1-moving') && last.length === 12 && last.every((t) => t === last[0]);
+          }),
+        { timeout: 4_000 },
+      )
+      .toBe(true);
+    const { tops, slide, times } = await page.evaluate(() => {
+      const w = window as unknown as { __tops: number[]; __slide: number[]; __at: number[]; __tick?: ReturnType<typeof setInterval> };
+      clearInterval(w.__tick);
+      return { tops: w.__tops, slide: w.__slide, times: w.__at };
     });
-    return Object.assign(tops, { slide, at });
+    return Object.assign(tops, { slide, times });
   };
   return read;
 }
 
 /** The sheet's drawn tops, and how far through its slide its animation was at each reading. */
-type Tops = number[] & { slide: number[]; at: number[] };
+type Tops = number[] & { slide: number[]; times: number[] };
 
 /**
  * The sheet slid: it was drawn at three or more places strictly between where it started and
@@ -347,6 +398,7 @@ for (const kind of ['chromium', 'webkit'] as const) {
 
     for (const screen of SCREENS) {
       test(`${screen}, at every phone size: a drag up follows the finger without scrolling, a drag down from the top lowers it, the handle toggles it`, async ({ browser, app }) => {
+        test.setTimeout(300_000);
         for (const size of SIZES) {
           const p = await phone(kind, browser, app, size);
           try {
@@ -366,15 +418,38 @@ for (const kind of ['chromium', 'webkit'] as const) {
       try {
         await open(p.page, app, 'Lesson');
         const rest = await frame(p.page);
-        // Fast: 45 px in three moves a frame apart, let go at once.
-        const at = await onContent(p.page);
-        await p.finger.down(at.x, at.y);
-        for (const dy of [15, 30, 45]) {
-          await p.page.waitForTimeout(16);
-          await p.finger.move(at.x, at.y - dy);
+        // Fast: 45 px in three moves a frame apart, let go at once. A flick is judged by the
+        // times the page hears the touches at, and the DevTools protocol's touches can arrive
+        // spread out (its round trips, other browsers busy beside this one) enough to read as a
+        // slow drag: a flick that didn't arrive as one is tried again, up to five times.
+        let flicked = false;
+        for (let attempt = 0; attempt < 5 && !flicked; attempt++) {
+          await p.page.evaluate(() => {
+            const w = window as unknown as { __heard: [number, number][]; __hearing?: boolean };
+            w.__heard = [];
+            if (w.__hearing) return;
+            w.__hearing = true;
+            for (const t of ['touchmove', 'touchend'])
+              document.addEventListener(t, (e) => w.__heard.push([e.timeStamp, (e as TouchEvent).changedTouches[0]?.clientY ?? 0]), { capture: true });
+          });
+          const at = await onContent(p.page);
+          await p.finger.flick(at.x, at.y, [-15, -30, -45], 16);
+          const heard = await p.page.evaluate(() => (window as unknown as { __heard: [number, number][] }).__heard);
+          // Heard as a flick: its last two moves at 0.4 px/ms or more (Chromium may swallow the
+          // first, inside its own slop), and lifted under 40 ms after the last.
+          const moves = heard.slice(0, -1);
+          const [a, b] = [moves.at(-2), moves.at(-1)];
+          const asFlick = Boolean(a && b) && (a![1] - b![1]) / Math.max(1, b![0] - a![0]) >= 0.4 && heard.at(-1)![0] - b![0] < 40;
+          if (!asFlick) {
+            await expect.poll(async () => (await frame(p.page)).moving).toBe(false);
+            if ((await frame(p.page)).full) await p.page.getByRole('button', { name: 'Let the panel down' }).tap();
+            await settled(p.page, false);
+            continue;
+          }
+          flicked = true;
+          await settled(p.page, true);
         }
-        await p.finger.up();
-        await settled(p.page, true);
+        expect(flicked, 'a flick arrived as one').toBe(true);
         await p.page.getByRole('button', { name: 'Let the panel down' }).tap();
         await settled(p.page, false);
         expect((await frame(p.page)).top).toBeCloseTo(rest.top, 0);
@@ -475,6 +550,37 @@ test.describe('Version 1 of the sheet: the moves the app makes itself slide', ()
       expectSlid(await tops(), typingTop, rest);
       await expect(page.getByRole('textbox', { name: 'Your Why Question' })).not.toBeFocused();
       await settled(page, false);
+      // A tap on the handle mid-slide turns it round from where it is drawn: no jump.
+      await page.getByRole('button', { name: 'Pull the panel up' }).tap();
+      await settled(page, true);
+      const up = (await frame(page)).top;
+      tops = await recordTops(page, 900);
+      // At a fifth of its speed, so the second tap surely lands mid-slide however busy the
+      // machine; `force`: Playwright would otherwise wait for the handle to stop moving.
+      const cdp = await page.context().newCDPSession(page);
+      await cdp.send('Animation.enable');
+      await cdp.send('Animation.setPlaybackRate', { playbackRate: 0.2 });
+      await page.getByRole('button', { name: 'Let the panel down' }).tap({ force: true });
+      await page.waitForTimeout(400);
+      await page.getByRole('button', { name: 'Pull the panel up' }).tap({ force: true });
+      const turned = await tops();
+      await cdp.send('Animation.setPlaybackRate', { playbackRate: 1 });
+      await settled(page, true);
+      const deepest = Math.max(...turned);
+      expect(deepest).toBeGreaterThan(up + 20);
+      expect(deepest).toBeLessThan(rest - 2);
+      // Never faster than the slide's start (4 times its average speed, about 2.5 px/ms here):
+      // no jump. Timed by the readings' own clock, as a busy page reads less often.
+      let last = 0;
+      for (let i = 1; i < turned.length; i++) {
+        if (turned[i] === turned[i - 1]) continue;
+        // From the reading where it last changed: the browser draws it once a frame.
+        const speed = Math.abs(turned[i]! - turned[last]!) / Math.max(1, turned.times[i]! - turned.times[last]!);
+        expect(speed, `reading ${i}: ${turned.join(' ')}`).toBeLessThan(3.5);
+        last = i;
+      }
+      await page.getByRole('button', { name: 'Let the panel down' }).tap();
+      await settled(page, false);
       // A Why Question pulls the sheet up for its answer, sliding.
       await app.script({ kind: 'reply', reply: { text: 'It attacks e5 and develops.' } });
       await page.getByRole('textbox', { name: 'Your Why Question' }).fill('Why does it matter that it attacks e5?');
@@ -489,31 +595,9 @@ test.describe('Version 1 of the sheet: the moves the app makes itself slide', ()
       await page.locator('.coach form').evaluate((f: HTMLFormElement) => f.requestSubmit());
       const asked = await tops();
       await settled(page, true);
-      const up = (await frame(page)).top;
-      expectSlid(asked, rest, up);
+      expectSlid(asked, rest, (await frame(page)).top);
       await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
       await page.waitForTimeout(500);
-      // A tap on the handle mid-slide turns it round from where it is drawn: no jump.
-      tops = await recordTops(page, 900);
-      // `force`: Playwright would otherwise wait for the handle to stop moving.
-      await page.getByRole('button', { name: 'Let the panel down' }).tap({ force: true });
-      await page.waitForTimeout(90);
-      await page.getByRole('button', { name: 'Pull the panel up' }).tap({ force: true });
-      const turned = await tops();
-      await settled(page, true);
-      const deepest = Math.max(...turned);
-      expect(deepest).toBeGreaterThan(up + 20);
-      expect(deepest).toBeLessThan(rest - 2);
-      // Never faster than the slide's start (4 times its average speed, about 2.5 px/ms here):
-      // no jump. Timed by the readings' own clock, as a busy page reads less often.
-      let last = 0;
-      for (let i = 1; i < turned.length; i++) {
-        if (turned[i] === turned[i - 1]) continue;
-        // From the reading where it last changed: the browser draws it once a frame.
-        const speed = Math.abs(turned[i]! - turned[last]!) / Math.max(1, turned.at[i]! - turned.at[last]!);
-        expect(speed, `reading ${i}: ${turned.join(' ')}`).toBeLessThan(3.5);
-        last = i;
-      }
       // Continue, with the sheet up: the Lesson lets it down, sliding.
       tops = await recordTops(page, 600);
       await page.getByRole('button', { name: 'Continue' }).tap();
@@ -563,10 +647,13 @@ test.describe('Version 1 of the sheet: the moves the app makes itself slide', ()
       await page.locator('.side.panel > .panel-body').evaluate((b) => (b.scrollTop = 0));
       const frames = await drag(p, await onContent(page), 90);
       expect(frames.at(-1)!.top).toBeCloseTo(up + 90, 0);
+      const after = await recordTops(page, 450);
       await p.finger.up();
-      await nextFrame(page);
-      expect((await frame(page)).top).toBeCloseTo(rest, 0);
-      expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);
+      // Where the finger left it, then at rest: nothing in between, and no animation.
+      const drawn = await after();
+      expect(drawn.filter((t) => Math.abs(t - (up + 90)) > 1 && Math.abs(t - rest) > 1), drawn.join(' ')).toEqual([]);
+      expect(drawn.at(-1)).toBeCloseTo(rest, 0);
+      expect(drawn.slide).toEqual([]);
       await settled(page, false);
     } finally {
       await p.close();

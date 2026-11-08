@@ -536,7 +536,7 @@
   );
 </script>
 
-<section class="screen" class:board-screen={lesson && phase !== 'intro' && part} class:sheet-full={sheet.shown}>
+<section class="screen" class:board-screen={lesson && phase !== 'intro' && part} class:sheet-full={sheet.shown} {@attach sheet.frame}>
   {#if missing}
     <h1>Lesson not found</h1>
     <p><a href="#/lessons">Back to the Lessons</a></p>

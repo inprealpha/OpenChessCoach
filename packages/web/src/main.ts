@@ -1,5 +1,10 @@
 import { mount } from 'svelte';
 import './app.css';
+// PROTOTYPE (#80): the three versions of the phone's panel sheet, each scoped under its own data-sheet.
+import './lib/sheet-variant.ts';
+import './sheet-v1.css';
+import './sheet-v2.css';
+import './sheet-v3.css';
 import App from './App.svelte';
 import { api } from './lib/api.svelte.ts';
 

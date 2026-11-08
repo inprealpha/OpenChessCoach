@@ -5,21 +5,41 @@
 // One sheet for the app, as one board screen shows at a time: its handle lets it down as a screen
 // opens, and the Coach's Ask box pulls it up for the answer on every screen.
 import type { Attachment } from 'svelte/attachments';
-import { afterSwipe } from './swipe.ts';
+import { driver } from './sheet-variants/index.ts';
 
 const query = typeof matchMedia === 'function' ? matchMedia('(max-width: 820px) and (min-height: 560px)') : null;
 
-class Sheet {
-  /** Pulled up: the panel takes the height and the board is a strip. */
-  full = $state(false);
+export class Sheet {
+  #full = $state(false);
   /** The frame has a sheet: a phone held upright. */
   on = $state(query?.matches ?? false);
+  /** PROTOTYPE (#80): told of every change of `full`, so a version can animate the moves the app makes itself. */
+  // Not state: nothing renders from the listeners themselves.
+  // eslint-disable-next-line svelte/prefer-svelte-reactivity
+  readonly #listeners = new Set<(full: boolean) => void>();
 
   constructor() {
     query?.addEventListener('change', (e) => {
       this.on = e.matches;
       if (!e.matches) this.full = false;
     });
+  }
+
+  /** Pulled up: the panel takes the height and the board is a strip. */
+  get full(): boolean {
+    return this.#full;
+  }
+
+  set full(value: boolean) {
+    if (value === this.#full) return;
+    this.#full = value;
+    for (const listen of this.#listeners) listen(value);
+  }
+
+  /** PROTOTYPE (#80): calls `listen` on every change of `full`; returns what stops it. */
+  listen(listen: (full: boolean) => void): () => void {
+    this.#listeners.add(listen);
+    return () => this.#listeners.delete(listen);
   }
 
   /** Pulled up where the frame has a sheet: what a screen's class follows. */
@@ -36,44 +56,15 @@ class Sheet {
     if (this.on) this.full = true;
   }
 
-  /**
-   * On the panel's scrolling body: a swipe up in it pulls the sheet up before the rest scrolls, and
-   * a pull down that starts at its top lets it back down. A wheel turned down does as a swipe up.
-   */
-  readonly gestures: Attachment<HTMLElement> = (node) => {
-    let startY: number | null = null;
-    let startTop = 0;
-    const start = (e: TouchEvent) => {
-      startY = e.touches.length === 1 ? (e.touches[0]?.clientY ?? null) : null;
-      startTop = node.scrollTop;
-    };
-    const move = (e: TouchEvent) => {
-      const y = e.touches[0]?.clientY;
-      if (!this.on || startY === null || y === undefined) return;
-      // From where the swipe started: one that scrolls the panel back to its top doesn't drop the sheet.
-      const next = afterSwipe(this.full, y - startY, startTop);
-      if (next === this.full) return;
-      this.full = next;
-      // One change per swipe: the rest of it scrolls the panel.
-      startY = null;
-    };
-    const end = () => (startY = null);
-    const wheel = (e: WheelEvent) => {
-      if (this.on && !this.full && e.deltaY > 0) this.full = true;
-    };
-    node.addEventListener('touchstart', start, { passive: true });
-    node.addEventListener('touchmove', move, { passive: true });
-    node.addEventListener('touchend', end, { passive: true });
-    node.addEventListener('touchcancel', end, { passive: true });
-    node.addEventListener('wheel', wheel, { passive: true });
-    return () => {
-      node.removeEventListener('touchstart', start);
-      node.removeEventListener('touchmove', move);
-      node.removeEventListener('touchend', end);
-      node.removeEventListener('touchcancel', end);
-      node.removeEventListener('wheel', wheel);
-    };
-  };
+  // PROTOTYPE (#80): each hook hands its element to the version this page load uses (lib/sheet-variants/).
+  /** On the panel's scrolling body. */
+  readonly gestures: Attachment<HTMLElement> = (node) => driver.panel(this, node);
+  /** On the grab handle's button. */
+  readonly handle: Attachment<HTMLElement> = (node) => driver.handle(this, node);
+  /** On the board strip's button. */
+  readonly strip: Attachment<HTMLElement> = (node) => driver.strip(this, node);
+  /** On the screen's `.board-screen` section. */
+  readonly frame: Attachment<HTMLElement> = (node) => driver.frame(this, node);
 }
 
 export const sheet = new Sheet();

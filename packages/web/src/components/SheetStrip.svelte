@@ -6,7 +6,7 @@
 </script>
 
 {#if sheet.shown}
-  <button type="button" class="strip-tap" aria-label="Show the board full size" onclick={() => (sheet.full = false)}></button>
+  <button type="button" class="strip-tap" aria-label="Show the board full size" {@attach sheet.strip}></button>
 {/if}
 
 <style>

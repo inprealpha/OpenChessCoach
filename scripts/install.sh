@@ -182,7 +182,15 @@ case ":${PATH}:" in
     if [ "$BIN_DIR" != "$HOME/.local/bin" ]; then
       EXPORT_LINE="export PATH=\"${BIN_DIR}:\$PATH\""
     fi
-    if [ -n "$SHELL_RC" ] && ! grep -Fq "$BIN_DIR" "$SHELL_RC" 2>/dev/null && ! grep -Fq '.local/bin' "$SHELL_RC" 2>/dev/null; then
+    ALREADY_IN_RC=0
+    if [ -n "$SHELL_RC" ]; then
+      if grep -Fq "$BIN_DIR" "$SHELL_RC" 2>/dev/null; then
+        ALREADY_IN_RC=1
+      elif [ "$BIN_DIR" = "$HOME/.local/bin" ] && grep -Fq '.local/bin' "$SHELL_RC" 2>/dev/null; then
+        ALREADY_IN_RC=1
+      fi
+    fi
+    if [ -n "$SHELL_RC" ] && [ "$ALREADY_IN_RC" -eq 0 ]; then
       printf '\n# OpenChessCoach\n%s\n' "$EXPORT_LINE" >> "$SHELL_RC"
       echo "Added $BIN_DIR to $SHELL_RC."
     fi

@@ -1,19 +1,23 @@
 # Sharing the app and releasing it
 
-Friends and early testers install the app from npm with one command and follow the welcome page,
-`site/index.html`, for everything else. This page is for the owner: what to do once to get there,
-and what a release takes after that.
+Friends and early testers install the standalone app with one command (no Node.js or npm needed)
+or run it from npm with `npx openchesscoach@latest`, and follow the welcome page, `site/index.html`,
+for everything else. This page is for the owner: what to do once to get there, and what a release
+takes after that.
 
 ## What a tester goes through
 
 The welcome page walks them through it for Windows, macOS and Linux:
 
 1. A paid Claude plan (Pro or Max), since the Coach runs on their own Claude Code login (ADR 0001).
-2. Node.js 22.18 or later. The app stops with a message naming the fix when it is older.
+2. One-line standalone install (`install.ps1` on Windows, `install.sh` on macOS and Linux), which
+   downloads a verified archive bundling the official signed Node.js runtime — no Node.js, npm, or
+   administrator rights required. Users who already have Node.js 22.18+ can also run
+   `npx openchesscoach@latest` (`npx.cmd` in Windows PowerShell).
 3. Claude Code, installed with its native installer, and logged in. The app also finds `claude`
-   in the installer's folder (`~/.local/bin`) when the terminal's PATH doesn't have it yet.
-4. `npx openchesscoach@latest` (`npx.cmd` in Windows PowerShell, which blocks `npx.ps1` by
-   default). `@latest` means every start picks up the newest release.
+   in the installer's folder (`~/.local/bin`, Windows WinGet/npm links, and macOS Homebrew paths)
+   when the terminal's PATH doesn't have it yet.
+4. `openchesscoach` (or the **OpenChessCoach** Start Menu shortcut on Windows).
 
 ## Once
 
@@ -62,8 +66,12 @@ The welcome page walks them through it for Windows, macOS and Linux:
    git tag v0.2.0 && git push origin v0.2.0
    ```
 
-3. The **Release** workflow checks the npm package on Windows, macOS and Linux
-   (`scripts/package-smoke.ts`), publishes it to npm and creates a GitHub release with the tarball.
-   Testers get it the next time they start the app.
+3. The **Release** workflow builds the npm tarball and standalone bundles (`scripts/build-standalone.ts`)
+   for Windows (`win-x64`, `win-arm64`), macOS (`darwin-arm64`, `darwin-x64`), and Linux (`linux-x64`,
+   `linux-arm64`). It checks both the npm package (`scripts/package-smoke.ts`) and the standalone
+   installers with system Node stripped from `PATH` (`scripts/standalone-smoke.ts`) on Windows,
+   macOS and Linux, then publishes the tarball to npm and attaches all standalone archives,
+   `SHA256SUMS.txt`, `install.ps1`, and `install.sh` to the GitHub release.
 
-The same package check runs on any PR that changes how the package is built or started.
+The same package and standalone checks run on any PR that changes how the package or standalone
+bundles are built or started.

@@ -45,7 +45,7 @@ gh issue edit <n> --add-label merge-approved
 gh issue comment <n> --body 'Merge approved by the owner: "<their exact words>" (<where: the session, the date>).'
 ```
 
-Never put a link to a Claude session in the comment (CLAUDE.md).
+Never put a link to a Claude session in the comment (AGENTS.md).
 
 ## 3. Show me first: show before finishing
 
@@ -95,7 +95,7 @@ When the owner corrects you, fix the case at hand, then encode the lesson as hig
 
 1. the code's structure (a type, a module boundary, a guard), so the mistake can't be written;
 2. a lint or a test, so the mistake fails CI;
-3. prose (a skill, CLAUDE.md, an ADR) only when neither fits.
+3. prose (a skill, AGENTS.md, an ADR) only when neither fits.
 
 Human review is the last resort. List each lesson and where it went under "Review notes" in the PR.
 

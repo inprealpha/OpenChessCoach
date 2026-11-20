@@ -2,6 +2,7 @@
 # GitHub cannot enforce these yet: agents open PRs under the owner's own account.
 /docs/adr/ @inprealpha
 /CONTEXT.md @inprealpha
+/AGENTS.md @inprealpha
 /CLAUDE.md @inprealpha
 /docs/agents/ @inprealpha
 /packages/backend/src/pairing.ts @inprealpha

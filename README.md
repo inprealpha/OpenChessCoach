@@ -209,7 +209,7 @@ its system libraries, which take root: `sudo npx playwright install-deps chromiu
 on your phone, `bash scripts/sandbox/instabox.sh up --notify` runs it on an InstaBox box and sends you
 the link; `.claude/skills/sandbox/SKILL.md` has the details.
 
-Read `CLAUDE.md` and `.claude/skills/verify/SKILL.md` before opening a PR: changes merge on
+Read `AGENTS.md` and `.claude/skills/verify/SKILL.md` before opening a PR: changes merge on
 evidence from the running app (`docs/adr/0006-merge-on-evidence.md`).
 
 ## Licence

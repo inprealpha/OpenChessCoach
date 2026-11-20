@@ -19,8 +19,9 @@ verdict at all.
 
 ## What to do
 
-1. `CLAUDE.md` is already loaded: use its rules table. Read `.claude/skills/verify/SKILL.md` and the
-   feature-map entries in `.claude/skills/verify/features/` for every feature the diff touches.
+1. Use the rules table in `AGENTS.md`, loaded through `CLAUDE.md`. Read
+   `.claude/skills/verify/SKILL.md` and the feature-map entries in `.claude/skills/verify/features/`
+   for every feature the diff touches.
 2. Read the diff and the issues. Write down what must be true if the PR is right: its "Done means"
    checks, plus anything the rules table says about the paths it touches.
    The PR's "How this was made" section is a claim too: for each testing method it ticks, find the

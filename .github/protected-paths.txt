@@ -6,6 +6,7 @@
 # Decisions, the glossary and the agent instructions
 docs/adr/
 CONTEXT.md
+AGENTS.md
 CLAUDE.md
 docs/agents/
 

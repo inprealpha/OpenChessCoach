@@ -245,6 +245,8 @@ export class PiCoach implements CoachPort {
         return;
       }
       if (event.type === 'message_start') {
+        const msg = event.message as { role?: string } | undefined;
+        if (!msg?.role || msg.role === 'assistant') streamError = undefined;
         currentTurnText = '';
         streamedLen = 0;
         sawToolThisTurn = false;
@@ -263,9 +265,12 @@ export class PiCoach implements CoachPort {
       }
       if (event.type === 'message_end') {
         const msg = event.message as { role?: string; stopReason?: string; errorMessage?: string } | undefined;
-        if (msg?.role === 'assistant' && msg.stopReason === 'error') {
-          streamError = msg.errorMessage || 'Pi returned an error.';
-          return;
+        if (msg?.role === 'assistant') {
+          if (msg.stopReason === 'error') {
+            streamError = msg.errorMessage || 'Pi returned an error.';
+            return;
+          }
+          streamError = undefined;
         }
         if (!sawToolThisTurn && currentTurnText) flushSafeProse(true);
       }

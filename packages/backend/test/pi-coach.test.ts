@@ -247,6 +247,29 @@ describe('PiCoach', () => {
     await expect(limitCoach.ask({ job: 'why', model: 'default', brief: BRIEF }, () => {})).rejects.toBeInstanceOf(CoachLimitError);
   });
 
+  it('clears a transient error when Pi automatically retries and succeeds', async () => {
+    const coach = new PiCoach({
+      createSession: fakePiSession({
+        async run(emit) {
+          emit({ type: 'message_start', message: { role: 'assistant' } });
+          emit({
+            type: 'message_end',
+            message: { role: 'assistant', stopReason: 'error', errorMessage: '429 rate limit exceeded', content: [] },
+          });
+          emit({ type: 'message_start', message: { role: 'assistant' } });
+          emit({ type: 'message_update', assistantMessageEvent: { type: 'text_delta', delta: 'Nf3 develops with tempo.' } });
+          emit({ type: 'message_end', message: { role: 'assistant', stopReason: 'stop', content: [] } });
+          return 'Nf3 develops with tempo.';
+        },
+      }),
+      checkAuth: async () => ({ ok: true, providers: ['openai'], modelCount: 1 }),
+    });
+    const streamed: string[] = [];
+    const back = await coach.ask({ job: 'why', model: 'default', brief: BRIEF }, (d) => streamed.push(d));
+    expect(back.text).toBe('Nf3 develops with tempo.');
+    expect(streamed.join('')).toBe('Nf3 develops with tempo.');
+  });
+
   it('builds isolated resource loader options and allowlists only custom tools', () => {
     const loaderOpts = buildPiResourceLoaderOptions('Chess Coach prompt');
     expect(loaderOpts).toMatchObject({

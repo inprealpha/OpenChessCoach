@@ -216,6 +216,37 @@ describe('PiCoach', () => {
     await expect(limitCoach.ask({ job: 'why', model: 'default', brief: BRIEF }, () => {})).rejects.toBeInstanceOf(CoachLimitError);
   });
 
+  it('captures assistant errorMessage reported on message_end when prompt resolves normally', async () => {
+    const authCoach = new PiCoach({
+      createSession: fakePiSession({
+        async run(emit) {
+          emit({ type: 'message_start' });
+          emit({
+            type: 'message_end',
+            message: { role: 'assistant', stopReason: 'error', errorMessage: '401 Unauthorized: expired token', content: [] },
+          });
+          return '';
+        },
+      }),
+      checkAuth: async () => ({ ok: false, code: 'not-logged-in', message: PI_LOGIN_FIX }),
+    });
+    await expect(authCoach.ask({ job: 'why', model: 'default', brief: BRIEF }, () => {})).rejects.toBeInstanceOf(CoachUnavailableError);
+
+    const limitCoach = new PiCoach({
+      createSession: fakePiSession({
+        async run(emit) {
+          emit({
+            type: 'message_end',
+            message: { role: 'assistant', stopReason: 'error', errorMessage: '429 rate limit exceeded', content: [] },
+          });
+          return '';
+        },
+      }),
+      checkAuth: async () => ({ ok: true, providers: ['openai'], modelCount: 1 }),
+    });
+    await expect(limitCoach.ask({ job: 'why', model: 'default', brief: BRIEF }, () => {})).rejects.toBeInstanceOf(CoachLimitError);
+  });
+
   it('builds isolated resource loader options and allowlists only custom tools', () => {
     const loaderOpts = buildPiResourceLoaderOptions('Chess Coach prompt');
     expect(loaderOpts).toMatchObject({

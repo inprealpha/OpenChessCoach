@@ -263,6 +263,11 @@ export class PiCoach implements CoachPort {
         return;
       }
       if (event.type === 'message_end') {
+        const msg = event.message as { role?: string; stopReason?: string; errorMessage?: string } | undefined;
+        if (msg?.role === 'assistant' && msg.stopReason === 'error') {
+          streamError = msg.errorMessage || 'Pi returned an error.';
+          return;
+        }
         if (!sawToolThisTurn && currentTurnText) flushSafeProse(true);
       }
     });

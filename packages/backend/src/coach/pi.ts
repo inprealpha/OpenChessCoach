@@ -9,7 +9,6 @@ import {
   ModelRegistry,
   SessionManager,
   type AgentSessionEvent,
-  type DefaultResourceLoaderOptions,
   type ToolDefinition,
 } from '@earendil-works/pi-coding-agent';
 import type { EngineQuestion } from '@chess-coach/shared/coach/engine-tool';
@@ -116,7 +115,7 @@ function resolvePiModel(registry: ModelRegistry, requested: string) {
  * Build isolated resource-loader options for Pi Coach sessions so personal coding-agent
  * extensions, skills, prompt templates, themes, and context files are never loaded.
  */
-export function buildPiResourceLoaderOptions(systemPrompt: string): DefaultResourceLoaderOptions {
+export function buildPiResourceLoaderOptions(systemPrompt: string): ConstructorParameters<typeof DefaultResourceLoader>[0] {
   return {
     cwd: tmpdir(),
     agentDir: getAgentDir(),

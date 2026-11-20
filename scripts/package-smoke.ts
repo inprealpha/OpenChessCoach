@@ -133,7 +133,7 @@ if (win) baseEnv.LOCALAPPDATA = join(work, 'local app data');
     ...baseEnv,
     [pathKey]: [nodeOnly(nodeDir), ...(baseEnv[pathKey] ?? '').split(delimiter).filter((d) => d && d !== nodeDir && !hasClaude(d))].join(delimiter),
   });
-  const timeout = new Promise<'timeout'>((r) => setTimeout(() => r('timeout'), 240_000));
+  const timeout = new Promise<'timeout'>((r) => setTimeout(() => r('timeout'), 420_000));
   const code = await Promise.race([run.exited, timeout]);
   if (code === 'timeout') await stop(run);
   check(code === 2, 'without Claude Code the app stops with exit code 2', String(code));

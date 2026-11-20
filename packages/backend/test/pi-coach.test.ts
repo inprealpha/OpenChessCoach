@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import type { Brief } from '@chess-coach/shared/coach/brief';
 import type { EngineQuestion } from '@chess-coach/shared/coach/engine-tool';
-import { PiCoach, type PiSessionLike, type PiSessionRequest } from '../src/coach/pi.ts';
+import {
+  buildPiResourceLoaderOptions,
+  buildPiToolAllowlist,
+  PiCoach,
+  type PiSessionLike,
+  type PiSessionRequest,
+} from '../src/coach/pi.ts';
 import { CoachDeadlineError, CoachLimitError, CoachUnavailableError, type CoachEngine } from '../src/coach/port.ts';
 import { PI_LOGIN_FIX } from '../src/pi-check.ts';
 
@@ -208,5 +214,19 @@ describe('PiCoach', () => {
       checkAuth: async () => ({ ok: true, providers: ['openai'], modelCount: 1 }),
     });
     await expect(limitCoach.ask({ job: 'why', model: 'default', brief: BRIEF }, () => {})).rejects.toBeInstanceOf(CoachLimitError);
+  });
+
+  it('builds isolated resource loader options and allowlists only custom tools', () => {
+    const loaderOpts = buildPiResourceLoaderOptions('Chess Coach prompt');
+    expect(loaderOpts).toMatchObject({
+      noExtensions: true,
+      noSkills: true,
+      noPromptTemplates: true,
+      noThemes: true,
+      noContextFiles: true,
+      systemPrompt: 'Chess Coach prompt',
+    });
+    expect(buildPiToolAllowlist([])).toEqual([]);
+    expect(buildPiToolAllowlist([{ name: 'ask_engine' } as never])).toEqual(['ask_engine']);
   });
 });

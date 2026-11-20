@@ -4,9 +4,12 @@ import { tmpdir } from 'node:os';
 import {
   AuthStorage,
   createAgentSession,
+  DefaultResourceLoader,
+  getAgentDir,
   ModelRegistry,
   SessionManager,
   type AgentSessionEvent,
+  type DefaultResourceLoaderOptions,
   type ToolDefinition,
 } from '@earendil-works/pi-coding-agent';
 import type { EngineQuestion } from '@chess-coach/shared/coach/engine-tool';
@@ -109,17 +112,42 @@ function resolvePiModel(registry: ModelRegistry, requested: string) {
   return available.find((m) => m.id === trimmed) ?? available.find((m) => m.id.includes(trimmed));
 }
 
+/**
+ * Build isolated resource-loader options for Pi Coach sessions so personal coding-agent
+ * extensions, skills, prompt templates, themes, and context files are never loaded.
+ */
+export function buildPiResourceLoaderOptions(systemPrompt: string): DefaultResourceLoaderOptions {
+  return {
+    cwd: tmpdir(),
+    agentDir: getAgentDir(),
+    noExtensions: true,
+    noSkills: true,
+    noPromptTemplates: true,
+    noThemes: true,
+    noContextFiles: true,
+    systemPrompt,
+  };
+}
+
+/** Tool allowlist passed to Pi: only the registered custom tools (e.g. `ask_engine`), never built-ins. */
+export function buildPiToolAllowlist(customTools: ToolDefinition[]): string[] {
+  return customTools.map((t) => t.name);
+}
+
 async function defaultCreateSession(req: PiSessionRequest): Promise<PiSessionLike> {
   const authStorage = AuthStorage.create();
   const modelRegistry = ModelRegistry.create(authStorage);
   modelRegistry.refresh();
   const model = resolvePiModel(modelRegistry, req.model);
+  const resourceLoader = new DefaultResourceLoader(buildPiResourceLoaderOptions(req.systemPrompt));
+  await resourceLoader.reload();
   const { session } = await createAgentSession({
     cwd: tmpdir(),
     authStorage,
     modelRegistry,
+    resourceLoader,
     ...(model ? { model } : {}),
-    tools: [],
+    tools: buildPiToolAllowlist(req.customTools),
     customTools: req.customTools,
     sessionManager: SessionManager.inMemory(),
   });
@@ -240,8 +268,7 @@ export class PiCoach implements CoachPort {
     });
 
     try {
-      const prompt = `${systemPrompt}\n\n${userPrompt(call.brief)}`;
-      await session.prompt(prompt);
+      await session.prompt(userPrompt(call.brief));
 
       if (late) throw new CoachDeadlineError(deadlineMs);
       if (streamError) this.throwMappedError(streamError);

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Brief } from '@chess-coach/shared/coach/brief';
-import { CodexCoach, type CodexClientLike, type CodexThreadLike } from '../src/coach/codex.ts';
+import { CodexCoach, CODEX_ISOLATED_CONFIG, type CodexClientLike, type CodexThreadLike } from '../src/coach/codex.ts';
 import { CoachLimitError, CoachUnavailableError } from '../src/coach/port.ts';
 import { checkCodex, CODEX_LOGIN_FIX } from '../src/codex-check.ts';
 
@@ -18,31 +18,44 @@ const BRIEF: Brief = {
 
 function mockCodex(
   events: Array<Record<string, unknown>>,
-  capture?: { threadOptions?: Record<string, unknown>; turnOptions?: Record<string, unknown>; prompt?: unknown },
-): () => CodexClientLike {
-  return () => ({
-    startThread(threadOptions) {
-      if (capture) capture.threadOptions = threadOptions as Record<string, unknown>;
-      const thread: CodexThreadLike = {
-        async runStreamed(input, turnOptions) {
-          if (capture) {
-            capture.prompt = input;
-            capture.turnOptions = turnOptions as Record<string, unknown>;
-          }
-          async function* stream() {
-            for (const ev of events) yield ev;
-          }
-          return { events: stream() as AsyncGenerator<never> };
-        },
-      };
-      return thread;
-    },
-  });
+  capture?: {
+    clientOptions?: Record<string, unknown>;
+    threadOptions?: Record<string, unknown>;
+    turnOptions?: Record<string, unknown>;
+    prompt?: unknown;
+  },
+): (opts?: Record<string, unknown>) => CodexClientLike {
+  return (opts) => {
+    if (capture) capture.clientOptions = opts;
+    return {
+      startThread(threadOptions) {
+        if (capture) capture.threadOptions = threadOptions as Record<string, unknown>;
+        const thread: CodexThreadLike = {
+          async runStreamed(input, turnOptions) {
+            if (capture) {
+              capture.prompt = input;
+              capture.turnOptions = turnOptions as Record<string, unknown>;
+            }
+            async function* stream() {
+              for (const ev of events) yield ev;
+            }
+            return { events: stream() as AsyncGenerator<never> };
+          },
+        };
+        return thread;
+      },
+    };
+  };
 }
 
 describe('CodexCoach', () => {
   it('streams deduplicated text deltas, parses structured JSON, enforces safe sandbox options, and maps usage', async () => {
-    const capture: { threadOptions?: Record<string, unknown>; turnOptions?: Record<string, unknown>; prompt?: unknown } = {};
+    const capture: {
+      clientOptions?: Record<string, unknown>;
+      threadOptions?: Record<string, unknown>;
+      turnOptions?: Record<string, unknown>;
+      prompt?: unknown;
+    } = {};
     const finalJson = JSON.stringify({
       text: 'Bb5 develops cleanly and pressures c6.',
       moves: ['Bb5', 'Bc4'],
@@ -88,7 +101,8 @@ describe('CodexCoach', () => {
       models: ['gpt-5.4-mini'],
     });
 
-    // Safe read-only sandbox options
+    // Safe isolated client & read-only sandbox options
+    expect(capture.clientOptions).toMatchObject({ config: CODEX_ISOLATED_CONFIG });
     expect(capture.threadOptions).toMatchObject({
       model: 'gpt-5.4-mini',
       sandboxMode: 'read-only',
@@ -98,6 +112,19 @@ describe('CodexCoach', () => {
       approvalPolicy: 'never',
     });
     expect(capture.turnOptions?.outputSchema).toBeDefined();
+  });
+
+  it('rejects unexpected local tool execution items from Codex', async () => {
+    const coach = new CodexCoach({
+      createClient: mockCodex([
+        { type: 'item.started', item: { id: '1', type: 'command_execution', command: 'cat /etc/passwd', aggregated_output: '', status: 'in_progress' } },
+      ]),
+      checkAuth: async () => ({ ok: true, path: '/usr/bin/codex', authSource: 'codex-auth' }),
+    });
+
+    await expect(coach.ask({ job: 'why', model: 'default', brief: BRIEF }, () => {})).rejects.toThrow(
+      /unexpected local tool call/i,
+    );
   });
 
   it('omits model option when model is default and forwards abort signal', async () => {

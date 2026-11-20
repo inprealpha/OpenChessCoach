@@ -1,6 +1,8 @@
 // Codex Coach: talks to the local Codex CLI via `@openai/codex-sdk`, preserving the owner's
 // ChatGPT subscription login (`~/.codex/auth.json`) or `OPENAI_API_KEY` / `CODEX_API_KEY`.
+import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { Codex, type CodexOptions, type ThreadEvent, type ThreadOptions, type TurnOptions } from '@openai/codex-sdk';
 import type { CoachRawReply, CoachUsage } from '@chess-coach/shared/coach/types';
 import type { CoachStatus } from '@chess-coach/shared/protocol';
@@ -24,6 +26,21 @@ export interface CodexThreadLike {
 export interface CodexClientLike {
   startThread(options?: ThreadOptions): CodexThreadLike;
 }
+
+/**
+ * Codex CLI config overrides that keep the Coach strictly text-only: no shell execution,
+ * no MCP servers, and no desktop/browser/app tools.
+ */
+export const CODEX_ISOLATED_CONFIG = {
+  features: {
+    shell_tool: false,
+    unified_exec: false,
+    apps: false,
+    computer_use: false,
+    browser_use: false,
+  },
+  mcp_servers: {},
+} as const;
 
 export interface CodexCoachOptions {
   /** Override the `codex` binary path when found outside PATH. */
@@ -58,7 +75,10 @@ export class CodexCoach implements CoachPort {
 
   private getClient(): CodexClientLike {
     if (!this.client) {
-      this.client = this.createClient(this.codexPath ? { codexPathOverride: this.codexPath } : undefined);
+      this.client = this.createClient({
+        ...(this.codexPath ? { codexPathOverride: this.codexPath } : {}),
+        config: CODEX_ISOLATED_CONFIG,
+      });
     }
     return this.client;
   }
@@ -80,10 +100,11 @@ export class CodexCoach implements CoachPort {
   async ask(call: CoachCall, onText: (delta: string) => void): Promise<CoachRawReply> {
     const started = Date.now();
     const model = call.model.trim();
+    const workingDirectory = mkdtempSync(join(tmpdir(), 'chess-coach-codex-'));
     const threadOptions: ThreadOptions = {
       ...(model && model !== 'default' ? { model } : {}),
       sandboxMode: 'read-only',
-      workingDirectory: tmpdir(),
+      workingDirectory,
       skipGitRepoCheck: true,
       networkAccessEnabled: false,
       webSearchMode: 'disabled',
@@ -110,6 +131,12 @@ export class CodexCoach implements CoachPort {
     try {
       const { events } = await thread.runStreamed(buildCodexPrompt(call), turnOptions);
       for await (const event of events) {
+        if (
+          (event.type === 'item.started' || event.type === 'item.updated' || event.type === 'item.completed') &&
+          (event.item.type === 'command_execution' || event.item.type === 'file_change' || event.item.type === 'mcp_tool_call')
+        ) {
+          throw new Error('Codex attempted an unexpected local tool call during a Coach reply.');
+        }
         if (event.type === 'item.updated' && event.item.type === 'agent_message') {
           const partial = extractPartialJsonText(event.item.text);
           if (partial) emitNewText(partial);
@@ -136,6 +163,8 @@ export class CodexCoach implements CoachPort {
       if (err instanceof CoachLimitError || err instanceof CoachUnavailableError) throw err;
       if (call.signal?.aborted) throw err;
       this.throwMappedError(err instanceof Error ? err.message : String(err));
+    } finally {
+      rmSync(workingDirectory, { recursive: true, force: true });
     }
 
     const parsed = parseTextAndStructuredReply(finalRawText);

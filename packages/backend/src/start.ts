@@ -106,19 +106,6 @@ async function main(): Promise<void> {
 
   const coach = new CoachRouter({ providers, initial, unavailableReasons });
 
-  // Claude Code saying it is logged in isn't enough: a login that expired still says so. One short
-  // call finds out now, rather than when the Player first asks the Coach. It runs while the app
-  // starts, and the browser opens only once Claude has answered.
-  const skip = process.env.CHESS_COACH_SKIP_LOGIN_CHECK === '1';
-  const shouldCheckClaude = initial === 'claude' && claudeCoach !== undefined;
-  if (shouldCheckClaude) {
-    process.stdout.write(skip ? '\nSkipping the Claude login check (CHESS_COACH_SKIP_LOGIN_CHECK=1).\n' : '\nChecking your Claude login…\n');
-  } else {
-    process.stdout.write(`\nUsing ${PROVIDER_LABELS[initial]} as the Coach backend.\n`);
-  }
-  const loginCheck =
-    initial === 'claude' && claudeCoach && !skip ? claudeCoach.checkLogin() : Promise.resolve({ state: 'ok' } as const);
-
   const log = (line: string) => process.stdout.write(`  ${line}\n`);
   // The moves a Player would reach for (ADR 0011): Maia-3, downloaded in the background into the
   // data folder; Opus answers until it is ready when Claude is available.
@@ -164,17 +151,31 @@ async function main(): Promise<void> {
 
   // Align the active router provider with saved Settings when --coach wasn't forced on the CLI.
   const saved = getSettings(app.db);
+  let activeProvider: CoachProvider = initial;
   if (options.coach) {
+    activeProvider = options.coach;
     if (saved.coachProvider !== options.coach) updateSettings(app.db, { coachProvider: options.coach });
-  } else if (providers[saved.coachProvider] && saved.coachProvider !== initial) {
-    await app.coach.switchProvider(saved.coachProvider);
-  } else if (!providers[saved.coachProvider]) {
+  } else if (providers[saved.coachProvider]) {
+    activeProvider = saved.coachProvider;
+    if (saved.coachProvider !== initial) await app.coach.switchProvider(saved.coachProvider);
+  } else {
     updateSettings(app.db, { coachProvider: initial });
   }
 
-  const login = await loginCheck;
+  // Only check Claude's login when Claude is actually the effective active backend (not when
+  // saved Settings or --coach selected Codex or Pi).
+  const skip = process.env.CHESS_COACH_SKIP_LOGIN_CHECK === '1';
+  const shouldCheckClaude = activeProvider === 'claude' && claudeCoach !== undefined;
+  if (shouldCheckClaude) {
+    process.stdout.write(skip ? '\nSkipping the Claude login check (CHESS_COACH_SKIP_LOGIN_CHECK=1).\n' : '\nChecking your Claude login…\n');
+  } else {
+    process.stdout.write(`\nUsing ${PROVIDER_LABELS[activeProvider]} as the Coach backend.\n`);
+  }
+  const login =
+    activeProvider === 'claude' && claudeCoach && !skip ? await claudeCoach.checkLogin() : ({ state: 'ok' } as const);
   if (login.state === 'refused') {
     process.stderr.write(`\n✗ ${login.message} Then start the app again.\n\n`);
+    await app.close();
     process.exit(2);
   }
   if (login.state === 'limit') {

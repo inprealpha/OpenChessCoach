@@ -172,3 +172,43 @@ describe('the Review overview', () => {
     expect(await c.request('settings.get', {})).toMatchObject({ reviewOverview: true, quality: 'best', models: BEST });
   });
 });
+
+describe('Coach backend', () => {
+  it('defaults to claude, switches to codex/pi with provider-appropriate default models, and rejects unknown backends', async () => {
+    const c = await client(await instance({ seed: 'empty' }));
+    expect(await c.request('settings.get', {})).toMatchObject({ coachProvider: 'claude', quality: 'best', models: BEST });
+
+    // Switching to Codex resets models to Codex's default preset unless overridden.
+    expect(await c.request('settings.update', { coachProvider: 'codex' })).toMatchObject({
+      coachProvider: 'codex',
+      quality: 'best',
+      models: { 'review-moment': 'default', why: 'default', 'lesson-turn': 'default', hint: 'default', live: 'default' },
+    });
+
+    // Codex Balanced preset uses gpt-5.4 / gpt-5.4-mini.
+    expect(await c.request('settings.update', { quality: 'balanced' })).toMatchObject({
+      coachProvider: 'codex',
+      quality: 'balanced',
+      models: {
+        'review-moment': 'gpt-5.4',
+        why: 'gpt-5.4',
+        'lesson-turn': 'gpt-5.4',
+        hint: 'gpt-5.4-mini',
+        live: 'gpt-5.4-mini',
+      },
+    });
+
+    // Switching to Pi resets to Pi defaults and accepts provider/model IDs.
+    expect(await c.request('settings.update', { coachProvider: 'pi' })).toMatchObject({
+      coachProvider: 'pi',
+      models: { 'review-moment': 'default', why: 'default', 'lesson-turn': 'default', hint: 'default', live: 'default' },
+    });
+    expect(await c.request('settings.update', { models: { why: 'openai/gpt-5.4' } })).toMatchObject({
+      coachProvider: 'pi',
+      models: { why: 'openai/gpt-5.4' },
+    });
+
+    // Unknown backend is rejected.
+    await expect(c.request('settings.update', { coachProvider: 'gemini' as never })).rejects.toMatchObject({ code: 'bad-request' });
+  });
+});

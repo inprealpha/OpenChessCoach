@@ -143,7 +143,7 @@ export function checkCall(record: CoachCallRecord, reply: CoachReply, terms: rea
 
 /** Wraps a Coach, runs every call on one model and keeps every brief and raw reply. */
 export class RecordingCoach implements CoachPort {
-  readonly name: 'real' | 'fake';
+  readonly name: CoachPort['name'];
   readonly calls: CoachCallRecord[] = [];
   private readonly inner: CoachPort;
   private readonly model: string;

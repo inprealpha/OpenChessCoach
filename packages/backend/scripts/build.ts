@@ -19,7 +19,17 @@ mkdirSync(dist, { recursive: true });
 
 // One file per command, so paths relative to the bundle (the web app, package.json) hold. The app
 // itself is its own file, loaded by cli.js only after node:sqlite's warning is silenced.
-const external = [/^node:/, '@anthropic-ai/claude-agent-sdk', 'ws', 'qrcode', 'stockfish', '@playwright/test', 'playwright'];
+const external = [
+  /^node:/,
+  '@anthropic-ai/claude-agent-sdk',
+  '@openai/codex-sdk',
+  '@earendil-works/pi-coding-agent',
+  'ws',
+  'qrcode',
+  'stockfish',
+  '@playwright/test',
+  'playwright',
+];
 const entries = [
   ['cli', 'src/cli.ts'],
   ['start', 'src/start.ts'],

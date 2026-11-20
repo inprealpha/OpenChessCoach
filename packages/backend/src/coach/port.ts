@@ -3,7 +3,7 @@
 import type { Brief } from '@chess-coach/shared/coach/brief';
 import type { EngineQuestion } from '@chess-coach/shared/coach/engine-tool';
 import type { CoachRawReply } from '@chess-coach/shared/coach/types';
-import type { CoachJob, CoachStatus } from '@chess-coach/shared/protocol';
+import type { CoachJob, CoachProvider, CoachStatus } from '@chess-coach/shared/protocol';
 
 export interface CoachCall {
   job: CoachJob;
@@ -27,10 +27,14 @@ export interface CoachEngine {
 }
 
 export interface CoachPort {
-  readonly name: 'real' | 'fake';
+  readonly name: 'real' | 'codex' | 'pi' | 'fake';
+  /** Which Coach backend this port talks to, when it is a real provider. */
+  readonly provider?: CoachProvider;
+  /** Whether this backend supports Think deeper (`ask_engine` tool). Defaults to true when omitted. */
+  readonly supportsEngineTool?: boolean;
   ask(call: CoachCall, onText: (delta: string) => void): Promise<CoachRawReply>;
   status(): Promise<CoachStatus>;
-  /** Hears the Coach become available again on its own, such as once the owner logs back in to Claude. */
+  /** Hears the Coach become available again on its own, such as once the owner logs back in. */
   watch?(listener: (back: CoachBack) => void): void;
 }
 

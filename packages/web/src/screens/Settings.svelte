@@ -4,6 +4,7 @@
   import {
     COACH_QUALITIES,
     MODEL_JOBS,
+    type CoachProvider,
     type CoachQuality,
     type ModelJob,
     type PairingInfo,
@@ -15,7 +16,7 @@
   import { router } from '../lib/router.svelte.ts';
 
   /** A card on this screen, where the outcome of a change made in it is shown. */
-  type Card = 'pairing' | 'tunnel' | 'live' | 'review' | 'quality' | 'deeper';
+  type Card = 'pairing' | 'tunnel' | 'live' | 'review' | 'provider' | 'quality' | 'deeper';
 
   let settings = $state<Settings | null>(null);
   let pairing = $state<PairingInfo | null>(null);
@@ -37,18 +38,48 @@
   };
 
   // The desktop owns which models each preset sets; this screen only names them and what they cost.
-  const QUALITY_TEXT: Record<CoachQuality, { name: string; cost: string }> = {
-    thrifty: {
-      name: 'Thrifty',
-      cost: 'Haiku for every job. Uses the least of your Claude limits; explanations are shorter and simpler.',
+  const QUALITY_TEXT: Record<CoachProvider, Record<CoachQuality, { name: string; cost: string }>> = {
+    claude: {
+      thrifty: {
+        name: 'Thrifty',
+        cost: 'Haiku for every job. Uses the least of your Claude limits; explanations are shorter and simpler.',
+      },
+      balanced: {
+        name: 'Balanced',
+        cost: 'Sonnet for Reviews (the overview and the key moments), Why Questions and Lessons; Haiku for Hints and Live Coaching. A moderate share of your Claude limits.',
+      },
+      best: {
+        name: 'Best (recommended)',
+        cost: 'Opus for Reviews (the overview and the key moments), Why Questions and Lessons; Haiku for Hints and Live Coaching, which must stay quick. Uses your Claude limits fastest.',
+      },
     },
-    balanced: {
-      name: 'Balanced',
-      cost: 'Sonnet for Reviews (the overview and the key moments), Why Questions and Lessons; Haiku for Hints and Live Coaching. A moderate share of your Claude limits.',
+    codex: {
+      thrifty: {
+        name: 'Thrifty',
+        cost: 'Mini model for every job. Uses the least of your Codex limits; explanations are shorter and simpler.',
+      },
+      balanced: {
+        name: 'Balanced',
+        cost: 'Standard model for Reviews, Why Questions and Lessons; mini model for Hints and Live Coaching.',
+      },
+      best: {
+        name: 'Best (recommended)',
+        cost: 'Uses your Codex default model for every job.',
+      },
     },
-    best: {
-      name: 'Best (recommended)',
-      cost: 'Opus for Reviews (the overview and the key moments), Why Questions and Lessons; Haiku for Hints and Live Coaching, which must stay quick. Uses your Claude limits fastest.',
+    pi: {
+      thrifty: {
+        name: 'Thrifty',
+        cost: 'Uses your configured Pi default model (or pick specific models under Advanced).',
+      },
+      balanced: {
+        name: 'Balanced',
+        cost: 'Uses your configured Pi default model (or pick specific models under Advanced).',
+      },
+      best: {
+        name: 'Best (recommended)',
+        cost: 'Uses your configured Pi default model for every job.',
+      },
     },
   };
 
@@ -57,14 +88,37 @@
    * but added false claims in the off/on comparison (ADR 0010), so the card says so.
    */
   const haikuThinksDeeper = $derived(
-    settings !== null && (['why', 'review-moment'] as const).some((job) => settings?.models[job].toLowerCase().includes('haiku')),
+    settings !== null &&
+      settings.coachProvider === 'claude' &&
+      (['why', 'review-moment'] as const).some((job) => settings?.models[job].toLowerCase().includes('haiku')),
   );
 
-  const MODEL_NAMES: Record<string, string> = {
-    haiku: 'Fastest, latest Haiku',
-    sonnet: 'Balanced, latest Sonnet',
-    opus: 'Strongest, latest Opus',
+  const MODEL_NAMES: Record<CoachProvider, Record<string, string>> = {
+    claude: {
+      haiku: 'Fastest, latest Haiku',
+      sonnet: 'Balanced, latest Sonnet',
+      opus: 'Strongest, latest Opus',
+    },
+    codex: {
+      default: 'Codex default',
+      'gpt-5.4-mini': 'gpt-5.4-mini (faster)',
+      'gpt-5.4': 'gpt-5.4 (balanced)',
+    },
+    pi: {
+      default: 'Pi default',
+    },
   };
+
+  const activeProvider = $derived(
+    settings && api.coachProviders
+      ? api.coachProviders.find((p) => p.provider === settings?.coachProvider) ?? null
+      : null,
+  );
+  const activeProviderLabel = $derived(
+    activeProvider?.label ?? (settings?.coachProvider === 'codex' ? 'Codex' : settings?.coachProvider === 'pi' ? 'Pi' : 'Claude'),
+  );
+  const currentQualityText = $derived(QUALITY_TEXT[settings?.coachProvider ?? 'claude']);
+  const currentModelNames = $derived(MODEL_NAMES[settings?.coachProvider ?? 'claude']);
 
   async function load(): Promise<void> {
     try {
@@ -213,15 +267,45 @@
       {@render said('review')}
     </section>
 
+    {#if api.coachProviders && api.coachProviders.length > 0}
+      <fieldset class="card" aria-label="Coach backend" data-testid="coach-backend-card">
+        <legend>Coach backend</legend>
+        <p class="muted small">Choose which logged-in Coach backend on your desktop answers your questions.</p>
+        {#each api.coachProviders as p (p.provider)}
+          <label class="option">
+            <input
+              type="radio"
+              name="coachProvider"
+              value={p.provider}
+              checked={settings.coachProvider === p.provider}
+              disabled={!p.available}
+              onchange={() => update('provider', { coachProvider: p.provider })}
+            />
+            <span>
+              <strong>{p.label}</strong>
+              {#if !p.available && p.reason}
+                <span class="muted small cost">{p.reason}</span>
+              {:else if !p.supportsEngineTool}
+                <span class="muted small cost">Available (Think deeper Engine tool is not supported on this backend).</span>
+              {:else}
+                <span class="muted small cost">Available on your desktop.</span>
+              {/if}
+            </span>
+          </label>
+        {/each}
+        {@render said('provider')}
+      </fieldset>
+    {/if}
+
     <fieldset class="card" aria-label="Coach quality">
       <legend>Coach quality</legend>
-      <p class="muted small">A faster model saves your Claude limits; a stronger one explains better.</p>
+      <p class="muted small">A faster model saves your Coach limits; a stronger one explains better.</p>
       {#each COACH_QUALITIES as q (q)}
         <label class="option">
           <input type="radio" name="quality" value={q} checked={settings.quality === q} onchange={() => update('quality', { quality: q })} />
           <span>
-            <strong>{QUALITY_TEXT[q].name}</strong>
-            <span class="muted small cost">{QUALITY_TEXT[q].cost}</span>
+            <strong>{currentQualityText[q].name}</strong>
+            <span class="muted small cost">{currentQualityText[q].cost}</span>
           </span>
         </label>
       {/each}
@@ -247,10 +331,10 @@
               value={settings.models[job]}
               onchange={(e) => update('quality', { models: { [job]: (e.currentTarget as HTMLSelectElement).value } })}
             >
-              {#each Object.keys(MODEL_NAMES) as m (m)}
-                <option value={m}>{MODEL_NAMES[m]}</option>
+              {#each Object.keys(currentModelNames) as m (m)}
+                <option value={m}>{currentModelNames[m]}</option>
               {/each}
-              {#if !Object.hasOwn(MODEL_NAMES, settings.models[job])}
+              {#if !Object.hasOwn(currentModelNames, settings.models[job])}
                 <option value={settings.models[job]}>{settings.models[job]}</option>
               {/if}
             </select>
@@ -272,9 +356,14 @@
       <p class="muted small">
         On by default. In Why Questions and Reviews, the Coach can ask the Engine about other moves and where they lead before it
         answers: up to three questions for a Why Question, and up to two for each key moment of a Review, only when it needs them.
-        Answers take a little longer and use a little more of your Claude limits. Turn it off for quicker answers. Hints, Live
+        Answers take a little longer and use a little more of your {activeProviderLabel} limits. Turn it off for quicker answers. Hints, Live
         Coaching and Lessons stay as they are.
       </p>
+      {#if activeProvider && !activeProvider.supportsEngineTool}
+        <p class="small warning" data-testid="think-deeper-unsupported">
+          {activeProvider.label} does not support Think deeper Engine questions yet, so replies use only the initial Engine brief.
+        </p>
+      {/if}
       {#if haikuThinksDeeper}
         <p class="small warning" data-testid="think-deeper-haiku">
           Your Coach uses Haiku for Why Questions or Reviews.
@@ -321,6 +410,7 @@
   legend { float: left; width: 100%; padding: 0; margin: 0 0 0.4rem; font-weight: 600; font-size: 1.05rem; }
   legend + * { clear: both; }
   .option { display: flex; gap: 0.5rem; align-items: flex-start; margin: 0.5rem 0; }
+  .option:last-child { margin-bottom: 0; }
   .option input { margin-top: 0.25rem; }
   .cost { display: block; }
   .advanced { margin-top: 0.8rem; }

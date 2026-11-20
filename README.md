@@ -106,9 +106,26 @@ and Engine Games played offline are saved when it comes back. The QR code's Wi-F
 `http://`, so a phone on it needs the desktop running each time it opens the app. For an
 `https://` address on your phone, see [Away from home](#away-from-home).
 
-Options: `--port <n>` (default 8737), `--host <address>`, `--data-dir <path>`, `--no-open`, `--version`, `--help`. Your games and
+Options: `--port <n>` (default 8737), `--host <address>`, `--data-dir <path>`, `--coach <backend>` (`claude`, `codex`, or `pi`; auto-detected when omitted), `--no-open`, `--version`, `--help`. Your games and
 Player Profile live in one SQLite file in your data folder (on Linux `~/.local/share/ai-chess-coach`,
 on macOS `~/Library/Application Support/ai-chess-coach`, on Windows `%APPDATA%\ai-chess-coach`).
+
+### Coach backends (Claude, Codex, and Pi)
+
+OpenChessCoach supports three Coach backends on your desktop:
+
+- **Claude** (Claude Code CLI — `claude login`)
+- **Codex** (OpenAI Codex CLI — `codex login` with your ChatGPT subscription, or `OPENAI_API_KEY`)
+- **Pi** (Pi coding agent — run `pi` and `/login`, or configure a provider API key in `~/.pi`)
+
+At startup, OpenChessCoach picks the first logged-in backend automatically (or the one passed via `--coach <backend>`). When more than one backend is logged in on your desktop, you can switch between them live in **Settings → Coach backend**. To smoke-test your local logged-in backend(s) from the terminal, run:
+
+```sh
+npm run smoke:coach
+# or target a single backend:
+npm run smoke:coach -- --provider codex
+npm run smoke:coach -- --provider pi
+```
 
 ## My phone can't open the app
 

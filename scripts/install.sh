@@ -159,6 +159,8 @@ if [ "$OS" = "Darwin" ] && command -v xattr >/dev/null 2>&1; then
   xattr -dr com.apple.quarantine "$INSTALL_DIR" 2>/dev/null || true
 fi
 
+INSTALL_DIR="$(cd -- "$INSTALL_DIR" && pwd)"
+BIN_DIR="$(cd -- "$BIN_DIR" && pwd)"
 ln -sf "$INSTALL_DIR/openchesscoach" "$BIN_DIR/openchesscoach"
 
 echo ""

@@ -208,6 +208,18 @@ describe('Coach backend', () => {
       models: { why: 'openai/gpt-5.4' },
     });
 
+    // Switching backend with a partial model override resets unspecified jobs to the new provider's defaults.
+    expect(await c.request('settings.update', { coachProvider: 'codex', models: { why: 'gpt-5.4-mini' } })).toMatchObject({
+      coachProvider: 'codex',
+      models: {
+        'review-moment': 'default',
+        why: 'gpt-5.4-mini',
+        'lesson-turn': 'default',
+        hint: 'default',
+        live: 'default',
+      },
+    });
+
     // Unknown backend is rejected.
     await expect(c.request('settings.update', { coachProvider: 'gemini' as never })).rejects.toMatchObject({ code: 'bad-request' });
   });

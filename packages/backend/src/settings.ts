@@ -112,7 +112,7 @@ export function updateSettings(db: Db, patch: SettingsPatch): Settings {
   const current = readStored(db);
   const nextProvider = patch.coachProvider ?? current.coachProvider;
   const providerChanged = patch.coachProvider !== undefined && patch.coachProvider !== current.coachProvider;
-  const baseModels = providerChanged && patch.quality === undefined && patch.models === undefined ? defaultModelsFor(nextProvider) : current.models;
+  const baseModels = providerChanged ? defaultModelsFor(nextProvider) : current.models;
   const preset = patch.quality === undefined ? {} : presetModels(patch.quality, nextProvider);
   const next: StoredSettings = {
     coachProvider: nextProvider,
@@ -126,7 +126,7 @@ export function updateSettings(db: Db, patch: SettingsPatch): Settings {
   // Only what the Player changed is stored: a setting never touched follows its default, so a new
   // default reaches every install without a migration (#32).
   const touched = new Set<string>(Object.keys(patch).map((k) => (k === 'quality' ? 'models' : k)));
-  if (providerChanged && patch.quality === undefined && patch.models === undefined) touched.add('models');
+  if (providerChanged) touched.add('models');
   for (const [k, v] of Object.entries(next)) if (touched.has(k)) put.run(k, JSON.stringify(v));
   return withQuality(next);
 }

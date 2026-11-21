@@ -84,15 +84,23 @@ function withQuality(s: StoredSettings): Settings {
 function readStored(db: Db): StoredSettings {
   const rows = all<{ key: string; value: string }>(db, 'SELECT key, value FROM settings');
   const stored: Partial<StoredSettings> = {};
-  for (const r of rows) (stored as Record<string, unknown>)[r.key] = JSON.parse(r.value);
+  for (const r of rows) {
+    try {
+      (stored as Record<string, unknown>)[r.key] = JSON.parse(r.value);
+    } catch {
+      // A corrupted or non-JSON row falls back to the default instead of stopping startup.
+    }
+  }
   const coachProvider: CoachProvider =
     typeof stored.coachProvider === 'string' && (COACH_PROVIDERS as readonly string[]).includes(stored.coachProvider)
       ? stored.coachProvider
       : DEFAULT_SETTINGS.coachProvider;
   const fallbackModels = defaultModelsFor(coachProvider);
+  const storedModels =
+    stored.models && typeof stored.models === 'object' && !Array.isArray(stored.models) ? stored.models : {};
   return {
     coachProvider,
-    models: { ...fallbackModels, ...(stored.models ?? {}) },
+    models: { ...fallbackModels, ...storedModels },
     liveCoachingDefault: stored.liveCoachingDefault ?? DEFAULT_SETTINGS.liveCoachingDefault,
     tunnelEnabled: stored.tunnelEnabled ?? DEFAULT_SETTINGS.tunnelEnabled,
     thinkDeeper: stored.thinkDeeper ?? DEFAULT_SETTINGS.thinkDeeper,

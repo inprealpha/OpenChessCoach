@@ -55,13 +55,14 @@ describe('Coach quality', () => {
     expect(getSettings(db).models).toEqual({ ...mine, why: 'opus' });
   });
 
-  it('starts even when the saved models are not JSON', () => {
+  it('starts even when the saved models are not JSON and falls back to default settings', () => {
     const dir = mkdtempSync(join(tmpdir(), 'chess-coach-opus-'));
     onTestFinished(() => rmSync(dir, { recursive: true, force: true }));
     before(dir, OPUS_MIGRATION, (old) => old.prepare("INSERT INTO settings (key, value) VALUES ('models', '{not json')").run());
     const db = openDb(dir);
     onTestFinished(() => db.close());
     expect((db.prepare("SELECT value FROM settings WHERE key = 'models'").get() as { value: string }).value).toBe('{not json');
+    expect(getSettings(db)).toMatchObject({ quality: 'best', models: BEST });
   });
 
   it('writes the per-job models of each preset and reads the preset back from them', async () => {

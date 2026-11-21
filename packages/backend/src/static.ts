@@ -20,8 +20,15 @@ const TYPES: Record<string, string> = {
 /** Serves the built web app, falling back to index.html for client-side routes. */
 export function serveStatic(root: string, req: IncomingMessage, res: ServerResponse): void {
   const url = new URL(req.url ?? '/', 'http://x');
+  let decodedPath: string;
+  try {
+    decodedPath = decodeURIComponent(url.pathname);
+  } catch {
+    res.writeHead(400, { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store' }).end('Bad request');
+    return;
+  }
   const rootAbs = resolve(root);
-  let file = normalize(join(rootAbs, decodeURIComponent(url.pathname)));
+  let file = normalize(join(rootAbs, decodedPath));
   if (!file.startsWith(rootAbs + sep) && file !== rootAbs) {
     res.writeHead(403).end();
     return;
@@ -44,5 +51,14 @@ export function serveStatic(root: string, req: IncomingMessage, res: ServerRespo
     'content-type': type,
     'cache-control': immutable ? 'public, max-age=31536000, immutable' : 'no-cache',
   });
-  createReadStream(file).pipe(res);
+  if (req.method === 'HEAD') {
+    res.end();
+    return;
+  }
+  const stream = createReadStream(file);
+  stream.on('error', () => {
+    if (!res.headersSent) res.writeHead(500, { 'content-type': 'text/plain; charset=utf-8' });
+    res.destroy();
+  });
+  stream.pipe(res);
 }

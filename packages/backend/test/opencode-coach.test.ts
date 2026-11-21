@@ -7,8 +7,11 @@ import {
   OPENCODE_ISOLATED_CONFIG,
   OpenCodeCoach,
   parseOpenCodeModel,
+  parseOpenCodeServerBanner,
   type OpenCodeClientLike,
   type OpenCodeInstanceLike,
+  type OpenCodeV2ClientLike,
+  type OpenCodeV2Event,
 } from '../src/coach/opencode.ts';
 import { CoachLimitError, CoachUnavailableError } from '../src/coach/port.ts';
 import { checkOpenCode, isOpenCodeAuthError, isOpenCodeLimitError } from '../src/opencode-check.ts';
@@ -95,7 +98,25 @@ describe('checkOpenCode', () => {
 
     expect(isOpenCodeLimitError('HTTP 429 rate limit exceeded')).toBe(true);
     expect(isOpenCodeLimitError('Quota exhausted for free tier')).toBe(true);
+    expect(isOpenCodeLimitError('provider.free-limit: Free usage limit reached')).toBe(true);
     expect(isOpenCodeLimitError('Invalid JSON')).toBe(false);
+  });
+});
+
+describe('parseOpenCodeServerBanner', () => {
+  it('detects both v1 and v2 opencode serve stdout banners', () => {
+    expect(parseOpenCodeServerBanner('opencode server listening on http://127.0.0.1:41234\n')).toEqual({
+      apiVersion: 'v1',
+      url: 'http://127.0.0.1:41234',
+    });
+    expect(parseOpenCodeServerBanner('server listening on http://127.0.0.1:41234\n')).toBeUndefined();
+    expect(
+      parseOpenCodeServerBanner('server listening on http://127.0.0.1:41234\nserver password secret-pw\n'),
+    ).toEqual({
+      apiVersion: 'v2',
+      url: 'http://127.0.0.1:41234',
+      password: 'secret-pw',
+    });
   });
 });
 
@@ -354,5 +375,171 @@ describe('OpenCodeCoach', () => {
     await expect(limitCoach.ask({ job: 'why', model: 'default', brief: BRIEF }, () => {})).rejects.toBeInstanceOf(
       CoachLimitError,
     );
+  });
+
+  it('supports OpenCode v2 HTTP+SSE streaming without leaking the JSON fence, parses structured output, and cleans up', async () => {
+    let createdDir: string | undefined;
+    let deletedSession: string | undefined;
+
+    async function* makeV2Events(): AsyncGenerator<OpenCodeV2Event, void, unknown> {
+      yield {
+        type: 'session.step.started',
+        data: { sessionID: 'ses-v2', model: { providerID: 'opencode', id: 'deepseek-v4.1-flash-free' } },
+      };
+      yield {
+        type: 'session.text.delta',
+        data: { sessionID: 'ses-v2', delta: 'Bb5 pressures ' },
+      };
+      yield {
+        type: 'session.text.delta',
+        data: {
+          sessionID: 'ses-v2',
+          delta:
+            'c6.\n\n```json\n{"text":"Bb5 pressures c6.","moves":["f1b5"],"arrows":[{"uci":"f1b5","brush":"green"}],"highlights":["c6"],"note":null}\n```',
+        },
+      };
+      yield {
+        type: 'session.text.ended',
+        data: {
+          sessionID: 'ses-v2',
+          text: 'Bb5 pressures c6.\n\n```json\n{"text":"Bb5 pressures c6.","moves":["f1b5"],"arrows":[{"uci":"f1b5","brush":"green"}],"highlights":["c6"],"note":null}\n```',
+        },
+      };
+      yield {
+        type: 'session.usage.updated',
+        data: {
+          sessionID: 'ses-v2',
+          cost: 0,
+          tokens: { input: 500, output: 80, cache: { read: 100, write: 0 } },
+        },
+      };
+      yield { type: 'session.execution.succeeded', data: { sessionID: 'ses-v2' } };
+    }
+
+    const v2Client: OpenCodeV2ClientLike = {
+      async createSession(params) {
+        createdDir = params.directory;
+        expect(params.model).toEqual({ providerID: 'opencode', id: 'deepseek-v4.1-flash-free' });
+        return { id: 'ses-v2', model: { providerID: 'opencode', id: 'deepseek-v4.1-flash-free' } };
+      },
+      async subscribeEvents() {
+        return makeV2Events();
+      },
+      async prompt() {},
+      async interrupt() {},
+      async deleteSession(id) {
+        deletedSession = id;
+      },
+    };
+
+    const coach = new OpenCodeCoach({
+      createInstance: async () => ({
+        apiVersion: 'v2',
+        v2Client,
+        server: { url: 'http://127.0.0.1:41234', close: () => {} },
+      }),
+      checkAuth: async () => ({ ok: true, path: '/usr/local/bin/opencode', authSource: 'opencode-cli' }),
+    });
+
+    const deltas: string[] = [];
+    const reply = await coach.ask(
+      { job: 'why', model: 'opencode/deepseek-v4.1-flash-free', brief: BRIEF },
+      (d) => deltas.push(d),
+    );
+
+    expect(deltas.join('')).not.toContain('```');
+    expect(deltas.join('').trim()).toBe('Bb5 pressures c6.');
+    expect(reply.text).toBe('Bb5 pressures c6.');
+    expect(reply.moves).toEqual(['f1b5']);
+    expect(reply.arrows).toEqual([{ uci: 'f1b5', brush: 'green' }]);
+    expect(reply.highlights).toEqual(['c6']);
+    expect(reply.usage).toMatchObject({
+      costUsd: 0,
+      inputTokens: 500,
+      outputTokens: 80,
+      cacheReadTokens: 100,
+      models: ['opencode/deepseek-v4.1-flash-free'],
+    });
+    expect(deletedSession).toBe('ses-v2');
+    expect(createdDir).toBeDefined();
+    expect(existsSync(createdDir!)).toBe(false);
+  });
+
+  it('rejects unexpected tool calls and maps v2 provider.free-limit errors with retryAfterMs', async () => {
+    const interrupted: string[] = [];
+    const rejectedPerms: string[] = [];
+
+    const toolClient: OpenCodeV2ClientLike = {
+      async createSession() {
+        return { id: 'ses-tool' };
+      },
+      async subscribeEvents() {
+        return (async function* () {
+          yield {
+            type: 'session.permission',
+            data: { sessionID: 'ses-tool', requestID: 'req-1', action: 'bash' },
+          };
+        })();
+      },
+      async prompt() {},
+      async interrupt(id) {
+        interrupted.push(id);
+      },
+      async rejectPermission(_sid, reqId) {
+        rejectedPerms.push(reqId);
+      },
+      async deleteSession() {},
+    };
+
+    const toolCoach = new OpenCodeCoach({
+      createInstance: async () => ({
+        apiVersion: 'v2',
+        v2Client: toolClient,
+        server: { url: 'http://127.0.0.1:41234', close: () => {} },
+      }),
+      checkAuth: async () => ({ ok: true, path: '/usr/local/bin/opencode', authSource: 'opencode-cli' }),
+    });
+
+    await expect(toolCoach.ask({ job: 'why', model: 'default', brief: BRIEF }, () => {})).rejects.toThrow(
+      /unexpected tool call \(bash\)/i,
+    );
+    expect(interrupted).toEqual(['ses-tool']);
+    expect(rejectedPerms).toEqual(['req-1']);
+
+    const limitClient: OpenCodeV2ClientLike = {
+      ...toolClient,
+      async createSession() {
+        return { id: 'ses-limit' };
+      },
+      async subscribeEvents() {
+        return (async function* () {
+          yield {
+            type: 'session.execution.failed',
+            data: {
+              sessionID: 'ses-limit',
+              error: {
+                type: 'provider.free-limit',
+                status: 429,
+                message: 'Free usage limit reached.',
+                retryAfterMs: 60_000,
+              },
+            },
+          };
+        })();
+      },
+    };
+
+    const limitCoach = new OpenCodeCoach({
+      createInstance: async () => ({
+        apiVersion: 'v2',
+        v2Client: limitClient,
+        server: { url: 'http://127.0.0.1:41234', close: () => {} },
+      }),
+      checkAuth: async () => ({ ok: true, path: '/usr/local/bin/opencode', authSource: 'opencode-cli' }),
+    });
+
+    const err = await limitCoach.ask({ job: 'why', model: 'default', brief: BRIEF }, () => {}).catch((e: unknown) => e);
+    expect(err).toBeInstanceOf(CoachLimitError);
+    expect((err as CoachLimitError).resetsAt).toBeInstanceOf(Date);
   });
 });

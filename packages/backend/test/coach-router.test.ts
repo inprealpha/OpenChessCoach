@@ -1,8 +1,15 @@
-import { describe, expect, it } from 'vitest';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { describe, expect, it, onTestFinished } from 'vitest';
 import type { Brief } from '@chess-coach/shared/coach/brief';
 import type { CoachRawReply } from '@chess-coach/shared/coach/types';
-import type { CoachBack, CoachCall, CoachPort } from '../src/coach/port.ts';
+import { INITIAL_FEN } from '@chess-coach/shared/chess';
+import { FakeClock } from '../src/clock.ts';
+import { openDb } from '../src/db.ts';
+import { CoachLimitError, type CoachBack, type CoachCall, type CoachPort } from '../src/coach/port.ts';
 import { CoachRouter } from '../src/coach/router.ts';
+import { CoachService } from '../src/coach/service.ts';
 
 const BRIEF: Brief = {
   job: 'why',
@@ -86,5 +93,62 @@ describe('CoachRouter', () => {
     expect(backs).toHaveLength(0);
     codex.fireBack({});
     expect(backs).toHaveLength(1);
+  });
+
+  it('names the active provider in usage-limit messages instead of hardcoding Claude', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'chess-coach-limit-provider-'));
+    onTestFinished(() => rmSync(dir, { recursive: true, force: true }));
+    const db = openDb(dir);
+    onTestFinished(() => db.close());
+    const clock = new FakeClock(new Date('2026-10-12T12:00:00Z'));
+
+    const limitedPort = (name: CoachPort['name'], provider: 'claude' | 'codex' | 'pi' | 'opencode'): CoachPort => ({
+      name,
+      provider,
+      async status() {
+        return { state: 'ready', provider };
+      },
+      async ask() {
+        throw new CoachLimitError('limit reached', new Date('2026-10-12T12:15:00Z'));
+      },
+    });
+
+    const router = new CoachRouter({
+      providers: {
+        claude: limitedPort('real', 'claude'),
+        codex: limitedPort('codex', 'codex'),
+        pi: limitedPort('pi', 'pi'),
+        opencode: limitedPort('opencode', 'opencode'),
+      },
+      initial: 'claude',
+    });
+    const service = new CoachService(db, clock, router);
+
+    const ask = {
+      job: 'why' as const,
+      fen: INITIAL_FEN,
+      recentMoves: [],
+      candidates: [{ uci: 'e2e4', san: 'e4', score: { cp: 30 }, pv: ['e2e4'] }],
+      question: 'Why e4?',
+    };
+
+    for (const [provider, label] of [
+      ['claude', 'Claude'],
+      ['codex', 'Codex'],
+      ['pi', 'Pi'],
+      ['opencode', 'OpenCode'],
+    ] as const) {
+      await service.switchProvider(provider);
+      await expect(service.ask(ask, () => {})).rejects.toMatchObject({
+        code: 'coach-limit',
+        message: expect.stringContaining(`Your ${label} usage limit has been reached.`),
+      });
+      const status = await service.status();
+      expect(status).toMatchObject({
+        state: 'limit-reached',
+        provider,
+        reason: expect.stringContaining(`Your ${label} usage limit has been reached.`),
+      });
+    }
   });
 });

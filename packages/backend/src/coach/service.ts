@@ -13,7 +13,7 @@ import type { EngineService } from '../engine/service.ts';
 import { getSettings } from '../settings.ts';
 import { EngineTool, type EngineCall } from './engine-tool.ts';
 import { CoachDeadlineError, CoachLimitError, CoachUnavailableError, type CoachPort } from './port.ts';
-import { CoachRouter } from './router.ts';
+import { CoachRouter, PROVIDER_LABELS } from './router.ts';
 
 /** How the Coach panel says the Coach is asking the Engine, numbered so the Player sees it move on. */
 export function checkingText(n: number): string {
@@ -71,10 +71,17 @@ export class CoachService {
   }
 
   async status(): Promise<CoachStatus> {
+    const provider = providerOf(this.coach);
     if (this.limitUntil && this.limitUntil > this.clock.now()) {
-      return { state: 'limit-reached', reason: limitMessage(this.limitUntil) };
+      return {
+        state: 'limit-reached',
+        ...(provider ? { provider } : {}),
+        reason: limitMessage(this.limitUntil, provider ? PROVIDER_LABELS[provider] : 'Coach'),
+      };
     }
-    if (this.unavailableReason) return { state: 'unavailable', reason: this.unavailableReason };
+    if (this.unavailableReason) {
+      return { state: 'unavailable', ...(provider ? { provider } : {}), reason: this.unavailableReason };
+    }
     return this.coach.status();
   }
 
@@ -234,7 +241,14 @@ export class CoachService {
   }
 }
 
-function limitMessage(until: Date): string {
+function providerOf(coach: CoachPort): CoachProvider | undefined {
+  if (coach.provider) return coach.provider;
+  if (coach.name === 'real') return 'claude';
+  if (coach.name === 'codex' || coach.name === 'pi' || coach.name === 'opencode') return coach.name;
+  return undefined;
+}
+
+function limitMessage(until: Date, providerLabel: string): string {
   const time = until.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  return `Your Claude usage limit has been reached. The Coach is back after ${time}.`;
+  return `Your ${providerLabel} usage limit has been reached. The Coach is back after ${time}.`;
 }

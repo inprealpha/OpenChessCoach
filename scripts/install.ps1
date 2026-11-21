@@ -29,6 +29,26 @@ function Assert-NotRunning([string]$Dir) {
   }
 }
 
+function Download-File([string]$Uri, [string]$OutFile, [switch]$ShowProgress) {
+  $curl = Get-Command curl.exe -ErrorAction SilentlyContinue
+  if ($curl) {
+    $curlArgs = @('-fL', '--retry', '3')
+    if ($ShowProgress) { $curlArgs += '--progress-bar' } else { $curlArgs += '-sS' }
+    $curlArgs += @($Uri, '-o', $OutFile)
+    $prevEap = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+      & $curl.Source @curlArgs
+      $exitCode = $LASTEXITCODE
+    } finally {
+      $ErrorActionPreference = $prevEap
+    }
+    if ($exitCode -eq 0) { return }
+    throw "Failed to download $Uri (curl exit code $exitCode)."
+  }
+  Invoke-WebRequest -UseBasicParsing -Uri $Uri -OutFile $OutFile
+}
+
 function Expand-ZipFast([string]$ZipPath, [string]$DestDir) {
   New-Item -ItemType Directory -Path $DestDir -Force | Out-Null
   $tar = Get-Command tar.exe -ErrorAction SilentlyContinue
@@ -117,8 +137,9 @@ try {
     $SumsPath = Join-Path $TempDir 'SHA256SUMS.txt'
 
     Write-Host "Downloading OpenChessCoach ($Target)..."
-    Invoke-WebRequest -UseBasicParsing -Uri "$BaseUrl/$ArchiveName" -OutFile $ZipPath
-    Invoke-WebRequest -UseBasicParsing -Uri "$BaseUrl/SHA256SUMS.txt" -OutFile $SumsPath
+    Download-File -Uri "$BaseUrl/$ArchiveName" -OutFile $ZipPath -ShowProgress
+    Write-Host 'Verifying download...'
+    Download-File -Uri "$BaseUrl/SHA256SUMS.txt" -OutFile $SumsPath
 
     $expectedLine = Get-Content $SumsPath | Where-Object { $_ -match ("^([a-fA-F0-9]{64})\s+\*?" + [Regex]::Escape($ArchiveName) + "$") } | Select-Object -First 1
     if (-not $expectedLine) { throw "Could not find checksum for $ArchiveName in SHA256SUMS.txt." }
@@ -178,19 +199,28 @@ try {
   Write-Host 'You can start it from the Start Menu ("OpenChessCoach") or by running:'
   Write-Host '  openchesscoach'
 
-  $claude = Get-Command claude -ErrorAction SilentlyContinue
-  if (-not $claude) {
+  $hasCoachCli = $false
+  foreach ($cmd in @('claude', 'codex', 'pi', 'opencode')) {
+    if (Get-Command $cmd -ErrorAction SilentlyContinue) {
+      $hasCoachCli = $true
+      break
+    }
+  }
+  if (-not $hasCoachCli) {
     $localClaude = @(
       (Join-Path $env:USERPROFILE '.local\bin\claude.exe'),
       (Join-Path $env:USERPROFILE '.claude\local\claude.exe'),
       (Join-Path $env:LOCALAPPDATA 'Microsoft\WinGet\Links\claude.exe')
     ) | Where-Object { Test-Path $_ } | Select-Object -First 1
-    if (-not $localClaude) {
-      Write-Host ''
-      Write-Host 'Next step - install Claude Code and sign in with your Claude Pro/Max account:'
-      Write-Host '  irm https://claude.ai/install.ps1 | iex'
-      Write-Host 'Then open a new PowerShell window, run "claude" to sign in, and run "openchesscoach".'
-    }
+    if ($localClaude) { $hasCoachCli = $true }
+  }
+  if (-not $hasCoachCli) {
+    Write-Host ''
+    Write-Host 'Next step - set up a Coach backend (Claude Code, Codex, Pi, or OpenCode).'
+    Write-Host 'For Claude Code (Claude Pro/Max):'
+    Write-Host '  irm https://claude.ai/install.ps1 | iex'
+    Write-Host 'Then open a new PowerShell window, run "claude" to sign in, and run "openchesscoach".'
+    Write-Host 'Prefer Codex, Pi, or OpenCode instead? Sign in with your chosen CLI and run "openchesscoach".'
   }
 } finally {
   if (Test-Path $TempDir) { Remove-Item -Recurse -Force $TempDir }

@@ -40,6 +40,10 @@ describe('build-standalone helpers', () => {
     expect(ps1).toContain('SHA256SUMS.txt');
     expect(ps1).toContain('Get-FileHash');
     expect(ps1).toContain('[switch]$Uninstall');
+    expect(ps1).toContain('Assert-NotRunning');
+    expect(ps1).toContain('Expand-ZipFast');
+    expect(ps1).toContain("ProgressPreference = 'SilentlyContinue'");
+    expect([...ps1].every((ch) => (ch.codePointAt(0) ?? 0) <= 0x7f)).toBe(true);
 
     const sh = readFileSync(resolve(REPO, 'scripts', 'install.sh'), 'utf8');
     expect(sh).toContain('SHA256SUMS.txt');

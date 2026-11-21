@@ -13,9 +13,40 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+$ProgressPreference = 'SilentlyContinue'
 
 $Repo = 'inprealpha/OpenChessCoach'
 $ShortcutPath = Join-Path ([Environment]::GetFolderPath('Programs')) 'OpenChessCoach.lnk'
+
+function Assert-NotRunning([string]$Dir) {
+  if (-not (Test-Path $Dir)) { return }
+  $resolved = (Resolve-Path $Dir).Path.TrimEnd('\') + '\'
+  $running = @(Get-Process -ErrorAction SilentlyContinue | Where-Object {
+    $_.Path -and $_.Path.StartsWith($resolved, [System.StringComparison]::OrdinalIgnoreCase)
+  })
+  if ($running.Count -gt 0) {
+    throw "OpenChessCoach is currently running from $Dir. Close it (press Ctrl+C in its terminal window) and re-run this command."
+  }
+}
+
+function Expand-ZipFast([string]$ZipPath, [string]$DestDir) {
+  New-Item -ItemType Directory -Path $DestDir -Force | Out-Null
+  $tar = Get-Command tar.exe -ErrorAction SilentlyContinue
+  if ($tar) {
+    & $tar.Source -xf $ZipPath -C $DestDir
+    if ($LASTEXITCODE -eq 0) { return }
+    Remove-Item -Recurse -Force $DestDir
+    New-Item -ItemType Directory -Path $DestDir -Force | Out-Null
+  }
+  try {
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    [System.IO.Compression.ZipFile]::ExtractToDirectory($ZipPath, $DestDir)
+    return
+  } catch {
+    Remove-Item -Recurse -Force $DestDir
+    Expand-Archive -Path $ZipPath -DestinationPath $DestDir -Force
+  }
+}
 
 function Remove-FromUserPath([string]$Dir) {
   $current = [Environment]::GetEnvironmentVariable('Path', 'User')
@@ -42,6 +73,7 @@ function Add-ToUserPath([string]$Dir) {
 }
 
 if ($Uninstall) {
+  Assert-NotRunning $InstallDir
   if (Test-Path $InstallDir) { Remove-Item -Recurse -Force $InstallDir }
   if (-not $NoShortcut -and (Test-Path $ShortcutPath)) { Remove-Item -Force $ShortcutPath }
   if (-not $NoPath) { Remove-FromUserPath $InstallDir }
@@ -50,6 +82,8 @@ if ($Uninstall) {
   Write-Host "Your games and Player Profile were kept in: $dataDir"
   return
 }
+
+Assert-NotRunning $InstallDir
 
 # Stock Windows 10 PowerShell 5.1 can default to TLS 1.0 unless TLS 1.2+ is enabled.
 try {
@@ -96,7 +130,8 @@ try {
   }
 
   $ExtractDir = Join-Path $TempDir 'extract'
-  Expand-Archive -Path $ZipPath -DestinationPath $ExtractDir -Force
+  Write-Host 'Extracting OpenChessCoach...'
+  Expand-ZipFast $ZipPath $ExtractDir
   $ExtractedRoot = Join-Path $ExtractDir 'openchesscoach'
   if (-not (Test-Path (Join-Path $ExtractedRoot 'openchesscoach.cmd'))) {
     throw 'Archive did not contain openchesscoach/openchesscoach.cmd.'
@@ -152,7 +187,7 @@ try {
     ) | Where-Object { Test-Path $_ } | Select-Object -First 1
     if (-not $localClaude) {
       Write-Host ''
-      Write-Host 'Next step — install Claude Code and sign in with your Claude Pro/Max account:'
+      Write-Host 'Next step - install Claude Code and sign in with your Claude Pro/Max account:'
       Write-Host '  irm https://claude.ai/install.ps1 | iex'
       Write-Host 'Then open a new PowerShell window, run "claude" to sign in, and run "openchesscoach".'
     }

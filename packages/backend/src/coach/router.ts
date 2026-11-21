@@ -7,6 +7,7 @@ export const PROVIDER_LABELS: Record<CoachProvider, string> = {
   claude: 'Claude',
   codex: 'Codex',
   pi: 'Pi',
+  opencode: 'OpenCode',
 };
 
 export interface CoachRouterOptions {
@@ -39,7 +40,7 @@ export class CoachRouter implements CoachPort {
     return this.providers[this.active];
   }
 
-  get name(): 'real' | 'codex' | 'pi' | 'fake' {
+  get name(): 'real' | 'codex' | 'pi' | 'opencode' | 'fake' {
     return this.current?.name ?? (this.active === 'claude' ? 'real' : this.active);
   }
 
@@ -86,7 +87,7 @@ export class CoachRouter implements CoachPort {
     return Promise.all(
       COACH_PROVIDERS.map(async (provider): Promise<CoachProviderInfo> => {
         const port = this.providers[provider];
-        const supportsEngineTool = port ? port.supportsEngineTool !== false : provider !== 'codex';
+        const supportsEngineTool = port ? port.supportsEngineTool !== false : provider !== 'codex' && provider !== 'opencode';
         if (!port) {
           return {
             provider,

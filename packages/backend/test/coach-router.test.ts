@@ -18,7 +18,7 @@ const BRIEF: Brief = {
 
 function stubPort(
   name: CoachPort['name'],
-  provider: 'claude' | 'codex' | 'pi',
+  provider: 'claude' | 'codex' | 'pi' | 'opencode',
   supportsEngineTool: boolean,
   replyText: string,
 ): CoachPort & { fireBack: (b: CoachBack) => void } {
@@ -51,7 +51,7 @@ describe('CoachRouter', () => {
     const router = new CoachRouter({
       providers: { claude, codex },
       initial: 'claude',
-      unavailableReasons: { pi: 'Pi is not logged in.' },
+      unavailableReasons: { pi: 'Pi is not logged in.', opencode: 'OpenCode CLI not found.' },
     });
 
     expect(router.provider).toBe('claude');
@@ -76,6 +76,7 @@ describe('CoachRouter', () => {
       { provider: 'claude', label: 'Claude', available: true, supportsEngineTool: true },
       { provider: 'codex', label: 'Codex', available: true, supportsEngineTool: false },
       { provider: 'pi', label: 'Pi', available: false, reason: 'Pi is not logged in.', supportsEngineTool: true },
+      { provider: 'opencode', label: 'OpenCode', available: false, reason: 'OpenCode CLI not found.', supportsEngineTool: false },
     ]);
 
     // Recovery watch forwards only from the currently active provider

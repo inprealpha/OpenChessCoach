@@ -27,7 +27,7 @@ export interface CoachEngine {
 }
 
 export interface CoachPort {
-  readonly name: 'real' | 'codex' | 'pi' | 'fake';
+  readonly name: 'real' | 'codex' | 'pi' | 'opencode' | 'fake';
   /** Which Coach backend this port talks to, when it is a real provider. */
   readonly provider?: CoachProvider;
   /** Whether this backend supports Think deeper (`ask_engine` tool). Defaults to true when omitted. */

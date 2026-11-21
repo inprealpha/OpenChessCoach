@@ -67,7 +67,7 @@ export async function startVerifyInstance(options: VerifyOptions = {}): Promise<
   const dataDir = options.dataDir ?? mkdtempSync(join(tmpdir(), 'chess-coach-verify-'));
   const clock = new FakeClock();
   const coach = new FakeCoach({ chunkDelayMs: options.chunkDelayMs ?? 5, recordings: coachRecordings() });
-  const fakeFor = (provider: 'claude' | 'codex' | 'pi', supportsEngineTool: boolean): CoachPort => ({
+  const fakeFor = (provider: 'claude' | 'codex' | 'pi' | 'opencode', supportsEngineTool: boolean): CoachPort => ({
     name: 'fake',
     provider,
     supportsEngineTool,
@@ -79,6 +79,7 @@ export async function startVerifyInstance(options: VerifyOptions = {}): Promise<
       claude: fakeFor('claude', true),
       codex: fakeFor('codex', false),
       pi: fakeFor('pi', true),
+      opencode: fakeFor('opencode', false),
     },
     initial: 'claude',
   });

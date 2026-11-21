@@ -158,7 +158,7 @@ export type CoachQuality = 'thrifty' | 'balanced' | 'best';
 export const COACH_QUALITIES: readonly CoachQuality[] = ['thrifty', 'balanced', 'best'];
 
 /** Supported Coach backends that can run on the desktop. */
-export const COACH_PROVIDERS = ['claude', 'codex', 'pi'] as const;
+export const COACH_PROVIDERS = ['claude', 'codex', 'pi', 'opencode'] as const;
 export type CoachProvider = (typeof COACH_PROVIDERS)[number];
 
 /** Availability of one Coach backend on this desktop. */

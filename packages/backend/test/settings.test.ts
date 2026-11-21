@@ -208,6 +208,16 @@ describe('Coach backend', () => {
       models: { why: 'openai/gpt-5.4' },
     });
 
+    // Switching to OpenCode resets to OpenCode defaults and accepts provider/model IDs.
+    expect(await c.request('settings.update', { coachProvider: 'opencode' })).toMatchObject({
+      coachProvider: 'opencode',
+      models: { 'review-moment': 'default', why: 'default', 'lesson-turn': 'default', hint: 'default', live: 'default' },
+    });
+    expect(await c.request('settings.update', { models: { why: 'opencode/big-pickle' } })).toMatchObject({
+      coachProvider: 'opencode',
+      models: { why: 'opencode/big-pickle' },
+    });
+
     // Switching backend with a partial model override resets unspecified jobs to the new provider's defaults.
     expect(await c.request('settings.update', { coachProvider: 'codex', models: { why: 'gpt-5.4-mini' } })).toMatchObject({
       coachProvider: 'codex',

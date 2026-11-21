@@ -1,8 +1,9 @@
-// One-command live smoke check for local Coach backends (Claude, Codex, Pi).
-// Run on your own machine where your Claude, Codex (ChatGPT subscription), or Pi credentials are logged in:
+// One-command live smoke check for local Coach backends (Claude, Codex, Pi, OpenCode).
+// Run on your own machine where your Claude, Codex (ChatGPT subscription), Pi, or OpenCode setup is ready:
 //   npm run smoke:coach
 //   npm run smoke:coach -- --provider codex
 //   npm run smoke:coach -- --provider pi
+//   npm run smoke:coach -- --provider opencode
 //   npm run smoke:coach -- --provider claude
 import { parseArgs } from 'node:util';
 import { COACH_PROVIDERS, type CoachProvider } from '../packages/shared/src/protocol.ts';
@@ -10,9 +11,11 @@ import type { Brief } from '../packages/shared/src/coach/brief.ts';
 import type { EngineQuestion } from '../packages/shared/src/coach/engine-tool.ts';
 import { checkClaude } from '../packages/backend/src/claude-check.ts';
 import { checkCodex } from '../packages/backend/src/codex-check.ts';
+import { checkOpenCode } from '../packages/backend/src/opencode-check.ts';
 import { checkPi } from '../packages/backend/src/pi-check.ts';
 import { RealCoach } from '../packages/backend/src/coach/real.ts';
 import { CodexCoach } from '../packages/backend/src/coach/codex.ts';
+import { OpenCodeCoach } from '../packages/backend/src/coach/opencode.ts';
 import { PiCoach } from '../packages/backend/src/coach/pi.ts';
 import type { CoachEngine, CoachPort } from '../packages/backend/src/coach/port.ts';
 
@@ -55,6 +58,7 @@ function mockEngineTool(onAsk: (q: EngineQuestion) => void): CoachEngine {
 async function runProviderSmoke(provider: CoachProvider, model?: string): Promise<boolean> {
   process.stdout.write(`\n=== ${provider.toUpperCase()} ===\n`);
   let coach: CoachPort;
+  let openCodeCoach: OpenCodeCoach | undefined;
   if (provider === 'claude') {
     const check = await checkClaude();
     if (!check.ok) {
@@ -69,55 +73,67 @@ async function runProviderSmoke(provider: CoachProvider, model?: string): Promis
       return false;
     }
     coach = new CodexCoach(check.path ? { codexPath: check.path } : {});
-  } else {
+  } else if (provider === 'pi') {
     const check = await checkPi();
     if (!check.ok) {
       process.stdout.write(`  [SKIP] ${check.message}\n`);
       return false;
     }
     coach = new PiCoach();
+  } else {
+    const check = await checkOpenCode();
+    if (!check.ok) {
+      process.stdout.write(`  [SKIP] ${check.message}\n`);
+      return false;
+    }
+    openCodeCoach = new OpenCodeCoach({ opencodePath: check.path });
+    coach = openCodeCoach;
   }
 
-  const status = await coach.status();
-  process.stdout.write(`  status(): ${JSON.stringify(status)}\n`);
-  if (status.state !== 'ready') {
-    process.stdout.write(`  [FAIL] Provider not ready: ${status.reason ?? 'unknown'}\n`);
-    return false;
+  try {
+    const status = await coach.status();
+    process.stdout.write(`  status(): ${JSON.stringify(status)}\n`);
+    if (status.state !== 'ready') {
+      process.stdout.write(`  [FAIL] Provider not ready: ${status.reason ?? 'unknown'}\n`);
+      return false;
+    }
+
+    let deltas = 0;
+    let streamed = '';
+    const engineCalls: EngineQuestion[] = [];
+    const engine = coach.supportsEngineTool !== false ? mockEngineTool((q) => engineCalls.push(q)) : undefined;
+
+    const started = Date.now();
+    const reply = await coach.ask(
+      {
+        job: 'why',
+        model: model ?? (provider === 'claude' ? 'haiku' : 'default'),
+        brief: SMOKE_BRIEF,
+        ...(engine ? { engine } : {}),
+      },
+      (delta) => {
+        deltas += 1;
+        streamed += delta;
+      },
+    );
+    const elapsed = Date.now() - started;
+
+    process.stdout.write(`  elapsed: ${elapsed}ms\n`);
+    process.stdout.write(`  streamed chunks: ${deltas} (${streamed.length} chars)\n`);
+    process.stdout.write(`  reply.text (${reply.text.length} chars): ${reply.text.slice(0, 160).replace(/\n/g, ' ')}\n`);
+    process.stdout.write(`  structured: moves=${JSON.stringify(reply.moves)} arrows=${JSON.stringify(reply.arrows)} highlights=${JSON.stringify(reply.highlights)}\n`);
+    if (engine) process.stdout.write(`  ask_engine calls: ${engineCalls.length}\n`);
+    if (reply.usage) process.stdout.write(`  usage: ${JSON.stringify(reply.usage)}\n`);
+
+    if (!reply.text.trim()) {
+      process.stdout.write(`  [FAIL] Empty reply.text\n`);
+      return false;
+    }
+    process.stdout.write(`  [PASS] ${provider} live smoke check succeeded.\n`);
+    return true;
+  } finally {
+    openCodeCoach?.close();
   }
-
-  let deltas = 0;
-  let streamed = '';
-  const engineCalls: EngineQuestion[] = [];
-  const engine = coach.supportsEngineTool !== false ? mockEngineTool((q) => engineCalls.push(q)) : undefined;
-
-  const started = Date.now();
-  const reply = await coach.ask(
-    {
-      job: 'why',
-      model: model ?? (provider === 'claude' ? 'haiku' : 'default'),
-      brief: SMOKE_BRIEF,
-      ...(engine ? { engine } : {}),
-    },
-    (delta) => {
-      deltas += 1;
-      streamed += delta;
-    },
-  );
-  const elapsed = Date.now() - started;
-
-  process.stdout.write(`  elapsed: ${elapsed}ms\n`);
-  process.stdout.write(`  streamed chunks: ${deltas} (${streamed.length} chars)\n`);
-  process.stdout.write(`  reply.text (${reply.text.length} chars): ${reply.text.slice(0, 160).replace(/\n/g, ' ')}\n`);
-  process.stdout.write(`  structured: moves=${JSON.stringify(reply.moves)} arrows=${JSON.stringify(reply.arrows)} highlights=${JSON.stringify(reply.highlights)}\n`);
-  if (engine) process.stdout.write(`  ask_engine calls: ${engineCalls.length}\n`);
-  if (reply.usage) process.stdout.write(`  usage: ${JSON.stringify(reply.usage)}\n`);
-
-  if (!reply.text.trim()) {
-    process.stdout.write(`  [FAIL] Empty reply.text\n`);
-    return false;
-  }
-  process.stdout.write(`  [PASS] ${provider} live smoke check succeeded.\n`);
-  return true;
 }
 
 async function main(): Promise<void> {

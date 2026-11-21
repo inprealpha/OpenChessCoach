@@ -81,6 +81,20 @@
         cost: 'Uses your configured Pi default model for every job.',
       },
     },
+    opencode: {
+      thrifty: {
+        name: 'Thrifty',
+        cost: 'Uses your configured OpenCode default or free Zen model.',
+      },
+      balanced: {
+        name: 'Balanced',
+        cost: 'Uses your configured OpenCode default or free Zen model.',
+      },
+      best: {
+        name: 'Best (recommended)',
+        cost: 'Uses your configured OpenCode default or free Zen model for every job.',
+      },
+    },
   };
 
   /**
@@ -107,6 +121,9 @@
     pi: {
       default: 'Pi default',
     },
+    opencode: {
+      default: 'OpenCode default',
+    },
   };
 
   const activeProvider = $derived(
@@ -115,7 +132,14 @@
       : null,
   );
   const activeProviderLabel = $derived(
-    activeProvider?.label ?? (settings?.coachProvider === 'codex' ? 'Codex' : settings?.coachProvider === 'pi' ? 'Pi' : 'Claude'),
+    activeProvider?.label ??
+      (settings?.coachProvider === 'codex'
+        ? 'Codex'
+        : settings?.coachProvider === 'pi'
+          ? 'Pi'
+          : settings?.coachProvider === 'opencode'
+            ? 'OpenCode'
+            : 'Claude'),
   );
   const currentQualityText = $derived(QUALITY_TEXT[settings?.coachProvider ?? 'claude']);
   const currentModelNames = $derived(MODEL_NAMES[settings?.coachProvider ?? 'claude']);

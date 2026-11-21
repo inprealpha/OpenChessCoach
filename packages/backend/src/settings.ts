@@ -27,7 +27,7 @@ export const COACH_QUALITY_MODELS: Record<CoachQuality, Record<ModelJob, string>
   best: { 'review-moment': 'opus', why: 'opus', 'lesson-turn': 'opus', hint: 'haiku', live: 'haiku' },
 };
 
-/** Per-provider quality presets. `'default'` tells Codex or Pi to use its own configured default model. */
+/** Per-provider quality presets. `'default'` tells Codex, Pi or OpenCode to use its own configured default model. */
 export const PROVIDER_QUALITY_MODELS: Record<CoachProvider, Record<CoachQuality, Record<ModelJob, string>>> = {
   claude: COACH_QUALITY_MODELS,
   codex: {
@@ -36,6 +36,11 @@ export const PROVIDER_QUALITY_MODELS: Record<CoachProvider, Record<CoachQuality,
     best: { 'review-moment': 'default', why: 'default', 'lesson-turn': 'default', hint: 'default', live: 'default' },
   },
   pi: {
+    thrifty: { 'review-moment': 'default', why: 'default', 'lesson-turn': 'default', hint: 'default', live: 'default' },
+    balanced: { 'review-moment': 'default', why: 'default', 'lesson-turn': 'default', hint: 'default', live: 'default' },
+    best: { 'review-moment': 'default', why: 'default', 'lesson-turn': 'default', hint: 'default', live: 'default' },
+  },
+  opencode: {
     thrifty: { 'review-moment': 'default', why: 'default', 'lesson-turn': 'default', hint: 'default', live: 'default' },
     balanced: { 'review-moment': 'default', why: 'default', 'lesson-turn': 'default', hint: 'default', live: 'default' },
     best: { 'review-moment': 'default', why: 'default', 'lesson-turn': 'default', hint: 'default', live: 'default' },
@@ -101,7 +106,7 @@ export function getSettings(db: Db): Settings {
 
 export function updateSettings(db: Db, patch: SettingsPatch): Settings {
   if (patch.coachProvider !== undefined && (typeof patch.coachProvider !== 'string' || !(COACH_PROVIDERS as readonly string[]).includes(patch.coachProvider))) {
-    throw new AppError('bad-request', 'The Coach backend is Claude, Codex or Pi.');
+    throw new AppError('bad-request', 'The Coach backend is Claude, Codex, Pi or OpenCode.');
   }
   if (patch.thinkDeeper !== undefined && typeof patch.thinkDeeper !== 'boolean') {
     throw new AppError('bad-request', 'Think deeper is on (true) or off (false).');

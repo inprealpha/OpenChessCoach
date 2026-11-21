@@ -1,4 +1,4 @@
-// The one command the owner runs (ADR 0001): checks Coach backends (Claude, Codex, Pi), serves the
+// The one command the owner runs (ADR 0001): checks Coach backends (Claude, Codex, Pi, OpenCode), serves the
 // app on the LAN, prints a QR code that pairs a phone, and opens the desktop browser already paired.
 import { spawn } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
@@ -7,6 +7,7 @@ import type { CoachProvider } from '@chess-coach/shared/protocol';
 import { checkClaude } from './claude-check.ts';
 import { systemClock } from './clock.ts';
 import { CodexCoach } from './coach/codex.ts';
+import { OpenCodeCoach } from './coach/opencode.ts';
 import { PiCoach } from './coach/pi.ts';
 import type { CoachPort } from './coach/port.ts';
 import { RealCoach } from './coach/real.ts';
@@ -15,6 +16,7 @@ import { checkCodex } from './codex-check.ts';
 import { desktopThreads } from './engine/node-engine.ts';
 import { firewallAdvice, isLoopbackHost, systemPromptWarning } from './firewall.ts';
 import { pairUrl, qrTerminal } from './network.ts';
+import { checkOpenCode } from './opencode-check.ts';
 import { defaultDataDir } from './paths.ts';
 import { checkPi } from './pi-check.ts';
 import { appVersion, startOptions, webRoot } from './runtime.ts';
@@ -33,7 +35,7 @@ Options:
   --port <n>          Port to serve on (default 8737)
   --host <address>    Interface to bind (default 0.0.0.0, every interface on this desktop)
   --data-dir <path>   Where your games and Player Profile live (default: ${defaultDataDir()})
-  --coach <backend>   Coach backend to use: claude, codex, or pi (auto-detected when omitted)
+  --coach <backend>   Coach backend to use: claude, codex, pi, or opencode (auto-detected when omitted)
   --no-open           Don't open the desktop browser
   --version, -v       Show the version
   --help, -h          Show this help
@@ -62,11 +64,12 @@ async function main(): Promise<void> {
   const { port, host } = options;
   const dataDir = options.dataDir ?? defaultDataDir();
 
-  const [claude, codex, pi] = await Promise.all([checkClaude(), checkCodex(), checkPi()]);
+  const [claude, codex, pi, opencode] = await Promise.all([checkClaude(), checkCodex(), checkPi(), checkOpenCode()]);
 
   const providers: Partial<Record<CoachProvider, CoachPort>> = {};
   const unavailableReasons: Partial<Record<CoachProvider, string>> = {};
   let claudeCoach: RealCoach | undefined;
+  let openCodeCoach: OpenCodeCoach | undefined;
 
   if (claude.ok) {
     claudeCoach = new RealCoach(claude.path ? { claudePath: claude.path } : {});
@@ -84,6 +87,12 @@ async function main(): Promise<void> {
   } else {
     unavailableReasons.pi = pi.message;
   }
+  if (opencode.ok) {
+    openCodeCoach = new OpenCodeCoach({ opencodePath: opencode.path });
+    providers.opencode = openCodeCoach;
+  } else {
+    unavailableReasons.opencode = opencode.message;
+  }
 
   let initial: CoachProvider | undefined = options.coach;
   if (initial) {
@@ -92,13 +101,14 @@ async function main(): Promise<void> {
       process.exit(2);
     }
   } else {
-    initial = (['claude', 'codex', 'pi'] as const).find((p) => Boolean(providers[p]));
+    initial = (['claude', 'codex', 'pi', 'opencode'] as const).find((p) => Boolean(providers[p]));
     if (!initial) {
       process.stderr.write(
         `\n✗ No Coach backend is logged in on this desktop.\n\n` +
-          `  Claude: ${unavailableReasons.claude}\n` +
-          `  Codex:  ${unavailableReasons.codex}\n` +
-          `  Pi:     ${unavailableReasons.pi}\n\n`,
+          `  Claude:   ${unavailableReasons.claude}\n` +
+          `  Codex:    ${unavailableReasons.codex}\n` +
+          `  Pi:       ${unavailableReasons.pi}\n` +
+          `  OpenCode: ${unavailableReasons.opencode}\n\n`,
       );
       process.exit(2);
     }
@@ -219,6 +229,7 @@ async function main(): Promise<void> {
 
   const stop = async () => {
     process.stdout.write('\nStopping…\n');
+    openCodeCoach?.close();
     await app.close();
     process.exit(0);
   };

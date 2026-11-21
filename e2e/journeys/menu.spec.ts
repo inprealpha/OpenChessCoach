@@ -327,7 +327,7 @@ test('Back returns to the place the Player left a screen at, even when they left
   await expect.poll(() => paired.evaluate(() => scrollY)).toBe(y);
 });
 
-test('Settings lets the Player switch between Claude, Codex and Pi Coach backends and updates presets and Think deeper notice', async ({ paired, app }) => {
+test('Settings lets the Player switch between Claude, Codex, Pi and OpenCode Coach backends and updates presets and Think deeper notice', async ({ paired, app }) => {
   await paired.goto(`${app.url}/#/settings`);
   const backendCard = paired.getByRole('group', { name: 'Coach backend' });
   await expect(backendCard).toBeVisible();
@@ -339,6 +339,11 @@ test('Settings lets the Player switch between Claude, Codex and Pi Coach backend
   const qualityCard = paired.getByRole('group', { name: 'Coach quality' });
   await expect(qualityCard).toContainText('gpt-5.4');
   await expect(paired.getByTestId('think-deeper-unsupported')).toContainText('Codex does not support Think deeper Engine questions yet');
+
+  // Switch to OpenCode: presets update to OpenCode default/free Zen copy and Think deeper shows unsupported notice.
+  await backendCard.getByRole('radio', { name: /^OpenCode/ }).check();
+  await expect(qualityCard).toContainText('OpenCode default');
+  await expect(paired.getByTestId('think-deeper-unsupported')).toContainText('OpenCode does not support Think deeper Engine questions yet');
 
   // Switch to Pi: Pi supports Think deeper, so the unsupported notice disappears and Pi presets show.
   await backendCard.getByRole('radio', { name: /^Pi/ }).check();

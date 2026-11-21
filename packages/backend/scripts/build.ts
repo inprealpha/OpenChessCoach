@@ -24,6 +24,7 @@ const external = [
   '@anthropic-ai/claude-agent-sdk',
   '@openai/codex-sdk',
   '@earendil-works/pi-coding-agent',
+  /^@opencode-ai\/sdk/,
   'ws',
   'qrcode',
   'stockfish',

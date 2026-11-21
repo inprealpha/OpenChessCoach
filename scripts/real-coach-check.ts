@@ -359,14 +359,22 @@ export function parseRealCoachArgs(argv: readonly string[]): RealCoachArgs {
       fake = true;
     } else if (arg === '--post') {
       postResult = true;
-    } else if (arg === '--provider' && argv[i + 1]) {
-      const value = argv[++i] as CoachProvider;
+    } else if (arg === '--provider') {
+      const next = argv[++i];
+      if (!next || next.startsWith('--')) {
+        throw new Error(`Missing value for --provider. Expected one of: ${COACH_PROVIDERS.join(', ')}.`);
+      }
+      const value = next as CoachProvider;
       if (!COACH_PROVIDERS.includes(value)) {
         throw new Error(`Unknown provider "${value}". Expected one of: ${COACH_PROVIDERS.join(', ')}.`);
       }
       provider = value;
-    } else if (arg === '--model' && argv[i + 1]) {
-      model = argv[++i];
+    } else if (arg === '--model') {
+      const next = argv[++i];
+      if (!next || next.startsWith('--')) {
+        throw new Error('Missing value for --model.');
+      }
+      model = next;
     }
   }
   return {

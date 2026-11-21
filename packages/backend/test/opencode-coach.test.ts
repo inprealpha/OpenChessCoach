@@ -78,7 +78,7 @@ describe('checkOpenCode', () => {
       findCli: async () => '/usr/local/bin/opencode',
       env: {},
       homeDir: '/home/tester',
-      fileExists: (p) => p.endsWith('/opencode/auth.json'),
+      fileExists: (p) => p.replaceAll('\\', '/').endsWith('/opencode/auth.json'),
     });
     expect(authFileRes).toEqual({ ok: true, path: '/usr/local/bin/opencode', authSource: 'opencode-auth' });
 

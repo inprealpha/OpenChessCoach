@@ -38,63 +38,25 @@
   };
 
   // The desktop owns which models each preset sets; this screen only names them and what they cost.
-  const QUALITY_TEXT: Record<CoachProvider, Record<CoachQuality, { name: string; cost: string }>> = {
-    claude: {
-      thrifty: {
-        name: 'Thrifty',
-        cost: 'Haiku for every job. Uses the least of your Claude limits; explanations are shorter and simpler.',
-      },
-      balanced: {
-        name: 'Balanced',
-        cost: 'Sonnet for Reviews (the overview and the key moments), Why Questions and Lessons; Haiku for Hints and Live Coaching. A moderate share of your Claude limits.',
-      },
-      best: {
-        name: 'Best (recommended)',
-        cost: 'Opus for Reviews (the overview and the key moments), Why Questions and Lessons; Haiku for Hints and Live Coaching, which must stay quick. Uses your Claude limits fastest.',
-      },
+  const CLAUDE_QUALITY_TEXT: Record<CoachQuality, { name: string; cost: string }> = {
+    thrifty: {
+      name: 'Thrifty',
+      cost: 'Haiku for every job. Uses the least of your Claude limits; explanations are shorter and simpler.',
     },
-    codex: {
-      thrifty: {
-        name: 'Thrifty',
-        cost: 'Uses your configured Codex default model (or pick specific models under Advanced).',
-      },
-      balanced: {
-        name: 'Balanced',
-        cost: 'Uses your configured Codex default model (or pick specific models under Advanced).',
-      },
-      best: {
-        name: 'Best (recommended)',
-        cost: 'Uses your configured Codex default model for every job.',
-      },
+    balanced: {
+      name: 'Balanced',
+      cost: 'Sonnet for Reviews (the overview and the key moments), Why Questions and Lessons; Haiku for Hints and Live Coaching. A moderate share of your Claude limits.',
     },
-    pi: {
-      thrifty: {
-        name: 'Thrifty',
-        cost: 'Uses your configured Pi default model (or pick specific models under Advanced).',
-      },
-      balanced: {
-        name: 'Balanced',
-        cost: 'Uses your configured Pi default model (or pick specific models under Advanced).',
-      },
-      best: {
-        name: 'Best (recommended)',
-        cost: 'Uses your configured Pi default model for every job.',
-      },
+    best: {
+      name: 'Best (recommended)',
+      cost: 'Opus for Reviews (the overview and the key moments), Why Questions and Lessons; Haiku for Hints and Live Coaching, which must stay quick. Uses your Claude limits fastest.',
     },
-    opencode: {
-      thrifty: {
-        name: 'Thrifty',
-        cost: 'Uses your configured OpenCode default or free Zen model.',
-      },
-      balanced: {
-        name: 'Balanced',
-        cost: 'Uses your configured OpenCode default or free Zen model.',
-      },
-      best: {
-        name: 'Best (recommended)',
-        cost: 'Uses your configured OpenCode default or free Zen model for every job.',
-      },
-    },
+  };
+
+  const SINGLE_DEFAULT_TEXT: Record<Exclude<CoachProvider, 'claude'>, string> = {
+    codex: 'Uses your configured Codex default model for every job.',
+    pi: 'Uses your configured Pi default model for every job.',
+    opencode: 'Uses your configured OpenCode default or free Zen model for every job.',
   };
 
   /**
@@ -139,7 +101,6 @@
             ? 'OpenCode'
             : 'Claude'),
   );
-  const currentQualityText = $derived(QUALITY_TEXT[settings?.coachProvider ?? 'claude']);
   const currentModelNames = $derived(MODEL_NAMES[settings?.coachProvider ?? 'claude']);
 
   async function load(): Promise<void> {
@@ -321,16 +282,32 @@
 
     <fieldset class="card" aria-label="Coach quality">
       <legend>Coach quality</legend>
-      <p class="muted small">A faster model saves your Coach limits; a stronger one explains better.</p>
-      {#each COACH_QUALITIES as q (q)}
+      {#if settings.coachProvider === 'claude'}
+        <p class="muted small">A faster model saves your Coach limits; a stronger one explains better.</p>
+        {#each COACH_QUALITIES as q (q)}
+          <label class="option">
+            <input type="radio" name="quality" value={q} checked={settings.quality === q} onchange={() => update('quality', { quality: q })} />
+            <span>
+              <strong>{CLAUDE_QUALITY_TEXT[q].name}</strong>
+              <span class="muted small cost">{CLAUDE_QUALITY_TEXT[q].cost}</span>
+            </span>
+          </label>
+        {/each}
+      {:else}
         <label class="option">
-          <input type="radio" name="quality" value={q} checked={settings.quality === q} onchange={() => update('quality', { quality: q })} />
+          <input
+            type="radio"
+            name="quality"
+            value="best"
+            checked={settings.quality !== 'custom'}
+            onchange={() => update('quality', { quality: 'best' })}
+          />
           <span>
-            <strong>{currentQualityText[q].name}</strong>
-            <span class="muted small cost">{currentQualityText[q].cost}</span>
+            <strong>Default</strong>
+            <span class="muted small cost">{SINGLE_DEFAULT_TEXT[settings.coachProvider]}</span>
           </span>
         </label>
-      {/each}
+      {/if}
       {#if settings.quality === 'custom'}
         <label class="option">
           <input type="radio" name="quality" value="custom" checked disabled />

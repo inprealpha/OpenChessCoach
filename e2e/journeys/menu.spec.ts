@@ -333,21 +333,25 @@ test('Settings lets the Player switch between Claude, Codex, Pi and OpenCode Coa
   await expect(backendCard).toBeVisible();
   await expect(backendCard.getByRole('radio', { name: /^Claude/ })).toBeChecked();
 
-  // Switch to Codex: model presets update to Codex defaults and Think deeper shows the unsupported notice.
+  // Switch to Codex: model presets update to a single Default option (no misleading Thrifty/Balanced) and Think deeper shows the unsupported notice.
   await backendCard.getByRole('radio', { name: /^Codex/ }).check();
   await expect(backendCard.getByText('Saved.')).toBeVisible();
   const qualityCard = paired.getByRole('group', { name: 'Coach quality' });
   await expect(qualityCard).toContainText('Codex default');
+  await expect(qualityCard.getByRole('radio', { name: /^Default/ })).toBeChecked();
+  await expect(qualityCard.getByRole('radio', { name: /^Thrifty/ })).toHaveCount(0);
   await expect(paired.getByTestId('think-deeper-unsupported')).toContainText('Codex does not support Think deeper Engine questions yet');
 
   // Switch to OpenCode: presets update to OpenCode default/free Zen copy and Think deeper shows unsupported notice.
   await backendCard.getByRole('radio', { name: /^OpenCode/ }).check();
   await expect(qualityCard).toContainText('OpenCode default');
+  await expect(qualityCard.getByRole('radio', { name: /^Default/ })).toBeChecked();
   await expect(paired.getByTestId('think-deeper-unsupported')).toContainText('OpenCode does not support Think deeper Engine questions yet');
 
-  // Switch to Pi: Pi supports Think deeper, so the unsupported notice disappears and Pi presets show.
+  // Switch to Pi: Pi supports Think deeper, so the unsupported notice disappears and Pi default shows.
   await backendCard.getByRole('radio', { name: /^Pi/ }).check();
   await expect(qualityCard).toContainText('Pi default');
+  await expect(qualityCard.getByRole('radio', { name: /^Default/ })).toBeChecked();
   await expect(paired.getByTestId('think-deeper-unsupported')).toHaveCount(0);
 
   // Persisted in the desktop database and survives a reload.

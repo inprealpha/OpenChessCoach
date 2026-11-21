@@ -203,6 +203,10 @@ describe('the real-Coach check', () => {
     expect(parseRealCoachArgs(['--provider', 'codex', '--model', 'gpt-6.1-terra'])).toEqual({ fake: false, post: false, provider: 'codex', model: 'gpt-6.1-terra' });
     expect(parseRealCoachArgs(['--provider', 'opencode', '--fake'])).toEqual({ fake: true, post: false, provider: 'opencode', model: 'default' });
     expect(() => parseRealCoachArgs(['--provider', 'bogus'])).toThrow(/Unknown provider/);
+    expect(() => parseRealCoachArgs(['--fake', '--provider'])).toThrow(/Missing value for --provider/);
+    expect(() => parseRealCoachArgs(['--provider', '--fake'])).toThrow(/Missing value for --provider/);
+    expect(() => parseRealCoachArgs(['--model'])).toThrow(/Missing value for --model/);
+    expect(() => parseRealCoachArgs(['--model', '--fake'])).toThrow(/Missing value for --model/);
   });
 
   it('forwards supportsEngineTool from the wrapped Coach', () => {

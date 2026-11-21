@@ -12,7 +12,7 @@ The welcome page walks them through it for Windows, macOS and Linux:
 1. A paid Claude plan (Pro or Max), since the Coach runs on their own Claude Code login (ADR 0001).
 2. One-line standalone install (`install.ps1` on Windows, `install.sh` on macOS and Linux), which
    downloads a verified archive bundling the official signed Node.js runtime — no Node.js, npm, or
-   administrator rights required. Users who already have Node.js 22.18+ can also run
+   administrator rights required. Users who already have Node.js 22.19+ can also run
    `npx openchesscoach@latest` (`npx.cmd` in Windows PowerShell).
 3. Claude Code, installed with its native installer, and logged in. The app also finds `claude`
    in the installer's folder (`~/.local/bin`, Windows WinGet/npm links, and macOS Homebrew paths)

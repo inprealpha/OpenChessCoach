@@ -55,9 +55,9 @@ export function appVersion(): string {
   return ownPackage()?.version ?? '0.0.0';
 }
 
-/** The oldest Node.js the app runs on, from package.json's engines (">=22.18" gives "22.18"). */
+/** The oldest Node.js the app runs on, from package.json's engines (">=22.19" gives "22.19"). */
 export function minNode(): string {
-  return ownPackage()?.engines?.node?.match(/\d+(\.\d+){0,2}/)?.[0] ?? '22.18';
+  return ownPackage()?.engines?.node?.match(/\d+(\.\d+){0,2}/)?.[0] ?? '22.19';
 }
 
 /** What the start command was asked to do, or why its arguments make no sense. */

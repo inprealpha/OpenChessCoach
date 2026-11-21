@@ -19,9 +19,9 @@ describe('build-standalone helpers', () => {
   it('parses standard and BSD-style SHASUMS256 lines', () => {
     const hashA = 'a'.repeat(64);
     const hashB = 'b'.repeat(64);
-    const map = parseShasums(`${hashA}  node-v22.18.0-linux-x64.tar.gz\n${hashB} *node-v22.18.0-win-x64.zip\n`);
-    expect(map.get('node-v22.18.0-linux-x64.tar.gz')).toBe(hashA);
-    expect(map.get('node-v22.18.0-win-x64.zip')).toBe(hashB);
+    const map = parseShasums(`${hashA}  node-v22.19.0-linux-x64.tar.gz\n${hashB} *node-v22.19.0-win-x64.zip\n`);
+    expect(map.get('node-v22.19.0-linux-x64.tar.gz')).toBe(hashA);
+    expect(map.get('node-v22.19.0-win-x64.zip')).toBe(hashB);
   });
 
   it('generates launchers that set OPENCHESSCOACH_STANDALONE=1 and run the bundled Node runtime', () => {

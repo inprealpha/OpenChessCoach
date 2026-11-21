@@ -64,7 +64,7 @@ case "$OS" in
   Linux)
     if command -v ldd >/dev/null 2>&1 && ldd --version 2>&1 | grep -qi musl; then
       echo "Standalone Linux bundles require glibc (Ubuntu, Debian, Fedora, Arch, etc.)." >&2
-      echo "On musl-based Linux (such as Alpine), install Node.js 22.18+ and run: npx openchesscoach@latest" >&2
+      echo "On musl-based Linux (such as Alpine), install Node.js 22.19+ and run: npx openchesscoach@latest" >&2
       exit 1
     fi
     case "$ARCH" in

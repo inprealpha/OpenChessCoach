@@ -38,7 +38,7 @@ import { COACH_PROVIDERS, type CoachJob, type CoachProvider } from '@chess-coach
 import { CoachClient } from '../packages/backend/src/client.ts';
 import type { CoachCall, CoachEngine, CoachPort } from '../packages/backend/src/coach/port.ts';
 import { avoidedTerms } from './glossary-lint.ts';
-import { hasProviderCredentials, isRetryableProviderFailure, isWeakerJudge, materializeCodexAuth, resolveProviderOrder } from './ci-providers.ts';
+import { hasProviderCredentials, isRetryableProviderFailure, isWeakerJudge, materializeCodexAuth, resolveProviderOrder, withOpenCodeEnv } from './ci-providers.ts';
 
 export const STATUS_CONTEXT = 'real Coach';
 /** The model every call in the check uses: Claude Code resolves the alias to the latest Haiku. */
@@ -420,6 +420,39 @@ async function createProviderCoach(
   return { coach: openCode, close: () => openCode.close() };
 }
 
+const DEFAULT_FREE_OPENCODE_TIMEOUT_MS = 90_000;
+const DEFAULT_PAID_PROVIDER_TIMEOUT_MS = 300_000;
+
+function providerTimeoutMs(provider: CoachProvider, env: NodeJS.ProcessEnv = process.env): number {
+  const raw = env.REAL_COACH_PROVIDER_TIMEOUT_MS?.trim();
+  if (raw) {
+    const parsed = Number(raw);
+    if (Number.isFinite(parsed) && parsed > 0) return parsed;
+  }
+  return provider === 'opencode' && isWeakerJudge('opencode', env)
+    ? DEFAULT_FREE_OPENCODE_TIMEOUT_MS
+    : DEFAULT_PAID_PROVIDER_TIMEOUT_MS;
+}
+
+function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => {
+      reject(Object.assign(new Error(message), { code: 'coach-unavailable' }));
+    }, ms);
+    timer.unref?.();
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (err) => {
+        clearTimeout(timer);
+        reject(err);
+      },
+    );
+  });
+}
+
 async function runSingleProvider(args: { fake: boolean; provider: CoachProvider; model: string; tagProvider?: boolean }): Promise<Verdict> {
   const root = new URL('../', import.meta.url);
   const { FakeCoach } = await import('../packages/backend/src/coach/fake.ts');
@@ -427,7 +460,16 @@ async function runSingleProvider(args: { fake: boolean; provider: CoachProvider;
   const sha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
   const codexAuth = !args.fake && args.provider === 'codex' ? materializeCodexAuth() : undefined;
   const previousCodexHome = process.env.CODEX_HOME;
+  const previousOpenCodeKey = process.env.OPENCODE_API_KEY;
   if (codexAuth?.codexHome) process.env.CODEX_HOME = codexAuth.codexHome;
+  const mappedOpenCodeKey =
+    !args.fake && args.provider === 'opencode'
+      ? withOpenCodeEnv(process.env).OPENCODE_API_KEY
+      : undefined;
+  if (mappedOpenCodeKey && !previousOpenCodeKey?.trim()) {
+    process.env.OPENCODE_API_KEY = mappedOpenCodeKey;
+  }
+  const timeoutMs = args.fake ? DEFAULT_PAID_PROVIDER_TIMEOUT_MS : providerTimeoutMs(args.provider);
   let created: { coach: CoachPort; close?: () => void | Promise<void> } | undefined;
   try {
     created = args.fake
@@ -444,7 +486,11 @@ async function runSingleProvider(args: { fake: boolean; provider: CoachProvider;
     try {
       const client = await CoachClient.connect(instance.url, instance.token);
       try {
-        received = await driveEveryJob(client, root);
+        received = await withTimeout(
+          driveEveryJob(client, root),
+          timeoutMs,
+          `real Coach (${args.provider}) timed out after ${Math.round(timeoutMs / 1000)}s`,
+        );
       } finally {
         await client.close();
       }
@@ -474,6 +520,10 @@ async function runSingleProvider(args: { fake: boolean; provider: CoachProvider;
     if (codexAuth?.codexHome) {
       if (previousCodexHome === undefined) delete process.env.CODEX_HOME;
       else process.env.CODEX_HOME = previousCodexHome;
+    }
+    if (mappedOpenCodeKey && !previousOpenCodeKey?.trim()) {
+      if (previousOpenCodeKey === undefined) delete process.env.OPENCODE_API_KEY;
+      else process.env.OPENCODE_API_KEY = previousOpenCodeKey;
     }
     codexAuth?.restore();
   }
@@ -539,20 +589,40 @@ function post(verdict: Verdict): void {
   execFileSync('gh', ['api', `repos/{owner}/{repo}/statuses/${verdict.sha}`, '-f', `state=${verdict.ok ? 'success' : 'failure'}`, '-f', `context=${STATUS_CONTEXT}`, '-f', `description=${verdict.description}`], { stdio: 'inherit' });
 }
 
+function postErrorStatus(description: string): void {
+  if (execFileSync('git', ['status', '--porcelain'], { encoding: 'utf8' }).trim()) return;
+  const sha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+  const clipped = description.length <= MAX_DESCRIPTION ? description : `${description.slice(0, MAX_DESCRIPTION - 1)}…`;
+  execFileSync(
+    'gh',
+    ['api', `repos/{owner}/{repo}/statuses/${sha}`, '-f', 'state=error', '-f', `context=${STATUS_CONTEXT}`, '-f', `description=${clipped}`],
+    { stdio: 'inherit' },
+  );
+}
+
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const { quietSqliteWarning } = await import('../packages/backend/src/runtime.ts');
   quietSqliteWarning();
+  let parsedArgs: RealCoachArgs | undefined;
   try {
-    const args = parseRealCoachArgs(process.argv.slice(2));
-    const verdict = await run(args);
+    parsedArgs = parseRealCoachArgs(process.argv.slice(2));
+    const verdict = await run(parsedArgs);
     process.stdout.write(`${JSON.stringify(verdict, null, 2)}\n`);
-    if (args.post) {
-      if (args.fake) throw new Error('A run with the fake Coach is never posted as the real-Coach verdict.');
+    if (parsedArgs.post) {
+      if (parsedArgs.fake) throw new Error('A run with the fake Coach is never posted as the real-Coach verdict.');
       post(verdict);
     }
     process.exit(verdict.ok ? 0 : 1);
   } catch (err) {
-    process.stderr.write(`${err instanceof Error ? err.message : String(err)}\n`);
+    const message = err instanceof Error ? err.message : String(err);
+    process.stderr.write(`${message}\n`);
+    if (parsedArgs?.post && !parsedArgs.fake) {
+      try {
+        postErrorStatus(message);
+      } catch {
+        // Best-effort status posting; preserve exit code 2.
+      }
+    }
     process.exit(2);
   }
 }

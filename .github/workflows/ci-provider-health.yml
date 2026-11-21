@@ -53,8 +53,10 @@ jobs:
             npm install -g "@anthropic-ai/claude-code@$CLAUDE_CODE_VERSION"
             claude --version || true
           fi
-          npm install -g opencode-ai
-          opencode --version || true
+          if [ -n "$OPENCODE_API_KEY" ] || [ -n "$OPENCODE_ZEN_API_KEY" ]; then
+            npm install -g opencode-ai
+            opencode --version || true
+          fi
 
       - name: Probe configured CI providers and report broken logins
         run: |

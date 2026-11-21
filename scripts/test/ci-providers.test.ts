@@ -257,20 +257,24 @@ describe('local Claude desktop login and Codex auth restore', () => {
 });
 
 describe('weekly CI provider health check', () => {
-  it('probes configured providers and formats a plain-English GitHub issue body', () => {
+  it('probes only saved provider logins, skips free OpenCode, and formats a plain-English GitHub issue body', () => {
+    const probed: string[] = [];
     const results = checkCiProviders({
       env: { OPENAI_API_KEY: 'sk-expired-1234' },
       hasCredentials: (p) => (p === 'claude' ? { configured: false } : { configured: true, source: p === 'codex' ? 'OPENAI_API_KEY' : 'opencode-free' }),
-      probe: (p) =>
-        p === 'codex'
+      probe: (p) => {
+        probed.push(p);
+        return p === 'codex'
           ? { status: 1, stdout: '', stderr: '401 Unauthorized: invalid_api_key' }
-          : { status: 0, stdout: 'OK', stderr: '' },
+          : { status: 0, stdout: 'OK', stderr: '' };
+      },
     });
 
+    expect(probed).toEqual(['codex']);
     expect(results.map((r) => [r.provider, r.status])).toEqual([
       ['codex', 'failed'],
       ['claude', 'skipped'],
-      ['opencode', 'ok'],
+      ['opencode', 'skipped'],
     ]);
 
     const body = formatHealthIssueBody(results, 'https://github.com/inprealpha/OpenChessCoach/actions/runs/99');
@@ -278,6 +282,30 @@ describe('weekly CI provider health check', () => {
     expect(body).toContain('**1** broken provider login');
     expect(body).toContain('Settings → Secrets and variables → Actions → Secrets');
     expect(body).toContain('https://github.com/inprealpha/OpenChessCoach/actions/runs/99');
+  });
+
+  it('treats OPENCODE_ZEN_API_KEY as a paid OpenCode key and forwards it to OPENCODE_API_KEY in runJudge', () => {
+    expect(isWeakerJudge('opencode', {})).toBe(true);
+    expect(isWeakerJudge('opencode', { OPENCODE_API_KEY: 'oc-key' })).toBe(false);
+    expect(isWeakerJudge('opencode', { OPENCODE_ZEN_API_KEY: 'zen-key' })).toBe(false);
+
+    const outDir = makeTempDir('judge-zen-');
+    let seenKey: string | undefined;
+    const { meta, hasVerdict } = runJudge(
+      { prompt: 'Judge this PR', outDir, workdir: outDir },
+      {
+        env: { CI_PROVIDER_ORDER: 'opencode', OPENCODE_ZEN_API_KEY: 'zen-secret-123' },
+        exec: (_inv, _wd, runEnv) => {
+          seenKey = runEnv.OPENCODE_API_KEY;
+          writeFileSync(join(outDir, 'verdict.json'), JSON.stringify({ verdict: 'PASS', summary: 'Looks good.' }));
+          return { status: 0, stdout: '', stderr: '' };
+        },
+      },
+    );
+
+    expect(hasVerdict).toBe(true);
+    expect(seenKey).toBe('zen-secret-123');
+    expect(meta.weakerJudge).toBe(false);
   });
 
   it('probes each saved login independently when a provider has multiple saved secrets', () => {

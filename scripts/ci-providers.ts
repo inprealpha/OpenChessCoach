@@ -137,11 +137,22 @@ export function hasProviderCredentials(
 
 /**
  * True when the Verdict judge is running on free OpenCode models rather than a paid Codex/Claude
- * provider, so the status and PR comment label it clearly as a weaker judge.
+ * provider or paid OpenCode key, so the status and PR comment label it clearly as a weaker judge.
  */
 export function isWeakerJudge(provider: JudgeProvider, env: NodeJS.ProcessEnv = process.env): boolean {
   if (provider !== 'opencode') return false;
-  return !env.OPENCODE_API_KEY?.trim();
+  return !env.OPENCODE_API_KEY?.trim() && !env.OPENCODE_ZEN_API_KEY?.trim();
+}
+
+/**
+ * Returns an env copy that forwards OPENCODE_ZEN_API_KEY as OPENCODE_API_KEY when OPENCODE_API_KEY
+ * is unset, since the OpenCode CLI reads OPENCODE_API_KEY.
+ */
+export function withOpenCodeEnv(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
+  if (!env.OPENCODE_API_KEY?.trim() && env.OPENCODE_ZEN_API_KEY?.trim()) {
+    return { ...env, OPENCODE_API_KEY: env.OPENCODE_ZEN_API_KEY };
+  }
+  return env;
 }
 
 /** Accepts either raw JSON or base64-encoded JSON for auth.json secrets. */

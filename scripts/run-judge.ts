@@ -19,6 +19,7 @@ import {
   type ProviderFailureKind,
   resolveProviderOrder,
   scrubSecretsFromDir,
+  withOpenCodeEnv,
 } from './ci-providers.ts';
 import { parseVerdict } from './verdict.ts';
 
@@ -143,10 +144,11 @@ export function runJudge(
     rmSync(verdictPath, { force: true });
     rmSync(reportPath, { force: true });
 
-    const runEnv: NodeJS.ProcessEnv =
+    let runEnv: NodeJS.ProcessEnv =
       codexAuth && typeof codexAuth === 'object' && codexAuth.codexHome
         ? { ...env, CODEX_HOME: codexAuth.codexHome }
         : env;
+    if (provider === 'opencode') runEnv = withOpenCodeEnv(runEnv);
     const inv = buildJudgeInvocation(provider, opts.prompt, opts.outDir, runEnv, opts.maxBudgetUsd ?? '5');
     let result: ReturnType<typeof defaultExec>;
     try {

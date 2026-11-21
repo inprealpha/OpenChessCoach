@@ -13,6 +13,7 @@ import {
   type JudgeProvider,
   materializeCodexAuth,
   type ProviderFailureKind,
+  withOpenCodeEnv,
 } from './ci-providers.ts';
 
 export const HEALTH_ISSUE_TITLE = '[CI Provider Health] One or more saved AI logins stopped working';
@@ -64,11 +65,7 @@ function isolateProviderSecretEnv(env: NodeJS.ProcessEnv, provider: JudgeProvide
   for (const key of PROVIDER_SECRET_KEYS[provider]) {
     if (key !== keepKey) delete isolated[key];
   }
-  // OpenCode CLI reads OPENCODE_API_KEY, so forward OPENCODE_ZEN_API_KEY under that name when probing it.
-  if (provider === 'opencode' && keepKey === 'OPENCODE_ZEN_API_KEY' && env.OPENCODE_ZEN_API_KEY?.trim()) {
-    isolated.OPENCODE_API_KEY = env.OPENCODE_ZEN_API_KEY;
-  }
-  return isolated;
+  return provider === 'opencode' ? withOpenCodeEnv(isolated) : isolated;
 }
 
 export interface CheckProvidersDeps {
@@ -93,11 +90,20 @@ export function checkCiProviders(deps: CheckProvidersDeps = {}): ProviderProbeRe
       }
     } else {
       const creds = checkCreds(provider, env);
-      if (!creds.configured) {
-        results.push({ provider, status: 'skipped', detail: 'No secret saved in GitHub Secrets.' });
+      // Weekly health checks monitor saved logins only; never probe unauthenticated free OpenCode
+      // so a free-tier timeout or missing CLI cannot open a false "broken saved login" issue.
+      if (!creds.configured || creds.source === 'opencode-free') {
+        results.push({
+          provider,
+          status: 'skipped',
+          detail:
+            provider === 'opencode'
+              ? 'No OpenCode secret saved in GitHub Secrets (free fallback is not a saved login).'
+              : 'No secret saved in GitHub Secrets.',
+        });
         continue;
       }
-      targets.push({ ...(creds.source ? { source: creds.source } : {}), probeEnv: env });
+      targets.push({ ...(creds.source ? { source: creds.source } : {}), probeEnv: provider === 'opencode' ? withOpenCodeEnv(env) : env });
     }
 
     for (const target of targets) {

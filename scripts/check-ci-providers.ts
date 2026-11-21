@@ -35,8 +35,9 @@ function runProbeCommand(
   if (provider === 'codex') {
     const codexAuth = materializeCodexAuth(env);
     try {
+      const probeEnv = codexAuth?.codexHome ? { ...env, CODEX_HOME: codexAuth.codexHome } : env;
       const args = ['exec', '--dangerously-bypass-approvals-and-sandbox', '--skip-git-repo-check', '-'];
-      const r = spawnSync('codex', args, { env, input: PROBE_PROMPT, encoding: 'utf8', timeout: 60_000 });
+      const r = spawnSync('codex', args, { env: probeEnv, input: PROBE_PROMPT, encoding: 'utf8', timeout: 60_000 });
       return { status: r.status, stdout: r.stdout ?? '', stderr: r.stderr ?? '', ...(r.error ? { error: r.error } : {}) };
     } finally {
       codexAuth?.restore();
@@ -62,6 +63,10 @@ function isolateProviderSecretEnv(env: NodeJS.ProcessEnv, provider: JudgeProvide
   const isolated: NodeJS.ProcessEnv = { ...env };
   for (const key of PROVIDER_SECRET_KEYS[provider]) {
     if (key !== keepKey) delete isolated[key];
+  }
+  // OpenCode CLI reads OPENCODE_API_KEY, so forward OPENCODE_ZEN_API_KEY under that name when probing it.
+  if (provider === 'opencode' && keepKey === 'OPENCODE_ZEN_API_KEY' && env.OPENCODE_ZEN_API_KEY?.trim()) {
+    isolated.OPENCODE_API_KEY = env.OPENCODE_ZEN_API_KEY;
   }
   return isolated;
 }

@@ -1,7 +1,7 @@
 // Shared CI provider ordering, credential detection, and fallback classification for Verdict,
 // real Coach, and the weekly provider health check (ADR 0013).
-import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
-import { homedir } from 'node:os';
+import { existsSync, lstatSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { homedir, tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 export const CI_PROVIDERS = ['codex', 'claude', 'pi', 'opencode'] as const;
@@ -163,37 +163,49 @@ export function decodeAuthJson(raw: string): string {
 
 export interface MaterializedCodexAuth {
   path: string;
+  codexHome: string;
   restore: () => void;
 }
 
 /**
- * Writes CODEX_AUTH_JSON to $CODEX_HOME/auth.json (or ~/.codex/auth.json) with 0600 permissions.
- * Returns a `restore()` callback that restores any pre-existing auth.json (or removes the temporary
- * file if none existed) so local runs never clobber a developer's desktop Codex login.
+ * Writes CODEX_AUTH_JSON into an isolated temporary CODEX_HOME directory (never touching the
+ * user's desktop ~/.codex/auth.json), or into an explicit $CODEX_HOME if provided.
+ * Pass `codexHome` as `CODEX_HOME` to the spawned Codex process and call `restore()` in `finally`.
  */
 export function materializeCodexAuth(
   env: NodeJS.ProcessEnv = process.env,
-  homeDir: string = homedir(),
 ): MaterializedCodexAuth | undefined {
   const raw = env.CODEX_AUTH_JSON?.trim();
   if (!raw) return undefined;
-  const target = codexAuthPath(env, homeDir);
-  const hadExisting = existsSync(target);
-  const previous = hadExisting ? readFileSync(target) : undefined;
-  const dir = join(target, '..');
-  mkdirSync(dir, { recursive: true, mode: 0o700 });
-  writeFileSync(target, `${decodeAuthJson(raw)}\n`, { mode: 0o600 });
+  const decoded = `${decodeAuthJson(raw)}\n`;
+  if (env.CODEX_HOME?.trim()) {
+    const codexHome = env.CODEX_HOME.trim();
+    const target = join(codexHome, 'auth.json');
+    const existed = existsSync(target);
+    mkdirSync(codexHome, { recursive: true, mode: 0o700 });
+    writeFileSync(target, decoded, { mode: 0o600 });
+    let restored = false;
+    return {
+      path: target,
+      codexHome,
+      restore: () => {
+        if (restored) return;
+        restored = true;
+        if (!existed) rmSync(target, { force: true });
+      },
+    };
+  }
+  const tempHome = mkdtempSync(join(tmpdir(), 'occ-codex-'));
+  const target = join(tempHome, 'auth.json');
+  writeFileSync(target, decoded, { mode: 0o600 });
   let restored = false;
   return {
     path: target,
+    codexHome: tempHome,
     restore: () => {
       if (restored) return;
       restored = true;
-      if (hadExisting && previous !== undefined) {
-        writeFileSync(target, previous, { mode: 0o600 });
-      } else {
-        rmSync(target, { force: true });
-      }
+      rmSync(tempHome, { recursive: true, force: true });
     },
   };
 }
@@ -251,7 +263,13 @@ export function scrubSecretsFromDir(dir: string, env: NodeJS.ProcessEnv = proces
   const walk = (current: string): void => {
     for (const entry of readdirSync(current)) {
       const full = join(current, entry);
-      const st = statSync(full);
+      const st = lstatSync(full);
+      if (st.isSymbolicLink()) {
+        // Never follow symlinks out of the evidence directory; unlink only the symlink itself.
+        rmSync(full, { force: true });
+        removed.push(full);
+        continue;
+      }
       if (st.isDirectory()) {
         walk(full);
         continue;

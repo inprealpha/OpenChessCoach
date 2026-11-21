@@ -426,6 +426,8 @@ async function runSingleProvider(args: { fake: boolean; provider: CoachProvider;
   const { startVerifyInstance } = await import('../packages/backend/src/verify/instance.ts');
   const sha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
   const codexAuth = !args.fake && args.provider === 'codex' ? materializeCodexAuth() : undefined;
+  const previousCodexHome = process.env.CODEX_HOME;
+  if (codexAuth?.codexHome) process.env.CODEX_HOME = codexAuth.codexHome;
   let created: { coach: CoachPort; close?: () => void | Promise<void> } | undefined;
   try {
     created = args.fake
@@ -469,6 +471,10 @@ async function runSingleProvider(args: { fake: boolean; provider: CoachProvider;
     return { ok, sha, ...(args.fake ? {} : { provider: args.provider, weakerFallback }), calls, description };
   } finally {
     await created?.close?.();
+    if (codexAuth?.codexHome) {
+      if (previousCodexHome === undefined) delete process.env.CODEX_HOME;
+      else process.env.CODEX_HOME = previousCodexHome;
+    }
     codexAuth?.restore();
   }
 }

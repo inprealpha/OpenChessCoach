@@ -83,7 +83,7 @@ export interface RunJudgeDeps {
   env?: NodeJS.ProcessEnv;
   exec?: (inv: JudgeInvocation, workdir: string, env: NodeJS.ProcessEnv) => { status: number | null; stdout: string; stderr: string; error?: Error };
   hasCredentials?: (provider: JudgeProvider, env: NodeJS.ProcessEnv) => { configured: boolean; source?: string };
-  materializeCodex?: (env: NodeJS.ProcessEnv) => { path: string; restore: () => void } | string | undefined;
+  materializeCodex?: (env: NodeJS.ProcessEnv) => { path: string; codexHome?: string; restore: () => void } | string | undefined;
 }
 
 function defaultExec(inv: JudgeInvocation, workdir: string, env: NodeJS.ProcessEnv): { status: number | null; stdout: string; stderr: string; error?: Error } {
@@ -125,7 +125,7 @@ export function runJudge(
       continue;
     }
 
-    let codexAuth: { path: string; restore: () => void } | string | undefined;
+    let codexAuth: { path: string; codexHome?: string; restore: () => void } | string | undefined;
     if (provider === 'codex') {
       try {
         codexAuth = prepareCodex(env);
@@ -143,10 +143,14 @@ export function runJudge(
     rmSync(verdictPath, { force: true });
     rmSync(reportPath, { force: true });
 
-    const inv = buildJudgeInvocation(provider, opts.prompt, opts.outDir, env, opts.maxBudgetUsd ?? '5');
+    const runEnv: NodeJS.ProcessEnv =
+      codexAuth && typeof codexAuth === 'object' && codexAuth.codexHome
+        ? { ...env, CODEX_HOME: codexAuth.codexHome }
+        : env;
+    const inv = buildJudgeInvocation(provider, opts.prompt, opts.outDir, runEnv, opts.maxBudgetUsd ?? '5');
     let result: ReturnType<typeof defaultExec>;
     try {
-      result = exec(inv, opts.workdir, env);
+      result = exec(inv, opts.workdir, runEnv);
     } finally {
       if (codexAuth && typeof codexAuth === 'object') codexAuth.restore();
     }

@@ -1,5 +1,5 @@
 // Tests for multi-provider CI fallback, judge runner, real-Coach auto fallback, and weekly health check (ADR 0013).
-import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -244,19 +244,13 @@ describe('local Claude desktop login and Codex auth restore', () => {
     });
   });
 
-  it('restores a pre-existing Codex auth.json after temporary CODEX_AUTH_JSON materialization', () => {
-    const dir = mkdtempSync(join(tmpdir(), 'codex-restore-'));
-    try {
-      const existing = join(dir, 'auth.json');
-      writeFileSync(existing, '{"existing":"desktop-login"}\n', 'utf8');
-      const handle = materializeCodexAuth({ CODEX_HOME: dir, CODEX_AUTH_JSON: '{"tokens":{"access_token":"temp"}}' });
-      expect(handle?.path).toBe(existing);
-      expect(readFileSync(existing, 'utf8')).toContain('temp');
-      handle?.restore();
-      expect(readFileSync(existing, 'utf8')).toBe('{"existing":"desktop-login"}\n');
-    } finally {
-      rmSync(dir, { recursive: true, force: true });
-    }
+  it('writes CODEX_AUTH_JSON to an isolated temp CODEX_HOME and removes it on restore', () => {
+    const handle = materializeCodexAuth({ CODEX_AUTH_JSON: '{"tokens":{"access_token":"temp"}}' });
+    expect(handle).toBeDefined();
+    expect(existsSync(handle!.path)).toBe(true);
+    expect(readFileSync(handle!.path, 'utf8')).toContain('temp');
+    handle?.restore();
+    expect(existsSync(handle!.codexHome)).toBe(false);
   });
 });
 

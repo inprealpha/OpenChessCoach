@@ -15,11 +15,11 @@ import {
   TRIM_STEPS,
   type Brief,
 } from '../src/coach/brief.ts';
-import { allowedMoves, askedLineMoves, guardReply } from '../src/coach/guard.ts';
+import { allowedMoves, askedLineMoves, guardReply, HINT_FALLBACK } from '../src/coach/guard.ts';
 import type { CoachAsk, CoachRawReply, GameFacts } from '../src/coach/types.ts';
 import { MAX_KEY_MOMENTS, MAX_STANDOUTS, pickKeyMoments } from '../src/key-moments.ts';
 import { gameFacts } from '../src/overview.ts';
-import { legalMoves, playUci, turnOf } from '../src/chess.ts';
+import { INITIAL_FEN, legalMoves, playUci, turnOf } from '../src/chess.ts';
 import { scoreAfterPly } from '../src/position-score.ts';
 import { nullMoveFen, type Threat } from '../src/threat.ts';
 import { winningChancesFor } from '../src/winning-chances.ts';
@@ -623,6 +623,83 @@ describe('the Coach-move guard', () => {
     const exd5: Brief = { ...base, move: { san: 'exd5', uci: 'e4d5', grade: 'Best', evaluationAfter: '+0.60' } };
     expect(allowedMoves(exd5).has('d5e4')).toBe(false);
     expect(guardReply(exd5, reply({ moves: ['d5e4'], arrows: [{ uci: 'd5e4', brush: 'red' }] }))).toMatchObject({ moves: [], arrows: [] });
+  });
+
+  describe('a Hint’s words', () => {
+    const hint = (fen: string, uci: string, san: string) =>
+      buildBrief({ ask: { job: 'hint', fen, recentMoves: [], candidates: [{ uci, san, score: { cp: 500 }, pv: [uci] }] }, profile });
+    const said = (b: Brief, text: string) => guardReply(b, reply({ text }));
+    // The rook takes on g7 with check: 1. Rxg7+.
+    const rook = hint('6k1/6p1/8/8/8/8/8/K5R1 w - - 0 1', 'g1g7', 'Rxg7+');
+    // The pawn takes on e8 and promotes with mate: 1. fxe8=Q#.
+    const pawn = hint('4r2k/5Ppp/8/8/8/8/8/K7 w - - 0 1', 'f7e8q', 'fxe8=Q#');
+
+    it('that name a move, in SAN or UCI, become the fallback, and the guard says why', () => {
+      for (const text of ['Play Rxg7+ now.', 'Rxg7 wins.', 'Look at Rg7!', 'Try g1g7.', 'G1-G7 is strong.', 'Rxg7# would be nice']) {
+        const out = said(rook, text);
+        expect(out.text, text).toBe(HINT_FALLBACK);
+        expect(out.stripped).toEqual(['text names Rxg7+, which a Hint keeps back']);
+      }
+      for (const text of ['fxe8=Q# ends it.', 'What about fxe8=Q?', 'fxe8Q', 'Play f7e8q.', 'xe8=Q#, fe8=Q']) expect(said(pawn, text).text, text).toBe(HINT_FALLBACK);
+    });
+
+    it('that name another legal move are kept back too, and so is castling', () => {
+      expect(said(rook, 'A king move like Kb2 changes nothing.').text).toBe(HINT_FALLBACK);
+      const castle = hint('r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1', 'a1a8', 'Rxa8+');
+      expect(said(castle, 'Not O-O yet.').text).toBe(HINT_FALLBACK);
+      expect(said(castle, 'Not 0-0-0 yet.').text).toBe(HINT_FALLBACK);
+    });
+
+    it('may say where pieces stand: a square alone names no move, unless it is the Engine’s pawn move', () => {
+      for (const text of ['Your king on a1 is safe; the pawn on g7 guards the king.', 'The g-file matters.']) expect(said(rook, text).text).toBe(text);
+      const start = hint(INITIAL_FEN, 'e2e4', 'e4');
+      expect(said(start, 'Aim for e4.').text).toBe(HINT_FALLBACK);
+      // d4 is a legal pawn move, but not one of the Engine's in the brief: a square, then.
+      expect(said(start, 'Think about the d4 square.').text).toBe('Think about the d4 square.');
+    });
+
+    it('that say the move in words or with a figurine are kept back too (the Verdict on #74)', () => {
+      // The bishop on e4 can take the knight on c6: 1. Bxc6.
+      const bishop = hint('6k1/8/2n5/8/4B3/8/8/K7 w - - 0 1', 'e4c6', 'Bxc6');
+      for (const text of ['The bishop can take the knight on c6.', 'Try ♗xc6.', 'Try ♝xc6!', 'Your bishops eye c6, so use them.', 'Take the knight on c6.']) {
+        expect(said(bishop, text).text, text).toBe(HINT_FALLBACK);
+      }
+      // A piece and a square it can go to: 1. Nf5.
+      const knight = hint('6k1/8/8/8/8/4N3/8/K7 w - - 0 1', 'e3f5', 'Nf5');
+      expect(said(knight, 'Bring the knight to f5.').text).toBe(HINT_FALLBACK);
+      // The piece it would take and its square, with a word for taking, whoever takes: 1. Rxc6.
+      const rookTakes = hint('6k1/8/2n5/8/8/8/8/K1R5 w - - 0 1', 'c1c6', 'Rxc6+');
+      expect(said(rookTakes, 'You can capture the knight on c6.').text).toBe(HINT_FALLBACK);
+      // A pawn named in words: "the c-pawn".
+      expect(said(hint('6k1/8/8/8/8/8/2P5/K7 w - - 0 1', 'c2c4', 'c4'), 'Push the c-pawn to c4.').text).toBe(HINT_FALLBACK);
+    });
+
+    it('say castling in words only when castling is legal', () => {
+      const castle = hint('r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1', 'a1a8', 'Rxa8+');
+      for (const text of ['Time to castle.', 'Castling would help.']) expect(said(castle, text).text, text).toBe(HINT_FALLBACK);
+      expect(said(rook, 'Your king has already castled away from danger.').text).toBe('Your king has already castled away from danger.');
+    });
+
+    it('may name a piece where it stands, but not a square a piece of that kind could go to', () => {
+      // The Player's own bishop on c6: no bishop moves to c6, so this says where it stands.
+      const own = hint('6k1/8/2B5/8/8/8/8/K7 w - - 0 1', 'c6d5', 'Bd5');
+      expect(said(own, 'Watch the bishop on c6.').text).toBe('Watch the bishop on c6.');
+      // Black's bishop on c6, which the Player's bishop on e4 can take: the same words could tell the
+      // Player to take it, so the general Hint is said instead. A false alarm costs a Hint its detail,
+      // never the answer.
+      const theirs = hint('6k1/8/2b5/8/4B3/8/8/K7 w - - 0 1', 'e4c6', 'Bxc6');
+      expect(said(theirs, 'Watch the bishop on c6.').text).toBe(HINT_FALLBACK);
+      // No square, no move: the prompt keeps such words out.
+      expect(said(theirs, 'Think about the piece on the long diagonal.').text).toBe('Think about the piece on the long diagonal.');
+      // A square and a piece in different sentences name no move together.
+      expect(said(theirs, 'The bishop is strong. Look at c6.').text).toBe('The bishop is strong. Look at c6.');
+    });
+
+    it('pass when they name nothing, and other jobs may still name moves', () => {
+      expect(said(rook, 'The black king is short of squares, and a file is open.').text).toBe('The black king is short of squares, and a file is open.');
+      const why = buildBrief({ ask: { job: 'why', fen: '6k1/6p1/8/8/8/8/8/K5R1 w - - 0 1', recentMoves: [], candidates: [{ uci: 'g1g7', san: 'Rxg7+', score: { cp: 500 }, pv: ['g1g7'] }] }, profile });
+      expect(guardReply(why, reply({ text: 'Rxg7+ wins a pawn with check.' })).text).toBe('Rxg7+ wins a pawn with check.');
+    });
   });
 
   it('lets the Coach name the Engine’s line after a move the Player asked about, each move where the line plays it, but draw only the move', () => {

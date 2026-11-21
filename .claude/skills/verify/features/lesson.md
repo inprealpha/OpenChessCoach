@@ -62,6 +62,10 @@ the order. `#/lessons?track=<track>` opens the catalogue at a track. Play it out
   view with it. After a Hint the focus stays on the button, now Show the move. Show the move gives the Lesson's move ("The Lesson’s move here is X." with a green
   arrow), never another move the Engine likes as well; it is said once per decision: another click
   only brings the arrow back. After a Hint, on a phone the Coach panel comes under the board too.
+  A Hint names no move in its words either: it arrives once the guard has checked it (no words
+  stream), and one that names a legal move, in notation, with a figurine or in words, becomes "Look
+  at every check, capture and threat in this position, for both sides, before you choose your
+  move." (see `puzzles.md`).
   A move played after Show the move counts apart in the summary ("1 after Show the move").
 - After each choice the region `Your choice` says "You played <move>" with its Move Grade
   ("Checkmate!" or a stalemate when the move ends the game), and the Coach explains. What follows
@@ -94,7 +98,13 @@ the order. `#/lessons?track=<track>` opens the catalogue at a track. Play it out
   buttons after another move.
 - While choosing, the one place to type is `Explain your thinking (optional)` (sent with the move;
   its example fits the Lesson, e.g. a pin in Pins, else its kind), a two-line box that wraps so the example shows
-  whole on any phone; the Coach's Why Question box appears once the move is graded.
+  whole on any phone; the Coach's Why Question box appears once the move is graded. It names the
+  move it asks about, the one just played on the board ("Ask why about 1. e4"; on a phone, where
+  the box is narrower, "Why 1. e4?"), or the Lesson's move after `Continue with the Lesson’s move`,
+  and the Why Question asks about that same move. Once the Lesson is complete it names the
+  variation's move, or reads "Ask about this position" on the Lesson's own final position. It never
+  names the Lesson's next move: there is no Ask box while a decision waits, after another move, or
+  after `Continue`.
 - While the Player's choice is shown, the board carries its Move Grade symbol on the square the
   move landed on (`Mistake on g4`, `Best on e4`; none for Good); `Try another move` and
   `Continue` clear it.
@@ -172,6 +182,15 @@ decision (`data/lessons/<id>.json` lists them as `parts[].mainLine`) → `Contin
   Coach arrow for another move for the Player left off the board after the Lesson's move.
 - In the Italian Game, 1.g4 shows one symbol on g4 (Inaccuracy or worse) and 1.e4 shows
   `Best on e4`.
+- In the Italian Game there is no Ask box while the Player decides; after 1. e4 it reads "Ask why
+  about 1. e4" and the `why` brief's `move.uci` is `e2e4`; after `Continue` it is gone again ("the
+  Ask box names the move the Player just played, and shows only once the decision is made"). After
+  1.g4 and `Continue with the Lesson’s move` it names the Lesson's move ("a poor move that isn’t the
+  Lesson’s keeps the answer back, …"). At 390×664 it reads "Why 1. e4?" in 16 px type with the
+  longest labels whole (`puzzles.spec.ts`, "on a phone the Ask box fits the longest move it can
+  name, in Puzzles and in Lessons"). Once the Lesson is complete it reads "Ask about this
+  position", then "Ask why about <the variation's move>" with a `why` brief about that move
+  (`explore.spec.ts`, "a complete Lesson’s final board takes moves; …").
 
 ## Gotchas
 

@@ -178,8 +178,11 @@ class Api {
     }
     const proto = location.protocol === 'https:' ? 'wss' : 'ws';
     const ws = new WebSocket(`${proto}://${location.host}/ws?token=${encodeURIComponent(this.token ?? '')}`);
+    const previous = this.ws;
     this.ws = ws;
+    previous?.close();
     ws.onopen = async () => {
+      if (this.ws !== ws) return;
       this.retryMs = 500;
       this.state = 'online';
       this.watch(ws);
@@ -195,9 +198,16 @@ class Api {
       }
     };
     ws.onmessage = (ev) => {
+      if (this.ws !== ws) return;
       this.heard = Date.now();
       this.checkSent = null;
-      this.onMessage(JSON.parse(String(ev.data)) as ServerMessage);
+      let msg: ServerMessage;
+      try {
+        msg = JSON.parse(String(ev.data)) as ServerMessage;
+      } catch {
+        return;
+      }
+      this.onMessage(msg);
     };
     ws.onclose = (ev) => this.lost(ws, ev.code);
   }
@@ -308,7 +318,12 @@ class Api {
     const id = String(this.nextId++);
     return new Promise((resolve, reject) => {
       this.pending.set(id, { resolve: resolve as (d: unknown) => void, reject, ...(onDelta ? { onDelta } : {}), ...(onProgress ? { onProgress } : {}) });
-      ws.send(JSON.stringify({ v: PROTOCOL_VERSION, id, type, ...body }));
+      try {
+        ws.send(JSON.stringify({ v: PROTOCOL_VERSION, id, type, ...body }));
+      } catch {
+        this.pending.delete(id);
+        reject(new ApiError('offline', OFFLINE_REASON));
+      }
     });
   }
 

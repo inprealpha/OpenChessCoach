@@ -147,11 +147,15 @@ async function main(): Promise<void> {
     onEvent: (event) => {
       if (event.kind === 'tunnel' && event.tunnel.status === 'running' && event.tunnel.url) {
         const url = pairUrl(event.tunnel.url, app.pairing.code);
-        qrTerminal(url).then((qr) => {
-          process.stdout.write(`\nAway-from-home address: ${event.tunnel.url}\nScan to pair over the tunnel:\n${qr}\n`);
-        });
+        qrTerminal(url)
+          .then((qr) => {
+            process.stdout.write(`\nAway-from-home address: ${event.tunnel.url}\nScan to pair over the tunnel:\n${qr}\n`);
+          })
+          .catch((err: unknown) => log(`Could not print tunnel QR code: ${String(err)}`));
       }
-      if (event.kind === 'pairing-reset') void printQr();
+      if (event.kind === 'pairing-reset') {
+        printQr().catch((err: unknown) => log(`Could not print QR code: ${String(err)}`));
+      }
     },
   }).catch((err: NodeJS.ErrnoException) => {
     if (err.code === 'EADDRINUSE') {
@@ -229,7 +233,10 @@ async function main(): Promise<void> {
 
   if (options.open) openBrowser(pairUrl(app.localUrl, app.pairing.code));
 
+  let stopping = false;
   const stop = async () => {
+    if (stopping) return;
+    stopping = true;
     process.stdout.write('\nStopping…\n');
     openCodeCoach?.close();
     await app.close();

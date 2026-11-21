@@ -22,24 +22,70 @@
     club: 'Club: I play regularly and know some opening theory.',
   };
   const SUGGESTED = ['Learn the Italian Game', 'Learn the Caro-Kann Defence', 'Stop blundering pieces'];
+  const DRAFT_KEY = 'occ.firstRunDraft';
 
-  let level = $state<PlayerLevel>(profile.profile?.level ?? 'beginner');
+  interface FirstRunDraft {
+    level?: PlayerLevel;
+    site?: RatingSite | '';
+    username?: string;
+    goals?: string[];
+  }
+
+  function loadDraft(): FirstRunDraft {
+    try {
+      const raw = sessionStorage.getItem(DRAFT_KEY);
+      if (!raw) return {};
+      const parsed = JSON.parse(raw) as FirstRunDraft;
+      return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch {
+      return {};
+    }
+  }
+
+  function clearDraft(): void {
+    try {
+      sessionStorage.removeItem(DRAFT_KEY);
+    } catch {
+      // Ignore restricted storage.
+    }
+  }
+
+  /** Set up already when this screen opened (`#/first-run` typed in): saving here is then the Player's own choice. */
+  const setUpBefore = profile.profile?.onboarded === true;
+  const draft = setUpBefore ? {} : loadDraft();
+
+  let level = $state<PlayerLevel>(
+    draft.level && (PLAYER_LEVELS as readonly string[]).includes(draft.level) ? draft.level : (profile.profile?.level ?? 'beginner'),
+  );
   /**
    * Where the Lessons start for the level chosen above: a casual or club Player skips the beginner
    * ones, unless a rating linked before says otherwise (ADR 0012).
    */
   const firstLesson = $derived(suggestNext(lessonCatalogue, profile.profile?.lessons ?? [], { level, rating: profile.profile?.rating ?? null })?.lesson);
-  let site = $state<RatingSite | ''>('');
-  let username = $state('');
-  let goals = $state<string[]>(profile.profile?.goals.length ? [...profile.profile.goals] : ['']);
+  let site = $state<RatingSite | ''>(draft.site === 'lichess' || draft.site === 'chesscom' ? draft.site : '');
+  let username = $state(typeof draft.username === 'string' ? draft.username : '');
+  let goals = $state<string[]>(
+    Array.isArray(draft.goals) && draft.goals.length && draft.goals.every((g) => typeof g === 'string')
+      ? [...draft.goals]
+      : profile.profile?.goals.length
+        ? [...profile.profile.goals]
+        : [''],
+  );
   let error = $state('');
   /** Why the site couldn't give a rating: shown beside the Username box, which it is about. */
   let ratingError = $state('');
   let account = $state<HTMLFieldSetElement>();
   let usernameBox = $state<HTMLInputElement>();
   let busy = $state(false);
-  /** Set up already when this screen opened (`#/first-run` typed in): saving here is then the Player's own choice. */
-  const setUpBefore = profile.profile?.onboarded === true;
+
+  $effect(() => {
+    if (setUpBefore) return;
+    try {
+      sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ level, site, username, goals }));
+    } catch {
+      // Ignore restricted storage.
+    }
+  });
 
   /** Null until the desktop says whether to ask for the phone. */
   let step = $state<'phone' | 'about' | null>(onPhoneOrTablet ? 'about' : null);
@@ -124,6 +170,7 @@
         }
       }
       updated = await api.request('profile.update', { onboarded: true });
+      clearDraft();
       profile.set(updated);
       router.go(next);
     } catch (err) {

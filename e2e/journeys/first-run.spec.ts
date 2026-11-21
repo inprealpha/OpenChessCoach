@@ -382,3 +382,23 @@ test.describe('Settings: Coach quality', () => {
     expect(await savedModels(app)).toEqual(mine);
   });
 });
+
+test('first-run level and draft Goal survive a browser reload before finishing', async ({ browser }) => {
+  const { startVerifyInstance } = await import('../../packages/backend/src/verify/instance.ts');
+  const app = await startVerifyInstance({ seed: 'empty' });
+  const page = await browser.newPage();
+  try {
+    await page.goto(`${app.url}/#pair=${app.code}`);
+    await expect(connection(page)).toHaveText(/Desktop connected/);
+    await page.getByRole('button', { name: 'I’ll do it later' }).click();
+    await page.getByRole('radio', { name: /^Casual:/ }).check();
+    await page.getByLabel('Goal 1').fill('Stop hanging pieces in rapid games');
+    await page.reload();
+    await expect(connection(page)).toHaveText(/Desktop connected/);
+    await expect(page.getByRole('radio', { name: /^Casual:/ })).toBeChecked();
+    await expect(page.getByLabel('Goal 1')).toHaveValue('Stop hanging pieces in rapid games');
+  } finally {
+    await page.close();
+    await app.stop();
+  }
+});

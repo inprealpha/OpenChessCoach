@@ -61,3 +61,45 @@ describe('a run skipped because the PR changed while the gate waited', () => {
     expect(skippedStatus('  ')).toBeUndefined();
   });
 });
+
+describe('multi-provider and local-fallback metadata', () => {
+  it('labels free OpenCode runs as a weaker judge in both the status and PR comment', () => {
+    const meta = {
+      provider: 'opencode' as const,
+      weakerJudge: true,
+      source: 'ci' as const,
+      attempts: [
+        { provider: 'codex' as const, outcome: 'skipped' as const, reason: 'no credentials configured' },
+        { provider: 'opencode' as const, outcome: 'verdict' as const, exitCode: 0 },
+      ],
+    };
+    const verdict = parseVerdict('{"verdict":"PASS","summary":"Looks good."}');
+    expect(statusFor(verdict, true, meta)).toEqual({ state: 'success', description: 'PASS [weaker judge: opencode]: Looks good.' });
+    const comment = commentFor(verdict, '### What I checked\n\n- board', SHA, RUN, true, meta);
+    expect(comment).toContain('Weaker judge notice');
+    expect(comment).toContain('weaker free fallback');
+  });
+
+  it('labels local independent-agent fallback runs and lists failed CI providers when all fail', () => {
+    const localMeta = { provider: null, weakerJudge: false, source: 'local' as const, judgeAgent: 'Devin-Reviewer', attempts: [] };
+    const verdict = parseVerdict('{"verdict":"PASS","summary":"Verified locally."}');
+    expect(statusFor(verdict, true, localMeta)).toEqual({ state: 'success', description: 'PASS [local: Devin-Reviewer]: Verified locally.' });
+    const localComment = commentFor(verdict, '### What I checked\n\n- all tests', SHA, undefined, true, localMeta);
+    expect(localComment).toContain('Local independent fallback');
+    expect(localComment).toContain('Devin-Reviewer');
+    expect(localComment).not.toContain('verdict-evidence');
+
+    const failedMeta = {
+      provider: null,
+      weakerJudge: false,
+      source: 'ci' as const,
+      allProvidersFailed: true,
+      attempts: [{ provider: 'codex' as const, outcome: 'provider-error' as const, reason: '401 Unauthorized' }],
+    };
+    expect(statusFor(undefined, true, failedMeta).description).toContain('No CI judge available');
+    const failedComment = commentFor(undefined, undefined, SHA, RUN, true, failedMeta);
+    expect(failedComment).toContain('CI providers tried');
+    expect(failedComment).toContain('401 Unauthorized');
+    expect(failedComment).toContain('--local --judge-agent');
+  });
+});

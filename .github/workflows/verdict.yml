@@ -35,12 +35,19 @@ permissions:
   contents: read
 
 env:
-  # The judge's model. The real-Coach check always uses Haiku (scripts/real-coach-check.ts).
+  # Provider priority order (configurable via GitHub Repository Variables, no workflow edits needed).
+  CI_PROVIDER_ORDER: ${{ vars.CI_PROVIDER_ORDER || 'codex,claude,opencode' }}
+  JUDGE_PROVIDER: ${{ vars.JUDGE_PROVIDER || '' }}
+  COACH_CHECK_PROVIDER: ${{ vars.COACH_CHECK_PROVIDER || '' }}
+  # Optional per-provider judge model overrides. The Claude real-Coach check always uses Haiku.
   JUDGE_MODEL: opus
-  # Limits on Claude usage: judge runs (counted by their Verdict comments), per PR and per UTC day.
+  CLAUDE_JUDGE_MODEL: ${{ vars.CLAUDE_JUDGE_MODEL || 'opus' }}
+  CODEX_JUDGE_MODEL: ${{ vars.CODEX_JUDGE_MODEL || '' }}
+  OPENCODE_JUDGE_MODEL: ${{ vars.OPENCODE_JUDGE_MODEL || '' }}
+  # Limits on judge runs (counted by their Verdict comments), per PR and per UTC day.
   MAX_RUNS_PER_PR: 3
   MAX_RUNS_PER_DAY: 10
-  # The most one judge run may spend, at API prices; Claude Code stops the run there.
+  # The most one Claude judge run may spend, at API prices; Claude Code stops the run there.
   JUDGE_BUDGET_USD: 5
   CLAUDE_CODE_VERSION: 2.1.310
   PR: ${{ github.event.pull_request.number || github.event.issue.number || inputs.pr }}
@@ -262,9 +269,15 @@ jobs:
             gh issue view "$n" --json number,title,body --jq '"# Issue #\(.number): \(.title)\n\n\(.body)\n"' >> "$IN/issues.md" || true
           done
 
-      - name: Install the app, the browser and Claude Code
+      - name: Install the app, the browser and judge CLIs
         if: steps.gather.outputs.fresh == 'yes'
         working-directory: pr
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          CODEX_API_KEY: ${{ secrets.CODEX_API_KEY }}
+          CODEX_AUTH_JSON: ${{ secrets.CODEX_AUTH_JSON }}
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
           npm ci
           npx playwright install --with-deps chromium
@@ -272,11 +285,19 @@ jobs:
           # A ready copy of the base branch, for the judge's before-and-after comparison.
           git worktree add --detach ../base "origin/$BASE"
           (cd ../base && npm ci && npx playwright install chromium && npm run build -w @chess-coach/web)
-          npm install -g "@anthropic-ai/claude-code@$CLAUDE_CODE_VERSION"
-          claude --version
+          if [ -n "$OPENAI_API_KEY" ] || [ -n "$CODEX_API_KEY" ] || [ -n "$CODEX_AUTH_JSON" ]; then
+            npm install -g @openai/codex
+            codex --version || true
+          fi
+          if [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ] || [ -n "$ANTHROPIC_API_KEY" ]; then
+            npm install -g "@anthropic-ai/claude-code@$CLAUDE_CODE_VERSION"
+            claude --version || true
+          fi
+          npm install -g opencode-ai
+          opencode --version || true
 
       - name: Real-Coach check, for a PR that touches the Coach
-        # The same check the desktop runs (.claude/skills/real-coach-check/), on the owner's token.
+        # The same check the desktop runs (.claude/skills/real-coach-check/), walking CI_PROVIDER_ORDER.
         # Once more if it couldn't run (exit 2, such as a Think deeper timeout). The post job posts it.
         # Running out of time here mustn't stop the judge, so the step can fail without failing the job.
         # A failed check (exit 1) is a FAIL already, so the judge doesn't run.
@@ -286,19 +307,27 @@ jobs:
         timeout-minutes: 25
         continue-on-error: true
         env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          CODEX_API_KEY: ${{ secrets.CODEX_API_KEY }}
+          CODEX_AUTH_JSON: ${{ secrets.CODEX_AUTH_JSON }}
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+          OPENCODE_ZEN_API_KEY: ${{ secrets.OPENCODE_ZEN_API_KEY }}
         run: |
           mkdir -p "$OUT/real-coach"
           for attempt in 1 2; do
             code=0
-            node scripts/real-coach-check.ts > "$OUT/real-coach/result.json" 2> "$OUT/real-coach/log.txt" || code=$?
+            node scripts/real-coach-check.ts --provider auto > "$OUT/real-coach/result.json" 2> "$OUT/real-coach/log.txt" || code=$?
             echo "Real-Coach check, attempt $attempt: exit $code"
             [ "$code" != 2 ] && break
           done
           echo "$code" > "$OUT/real-coach/exit"
           echo "exit=$code" >> "$GITHUB_OUTPUT"
           tail -n 5 "$OUT/real-coach/log.txt"
-          { jq '{ok, description, calls: [.calls[] | select((.problems | length) > 0 or (.warnings | length) > 0)]}' "$OUT/real-coach/result.json" 2>/dev/null \
+          { jq '{ok, provider, description, calls: [.calls[] | select((.problems | length) > 0 or (.warnings | length) > 0)]}' "$OUT/real-coach/result.json" 2>/dev/null \
             || cat "$OUT/real-coach/log.txt"; } > "$IN/real-coach.txt"
           if [ "$code" = 1 ]; then
             jq -n --arg d "$(jq -r '.description // ""' "$OUT/real-coach/result.json")" \
@@ -312,30 +341,48 @@ jobs:
         working-directory: pr
         timeout-minutes: 55
         env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          CODEX_API_KEY: ${{ secrets.CODEX_API_KEY }}
+          CODEX_AUTH_JSON: ${{ secrets.CODEX_AUTH_JSON }}
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+          OPENCODE_ZEN_API_KEY: ${{ secrets.OPENCODE_ZEN_API_KEY }}
         run: |
-          prompt=$(sed -e "s|{{PR}}|$PR|g" -e "s|{{SHA}}|$SHA|g" -e "s|{{BASE}}|$BASE|g" -e "s|{{IN}}|$IN|g" -e "s|{{OUT}}|$OUT|g" \
-            -e "s|{{BASE_DIR}}|$GITHUB_WORKSPACE/base|g" ../trusted/.github/verdict-prompt.md)
-          # Marks a run that used Claude, so it counts toward the limits.
+          sed -e "s|{{PR}}|$PR|g" -e "s|{{SHA}}|$SHA|g" -e "s|{{BASE}}|$BASE|g" -e "s|{{IN}}|$IN|g" -e "s|{{OUT}}|$OUT|g" \
+            -e "s|{{BASE_DIR}}|$GITHUB_WORKSPACE/base|g" ../trusted/.github/verdict-prompt.md > "$IN/verdict-prompt.md"
+          # Marks a run that started the judge, so it counts toward the limits.
           touch "$OUT/started"
-          claude -p "$prompt" --model "$JUDGE_MODEL" --max-budget-usd "$JUDGE_BUDGET_USD" \
-            --dangerously-skip-permissions --output-format json < /dev/null > "$OUT/claude.json" \
-            || echo "Claude Code exited with $?"
-          jq '{subtype, num_turns, duration_ms, total_cost_usd, is_error}' "$OUT/claude.json" || true
+          node ../trusted/scripts/run-judge.ts \
+            --prompt-file "$IN/verdict-prompt.md" \
+            --out "$OUT" \
+            --workdir "$PWD" \
+            --max-budget-usd "$JUDGE_BUDGET_USD" \
+            || echo "Judge runner exited with $?"
+          if [ -f "$OUT/claude.json" ]; then
+            jq '{subtype, num_turns, duration_ms, total_cost_usd, is_error}' "$OUT/claude.json" || true
+          fi
 
       - name: Leave no secret in what gets published
         # Artifacts and comments on a public repository are public, and log masking doesn't reach them.
         if: always()
         env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          CODEX_API_KEY: ${{ secrets.CODEX_API_KEY }}
+          CODEX_AUTH_JSON: ${{ secrets.CODEX_AUTH_JSON }}
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+          OPENCODE_ZEN_API_KEY: ${{ secrets.OPENCODE_ZEN_API_KEY }}
         run: |
           mkdir -p "$OUT"
           cp -r pr/evidence "$OUT/app-evidence" 2>/dev/null || true
-          if [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ]; then
-            grep -rlF -- "$CLAUDE_CODE_OAUTH_TOKEN" "$OUT" | while read -r f; do
-              echo "Removed $f: it contained a secret."; rm -f "$f"
-            done || true
-          fi
+          rm -f "$HOME/.codex/auth.json"
+          node trusted/scripts/run-judge.ts --scrub "$OUT"
 
       - name: Keep the judge's files
         if: always()

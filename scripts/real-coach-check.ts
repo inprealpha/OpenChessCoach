@@ -38,6 +38,7 @@ import { COACH_PROVIDERS, type CoachJob, type CoachProvider } from '@chess-coach
 import { CoachClient } from '../packages/backend/src/client.ts';
 import type { CoachCall, CoachEngine, CoachPort } from '../packages/backend/src/coach/port.ts';
 import { avoidedTerms } from './glossary-lint.ts';
+import { hasProviderCredentials, isRetryableProviderFailure, isWeakerJudge, materializeCodexAuth, resolveProviderOrder } from './ci-providers.ts';
 
 export const STATUS_CONTEXT = 'real Coach';
 /** The model every call in the check uses: Claude Code resolves the alias to the latest Haiku. */
@@ -327,32 +328,38 @@ async function driveEveryJob(client: CoachClient, root: URL): Promise<Received[]
 export interface Verdict {
   ok: boolean;
   sha: string;
+  provider?: CoachProvider;
+  weakerFallback?: boolean;
   calls: CallVerdict[];
   description: string;
 }
 
 /** The run's verdict: any problem fails it, and the status it posts counts the warnings. */
-export function summarize(calls: readonly CallVerdict[]): { ok: boolean; description: string } {
+export function summarize(calls: readonly CallVerdict[], providerTag?: string): { ok: boolean; description: string } {
+  const prefix = providerTag ? `[${providerTag}] ` : '';
   const failed = calls.filter((c) => c.problems.length);
-  if (failed.length) return { ok: false, description: `${failed.length} of ${calls.length} Coach calls failed: ${failed[0]?.problems[0] ?? ''}`.slice(0, MAX_DESCRIPTION - 1) };
-  const passed = `${calls.length} Coach ${calls.length === 1 ? 'call' : 'calls'} passed the structural checks`;
+  if (failed.length) return { ok: false, description: `${prefix}${failed.length} of ${calls.length} Coach calls failed: ${failed[0]?.problems[0] ?? ''}`.slice(0, MAX_DESCRIPTION - 1) };
+  const passed = `${prefix}${calls.length} Coach ${calls.length === 1 ? 'call' : 'calls'} passed the structural checks`;
   const warnings = calls.flatMap((c) => c.warnings);
   if (!warnings.length) return { ok: true, description: passed };
   return { ok: true, description: `${passed}, ${warnings.length} ${warnings.length === 1 ? 'warning' : 'warnings'}: ${warnings[0]}`.slice(0, MAX_DESCRIPTION - 1) };
 }
 
+export type RealCoachProviderArg = CoachProvider | 'auto';
+
 export interface RealCoachArgs {
   fake: boolean;
   post: boolean;
-  provider: CoachProvider;
+  provider: RealCoachProviderArg;
   model: string;
 }
 
 export function parseRealCoachArgs(argv: readonly string[]): RealCoachArgs {
   let fake = false;
   let postResult = false;
-  let provider: CoachProvider = 'claude';
+  let provider: RealCoachProviderArg = 'claude';
   let model: string | undefined;
+  const validProviders: readonly string[] = [...COACH_PROVIDERS, 'auto'];
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === '--fake') {
@@ -362,13 +369,12 @@ export function parseRealCoachArgs(argv: readonly string[]): RealCoachArgs {
     } else if (arg === '--provider') {
       const next = argv[++i];
       if (!next || next.startsWith('--')) {
-        throw new Error(`Missing value for --provider. Expected one of: ${COACH_PROVIDERS.join(', ')}.`);
+        throw new Error(`Missing value for --provider. Expected one of: ${validProviders.join(', ')}.`);
       }
-      const value = next as CoachProvider;
-      if (!COACH_PROVIDERS.includes(value)) {
-        throw new Error(`Unknown provider "${value}". Expected one of: ${COACH_PROVIDERS.join(', ')}.`);
+      if (!validProviders.includes(next)) {
+        throw new Error(`Unknown provider "${next}". Expected one of: ${validProviders.join(', ')}.`);
       }
-      provider = value;
+      provider = next as RealCoachProviderArg;
     } else if (arg === '--model') {
       const next = argv[++i];
       if (!next || next.startsWith('--')) {
@@ -414,11 +420,14 @@ async function createProviderCoach(
   return { coach: openCode, close: () => openCode.close() };
 }
 
-async function run(args: Pick<RealCoachArgs, 'fake' | 'provider' | 'model'>): Promise<Verdict> {
+async function runSingleProvider(args: { fake: boolean; provider: CoachProvider; model: string; tagProvider?: boolean }): Promise<Verdict> {
   const root = new URL('../', import.meta.url);
   const { FakeCoach } = await import('../packages/backend/src/coach/fake.ts');
   const { startVerifyInstance } = await import('../packages/backend/src/verify/instance.ts');
   const sha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+  if (!args.fake && args.provider === 'codex') {
+    materializeCodexAuth();
+  }
   const created: { coach: CoachPort; close?: () => void | Promise<void> } = args.fake
     ? { coach: new FakeCoach({ chunkDelayMs: 0 }) }
     : await createProviderCoach(args.provider);
@@ -455,11 +464,56 @@ async function run(args: Pick<RealCoachArgs, 'fake' | 'provider' | 'model'>): Pr
     const jobs = new Set(calls.map((c) => c.job));
     const missing = (Object.keys(MAX_WORDS) as CoachJob[]).filter((j) => !jobs.has(j));
     if (missing.length) calls.push({ job: missing[0] as CoachJob, words: 0, maxWords: 0, problems: [`no Coach call was made for ${missing.join(', ')}`], warnings: [] });
-    const { ok, description } = summarize(calls);
-    return { ok, sha, calls, description };
+    const weakerFallback = !args.fake && args.provider === 'opencode' && isWeakerJudge('opencode');
+    const providerTag = args.tagProvider && !args.fake ? (weakerFallback ? 'opencode free' : args.provider) : undefined;
+    const { ok, description } = summarize(calls, providerTag);
+    return { ok, sha, ...(args.fake ? {} : { provider: args.provider, weakerFallback }), calls, description };
   } finally {
     await created.close?.();
   }
+}
+
+export async function runWithFallback(
+  order: readonly CoachProvider[],
+  tryProvider: (provider: CoachProvider) => Promise<Verdict>,
+  isConfigured: (provider: CoachProvider) => boolean = (p) => hasProviderCredentials(p).configured,
+): Promise<Verdict> {
+  const errors: string[] = [];
+  for (const provider of order) {
+    if (!isConfigured(provider)) {
+      errors.push(`${provider}: skipped (no credentials configured)`);
+      continue;
+    }
+    try {
+      return await tryProvider(provider);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      if (isRetryableProviderFailure(message) || /is not ready|not logged in|not installed/i.test(message)) {
+        errors.push(`${provider}: ${message}`);
+        continue;
+      }
+      throw err;
+    }
+  }
+  throw new Error(`No real-Coach provider succeeded (${errors.join('; ')}).`);
+}
+
+async function run(args: Pick<RealCoachArgs, 'fake' | 'provider' | 'model'>): Promise<Verdict> {
+  if (args.fake) {
+    return runSingleProvider({ fake: true, provider: 'claude', model: args.model });
+  }
+  if (args.provider !== 'auto') {
+    return runSingleProvider({ fake: false, provider: args.provider, model: args.model });
+  }
+  const order = resolveProviderOrder('coach', process.env);
+  return runWithFallback(order, (provider) =>
+    runSingleProvider({
+      fake: false,
+      provider,
+      model: provider === 'claude' ? CHECK_MODEL : 'default',
+      tagProvider: true,
+    }),
+  );
 }
 
 function post(verdict: Verdict): void {

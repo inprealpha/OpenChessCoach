@@ -111,6 +111,9 @@ function isExecutable(path: string): boolean {
 export async function checkClaude(explicit?: string): Promise<ClaudeCheck> {
   const path = findClaude(explicit);
   if (!path) return { ok: false, message: installFix() };
+  if (process.env.ANTHROPIC_API_KEY?.trim()) {
+    return { ok: true, path, message: 'Claude Code is installed and configured with ANTHROPIC_API_KEY.' };
+  }
   // A .cmd shim only runs through a shell: one quoted command line, so a home folder with a space
   // in it still works (an args array with a shell is deprecated on Node 24).
   const output = await new Promise<{ stdout: string; failed: boolean }>((resolve) => {

@@ -1,0 +1,63 @@
+# Weekly health check for configured CI AI provider logins (ADR 0013).
+# Tests every saved secret (Codex, Claude, OpenCode) with a tiny prompt and opens or updates a
+# plain-English GitHub issue if any saved login stopped working.
+name: CI Provider Health
+
+on:
+  schedule:
+    - cron: '17 9 * * 1' # Mondays 09:17 UTC
+  workflow_dispatch:
+
+concurrency:
+  group: ci-provider-health
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  health:
+    name: Check saved CI provider logins
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ github.token }}
+      CI_PROVIDER_ORDER: ${{ vars.CI_PROVIDER_ORDER || 'codex,claude,opencode' }}
+      CLAUDE_CODE_VERSION: '2.1.310'
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      CODEX_API_KEY: ${{ secrets.CODEX_API_KEY }}
+      CODEX_AUTH_JSON: ${{ secrets.CODEX_AUTH_JSON }}
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+      OPENCODE_ZEN_API_KEY: ${{ secrets.OPENCODE_ZEN_API_KEY }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install configured provider CLIs
+        run: |
+          if [ -n "$OPENAI_API_KEY" ] || [ -n "$CODEX_API_KEY" ] || [ -n "$CODEX_AUTH_JSON" ]; then
+            npm install -g @openai/codex
+            codex --version || true
+          fi
+          if [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ] || [ -n "$ANTHROPIC_API_KEY" ]; then
+            npm install -g "@anthropic-ai/claude-code@$CLAUDE_CODE_VERSION"
+            claude --version || true
+          fi
+          npm install -g opencode-ai
+          opencode --version || true
+
+      - name: Probe configured CI providers and report broken logins
+        run: |
+          node scripts/check-ci-providers.ts \
+            --report-issue \
+            --run-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"

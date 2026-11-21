@@ -36,6 +36,9 @@ scripts/glossary-lint.ts
 scripts/glossary-allowlist.json
 scripts/real-coach-check.ts
 scripts/verdict.ts
+scripts/ci-providers.ts
+scripts/run-judge.ts
+scripts/check-ci-providers.ts
 scripts/before-after.ts
 scripts/pr-description.ts
 scripts/wait-ci.ts

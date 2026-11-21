@@ -176,12 +176,16 @@ case ":${PATH}:" in
     case "${SHELL:-}" in
       */zsh)  SHELL_RC="$HOME/.zshrc" ;;
       */bash)
-        # macOS Terminal opens login bash shells, which read ~/.bash_profile (or ~/.profile) and ignore ~/.bashrc.
+        # macOS Terminal opens login bash shells, which read the first of ~/.bash_profile, ~/.bash_login, or ~/.profile (and ignore ~/.bashrc).
         if [ "$OS" = "Darwin" ]; then
-          if [ -f "$HOME/.bash_profile" ] || [ ! -f "$HOME/.profile" ]; then
+          if [ -f "$HOME/.bash_profile" ]; then
             SHELL_RC="$HOME/.bash_profile"
-          else
+          elif [ -f "$HOME/.bash_login" ]; then
+            SHELL_RC="$HOME/.bash_login"
+          elif [ -f "$HOME/.profile" ]; then
             SHELL_RC="$HOME/.profile"
+          else
+            SHELL_RC="$HOME/.bash_profile"
           fi
         else
           SHELL_RC="$HOME/.bashrc"

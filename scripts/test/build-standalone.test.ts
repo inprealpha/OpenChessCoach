@@ -75,6 +75,15 @@ describe('build-standalone helpers', () => {
         expect(readFileSync(join(homeFresh, '.bash_profile'), 'utf8')).toContain('.local/bin');
         expect(existsSync(join(homeFresh, '.bashrc'))).toBe(false);
 
+        const homeWithBashLogin = join(work, 'home-bash-login');
+        mkdirSync(homeWithBashLogin, { recursive: true });
+        writeFileSync(join(homeWithBashLogin, '.bash_login'), '# existing bash_login\n');
+        writeFileSync(join(homeWithBashLogin, '.profile'), '# existing profile\n');
+        runInstall(homeWithBashLogin);
+        expect(existsSync(join(homeWithBashLogin, '.bash_profile'))).toBe(false);
+        expect(readFileSync(join(homeWithBashLogin, '.bash_login'), 'utf8')).toContain('.local/bin');
+        expect(readFileSync(join(homeWithBashLogin, '.profile'), 'utf8')).not.toContain('.local/bin');
+
         const homeWithProfile = join(work, 'home-profile');
         mkdirSync(homeWithProfile, { recursive: true });
         writeFileSync(join(homeWithProfile, '.profile'), '# existing profile\n');

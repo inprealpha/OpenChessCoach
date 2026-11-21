@@ -589,9 +589,23 @@ function post(verdict: Verdict): void {
   execFileSync('gh', ['api', `repos/{owner}/{repo}/statuses/${verdict.sha}`, '-f', `state=${verdict.ok ? 'success' : 'failure'}`, '-f', `context=${STATUS_CONTEXT}`, '-f', `description=${verdict.description}`], { stdio: 'inherit' });
 }
 
+function hasPassingRealCoachStatus(sha: string): boolean {
+  try {
+    const state = execFileSync(
+      'gh',
+      ['api', `repos/{owner}/{repo}/commits/${sha}/status`, '--jq', `[.statuses[] | select(.context == "${STATUS_CONTEXT}")][0].state // ""`],
+      { encoding: 'utf8' },
+    ).trim();
+    return state === 'success';
+  } catch {
+    return false;
+  }
+}
+
 function postErrorStatus(description: string): void {
   if (execFileSync('git', ['status', '--porcelain'], { encoding: 'utf8' }).trim()) return;
   const sha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+  if (hasPassingRealCoachStatus(sha)) return;
   const clipped = description.length <= MAX_DESCRIPTION ? description : `${description.slice(0, MAX_DESCRIPTION - 1)}…`;
   execFileSync(
     'gh',

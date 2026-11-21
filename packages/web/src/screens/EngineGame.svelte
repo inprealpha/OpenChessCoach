@@ -550,7 +550,7 @@
   }
 </script>
 
-<section class="screen board-screen engine-game" class:sheet-full={sheet.shown}>
+<section class="screen board-screen engine-game" class:sheet-full={sheet.shown} {@attach sheet.frame}>
   <header class="frame-head">
     <h1>Engine Game</h1>
     {#if game}

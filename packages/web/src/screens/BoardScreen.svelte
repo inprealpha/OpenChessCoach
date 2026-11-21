@@ -349,7 +349,7 @@
   });
 </script>
 
-<section class="screen board-screen board-free" class:sheet-full={sheet.shown}>
+<section class="screen board-screen board-free" class:sheet-full={sheet.shown} {@attach sheet.frame}>
   <header class="frame-head">
     <h1>Board</h1>
     <p class="head-line">{outcomeOf(boardFen) ? 'Game over' : `${SIDE_NAMES[turnOf(boardFen)]} to move`}</p>

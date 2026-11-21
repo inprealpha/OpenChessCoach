@@ -1,6 +1,6 @@
 // One Engine for the whole app, with a cache so each position is analysed once.
 import { gradeFromAnalyses, type GameSoFar, type GradedMove } from '@chess-coach/shared/analysis';
-import { outcomeOf } from '@chess-coach/shared/chess';
+import { INITIAL_FEN, outcomeOf } from '@chess-coach/shared/chess';
 import type { Analysis, PlayOptions } from '@chess-coach/shared/engine';
 import { findThreat, type Threat } from '@chess-coach/shared/threat';
 import { api } from '../api.svelte.ts';
@@ -18,6 +18,21 @@ async function startEngine(threads: number): Promise<BrowserEngine> {
   const e = new BrowserEngine({ threads, deterministic: api.engine.singleThread, startTimeoutMs: 20_000 });
   try {
     await e.whenReady();
+    // Multi-threaded Stockfish can answer readyok and still crash on its first search (e.g. WebKit
+    // pthread WASM memory errors). Verify one shallow search succeeds before keeping it.
+    if (threads > 1) {
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      try {
+        await Promise.race([
+          e.analyse(INITIAL_FEN, { depth: 1, multiPv: 1 }),
+          new Promise<never>((_, reject) => {
+            timer = setTimeout(() => reject(new Error('The multi-threaded Engine did not answer in time.')), 5_000);
+          }),
+        ]);
+      } finally {
+        clearTimeout(timer);
+      }
+    }
     return e;
   } catch (err) {
     e.dispose();

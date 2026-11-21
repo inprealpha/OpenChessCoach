@@ -35,6 +35,21 @@ describe('starting the Engine', () => {
     t.fail('Out of memory');
     await expect(engine.whenReady()).rejects.toThrow('Out of memory');
   });
+
+  it('rejects an in-flight search and queued work when the transport errors after readyok', async () => {
+    const t = transport(true);
+    const engine = new UciEngine(t, { threads: 4, deterministic: false });
+    await engine.whenReady();
+    const START = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+    const running = engine.analyse(START, { depth: 4, multiPv: 1 });
+    const queued = engine.bestMove(START, { skill: 20, depth: 4 });
+    // Let the first job start before the transport crashes (as on WebKit multi-threaded WASM).
+    await Promise.resolve();
+    t.fail('Out of bounds memory access');
+    await expect(running).rejects.toThrow('Out of bounds memory access');
+    await expect(queued).rejects.toThrow('Out of bounds memory access');
+    await expect(engine.analyse(START, { depth: 1, multiPv: 1 })).rejects.toThrow('Out of bounds memory access');
+  });
 });
 
 describe('playing a move', () => {

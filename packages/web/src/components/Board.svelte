@@ -3,7 +3,7 @@
   // drag for touch and mouse, an overlay for arrows (the Coach's, a Review's) and highlights, the
   // last Move Grade's symbol on its own layer, and a legend of the arrows' colours under it.
   import type { Arrow } from '@chess-coach/shared/coach/types';
-  import { untrack } from 'svelte';
+  import { tick, untrack } from 'svelte';
   import { illegalReason, isCheck, isPromotion, legalDests, piecesOf, playUci, SIDE_NAMES, turnOf, type BoardPiece, type Side } from '@chess-coach/shared/chess';
   import { ARROW_LOOK, coachArrows, drawOrder, legendOf, type ArrowKind, type BoardArrow } from '../lib/arrows.ts';
   import type { GradeMark } from '../lib/grades.ts';
@@ -44,10 +44,15 @@
   const ROLE_CHAR: Record<string, string> = { pawn: 'P', knight: 'N', bishop: 'B', rook: 'R', queen: 'Q', king: 'K' };
 
   let selected = $state<string | null>(null);
+  let activeSquare = $state<string>('e2');
   let message = $state('');
   let promotion = $state<{ from: string; to: string } | null>(null);
   let drag = $state<{ from: string; piece: BoardPiece; x: number; y: number; moved: boolean } | null>(null);
   let boardEl: HTMLDivElement | undefined = $state();
+  let promoEl: HTMLDivElement | undefined = $state();
+  /** Focus arrived on the board via pointer, so ← → keep stepping moves instead of moving across squares. */
+  let byPointer = false;
+  let promoByPointer = false;
 
   const pieces = $derived(new Map(piecesOf(fen).map((p) => [p.square, p])));
   const toMove = $derived(turnOf(fen));
@@ -214,7 +219,9 @@
     }
     // A promoting pawn goes back to its square while the Player chooses, so it slides in even when dragged.
     if (isPromotion(fen, from, to)) {
+      promoByPointer = byPointer || dragged;
       promotion = { from, to };
+      void tick().then(() => promoEl?.querySelector<HTMLButtonElement>('button')?.focus());
       return;
     }
     message = '';
@@ -225,10 +232,78 @@
 
   function promote(role: string): void {
     if (!promotion) return;
-    const uci = `${promotion.from}${promotion.to}${role}`;
+    const { from, to } = promotion;
+    const restoreKeyboard = !promoByPointer;
+    const uci = `${from}${to}${role}`;
     promotion = null;
     selected = null;
     onmove?.(uci);
+    if (restoreKeyboard) {
+      byPointer = false;
+      activeSquare = to;
+      void tick().then(() => boardEl?.querySelector<HTMLButtonElement>(`[data-square="${to}"]`)?.focus());
+    }
+  }
+
+  function cancelPromotion(restoreKeyboard: boolean): void {
+    const target = promotion?.to ?? activeSquare;
+    promotion = null;
+    selected = null;
+    if (restoreKeyboard) {
+      byPointer = false;
+      activeSquare = target;
+      void tick().then(() => boardEl?.querySelector<HTMLButtonElement>(`[data-square="${target}"]`)?.focus());
+    }
+  }
+
+  function onBoardFocusOut(e: FocusEvent): void {
+    if (!boardEl?.contains(e.relatedTarget as Node | null)) byPointer = false;
+  }
+
+  function onSquareKeyDown(e: KeyboardEvent, sq: string): void {
+    if (promotion) return;
+    if (e.key === 'Escape' && selected) {
+      e.preventDefault();
+      selected = null;
+      return;
+    }
+    if (byPointer || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+    const idx = squares.indexOf(sq);
+    if (idx < 0) return;
+    let row = Math.floor(idx / 8);
+    let col = idx % 8;
+    if (e.key === 'ArrowUp') row = Math.max(0, row - 1);
+    else if (e.key === 'ArrowDown') row = Math.min(7, row + 1);
+    else if (e.key === 'ArrowLeft') col = Math.max(0, col - 1);
+    else if (e.key === 'ArrowRight') col = Math.min(7, col + 1);
+    else if (e.key === 'Home') col = 0;
+    else if (e.key === 'End') col = 7;
+    else return;
+    e.preventDefault();
+    const next = squares[row * 8 + col];
+    if (!next) return;
+    activeSquare = next;
+    boardEl?.querySelector<HTMLButtonElement>(`[data-square="${next}"]`)?.focus();
+  }
+
+  function onPromoKeyDown(e: KeyboardEvent): void {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      cancelPromotion(true);
+      return;
+    }
+    if (e.key !== 'Tab' || !promoEl) return;
+    const buttons = [...promoEl.querySelectorAll<HTMLButtonElement>('button')];
+    if (!buttons.length) return;
+    const first = buttons[0] as HTMLButtonElement;
+    const last = buttons[buttons.length - 1] as HTMLButtonElement;
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
   }
 
   function click(sq: string): void {
@@ -265,6 +340,7 @@
   }
 
   function pointerDown(e: PointerEvent, sq: string): void {
+    byPointer = true;
     const p = pieces.get(sq);
     if (!p || !canMove || p.color !== toMove || e.button !== 0) return;
     drag = { from: sq, piece: p, x: e.clientX, y: e.clientY, moved: false };
@@ -311,10 +387,28 @@
   const headId = (kind: ArrowKind): string => `head-${boardId}-${kind}`;
 </script>
 
-<svelte:window onpointermove={pointerMove} onpointerup={pointerUp} />
+<svelte:window
+  onpointermove={pointerMove}
+  onpointerup={pointerUp}
+  onkeydown={(e) => {
+    if (promotion && e.key === 'Escape') {
+      e.preventDefault();
+      cancelPromotion(true);
+    }
+  }}
+/>
 
 <div class="wrap">
-  <div class="board" role="group" aria-label={label} tabindex="-1" bind:this={boardEl} data-fen={fen} data-orientation={orientation}>
+  <div
+    class="board"
+    role="group"
+    aria-label={label}
+    tabindex="-1"
+    bind:this={boardEl}
+    data-fen={fen}
+    data-orientation={orientation}
+    onfocusout={onBoardFocusOut}
+  >
     {#each [0, 1, 2, 3, 4, 5, 6, 7] as row (row)}
       <div class="row">
         {#each squares.slice(row * 8, row * 8 + 8) as sq, col (sq)}
@@ -331,8 +425,11 @@
             class:highlight={highlights.includes(sq)}
             aria-label={squareName(sq)}
             aria-pressed={selected === sq}
+            tabindex={activeSquare === sq ? 0 : -1}
             data-square={sq}
+            onfocus={() => (activeSquare = sq)}
             onclick={() => click(sq)}
+            onkeydown={(e) => onSquareKeyDown(e, sq)}
             onpointerdown={(e) => pointerDown(e, sq)}
           >
             {#if p && !(drag?.moved && drag.from === sq)}
@@ -396,13 +493,13 @@
   </div>
 
   {#if promotion}
-    <div class="promotion" role="dialog" aria-label="Choose a piece to promote to">
+    <div class="promotion" role="dialog" aria-modal="true" aria-label="Choose a piece to promote to" tabindex="-1" bind:this={promoEl} onkeydown={onPromoKeyDown}>
       {#each [['q', 'queen'], ['r', 'rook'], ['b', 'bishop'], ['n', 'knight']] as [code, name] (code)}
         <button type="button" onclick={() => promote(code as string)} aria-label={`Promote to ${name}`}>
           <img src={`/pieces/${toMove === 'white' ? 'w' : 'b'}${ROLE_CHAR[name as string]}.svg`} alt="" />
         </button>
       {/each}
-      <button type="button" class="cancel" onclick={() => (promotion = null)}>Cancel</button>
+      <button type="button" class="cancel" onclick={(e) => cancelPromotion(e.detail === 0)}>Cancel</button>
     </div>
   {/if}
   <div class="under">

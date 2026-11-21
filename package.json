@@ -20,6 +20,7 @@
     "lint": "eslint . && node scripts/glossary-lint.ts",
     "test": "vitest run",
     "test:journeys": "playwright test",
+    "smoke:coach": "node scripts/live-coach-smoke.ts",
     "check:paths": "node scripts/protected-paths.ts --check",
     "wait:ci": "node scripts/wait-ci.ts"
   },

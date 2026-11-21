@@ -23,7 +23,7 @@ export interface AllowEntry {
 /** Every term CONTEXT.md lists after "_Avoid_:". */
 export function avoidedTerms(context: string): string[] {
   const terms = new Set<string>();
-  for (const line of context.split('\n')) {
+  for (const line of context.split(/\r?\n/)) {
     const m = line.match(/^_Avoid_:\s*(.+)$/);
     if (!m) continue;
     for (const t of (m[1] as string).split(',')) if (t.trim()) terms.add(t.trim().toLowerCase());

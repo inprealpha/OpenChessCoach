@@ -84,6 +84,8 @@ export interface RealCoachOptions {
 
 export class RealCoach implements CoachPort {
   readonly name = 'real' as const;
+  readonly provider = 'claude' as const;
+  readonly supportsEngineTool = true;
   private readonly claudePath: string | undefined;
   private readonly deadlineMs: number;
   private readonly query: typeof query;

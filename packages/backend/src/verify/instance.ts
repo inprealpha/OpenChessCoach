@@ -7,6 +7,7 @@ import { join } from 'node:path';
 import { CoachClient, pairDevice } from '../client.ts';
 import { FakeClock } from '../clock.ts';
 import { FakeCoach } from '../coach/fake.ts';
+import { CoachRouter } from '../coach/router.ts';
 import { openDb } from '../db.ts';
 import { appVersion, webRoot } from '../runtime.ts';
 import { startApp, type AppOptions, type RunningApp } from '../server.ts';
@@ -66,6 +67,22 @@ export async function startVerifyInstance(options: VerifyOptions = {}): Promise<
   const dataDir = options.dataDir ?? mkdtempSync(join(tmpdir(), 'chess-coach-verify-'));
   const clock = new FakeClock();
   const coach = new FakeCoach({ chunkDelayMs: options.chunkDelayMs ?? 5, recordings: coachRecordings() });
+  const fakeFor = (provider: 'claude' | 'codex' | 'pi' | 'opencode', supportsEngineTool: boolean): CoachPort => ({
+    name: 'fake',
+    provider,
+    supportsEngineTool,
+    ask: (call, onText) => coach.ask(call, onText),
+    status: () => coach.status(),
+  });
+  const routedCoach = new CoachRouter({
+    providers: {
+      claude: fakeFor('claude', true),
+      codex: fakeFor('codex', false),
+      pi: fakeFor('pi', true),
+      opencode: fakeFor('opencode', false),
+    },
+    initial: 'claude',
+  });
   const seeded = openDb(dataDir);
   seed(seeded, clock, options.seed ?? 'default');
   seeded.close();
@@ -76,7 +93,7 @@ export async function startVerifyInstance(options: VerifyOptions = {}): Promise<
     port: options.port ?? 0,
     webRoot: options.webRoot ?? webRoot(),
     verify: true,
-    coach: options.coachPort ?? coach,
+    coach: options.coachPort ?? routedCoach,
     clock,
     version: appVersion(),
     engine: VERIFY_ENGINE,

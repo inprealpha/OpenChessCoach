@@ -407,6 +407,44 @@ test.describe('a desktop that goes silent', () => {
     await page.clock.runFor('00:15');
     await expect(connection(page)).toHaveText(/Desktop connected/);
     await expect(page.getByRole('button', { name: 'Ask the Coach why' })).toBeEnabled();
+    await expect(coachPanel(page)).not.toContainText('Your desktop can’t be reached');
+  });
+
+  test('an interrupted Why Question stays visible while offline, then clears its stale offline error on reconnect while keeping the draft ready to ask', async ({ page, app }) => {
+    let silent = false;
+    await page.routeWebSocket(/\/ws\b/, (ws) => {
+      const server = ws.connectToServer();
+      ws.onMessage((m) => {
+        if (!silent) server.send(m);
+      });
+      server.onMessage((m) => {
+        if (!silent) ws.send(m);
+      });
+    });
+    await page.route(/\/api\//, (route) => (silent ? route.abort('connectionrefused') : route.continue()));
+    await page.clock.install();
+    await page.goto(`${app.url}/#pair=${app.code}`);
+    await expect(connection(page)).toHaveText(/Desktop connected/);
+    await page.goto(`${app.url}/#/board`);
+    await play(page, 'e2e4');
+    await page.getByRole('tab', { name: 'Coach' }).click();
+
+    const askBox = page.getByLabel('Your Why Question');
+    await askBox.fill('Why play e4 on move one?');
+    silent = true;
+    await page.getByRole('button', { name: 'Ask the Coach why' }).click();
+    await page.clock.runFor('00:20');
+    await expect(connection(page)).toHaveText(/Desktop offline/);
+    await expect(coachPanel(page)).toContainText('Why play e4 on move one?');
+    await expect(coachPanel(page)).toContainText('Your desktop can’t be reached');
+    await expect(askBox).toHaveValue('Why play e4 on move one?');
+
+    silent = false;
+    await page.clock.runFor('00:15');
+    await expect(connection(page)).toHaveText(/Desktop connected/);
+    await expect(coachPanel(page)).toContainText('Coach ready');
+    await expect(coachPanel(page)).not.toContainText('Your desktop can’t be reached');
+    await expect(askBox).toHaveValue('Why play e4 on move one?');
   });
 
   test('on a phone, a Player Profile save the silent desktop never answers says so beside Save, and the greyed-out buttons say why', async ({ page, app }) => {

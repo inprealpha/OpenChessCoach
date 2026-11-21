@@ -10,6 +10,8 @@ export interface Entry {
   text: string;
   streaming: boolean;
   error?: boolean;
+  /** Shown because the desktop was unreachable; cleared automatically once it reconnects. */
+  offline?: boolean;
   note?: string | null;
   /** How many questions the Coach asked the Engine for this reply, with Think deeper on. */
   engineQuestions?: number;
@@ -73,7 +75,14 @@ export class CoachThread {
   /** Shows why something the Player asked for failed, such as an error from the desktop's Engine. */
   sayError(err: unknown): void {
     const text = err instanceof ApiError ? err.message : 'Something went wrong. Try again.';
-    this.entries = [...this.entries, { id: nextEntry++, from: 'coach', text, streaming: false, error: true }];
+    const offline = err instanceof ApiError && err.code === 'offline';
+    this.entries = [...this.entries, { id: nextEntry++, from: 'coach', text, streaming: false, error: true, ...(offline ? { offline: true } : {}) }];
+  }
+
+  /** Drops offline failure entries once the desktop reconnects so stale errors don't linger beside Coach ready. */
+  clearOfflineErrors(): void {
+    if (!this.entries.some((e) => e.offline)) return;
+    this.entries = this.entries.filter((e) => !e.offline);
   }
 
   /**
@@ -112,8 +121,15 @@ export class CoachThread {
       return reply;
     } catch (err) {
       const message = err instanceof ApiError ? err.message : 'The Coach couldn’t answer.';
-      update(() => ({ ...entry, text: message, streaming: false, error: true }));
-      if (said) this.entries = this.entries.filter((e) => e.id !== said.id);
+      const offline = err instanceof ApiError && err.code === 'offline';
+      update(() => ({ ...entry, text: message, streaming: false, error: true, ...(offline ? { offline: true } : {}) }));
+      if (said) {
+        if (offline) {
+          this.entries = this.entries.map((e) => (e.id === said.id ? { ...e, offline: true } : e));
+        } else {
+          this.entries = this.entries.filter((e) => e.id !== said.id);
+        }
+      }
       if (call === this.calls) this.failed = true;
       return undefined;
     } finally {

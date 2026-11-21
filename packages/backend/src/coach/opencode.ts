@@ -824,7 +824,7 @@ export class OpenCodeCoach implements CoachPort {
             } else if (event.type === 'message.part.updated') {
               const part = event.properties.part;
               if (part.sessionID !== sessionID) continue;
-              if (part.type === 'tool') {
+              if (part.type === 'tool' && part.tool !== 'StructuredOutput') {
                 unexpectedTool = part.tool;
                 streamAbort.abort();
                 void client.session.abort({ sessionID, directory: ctx.workingDirectory }).catch(() => {});
@@ -888,7 +888,7 @@ export class OpenCodeCoach implements CoachPort {
         if (info.error) {
           throw this.mapError(formatOpenCodeError(info.error));
         }
-        const toolPart = parts.find((p) => p.type === 'tool');
+        const toolPart = parts.find((p) => p.type === 'tool' && p.tool !== 'StructuredOutput');
         if (toolPart && toolPart.type === 'tool') {
           throw new Error(`OpenCode attempted an unexpected tool call (${toolPart.tool}) during Coach reply.`);
         }

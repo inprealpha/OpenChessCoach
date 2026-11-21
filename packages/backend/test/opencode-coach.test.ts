@@ -308,6 +308,105 @@ describe('OpenCodeCoach', () => {
     expect(deltas.join('')).toBe('Bb5 pressures the knight on c6.');
   });
 
+  it('allows OpenCode v1 StructuredOutput tool parts while still rejecting other tools', async () => {
+    const structuredToolPart = {
+      id: 'part-structured',
+      sessionID: 'sess-structured',
+      messageID: 'msg-1',
+      type: 'tool',
+      callID: 'call-1',
+      tool: 'StructuredOutput',
+    } as unknown as Part;
+
+    const structuredClient: OpenCodeClientLike = {
+      session: {
+        async create() {
+          return { data: { id: 'sess-structured' } };
+        },
+        async prompt() {
+          return {
+            data: {
+              info: makeAssistantInfo({
+                sessionID: 'sess-structured',
+                structured: {
+                  text: 'Bb5 develops with tempo against the c6 knight.',
+                  moves: ['f1b5'],
+                  arrows: [],
+                  highlights: ['c6'],
+                  note: null,
+                },
+              }),
+              parts: [structuredToolPart],
+            },
+          };
+        },
+        async abort() {
+          return {};
+        },
+        async delete() {
+          return {};
+        },
+      },
+      event: {
+        async subscribe() {
+          return {
+            stream: (async function* () {
+              yield {
+                type: 'message.part.updated',
+                properties: { part: structuredToolPart },
+              } as Event;
+            })(),
+          };
+        },
+      },
+    };
+
+    const structuredCoach = new OpenCodeCoach({
+      createInstance: async () => ({
+        client: structuredClient,
+        server: { url: 'http://127.0.0.1:12345', close: () => {} },
+      }),
+      checkAuth: async () => ({ ok: true, path: '/usr/local/bin/opencode', authSource: 'opencode-cli' }),
+    });
+
+    const reply = await structuredCoach.ask({ job: 'why', model: 'default', brief: BRIEF }, () => {});
+    expect(reply.text).toBe('Bb5 develops with tempo against the c6 knight.');
+    expect(reply.moves).toEqual(['f1b5']);
+
+    const bashToolPart = { ...structuredToolPart, tool: 'bash' } as unknown as Part;
+    const bashClient: OpenCodeClientLike = {
+      ...structuredClient,
+      session: {
+        ...structuredClient.session,
+        async prompt() {
+          return {
+            data: {
+              info: makeAssistantInfo({ sessionID: 'sess-structured' }),
+              parts: [bashToolPart],
+            },
+          };
+        },
+      },
+      event: {
+        async subscribe() {
+          return { stream: (async function* () {})() };
+        },
+      },
+    };
+
+    const bashCoach = new OpenCodeCoach({
+      createInstance: async () => ({
+        client: bashClient,
+        server: { url: 'http://127.0.0.1:12345', close: () => {} },
+      }),
+      checkAuth: async () => ({ ok: true, path: '/usr/local/bin/opencode', authSource: 'opencode-cli' }),
+    });
+
+    await expect(bashCoach.ask({ job: 'why', model: 'default', brief: BRIEF }, () => {})).rejects.toThrow(
+      /unexpected tool call \(bash\)/i,
+    );
+  });
+
   it('maps ProviderAuthError to CoachUnavailableError and 429 rate-limit errors to CoachLimitError', async () => {
     const authClient: OpenCodeClientLike = {
       session: {

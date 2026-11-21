@@ -21,7 +21,7 @@ function Remove-FromUserPath([string]$Dir) {
   $current = [Environment]::GetEnvironmentVariable('Path', 'User')
   if (-not $current) { return }
   $norm = $Dir.TrimEnd('\').ToLowerInvariant()
-  $kept = $current -split ';' | Where-Object { $_ -and ($_.TrimEnd('\').ToLowerInvariant() -ne $norm) }
+  $kept = @($current -split ';' | Where-Object { $_ -and ($_.TrimEnd('\').ToLowerInvariant() -ne $norm) })
   [Environment]::SetEnvironmentVariable('Path', ($kept -join ';'), 'User')
 }
 
@@ -29,13 +29,13 @@ function Add-ToUserPath([string]$Dir) {
   $current = [Environment]::GetEnvironmentVariable('Path', 'User')
   $norm = $Dir.TrimEnd('\').ToLowerInvariant()
   $parts = @()
-  if ($current) { $parts = $current -split ';' | Where-Object { $_ } }
+  if ($current) { $parts = @($current -split ';' | Where-Object { $_ }) }
   $exists = $parts | Where-Object { $_.TrimEnd('\').ToLowerInvariant() -eq $norm }
   if (-not $exists) {
     $next = if ($parts.Count -gt 0) { ($parts + $Dir) -join ';' } else { $Dir }
     [Environment]::SetEnvironmentVariable('Path', $next, 'User')
   }
-  $procParts = ($env:PATH -split ';') | Where-Object { $_ }
+  $procParts = @($env:PATH -split ';' | Where-Object { $_ })
   if (-not ($procParts | Where-Object { $_.TrimEnd('\').ToLowerInvariant() -eq $norm })) {
     $env:PATH = "$Dir;$env:PATH"
   }
@@ -127,8 +127,9 @@ try {
       $ws = New-Object -ComObject WScript.Shell
       $sc = $ws.CreateShortcut($ShortcutPath)
       $cmdPath = Join-Path $InstallDir 'openchesscoach.cmd'
+      $escapedCmdPath = $cmdPath -replace "'", "''"
       $sc.TargetPath = 'powershell.exe'
-      $sc.Arguments = "-NoProfile -Command `"& '$cmdPath'; if (`$LASTEXITCODE -ne 0) { Write-Host ''; Read-Host 'Press Enter to close' }`""
+      $sc.Arguments = "-NoProfile -Command `"& '$escapedCmdPath'; if (`$LASTEXITCODE -ne 0) { Write-Host ''; Read-Host 'Press Enter to close' }`""
       $sc.WorkingDirectory = $InstallDir
       $sc.Description = 'OpenChessCoach'
       $sc.Save()

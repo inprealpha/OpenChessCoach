@@ -269,15 +269,10 @@ jobs:
             gh issue view "$n" --json number,title,body --jq '"# Issue #\(.number): \(.title)\n\n\(.body)\n"' >> "$IN/issues.md" || true
           done
 
-      - name: Install the app, the browser and judge CLIs
+      - name: Install the app and the browser
+        # Runs PR-controlled install/build scripts with NO provider secrets in the environment.
         if: steps.gather.outputs.fresh == 'yes'
         working-directory: pr
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          CODEX_API_KEY: ${{ secrets.CODEX_API_KEY }}
-          CODEX_AUTH_JSON: ${{ secrets.CODEX_AUTH_JSON }}
-          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
           npm ci
           npx playwright install --with-deps chromium
@@ -285,11 +280,18 @@ jobs:
           # A ready copy of the base branch, for the judge's before-and-after comparison.
           git worktree add --detach ../base "origin/$BASE"
           (cd ../base && npm ci && npx playwright install chromium && npm run build -w @chess-coach/web)
-          if [ -n "$OPENAI_API_KEY" ] || [ -n "$CODEX_API_KEY" ] || [ -n "$CODEX_AUTH_JSON" ]; then
+
+      - name: Install judge CLIs
+        if: steps.gather.outputs.fresh == 'yes'
+        env:
+          HAS_CODEX_AUTH: ${{ secrets.OPENAI_API_KEY != '' || secrets.CODEX_API_KEY != '' || secrets.CODEX_AUTH_JSON != '' }}
+          HAS_CLAUDE_AUTH: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN != '' || secrets.ANTHROPIC_API_KEY != '' }}
+        run: |
+          if [ "$HAS_CODEX_AUTH" = true ]; then
             npm install -g @openai/codex
             codex --version || true
           fi
-          if [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ] || [ -n "$ANTHROPIC_API_KEY" ]; then
+          if [ "$HAS_CLAUDE_AUTH" = true ]; then
             npm install -g "@anthropic-ai/claude-code@$CLAUDE_CODE_VERSION"
             claude --version || true
           fi

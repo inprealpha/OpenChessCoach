@@ -68,7 +68,9 @@ For GitHub to accept those locally posted checks as satisfying your required che
 4. Next to each check, look at the **source** dropdown (which may say `GitHub Actions` or `Any source`).
 5. Set the source to **`Any source`** and click **Save changes**.
 
-- Keep **both** `Verdict` and `real Coach` checked as required — you are **not** weakening your rules, only allowing a check posted via GitHub's Commit Status API from an authorized token (in addition to `GitHub Actions`) to count.
+- **Security tradeoff to know:** Keep **both** `Verdict` and `real Coach` checked as required. Setting the source to **`Any source`** is what lets a separate agent post a passing status from its own machine, **but** it also means any user or token with `statuses: write` permission on this repository (not just GitHub Actions) can post a passing `Verdict` or `real Coach` status. Because only people/agents you grant write access to can do that — and you still review and merge protected PRs by hand — this is the same trust model as ADR 0013. (Note: if your rule is already set to `Any source`, no change is needed.)
+
+> **How CI protects your API keys on a public repo:** `verdict.yml` runs under `pull_request_target` so a PR cannot modify its own judge workflow, and the gate **rejects all fork PRs** before any secret is ever loaded (only branches pushed by collaborators with write access to `inprealpha/OpenChessCoach` can run). Provider secrets are scoped strictly to the judge/Coach steps — never job-level and never exposed during `npm ci` or build steps — and every configured secret is scrubbed before public artifacts are uploaded. Still, because the judge runs PR code pushed by repo collaborators, set a low monthly spend cap on `OPENAI_API_KEY` (e.g. $10–$15) as recommended by OpenAI's non-interactive Codex docs.
 
 ---
 

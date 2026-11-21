@@ -1,6 +1,6 @@
 // Shared CI provider ordering, credential detection, and fallback classification for Verdict,
 // real Coach, and the weekly provider health check (ADR 0013).
-import { existsSync, lstatSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, lstatSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { homedir, tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -168,8 +168,8 @@ export interface MaterializedCodexAuth {
 }
 
 /**
- * Writes CODEX_AUTH_JSON into an isolated temporary CODEX_HOME directory (never touching the
- * user's desktop ~/.codex/auth.json), or into an explicit $CODEX_HOME if provided.
+ * Writes CODEX_AUTH_JSON into an isolated temporary CODEX_HOME directory so it never overwrites
+ * ~/.codex/auth.json or a user's custom $CODEX_HOME/auth.json.
  * Pass `codexHome` as `CODEX_HOME` to the spawned Codex process and call `restore()` in `finally`.
  */
 export function materializeCodexAuth(
@@ -178,23 +178,6 @@ export function materializeCodexAuth(
   const raw = env.CODEX_AUTH_JSON?.trim();
   if (!raw) return undefined;
   const decoded = `${decodeAuthJson(raw)}\n`;
-  if (env.CODEX_HOME?.trim()) {
-    const codexHome = env.CODEX_HOME.trim();
-    const target = join(codexHome, 'auth.json');
-    const existed = existsSync(target);
-    mkdirSync(codexHome, { recursive: true, mode: 0o700 });
-    writeFileSync(target, decoded, { mode: 0o600 });
-    let restored = false;
-    return {
-      path: target,
-      codexHome,
-      restore: () => {
-        if (restored) return;
-        restored = true;
-        if (!existed) rmSync(target, { force: true });
-      },
-    };
-  }
   const tempHome = mkdtempSync(join(tmpdir(), 'occ-codex-'));
   const target = join(tempHome, 'auth.json');
   writeFileSync(target, decoded, { mode: 0o600 });

@@ -76,10 +76,12 @@ describe('CI provider ordering and credentials', () => {
     expect(() => decodeAuthJson('not-json')).toThrow(/not valid JSON/);
 
     const codexHome = makeTempDir('codex-home-');
+    writeFileSync(join(codexHome, 'auth.json'), '{"existing":true}\n', 'utf8');
     const written = materializeCodexAuth({ CODEX_AUTH_JSON: b64, CODEX_HOME: codexHome });
-    expect(written?.path).toBe(join(codexHome, 'auth.json'));
+    expect(written?.codexHome).not.toBe(codexHome);
     expect(JSON.parse(readFileSync(written!.path, 'utf8'))).toEqual(JSON.parse(sample));
     written?.restore();
+    expect(readFileSync(join(codexHome, 'auth.json'), 'utf8')).toBe('{"existing":true}\n');
   });
 
   it('classifies auth, quota, and missing-CLI failures as retryable, but not normal failures', () => {

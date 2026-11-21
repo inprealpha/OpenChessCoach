@@ -1,5 +1,7 @@
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { execFileSync } from 'node:child_process';
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { currentTarget, parseShasums, posixLauncher, resolveTargets, TARGETS, windowsLauncher } from '../build-standalone.ts';
 
@@ -45,5 +47,46 @@ describe('build-standalone helpers', () => {
     expect(sh).toContain('SHA256SUMS.txt');
     expect(sh).toContain('--uninstall');
     expect(sh).toContain('musl');
+  });
+
+  it.skipIf(process.platform === 'win32')('install.sh updates the login profile for bash on macOS and .bashrc on Linux', () => {
+    const work = mkdtempSync(join(tmpdir(), 'occ-install-rc-'));
+    try {
+      const stage = join(work, 'stage', 'openchesscoach');
+      mkdirSync(stage, { recursive: true });
+      const bin = join(stage, 'openchesscoach');
+      writeFileSync(bin, '#!/bin/sh\necho ok\n');
+      chmodSync(bin, 0o755);
+      const archive = join(work, 'occ.tar.gz');
+      execFileSync('tar', ['-czf', archive, '-C', join(work, 'stage'), 'openchesscoach'], { stdio: 'pipe' });
+
+      const runInstall = (home: string) =>
+        execFileSync('bash', [resolve(REPO, 'scripts', 'install.sh'), '--archive', archive], {
+          env: { HOME: home, SHELL: '/bin/bash', PATH: '/usr/bin:/bin:/usr/sbin:/sbin' },
+          stdio: 'pipe',
+        });
+
+      const homeFresh = join(work, 'home-fresh');
+      mkdirSync(homeFresh, { recursive: true });
+      runInstall(homeFresh);
+
+      if (process.platform === 'darwin') {
+        expect(existsSync(join(homeFresh, '.bash_profile'))).toBe(true);
+        expect(readFileSync(join(homeFresh, '.bash_profile'), 'utf8')).toContain('.local/bin');
+        expect(existsSync(join(homeFresh, '.bashrc'))).toBe(false);
+
+        const homeWithProfile = join(work, 'home-profile');
+        mkdirSync(homeWithProfile, { recursive: true });
+        writeFileSync(join(homeWithProfile, '.profile'), '# existing profile\n');
+        runInstall(homeWithProfile);
+        expect(existsSync(join(homeWithProfile, '.bash_profile'))).toBe(false);
+        expect(readFileSync(join(homeWithProfile, '.profile'), 'utf8')).toContain('.local/bin');
+      } else {
+        expect(existsSync(join(homeFresh, '.bashrc'))).toBe(true);
+        expect(readFileSync(join(homeFresh, '.bashrc'), 'utf8')).toContain('.local/bin');
+      }
+    } finally {
+      rmSync(work, { recursive: true, force: true });
+    }
   });
 });

@@ -45,5 +45,7 @@ describe('build-standalone helpers', () => {
     expect(sh).toContain('SHA256SUMS.txt');
     expect(sh).toContain('--uninstall');
     expect(sh).toContain('musl');
+    expect(sh).toContain('config.fish');
+    expect(sh).toContain('fish_add_path');
   });
 });

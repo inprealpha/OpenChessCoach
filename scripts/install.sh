@@ -173,14 +173,26 @@ case ":${PATH}:" in
     ;;
   *)
     SHELL_RC=""
+    IS_FISH=0
     case "${SHELL:-}" in
+      */fish)
+        IS_FISH=1
+        SHELL_RC="${XDG_CONFIG_HOME:-$HOME/.config}/fish/config.fish"
+        ;;
       */zsh)  SHELL_RC="$HOME/.zshrc" ;;
       */bash) SHELL_RC="$HOME/.bashrc" ;;
       *)      SHELL_RC="$HOME/.profile" ;;
     esac
-    EXPORT_LINE="export PATH=\"\$HOME/.local/bin:\$PATH\""
-    if [ "$BIN_DIR" != "$HOME/.local/bin" ]; then
-      EXPORT_LINE="export PATH=\"${BIN_DIR}:\$PATH\""
+    if [ "$IS_FISH" -eq 1 ]; then
+      EXPORT_LINE="fish_add_path -p \"\$HOME/.local/bin\""
+      if [ "$BIN_DIR" != "$HOME/.local/bin" ]; then
+        EXPORT_LINE="fish_add_path -p \"${BIN_DIR}\""
+      fi
+    else
+      EXPORT_LINE="export PATH=\"\$HOME/.local/bin:\$PATH\""
+      if [ "$BIN_DIR" != "$HOME/.local/bin" ]; then
+        EXPORT_LINE="export PATH=\"${BIN_DIR}:\$PATH\""
+      fi
     fi
     ALREADY_IN_RC=0
     if [ -n "$SHELL_RC" ]; then
@@ -191,6 +203,7 @@ case ":${PATH}:" in
       fi
     fi
     if [ -n "$SHELL_RC" ] && [ "$ALREADY_IN_RC" -eq 0 ]; then
+      mkdir -p "$(dirname "$SHELL_RC")"
       printf '\n# OpenChessCoach\n%s\n' "$EXPORT_LINE" >> "$SHELL_RC"
       echo "Added $BIN_DIR to $SHELL_RC."
     fi

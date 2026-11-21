@@ -240,14 +240,28 @@ async function main(): Promise<void> {
 }
 
 function openBrowser(url: string): void {
+  const fallback = () => process.stdout.write(`  Open ${url} in your browser.\n`);
+  if (process.platform === 'linux' && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY) {
+    fallback();
+    return;
+  }
   const cmd = process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'cmd' : 'xdg-open';
   const args = process.platform === 'win32' ? ['/c', 'start', '', url] : [url];
+  let printed = false;
+  const warnOnce = () => {
+    if (printed) return;
+    printed = true;
+    fallback();
+  };
   try {
     const child = spawn(cmd, args, { stdio: 'ignore', detached: true });
-    child.on('error', () => process.stdout.write(`  Open ${url} in your browser.\n`));
+    child.on('error', warnOnce);
+    child.on('exit', (code) => {
+      if (code && code !== 0) warnOnce();
+    });
     child.unref();
   } catch {
-    process.stdout.write(`  Open ${url} in your browser.\n`);
+    warnOnce();
   }
 }
 

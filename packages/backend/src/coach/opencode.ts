@@ -526,6 +526,11 @@ export class OpenCodeCoach implements CoachPort {
 
   async status(): Promise<CoachStatus> {
     if (this.unavailableReason) {
+      const check = await this.checkAuth();
+      if (check.ok) {
+        this.unavailableReason = undefined;
+        return { state: 'ready', provider: 'opencode' };
+      }
       return { state: 'unavailable', provider: 'opencode', reason: this.unavailableReason };
     }
     const check = await this.checkAuth();

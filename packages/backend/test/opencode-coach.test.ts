@@ -437,9 +437,13 @@ describe('OpenCodeCoach', () => {
       },
     };
 
+    let authOk = false;
     const authCoach = new OpenCodeCoach({
       createInstance: async () => ({ client: authClient, server: { url: 'http://127.0.0.1:12345', close: () => {} } }),
-      checkAuth: async () => ({ ok: true, path: '/usr/local/bin/opencode', authSource: 'opencode-cli' }),
+      checkAuth: async () =>
+        authOk
+          ? { ok: true, path: '/usr/local/bin/opencode', authSource: 'opencode-cli' }
+          : { ok: false, code: 'missing-cli', message: 'OpenCode CLI not found.' },
     });
 
     await expect(authCoach.ask({ job: 'why', model: 'default', brief: BRIEF }, () => {})).rejects.toBeInstanceOf(
@@ -448,6 +452,11 @@ describe('OpenCodeCoach', () => {
     const st = await authCoach.status();
     expect(st.state).toBe('unavailable');
     expect(st.provider).toBe('opencode');
+
+    // Once auth/CLI is repaired or the user switches models, status() clears the stale lockout instead of wedging forever.
+    authOk = true;
+    const recovered = await authCoach.status();
+    expect(recovered).toEqual({ state: 'ready', provider: 'opencode' });
 
     const limitClient: OpenCodeClientLike = {
       ...authClient,

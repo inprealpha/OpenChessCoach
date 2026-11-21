@@ -17,7 +17,9 @@ graded by the browser's Engine instead.
   Question) fails with "Your desktop can’t be reached…", and the app keeps retrying. Coming back
   on screen or onto a network reconnects at once instead of waiting for the next retry. A Review
   in progress isn't cut short while the desktop is awake: it answers the check while it works.
-- An Engine Game finished offline: "Saved on this device…", then synced when the desktop is back.
+- An Engine Game finished offline: "Saved on this device." in the end-of-game card, in place of
+  `Review this game` and beside `New game`, then synced when the desktop is back (see
+  `engine-game.md`).
 - The game list (`#/games`) while offline: a note "Your games live on your desktop, which can’t
   be reached right now.", with the list this device kept from the last time it was opened online
   (never "No games yet"): only the games it was shown, with the total then ("Showing 50 of 61

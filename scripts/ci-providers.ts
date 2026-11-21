@@ -107,6 +107,9 @@ export function hasProviderCredentials(
   if (provider === 'claude') {
     if (env.CLAUDE_CODE_OAUTH_TOKEN?.trim()) return { configured: true, source: 'CLAUDE_CODE_OAUTH_TOKEN' };
     if (env.ANTHROPIC_API_KEY?.trim()) return { configured: true, source: 'ANTHROPIC_API_KEY' };
+    if (!env.GITHUB_ACTIONS && fileExists(join(homeDir, '.claude'))) {
+      return { configured: true, source: 'claude-desktop-login' };
+    }
     return { configured: false };
   }
   if (provider === 'pi') {
@@ -158,15 +161,41 @@ export function decodeAuthJson(raw: string): string {
   throw new Error('CODEX_AUTH_JSON is not valid JSON or base64-encoded JSON.');
 }
 
-/** Writes CODEX_AUTH_JSON to $CODEX_HOME/auth.json (or ~/.codex/auth.json) with 0600 permissions. */
-export function materializeCodexAuth(env: NodeJS.ProcessEnv = process.env, homeDir: string = homedir()): string | undefined {
+export interface MaterializedCodexAuth {
+  path: string;
+  restore: () => void;
+}
+
+/**
+ * Writes CODEX_AUTH_JSON to $CODEX_HOME/auth.json (or ~/.codex/auth.json) with 0600 permissions.
+ * Returns a `restore()` callback that restores any pre-existing auth.json (or removes the temporary
+ * file if none existed) so local runs never clobber a developer's desktop Codex login.
+ */
+export function materializeCodexAuth(
+  env: NodeJS.ProcessEnv = process.env,
+  homeDir: string = homedir(),
+): MaterializedCodexAuth | undefined {
   const raw = env.CODEX_AUTH_JSON?.trim();
   if (!raw) return undefined;
   const target = codexAuthPath(env, homeDir);
+  const hadExisting = existsSync(target);
+  const previous = hadExisting ? readFileSync(target) : undefined;
   const dir = join(target, '..');
   mkdirSync(dir, { recursive: true, mode: 0o700 });
   writeFileSync(target, `${decodeAuthJson(raw)}\n`, { mode: 0o600 });
-  return target;
+  let restored = false;
+  return {
+    path: target,
+    restore: () => {
+      if (restored) return;
+      restored = true;
+      if (hadExisting && previous !== undefined) {
+        writeFileSync(target, previous, { mode: 0o600 });
+      } else {
+        rmSync(target, { force: true });
+      }
+    },
+  };
 }
 
 export type ProviderFailureKind = 'auth' | 'quota' | 'missing-cli' | 'other';
@@ -227,11 +256,18 @@ export function scrubSecretsFromDir(dir: string, env: NodeJS.ProcessEnv = proces
         walk(full);
         continue;
       }
-      if (!st.isFile() || st.size > 20 * 1024 * 1024) continue;
+      if (!st.isFile()) continue;
+      if (st.size > 20 * 1024 * 1024) {
+        rmSync(full, { force: true });
+        removed.push(full);
+        continue;
+      }
       let text: string;
       try {
         text = readFileSync(full, 'utf8');
       } catch {
+        rmSync(full, { force: true });
+        removed.push(full);
         continue;
       }
       for (const needle of needles) {

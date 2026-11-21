@@ -74,7 +74,7 @@ describe('multi-provider and local-fallback metadata', () => {
       ],
     };
     const verdict = parseVerdict('{"verdict":"PASS","summary":"Looks good."}');
-    expect(statusFor(verdict, true, meta)).toEqual({ state: 'success', description: 'PASS [weaker judge: opencode]: Looks good.' });
+    expect(statusFor(verdict, true, meta)).toEqual({ state: 'success', description: 'PASS: [weaker judge: opencode] Looks good.' });
     const comment = commentFor(verdict, '### What I checked\n\n- board', SHA, RUN, true, meta);
     expect(comment).toContain('Weaker judge notice');
     expect(comment).toContain('weaker free fallback');
@@ -83,7 +83,7 @@ describe('multi-provider and local-fallback metadata', () => {
   it('labels local independent-agent fallback runs and lists failed CI providers when all fail', () => {
     const localMeta = { provider: null, weakerJudge: false, source: 'local' as const, judgeAgent: 'Devin-Reviewer', attempts: [] };
     const verdict = parseVerdict('{"verdict":"PASS","summary":"Verified locally."}');
-    expect(statusFor(verdict, true, localMeta)).toEqual({ state: 'success', description: 'PASS [local: Devin-Reviewer]: Verified locally.' });
+    expect(statusFor(verdict, true, localMeta)).toEqual({ state: 'success', description: 'PASS: [local: Devin-Reviewer] Verified locally.' });
     const localComment = commentFor(verdict, '### What I checked\n\n- all tests', SHA, undefined, true, localMeta);
     expect(localComment).toContain('Local independent fallback');
     expect(localComment).toContain('Devin-Reviewer');

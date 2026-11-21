@@ -96,8 +96,9 @@ export function statusFor(verdict: JudgeVerdict | undefined, started = true, met
     };
   }
   if (!verdict) return { state: 'error', description: 'The judge gave no verdict (it crashed, ran out of time or hit its spending limit): comment /verdict to run it again' };
-  const tag = judgeTag(meta);
-  return { state: verdict.verdict === 'FAIL' ? 'failure' : 'success', description: clip(`${verdict.verdict}${tag}: ${verdict.summary}`) };
+  const tag = judgeTag(meta).trim();
+  const body = tag ? `${tag} ${verdict.summary}` : verdict.summary;
+  return { state: verdict.verdict === 'FAIL' ? 'failure' : 'success', description: clip(`${verdict.verdict}: ${body}`) };
 }
 
 /** A judge job that stopped because the PR changed posts its reason as an error, and no comment. */

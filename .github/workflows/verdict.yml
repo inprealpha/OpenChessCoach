@@ -369,6 +369,7 @@ jobs:
 
       - name: Leave no secret in what gets published
         # Artifacts and comments on a public repository are public, and log masking doesn't reach them.
+        id: scrub
         if: always()
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -387,7 +388,7 @@ jobs:
           node trusted/scripts/run-judge.ts --scrub "$OUT"
 
       - name: Keep the judge's files
-        if: always()
+        if: always() && steps.scrub.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: verdict-evidence

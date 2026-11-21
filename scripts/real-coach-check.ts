@@ -425,14 +425,13 @@ async function runSingleProvider(args: { fake: boolean; provider: CoachProvider;
   const { FakeCoach } = await import('../packages/backend/src/coach/fake.ts');
   const { startVerifyInstance } = await import('../packages/backend/src/verify/instance.ts');
   const sha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
-  if (!args.fake && args.provider === 'codex') {
-    materializeCodexAuth();
-  }
-  const created: { coach: CoachPort; close?: () => void | Promise<void> } = args.fake
-    ? { coach: new FakeCoach({ chunkDelayMs: 0 }) }
-    : await createProviderCoach(args.provider);
-  const coach = new RecordingCoach(created.coach, args.model);
+  const codexAuth = !args.fake && args.provider === 'codex' ? materializeCodexAuth() : undefined;
+  let created: { coach: CoachPort; close?: () => void | Promise<void> } | undefined;
   try {
+    created = args.fake
+      ? { coach: new FakeCoach({ chunkDelayMs: 0 }) }
+      : await createProviderCoach(args.provider);
+    const coach = new RecordingCoach(created.coach, args.model);
     const status = await coach.status();
     if (status.state !== 'ready') {
       throw new Error(`The real Coach (${args.provider}) is not ready: ${'reason' in status ? status.reason : status.state}.`);
@@ -469,8 +468,19 @@ async function runSingleProvider(args: { fake: boolean; provider: CoachProvider;
     const { ok, description } = summarize(calls, providerTag);
     return { ok, sha, ...(args.fake ? {} : { provider: args.provider, weakerFallback }), calls, description };
   } finally {
-    await created.close?.();
+    await created?.close?.();
+    codexAuth?.restore();
   }
+}
+
+function isCoachUnavailableError(err: unknown): boolean {
+  if (!err || typeof err !== 'object') return false;
+  const record = err as { code?: unknown; cause?: unknown };
+  if (record.code === 'coach-unavailable') return true;
+  if (record.cause && typeof record.cause === 'object' && (record.cause as { code?: unknown }).code === 'coach-unavailable') {
+    return true;
+  }
+  return false;
 }
 
 export async function runWithFallback(
@@ -488,7 +498,7 @@ export async function runWithFallback(
       return await tryProvider(provider);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      if (isRetryableProviderFailure(message) || /is not ready|not logged in|not installed/i.test(message)) {
+      if (isCoachUnavailableError(err) || isRetryableProviderFailure(message) || /is not ready|not logged in|not installed/i.test(message)) {
         errors.push(`${provider}: ${message}`);
         continue;
       }

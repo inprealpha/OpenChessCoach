@@ -77,8 +77,9 @@ describe('CI provider ordering and credentials', () => {
 
     const codexHome = makeTempDir('codex-home-');
     const written = materializeCodexAuth({ CODEX_AUTH_JSON: b64, CODEX_HOME: codexHome });
-    expect(written).toBe(join(codexHome, 'auth.json'));
-    expect(JSON.parse(readFileSync(written!, 'utf8'))).toEqual(JSON.parse(sample));
+    expect(written?.path).toBe(join(codexHome, 'auth.json'));
+    expect(JSON.parse(readFileSync(written!.path, 'utf8'))).toEqual(JSON.parse(sample));
+    written?.restore();
   });
 
   it('classifies auth, quota, and missing-CLI failures as retryable, but not normal failures', () => {
@@ -210,6 +211,53 @@ describe('real-Coach --provider auto fallback', () => {
     expect(verdict.ok).toBe(false);
     expect(verdict.provider).toBe('claude');
   });
+
+  it('falls back when a Coach client throws a structured coach-unavailable error', async () => {
+    const tried: string[] = [];
+    const verdict = await runWithFallback(
+      ['claude', 'opencode'],
+      async (provider) => {
+        tried.push(provider);
+        if (provider === 'claude') {
+          const err = Object.assign(new Error('Account on hold'), { code: 'coach-unavailable' });
+          throw err;
+        }
+        return { ok: true, sha: 'abc', provider, calls: [], description: '[opencode] ok' };
+      },
+      () => true,
+    );
+    expect(tried).toEqual(['claude', 'opencode']);
+    expect(verdict.ok).toBe(true);
+    expect(verdict.provider).toBe('opencode');
+  });
+});
+
+describe('local Claude desktop login and Codex auth restore', () => {
+  it('detects ~/.claude login locally but skips it inside GitHub Actions', () => {
+    const fakeExists = (p: string) => p.endsWith('/.claude');
+    expect(hasProviderCredentials('claude', {}, '/home/dev', fakeExists)).toEqual({
+      configured: true,
+      source: 'claude-desktop-login',
+    });
+    expect(hasProviderCredentials('claude', { GITHUB_ACTIONS: 'true' }, '/home/dev', fakeExists)).toEqual({
+      configured: false,
+    });
+  });
+
+  it('restores a pre-existing Codex auth.json after temporary CODEX_AUTH_JSON materialization', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'codex-restore-'));
+    try {
+      const existing = join(dir, 'auth.json');
+      writeFileSync(existing, '{"existing":"desktop-login"}\n', 'utf8');
+      const handle = materializeCodexAuth({ CODEX_HOME: dir, CODEX_AUTH_JSON: '{"tokens":{"access_token":"temp"}}' });
+      expect(handle?.path).toBe(existing);
+      expect(readFileSync(existing, 'utf8')).toContain('temp');
+      handle?.restore();
+      expect(readFileSync(existing, 'utf8')).toBe('{"existing":"desktop-login"}\n');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
 });
 
 describe('weekly CI provider health check', () => {
@@ -234,5 +282,28 @@ describe('weekly CI provider health check', () => {
     expect(body).toContain('**1** broken provider login');
     expect(body).toContain('Settings → Secrets and variables → Actions → Secrets');
     expect(body).toContain('https://github.com/inprealpha/OpenChessCoach/actions/runs/99');
+  });
+
+  it('probes each saved login independently when a provider has multiple saved secrets', () => {
+    const seen: Array<[string, string | undefined, string | undefined]> = [];
+    const results = checkCiProviders({
+      env: { CLAUDE_CODE_OAUTH_TOKEN: 'oauth-expired', ANTHROPIC_API_KEY: 'sk-ant-valid' },
+      hasCredentials: (p) => (p === 'codex' ? { configured: false } : { configured: true, source: 'opencode-free' }),
+      probe: (p, probeEnv) => {
+        seen.push([p, probeEnv.CLAUDE_CODE_OAUTH_TOKEN, probeEnv.ANTHROPIC_API_KEY]);
+        if (p === 'claude' && probeEnv.CLAUDE_CODE_OAUTH_TOKEN) {
+          return { status: 1, stdout: '', stderr: '401 Unauthorized: OAuth token expired' };
+        }
+        return { status: 0, stdout: 'OK', stderr: '' };
+      },
+    });
+
+    const claudeResults = results.filter((r) => r.provider === 'claude');
+    expect(claudeResults.map((r) => [r.source, r.status])).toEqual([
+      ['CLAUDE_CODE_OAUTH_TOKEN', 'failed'],
+      ['ANTHROPIC_API_KEY', 'ok'],
+    ]);
+    expect(seen).toContainEqual(['claude', 'oauth-expired', undefined]);
+    expect(seen).toContainEqual(['claude', undefined, 'sk-ant-valid']);
   });
 });

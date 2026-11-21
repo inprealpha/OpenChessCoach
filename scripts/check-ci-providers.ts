@@ -33,10 +33,14 @@ function runProbeCommand(
   env: NodeJS.ProcessEnv,
 ): { status: number | null; stdout: string; stderr: string; error?: Error } {
   if (provider === 'codex') {
-    materializeCodexAuth(env);
-    const args = ['exec', '--dangerously-bypass-approvals-and-sandbox', '--skip-git-repo-check', '-'];
-    const r = spawnSync('codex', args, { env, input: PROBE_PROMPT, encoding: 'utf8', timeout: 60_000 });
-    return { status: r.status, stdout: r.stdout ?? '', stderr: r.stderr ?? '', ...(r.error ? { error: r.error } : {}) };
+    const codexAuth = materializeCodexAuth(env);
+    try {
+      const args = ['exec', '--dangerously-bypass-approvals-and-sandbox', '--skip-git-repo-check', '-'];
+      const r = spawnSync('codex', args, { env, input: PROBE_PROMPT, encoding: 'utf8', timeout: 60_000 });
+      return { status: r.status, stdout: r.stdout ?? '', stderr: r.stderr ?? '', ...(r.error ? { error: r.error } : {}) };
+    } finally {
+      codexAuth?.restore();
+    }
   }
   if (provider === 'claude') {
     const args = ['-p', PROBE_PROMPT, '--model', 'haiku', '--max-budget-usd', '0.10', '--output-format', 'text'];
@@ -47,13 +51,28 @@ function runProbeCommand(
   return { status: r.status, stdout: r.stdout ?? '', stderr: r.stderr ?? '', ...(r.error ? { error: r.error } : {}) };
 }
 
+const PROVIDER_SECRET_KEYS: Record<JudgeProvider, readonly string[]> = {
+  codex: ['CODEX_API_KEY', 'OPENAI_API_KEY', 'CODEX_AUTH_JSON'],
+  claude: ['CLAUDE_CODE_OAUTH_TOKEN', 'ANTHROPIC_API_KEY'],
+  opencode: ['OPENCODE_API_KEY', 'OPENCODE_ZEN_API_KEY'],
+};
+
+/** Returns an env copy containing only `keepKey` from the provider's secret group so each saved login is probed independently. */
+function isolateProviderSecretEnv(env: NodeJS.ProcessEnv, provider: JudgeProvider, keepKey: string): NodeJS.ProcessEnv {
+  const isolated: NodeJS.ProcessEnv = { ...env };
+  for (const key of PROVIDER_SECRET_KEYS[provider]) {
+    if (key !== keepKey) delete isolated[key];
+  }
+  return isolated;
+}
+
 export interface CheckProvidersDeps {
   env?: NodeJS.ProcessEnv;
   hasCredentials?: (provider: JudgeProvider, env: NodeJS.ProcessEnv) => { configured: boolean; source?: string };
   probe?: (provider: JudgeProvider, env: NodeJS.ProcessEnv) => { status: number | null; stdout: string; stderr: string; error?: Error };
 }
 
-/** Probes every configured CI provider and returns a structured health report. */
+/** Probes every configured CI provider credential independently and returns a structured health report. */
 export function checkCiProviders(deps: CheckProvidersDeps = {}): ProviderProbeResult[] {
   const env = deps.env ?? process.env;
   const checkCreds = deps.hasCredentials ?? ((p, e) => hasProviderCredentials(p, e));
@@ -61,41 +80,53 @@ export function checkCiProviders(deps: CheckProvidersDeps = {}): ProviderProbeRe
   const results: ProviderProbeResult[] = [];
 
   for (const provider of JUDGE_PROVIDERS) {
-    const creds = checkCreds(provider, env);
-    if (!creds.configured) {
-      results.push({ provider, status: 'skipped', detail: 'No secret saved in GitHub Secrets.' });
-      continue;
+    const savedKeys = PROVIDER_SECRET_KEYS[provider].filter((k) => Boolean(env[k]?.trim()));
+    const targets: Array<{ source?: string; probeEnv: NodeJS.ProcessEnv }> = [];
+    if (savedKeys.length > 0) {
+      for (const key of savedKeys) {
+        targets.push({ source: key, probeEnv: isolateProviderSecretEnv(env, provider, key) });
+      }
+    } else {
+      const creds = checkCreds(provider, env);
+      if (!creds.configured) {
+        results.push({ provider, status: 'skipped', detail: 'No secret saved in GitHub Secrets.' });
+        continue;
+      }
+      targets.push({ ...(creds.source ? { source: creds.source } : {}), probeEnv: env });
     }
-    try {
-      const res = probe(provider, env);
-      const combined = [res.error?.message, res.stdout, res.stderr].filter(Boolean).join('\n').trim();
-      if (!res.error && res.status === 0 && res.stdout.trim().length > 0) {
-        results.push({
-          provider,
-          status: 'ok',
-          ...(creds.source ? { source: creds.source } : {}),
-          detail: 'Responded normally.',
-        });
-      } else {
-        const failureKind = classifyProviderFailure(combined);
+
+    for (const target of targets) {
+      try {
+        const res = probe(provider, target.probeEnv);
+        const combined = [res.error?.message, res.stdout, res.stderr].filter(Boolean).join('\n').trim();
+        if (!res.error && res.status === 0 && res.stdout.trim().length > 0) {
+          results.push({
+            provider,
+            status: 'ok',
+            ...(target.source ? { source: target.source } : {}),
+            detail: 'Responded normally.',
+          });
+        } else {
+          const failureKind = classifyProviderFailure(combined);
+          results.push({
+            provider,
+            status: 'failed',
+            ...(target.source ? { source: target.source } : {}),
+            failureKind,
+            detail: explainFailure(provider, failureKind, combined),
+          });
+        }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        const failureKind = classifyProviderFailure(msg);
         results.push({
           provider,
           status: 'failed',
-          ...(creds.source ? { source: creds.source } : {}),
+          ...(target.source ? { source: target.source } : {}),
           failureKind,
-          detail: explainFailure(provider, failureKind, combined),
+          detail: explainFailure(provider, failureKind, msg),
         });
       }
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      const failureKind = classifyProviderFailure(msg);
-      results.push({
-        provider,
-        status: 'failed',
-        ...(creds.source ? { source: creds.source } : {}),
-        failureKind,
-        detail: explainFailure(provider, failureKind, msg),
-      });
     }
   }
   return results;
@@ -139,11 +170,15 @@ export function formatHealthIssueBody(results: readonly ProviderProbeResult[], r
 function findOpenHealthIssue(): number | undefined {
   const out = execFileSync(
     'gh',
-    ['issue', 'list', '--state', 'open', '--search', `"${HEALTH_ISSUE_TITLE}" in:title`, '--json', 'number,title,body'],
+    ['issue', 'list', '--state', 'open', '--search', `"${HEALTH_ISSUE_TITLE}" in:title`, '--json', 'number,title,body,author'],
     { encoding: 'utf8' },
   );
-  const issues = JSON.parse(out) as Array<{ number: number; title: string; body: string }>;
-  return issues.find((i) => i.body?.includes(HEALTH_ISSUE_MARKER) || i.title === HEALTH_ISSUE_TITLE)?.number;
+  const issues = JSON.parse(out) as Array<{ number: number; title: string; body: string; author?: { login?: string } }>;
+  return issues.find(
+    (i) =>
+      i.body?.includes(HEALTH_ISSUE_MARKER) &&
+      (i.author?.login === 'app/github-actions' || i.author?.login === 'github-actions[bot]'),
+  )?.number;
 }
 
 function reportHealthIssue(results: readonly ProviderProbeResult[], runUrl?: string): void {

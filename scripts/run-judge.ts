@@ -83,7 +83,7 @@ export interface RunJudgeDeps {
   env?: NodeJS.ProcessEnv;
   exec?: (inv: JudgeInvocation, workdir: string, env: NodeJS.ProcessEnv) => { status: number | null; stdout: string; stderr: string; error?: Error };
   hasCredentials?: (provider: JudgeProvider, env: NodeJS.ProcessEnv) => { configured: boolean; source?: string };
-  materializeCodex?: (env: NodeJS.ProcessEnv) => string | undefined;
+  materializeCodex?: (env: NodeJS.ProcessEnv) => { path: string; restore: () => void } | string | undefined;
 }
 
 function defaultExec(inv: JudgeInvocation, workdir: string, env: NodeJS.ProcessEnv): { status: number | null; stdout: string; stderr: string; error?: Error } {
@@ -125,9 +125,10 @@ export function runJudge(
       continue;
     }
 
+    let codexAuth: { path: string; restore: () => void } | string | undefined;
     if (provider === 'codex') {
       try {
-        prepareCodex(env);
+        codexAuth = prepareCodex(env);
       } catch (err) {
         attempts.push({
           provider,
@@ -143,7 +144,12 @@ export function runJudge(
     rmSync(reportPath, { force: true });
 
     const inv = buildJudgeInvocation(provider, opts.prompt, opts.outDir, env, opts.maxBudgetUsd ?? '5');
-    const result = exec(inv, opts.workdir, env);
+    let result: ReturnType<typeof defaultExec>;
+    try {
+      result = exec(inv, opts.workdir, env);
+    } finally {
+      if (codexAuth && typeof codexAuth === 'object') codexAuth.restore();
+    }
     const combined = [result.error?.message, result.stdout, result.stderr].filter(Boolean).join('\n');
     try {
       writeFileSync(inv.logFile, result.stdout || combined);

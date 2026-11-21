@@ -1,7 +1,7 @@
 # OpenChessCoach
 
-A chess coach that runs on your own desktop: the Engine (Stockfish) judges every move, and Claude,
-the Coach, explains why in plain words, on your own Claude subscription.
+A chess coach that runs on your own desktop: the Engine (Stockfish) judges every move, and the
+Coach (Claude, Codex, Pi, or OpenCode) explains why in plain words, on your own subscription or key.
 
 ![A Review of an Italian Game: the Winning Chances bar beside the board, arrows for the move played and the Engine's best, the Winning Chances graph under it, and the key moments with their Move Grades](https://github.com/inprealpha/OpenChessCoach/raw/HEAD/docs/images/review.png)
 
@@ -19,8 +19,10 @@ irm https://github.com/inprealpha/OpenChessCoach/releases/latest/download/instal
 curl -fsSL https://github.com/inprealpha/OpenChessCoach/releases/latest/download/install.sh | bash
 ```
 
-Then install [Claude Code](https://claude.com/claude-code), sign in once with `claude`, and start
-OpenChessCoach from your Start Menu (**OpenChessCoach**, on Windows) or by running `openchesscoach`.
+Then install [Claude Code](https://claude.com/claude-code) and sign in once with `claude` (or use
+Codex, Pi, or OpenCode — see [Coach backends](#coach-backends-claude-codex-pi-and-opencode)), and
+start OpenChessCoach from your Start Menu (**OpenChessCoach**, on Windows) or by running
+`openchesscoach`.
 Already have Node.js 22.18+? You can also run `npx openchesscoach@latest` without installing
 anything first: see [Install with npm](#already-have-nodejs-npx).
 
@@ -42,9 +44,11 @@ anything first: see [Install with npm](#already-have-nodejs-npx).
 - **A desktop or laptop** running 64-bit Windows 10/11 (x64 or ARM64), macOS 13+ (Apple Silicon or
   Intel), or Linux (x64 or ARM64, glibc such as Ubuntu, Debian, Fedora, Arch). Phones and tablets
   connect to it over Wi-Fi or an optional tunnel.
-- **Claude Code, logged in** with a paid Claude plan (Pro or Max). The Coach uses your own Claude
-  Code login; the app never sees your password or token. The free Claude plan does not include
-  Claude Code.
+- **A Coach backend, logged in:** recommended is **Claude Code** with a paid Claude plan (Pro or
+  Max; the free Claude plan does not include Claude Code). You can also use **Codex** (ChatGPT
+  subscription or `OPENAI_API_KEY`), **Pi**, or **OpenCode** (including OpenCode's free Zen models);
+  see [Coach backends](#coach-backends-claude-codex-pi-and-opencode). The app never sees your
+  password or token.
 
 You do **not** need Node.js or npm for the standalone install — it bundles the official signed
 Node.js runtime for your system.
@@ -64,7 +68,7 @@ Node.js runtime for your system.
    This downloads the verified zip for your PC (x64 or ARM64) into `%LOCALAPPDATA%\OpenChessCoach`,
    adds `openchesscoach` to your user `PATH`, and adds an **OpenChessCoach** shortcut to your Start
    Menu. It works under Windows' default PowerShell script policy (`Restricted`).
-3. Install Claude Code and sign in (skip if you already have it):
+3. Install Claude Code and sign in (skip if you already have it, or use another [Coach backend](#coach-backends-claude-codex-pi-and-opencode)):
 
    ```powershell
    irm https://claude.ai/install.ps1 | iex
@@ -86,7 +90,7 @@ Node.js runtime for your system.
 
    This installs to `~/.local/share/openchesscoach-app` and links `openchesscoach` into
    `~/.local/bin`.
-3. Install Claude Code and sign in (skip if you already have it):
+3. Install Claude Code and sign in (skip if you already have it, or use another [Coach backend](#coach-backends-claude-codex-pi-and-opencode)):
 
    ```bash
    curl -fsSL https://claude.ai/install.sh | bash
@@ -108,7 +112,7 @@ Node.js runtime for your system.
    Needs `curl` and `tar` (preinstalled on most desktop distros; on minimal installs, install them
    with your package manager first). On Alpine or other musl-based Linux distros, use the
    [Node.js / npx route](#already-have-nodejs-npx) instead.
-3. Install Claude Code and sign in (skip if you already have it):
+3. Install Claude Code and sign in (skip if you already have it, or use another [Coach backend](#coach-backends-claude-codex-pi-and-opencode)):
 
    ```bash
    curl -fsSL https://claude.ai/install.sh | bash
@@ -120,12 +124,13 @@ Node.js runtime for your system.
 
 ### Portable download (no install script)
 
-Prefer not to pipe a script to a shell? Download the archive for your system (`win-x64.zip`,
-`win-arm64.zip`, `darwin-arm64.tar.gz`, `darwin-x64.tar.gz`, `linux-x64.tar.gz`, or
-`linux-arm64.tar.gz`) and `SHA256SUMS.txt` from
+Prefer not to pipe a script to a shell? Download the archive for your system
+(`openchesscoach-win-x64.zip`, `openchesscoach-win-arm64.zip`, `openchesscoach-darwin-arm64.tar.gz`,
+`openchesscoach-darwin-x64.tar.gz`, `openchesscoach-linux-x64.tar.gz`, or
+`openchesscoach-linux-arm64.tar.gz`) and `SHA256SUMS.txt` from
 [GitHub Releases](https://github.com/inprealpha/OpenChessCoach/releases/latest), verify the
-checksum, extract it anywhere, and run `openchesscoach.cmd` (Windows) or `./openchesscoach`
-(macOS/Linux).
+checksum, extract it anywhere, and from the extracted `openchesscoach` folder run
+`openchesscoach.cmd` (Windows) or `./openchesscoach` (macOS/Linux).
 
 ### Already have Node.js? (`npx`)
 
@@ -170,7 +175,7 @@ on macOS, or [nvm](https://github.com/nvm-sh/nvm) on Linux).
   Uninstalling removes the program files and shortcut while keeping your games and Player Profile.
   To delete your saved data too, remove your data folder (paths below).
 
-The desktop checks Claude Code, starts the app and opens your browser already paired. The first
+The desktop checks your Coach backend, starts the app and opens your browser already paired. The first
 thing the browser shows is a QR code: scan it with your phone on the same Wi-Fi to open the app
 there, already paired, and carry on setting up on the phone. The desktop prints the same QR code.
 Until a phone is paired, the main menu on the desktop asks again every few days, unless you choose
@@ -196,30 +201,23 @@ OpenChessCoach supports four Coach backends on your desktop:
 - **Pi** (Pi coding agent — run `pi` and `/login`, or configure a provider API key in `~/.pi`)
 - **OpenCode** (OpenCode CLI — `opencode auth login`, or OpenCode's free Zen models)
 
-At startup, OpenChessCoach picks the first ready backend automatically (or the one passed via `--coach <backend>`). When more than one backend is ready on your desktop, you can switch between them live in **Settings → Coach backend**. To smoke-test your local backend(s) from the terminal, run:
-
-```sh
-npm run smoke:coach
-# or target a single backend:
-npm run smoke:coach -- --provider codex
-npm run smoke:coach -- --provider pi
-npm run smoke:coach -- --provider opencode
-```
+At startup, OpenChessCoach picks the first ready backend automatically (or the one passed via `--coach <backend>`). When more than one backend is ready on your desktop, you can switch between them live in **Settings → Coach backend**.
 
 ## Common issues
 
 - **`openchesscoach` is not recognized / command not found:** close your terminal and open a **new**
   one so it picks up the updated `PATH`. On Windows, you can also launch **OpenChessCoach** from the
   Start Menu. On macOS/Linux, check that `~/.local/bin` is in your `PATH`.
-- **Claude Code is not installed / not logged in / login expired:** install Claude Code from
-  <https://claude.com/claude-code>, open a new terminal, run `claude` (or `/login` inside `claude`),
-  sign in with a paid Claude Pro or Max account, then start OpenChessCoach again.
+- **No Coach backend is logged in / Claude Code is not installed or login expired:** install Claude
+  Code from <https://claude.com/claude-code>, open a new terminal, run `claude` (or `/login` inside
+  `claude`), sign in with a paid Claude Pro or Max account, then start OpenChessCoach again — or
+  sign in to Codex, Pi, or OpenCode (see [Coach backends](#coach-backends-claude-codex-pi-and-opencode)).
 - **Port 8737 is already in use:** OpenChessCoach is probably already running in another terminal
   window. Otherwise start it on another port: `openchesscoach --port 8738`.
 - **Browser doesn't open automatically (especially headless or minimal Linux):** open the
-  `http://127.0.0.1:8737/#pair=…` link printed in the terminal under the QR code.
-- **Claude usage limit reached:** the Coach shares your Claude plan's limits and shows when they
-  reset. The board, Engine, Lessons, and Puzzles keep working offline and without Claude.
+  `On this desktop:` link (`http://localhost:8737/#pair=…`) printed in the terminal above the QR code.
+- **Usage limit reached:** the Coach shares your active Coach plan's limits and shows when they
+  reset. The board, Engine, Lessons, Puzzles, and Engine Games keep working offline and without the Coach.
 
 ## My phone can't open the app
 
@@ -277,7 +275,7 @@ Two ways to reach your desktop from outside your Wi-Fi:
 
 ## Coach quality
 
-Settings → Coach quality picks how much of your Claude limits the Coach uses:
+When using Claude, **Settings → Coach quality** picks how much of your Claude limits the Coach uses:
 
 - **Thrifty**: Haiku for every job.
 - **Balanced**: Sonnet for Reviews (the overview and the key moments), Why Questions and Lessons;
@@ -287,10 +285,14 @@ Settings → Coach quality picks how much of your Claude limits the Coach uses:
   for them: `docs/research/hint-and-live-coaching-models.md`).
 
 Under **Advanced** you can choose the model for each job yourself; the choice then shows as Custom.
+When using Codex, Pi, or OpenCode, Coach quality shows **Default** and uses that backend's
+configured default model.
 A Review's overview uses the model chosen for Reviews. Settings → Reviews turns the overview off,
-which saves one Coach call per Review.
-The models are named by family (`haiku`, `sonnet`, `opus`), and the Claude Agent SDK maps each to
-the newest model of that family it knows, so updating the app keeps the Coach on the latest models.
+which saves one Coach call per Review. **Settings → Think deeper** (on by default on backends that
+support it) lets the Coach ask the Engine follow-up questions during Why Questions and Reviews.
+The Claude models are named by family (`haiku`, `sonnet`, `opus`), and the Claude Agent SDK maps
+each to the newest model of that family it knows, so updating the app keeps the Coach on the latest
+models.
 
 ## For contributors
 
@@ -311,6 +313,7 @@ npm test                          # unit, golden, data and protocol tests
 npx playwright install chromium   # once: the browser the Player journeys run in
 npm run test:journeys             # the Player journeys in a real browser
 npm run verify                    # a disposable verify-mode copy of the app for checking a change
+npm run smoke:coach               # smoke-test local Coach backends (-- --provider codex|pi|opencode)
 ```
 
 To set up a whole machine in one step (a new computer, or a sandbox where agents work), run

@@ -11,14 +11,14 @@
      https://<host>/og.png (docs/releasing.md, "Host the welcome page"). -->
 <meta property="og:type" content="website">
 <meta property="og:title" content="OpenChessCoach: a chess coach on your own desktop">
-<meta property="og:description" content="The Engine (Stockfish) judges every move, and Claude, the Coach, explains why in plain words, on your own Claude plan. Review your games, play the Engine, learn openings and Themes.">
+<meta property="og:description" content="The Engine (Stockfish) judges every move, and the Coach (Claude, Codex, Pi, or OpenCode) explains why in plain words. Review your games, play the Engine, learn openings and Themes.">
 <meta property="og:image" content="og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="OpenChessCoach: a Review board with the Winning Chances bar and arrows for the move played and the Engine's best">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="OpenChessCoach: a chess coach on your own desktop">
-<meta name="twitter:description" content="The Engine (Stockfish) judges every move, and Claude, the Coach, explains why in plain words, on your own Claude plan.">
+<meta name="twitter:description" content="The Engine (Stockfish) judges every move, and the Coach (Claude, Codex, Pi, or OpenCode) explains why in plain words.">
 <meta name="twitter:image" content="og.png">
 <meta name="twitter:image:alt" content="OpenChessCoach: a Review board with the Winning Chances bar and arrows for the move played and the Engine's best">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -159,7 +159,7 @@ footer { font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--li
   <div class="hero-text">
     <span class="eyebrow">Welcome</span>
     <h1>OpenChessCoach</h1>
-    <p class="lede">A chess coach that runs on your own desktop or laptop. The Engine (Stockfish) judges every move, and Claude, the Coach, explains why in plain language.</p>
+    <p class="lede">A chess coach that runs on your own desktop or laptop. The Engine (Stockfish) judges every move, and the Coach (Claude, Codex, Pi, or OpenCode) explains why in plain language.</p>
     <p class="muted">Set up takes about ten minutes. After that it's one command each time you want to play, on your desktop or on your phone.</p>
   </div>
   <figure class="board-card" aria-label="Example: the knight jumps to c7 and forks the king and the rook" style="margin:0">
@@ -176,7 +176,7 @@ footer { font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--li
   <h2 id="need">What you need</h2>
   <ul class="needs">
     <li><span class="tick">✓</span><span><strong>A Windows, Mac or Linux desktop or laptop.</strong> 64-bit Windows 10 or later, macOS 13 or later, or a recent Ubuntu, Debian, Fedora or Arch. No Node.js or developer tools needed. The app runs there; your phone connects to it.</span></li>
-    <li><span class="tick">✓</span><span><strong>A paid Claude plan (Pro or Max).</strong> The Coach runs on your own Claude subscription through Claude Code. The free Claude plan doesn't include Claude Code. Sign up at <a href="https://claude.ai" rel="noopener">claude.ai</a>.</span></li>
+    <li><span class="tick">✓</span><span><strong>A Coach backend.</strong> Recommended: a paid Claude plan (Pro or Max) through Claude Code (<a href="https://claude.ai" rel="noopener">claude.ai</a>; the free Claude plan doesn't include Claude Code). You can also use Codex (ChatGPT subscription or API key), Pi, or OpenCode (which includes free Zen models).</span></li>
     <li><span class="tick">✓</span><span><strong>A terminal, used three times.</strong> You'll paste a few commands. Each step below says exactly what to paste.</span></li>
   </ul>
 </section>
@@ -207,6 +207,7 @@ footer { font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--li
         <h3>Install Claude Code and log in</h3>
         <div class="cmd"><code>irm https://claude.ai/install.ps1 | iex</code><button type="button">Copy</button></div>
         <p>Close PowerShell and open a <strong>new</strong> PowerShell window, then run <code class="inline">claude</code>. It opens your browser: sign in with your Claude account. When Claude Code says you're logged in, type <code class="inline">/exit</code>.</p>
+        <p class="or muted">Prefer Codex, Pi, or OpenCode? Sign in with your chosen backend (<code class="inline">codex login</code>, <code class="inline">pi</code> then <code class="inline">/login</code>, or <code class="inline">opencode auth login</code>) and skip Claude Code.</p>
       </div></li>
       <li><div class="step-body">
         <h3>Start OpenChessCoach</h3>
@@ -233,7 +234,7 @@ footer { font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--li
         <h3>Install Claude Code and log in</h3>
         <div class="cmd"><code>curl -fsSL https://claude.ai/install.sh | bash</code><button type="button">Copy</button></div>
         <p>Open a <strong>new</strong> Terminal window, then run <code class="inline">claude</code>. It opens your browser: sign in with your Claude account. When Claude Code says you're logged in, type <code class="inline">/exit</code>.</p>
-        <p class="or muted">If the new terminal says <code class="inline">claude</code> isn't found, run the PATH command the installer printed at the end, then open another new terminal.</p>
+        <p class="or muted">If the new terminal says <code class="inline">claude</code> isn't found, run the PATH command the installer printed at the end, then open another new terminal. Prefer Codex, Pi, or OpenCode? Sign in with that backend instead and skip Claude Code.</p>
       </div></li>
       <li><div class="step-body">
         <h3>Start OpenChessCoach</h3>
@@ -260,7 +261,7 @@ footer { font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--li
         <h3>Install Claude Code and log in</h3>
         <div class="cmd"><code>curl -fsSL https://claude.ai/install.sh | bash</code><button type="button">Copy</button></div>
         <p>Open a <strong>new</strong> terminal, then run <code class="inline">claude</code>. It opens your browser, or prints a link to open: sign in with your Claude account. When Claude Code says you're logged in, type <code class="inline">/exit</code>.</p>
-        <p class="or muted">If the new terminal says <code class="inline">claude</code> isn't found, run the PATH command the installer printed at the end, then open another new terminal.</p>
+        <p class="or muted">If the new terminal says <code class="inline">claude</code> isn't found, run the PATH command the installer printed at the end, then open another new terminal. Prefer Codex, Pi, or OpenCode? Sign in with that backend instead and skip Claude Code.</p>
       </div></li>
       <li><div class="step-body">
         <h3>Start OpenChessCoach</h3>
@@ -274,12 +275,13 @@ footer { font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--li
 
 <section aria-labelledby="every">
   <span class="eyebrow">Every time after</span>
-  <h2 id="every">Start, stop, update</h2>
+  <h2 id="every">Start, stop, update, uninstall</h2>
   <div class="facts">
     <p><strong>Start</strong>Open a terminal and run <code class="inline">openchesscoach</code> (or open <strong>OpenChessCoach</strong> from the Start Menu on Windows). Keep that window open while you play: closing it stops the app.</p>
     <p><strong>Stop</strong>Press <kbd>Ctrl</kbd>+<kbd>C</kbd> in that terminal.</p>
     <p><strong>Update</strong>Re-run the install command in step 2 — it updates the app and keeps your games and Player Profile. (If you run with <code class="inline">npx openchesscoach@latest</code>, every start already fetches the newest version.)</p>
-    <p><strong>On your phone</strong>The first thing the app shows on your desktop is a QR code, and the terminal prints the same one. Scan it with your phone's camera while it's on the same Wi-Fi, and the app opens already paired. That Wi-Fi address starts with <code class="inline">http://</code>, so the phone needs the desktop running each time it opens the app. To play away from home, tick <strong>away-from-home access</strong> in Settings and scan the new QR code. Its <code class="inline">https://</code> address is the one to add to your home screen: from there the board, the Engine, Lessons and Puzzles keep working with the desktop off. The address changes each time you start the app on the desktop, so scan again then.</p>
+    <p><strong>Uninstall</strong>On Windows PowerShell, run <code class="inline">&amp; ([scriptblock]::Create((irm https://github.com/inprealpha/OpenChessCoach/releases/latest/download/install.ps1))) -Uninstall</code>. On macOS or Linux, run <code class="inline">curl -fsSL https://github.com/inprealpha/OpenChessCoach/releases/latest/download/install.sh | bash -s -- --uninstall</code>. Uninstalling removes the app and shortcut while keeping your games and Player Profile.</p>
+    <p><strong>On your phone</strong>The first thing the app shows on your desktop is a QR code, and the terminal prints the same one. Scan it with your phone's camera while it's on the same Wi-Fi, and the app opens already paired. That Wi-Fi address starts with <code class="inline">http://</code>, so the phone needs the desktop running each time it opens the app. To play away from home, open Settings, go to <strong>Away from home</strong>, tick <strong>Make the app reachable away from home</strong>, and scan the new QR code. Its <code class="inline">https://</code> address is the one to add to your home screen: from there the board, the Engine, Lessons and Puzzles keep working with the desktop off. The address changes each time you start the app on the desktop, so scan again then.</p>
   </div>
 </section>
 
@@ -308,8 +310,8 @@ footer { font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--li
     <details><summary>OpenChessCoach needs Node.js 22.18 or later (when using <code>npx</code>)</summary><div>
       <p>Your installed Node.js is too old for the <code class="inline">npx</code> route. Either use the standalone installer in step 2 (no Node.js needed), or install the LTS version of Node.js from <a href="https://nodejs.org/en/download" rel="noopener">nodejs.org</a>.</p>
     </div></details>
-    <details><summary>Claude Code is not installed</summary><div>
-      <p>Do step 3, then open a new terminal. If <code class="inline">claude --version</code> works in the new terminal, start OpenChessCoach from that same window.</p>
+    <details><summary>No Coach backend is logged in / Claude Code is not installed</summary><div>
+      <p>Do step 3 to install and log in to Claude Code, then open a new terminal. If <code class="inline">claude --version</code> works in the new terminal, start OpenChessCoach from that same window. You can also sign in to Codex (<code class="inline">codex login</code>), Pi (<code class="inline">pi</code> then <code class="inline">/login</code>), or OpenCode (<code class="inline">opencode auth login</code>).</p>
     </div></details>
     <details><summary>Claude Code is installed but not logged in</summary><div>
       <p>Run <code class="inline">claude</code>, type <code class="inline">/login</code> and sign in. A free Claude plan can't log in to Claude Code; you need Pro or Max.</p>
@@ -324,27 +326,27 @@ footer { font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--li
       <p>The standalone installer in step 2 does not hit this. If you chose the <code class="inline">npx</code> route, PowerShell blocks <code class="inline">npx.ps1</code> by default: type <code class="inline">npx.cmd openchesscoach@latest</code> instead, or run <code class="inline">Set-ExecutionPolicy -Scope CurrentUser RemoteSigned</code> once (type <kbd>Y</kbd> if it asks; needs no administrator).</p>
     </div></details>
     <details><summary>My phone can't connect</summary><div>
-      <p>Check the phone is on the same Wi-Fi as the desktop, and that you allowed the firewall prompt (see step 4). On guest or office Wi-Fi, devices often can't see each other: use <strong>away-from-home access</strong> in Settings instead.</p>
+      <p>Check the phone is on the same Wi-Fi as the desktop, and that you allowed the firewall prompt (see step 4). On guest or office Wi-Fi, devices often can't see each other: wait a couple of minutes on the QR screen and choose <strong>Connect another way</strong> when <strong>Phone can't open it?</strong> appears, or turn on <strong>Make the app reachable away from home</strong> under <strong>Away from home</strong> in Settings.</p>
     </div></details>
-    <details><summary>The Coach says your Claude usage limit has been reached</summary><div>
-      <p>The Coach shares your Claude plan's usage limits. The app shows when they reset. The board, the Engine, Puzzles and Engine Games keep working meanwhile.</p>
+    <details><summary>The Coach says your usage limit has been reached</summary><div>
+      <p>The Coach shares your active Coach plan's usage limits. The app shows when they reset. The board, the Engine, Lessons, Puzzles and Engine Games keep working meanwhile.</p>
     </div></details>
   </div>
-  <p>Still stuck, or found a bug? Send a screenshot of the terminal to the person who shared this page or, if the project is public on GitHub, <a href="https://github.com/inprealpha/OpenChessCoach/issues" rel="noopener">open an issue there</a> with it. The terminal's first line, <code class="inline">OpenChessCoach <var>version</var> is running</code>, says which version you have.</p>
+  <p>Still stuck, or found a bug? Send a screenshot of the terminal to the person who shared this page or <a href="https://github.com/inprealpha/OpenChessCoach/issues" rel="noopener">open an issue on GitHub</a> with it. The terminal line <code class="inline">OpenChessCoach <var>version</var> is running.</code> says which version you have.</p>
 </section>
 
 <section aria-labelledby="know">
   <span class="eyebrow">Good to know</span>
-  <h2 id="know">Your data and your Claude plan</h2>
+  <h2 id="know">Your data and your Coach</h2>
   <div class="facts">
     <p><strong>Everything stays on your desktop.</strong>Your games and Player Profile live in one file in your data folder. There are no accounts and no server. On Windows it's <code class="inline">%APPDATA%\ai-chess-coach</code>, on macOS <code class="inline">~/Library/Application Support/ai-chess-coach</code>, on Linux <code class="inline">~/.local/share/ai-chess-coach</code>. Delete that folder to start over.</p>
-    <p><strong>The Coach uses your Claude plan.</strong>Each Coach reply counts towards your Claude usage, like a message in Claude. The app never sees your password; it goes through Claude Code's login.</p>
-    <p><strong>Only your devices get in.</strong>A device needs the pairing code from your desktop's QR code, so nobody else on your Wi-Fi can use the app or your Claude limits. Settings has <strong>Reset pairing</strong> to sign every other device out.</p>
+    <p><strong>The Coach uses your own backend login.</strong>Each Coach reply counts towards the limits of the backend you chose (Claude, Codex, Pi, or OpenCode). The app never sees your password; it goes through your local backend login.</p>
+    <p><strong>Only your devices get in.</strong>A device needs the pairing code from your desktop's QR code, so nobody else on your Wi-Fi can use the app or your Coach limits. Settings has <strong>Reset pairing</strong> to sign every other device out.</p>
   </div>
 </section>
 
 <footer>
-  <p>OpenChessCoach is free software under the GPL-3.0-or-later licence. The Engine is Stockfish (GPL-3.0). Chess pieces: cburnett by Colin M.L. Burnett (GPL-2.0-or-later).</p>
+  <p>OpenChessCoach is free software under the GPL-3.0-or-later licence (<a href="https://github.com/inprealpha/OpenChessCoach" rel="noopener">source code</a>). The Engine is Stockfish (GPL-3.0). Maia-3 is shared under AGPL-3.0. Chess pieces: cburnett by Colin M.L. Burnett (GPL-2.0-or-later). See <a href="https://github.com/inprealpha/OpenChessCoach/blob/main/THIRD_PARTY_NOTICES.md" rel="noopener">Third-party notices</a>.</p>
 </footer>
 
 </div>

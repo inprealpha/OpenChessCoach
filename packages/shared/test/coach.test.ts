@@ -439,6 +439,22 @@ describe('the Coach brief', () => {
     expect(brief.winningChances).toEqual({ side: 'white', before: winningChancesFor(before.score, before.pov, 'white').short, after: winningChancesFor(after.score, after.pov, 'white').short });
   });
 
+  it('carries White’s Winning Chances for a Black move on the Board, whose bar names White’s (#52)', () => {
+    // 1… e5 in the golden Italian Game: Black's move, asked about on the Board, which sends no playerSide.
+    const g = game('i425hmuv');
+    const m = g.moves[1]!;
+    expect(m.side).toBe('black');
+    const ask: CoachAsk = { job: 'why', fen: m.fenBefore, recentMoves: ['e4'], move: { uci: m.uci, san: m.san, grade: m.grade, playedScore: m.playedScore }, candidates: m.candidates, replies: g.moves[2]!.candidates };
+    const best = m.candidates[0]!;
+    const white = buildBrief({ ask: { ...ask, chancesSide: 'white' }, profile }).winningChances;
+    expect(white?.side).toBe('white');
+    expect(white?.before).toBe(winningChancesFor(best.score, 'black', 'white').short);
+    // The Player's side is not changed by it: the brief speaks to the Player as before.
+    expect(buildBrief({ ask: { ...ask, chancesSide: 'white' }, profile }).playerSide).toBeUndefined();
+    // Where a screen doesn't say, the side to move's, as before.
+    expect(buildBrief({ ask, profile }).winningChances?.side).toBe('black');
+  });
+
   it('carries only the Winning Chances in the position when there is no move, for the side to move', () => {
     const { move: _move, playerSide: _side, ...rest } = longGameAsk();
     const brief = buildBrief({ ask: { ...rest, job: 'why' }, profile });

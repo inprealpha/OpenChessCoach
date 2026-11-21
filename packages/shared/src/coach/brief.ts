@@ -292,7 +292,8 @@ export function buildBrief({ ask, profile, summary }: BriefInput): Brief {
 function winningChancesOf(ask: CoachAsk): Brief['winningChances'] {
   // An overview is about the whole game, not the final position.
   if (ask.job === 'hint' || ask.job === 'lesson-turn' || ask.job === 'review-overview' || ask.hideWinningChances) return undefined;
-  const side = ask.playerSide ?? turnOf(ask.fen);
+  // The side the bar names: White on the Board (#52), otherwise the Player's, or the side to move.
+  const side = ask.chancesSide ?? ask.playerSide ?? turnOf(ask.fen);
   const before = ask.positionBefore ?? bestLineScore(ask.fen, ask.candidates);
   if (!before) return undefined;
   const played = ask.move ? playUci(ask.fen, ask.move.uci) : null;

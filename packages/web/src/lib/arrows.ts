@@ -5,6 +5,8 @@
 import type { GradedMove } from '@chess-coach/shared/analysis';
 import { legalMoves, piecesOf, SIDE_NAMES, turnOf, type Side } from '@chess-coach/shared/chess';
 import type { Arrow, Brush } from '@chess-coach/shared/coach/types';
+import { numberedMoves } from '@chess-coach/shared/engine-lines';
+import type { Analysis } from '@chess-coach/shared/engine';
 import { nullMoveFen, type Threat } from '@chess-coach/shared/threat';
 
 /** What an arrow means, which picks its colour on every board. */
@@ -79,6 +81,17 @@ export function reviewArrows(move: GradedMove | undefined): BoardArrow[] {
     { from, to, kind: 'played', label: `Move played: ${move.san}, ${move.grade}` },
     { from: best.uci.slice(0, 2), to: best.uci.slice(2, 4), kind: 'best', label: `Engine’s best: ${best.san}` },
   ];
+}
+
+/**
+ * The Board's Engine's-best arrow: the first move of the Engine's best line in `fen`, green, named
+ * with its move number ("Engine’s best: 14. Nxd5"). None until the Engine has a line for `fen`.
+ */
+export function bestLineArrow(fen: string, analysis: Pick<Analysis, 'fen' | 'lines'> | null | undefined): BoardArrow[] {
+  const uci = analysis?.fen === fen ? analysis.lines[0]?.pv[0] : undefined;
+  const move = uci ? numberedMoves(fen, [uci])[0] : undefined;
+  if (!uci || !move) return [];
+  return [{ from: uci.slice(0, 2), to: uci.slice(2, 4), kind: 'best', label: `Engine’s best: ${move.label}` }];
 }
 
 /**

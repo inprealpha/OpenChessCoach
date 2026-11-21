@@ -1,16 +1,16 @@
 // Feature map: Board and Engine, Why Question. ADR 0002: the Engine judges, the Coach explains;
 // ADR 0006: the Engine is deterministic in verify mode; ADR 0007: the browser and the desktop run
 // the same Engine build.
-import type { Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 import type { GradedMove } from '../../packages/shared/src/analysis.ts';
-import { INITIAL_FEN, playUci, sanLine, turnOf } from '../../packages/shared/src/chess.ts';
+import { INITIAL_FEN, playUci } from '../../packages/shared/src/chess.ts';
 import type { Analysis } from '../../packages/shared/src/engine.ts';
 import { parseSinglePgn } from '../../packages/shared/src/pgn.ts';
-import { winningChancesFor } from '../../packages/shared/src/winning-chances.ts';
+import { engineLineView } from '../../packages/shared/src/engine-lines.ts';
 import { game, PGN_FIXTURES } from '../../packages/shared/test/golden.ts';
 import { CoachClient } from '../../packages/backend/src/client.ts';
 import { startVerifyInstance, VERIFY_ENGINE } from '../../packages/backend/src/verify/instance.ts';
-import { board, coachIdle, connection, expect, fenOf, play, square, test } from '../fixtures/app.ts';
+import { board, coachIdle, coachPanel, connection, expect, fenOf, play, square, test } from '../fixtures/app.ts';
 
 const MOVES = ['e2e4', 'e7e5', 'g1f3', 'b8c6', 'f1c4', 'f8c5', 'b2b4'];
 
@@ -39,16 +39,16 @@ async function playAndRead(page: Page, url: string): Promise<{ grades: string[];
   await expect(moves).toHaveCount(MOVES.length);
   for (let i = 0; i < MOVES.length; i++) await expect(moves.nth(i)).toHaveAccessibleName(/, (Best|Good|Inaccuracy|Mistake|Blunder)$/);
   const grades = await moves.evaluateAll((els) => els.map((e) => e.getAttribute('aria-label') ?? ''));
-  await page.getByRole('button', { name: 'Show Engine lines' }).click();
+  await page.getByRole('tab', { name: 'Lines' }).click();
   // Lines 2 to 5 are behind More lines.
   await page.getByRole('button', { name: /^More lines/ }).click();
   const section = page.getByRole('region', { name: 'Engine lines' });
   await expect(section.getByText('Depth 10')).toBeVisible();
   const lines = await section.getByRole('listitem').evaluateAll((els) => els.map((e) => e.getAttribute('aria-label') ?? ''));
-  // Black is to move: the bar names White, the side at the bottom, with the rest of line 1's percentage.
-  const black = Number(/Black’s winning chances: (\d+)%/.exec(lines[0] ?? '')?.[1]);
+  // Black is to move: the lines and the bar both give White's Winning Chances, the same as line 1's (#52).
+  const white = Number(/White’s winning chances: (\d+)%/.exec(lines[0] ?? '')?.[1]);
   const bar = chancesBar(page);
-  await expect(bar).toHaveAccessibleName(`Winning Chances bar: White’s winning chances: ${100 - black}%`);
+  await expect(bar).toHaveAccessibleName(`Winning Chances bar: White’s winning chances: ${white}%`);
   return { grades, threat, lines, bar: (await bar.getAttribute('aria-label')) ?? '' };
 }
 
@@ -84,9 +84,8 @@ function asShown(analysis: Analysis): { depth: string; lines: string[] } {
   return {
     depth: `Depth ${analysis.depth}`,
     lines: analysis.lines.map((line, i) => {
-      const sans = sanLine(analysis.fen, line.pv.slice(0, 6));
-      const chances = winningChancesFor(line.score, turnOf(analysis.fen));
-      return `Engine line ${i + 1}: ${sans[0] ?? ''}, ${chances.text}, ${chances.evaluation} | ${[chances.short, chances.evaluation, ...sans].join(' ')}`;
+      const { moves, chances } = engineLineView(analysis.fen, line);
+      return `Engine line ${i + 1}: ${moves[0]?.label ?? ''}, ${chances.text}, ${chances.evaluation} | ${[chances.short, chances.evaluation, ...moves.map((m) => m.label)].join(' ')}`;
     }),
   };
 }
@@ -99,7 +98,7 @@ test('the browser Engine shows the same lines as the desktop Engine for golden p
   const desktop = await CoachClient.connect(app.url, app.token);
   try {
     await paired.goto(`${app.url}/#/board`);
-    await paired.getByRole('button', { name: 'Show Engine lines' }).click();
+    await paired.getByRole('tab', { name: 'Lines' }).click();
     // Lines 2 to 5 are behind More lines.
     await paired.getByRole('button', { name: /^More lines/ }).click();
     let played = 0;
@@ -157,16 +156,16 @@ test('the Threat button shows the opponent’s threat, follows each move and is 
   await expect(button).toHaveAttribute('aria-pressed', 'false');
 });
 
-test('the Engine lines lead with the side to move’s Winning Chances, the evaluation beside them', async ({ paired, app }) => {
+test('the Engine lines lead with White’s Winning Chances whoever is to move, the evaluation beside them', async ({ paired, app }) => {
   // The start position and 1. e4 in verify mode: the same Engine facts as the golden Italian Game.
   await paired.goto(`${app.url}/#/board`);
-  await paired.getByRole('button', { name: 'Show Engine lines' }).click();
+  await paired.getByRole('tab', { name: 'Lines' }).click();
   // Lines 2 to 5 are behind More lines.
   await paired.getByRole('button', { name: /^More lines/ }).click();
   const section = paired.getByRole('region', { name: 'Engine lines' });
   const first = section.getByRole('listitem').first();
   await expect(section.getByText('Depth 10')).toBeVisible();
-  await expect(first).toHaveAccessibleName('Engine line 1: e4, White’s winning chances: 53%, +0.38');
+  await expect(first).toHaveAccessibleName('Engine line 1: 1. e4, White’s winning chances: 53%, +0.38');
   await expect(first.getByTestId('winning-chances')).toHaveText('53%');
   await expect(first.getByTestId('evaluation')).toHaveText('+0.38');
   // The evaluation is kept, smaller, beside the percentage.
@@ -176,10 +175,13 @@ test('the Engine lines lead with the side to move’s Winning Chances, the evalu
 
   await play(paired, 'e2e4');
   await expect(section.getByText('Depth 10')).toBeVisible();
-  // The evaluation stays from White's point of view, as most chess sites show it (#32).
-  await expect(section.getByRole('listitem').first()).toHaveAccessibleName('Engine line 1: e6, Black’s winning chances: 47%, +0.37');
+  // With Black to move the percentage stays White's, as on the bar and the Review's graph (#52), and
+  // the evaluation from White's point of view, as most chess sites show it (#32).
+  await expect(section.getByRole('listitem').first()).toHaveAccessibleName('Engine line 1: 1… e6, White’s winning chances: 53%, +0.37');
+  await expect(section.getByRole('listitem').first().getByTestId('winning-chances')).toHaveText('53%');
   await expect(section.getByRole('listitem').first().getByTestId('evaluation')).toHaveText('+0.37');
-  await expect(section).toContainText('Black’s winning chances');
+  await expect(section).toContainText('White’s winning chances');
+  await expect(section).not.toContainText('Black’s winning chances');
 });
 
 /** The Winning Chances bar beside the board, read by its accessible name. */
@@ -187,7 +189,7 @@ function chancesBar(page: Page) {
   return page.getByRole('meter', { name: /^Winning Chances bar/ });
 }
 
-test('the Winning Chances bar beside the board matches the Engine lines, follows the moves and flips with the board', async ({ paired, app }) => {
+test('the Winning Chances bar beside the board matches the Engine lines, follows the moves and fills from the bottom side when flipped', async ({ paired, app }) => {
   // The start position and 1. e4 in verify mode: the same seeded Engine facts as the Engine lines journey.
   await paired.goto(`${app.url}/#/board`);
   const bar = chancesBar(paired);
@@ -196,14 +198,14 @@ test('the Winning Chances bar beside the board matches the Engine lines, follows
   await expect(bar.getByTestId('bar-percent')).toHaveText(['47%', '53%']);
 
   // The same value as the Engine's first candidate move for the same position.
-  await paired.getByRole('button', { name: 'Show Engine lines' }).click();
+  await paired.getByRole('tab', { name: 'Lines' }).click();
   // Lines 2 to 5 are behind More lines.
   await paired.getByRole('button', { name: /^More lines/ }).click();
   const section = paired.getByRole('region', { name: 'Engine lines' });
-  await expect(section.getByRole('listitem').first()).toHaveAccessibleName('Engine line 1: e4, White’s winning chances: 53%, +0.38');
+  await expect(section.getByRole('listitem').first()).toHaveAccessibleName('Engine line 1: 1. e4, White’s winning chances: 53%, +0.38');
 
   await play(paired, 'e2e4');
-  await expect(section.getByRole('listitem').first()).toHaveAccessibleName('Engine line 1: e6, Black’s winning chances: 47%, +0.37');
+  await expect(section.getByRole('listitem').first()).toHaveAccessibleName('Engine line 1: 1… e6, White’s winning chances: 53%, +0.37');
   await expect(bar).toHaveAccessibleName('Winning Chances bar: White’s winning chances: 53%');
 
   // It follows the board as the Player steps through moves, with no Coach call.
@@ -221,7 +223,8 @@ test('the Winning Chances bar beside the board matches the Engine lines, follows
   await expect(bar).toHaveAccessibleName(`Winning Chances bar: White’s winning chances: ${white}%`);
   expect(await app.rows('coach_calls')).toHaveLength(0);
 
-  // It flips with the board: the side at the bottom of the board fills the bar from the bottom.
+  // It flips with the board: the side at the bottom of the board fills the bar from the bottom, and
+  // what it says stays White's, as on the Engine lines (#52).
   const fill = () =>
     bar.getByTestId('bar-fill').evaluate((el) => {
       const own = el.getBoundingClientRect();
@@ -230,7 +233,7 @@ test('the Winning Chances bar beside the board matches the Engine lines, follows
     });
   await expect.poll(fill).toEqual({ side: 'white', fromBottom: true, share: white });
   await paired.getByRole('button', { name: 'Flip board' }).click();
-  await expect(bar).toHaveAccessibleName(`Winning Chances bar: Black’s winning chances: ${100 - white}%`);
+  await expect(bar).toHaveAccessibleName(`Winning Chances bar: White’s winning chances: ${white}%`);
   await expect.poll(fill).toEqual({ side: 'black', fromBottom: true, share: 100 - white });
 });
 
@@ -260,6 +263,383 @@ test('the Winning Chances bar stands beside the board, and above it on a phone',
   expect(Math.abs(narrow.bar.width - narrow.board.width)).toBeLessThan(2);
   expect(narrow.board.width).toBeGreaterThan(340);
   expect(narrow.bar.height).toBeLessThan(30);
+});
+
+/** The sizes the Board's panel is checked at (#52): a desktop, and phones from the iPhone 13 in Safari up. */
+const PANEL_SIZES = [
+  { width: 1280, height: 800 },
+  { width: 390, height: 844 },
+  { width: 402, height: 714 },
+  { width: 440, height: 790 },
+  { width: 390, height: 664 },
+];
+
+/** Whether the element is wholly on the screen. */
+async function onScreen(page: Page, el: Locator): Promise<boolean> {
+  const box = await el.boundingBox();
+  const view = page.viewportSize();
+  return Boolean(box && view && box.y >= -1 && box.x >= -1 && box.y + box.height <= view.height + 1 && box.x + box.width <= view.width + 1);
+}
+
+test('the Board’s panel has Lines, Moves and Coach tabs at desktop and phone sizes, and remembers the one picked', async ({ paired, app }) => {
+  for (const size of PANEL_SIZES) {
+    await paired.setViewportSize(size);
+    await paired.goto(`${app.url}/#/board`);
+    const tabs = paired.getByRole('tablist', { name: 'Board' }).getByRole('tab');
+    await expect(tabs).toHaveText(['Lines', 'Moves', 'Coach']);
+    for (let i = 0; i < 3; i++) expect(await onScreen(paired, tabs.nth(i)), `tab ${i} at ${size.width}×${size.height}`).toBe(true);
+    await play(paired, 'e2e4');
+
+    // Moves: the move list.
+    await paired.getByRole('tab', { name: 'Moves' }).click();
+    await expect(paired.getByRole('tab', { name: 'Moves' })).toHaveAttribute('aria-selected', 'true');
+    await expect(paired.getByRole('list', { name: 'Moves' }).getByRole('button')).toHaveCount(1);
+    await expect(paired.getByRole('region', { name: 'Engine lines' })).toHaveCount(0);
+
+    // Lines: the top Engine line on the first screen, then More lines.
+    await paired.getByRole('tab', { name: 'Lines' }).click();
+    const lines = paired.getByRole('region', { name: 'Engine lines' });
+    await expect(lines.getByText('Depth 10')).toBeAttached();
+    await expect(lines.getByRole('listitem')).toHaveCount(1);
+    await expect(lines.getByRole('button', { name: /^More lines/ })).toBeAttached();
+    await expect(paired.getByRole('list', { name: 'Moves' })).toHaveCount(0);
+    expect(await onScreen(paired, lines.getByRole('listitem').first()), `top line at ${size.width}×${size.height}`).toBe(true);
+
+    // Coach: the conversation, with the Ask box docked under every tab.
+    await paired.getByRole('tab', { name: 'Coach' }).click();
+    await expect(paired.getByRole('tabpanel', { name: 'Coach' })).toContainText('Ask the Coach why');
+    const ask = paired.getByRole('textbox', { name: 'Your Why Question' });
+    expect(await onScreen(paired, ask), `Ask box at ${size.width}×${size.height}`).toBe(true);
+    expect(await onScreen(paired, board(paired, 'Chess board')), `board at ${size.width}×${size.height}`).toBe(true);
+    // One screen: the page itself never scrolls.
+    expect(await paired.evaluate(() => document.scrollingElement!.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(1);
+
+    // The tab picked is the one the Board opens on next time.
+    await paired.reload();
+    await expect(paired.getByRole('tab', { name: 'Coach' })).toHaveAttribute('aria-selected', 'true');
+    await paired.getByRole('tab', { name: 'Moves' }).click();
+  }
+});
+
+test('on the Coach tab of a phone, the set-up form and the New board question keep their buttons in view', async ({ paired, app }) => {
+  // A break-it probe: the conversation fills the Coach tab, so check the form and the question still have room.
+  for (const size of [{ width: 440, height: 790 }, { width: 390, height: 664 }]) {
+    await paired.setViewportSize(size);
+    await paired.goto(`${app.url}/#/board`);
+    await play(paired, 'e2e4');
+    await paired.getByRole('tab', { name: 'Coach' }).click();
+    await paired.getByRole('button', { name: 'Set up a position' }).click();
+    // The form scrolls inside the panel's sheet, as on the other tabs: its Set up button is reachable, never under the Ask box.
+    const submit = paired.getByRole('button', { name: 'Set up', exact: true });
+    await submit.scrollIntoViewIfNeeded();
+    expect(await onScreen(paired, submit)).toBe(true);
+    const ask = (await paired.getByRole('textbox', { name: 'Your Why Question' }).boundingBox())!;
+    expect((await submit.boundingBox())!.y + 44).toBeLessThanOrEqual(ask.y);
+    expect(await onScreen(paired, paired.getByRole('textbox', { name: 'Your Why Question' }))).toBe(true);
+    await paired.getByRole('button', { name: 'Cancel' }).click();
+    await paired.getByRole('button', { name: 'New board' }).click();
+    expect(await onScreen(paired, paired.getByRole('button', { name: 'Yes, a new board' }))).toBe(true);
+    expect(await onScreen(paired, paired.getByRole('button', { name: 'Keep this board' }))).toBe(true);
+    await paired.getByRole('button', { name: 'Keep this board' }).click();
+  }
+});
+
+test('asking the Coach opens the Coach tab, where the answer takes the panel’s room', async ({ paired, app }) => {
+  await paired.goto(`${app.url}/#/board`);
+  await play(paired, 'e2e4');
+  await paired.getByRole('tab', { name: 'Lines' }).click();
+  await paired.getByRole('textbox', { name: 'Your Why Question' }).fill('Why e4?');
+  await paired.getByRole('button', { name: 'Ask the Coach why' }).click();
+  await expect(paired.getByRole('tab', { name: 'Coach' })).toHaveAttribute('aria-selected', 'true');
+  await expect(paired.getByLabel('Coach conversation')).toContainText('e4 is graded');
+  // The panel's body is its tabs; the conversation fills the rest, down to the Ask box.
+  const panel = (await paired.locator('.side.panel').boundingBox())!;
+  const coach = (await coachPanel(paired).boundingBox())!;
+  expect(coach.height).toBeGreaterThan(panel.height * 0.6);
+  // Picked by the question, not by the Player: the Board opens on the tab the Player last picked.
+  await paired.reload();
+  await expect(paired.getByRole('tab', { name: 'Lines' })).toHaveAttribute('aria-selected', 'true');
+});
+
+test('an Engine line’s moves are numbered buttons: pointing at one shows it on the board, and a click tries the line', async ({ paired, app }) => {
+  const desktop = await CoachClient.connect(app.url, app.token);
+  let view: ReturnType<typeof engineLineView>;
+  try {
+    view = engineLineView(INITIAL_FEN, (await desktop.request('engine.analyse', { fen: INITIAL_FEN })).lines[0]!);
+  } finally {
+    await desktop.close();
+  }
+  await paired.goto(`${app.url}/#/board`);
+  await paired.getByRole('tab', { name: 'Lines' }).click();
+  const line = paired.getByRole('region', { name: 'Engine lines' }).getByRole('listitem').first();
+  const moves = line.getByRole('button');
+  // The moves with their numbers, as a scoresheet writes them: "1. e4 e5 2. Nf3".
+  await expect(moves).toHaveText(view.moves.map((m) => m.label));
+  expect(view.moves[0]!.label).toMatch(/^1\. /);
+  expect(view.moves[2]!.label).toMatch(/^2\. /);
+  const third = moves.nth(2);
+  const upTo = view.moves.slice(0, 3);
+  const text = upTo.map((m) => m.label).join(' ');
+  await expect(third).toHaveAccessibleName(`Try ${text} on the board`);
+
+  // Pointing at a move shows the position after it, and the header line says it is the Engine's line.
+  const head = paired.locator('.frame-head .head-line');
+  await third.hover();
+  await expect(board(paired, 'Chess board')).toHaveAttribute('data-fen', upTo[2]!.fenAfter);
+  await expect(head).toHaveText(`Engine line: ${text}`);
+  // Nothing that belongs to the position itself is drawn over the preview.
+  await expect(paired.getByRole('img', { name: /^Engine’s best: / })).toHaveCount(0);
+  await paired.mouse.move(0, 0);
+  await expect(board(paired, 'Chess board')).toHaveAttribute('data-fen', INITIAL_FEN);
+  await expect(head).toHaveText('White to move');
+
+  // Keyboard focus previews too; Enter tries the line.
+  await third.focus();
+  await expect(board(paired, 'Chess board')).toHaveAttribute('data-fen', upTo[2]!.fenAfter);
+  await paired.keyboard.press('Enter');
+  await expect(paired.getByRole('group', { name: 'Your own line' })).toBeVisible();
+  // Tried, the line stays on the board when the pointer and the focus move on.
+  await paired.mouse.move(0, 0);
+  await paired.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+  await expect(board(paired, 'Chess board')).toHaveAttribute('data-fen', upTo[2]!.fenAfter);
+  await paired.getByRole('button', { name: 'Back to the main line' }).click();
+  await expect(board(paired, 'Chess board')).toHaveAttribute('data-fen', INITIAL_FEN);
+
+  // A click on a move tries the line up to it as a variation.
+  await moves.nth(1).click();
+  await expect(board(paired, 'Chess board')).toHaveAttribute('data-fen', view.moves[1]!.fenAfter);
+  await paired.getByRole('tab', { name: 'Moves' }).click();
+  await expect(paired.getByRole('list', { name: 'Moves' }).getByRole('button')).toHaveCount(2);
+});
+
+test('a move kept in focus stays on the board when the pointer passes over another and leaves (#52 review)', async ({ paired, app }) => {
+  await paired.goto(`${app.url}/#/board`);
+  await paired.getByRole('tab', { name: 'Lines' }).click();
+  const moves = paired.getByRole('region', { name: 'Engine lines' }).getByRole('listitem').first().getByRole('button');
+  await expect(paired.getByRole('region', { name: 'Engine lines' }).getByText('Depth 10')).toBeAttached();
+  await expect(moves).toHaveCount(6);
+  await moves.nth(2).focus();
+  await expect(paired.locator('.frame-head .head-line')).toHaveText(/^Engine line: /);
+  const focused = await fenOf(paired, 'Chess board');
+  expect(focused).not.toBe(INITIAL_FEN);
+  await moves.nth(4).hover();
+  await expect(board(paired, 'Chess board')).not.toHaveAttribute('data-fen', focused);
+  await paired.mouse.move(0, 0);
+  await expect(board(paired, 'Chess board')).toHaveAttribute('data-fen', focused);
+  await expect(paired.locator('.frame-head .head-line')).toHaveText(/^Engine line: 1\. \S+ \S+ 2\. \S+$/);
+});
+
+test('a preview ends when the position or the tab changes under the pointer: the board shows the position on it', async ({ paired, app }) => {
+  await paired.goto(`${app.url}/#/board`);
+  await play(paired, 'e2e4');
+  await play(paired, 'e7e5');
+  await paired.getByRole('tab', { name: 'Lines' }).click();
+  const moves = paired.getByRole('region', { name: 'Engine lines' }).getByRole('listitem').first().getByRole('button');
+  await expect(paired.getByRole('region', { name: 'Engine lines' }).getByText('Depth 10')).toBeAttached();
+  const stepped = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1';
+  // The pointer previews the line; ← steps the game back under it. Its button goes with the old
+  // position's lines without the pointer ever leaving it, so only the new position ends the preview.
+  await moves.nth(3).hover();
+  await expect(paired.locator('.frame-head .head-line')).toHaveText(/^Engine line: 2\. /);
+  const previewed = await fenOf(paired, 'Chess board');
+  await paired.keyboard.press('ArrowLeft');
+  // The old line's preview is gone with its position (the new position's lines may preview one of
+  // their own under the pointer, as hovering does).
+  await expect(board(paired, 'Chess board')).not.toHaveAttribute('data-fen', previewed);
+  await expect(paired.locator('.frame-head .head-line')).not.toHaveText(/^Engine line: 2\. /);
+  // The new position's lines may come up under the pointer and preview one of theirs; leaving them puts the position back.
+  await paired.mouse.move(0, 0);
+  await expect(board(paired, 'Chess board')).toHaveAttribute('data-fen', stepped);
+  await expect(paired.locator('.frame-head .head-line')).toHaveText('Black to move');
+
+  // The lines leaving the screen under the pointer: another tab picked with the keyboard.
+  await expect(paired.getByRole('region', { name: 'Engine lines' }).getByText('Depth 10')).toBeAttached();
+  await paired.getByRole('textbox', { name: 'Your Why Question' }).focus();
+  await paired.getByRole('tab', { name: 'Lines' }).focus();
+  await moves.nth(2).hover();
+  await expect(paired.locator('.frame-head .head-line')).toHaveText(/^Engine line: /);
+  await paired.keyboard.press('ArrowRight');
+  await expect(paired.getByRole('tab', { name: 'Moves' })).toHaveAttribute('aria-selected', 'true');
+  await expect(board(paired, 'Chess board')).toHaveAttribute('data-fen', stepped);
+  await expect(paired.locator('.frame-head .head-line')).toHaveText('Black to move');
+});
+
+test('after a Why Question, each tab shows at most one green arrow: the Engine’s best on Lines, the Coach’s on the others (#52 review)', async ({ paired, app }) => {
+  await paired.goto(`${app.url}/#/board`);
+  for (const uci of MOVES.slice(0, 5)) await play(paired, uci);
+  await paired.getByRole('button', { name: 'Ask the Coach why' }).click();
+  await coachIdle(paired);
+  const green = board(paired, 'Chess board').locator('[data-kind="best"]');
+  const engineBest = paired.getByRole('img', { name: /^Engine’s best: / });
+  const coachArrows = paired.getByRole('img', { name: /^Arrow / });
+  // The Coach tab, which the question opened: the Coach's arrows, among them its green one.
+  await expect(paired.getByRole('tab', { name: 'Coach' })).toHaveAttribute('aria-selected', 'true');
+  await expect(coachArrows.first()).toBeVisible();
+  await expect(green).toHaveCount(1);
+  await expect(engineBest).toHaveCount(0);
+  // Lines: the Engine's best only.
+  await paired.getByRole('tab', { name: 'Lines' }).click();
+  await expect(engineBest).toHaveCount(1);
+  await expect(coachArrows).toHaveCount(0);
+  await expect(green).toHaveCount(1);
+  // Moves: the Coach's again.
+  await paired.getByRole('tab', { name: 'Moves' }).click();
+  await expect(engineBest).toHaveCount(0);
+  await expect(coachArrows.first()).toBeVisible();
+  await expect(green).toHaveCount(1);
+});
+
+test('the Coach tab’s panel is the Coach itself, with the conversation in it (#52 review)', async ({ paired, app }) => {
+  await paired.goto(`${app.url}/#/board`);
+  await play(paired, 'e2e4');
+  const tab = paired.getByRole('tab', { name: 'Coach' });
+  await paired.getByRole('button', { name: 'Ask the Coach why' }).click();
+  await coachIdle(paired);
+  await expect(tab).toHaveAttribute('aria-selected', 'true');
+  const controls = await tab.getAttribute('aria-controls');
+  const panel = paired.locator(`#${controls}`);
+  await expect(panel).toHaveAttribute('role', 'tabpanel');
+  await expect(paired.getByRole('tabpanel', { name: 'Coach' }).getByLabel('Coach conversation')).toContainText('e4 is graded');
+  // On another tab the Coach is docked under it as its own region, not a tab panel.
+  await paired.getByRole('tab', { name: 'Moves' }).click();
+  await expect(paired.getByRole('tabpanel', { name: 'Coach' })).toHaveCount(0);
+  await expect(paired.getByRole('region', { name: 'Coach' }).getByLabel('Coach conversation')).toContainText('e4 is graded');
+});
+
+test('the arrow keys move between the Board’s tabs while one has the focus, and step the board otherwise (#52 review)', async ({ paired, app }) => {
+  await paired.goto(`${app.url}/#/board`);
+  await play(paired, 'e2e4');
+  const after = await fenOf(paired, 'Chess board');
+  const tabs = paired.getByRole('tablist', { name: 'Board' }).getByRole('tab');
+  // Tab reaches the picked tab only.
+  await expect(tabs).toHaveCount(3);
+  expect(await tabs.evaluateAll((els) => els.map((e) => e.getAttribute('tabindex')))).toEqual(['-1', '0', '-1']);
+  // A tab clicked with the mouse keeps the focus, but ← → still step the board there.
+  await paired.getByRole('tab', { name: 'Moves' }).click();
+  await paired.keyboard.press('ArrowLeft');
+  await expect(board(paired, 'Chess board')).toHaveAttribute('data-fen', INITIAL_FEN);
+  await expect(paired.getByRole('tab', { name: 'Moves' })).toHaveAttribute('aria-selected', 'true');
+  await paired.keyboard.press('ArrowRight');
+  await expect(board(paired, 'Chess board')).toHaveAttribute('data-fen', after);
+  // Reached with the keyboard, the tablist takes the keys.
+  await paired.getByRole('textbox', { name: 'Your Why Question' }).focus();
+  await paired.keyboard.press('Shift+Tab');
+  await paired.keyboard.press('Shift+Tab');
+  await paired.getByRole('tab', { name: 'Moves' }).focus();
+  await paired.keyboard.press('ArrowRight');
+  await expect(paired.getByRole('tab', { name: 'Coach' })).toBeFocused();
+  await expect(paired.getByRole('tab', { name: 'Coach' })).toHaveAttribute('aria-selected', 'true');
+  await paired.keyboard.press('ArrowRight');
+  await expect(paired.getByRole('tab', { name: 'Lines' })).toBeFocused();
+  await paired.keyboard.press('End');
+  await expect(paired.getByRole('tab', { name: 'Coach' })).toBeFocused();
+  await paired.keyboard.press('Home');
+  await expect(paired.getByRole('tab', { name: 'Lines' })).toHaveAttribute('aria-selected', 'true');
+  await paired.keyboard.press('ArrowLeft');
+  await expect(paired.getByRole('tab', { name: 'Coach' })).toBeFocused();
+  // The board never stepped while the tablist had the keys.
+  await expect(board(paired, 'Chess board')).toHaveAttribute('data-fen', after);
+  expect(await tabs.evaluateAll((els) => els.map((e) => e.getAttribute('tabindex')))).toEqual(['-1', '-1', '0']);
+  // Out of the tablist, ← steps the board again.
+  await paired.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+  await paired.keyboard.press('ArrowLeft');
+  await expect(board(paired, 'Chess board')).toHaveAttribute('data-fen', INITIAL_FEN);
+});
+
+test('on a short phone the top Engine line sits whole above the Ask box, and every move of every line can be reached (#52 review)', async ({ browser, app }) => {
+  for (const viewport of [{ width: 390, height: 664 }, { width: 402, height: 714 }]) {
+    const ctx = await browser.newContext({ viewport, isMobile: true, hasTouch: true });
+    const page = await ctx.newPage();
+    try {
+      await page.goto(`${app.url}/#pair=${app.code}`);
+      await expect(connection(page)).toHaveText(/Desktop connected/);
+      await page.goto(`${app.url}/#/board`);
+      await page.getByRole('tab', { name: 'Lines' }).tap();
+      const lines = page.getByRole('region', { name: 'Engine lines' }).getByRole('listitem');
+      await expect(lines.first().getByRole('button').first()).toBeVisible();
+      const first = (await lines.first().boundingBox())!;
+      const body = (await page.locator('.panel-body').boundingBox())!;
+      const ask = (await page.getByRole('textbox', { name: 'Your Why Question' }).boundingBox())!;
+      expect(first.y + first.height, `${viewport.width}×${viewport.height}`).toBeLessThanOrEqual(body.y + body.height + 0.5);
+      expect(first.y + first.height).toBeLessThanOrEqual(ask.y);
+      // More lines open: each line's last move scrolls into reach, whole, and plays.
+      await page.getByRole('button', { name: /^More lines/ }).tap();
+      await expect(lines).toHaveCount(5);
+      for (let i = 0; i < 5; i++) {
+        const last = lines.nth(i).getByRole('button').last();
+        await last.scrollIntoViewIfNeeded();
+        const b = (await last.boundingBox())!;
+        const row = (await lines.nth(i).locator('.moves').boundingBox())!;
+        expect(b.x, `line ${i + 1}`).toBeGreaterThanOrEqual(row.x - 0.5);
+        expect(b.x + b.width, `line ${i + 1}`).toBeLessThanOrEqual(row.x + row.width + 0.5);
+      }
+      const label = (await lines.nth(4).getByRole('button').last().getAttribute('aria-label')) ?? '';
+      await lines.nth(4).getByRole('button').last().tap();
+      await expect(page.getByRole('button', { name: 'Back to the main line' })).toBeVisible();
+      expect(label).toMatch(/^Try 1\. /);
+    } finally {
+      await ctx.close();
+    }
+  }
+});
+
+test('on a touch phone, tapping an Engine line’s move tries the line on the board', async ({ browser, app }) => {
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 664 }, isMobile: true, hasTouch: true });
+  const page = await ctx.newPage();
+  try {
+    await page.goto(`${app.url}/#pair=${app.code}`);
+    await expect(connection(page)).toHaveText(/Desktop connected/);
+    await page.goto(`${app.url}/#/board`);
+    await page.getByRole('tab', { name: 'Lines' }).tap();
+    const moves = page.getByRole('region', { name: 'Engine lines' }).getByRole('listitem').first().getByRole('button');
+    await expect(moves.first()).toHaveText(/^1\. /);
+    // Each move is a full thumb's height.
+    expect((await moves.first().boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    await expect(moves.nth(2)).toHaveAccessibleName(/^Try 1\. \S+ \S+ 2\. \S+ on the board$/);
+    await moves.nth(2).tap();
+    await expect(page.getByRole('button', { name: 'Back to the main line' })).toBeVisible();
+    await expect(board(page, 'Chess board')).not.toHaveAttribute('data-fen', INITIAL_FEN);
+  } finally {
+    await ctx.close();
+  }
+});
+
+test('the best line’s first move is drawn as the Engine’s-best arrow while the Lines tab is open', async ({ paired, app }) => {
+  await paired.goto(`${app.url}/#/board`);
+  const best = paired.getByRole('img', { name: /^Engine’s best: / });
+  // Not on the Moves tab: the Engine's choice shows once the Player opens its lines.
+  await expect(paired.getByRole('tab', { name: 'Moves' })).toHaveAttribute('aria-selected', 'true');
+  await expect(chancesBar(paired)).toHaveAccessibleName('Winning Chances bar: White’s winning chances: 53%');
+  await expect(best).toHaveCount(0);
+  await paired.getByRole('tab', { name: 'Lines' }).click();
+  const first = paired.getByRole('region', { name: 'Engine lines' }).getByRole('listitem').first();
+  await expect(first).toHaveAccessibleName('Engine line 1: 1. e4, White’s winning chances: 53%, +0.38');
+  await expect(best).toHaveAccessibleName('Engine’s best: 1. e4');
+  await expect(best).toHaveAttribute('data-kind', 'best');
+  await expect(paired.getByRole('list', { name: 'Arrow colours' })).toContainText('best');
+  // It follows the position: after 1. e4, Black's best.
+  await play(paired, 'e2e4');
+  await expect(first).toHaveAccessibleName(/^Engine line 1: 1… e6,/);
+  await expect(best).toHaveAccessibleName('Engine’s best: 1… e6');
+  await paired.getByRole('tab', { name: 'Coach' }).click();
+  await expect(best).toHaveCount(0);
+});
+
+test('with Black to move, the bar and the Engine lines both give White’s Winning Chances (#52)', async ({ paired, app }) => {
+  // The Two Knights after 4. Ng5: Black to move, and the Board turns to Black's side.
+  const fen = 'r1bqkb1r/pppp1ppp/2n2n2/4p1N1/2B1P3/8/PPPP1PPP/RNBQK2R b KQkq - 5 4';
+  await paired.goto(`${app.url}/#/board?fen=${encodeURIComponent(fen)}`);
+  await expect(board(paired, 'Chess board')).toHaveAttribute('data-orientation', 'black');
+  await paired.getByRole('tab', { name: 'Lines' }).click();
+  const section = paired.getByRole('region', { name: 'Engine lines' });
+  await expect(section.getByText('Depth 10')).toBeAttached();
+  const name = (await section.getByRole('listitem').first().getAttribute('aria-label')) ?? '';
+  expect(name).toMatch(/^Engine line 1: 4… \S+, White’s winning chances: \d+%, [+-]\d/);
+  const white = /White’s winning chances: (\d+)%/.exec(name)![1];
+  await expect(section.getByRole('listitem').first().getByTestId('winning-chances')).toHaveText(`${white}%`);
+  await expect(chancesBar(paired)).toHaveAccessibleName(`Winning Chances bar: White’s winning chances: ${white}%`);
+  await expect(section).toContainText('White’s winning chances');
+  await expect(paired.locator('#app')).not.toContainText('Black’s winning chances');
 });
 
 test('the squares meet edge to edge, like a real board', async ({ paired, app }) => {
@@ -811,6 +1191,21 @@ test('the Coach quotes the Winning Chances the bar shows either side of the move
   await coachIdle(paired);
   // The fake Coach repeats the brief's Winning Chances word for word, as the real Coach is told to.
   await expect(paired.getByLabel('Coach conversation')).toContainText('Bc4 is graded Good. Before it, White’s winning chances: 54%. After it, White’s winning chances: 54%.');
+
+  // A Black move: the Coach still quotes White's, as the bar and the Engine lines name them (#52).
+  await play(paired, MOVES[5]!);
+  await paired.getByRole('tab', { name: 'Moves' }).click();
+  await expect(paired.getByRole('button', { name: /Move 3… Bc5, / })).toBeVisible();
+  await expect(bar).toHaveAccessibleName(/^Winning Chances bar: White’s winning chances: \d+%$/);
+  const after = Number(/(\d+)%$/.exec((await bar.getAttribute('aria-label')) ?? '')?.[1]);
+  await paired.getByRole('button', { name: 'Previous move' }).click();
+  await expect(bar).toHaveAccessibleName('Winning Chances bar: White’s winning chances: 54%');
+  await paired.getByRole('button', { name: 'Last position' }).click();
+  await expect(bar).toHaveAccessibleName(`Winning Chances bar: White’s winning chances: ${after}%`);
+  await paired.getByRole('button', { name: 'Ask the Coach why' }).click();
+  await coachIdle(paired);
+  await expect(paired.getByLabel('Coach conversation')).toContainText(new RegExp(`Bc5 is graded \\w+\\. Before it, White’s winning chances: 54%\\. After it, White’s winning chances: ${after}%\\.`));
+  await expect(paired.getByLabel('Coach conversation')).not.toContainText('Black’s winning chances');
 });
 
 test('a Why Question stops at 300 characters, and the Player sees how many are left', async ({ paired, app }) => {
@@ -895,10 +1290,10 @@ test.describe('setting up a position', () => {
     await expect(board(paired, 'Chess board')).toHaveAttribute('data-fen', MATE_IN_ONE);
     await expect(paired.getByRole('form', { name: 'Set up a position' })).toHaveCount(0);
     await expect(chancesBar(paired)).toHaveAccessibleName('Winning Chances bar: White mates in 1');
-    await paired.getByRole('button', { name: 'Show Engine lines' }).click();
+    await paired.getByRole('tab', { name: 'Lines' }).click();
     // Lines 2 to 5 are behind More lines.
     await paired.getByRole('button', { name: /^More lines/ }).click();
-    await expect(paired.getByRole('region', { name: 'Engine lines' }).getByRole('listitem').first()).toHaveAccessibleName(/^Engine line 1: Rd8#/);
+    await expect(paired.getByRole('region', { name: 'Engine lines' }).getByRole('listitem').first()).toHaveAccessibleName(/^Engine line 1: 1\. Rd8#/);
     // The Player plays on from it as from any position.
     await play(paired, 'd1d8');
     await expect(paired.getByRole('status', { name: 'Result' })).toHaveText('Checkmate. White wins.');

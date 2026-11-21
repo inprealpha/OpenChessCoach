@@ -92,6 +92,24 @@ describe('the Coach port', () => {
     expect(JSON.parse(call?.raw_reply ?? '{}').text).toContain(`After it, ${await barAt(bc4.fenAfter)}.`);
   });
 
+  it('quotes White’s Winning Chances for a Black move asked about on the Board, as its bar names them (#52)', async () => {
+    const app = await instance();
+    const c = await client(app);
+    // 1… e5, as the Board sends it: the position, the move, no Player's side, and the bar's side.
+    const before = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1';
+    const e5 = playSan(before, 'e5');
+    if (!e5) throw new Error('bad fixture');
+    await c.request('coach.ask', { job: 'why', fen: before, recentMoves: ['e4'], moveUci: e5.uci, chancesSide: 'white' });
+    // A side that isn't one is dropped, so the brief falls back to the side to move.
+    await c.request('coach.ask', { job: 'why', fen: before, recentMoves: ['e4'], moveUci: e5.uci, chancesSide: 'purple' as 'white' });
+    const [board, odd] = rows<{ brief: string; raw_reply: string }>(app, 'SELECT brief, raw_reply FROM coach_calls ORDER BY id');
+    const brief = JSON.parse(board?.brief ?? '{}');
+    expect(brief.winningChances).toEqual({ side: 'white', before: await numbersAt(before), after: await numbersAt(e5.fenAfter) });
+    expect(brief).not.toHaveProperty('playerSide');
+    expect(JSON.parse(board?.raw_reply ?? '{}').text).toContain(`Before it, ${await barAt(before)}.`);
+    expect(JSON.parse(odd?.brief ?? '{}').winningChances.side).toBe('black');
+  });
+
   it('quotes the bar’s Winning Chances and mate count after a move that was among the Engine’s lines', async () => {
     const app = await instance();
     const c = await client(app);

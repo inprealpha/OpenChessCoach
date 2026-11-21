@@ -3,7 +3,9 @@
   // position's Winning Chances, with each side's percentage at its end. The side at the bottom of
   // the board fills it from the bottom, or from the left where the bar lies above the board on a
   // phone. Its value comes from the shared formatter, so it agrees with the Engine lines and the
-  // Move Grades (ADR 0002).
+  // Move Grades (ADR 0002). Its name and value are the side `names` says: White's on the Board,
+  // whoever is at the bottom or to move, as its Engine lines and Lichess show them (#52); the side
+  // at the bottom where a screen doesn't say, which is the Player's in a Review and an Engine Game.
   import { otherSide, type Side } from '@chess-coach/shared/chess';
   import type { Score } from '@chess-coach/shared/engine';
   import { winningChancesFor } from '@chess-coach/shared/winning-chances';
@@ -17,11 +19,16 @@
     orientation: Side;
     /** Said in place of the percentage while there is no score. */
     waiting?: string;
+    /** The side whose Winning Chances the bar names and reads out; the side at the bottom unless given. */
+    names?: Side;
   }
 
-  let { score, pov, orientation, waiting = 'the Engine is thinking' }: Props = $props();
+  let { score, pov, orientation, waiting = 'the Engine is thinking', names }: Props = $props();
 
+  /** The bottom side's share, which fills the bar from its end. */
   const bottom = $derived(score ? winningChancesFor(score, pov, orientation) : null);
+  /** What the bar says: the named side's Winning Chances. */
+  const named = $derived(score ? winningChancesFor(score, pov, names ?? orientation) : null);
   /** The fill keeps its last value while the Engine thinks, so the bar doesn't jump to even. */
   let shown = $state(50);
   $effect(() => {
@@ -37,7 +44,7 @@
     }
     return ends.map((side) => ({ side, label: winningChancesFor(score, pov, side).short }));
   });
-  const name = $derived(`Winning Chances bar: ${bottom ? bottom.text : waiting}`);
+  const name = $derived(`Winning Chances bar: ${named ? named.text : waiting}`);
 </script>
 
 <div
@@ -47,8 +54,8 @@
   aria-label={name}
   aria-valuemin="0"
   aria-valuemax="100"
-  aria-valuenow={bottom ? Math.round(bottom.percent) : undefined}
-  aria-valuetext={bottom ? bottom.text : waiting}
+  aria-valuenow={named ? Math.round(named.percent) : undefined}
+  aria-valuetext={named ? named.text : waiting}
   data-orientation={orientation}
 >
   <div class="track {otherSide(orientation)}">

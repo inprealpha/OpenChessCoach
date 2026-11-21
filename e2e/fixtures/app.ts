@@ -78,8 +78,9 @@ export async function fenOf(page: Page, boardName?: string): Promise<string> {
   return (await board(page, boardName).getAttribute('data-fen')) ?? '';
 }
 
+/** The Coach's panel: a region, or on the Board's Coach tab, that tab's panel (#52). */
 export function coachPanel(page: Page): Locator {
-  return page.getByRole('region', { name: 'Coach' });
+  return page.getByRole('region', { name: 'Coach' }).or(page.getByRole('tabpanel', { name: 'Coach' }));
 }
 
 /** Waits until the Coach has finished its reply (no entry still streaming). */

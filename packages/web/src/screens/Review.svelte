@@ -25,6 +25,7 @@
   import StepButtons from '../components/StepButtons.svelte';
   import ThreatButton from '../components/ThreatButton.svelte';
   import VariationBar from '../components/VariationBar.svelte';
+  import PanelTabs from '../components/PanelTabs.svelte';
   import WinningChancesBar from '../components/WinningChancesBar.svelte';
   import WinningChancesGraph from '../components/WinningChancesGraph.svelte';
   import { api, ApiError } from '../lib/api.svelte.ts';
@@ -565,14 +566,12 @@
           {#if review}
             {@const tabs = (overview ? ['moments', 'moves', 'overview'] : ['moments', 'moves']) as Tab[]}
             {@const names = { moments: 'Moments', moves: 'Moves', overview: 'Overview' }}
-            <div class="tabs" role="tablist" aria-label="Review">
-              {#each tabs as t (t)}
-                <button type="button" role="tab" id={`tab-${t}`} aria-controls={`panel-${t}`} aria-selected={tab === t} class:on={tab === t} onclick={() => pickTab(t)}
-                  aria-label={t === 'overview' && overviewNew ? 'Overview, not read yet' : undefined}
-                  >{names[t]}{#if t === 'overview' && overviewNew}<span class="new-dot" aria-hidden="true"></span>{/if}</button
-                >
-              {/each}
-            </div>
+            <PanelTabs
+              label="Review"
+              current={tab}
+              onpick={pickTab}
+              tabs={tabs.map((t) => ({ id: t, name: names[t], ...(t === 'overview' && overviewNew ? { label: 'Overview, not read yet', dot: true } : {}) }))}
+            />
             <div id="panel-moments" role="tabpanel" aria-labelledby="tab-moments" hidden={tab !== 'moments'} class="tab-panel rows">
               <section aria-label="Key moments">
                 <h2 class="visually-hidden">Key moments</h2>
@@ -711,9 +710,6 @@
      keeps around the board: the header line, the legend, the panel's tabs and its first row, and
      the thumb bar. */
   .review { --under-board: 9.75rem; --phone-reserve: 18rem; }
-  .tabs { display: flex; gap: 0.25rem; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--panel); z-index: 1; margin-inline: calc(-1 * var(--panel-pad)); padding-inline: calc(var(--panel-pad) - 0.25rem); }
-  .tabs button { background: none; color: var(--muted); border-radius: 0; padding: 0.45rem 0.75rem; min-height: 2.5rem; border-bottom: 2px solid transparent; margin-bottom: -1px; }
-  .tabs button.on { color: var(--text); font-weight: 600; border-bottom-color: var(--accent); }
   .tab-panel { display: flex; flex-direction: column; gap: 0.6rem; }
   .tab-panel[hidden] { display: none; }
   .tab-panel.rows { gap: 0; }
@@ -742,8 +738,6 @@
   .more p { margin: 0.2rem 0 0; }
   .none { margin: 0.6rem 0 0; }
   .explore-hint { margin: 0.6rem 0 0; }
-  /* The overview not read yet: a dot on its tab, not a row that costs a phone's sheet a line. */
-  .new-dot { display: inline-block; width: 0.45rem; height: 0.45rem; margin-left: 0.3rem; border-radius: 50%; background: var(--accent); vertical-align: 0.15rem; }
   .trying { margin: 0 0 0.45rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.2rem 0.4rem; }
   .more-arrows { display: block; margin-top: 0.4rem; color: var(--muted); text-decoration: underline; }
   .overview { margin: 0.6rem 0 0; line-height: 1.5; }
@@ -756,7 +750,6 @@
   progress { width: 100%; }
   .panel-body > .card { margin-top: 0.6rem; }
   @media (max-width: 820px) {
-    .tabs button { min-height: var(--tap); }
     .better .try { min-height: var(--tap); }
   }
 </style>

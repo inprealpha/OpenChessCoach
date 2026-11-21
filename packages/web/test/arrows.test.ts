@@ -3,7 +3,7 @@
 import { describe, expect, it } from 'vitest';
 import { playUci } from '@chess-coach/shared/chess';
 import type { Arrow } from '@chess-coach/shared/coach/types';
-import { ARROW_LOOK, coachArrows, drawOrder, legendOf, lessonArrows, lessonHighlights, punishingArrow, threatArrows } from '../src/lib/arrows.ts';
+import { ARROW_LOOK, bestLineArrow, coachArrows, drawOrder, legendOf, lessonArrows, lessonHighlights, punishingArrow, threatArrows } from '../src/lib/arrows.ts';
 
 const arrow = (uci: string, brush: Arrow['brush']): Arrow => ({ from: uci.slice(0, 2), to: uci.slice(2, 4), brush });
 
@@ -82,5 +82,30 @@ describe('one arrow colour per meaning', () => {
     expect(a).toEqual({ from: 'd8', to: 'h4', kind: 'threat', label: 'Threat: Black answers Qh4# (d8 to h4)' });
     expect(ARROW_LOOK.threat.dashed).toBe(true);
     expect(punishingArrow(undefined, undefined, 'black')).toEqual([]);
+  });
+});
+
+describe('the Board’s Engine’s-best arrow', () => {
+  const start = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+
+  it('draws the best line’s first move in green, named with its move number', () => {
+    const analysis = { fen: start, lines: [{ pv: ['e2e4', 'e7e5'], score: { cp: 38 }, depth: 10 }, { pv: ['d2d4'], score: { cp: 30 }, depth: 10 }] };
+    expect(bestLineArrow(start, analysis)).toEqual([{ from: 'e2', to: 'e4', kind: 'best', label: 'Engine’s best: 1. e4' }]);
+    const afterE4 = playUci(start, 'e2e4')!.fenAfter;
+    expect(bestLineArrow(afterE4, { fen: afterE4, lines: [{ pv: ['e7e6'], score: { cp: -37 }, depth: 10 }] })[0]?.label).toBe('Engine’s best: 1… e6');
+  });
+
+  it('draws castling as the king’s move and a promotion from its pawn’s square', () => {
+    const castle = 'r3k2r/pppq1ppp/2npbn2/4p3/2B1P3/2NP1N2/PPPQ1PPP/R3K2R w KQkq - 0 8';
+    expect(bestLineArrow(castle, { fen: castle, lines: [{ pv: ['e1g1'], score: { cp: 30 }, depth: 10 }] })).toEqual([{ from: 'e1', to: 'g1', kind: 'best', label: 'Engine’s best: 8. O-O' }]);
+    const promote = 'k7/4P3/8/8/8/8/8/7K w - - 0 1';
+    expect(bestLineArrow(promote, { fen: promote, lines: [{ pv: ['e7e8q'], score: { mate: 3 }, depth: 10 }] })).toEqual([{ from: 'e7', to: 'e8', kind: 'best', label: 'Engine’s best: 1. e8=Q+' }]);
+  });
+
+  it('draws nothing for another position’s analysis, or before there is a line', () => {
+    const afterE4 = playUci(start, 'e2e4')!.fenAfter;
+    expect(bestLineArrow(afterE4, { fen: start, lines: [{ pv: ['e2e4'], score: { cp: 38 }, depth: 10 }] })).toEqual([]);
+    expect(bestLineArrow(start, null)).toEqual([]);
+    expect(bestLineArrow(start, { fen: start, lines: [] })).toEqual([]);
   });
 });

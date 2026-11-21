@@ -20,9 +20,11 @@
 // Every call runs on the latest Haiku (the `haiku` alias), whatever model the job uses in the app,
 // to keep the check cheap on the owner's subscription.
 //
-//   node scripts/real-coach-check.ts            run the check and print the verdict as JSON
-//   node scripts/real-coach-check.ts --post     also post it as the "real Coach" status on HEAD
-//   node scripts/real-coach-check.ts --fake     drive the same calls with the fake Coach, to test this script
+//   node scripts/real-coach-check.ts                          run the check (default: claude / haiku) and print the verdict as JSON
+//   node scripts/real-coach-check.ts --provider pi            run against another local Coach backend (codex, pi, opencode)
+//   node scripts/real-coach-check.ts --provider pi --model X  override the model used for the check
+//   node scripts/real-coach-check.ts --post                   also post it as the "real Coach" status on HEAD
+//   node scripts/real-coach-check.ts --fake                   drive the same calls with the fake Coach, to test this script
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -32,7 +34,7 @@ import { answerMoves, type EngineAnswer, type EngineQuestion } from '@chess-coac
 import { MAX_WORDS, threatFen, type Brief } from '@chess-coach/shared/coach/brief';
 import type { CoachRequest, CoachRawReply, CoachReply } from '@chess-coach/shared/coach/types';
 import type { LessonData, LessonPart } from '@chess-coach/shared/content/lessons';
-import type { CoachJob } from '@chess-coach/shared/protocol';
+import { COACH_PROVIDERS, type CoachJob, type CoachProvider } from '@chess-coach/shared/protocol';
 import { CoachClient } from '../packages/backend/src/client.ts';
 import type { CoachCall, CoachEngine, CoachPort } from '../packages/backend/src/coach/port.ts';
 import { avoidedTerms } from './glossary-lint.ts';
@@ -144,6 +146,7 @@ export function checkCall(record: CoachCallRecord, reply: CoachReply, terms: rea
 /** Wraps a Coach, runs every call on one model and keeps every brief and raw reply. */
 export class RecordingCoach implements CoachPort {
   readonly name: CoachPort['name'];
+  readonly supportsEngineTool?: boolean;
   readonly calls: CoachCallRecord[] = [];
   private readonly inner: CoachPort;
   private readonly model: string;
@@ -151,6 +154,7 @@ export class RecordingCoach implements CoachPort {
   constructor(inner: CoachPort, model = CHECK_MODEL) {
     this.inner = inner;
     this.name = inner.name;
+    this.supportsEngineTool = inner.supportsEngineTool;
     this.model = model;
   }
 
@@ -337,44 +341,117 @@ export function summarize(calls: readonly CallVerdict[]): { ok: boolean; descrip
   return { ok: true, description: `${passed}, ${warnings.length} ${warnings.length === 1 ? 'warning' : 'warnings'}: ${warnings[0]}`.slice(0, MAX_DESCRIPTION - 1) };
 }
 
-async function run(fake: boolean): Promise<Verdict> {
+export interface RealCoachArgs {
+  fake: boolean;
+  post: boolean;
+  provider: CoachProvider;
+  model: string;
+}
+
+export function parseRealCoachArgs(argv: readonly string[]): RealCoachArgs {
+  let fake = false;
+  let postResult = false;
+  let provider: CoachProvider = 'claude';
+  let model: string | undefined;
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i];
+    if (arg === '--fake') {
+      fake = true;
+    } else if (arg === '--post') {
+      postResult = true;
+    } else if (arg === '--provider' && argv[i + 1]) {
+      const value = argv[++i] as CoachProvider;
+      if (!COACH_PROVIDERS.includes(value)) {
+        throw new Error(`Unknown provider "${value}". Expected one of: ${COACH_PROVIDERS.join(', ')}.`);
+      }
+      provider = value;
+    } else if (arg === '--model' && argv[i + 1]) {
+      model = argv[++i];
+    }
+  }
+  return {
+    fake,
+    post: postResult,
+    provider,
+    model: model ?? (provider === 'claude' ? CHECK_MODEL : 'default'),
+  };
+}
+
+async function createProviderCoach(
+  provider: CoachProvider,
+): Promise<{ coach: CoachPort; close?: () => void | Promise<void> }> {
+  if (provider === 'claude') {
+    const { RealCoach } = await import('../packages/backend/src/coach/real.ts');
+    return { coach: new RealCoach() };
+  }
+  if (provider === 'codex') {
+    const { checkCodex } = await import('../packages/backend/src/codex-check.ts');
+    const { CodexCoach } = await import('../packages/backend/src/coach/codex.ts');
+    const check = await checkCodex();
+    if (!check.ok) throw new Error(check.message);
+    return { coach: new CodexCoach(check.path ? { codexPath: check.path } : {}) };
+  }
+  if (provider === 'pi') {
+    const { checkPi } = await import('../packages/backend/src/pi-check.ts');
+    const { PiCoach } = await import('../packages/backend/src/coach/pi.ts');
+    const check = await checkPi();
+    if (!check.ok) throw new Error(check.message);
+    return { coach: new PiCoach() };
+  }
+  const { checkOpenCode } = await import('../packages/backend/src/opencode-check.ts');
+  const { OpenCodeCoach } = await import('../packages/backend/src/coach/opencode.ts');
+  const check = await checkOpenCode();
+  if (!check.ok) throw new Error(check.message);
+  const openCode = new OpenCodeCoach(check.path ? { opencodePath: check.path } : {});
+  return { coach: openCode, close: () => openCode.close() };
+}
+
+async function run(args: Pick<RealCoachArgs, 'fake' | 'provider' | 'model'>): Promise<Verdict> {
   const root = new URL('../', import.meta.url);
-  const { RealCoach } = await import('../packages/backend/src/coach/real.ts');
   const { FakeCoach } = await import('../packages/backend/src/coach/fake.ts');
   const { startVerifyInstance } = await import('../packages/backend/src/verify/instance.ts');
   const sha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
-  const coach = new RecordingCoach(fake ? new FakeCoach({ chunkDelayMs: 0 }) : new RealCoach());
-  const status = await coach.status();
-  if (status.state !== 'ready') throw new Error(`The real Coach is not ready: ${'reason' in status ? status.reason : status.state}. Log in to Claude Code first.`);
-
-  const instance = await startVerifyInstance({ coachPort: coach, seed: 'default' });
-  let received: Received[];
+  const created: { coach: CoachPort; close?: () => void | Promise<void> } = args.fake
+    ? { coach: new FakeCoach({ chunkDelayMs: 0 }) }
+    : await createProviderCoach(args.provider);
+  const coach = new RecordingCoach(created.coach, args.model);
   try {
-    const client = await CoachClient.connect(instance.url, instance.token);
-    try {
-      received = await driveEveryJob(client, root);
-    } finally {
-      await client.close();
+    const status = await coach.status();
+    if (status.state !== 'ready') {
+      throw new Error(`The real Coach (${args.provider}) is not ready: ${'reason' in status ? status.reason : status.state}.`);
     }
-  } finally {
-    await instance.stop();
-  }
 
-  const terms = avoidedTerms(readFileSync(new URL('CONTEXT.md', root), 'utf8'));
-  // A Review's overview and key moments reach the client inside the Review, in the order the Coach was called.
-  const inReview = (job: CoachJob) => job === 'review-overview' || job === 'review-moment';
-  const reviewReplies = received.filter((r) => inReview(r.job));
-  const others = received.filter((r) => !inReview(r.job));
-  const calls = coach.calls.map((record) => {
-    const reply = inReview(record.job) ? reviewReplies.shift() : others.shift();
-    if (!reply) return { job: record.job, words: 0, maxWords: MAX_WORDS[record.job], problems: ['no reply reached the client'], warnings: [] };
-    return checkCall(record, reply.reply, terms, reply.keptBack);
-  });
-  const jobs = new Set(calls.map((c) => c.job));
-  const missing = (Object.keys(MAX_WORDS) as CoachJob[]).filter((j) => !jobs.has(j));
-  if (missing.length) calls.push({ job: missing[0] as CoachJob, words: 0, maxWords: 0, problems: [`no Coach call was made for ${missing.join(', ')}`], warnings: [] });
-  const { ok, description } = summarize(calls);
-  return { ok, sha, calls, description };
+    const instance = await startVerifyInstance({ coachPort: coach, seed: 'default' });
+    let received: Received[];
+    try {
+      const client = await CoachClient.connect(instance.url, instance.token);
+      try {
+        received = await driveEveryJob(client, root);
+      } finally {
+        await client.close();
+      }
+    } finally {
+      await instance.stop();
+    }
+
+    const terms = avoidedTerms(readFileSync(new URL('CONTEXT.md', root), 'utf8'));
+    // A Review's overview and key moments reach the client inside the Review, in the order the Coach was called.
+    const inReview = (job: CoachJob) => job === 'review-overview' || job === 'review-moment';
+    const reviewReplies = received.filter((r) => inReview(r.job));
+    const others = received.filter((r) => !inReview(r.job));
+    const calls = coach.calls.map((record) => {
+      const reply = inReview(record.job) ? reviewReplies.shift() : others.shift();
+      if (!reply) return { job: record.job, words: 0, maxWords: MAX_WORDS[record.job], problems: ['no reply reached the client'], warnings: [] };
+      return checkCall(record, reply.reply, terms, reply.keptBack);
+    });
+    const jobs = new Set(calls.map((c) => c.job));
+    const missing = (Object.keys(MAX_WORDS) as CoachJob[]).filter((j) => !jobs.has(j));
+    if (missing.length) calls.push({ job: missing[0] as CoachJob, words: 0, maxWords: 0, problems: [`no Coach call was made for ${missing.join(', ')}`], warnings: [] });
+    const { ok, description } = summarize(calls);
+    return { ok, sha, calls, description };
+  } finally {
+    await created.close?.();
+  }
 }
 
 function post(verdict: Verdict): void {
@@ -388,11 +465,11 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const { quietSqliteWarning } = await import('../packages/backend/src/runtime.ts');
   quietSqliteWarning();
   try {
-    const fake = process.argv.includes('--fake');
-    const verdict = await run(fake);
+    const args = parseRealCoachArgs(process.argv.slice(2));
+    const verdict = await run(args);
     process.stdout.write(`${JSON.stringify(verdict, null, 2)}\n`);
-    if (process.argv.includes('--post')) {
-      if (fake) throw new Error('A run with the fake Coach is never posted as the real-Coach verdict.');
+    if (args.post) {
+      if (args.fake) throw new Error('A run with the fake Coach is never posted as the real-Coach verdict.');
       post(verdict);
     }
     process.exit(verdict.ok ? 0 : 1);

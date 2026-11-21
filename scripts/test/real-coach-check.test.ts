@@ -5,7 +5,7 @@ import type { Brief } from '@chess-coach/shared/coach/brief';
 import type { CoachRawReply, CoachReply } from '@chess-coach/shared/coach/types';
 import type { EngineAnswer } from '@chess-coach/shared/coach/engine-tool';
 import { avoidedTerms } from '../glossary-lint.ts';
-import { CHECK_MODEL, type CallVerdict, checkCall, RecordingCoach, ROLE_BREAK_TERMS, summarize } from '../real-coach-check.ts';
+import { CHECK_MODEL, type CallVerdict, checkCall, parseRealCoachArgs, RecordingCoach, ROLE_BREAK_TERMS, summarize } from '../real-coach-check.ts';
 import type { CoachCall, CoachPort } from '../../packages/backend/src/coach/port.ts';
 
 const AFTER_E4_D5 = 'rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2';
@@ -195,5 +195,18 @@ describe('the real-Coach check', () => {
     await coach.ask({ job: 'why', model: 'sonnet', brief, engine }, () => {});
     await coach.ask({ job: 'why', model: 'sonnet', brief }, () => {});
     expect(coach.calls.map((c) => c.answers)).toEqual([[answer], undefined]);
+  });
+
+  it('parses provider and model flags while defaulting to Claude Haiku', () => {
+    expect(parseRealCoachArgs([])).toEqual({ fake: false, post: false, provider: 'claude', model: CHECK_MODEL });
+    expect(parseRealCoachArgs(['--provider', 'pi', '--post'])).toEqual({ fake: false, post: true, provider: 'pi', model: 'default' });
+    expect(parseRealCoachArgs(['--provider', 'codex', '--model', 'gpt-6.1-terra'])).toEqual({ fake: false, post: false, provider: 'codex', model: 'gpt-6.1-terra' });
+    expect(parseRealCoachArgs(['--provider', 'opencode', '--fake'])).toEqual({ fake: true, post: false, provider: 'opencode', model: 'default' });
+    expect(() => parseRealCoachArgs(['--provider', 'bogus'])).toThrow(/Unknown provider/);
+  });
+
+  it('forwards supportsEngineTool from the wrapped Coach', () => {
+    const inner: CoachPort = { name: 'codex', supportsEngineTool: false, status: async () => ({ state: 'ready' }), ask: async () => raw };
+    expect(new RecordingCoach(inner, 'default').supportsEngineTool).toBe(false);
   });
 });

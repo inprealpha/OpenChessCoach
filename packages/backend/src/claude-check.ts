@@ -52,11 +52,18 @@ export function refusedLogin(error: string | undefined): string | undefined {
 
 /**
  * Where Claude Code's installers put `claude` when the terminal's PATH doesn't have it yet: the
- * native installer (~/.local/bin on every system), the older local install, and WinGet's links.
+ * native installer (~/.local/bin on every system), the older local install, WinGet/npm on Windows,
+ * and Homebrew/standard paths on macOS.
  */
-export function installDirs(home = homedir(), env: NodeJS.ProcessEnv = process.env): string[] {
+export function installDirs(
+  home = homedir(),
+  env: NodeJS.ProcessEnv = process.env,
+  platform: NodeJS.Platform = process.platform,
+): string[] {
   const dirs = [join(home, '.local', 'bin'), join(home, '.claude', 'local')];
   if (env.LOCALAPPDATA) dirs.push(join(env.LOCALAPPDATA, 'Microsoft', 'WinGet', 'Links'));
+  if (env.APPDATA) dirs.push(join(env.APPDATA, 'npm'));
+  if (platform === 'darwin') dirs.push('/opt/homebrew/bin', '/usr/local/bin');
   return dirs;
 }
 

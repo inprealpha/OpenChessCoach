@@ -50,11 +50,15 @@ describe('the start-up messages', () => {
     expect(installFix('win32')).toContain('irm https://claude.ai/install.ps1 | iex');
   });
 
-  it("looks in the native installer's folder and WinGet's links", () => {
-    expect(installDirs('/home/p', {})).toEqual([join('/home/p', '.local', 'bin'), join('/home/p', '.claude', 'local')]);
-    expect(installDirs('C:/Users/A B', { LOCALAPPDATA: 'C:/Users/A B/AppData/Local' })).toContain(
-      join('C:/Users/A B/AppData/Local', 'Microsoft', 'WinGet', 'Links'),
+  it("looks in the native installer's folder, WinGet/npm on Windows, and Homebrew on macOS", () => {
+    expect(installDirs('/home/p', {}, 'linux')).toEqual([join('/home/p', '.local', 'bin'), join('/home/p', '.claude', 'local')]);
+    expect(installDirs('C:/Users/A B', { LOCALAPPDATA: 'C:/Users/A B/AppData/Local', APPDATA: 'C:/Users/A B/AppData/Roaming' }, 'win32')).toEqual(
+      expect.arrayContaining([
+        join('C:/Users/A B/AppData/Local', 'Microsoft', 'WinGet', 'Links'),
+        join('C:/Users/A B/AppData/Roaming', 'npm'),
+      ]),
     );
+    expect(installDirs('/Users/p', {}, 'darwin')).toEqual(expect.arrayContaining(['/opt/homebrew/bin', '/usr/local/bin']));
   });
 
   it("tells npm's Windows shims apart from real executables", () => {

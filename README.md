@@ -5,13 +5,24 @@ the Coach, explains why in plain words, on your own Claude subscription.
 
 ![A Review of an Italian Game: the Winning Chances bar beside the board, arrows for the move played and the Engine's best, the Winning Chances graph under it, and the key moments with their Move Grades](https://github.com/inprealpha/OpenChessCoach/raw/HEAD/docs/images/review.png)
 
-```bash
-npx openchesscoach@latest
+No Node.js, npm, Git, or administrator rights required. Open a terminal and install:
+
+**Windows (PowerShell):**
+
+```powershell
+irm https://github.com/inprealpha/OpenChessCoach/releases/latest/download/install.ps1 | iex
 ```
 
-You need Node.js 22.18 or later and Claude Code, logged in: see [What you need](#what-you-need).
-On Windows, let PowerShell run `npx` once first: see
-[Letting PowerShell run npx](#letting-powershell-run-npx-windows).
+**macOS or Linux (Terminal):**
+
+```bash
+curl -fsSL https://github.com/inprealpha/OpenChessCoach/releases/latest/download/install.sh | bash
+```
+
+Then install [Claude Code](https://claude.com/claude-code), sign in once with `claude`, and start
+OpenChessCoach from your Start Menu (**OpenChessCoach**, on Windows) or by running `openchesscoach`.
+Already have Node.js 22.18+? You can also run `npx openchesscoach@latest` without installing
+anything first: see [Install with npm](#already-have-nodejs-npx).
 
 - **Review your own games** from Lichess, chess.com or a PGN: every move gets a Move Grade, a graph
   shows where the game turned, and the Coach sums up the whole game, then walks you through the
@@ -28,70 +39,136 @@ On Windows, let PowerShell run `npx` once first: see
 
 ## What you need
 
-- **Node.js 22.18 or later** (`node --version`). Node.js brings `npm` and `npx` with it, so
-  you install nothing else. If `node --version` says the command is not found, or shows a
-  version older than 22.18, see [Installing Node.js](#installing-nodejs).
-- **Claude Code, logged in** with a paid Claude plan (Pro or Max): install it from
-  <https://claude.com/claude-code>, run `claude` once and log in. The Coach uses that login; the
-  app never sees your password or token.
-- A desktop running macOS, Windows or Linux. Phones and tablets connect to it.
+- **A desktop or laptop** running 64-bit Windows 10/11 (x64 or ARM64), macOS 13+ (Apple Silicon or
+  Intel), or Linux (x64 or ARM64, glibc such as Ubuntu, Debian, Fedora, Arch). Phones and tablets
+  connect to it over Wi-Fi or an optional tunnel.
+- **Claude Code, logged in** with a paid Claude plan (Pro or Max). The Coach uses your own Claude
+  Code login; the app never sees your password or token. The free Claude plan does not include
+  Claude Code.
 
-### Installing Node.js
+You do **not** need Node.js or npm for the standalone install — it bundles the official signed
+Node.js runtime for your system.
 
-Open a terminal (on Windows, PowerShell; on macOS, the Terminal app) and run the command for your
-system.
+## Install
 
-On Windows:
+### Windows (stock Windows 10 or 11)
 
-```powershell
-winget install OpenJS.NodeJS.LTS
-```
+1. Press **Start**, type **PowerShell**, and open **Windows PowerShell** (regular user, no
+   administrator needed).
+2. Install OpenChessCoach:
 
-Then close PowerShell and open a new one, so it finds `node`, and let it run `npx` (next section).
+   ```powershell
+   irm https://github.com/inprealpha/OpenChessCoach/releases/latest/download/install.ps1 | iex
+   ```
 
-On macOS or Linux:
+   This downloads the verified zip for your PC (x64 or ARM64) into `%LOCALAPPDATA%\OpenChessCoach`,
+   adds `openchesscoach` to your user `PATH`, and adds an **OpenChessCoach** shortcut to your Start
+   Menu. It works under Windows' default PowerShell script policy (`Restricted`).
+3. Install Claude Code and sign in (skip if you already have it):
 
-```bash
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
-```
+   ```powershell
+   irm https://claude.ai/install.ps1 | iex
+   ```
 
-Then close the terminal, open a new one, and run:
+   Close PowerShell, open a **new** PowerShell window, run `claude`, sign in with your Claude Pro
+   or Max account, and type `/exit`.
+4. Start OpenChessCoach from the Start Menu (**OpenChessCoach**) or by running `openchesscoach` in
+   a new PowerShell window.
 
-```bash
-nvm install --lts
-```
+### macOS (Apple Silicon and Intel)
 
-Check that it worked with `node --version`. If you prefer an installer you click through, download
-the LTS version from <https://nodejs.org/en/download>.
+1. Press **⌘+Space**, type **Terminal**, and press **Enter**.
+2. Install OpenChessCoach:
 
-### Letting PowerShell run npx (Windows)
+   ```bash
+   curl -fsSL https://github.com/inprealpha/OpenChessCoach/releases/latest/download/install.sh | bash
+   ```
 
-`npx` and `npm` are PowerShell scripts on Windows, and PowerShell doesn't run scripts until you
-allow them, so `npx` stops with "running scripts is disabled on this system". Allow them once, in
-PowerShell:
+   This installs to `~/.local/share/openchesscoach-app` and links `openchesscoach` into
+   `~/.local/bin`.
+3. Install Claude Code and sign in (skip if you already have it):
 
-```powershell
-Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
-```
+   ```bash
+   curl -fsSL https://claude.ai/install.sh | bash
+   ```
 
-If it asks whether to change the execution policy, type `Y` and press Enter. `RemoteSigned` runs
-scripts installed on your computer, such as the ones Node.js brings, and still blocks unsigned
-scripts downloaded from the internet. `-Scope CurrentUser` changes it only for your Windows account,
-so you don't need to run PowerShell as an administrator. Check it with `Get-ExecutionPolicy`,
-which should print `RemoteSigned`. If it prints something else, a policy your organization set wins
-over yours: type `npx.cmd` instead.
+   Open a **new** Terminal window, run `claude`, sign in with your Claude Pro or Max account, and
+   type `/exit`.
+4. Start OpenChessCoach by running `openchesscoach` in a new Terminal window.
 
-If you'd rather leave the policy as it is, type `npx.cmd` instead of `npx` in every command here.
+### Linux (Ubuntu, Debian, Fedora, Arch, …)
 
-## Start
+1. Open a terminal (**Ctrl+Alt+T** on most desktops).
+2. Install OpenChessCoach:
+
+   ```bash
+   curl -fsSL https://github.com/inprealpha/OpenChessCoach/releases/latest/download/install.sh | bash
+   ```
+
+   Needs `curl` and `tar` (preinstalled on most desktop distros; on minimal installs, install them
+   with your package manager first). On Alpine or other musl-based Linux distros, use the
+   [Node.js / npx route](#already-have-nodejs-npx) instead.
+3. Install Claude Code and sign in (skip if you already have it):
+
+   ```bash
+   curl -fsSL https://claude.ai/install.sh | bash
+   ```
+
+   Open a **new** terminal, run `claude`, sign in with your Claude Pro or Max account, and type
+   `/exit`.
+4. Start OpenChessCoach by running `openchesscoach` in a new terminal.
+
+### Portable download (no install script)
+
+Prefer not to pipe a script to a shell? Download the archive for your system (`win-x64.zip`,
+`win-arm64.zip`, `darwin-arm64.tar.gz`, `darwin-x64.tar.gz`, `linux-x64.tar.gz`, or
+`linux-arm64.tar.gz`) and `SHA256SUMS.txt` from
+[GitHub Releases](https://github.com/inprealpha/OpenChessCoach/releases/latest), verify the
+checksum, extract it anywhere, and run `openchesscoach.cmd` (Windows) or `./openchesscoach`
+(macOS/Linux).
+
+### Already have Node.js? (`npx`)
+
+If you already have **Node.js 22.18 or later** (`node --version`), you can run OpenChessCoach
+directly from npm without installing the standalone bundle:
 
 ```bash
 npx openchesscoach@latest
 ```
 
-`@latest` picks up the newest release each time you start the app. In Windows PowerShell, if it
-says running scripts is disabled, see
-[Letting PowerShell run npx](#letting-powershell-run-npx-windows).
+`@latest` picks up the newest release each time you start the app.
+
+On **Windows PowerShell**, `npx` is a `.ps1` script and PowerShell blocks scripts by default
+("running scripts is disabled on this system"). Either use `npx.cmd openchesscoach@latest`, or allow
+locally installed scripts once for your user account (no administrator needed):
+
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+```
+
+If you need Node.js on Windows, macOS or Linux for the `npx` route, download the LTS installer from
+<https://nodejs.org/en/download> (or `winget install OpenJS.NodeJS.LTS` on Windows, `brew install node`
+on macOS, or [nvm](https://github.com/nvm-sh/nvm) on Linux).
+
+## Start, update, and uninstall
+
+- **Start:** run `openchesscoach` (or click **OpenChessCoach** in the Windows Start Menu; or
+  `npx openchesscoach@latest` if using npm). Keep the terminal window open while you play.
+- **Stop:** press **Ctrl+C** in that terminal window (or close it).
+- **Update:** re-run the install command for your system above — it replaces the app files cleanly
+  and keeps your games and Player Profile. (With `npx openchesscoach@latest`, every start already
+  uses the latest version.)
+- **Uninstall:**
+  - Windows (PowerShell):
+    ```powershell
+    & ([scriptblock]::Create((irm https://github.com/inprealpha/OpenChessCoach/releases/latest/download/install.ps1))) -Uninstall
+    ```
+  - macOS / Linux:
+    ```bash
+    curl -fsSL https://github.com/inprealpha/OpenChessCoach/releases/latest/download/install.sh | bash -s -- --uninstall
+    ```
+  Uninstalling removes the program files and shortcut while keeping your games and Player Profile.
+  To delete your saved data too, remove your data folder (paths below).
 
 The desktop checks Claude Code, starts the app and opens your browser already paired. The first
 thing the browser shows is a QR code: scan it with your phone on the same Wi-Fi to open the app
@@ -128,6 +205,21 @@ npm run smoke:coach -- --provider codex
 npm run smoke:coach -- --provider pi
 npm run smoke:coach -- --provider opencode
 ```
+
+## Common issues
+
+- **`openchesscoach` is not recognized / command not found:** close your terminal and open a **new**
+  one so it picks up the updated `PATH`. On Windows, you can also launch **OpenChessCoach** from the
+  Start Menu. On macOS/Linux, check that `~/.local/bin` is in your `PATH`.
+- **Claude Code is not installed / not logged in / login expired:** install Claude Code from
+  <https://claude.com/claude-code>, open a new terminal, run `claude` (or `/login` inside `claude`),
+  sign in with a paid Claude Pro or Max account, then start OpenChessCoach again.
+- **Port 8737 is already in use:** OpenChessCoach is probably already running in another terminal
+  window. Otherwise start it on another port: `openchesscoach --port 8738`.
+- **Browser doesn't open automatically (especially headless or minimal Linux):** open the
+  `http://127.0.0.1:8737/#pair=…` link printed in the terminal under the QR code.
+- **Claude usage limit reached:** the Coach shares your Claude plan's limits and shows when they
+  reset. The board, Engine, Lessons, and Puzzles keep working offline and without Claude.
 
 ## My phone can't open the app
 

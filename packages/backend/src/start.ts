@@ -27,7 +27,9 @@ import { OpusTemptingMoves } from './tempting-moves/opus.ts';
 import type { TemptingMovesPort } from './tempting-moves/port.ts';
 import { TemptingMovesService } from './tempting-moves/service.ts';
 
-const HELP = `Usage: npx openchesscoach@latest [options]
+const COMMAND = process.env.OPENCHESSCOACH_STANDALONE === '1' ? 'openchesscoach' : 'npx openchesscoach@latest';
+
+const HELP = `Usage: ${COMMAND} [options]
 
 Starts OpenChessCoach on this desktop and prints a QR code to pair your phone.
 

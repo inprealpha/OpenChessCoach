@@ -175,7 +175,7 @@ footer { font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--li
   <span class="eyebrow">Before you start</span>
   <h2 id="need">What you need</h2>
   <ul class="needs">
-    <li><span class="tick">✓</span><span><strong>A Windows, Mac or Linux desktop or laptop.</strong> Windows 10 or later, macOS 13 or later, or a recent Ubuntu, Debian or Fedora. The app runs there; your phone connects to it.</span></li>
+    <li><span class="tick">✓</span><span><strong>A Windows, Mac or Linux desktop or laptop.</strong> 64-bit Windows 10 or later, macOS 13 or later, or a recent Ubuntu, Debian, Fedora or Arch. No Node.js or developer tools needed. The app runs there; your phone connects to it.</span></li>
     <li><span class="tick">✓</span><span><strong>A paid Claude plan (Pro or Max).</strong> The Coach runs on your own Claude subscription through Claude Code. The free Claude plan doesn't include Claude Code. Sign up at <a href="https://claude.ai" rel="noopener">claude.ai</a>.</span></li>
     <li><span class="tick">✓</span><span><strong>A terminal, used three times.</strong> You'll paste a few commands. Each step below says exactly what to paste.</span></li>
   </ul>
@@ -199,22 +199,20 @@ footer { font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--li
         <p>Press <kbd>Start</kbd>, type <strong>PowerShell</strong> and open <strong>Windows PowerShell</strong>. You don't need to run it as administrator. Paste with <kbd>Ctrl</kbd>+<kbd>V</kbd> or a right-click, then press <kbd>Enter</kbd>.</p>
       </div></li>
       <li><div class="step-body">
-        <h3>Install Node.js</h3>
-        <p>Node.js runs the app. Install the LTS version:</p>
-        <div class="cmd"><code>winget install OpenJS.NodeJS.LTS</code><button type="button">Copy</button></div>
-        <p class="or muted">Or download the LTS installer from <a href="https://nodejs.org/en/download" rel="noopener">nodejs.org</a> and click through it.</p>
-        <p>Close PowerShell and open a new one, so it finds Node.js. Then check it worked: <code class="inline">node --version</code> should print <code class="inline">v22.18</code> or later.</p>
+        <h3>Install OpenChessCoach</h3>
+        <div class="cmd"><code>irm https://github.com/inprealpha/OpenChessCoach/releases/latest/download/install.ps1 | iex</code><button type="button">Copy</button></div>
+        <p class="or muted">No Node.js or administrator rights needed. Already have Node.js 22.18+? You can skip this step and run <code class="inline">npx.cmd openchesscoach@latest</code> in step 4.</p>
       </div></li>
       <li><div class="step-body">
         <h3>Install Claude Code and log in</h3>
         <div class="cmd"><code>irm https://claude.ai/install.ps1 | iex</code><button type="button">Copy</button></div>
-        <p>Open a new PowerShell window again, then run <code class="inline">claude</code>. It opens your browser: sign in with your Claude account. When Claude Code says you're logged in, type <code class="inline">/exit</code>.</p>
+        <p>Close PowerShell and open a <strong>new</strong> PowerShell window, then run <code class="inline">claude</code>. It opens your browser: sign in with your Claude account. When Claude Code says you're logged in, type <code class="inline">/exit</code>.</p>
       </div></li>
       <li><div class="step-body">
         <h3>Start OpenChessCoach</h3>
-        <div class="cmd"><code>npx.cmd openchesscoach@latest</code><button type="button">Copy</button></div>
-        <p>The first time, npm asks <code class="inline">Ok to proceed? (y)</code>: press <kbd>Y</kbd> and <kbd>Enter</kbd>. Your browser opens the app, already paired.</p>
-        <p class="note"><strong>Windows Firewall</strong> may ask whether Node.js can use the network. Tick <strong>Private networks</strong> and click <strong>Allow</strong>, so your phone can connect.</p>
+        <div class="cmd"><code>openchesscoach</code><button type="button">Copy</button></div>
+        <p>Or open <strong>OpenChessCoach</strong> from your Start Menu. Your browser opens the app, already paired.</p>
+        <p class="note"><strong>Windows Firewall</strong> may ask whether Node.js can use the network. Tick both boxes (Private and Public) and click <strong>Allow access</strong>, so your phone can connect.</p>
       </div></li>
     </ol>
   </div>
@@ -227,23 +225,21 @@ footer { font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--li
         <p>Press <kbd>⌘</kbd>+<kbd>Space</kbd>, type <strong>Terminal</strong> and press <kbd>Enter</kbd>. Paste with <kbd>⌘</kbd>+<kbd>V</kbd>, then press <kbd>Enter</kbd>.</p>
       </div></li>
       <li><div class="step-body">
-        <h3>Install Node.js</h3>
-        <p>Node.js runs the app. Download the LTS <strong>macOS Installer (.pkg)</strong> from <a href="https://nodejs.org/en/download" rel="noopener">nodejs.org</a> and click through it.</p>
-        <p class="or muted">If you use Homebrew, this does the same:</p>
-        <div class="cmd"><code>brew install node</code><button type="button">Copy</button></div>
-        <p>Open a new Terminal window, then check it worked: <code class="inline">node --version</code> should print <code class="inline">v22.18</code> or later.</p>
+        <h3>Install OpenChessCoach</h3>
+        <div class="cmd"><code>curl -fsSL https://github.com/inprealpha/OpenChessCoach/releases/latest/download/install.sh | bash</code><button type="button">Copy</button></div>
+        <p class="or muted">No Node.js or Homebrew needed. Already have Node.js 22.18+? You can skip this step and run <code class="inline">npx openchesscoach@latest</code> in step 4.</p>
       </div></li>
       <li><div class="step-body">
         <h3>Install Claude Code and log in</h3>
         <div class="cmd"><code>curl -fsSL https://claude.ai/install.sh | bash</code><button type="button">Copy</button></div>
-        <p>Open a new Terminal window, then run <code class="inline">claude</code>. It opens your browser: sign in with your Claude account. When Claude Code says you're logged in, type <code class="inline">/exit</code>.</p>
+        <p>Open a <strong>new</strong> Terminal window, then run <code class="inline">claude</code>. It opens your browser: sign in with your Claude account. When Claude Code says you're logged in, type <code class="inline">/exit</code>.</p>
         <p class="or muted">If the new terminal says <code class="inline">claude</code> isn't found, run the PATH command the installer printed at the end, then open another new terminal.</p>
       </div></li>
       <li><div class="step-body">
         <h3>Start OpenChessCoach</h3>
-        <div class="cmd"><code>npx openchesscoach@latest</code><button type="button">Copy</button></div>
-        <p>The first time, npm asks <code class="inline">Ok to proceed? (y)</code>: press <kbd>Y</kbd> and <kbd>Enter</kbd>. Your browser opens the app, already paired.</p>
-        <p class="note"><strong>macOS</strong> may ask whether Node.js can accept incoming network connections. Click <strong>Allow</strong>, so your phone can connect.</p>
+        <div class="cmd"><code>openchesscoach</code><button type="button">Copy</button></div>
+        <p>Your browser opens the app, already paired.</p>
+        <p class="note"><strong>macOS</strong> may ask whether <code class="inline">node</code> can accept incoming network connections. Click <strong>Allow</strong>, so your phone can connect.</p>
       </div></li>
     </ol>
   </div>
@@ -256,24 +252,21 @@ footer { font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--li
         <p>On Ubuntu and most desktops, press <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>T</kbd>, or find <strong>Terminal</strong> in your apps. Paste with <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd>, then press <kbd>Enter</kbd>.</p>
       </div></li>
       <li><div class="step-body">
-        <h3>Install Node.js</h3>
-        <p>Your distribution's own Node.js is usually too old, so install it with nvm, the Node.js version manager:</p>
-        <div class="cmd"><code>curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.8/install.sh | bash</code><button type="button">Copy</button></div>
-        <p>Open a new terminal, then install the LTS version:</p>
-        <div class="cmd"><code>nvm install --lts</code><button type="button">Copy</button></div>
-        <p>Check it worked: <code class="inline">node --version</code> should print <code class="inline">v22.18</code> or later.</p>
+        <h3>Install OpenChessCoach</h3>
+        <div class="cmd"><code>curl -fsSL https://github.com/inprealpha/OpenChessCoach/releases/latest/download/install.sh | bash</code><button type="button">Copy</button></div>
+        <p class="or muted">No Node.js needed. Already have Node.js 22.18+? You can skip this step and run <code class="inline">npx openchesscoach@latest</code> in step 4.</p>
       </div></li>
       <li><div class="step-body">
         <h3>Install Claude Code and log in</h3>
         <div class="cmd"><code>curl -fsSL https://claude.ai/install.sh | bash</code><button type="button">Copy</button></div>
-        <p>Open a new terminal, then run <code class="inline">claude</code>. It opens your browser, or prints a link to open: sign in with your Claude account. When Claude Code says you're logged in, type <code class="inline">/exit</code>.</p>
+        <p>Open a <strong>new</strong> terminal, then run <code class="inline">claude</code>. It opens your browser, or prints a link to open: sign in with your Claude account. When Claude Code says you're logged in, type <code class="inline">/exit</code>.</p>
         <p class="or muted">If the new terminal says <code class="inline">claude</code> isn't found, run the PATH command the installer printed at the end, then open another new terminal.</p>
       </div></li>
       <li><div class="step-body">
         <h3>Start OpenChessCoach</h3>
-        <div class="cmd"><code>npx openchesscoach@latest</code><button type="button">Copy</button></div>
-        <p>The first time, npm asks <code class="inline">Ok to proceed? (y)</code>: press <kbd>Y</kbd> and <kbd>Enter</kbd>. Your browser opens the app, already paired. If it doesn't, open the address ending in <code class="inline">#pair=…</code> that the terminal prints under the QR code.</p>
-        <p class="note"><strong>A firewall</strong> such as <code class="inline">ufw</code> may block your phone. Allow port 8737 on your home network: <code class="inline">sudo ufw allow 8737/tcp</code>.</p>
+        <div class="cmd"><code>openchesscoach</code><button type="button">Copy</button></div>
+        <p>Your browser opens the app, already paired. If it doesn't, open the address ending in <code class="inline">#pair=…</code> that the terminal prints under the QR code.</p>
+        <p class="note"><strong>A firewall</strong> such as <code class="inline">ufw</code> may block your phone. When one is on, the terminal prints the one command to allow port 8737 on your home network.</p>
       </div></li>
     </ol>
   </div>
@@ -283,9 +276,9 @@ footer { font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--li
   <span class="eyebrow">Every time after</span>
   <h2 id="every">Start, stop, update</h2>
   <div class="facts">
-    <p><strong>Start</strong>Open a terminal and run the same command as step 4. Keep that window open while you play: closing it stops the app.</p>
+    <p><strong>Start</strong>Open a terminal and run <code class="inline">openchesscoach</code> (or open <strong>OpenChessCoach</strong> from the Start Menu on Windows). Keep that window open while you play: closing it stops the app.</p>
     <p><strong>Stop</strong>Press <kbd>Ctrl</kbd>+<kbd>C</kbd> in that terminal.</p>
-    <p><strong>Update</strong>Nothing to do. <code class="inline">@latest</code> fetches the newest version each time you start it.</p>
+    <p><strong>Update</strong>Re-run the install command in step 2 — it updates the app and keeps your games and Player Profile. (If you run with <code class="inline">npx openchesscoach@latest</code>, every start already fetches the newest version.)</p>
     <p><strong>On your phone</strong>The first thing the app shows on your desktop is a QR code, and the terminal prints the same one. Scan it with your phone's camera while it's on the same Wi-Fi, and the app opens already paired. That Wi-Fi address starts with <code class="inline">http://</code>, so the phone needs the desktop running each time it opens the app. To play away from home, tick <strong>away-from-home access</strong> in Settings and scan the new QR code. Its <code class="inline">https://</code> address is the one to add to your home screen: from there the board, the Engine, Lessons and Puzzles keep working with the desktop off. The address changes each time you start the app on the desktop, so scan again then.</p>
   </div>
 </section>
@@ -309,11 +302,11 @@ footer { font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--li
   <span class="eyebrow">If something goes wrong</span>
   <h2 id="fix">Fixes for common messages</h2>
   <div class="fixes">
-    <details><summary><code>npx</code> or <code>node</code> is not recognized, or command not found</summary><div>
-      <p>Node.js isn't installed, or the terminal was opened before you installed it. Do step 2, then open a <strong>new</strong> terminal window and try again.</p>
+    <details><summary><code>openchesscoach</code> is not recognized, or command not found</summary><div>
+      <p>The terminal was opened before you installed OpenChessCoach. Open a <strong>new</strong> terminal window and run <code class="inline">openchesscoach</code> again. On Windows, you can also launch <strong>OpenChessCoach</strong> from the Start Menu.</p>
     </div></details>
-    <details><summary>OpenChessCoach needs Node.js 22.18 or later</summary><div>
-      <p>Your Node.js is too old. Install the LTS version as in step 2, open a new terminal and run the start command again.</p>
+    <details><summary>OpenChessCoach needs Node.js 22.18 or later (when using <code>npx</code>)</summary><div>
+      <p>Your installed Node.js is too old for the <code class="inline">npx</code> route. Either use the standalone installer in step 2 (no Node.js needed), or install the LTS version of Node.js from <a href="https://nodejs.org/en/download" rel="noopener">nodejs.org</a>.</p>
     </div></details>
     <details><summary>Claude Code is not installed</summary><div>
       <p>Do step 3, then open a new terminal. If <code class="inline">claude --version</code> works in the new terminal, start OpenChessCoach from that same window.</p>
@@ -325,10 +318,10 @@ footer { font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--li
       <p>OpenChessCoach asks Claude once when it starts, because Claude Code can still say it is logged in after its login has expired or was signed out elsewhere. Run <code class="inline">claude</code>, type <code class="inline">/login</code> and sign in again, then run the start command again. If it happens while the app runs, the Coach says so and comes back on its own once you have logged in again.</p>
     </div></details>
     <details><summary>Port 8737 is already in use</summary><div>
-      <p>OpenChessCoach is probably already running in another terminal window: use that one. Otherwise start it on another port, for example <code class="inline">npx openchesscoach@latest --port 8738</code>.</p>
+      <p>OpenChessCoach is probably already running in another terminal window: use that one. Otherwise start it on another port, for example <code class="inline">openchesscoach --port 8738</code>.</p>
     </div></details>
-    <details><summary>Windows: running scripts is disabled on this system</summary><div>
-      <p>PowerShell blocked <code class="inline">npx</code>. Type <code class="inline">npx.cmd</code> instead of <code class="inline">npx</code>, exactly as in step 4. Or let PowerShell run the scripts Node.js installed, once, with <code class="inline">Set-ExecutionPolicy -Scope CurrentUser RemoteSigned</code> (type <kbd>Y</kbd> if it asks); then <code class="inline">npx</code> works too. It still blocks unsigned scripts downloaded from the internet, and needs no administrator.</p>
+    <details><summary>Windows: running scripts is disabled on this system (when using <code>npx</code>)</summary><div>
+      <p>The standalone installer in step 2 does not hit this. If you chose the <code class="inline">npx</code> route, PowerShell blocks <code class="inline">npx.ps1</code> by default: type <code class="inline">npx.cmd openchesscoach@latest</code> instead, or run <code class="inline">Set-ExecutionPolicy -Scope CurrentUser RemoteSigned</code> once (type <kbd>Y</kbd> if it asks; needs no administrator).</p>
     </div></details>
     <details><summary>My phone can't connect</summary><div>
       <p>Check the phone is on the same Wi-Fi as the desktop, and that you allowed the firewall prompt (see step 4). On guest or office Wi-Fi, devices often can't see each other: use <strong>away-from-home access</strong> in Settings instead.</p>

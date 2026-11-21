@@ -1,4 +1,5 @@
 // Small runtime helpers shared by the start command, verify mode and coachctl.
+import { COACH_PROVIDERS, type CoachProvider } from '@chess-coach/shared/protocol';
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -61,7 +62,7 @@ export function minNode(): string {
 
 /** What the start command was asked to do, or why its arguments make no sense. */
 export type StartOptions =
-  | { do: 'start'; port: number; host: string; dataDir?: string; open: boolean }
+  | { do: 'start'; port: number; host: string; dataDir?: string; coach?: CoachProvider; open: boolean }
   | { do: 'help' }
   | { do: 'version' }
   | { do: 'error'; message: string };
@@ -70,6 +71,7 @@ const START_OPTIONS = {
   port: { type: 'string' },
   host: { type: 'string' },
   'data-dir': { type: 'string' },
+  coach: { type: 'string' },
   'no-open': { type: 'boolean' },
   help: { type: 'boolean', short: 'h' },
   version: { type: 'boolean', short: 'v' },
@@ -97,12 +99,17 @@ export function startOptions(argv: readonly string[]): StartOptions {
   if (!/^\d+$/.test(port) || Number(port) < 1 || Number(port) > 65535) {
     return { do: 'error', message: `--port needs a whole number from 1 to 65535, and "${port}" isn't one.` };
   }
+  const coachRaw = typeof values.coach === 'string' ? values.coach.trim().toLowerCase() : undefined;
+  if (coachRaw !== undefined && !(COACH_PROVIDERS as readonly string[]).includes(coachRaw)) {
+    return { do: 'error', message: `--coach must be one of ${COACH_PROVIDERS.join(', ')}, and "${values.coach}" isn't one.` };
+  }
   const dataDir = typeof values['data-dir'] === 'string' ? values['data-dir'] : undefined;
   return {
     do: 'start',
     port: Number(port),
     host: typeof values.host === 'string' ? values.host : '0.0.0.0',
     ...(dataDir !== undefined ? { dataDir } : {}),
+    ...(coachRaw !== undefined ? { coach: coachRaw as CoachProvider } : {}),
     open: !values['no-open'],
   };
 }

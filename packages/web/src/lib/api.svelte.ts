@@ -2,6 +2,7 @@
 import {
   CLOSE_UNAUTHORISED,
   PROTOCOL_VERSION,
+  type CoachProviderInfo,
   type CoachStatus,
   type ErrorCode,
   type PhoneStatus,
@@ -50,6 +51,7 @@ const CONNECT_MS = 10_000;
 class Api {
   state = $state<ConnectionState>('starting');
   coach = $state<CoachStatus>({ state: 'unavailable', reason: 'Connecting to your desktop…' });
+  coachProviders = $state<CoachProviderInfo[] | null>(null);
   verify = $state(false);
   tunnel = $state<TunnelState | null>(null);
   engine = $state<EngineConfig>({ depth: 16, multiPv: 5, singleThread: false });
@@ -185,6 +187,7 @@ class Api {
         const hello = await this.request('hello', { client: 'web', deviceName: thisDeviceName });
         this.verify = hello.verify;
         this.coach = hello.coach;
+        this.coachProviders = hello.coachProviders ?? null;
         this.reconnects++;
         this.onlineWaiters.splice(0).forEach((w) => w());
       } catch {

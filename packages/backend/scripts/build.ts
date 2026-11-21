@@ -2,6 +2,7 @@
 // built web app next to them, and the licences. Run after building the web app:
 //   npm run build -w @chess-coach/web && npm run build -w openchesscoach
 import { cpSync, existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { build } from 'rolldown';
 
 const pkg = new URL('../', import.meta.url);
@@ -19,7 +20,18 @@ mkdirSync(dist, { recursive: true });
 
 // One file per command, so paths relative to the bundle (the web app, package.json) hold. The app
 // itself is its own file, loaded by cli.js only after node:sqlite's warning is silenced.
-const external = [/^node:/, '@anthropic-ai/claude-agent-sdk', 'ws', 'qrcode', 'stockfish', '@playwright/test', 'playwright'];
+const external = [
+  /^node:/,
+  '@anthropic-ai/claude-agent-sdk',
+  '@openai/codex-sdk',
+  '@earendil-works/pi-coding-agent',
+  /^@opencode-ai\/sdk/,
+  'ws',
+  'qrcode',
+  'stockfish',
+  '@playwright/test',
+  'playwright',
+];
 const entries = [
   ['cli', 'src/cli.ts'],
   ['start', 'src/start.ts'],
@@ -27,7 +39,7 @@ const entries = [
 ] as const;
 for (const [name, entry] of entries) {
   await build({
-    input: new URL(entry, pkg).pathname,
+    input: fileURLToPath(new URL(entry, pkg)),
     platform: 'node',
     // Runtime dependencies stay as imports; Playwright is optional (coachctl screenshot and snapshot).
     external,
@@ -39,7 +51,7 @@ for (const [name, entry] of entries) {
     ],
     logLevel: 'warn',
     output: {
-      file: new URL(`${name}.js`, dist).pathname,
+      file: fileURLToPath(new URL(`${name}.js`, dist)),
       format: 'esm',
       ...(name === 'start' ? {} : { banner: '#!/usr/bin/env node' }),
       codeSplitting: false,
@@ -60,15 +72,15 @@ writeFileSync(new URL('web/engine/package.json', dist), '{ "type": "commonjs" }\
 // model itself is downloaded after install.
 const ortDist = new URL('node_modules/onnxruntime-web/dist/', repo);
 await build({
-  input: new URL('ort.node.min.js', ortDist).pathname,
+  input: fileURLToPath(new URL('ort.node.min.js', ortDist)),
   platform: 'node',
   external: [/^node:/],
   logLevel: 'warn',
-  output: { file: new URL('ort/ort.node.min.js', dist).pathname, format: 'cjs', codeSplitting: false },
+  output: { file: fileURLToPath(new URL('ort/ort.node.min.js', dist)), format: 'cjs', codeSplitting: false },
 });
 for (const file of ['ort-wasm-simd-threaded.mjs', 'ort-wasm-simd-threaded.wasm']) cpSync(new URL(file, ortDist), new URL(`ort/${file}`, dist));
 writeFileSync(new URL('ort/package.json', dist), '{ "type": "commonjs" }\n');
 for (const file of ['LICENSE', 'THIRD_PARTY_NOTICES.md', 'README.md']) {
   if (existsSync(new URL(file, repo))) cpSync(new URL(file, repo), new URL(file, pkg));
 }
-process.stdout.write(`Built ${dist.pathname}\n`);
+process.stdout.write(`Built ${fileURLToPath(dist)}\n`);

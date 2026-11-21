@@ -16,12 +16,14 @@ export const systemHandlers: HandlerMap<
     // desktop, such as an Android tablet in desktop mode with a trackpad, stays a phone.
     const name = req.deviceName;
     if (typeof name === 'string' && name !== device.name && isPhoneOrTablet(name)) app.pairing.rename(device.id, name);
+    const coachProviders = await app.coach.listProviders();
     return {
       protocol: PROTOCOL_VERSION,
       version: app.version,
       verify: app.verify,
       deviceId: device.id,
       coach: await app.coach.status(),
+      ...(coachProviders ? { coachProviders } : {}),
       temptingMoves: app.temptingMoves.status(),
     };
   },
@@ -61,6 +63,9 @@ export const systemHandlers: HandlerMap<
   'settings.update': async (req, { app }) => {
     const before = getSettings(app.db);
     const next = updateSettings(app.db, req);
+    if (next.coachProvider !== before.coachProvider) {
+      await app.coach.switchProvider(next.coachProvider);
+    }
     // Asked for while it is on but stopped, as "Connect another way" does after a failure: try again.
     const stopped = ['off', 'error'].includes(app.tunnel.state().status);
     if (next.tunnelEnabled && (!before.tunnelEnabled || (req.tunnelEnabled === true && stopped))) {

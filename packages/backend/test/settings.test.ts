@@ -172,3 +172,68 @@ describe('the Review overview', () => {
     expect(await c.request('settings.get', {})).toMatchObject({ reviewOverview: true, quality: 'best', models: BEST });
   });
 });
+
+describe('Coach backend', () => {
+  it('defaults to claude, switches to codex/pi with provider-appropriate default models, and rejects unknown backends', async () => {
+    const c = await client(await instance({ seed: 'empty' }));
+    expect(await c.request('settings.get', {})).toMatchObject({ coachProvider: 'claude', quality: 'best', models: BEST });
+
+    // Switching to Codex resets models to Codex's default preset unless overridden.
+    expect(await c.request('settings.update', { coachProvider: 'codex' })).toMatchObject({
+      coachProvider: 'codex',
+      quality: 'best',
+      models: { 'review-moment': 'default', why: 'default', 'lesson-turn': 'default', hint: 'default', live: 'default' },
+    });
+
+    // Codex defaults every preset to 'default' (your Codex CLI default model), matching Best.
+    expect(await c.request('settings.update', { quality: 'balanced' })).toMatchObject({
+      coachProvider: 'codex',
+      quality: 'best',
+      models: {
+        'review-moment': 'default',
+        why: 'default',
+        'lesson-turn': 'default',
+        hint: 'default',
+        live: 'default',
+      },
+    });
+
+    // Switching to Pi resets to Pi defaults (matching Best) and accepts provider/model IDs.
+    expect(await c.request('settings.update', { coachProvider: 'pi' })).toMatchObject({
+      coachProvider: 'pi',
+      quality: 'best',
+      models: { 'review-moment': 'default', why: 'default', 'lesson-turn': 'default', hint: 'default', live: 'default' },
+    });
+    expect(await c.request('settings.update', { models: { why: 'openai-codex/gpt-6.1-terra' } })).toMatchObject({
+      coachProvider: 'pi',
+      quality: 'custom',
+      models: { why: 'openai-codex/gpt-6.1-terra' },
+    });
+
+    // Switching to OpenCode resets to OpenCode defaults and accepts provider/model IDs.
+    expect(await c.request('settings.update', { coachProvider: 'opencode' })).toMatchObject({
+      coachProvider: 'opencode',
+      models: { 'review-moment': 'default', why: 'default', 'lesson-turn': 'default', hint: 'default', live: 'default' },
+    });
+    expect(await c.request('settings.update', { models: { why: 'opencode/big-pickle' } })).toMatchObject({
+      coachProvider: 'opencode',
+      models: { why: 'opencode/big-pickle' },
+    });
+
+    // Switching backend with a partial model override resets unspecified jobs to the new provider's defaults.
+    expect(await c.request('settings.update', { coachProvider: 'codex', models: { why: 'gpt-6.1-terra' } })).toMatchObject({
+      coachProvider: 'codex',
+      quality: 'custom',
+      models: {
+        'review-moment': 'default',
+        why: 'gpt-6.1-terra',
+        'lesson-turn': 'default',
+        hint: 'default',
+        live: 'default',
+      },
+    });
+
+    // Unknown backend is rejected.
+    await expect(c.request('settings.update', { coachProvider: 'gemini' as never })).rejects.toMatchObject({ code: 'bad-request' });
+  });
+});

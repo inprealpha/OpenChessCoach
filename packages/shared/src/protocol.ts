@@ -157,8 +157,25 @@ export function modelJobOf(job: CoachJob): ModelJob {
 export type CoachQuality = 'thrifty' | 'balanced' | 'best';
 export const COACH_QUALITIES: readonly CoachQuality[] = ['thrifty', 'balanced', 'best'];
 
+/** Supported Coach backends that can run on the desktop. */
+export const COACH_PROVIDERS = ['claude', 'codex', 'pi', 'opencode'] as const;
+export type CoachProvider = (typeof COACH_PROVIDERS)[number];
+
+/** Availability of one Coach backend on this desktop. */
+export interface CoachProviderInfo {
+  provider: CoachProvider;
+  label: string;
+  available: boolean;
+  /** Plain-language reason when this backend is not ready. */
+  reason?: string;
+  /** Whether this backend supports Think deeper (asking the Engine mid-answer). */
+  supportsEngineTool: boolean;
+}
+
 export interface Settings {
-  /** Model per Coach job, passed to the Claude Agent SDK. A Review's overview uses the Review moments' model. */
+  /** Which Coach backend is active on this desktop. */
+  coachProvider: CoachProvider;
+  /** Model per Coach job, passed to the active Coach SDK. A Review's overview uses the Review moments' model. */
   models: Record<ModelJob, string>;
   /** The preset the per-job models match, or custom when they match none. Read from `models`, never stored. */
   quality: CoachQuality | 'custom';
@@ -186,6 +203,8 @@ export type CoachState = 'ready' | 'unavailable' | 'limit-reached';
 
 export interface CoachStatus {
   state: CoachState;
+  /** Which Coach backend produced this status, when known. */
+  provider?: CoachProvider;
   /** Plain-language reason when the Coach can't be used. */
   reason?: string;
 }
@@ -258,7 +277,15 @@ export interface RequestMap {
   /** `deviceName`, from the web app, renames this device: the name it paired under may predate today's naming. */
   hello: {
     req: { client: string; deviceName?: string };
-    res: { protocol: number; version: string; verify: boolean; deviceId: string; coach: CoachStatus; temptingMoves: TemptingMovesStatus };
+    res: {
+      protocol: number;
+      version: string;
+      verify: boolean;
+      deviceId: string;
+      coach: CoachStatus;
+      coachProviders?: CoachProviderInfo[];
+      temptingMoves: TemptingMovesStatus;
+    };
   };
   'pairing.info': { req: Record<string, never>; res: PairingInfo };
   /** Revokes every device token and the pairing code. The caller gets a fresh token so it stays paired. */

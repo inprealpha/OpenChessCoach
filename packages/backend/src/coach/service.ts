@@ -4,7 +4,7 @@ import { assertBriefWithinBudget, BriefTooLargeError, buildBrief, type Brief } f
 import { ENGINE_TOOL_JOBS, maxEngineQuestions } from '@chess-coach/shared/coach/engine-tool';
 import { guardReply } from '@chess-coach/shared/coach/guard';
 import type { CoachAsk, CoachReply } from '@chess-coach/shared/coach/types';
-import { modelJobOf, type CoachStatus } from '@chess-coach/shared/protocol';
+import { modelJobOf, type CoachProvider, type CoachProviderInfo, type CoachStatus } from '@chess-coach/shared/protocol';
 import { type Clock, iso } from '../clock.ts';
 import type { Db } from '../db.ts';
 import { AppError } from '../errors.ts';
@@ -13,6 +13,7 @@ import type { EngineService } from '../engine/service.ts';
 import { getSettings } from '../settings.ts';
 import { EngineTool, type EngineCall } from './engine-tool.ts';
 import { CoachDeadlineError, CoachLimitError, CoachUnavailableError, type CoachPort } from './port.ts';
+import { CoachRouter } from './router.ts';
 
 /** How the Coach panel says the Coach is asking the Engine, numbered so the Player sees it move on. */
 export function checkingText(n: number): string {
@@ -81,10 +82,28 @@ export class CoachService {
     this.unavailableReason = reason;
   }
 
+  /** Switches the active Coach provider when backed by a `CoachRouter`, clearing stale limit/unavailable state. */
+  async switchProvider(provider: CoachProvider): Promise<CoachStatus> {
+    if (this.coach instanceof CoachRouter) {
+      this.limitUntil = undefined;
+      this.unavailableReason = undefined;
+      this.coach.switchProvider(provider);
+    }
+    const status = await this.status();
+    this.onStatus(status);
+    return status;
+  }
+
+  /** Lists available Coach providers when backed by a `CoachRouter`. */
+  async listProviders(): Promise<CoachProviderInfo[] | undefined> {
+    if (this.coach instanceof CoachRouter) return this.coach.listProviders();
+    return undefined;
+  }
+
   /** Throws the Player-facing reason when the Coach can't answer right now. */
   async assertAvailable(): Promise<void> {
     const status = await this.status();
-    if (status.state === 'limit-reached') throw new AppError('coach-limit', status.reason ?? 'Your Claude usage limit has been reached.');
+    if (status.state === 'limit-reached') throw new AppError('coach-limit', status.reason ?? 'Your Coach usage limit has been reached.');
     if (status.state === 'unavailable') throw new AppError('coach-unavailable', status.reason ?? 'The Coach is unavailable.');
   }
 
@@ -104,7 +123,7 @@ export class CoachService {
     const cancel = () => stop.abort();
     signal?.addEventListener('abort', cancel, { once: true });
     const tool =
-      engine && settings.thinkDeeper && ENGINE_TOOL_JOBS.includes(ask.job)
+      engine && settings.thinkDeeper && this.coach.supportsEngineTool !== false && ENGINE_TOOL_JOBS.includes(ask.job)
         ? new EngineTool(engine, brief.fen, { signal: stop.signal, onQuestion: (n) => options.onStatus?.(checkingText(n)), maxQuestions: maxEngineQuestions(ask.job) })
         : undefined;
     let raw;

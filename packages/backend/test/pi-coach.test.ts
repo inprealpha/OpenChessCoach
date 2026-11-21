@@ -5,6 +5,7 @@ import {
   buildPiResourceLoaderOptions,
   buildPiToolAllowlist,
   PiCoach,
+  resolvePiModel,
   type PiSessionLike,
   type PiSessionRequest,
 } from '../src/coach/pi.ts';
@@ -274,6 +275,7 @@ describe('PiCoach', () => {
     const loaderOpts = buildPiResourceLoaderOptions('Chess Coach prompt');
     expect(loaderOpts).toMatchObject({
       noExtensions: true,
+      disabledBuiltinExtensions: ['mcp'],
       noSkills: true,
       noPromptTemplates: true,
       noThemes: true,
@@ -282,5 +284,18 @@ describe('PiCoach', () => {
     });
     expect(buildPiToolAllowlist([])).toEqual([]);
     expect(buildPiToolAllowlist([{ name: 'ask_engine' } as never])).toEqual(['ask_engine']);
+  });
+
+  it('resolves Pi models by provider/id, id, or substring, and rejects unknown explicit models', () => {
+    const models = [
+      { provider: 'openai-codex', id: 'gpt-6.1-terra' },
+      { provider: 'openai-codex', id: 'gpt-6.2-sol' },
+    ];
+    expect(resolvePiModel(models, 'default')).toBeUndefined();
+    expect(resolvePiModel(models, '')).toBeUndefined();
+    expect(resolvePiModel(models, 'openai-codex/gpt-6.1-terra')).toEqual(models[0]);
+    expect(resolvePiModel(models, 'gpt-6.1-terra')).toEqual(models[0]);
+    expect(resolvePiModel(models, 'terra')).toEqual(models[0]);
+    expect(() => resolvePiModel(models, 'nonexistent-model')).toThrow(/not available in Pi/i);
   });
 });

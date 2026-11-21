@@ -2,11 +2,10 @@
 // `~/.pi/agent` authentication and model registry while disabling built-in filesystem/shell tools.
 import { tmpdir } from 'node:os';
 import {
-  AuthStorage,
   createAgentSession,
   DefaultResourceLoader,
   getAgentDir,
-  ModelRegistry,
+  ModelRuntime,
   SessionManager,
   type AgentSessionEvent,
   type ToolDefinition,
@@ -26,8 +25,8 @@ import {
 } from './port.ts';
 import { engineToolPrompt, SYSTEM_PROMPT, userPrompt } from './prompts.ts';
 
-/** How long a call with the Engine tool may take before it is aborted. */
-const ENGINE_DEADLINE_MS = 30_000;
+/** How long a call with the Engine tool may take before it is aborted (matches `RealCoach`). */
+const ENGINE_DEADLINE_MS = 90_000;
 
 /** Minimal session interface used by `PiCoach`, so tests can inject a deterministic double. */
 export interface PiSessionLike {
@@ -40,6 +39,7 @@ export interface PiSessionLike {
     cost?: number;
     assistantMessages?: number;
   };
+  modelId?: string;
   dispose(): void;
 }
 
@@ -68,9 +68,15 @@ After your plain-language explanation, append a fenced JSON block with the struc
 const ASK_ENGINE_PARAMETERS = {
   type: 'object',
   properties: {
-    move: { type: 'string', description: 'One SAN move from the current position (or from `fen`).' },
-    line: { type: 'array', items: { type: 'string' }, description: 'A short SAN line (1 to 4 moves) to play out and evaluate.' },
-    fen: { type: 'string', description: 'Optional FEN from the brief or an earlier ask_engine answer.' },
+    line: {
+      type: 'array',
+      items: { type: 'string' },
+      description: "SAN moves played one after another from the brief's fen. Leave out for the brief's position.",
+    },
+    move: {
+      type: 'string',
+      description: 'One SAN move in the position after the line, to grade and explain.',
+    },
   },
   additionalProperties: false,
 } as const;
@@ -79,15 +85,13 @@ function buildAskEngineTool(engine: CoachEngine): ToolDefinition {
   return {
     name: 'ask_engine',
     label: 'Ask chess engine',
-    description:
-      'Ask the chess engine about a move or short line in SAN (optionally from a FEN in the brief or a previous answer). Returns its evaluation and best reply.',
+    description: `Ask the Engine about the position after a line of moves from the brief's position, and optionally one move there. At most ${engine.maxQuestions} questions per answer.`,
     parameters: ASK_ENGINE_PARAMETERS as unknown as ToolDefinition['parameters'],
     async execute(_toolCallId, params) {
       const args = (params ?? {}) as Record<string, unknown>;
       const question: EngineQuestion = {
-        ...(typeof args.move === 'string' ? { move: args.move } : {}),
         ...(Array.isArray(args.line) ? { line: args.line.filter((m): m is string => typeof m === 'string') } : {}),
-        ...(typeof args.fen === 'string' ? { fen: args.fen } : {}),
+        ...(typeof args.move === 'string' ? { move: args.move } : {}),
       };
       const answer = await engine.ask(question);
       return {
@@ -98,17 +102,21 @@ function buildAskEngineTool(engine: CoachEngine): ToolDefinition {
   };
 }
 
-function resolvePiModel(registry: ModelRegistry, requested: string) {
+export function resolvePiModel<T extends { provider: string; id: string }>(
+  available: readonly T[],
+  requested: string,
+): T | undefined {
   const trimmed = requested.trim();
   if (!trimmed || trimmed === 'default') return undefined;
   const slash = trimmed.indexOf('/');
-  if (slash > 0) {
-    const provider = trimmed.slice(0, slash);
-    const id = trimmed.slice(slash + 1);
-    return registry.find(provider, id);
+  const match =
+    slash > 0
+      ? available.find((m) => m.provider === trimmed.slice(0, slash) && m.id === trimmed.slice(slash + 1))
+      : available.find((m) => m.id === trimmed) ?? available.find((m) => m.id.includes(trimmed));
+  if (!match) {
+    throw new Error(`Model "${trimmed}" is not available in Pi. Check your logged-in Pi providers and model IDs.`);
   }
-  const available = registry.getAvailable();
-  return available.find((m) => m.id === trimmed) ?? available.find((m) => m.id.includes(trimmed));
+  return match;
 }
 
 /**
@@ -120,6 +128,7 @@ export function buildPiResourceLoaderOptions(systemPrompt: string): ConstructorP
     cwd: tmpdir(),
     agentDir: getAgentDir(),
     noExtensions: true,
+    disabledBuiltinExtensions: ['mcp'],
     noSkills: true,
     noPromptTemplates: true,
     noThemes: true,
@@ -134,23 +143,34 @@ export function buildPiToolAllowlist(customTools: ToolDefinition[]): string[] {
 }
 
 async function defaultCreateSession(req: PiSessionRequest): Promise<PiSessionLike> {
-  const authStorage = AuthStorage.create();
-  const modelRegistry = ModelRegistry.create(authStorage);
-  modelRegistry.refresh();
-  const model = resolvePiModel(modelRegistry, req.model);
+  const modelRuntime = await ModelRuntime.create();
+  const available = await modelRuntime.getAvailable();
+  const model = resolvePiModel(available, req.model);
   const resourceLoader = new DefaultResourceLoader(buildPiResourceLoaderOptions(req.systemPrompt));
   await resourceLoader.reload();
   const { session } = await createAgentSession({
     cwd: tmpdir(),
-    authStorage,
-    modelRegistry,
+    modelRuntime,
     resourceLoader,
     ...(model ? { model } : {}),
+    noTools: req.customTools.length > 0 ? 'builtin' : 'all',
     tools: buildPiToolAllowlist(req.customTools),
     customTools: req.customTools,
     sessionManager: SessionManager.inMemory(),
   });
-  return session as unknown as PiSessionLike;
+  const modelId = session.model ? `${session.model.provider}/${session.model.id}` : undefined;
+  return {
+    subscribe: (listener) => session.subscribe(listener),
+    prompt: (text) => session.prompt(text),
+    abort: () => session.abort(),
+    getLastAssistantText: () => session.getLastAssistantText(),
+    getSessionStats: () => session.getSessionStats(),
+    ...(modelId ? { modelId } : {}),
+    dispose() {
+      session.dispose();
+      void modelRuntime.settleCredentialWrites().catch(() => {});
+    },
+  };
 }
 
 export class PiCoach implements CoachPort {
@@ -296,7 +316,7 @@ export class PiCoach implements CoachPort {
             cacheWriteTokens: stats.tokens.cacheWrite ?? 0,
             turns: stats.assistantMessages ?? 1,
             ms: Date.now() - started,
-            models: call.model && call.model !== 'default' ? [call.model] : ['pi'],
+            models: call.model && call.model !== 'default' ? [call.model] : [session.modelId ?? 'pi'],
           }
         : undefined;
 

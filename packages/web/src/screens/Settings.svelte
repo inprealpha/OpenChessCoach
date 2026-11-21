@@ -56,15 +56,15 @@
     codex: {
       thrifty: {
         name: 'Thrifty',
-        cost: 'Mini model for every job. Uses the least of your Codex limits; explanations are shorter and simpler.',
+        cost: 'Uses your configured Codex default model (or pick specific models under Advanced).',
       },
       balanced: {
         name: 'Balanced',
-        cost: 'Standard model for Reviews, Why Questions and Lessons; mini model for Hints and Live Coaching.',
+        cost: 'Uses your configured Codex default model (or pick specific models under Advanced).',
       },
       best: {
         name: 'Best (recommended)',
-        cost: 'Uses your Codex default model for every job.',
+        cost: 'Uses your configured Codex default model for every job.',
       },
     },
     pi: {
@@ -115,8 +115,6 @@
     },
     codex: {
       default: 'Codex default',
-      'gpt-5.4-mini': 'gpt-5.4-mini (faster)',
-      'gpt-5.4': 'gpt-5.4 (balanced)',
     },
     pi: {
       default: 'Pi default',

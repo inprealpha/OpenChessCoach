@@ -31,8 +31,8 @@ export const COACH_QUALITY_MODELS: Record<CoachQuality, Record<ModelJob, string>
 export const PROVIDER_QUALITY_MODELS: Record<CoachProvider, Record<CoachQuality, Record<ModelJob, string>>> = {
   claude: COACH_QUALITY_MODELS,
   codex: {
-    thrifty: { 'review-moment': 'gpt-5.4-mini', why: 'gpt-5.4-mini', 'lesson-turn': 'gpt-5.4-mini', hint: 'gpt-5.4-mini', live: 'gpt-5.4-mini' },
-    balanced: { 'review-moment': 'gpt-5.4', why: 'gpt-5.4', 'lesson-turn': 'gpt-5.4', hint: 'gpt-5.4-mini', live: 'gpt-5.4-mini' },
+    thrifty: { 'review-moment': 'default', why: 'default', 'lesson-turn': 'default', hint: 'default', live: 'default' },
+    balanced: { 'review-moment': 'default', why: 'default', 'lesson-turn': 'default', hint: 'default', live: 'default' },
     best: { 'review-moment': 'default', why: 'default', 'lesson-turn': 'default', hint: 'default', live: 'default' },
   },
   pi: {
@@ -74,7 +74,7 @@ const DEFAULT_SETTINGS: StoredSettings = {
 /** The preset whose models these are for the active provider, or custom when they match none. */
 export function qualityOf(models: Record<ModelJob, string>, provider: CoachProvider = 'claude'): Settings['quality'] {
   const presets = PROVIDER_QUALITY_MODELS[provider];
-  return COACH_QUALITIES.find((q) => MODEL_JOBS.every((job) => presets[q][job] === models[job])) ?? 'custom';
+  return [...COACH_QUALITIES].reverse().find((q) => MODEL_JOBS.every((job) => presets[q][job] === models[job])) ?? 'custom';
 }
 
 function withQuality(s: StoredSettings): Settings {

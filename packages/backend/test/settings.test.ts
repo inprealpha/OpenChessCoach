@@ -185,27 +185,29 @@ describe('Coach backend', () => {
       models: { 'review-moment': 'default', why: 'default', 'lesson-turn': 'default', hint: 'default', live: 'default' },
     });
 
-    // Codex Balanced preset uses gpt-5.4 / gpt-5.4-mini.
+    // Codex defaults every preset to 'default' (your Codex CLI default model), matching Best.
     expect(await c.request('settings.update', { quality: 'balanced' })).toMatchObject({
       coachProvider: 'codex',
-      quality: 'balanced',
+      quality: 'best',
       models: {
-        'review-moment': 'gpt-5.4',
-        why: 'gpt-5.4',
-        'lesson-turn': 'gpt-5.4',
-        hint: 'gpt-5.4-mini',
-        live: 'gpt-5.4-mini',
+        'review-moment': 'default',
+        why: 'default',
+        'lesson-turn': 'default',
+        hint: 'default',
+        live: 'default',
       },
     });
 
-    // Switching to Pi resets to Pi defaults and accepts provider/model IDs.
+    // Switching to Pi resets to Pi defaults (matching Best) and accepts provider/model IDs.
     expect(await c.request('settings.update', { coachProvider: 'pi' })).toMatchObject({
       coachProvider: 'pi',
+      quality: 'best',
       models: { 'review-moment': 'default', why: 'default', 'lesson-turn': 'default', hint: 'default', live: 'default' },
     });
-    expect(await c.request('settings.update', { models: { why: 'openai/gpt-5.4' } })).toMatchObject({
+    expect(await c.request('settings.update', { models: { why: 'openai-codex/gpt-6.1-terra' } })).toMatchObject({
       coachProvider: 'pi',
-      models: { why: 'openai/gpt-5.4' },
+      quality: 'custom',
+      models: { why: 'openai-codex/gpt-6.1-terra' },
     });
 
     // Switching to OpenCode resets to OpenCode defaults and accepts provider/model IDs.
@@ -219,11 +221,12 @@ describe('Coach backend', () => {
     });
 
     // Switching backend with a partial model override resets unspecified jobs to the new provider's defaults.
-    expect(await c.request('settings.update', { coachProvider: 'codex', models: { why: 'gpt-5.4-mini' } })).toMatchObject({
+    expect(await c.request('settings.update', { coachProvider: 'codex', models: { why: 'gpt-6.1-terra' } })).toMatchObject({
       coachProvider: 'codex',
+      quality: 'custom',
       models: {
         'review-moment': 'default',
-        why: 'gpt-5.4-mini',
+        why: 'gpt-6.1-terra',
         'lesson-turn': 'default',
         hint: 'default',
         live: 'default',

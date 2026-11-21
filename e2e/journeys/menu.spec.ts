@@ -333,11 +333,11 @@ test('Settings lets the Player switch between Claude, Codex, Pi and OpenCode Coa
   await expect(backendCard).toBeVisible();
   await expect(backendCard.getByRole('radio', { name: /^Claude/ })).toBeChecked();
 
-  // Switch to Codex: model presets update to Codex models and Think deeper shows the unsupported notice.
+  // Switch to Codex: model presets update to Codex defaults and Think deeper shows the unsupported notice.
   await backendCard.getByRole('radio', { name: /^Codex/ }).check();
   await expect(backendCard.getByText('Saved.')).toBeVisible();
   const qualityCard = paired.getByRole('group', { name: 'Coach quality' });
-  await expect(qualityCard).toContainText('gpt-5.4');
+  await expect(qualityCard).toContainText('Codex default');
   await expect(paired.getByTestId('think-deeper-unsupported')).toContainText('Codex does not support Think deeper Engine questions yet');
 
   // Switch to OpenCode: presets update to OpenCode default/free Zen copy and Think deeper shows unsupported notice.

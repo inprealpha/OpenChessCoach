@@ -1,5 +1,5 @@
 // Checks Pi (`@earendil-works/pi-coding-agent`) local authentication and available models.
-import { AuthStorage, ModelRegistry } from '@earendil-works/pi-coding-agent';
+import { ModelRuntime } from '@earendil-works/pi-coding-agent';
 
 export type PiCheckResult =
   | { ok: true; providers: string[]; modelCount: number }
@@ -13,10 +13,8 @@ export interface PiCheckDeps {
 export const PI_LOGIN_FIX = 'Run `pi` in a terminal and use `/login` (or set a provider API key) so Pi has a logged-in model.';
 
 async function defaultInspect(): Promise<{ providers: string[]; modelCount: number }> {
-  const authStorage = AuthStorage.create();
-  const registry = ModelRegistry.create(authStorage);
-  registry.refresh();
-  const available = registry.getAvailable();
+  const runtime = await ModelRuntime.create();
+  const available = await runtime.getAvailable();
   const providers = Array.from(new Set(available.map((m) => m.provider)));
   return { providers, modelCount: available.length };
 }

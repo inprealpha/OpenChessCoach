@@ -185,7 +185,7 @@
     /* One row per line: a long line scrolls sideways, every move whole and in reach. */
     .moves { flex: 1 1 auto; gap: 0; flex-wrap: nowrap; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; }
     .moves::-webkit-scrollbar { display: none; }
-    .move { min-height: var(--tap); padding-inline: 0.3rem; }
+    .move { min-height: var(--tap); min-width: var(--tap); padding-inline: 0.3rem; }
     li { align-items: center; padding: 0; gap: 0.3rem; }
   }
 </style>

@@ -204,6 +204,14 @@
     return `${(g.result === '1-0') === (g.playerSide === 'white') ? 'Won' : 'Lost'} ${as}`;
   }
 
+  /** Whether the Player won, lost or drew, for visual distinction beside the text. */
+  function outcomeKind(g: GameSummary): 'won' | 'lost' | 'drew' | null {
+    if (g.source === 'sample') return null;
+    if (g.result === '1/2-1/2') return 'drew';
+    if (g.result !== '1-0' && g.result !== '0-1') return null;
+    return (g.result === '1-0') === (g.playerSide === 'white') ? 'won' : 'lost';
+  }
+
   const dateOf = (g: GameSummary): string => (g.date ? g.date.slice(0, 10) : 'Unknown');
   const sourceOf = (g: GameSummary): string =>
     g.source === 'engine' ? '' : ` (${g.source === 'pgn' ? 'PGN' : g.source === 'sample' ? 'sample' : g.source === 'lichess' ? 'Lichess' : 'chess.com'})`;
@@ -375,7 +383,7 @@
               {g.opponent}{sourceOf(g)}
               <span class="narrow-only muted">{dateOf(g)} · {g.opening}</span>
             </td>
-            <td>{outcome(g)}</td>
+            <td class={outcomeKind(g) ? `result ${outcomeKind(g)}` : 'result'}>{outcome(g)}</td>
             <td class="wide-only">{g.opening}</td>
             <td class="actions" data-menu-of={g.id}>
               <a href={`#/review/${g.id}`} onclick={rememberPlace} aria-label={`${g.hasReview ? 'Open Review' : 'Review'}: ${nameOf(g)}`}>{g.hasReview ? 'Open Review' : 'Review'}</a>
@@ -464,6 +472,10 @@
   th, td { text-align: left; padding: 0.35rem 0.3rem; border-bottom: 1px solid var(--line); }
   .date { white-space: nowrap; }
   .opponent { overflow-wrap: anywhere; }
+  .result { white-space: nowrap; }
+  .result.won { color: var(--accent); font-weight: 600; }
+  .result.lost { color: var(--danger); font-weight: 600; }
+  .result.drew { color: var(--muted); }
   .actions { position: relative; white-space: nowrap; text-align: right; }
   .more { margin-left: 0.4rem; padding: 0.1rem 0.55rem; line-height: 1.2; }
   .menu {

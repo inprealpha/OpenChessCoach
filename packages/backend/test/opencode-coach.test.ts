@@ -641,4 +641,59 @@ describe('OpenCodeCoach', () => {
     expect(err).toBeInstanceOf(CoachLimitError);
     expect((err as CoachLimitError).resetsAt).toBeInstanceOf(Date);
   });
+
+  it('rejects v2 streams that disconnect or error before session.execution.succeeded', async () => {
+    const eofClient: OpenCodeV2ClientLike = {
+      async createSession() {
+        return { id: 'ses-eof' };
+      },
+      async subscribeEvents() {
+        return (async function* () {
+          yield { type: 'session.text.delta', data: { sessionID: 'ses-eof', delta: 'Partial explanation ' } };
+        })();
+      },
+      async prompt() {},
+      async interrupt() {},
+      async deleteSession() {},
+    };
+
+    const eofCoach = new OpenCodeCoach({
+      createInstance: async () => ({
+        apiVersion: 'v2',
+        v2Client: eofClient,
+        server: { url: 'http://127.0.0.1:41234', close: () => {} },
+      }),
+      checkAuth: async () => ({ ok: true, path: '/usr/local/bin/opencode', authSource: 'opencode-cli' }),
+    });
+
+    await expect(eofCoach.ask({ job: 'why', model: 'default', brief: BRIEF }, () => {})).rejects.toThrow(
+      /disconnected before completing/i,
+    );
+
+    const dropClient: OpenCodeV2ClientLike = {
+      ...eofClient,
+      async createSession() {
+        return { id: 'ses-drop' };
+      },
+      async subscribeEvents() {
+        return (async function* () {
+          yield { type: 'session.text.delta', data: { sessionID: 'ses-drop', delta: 'Partial explanation ' } };
+          throw new Error('socket hang up');
+        })();
+      },
+    };
+
+    const dropCoach = new OpenCodeCoach({
+      createInstance: async () => ({
+        apiVersion: 'v2',
+        v2Client: dropClient,
+        server: { url: 'http://127.0.0.1:41234', close: () => {} },
+      }),
+      checkAuth: async () => ({ ok: true, path: '/usr/local/bin/opencode', authSource: 'opencode-cli' }),
+    });
+
+    await expect(dropCoach.ask({ job: 'why', model: 'default', brief: BRIEF }, () => {})).rejects.toThrow(
+      /socket hang up/i,
+    );
+  });
 });

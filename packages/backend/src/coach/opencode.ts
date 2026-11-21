@@ -626,6 +626,9 @@ export class OpenCodeCoach implements CoachPort {
       let enteredFence = false;
       let unexpectedTool: string | undefined;
       let executionError: ParsedOpenCodeError | undefined;
+      let executionSucceeded = false;
+      let executionInterrupted = false;
+      let streamErr: unknown;
       let stepModel: { providerID: string; id: string } | undefined;
       let usageInfo:
         | { cost?: number; tokens?: { input?: number; output?: number; cache?: { read?: number; write?: number } } }
@@ -697,12 +700,18 @@ export class OpenCodeCoach implements CoachPort {
             } else if (ev.type === 'session.execution.failed') {
               executionError = formatOpenCodeError(d.error ?? 'OpenCode execution failed.');
               break;
-            } else if (ev.type === 'session.execution.succeeded' || ev.type === 'session.execution.interrupted') {
+            } else if (ev.type === 'session.execution.succeeded') {
+              executionSucceeded = true;
+              break;
+            } else if (ev.type === 'session.execution.interrupted') {
+              executionInterrupted = true;
               break;
             }
           }
-        } catch {
-          // Expected when streamAbort fires after completion or abort.
+        } catch (err) {
+          if (!streamAbort.signal.aborted) {
+            streamErr = err;
+          }
         }
       })();
 
@@ -712,10 +721,20 @@ export class OpenCodeCoach implements CoachPort {
       streamAbort.abort();
 
       if (ctx.isTimedOut() && call.deadlineMs) throw new CoachDeadlineError(call.deadlineMs);
+      if (ctx.signal.aborted) {
+        throw ctx.signal.reason instanceof Error ? ctx.signal.reason : new Error('OpenCode request aborted.');
+      }
       if (unexpectedTool) {
         throw new Error(`OpenCode attempted an unexpected tool call (${unexpectedTool}) during Coach reply.`);
       }
       if (executionError) throw this.mapError(executionError);
+      if (streamErr) throw this.mapError(formatOpenCodeError(streamErr));
+      if (executionInterrupted) {
+        throw new Error('OpenCode execution was interrupted before completing the Coach reply.');
+      }
+      if (!executionSucceeded) {
+        throw new Error('OpenCode stream disconnected before completing the Coach reply.');
+      }
 
       flushSafeProse(true);
       const parsed = parseTextAndStructuredReply(finalEndedText || rawText);

@@ -134,7 +134,11 @@
   async function update(card: Card, patch: SettingsPatch): Promise<void> {
     try {
       settings = await api.request('settings.update', patch);
-      outcome = { card, text: 'Saved.', failed: false };
+      if (card === 'tunnel' && patch.tunnelEnabled === true) {
+        if (outcome?.card === 'tunnel') outcome = null;
+      } else {
+        outcome = { card, text: 'Saved.', failed: false };
+      }
     } catch (err) {
       outcome = { card, text: err instanceof ApiError ? err.message : 'Could not save.', failed: true };
     }
@@ -152,13 +156,13 @@
     }
   }
 
-  async function copyLink(): Promise<void> {
-    if (!pairing) return;
+  async function copyLink(url: string | null | undefined, card: 'pairing' | 'tunnel'): Promise<void> {
+    if (!url) return;
     try {
-      await navigator.clipboard.writeText(pairing.pairUrl);
-      outcome = { card: 'pairing', text: 'Pairing link copied.', failed: false };
+      await navigator.clipboard.writeText(url);
+      outcome = { card, text: 'Pairing link copied.', failed: false };
     } catch {
-      outcome = { card: 'pairing', text: 'Could not copy the link. Select it and copy it instead.', failed: true };
+      outcome = { card, text: 'Could not copy the link. Select it and copy it instead.', failed: true };
     }
   }
 </script>
@@ -184,7 +188,7 @@
       <p class="muted small">
         Or open the pairing link there:
         <span class="address link" data-testid="pairing-link">{pairing.pairUrl}</span>
-        {#if canCopy}<button type="button" class="secondary copy" onclick={copyLink}>Copy link</button>{/if}
+        {#if canCopy}<button type="button" class="secondary copy" onclick={() => copyLink(pairing?.pairUrl, 'pairing')}>Copy link</button>{/if}
       </p>
       {#if confirmReset}
         <p>Every other device will have to scan a new QR code. Continue?</p>
@@ -215,7 +219,14 @@
       {#if pairing.tunnelQrSvg && pairing.tunnel.url}
         <!-- eslint-disable-next-line svelte/no-at-html-tags -- the desktop draws this SVG from its own tunnel URL -->
         <figure class="qr" aria-label="Away-from-home QR code">{@html pairing.tunnelQrSvg}</figure>
-        <p class="small">Away-from-home address: <span data-testid="tunnel-url">{pairing.tunnel.url}</span></p>
+        <p class="small">Away-from-home address: <span class="address" data-testid="tunnel-url">{pairing.tunnel.url}</span></p>
+        {#if pairing.tunnelPairUrl}
+          <p class="muted small">
+            Or open the pairing link there:
+            <span class="address link" data-testid="tunnel-pairing-link">{pairing.tunnelPairUrl}</span>
+            {#if canCopy}<button type="button" class="secondary copy" onclick={() => copyLink(pairing?.tunnelPairUrl, 'tunnel')}>Copy link</button>{/if}
+          </p>
+        {/if}
       {/if}
       {@render said('tunnel')}
     </section>

@@ -89,12 +89,26 @@ test('Settings shows the pairing code, and a device without a camera pairs by ty
   await laptop.close();
 });
 
-test('away-from-home access starts a tunnel and shows its pairing address', async ({ paired, app }) => {
+test('away-from-home access starts a tunnel and shows its pairing address and link', async ({ paired, app }) => {
   await paired.goto(`${app.url}/#/settings`);
-  await paired.getByRole('checkbox', { name: 'Make the app reachable away from home' }).check();
-  await expect(paired.getByTestId('tunnel-url')).toHaveText(/verify-mode\.trycloudflare\.com/);
-  await paired.getByRole('checkbox', { name: 'Make the app reachable away from home' }).uncheck();
-  await expect(paired.getByTestId('tunnel-url')).toHaveCount(0);
+  const tunnel = paired.getByRole('region', { name: 'Away from home' });
+  await tunnel.getByRole('checkbox', { name: 'Make the app reachable away from home' }).check();
+  await expect(tunnel.getByTestId('tunnel-url')).toHaveText(/verify-mode\.trycloudflare\.com/);
+  await expect(tunnel.getByTestId('tunnel-pairing-link')).toHaveText(`https://verify-mode.trycloudflare.com/#pair=${app.code}`);
+  await expect(tunnel.getByRole('button', { name: 'Copy link' })).toBeVisible();
+  await expect(tunnel).not.toContainText('Saved.');
+  await tunnel.getByRole('checkbox', { name: 'Make the app reachable away from home' }).uncheck();
+  await expect(tunnel.getByTestId('tunnel-url')).toHaveCount(0);
+  await expect(tunnel.getByTestId('tunnel-pairing-link')).toHaveCount(0);
+});
+
+test('a network error while pairing does not blame Wi-Fi', async ({ page, app }) => {
+  await page.goto(app.url);
+  await page.route('**/api/pair', (route) => route.abort());
+  await page.getByLabel('Pairing code').fill(app.code);
+  await page.getByRole('button', { name: 'Pair this device' }).click();
+  await expect(page.getByRole('alert')).toHaveText(/OpenChessCoach is running on it and that your connection is working/);
+  await expect(page.getByRole('alert')).not.toContainText('Wi-Fi');
 });
 
 test('when the Coach is unavailable the app says why and keeps the board working', async ({ paired, app }) => {

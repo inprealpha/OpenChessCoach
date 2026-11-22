@@ -175,7 +175,22 @@ case ":${PATH}:" in
     SHELL_RC=""
     case "${SHELL:-}" in
       */zsh)  SHELL_RC="$HOME/.zshrc" ;;
-      */bash) SHELL_RC="$HOME/.bashrc" ;;
+      */bash)
+        # macOS Terminal opens login bash shells, which read the first of ~/.bash_profile, ~/.bash_login, or ~/.profile (and ignore ~/.bashrc).
+        if [ "$OS" = "Darwin" ]; then
+          if [ -f "$HOME/.bash_profile" ]; then
+            SHELL_RC="$HOME/.bash_profile"
+          elif [ -f "$HOME/.bash_login" ]; then
+            SHELL_RC="$HOME/.bash_login"
+          elif [ -f "$HOME/.profile" ]; then
+            SHELL_RC="$HOME/.profile"
+          else
+            SHELL_RC="$HOME/.bash_profile"
+          fi
+        else
+          SHELL_RC="$HOME/.bashrc"
+        fi
+        ;;
       *)      SHELL_RC="$HOME/.profile" ;;
     esac
     EXPORT_LINE="export PATH=\"\$HOME/.local/bin:\$PATH\""

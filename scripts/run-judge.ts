@@ -110,6 +110,14 @@ export function isOpenCodeStartupOrLogLine(rawLine: string): boolean {
   return false;
 }
 
+function couldBeOpenCodeStartupOrLogPrefix(rawLine: string): boolean {
+  const clean = stripAnsi(rawLine).trimStart();
+  if (!clean) return true;
+  if (clean.startsWith('>')) return true;
+  if ('timestamp='.startsWith(clean) || clean.startsWith('timestamp=')) return true;
+  return false;
+}
+
 /**
  * Returns the cleaned error line when an OpenCode log/output line reports a fatal provider stream
  * error (such as `AI_APICallError: Free usage limit reached`), where `opencode run 1.19.6` is
@@ -335,8 +343,10 @@ export function execJudgeProcess(
         stdoutPendingLine = lines.pop() ?? '';
         for (const line of lines) inspectLine(line, 'stdout');
         // Handle non-newline-terminated model output as activity when it isn't a startup banner.
-        if (stdoutPendingLine && inv.provider !== 'opencode' && stripAnsi(stdoutPendingLine).trim()) {
-          recordActivity();
+        if (stdoutPendingLine && stripAnsi(stdoutPendingLine).trim()) {
+          if (hasActivity || inv.provider !== 'opencode' || !couldBeOpenCodeStartupOrLogPrefix(stdoutPendingLine)) {
+            recordActivity();
+          }
         }
       } else {
         if (stderr.length < MAX_BUFFER_BYTES) {
@@ -346,6 +356,11 @@ export function execJudgeProcess(
         const lines = combined.split(/\r?\n/);
         stderrPendingLine = lines.pop() ?? '';
         for (const line of lines) inspectLine(line, 'stderr');
+        if (stderrPendingLine && stripAnsi(stderrPendingLine).trim()) {
+          if (inv.provider !== 'opencode' || !couldBeOpenCodeStartupOrLogPrefix(stderrPendingLine)) {
+            recordActivity();
+          }
+        }
       }
     };
 

@@ -583,6 +583,29 @@ describe('judge hang and fatal-error watchdogs', () => {
     expect(res.timedOut).toBe('idle');
   });
 
+  it('counts non-newline-terminated opencode token streams as activity so active streams do not time out', async () => {
+    const outDir = makeTempDir('judge-stream-tokens-');
+    const res = await execJudgeProcess(
+      {
+        provider: 'opencode',
+        command: process.execPath,
+        args: [
+          '-e',
+          'let n = 0; const t = setInterval(() => { process.stdout.write("tok "); if (++n >= 6) { clearInterval(t); process.exit(0); } }, 80);',
+        ],
+        model: 'opencode/deepseek-v4.1-flash-free',
+        logFile: join(outDir, 'judge-opencode.log'),
+      },
+      outDir,
+      process.env,
+      { firstActivityMs: 200, idleMs: 200, overallMs: 5_000, killGraceMs: 100 },
+    );
+
+    expect(res.status).toBe(0);
+    expect(res.timedOut).toBeUndefined();
+    expect(res.stdout).toContain('tok ');
+  });
+
   it('advances to the next ZDR free model when the first hangs on Free usage limit reached or times out', async () => {
     const outDir = makeTempDir('judge-fallback-hang-');
     const tried: Array<string | undefined> = [];

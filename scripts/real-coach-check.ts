@@ -429,7 +429,7 @@ async function createProviderCoach(
   return { coach: openCode, close: () => openCode.close() };
 }
 
-const DEFAULT_FREE_OPENCODE_TIMEOUT_MS = 180_000;
+const DEFAULT_FREE_OPENCODE_TIMEOUT_MS = 360_000;
 const DEFAULT_PAID_PROVIDER_TIMEOUT_MS = 300_000;
 
 /**

@@ -7,7 +7,7 @@
 //   node scripts/run-judge.ts --scrub <dir>
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   classifyProviderFailure,
@@ -106,9 +106,29 @@ function defaultExec(inv: JudgeInvocation, workdir: string, env: NodeJS.ProcessE
   };
 }
 
+/**
+ * Builds the narrowest OPENCODE_PERMISSION JSON needed for headless `opencode run` judging:
+ * denies all external directories by default and allows only the judge's own input/output/base
+ * directories (never a blanket `*` allow, and preserving OpenCode's default `.env` protection).
+ */
+export function buildOpenCodeJudgePermission(allowedDirs: readonly string[]): string {
+  const externalDirectory: Record<string, 'allow' | 'deny'> = { '*': 'deny' };
+  for (const dir of allowedDirs) {
+    const trimmed = dir.trim();
+    if (!trimmed) continue;
+    const normalized = resolve(trimmed).replace(/\\/g, '/').replace(/\/+$/, '');
+    if (!normalized) continue;
+    externalDirectory[normalized] = 'allow';
+    externalDirectory[`${normalized}/*`] = 'allow';
+  }
+  return JSON.stringify({
+    external_directory: externalDirectory,
+  });
+}
+
 /** Runs configured judge providers in order until one writes a valid verdict.json or all fail. */
 export function runJudge(
-  opts: { prompt: string; outDir: string; workdir: string; maxBudgetUsd?: string },
+  opts: { prompt: string; outDir: string; workdir: string; maxBudgetUsd?: string; inDir?: string; baseDir?: string },
   deps: RunJudgeDeps = {},
 ): { meta: JudgeMeta; hasVerdict: boolean } {
   const env = deps.env ?? process.env;
@@ -151,7 +171,21 @@ export function runJudge(
       codexAuth && typeof codexAuth === 'object' && codexAuth.codexHome
         ? { ...env, CODEX_HOME: codexAuth.codexHome }
         : env;
-    if (provider === 'opencode') runEnv = withOpenCodeEnv(runEnv);
+    if (provider === 'opencode') {
+      runEnv = withOpenCodeEnv(runEnv);
+      if (!runEnv.OPENCODE_PERMISSION?.trim()) {
+        const allowedDirs = [opts.outDir];
+        if (opts.inDir) allowedDirs.push(opts.inDir);
+        else if (runEnv.IN?.trim()) allowedDirs.push(runEnv.IN.trim());
+        if (opts.baseDir) {
+          allowedDirs.push(opts.baseDir);
+        } else if (runEnv.GITHUB_WORKSPACE?.trim()) {
+          const candidateBase = join(runEnv.GITHUB_WORKSPACE.trim(), 'base');
+          if (existsSync(candidateBase)) allowedDirs.push(candidateBase);
+        }
+        runEnv = { ...runEnv, OPENCODE_PERMISSION: buildOpenCodeJudgePermission(allowedDirs) };
+      }
+    }
 
     // Free OpenCode is restricted to the Zero-Data-Retention (ZDR) model allowlist so code and
     // prompts never fall back to non-ZDR free models such as `opencode/big-pickle`.
@@ -296,7 +330,13 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
     const workdir = process.argv.includes('--workdir') ? arg('--workdir') : process.cwd();
     const maxBudgetUsd = process.argv.includes('--max-budget-usd') ? arg('--max-budget-usd') : '5';
     const prompt = readFileSync(promptFile, 'utf8');
-    const { meta, hasVerdict } = runJudge({ prompt, outDir, workdir, maxBudgetUsd });
+    const { meta, hasVerdict } = runJudge({
+      prompt,
+      outDir,
+      workdir,
+      maxBudgetUsd,
+      inDir: dirname(resolve(promptFile)),
+    });
     process.stdout.write(`${JSON.stringify(meta, null, 2)}\n`);
     process.exit(hasVerdict ? 0 : 1);
   } catch (err) {

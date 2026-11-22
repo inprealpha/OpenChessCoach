@@ -19,7 +19,7 @@ import {
   scrubSecretsFromDir,
   ZDR_FREE_OPENCODE_MODELS,
 } from '../ci-providers.ts';
-import { buildJudgeInvocation, runJudge } from '../run-judge.ts';
+import { buildJudgeInvocation, buildOpenCodeJudgePermission, runJudge } from '../run-judge.ts';
 import { checkCiProviders, formatHealthIssueBody, HEALTH_ISSUE_MARKER } from '../check-ci-providers.ts';
 import { parseRealCoachArgs, resolveOpenCodeModelsToTry, runWithFallback, summarize } from '../real-coach-check.ts';
 
@@ -189,6 +189,52 @@ describe('multi-provider judge runner', () => {
     expect(meta.provider).toBeNull();
     expect(meta.allProvidersFailed).toBe(true);
     expect(meta.attempts).toHaveLength(1 + ZDR_FREE_OPENCODE_MODELS.length);
+  });
+
+  it('passes narrow OPENCODE_PERMISSION allowing only judge input/output/base dirs', () => {
+    const workspace = makeTempDir('judge-perm-ws-');
+    const inDir = join(workspace, 'verdict-in');
+    const outDir = join(workspace, 'verdict-out');
+    const baseDir = join(workspace, 'base');
+    mkdirSync(inDir, { recursive: true });
+    mkdirSync(baseDir, { recursive: true });
+
+    const seenEnv: NodeJS.ProcessEnv[] = [];
+    const { hasVerdict } = runJudge(
+      { prompt: 'judge this PR', outDir, workdir: workspace, inDir },
+      {
+        env: { CI_PROVIDER_ORDER: 'opencode', GITHUB_WORKSPACE: workspace },
+        hasCredentials: () => ({ configured: true, source: 'opencode-free' }),
+        exec: (_inv, _workdir, env) => {
+          seenEnv.push(env);
+          writeFileSync(join(outDir, 'verdict.json'), JSON.stringify({ verdict: 'PASS', summary: 'Looks good.' }));
+          return { status: 0, stdout: 'done', stderr: '' };
+        },
+      },
+    );
+
+    expect(hasVerdict).toBe(true);
+    expect(seenEnv).toHaveLength(1);
+    const parsed = JSON.parse(seenEnv[0]?.OPENCODE_PERMISSION ?? '{}') as Record<string, unknown>;
+    expect(Object.keys(parsed)).toEqual(['external_directory']);
+    const ext = parsed.external_directory as Record<string, string>;
+    expect(Object.keys(ext)[0]).toBe('*');
+    expect(ext['*']).toBe('deny');
+    expect(ext[outDir.replace(/\\/g, '/')]).toBe('allow');
+    expect(ext[`${outDir.replace(/\\/g, '/')}/*`]).toBe('allow');
+    expect(ext[inDir.replace(/\\/g, '/')]).toBe('allow');
+    expect(ext[`${inDir.replace(/\\/g, '/')}/*`]).toBe('allow');
+    expect(ext[baseDir.replace(/\\/g, '/')]).toBe('allow');
+    expect(ext[`${baseDir.replace(/\\/g, '/')}/*`]).toBe('allow');
+
+    const explicit = buildOpenCodeJudgePermission([inDir]);
+    expect(JSON.parse(explicit)).toEqual({
+      external_directory: {
+        '*': 'deny',
+        [inDir.replace(/\\/g, '/')]: 'allow',
+        [`${inDir.replace(/\\/g, '/')}/*`]: 'allow',
+      },
+    });
   });
 });
 

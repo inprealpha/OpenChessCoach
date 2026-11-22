@@ -19,7 +19,14 @@ import {
   scrubSecretsFromDir,
   ZDR_FREE_OPENCODE_MODELS,
 } from '../ci-providers.ts';
-import { buildJudgeInvocation, buildOpenCodeJudgePermission, runJudge } from '../run-judge.ts';
+import {
+  buildJudgeInvocation,
+  buildOpenCodeJudgePermission,
+  detectFatalProviderErrorLine,
+  execJudgeProcess,
+  isOpenCodeStartupOrLogLine,
+  runJudge,
+} from '../run-judge.ts';
 import { checkCiProviders, formatHealthIssueBody, HEALTH_ISSUE_MARKER } from '../check-ci-providers.ts';
 import { parseRealCoachArgs, resolveOpenCodeModelsToTry, runWithFallback, summarize } from '../real-coach-check.ts';
 
@@ -118,17 +125,22 @@ describe('multi-provider judge runner', () => {
     const out = '/tmp/out';
     expect(buildJudgeInvocation('codex', 'hello', out, {}).command).toBe('codex');
     expect(buildJudgeInvocation('claude', 'hello', out, { CLAUDE_JUDGE_MODEL: 'sonnet' }).args).toContain('sonnet');
-    expect(buildJudgeInvocation('opencode', 'hello', out, {}).command).toBe('opencode');
+    const opencodeInv = buildJudgeInvocation('opencode', 'hello', out, {});
+    expect(opencodeInv.command).toBe('opencode');
+    expect(opencodeInv.args).toContain('--print-logs');
+    expect(opencodeInv.args).toContain('--log-level');
+    expect(opencodeInv.args).toContain('ERROR');
   });
 
-  it('falls back from expired Codex -> skipped Claude -> free OpenCode and marks OpenCode as weaker judge', () => {
+  it('falls back from expired Codex -> skipped Claude -> free OpenCode and marks OpenCode as weaker judge', async () => {
     const outDir = makeTempDir('judge-out-');
-    const { meta, hasVerdict } = runJudge(
+    const { meta, hasVerdict } = await runJudge(
       { prompt: 'judge this PR', outDir, workdir: outDir },
       {
         env: { CI_PROVIDER_ORDER: 'codex,claude,opencode', OPENAI_API_KEY: 'sk-expired-key-1234' },
         hasCredentials: (p) => (p === 'claude' ? { configured: false } : { configured: true, source: p }),
         materializeCodex: () => undefined,
+        log: () => {},
         exec: (inv) => {
           if (inv.command === 'codex') {
             return { status: 1, stdout: '', stderr: '401 Unauthorized: invalid_api_key' };
@@ -150,15 +162,16 @@ describe('multi-provider judge runner', () => {
     ]);
   });
 
-  it('never falls back after a valid FAIL verdict', () => {
+  it('never falls back after a valid FAIL verdict', async () => {
     const outDir = makeTempDir('judge-fail-');
     const called: string[] = [];
-    const { meta, hasVerdict } = runJudge(
+    const { meta, hasVerdict } = await runJudge(
       { prompt: 'judge this PR', outDir, workdir: outDir },
       {
         env: { CI_PROVIDER_ORDER: 'codex,claude,opencode', OPENAI_API_KEY: 'sk-good-key-1234', ANTHROPIC_API_KEY: 'sk-ant-1234' },
         hasCredentials: () => ({ configured: true }),
         materializeCodex: () => undefined,
+        log: () => {},
         exec: (inv) => {
           called.push(inv.command);
           writeFileSync(join(outDir, 'verdict.json'), JSON.stringify({ verdict: 'FAIL', summary: 'Button broken.' }));
@@ -173,14 +186,15 @@ describe('multi-provider judge runner', () => {
     expect(meta.weakerJudge).toBe(false);
   });
 
-  it('records allProvidersFailed when every provider fails auth or quota', () => {
+  it('records allProvidersFailed when every provider fails auth or quota', async () => {
     const outDir = makeTempDir('judge-all-fail-');
-    const { meta, hasVerdict } = runJudge(
+    const { meta, hasVerdict } = await runJudge(
       { prompt: 'judge this PR', outDir, workdir: outDir },
       {
         env: { CI_PROVIDER_ORDER: 'codex,opencode', OPENAI_API_KEY: 'sk-expired-1234' },
         hasCredentials: () => ({ configured: true }),
         materializeCodex: () => undefined,
+        log: () => {},
         exec: () => ({ status: 1, stdout: '', stderr: '429 Too Many Requests: rate limit exceeded' }),
       },
     );
@@ -191,7 +205,7 @@ describe('multi-provider judge runner', () => {
     expect(meta.attempts).toHaveLength(1 + ZDR_FREE_OPENCODE_MODELS.length);
   });
 
-  it('passes narrow OPENCODE_PERMISSION allowing only judge input/output/base dirs', () => {
+  it('passes narrow OPENCODE_PERMISSION allowing only judge input/output/base dirs', async () => {
     const workspace = makeTempDir('judge-perm-ws-');
     const inDir = join(workspace, 'verdict-in');
     const outDir = join(workspace, 'verdict-out');
@@ -200,11 +214,12 @@ describe('multi-provider judge runner', () => {
     mkdirSync(baseDir, { recursive: true });
 
     const seenEnv: NodeJS.ProcessEnv[] = [];
-    const { hasVerdict } = runJudge(
+    const { hasVerdict } = await runJudge(
       { prompt: 'judge this PR', outDir, workdir: workspace, inDir },
       {
         env: { CI_PROVIDER_ORDER: 'opencode', GITHUB_WORKSPACE: workspace },
         hasCredentials: () => ({ configured: true, source: 'opencode-free' }),
+        log: () => {},
         exec: (_inv, _workdir, env) => {
           seenEnv.push(env);
           writeFileSync(join(outDir, 'verdict.json'), JSON.stringify({ verdict: 'PASS', summary: 'Looks good.' }));
@@ -333,17 +348,18 @@ describe('weekly CI provider health check', () => {
     expect(body).toContain('https://github.com/inprealpha/OpenChessCoach/actions/runs/99');
   });
 
-  it('treats OPENCODE_ZEN_API_KEY as a paid OpenCode key and forwards it to OPENCODE_API_KEY in runJudge', () => {
+  it('treats OPENCODE_ZEN_API_KEY as a paid OpenCode key and forwards it to OPENCODE_API_KEY in runJudge', async () => {
     expect(isWeakerJudge('opencode', {})).toBe(true);
     expect(isWeakerJudge('opencode', { OPENCODE_API_KEY: 'oc-key' })).toBe(false);
     expect(isWeakerJudge('opencode', { OPENCODE_ZEN_API_KEY: 'zen-key' })).toBe(false);
 
     const outDir = makeTempDir('judge-zen-');
     let seenKey: string | undefined;
-    const { meta, hasVerdict } = runJudge(
+    const { meta, hasVerdict } = await runJudge(
       { prompt: 'Judge this PR', outDir, workdir: outDir },
       {
         env: { CI_PROVIDER_ORDER: 'opencode', OPENCODE_ZEN_API_KEY: 'zen-secret-123' },
+        log: () => {},
         exec: (_inv, _wd, runEnv) => {
           seenKey = runEnv.OPENCODE_API_KEY;
           writeFileSync(join(outDir, 'verdict.json'), JSON.stringify({ verdict: 'PASS', summary: 'Looks good.' }));
@@ -380,7 +396,7 @@ describe('weekly CI provider health check', () => {
     expect(seen).toContainEqual(['claude', undefined, 'sk-ant-valid']);
   });
 
-  it('pins free OpenCode Verdict and real Coach strictly to Zero-Data-Retention models and rejects non-ZDR models', () => {
+  it('pins free OpenCode Verdict and real Coach strictly to Zero-Data-Retention models and rejects non-ZDR models', async () => {
     expect(resolveZdrFreeOpenCodeModels({})).toEqual([...ZDR_FREE_OPENCODE_MODELS]);
     expect(resolveZdrFreeOpenCodeModels({ OPENCODE_ZDR_FREE_MODELS: '' })).toEqual([...ZDR_FREE_OPENCODE_MODELS]);
     expect(isZdrFreeOpenCodeModel('opencode/deepseek-v4.1-flash-free', {})).toBe(true);
@@ -418,10 +434,11 @@ describe('weekly CI provider health check', () => {
     // runJudge tries ZDR free models in order and never defaults to big-pickle.
     const outDir = makeTempDir('judge-zdr-');
     const triedModels: Array<string | undefined> = [];
-    const { meta, hasVerdict } = runJudge(
+    const { meta, hasVerdict } = await runJudge(
       { prompt: 'Judge this PR', outDir, workdir: outDir },
       {
         env: { CI_PROVIDER_ORDER: 'opencode' },
+        log: () => {},
         exec: (inv) => {
           triedModels.push(inv.model);
           if (inv.model === ZDR_FREE_OPENCODE_MODELS[0]) {
@@ -440,10 +457,11 @@ describe('weekly CI provider health check', () => {
     // runJudge refuses a non-ZDR OPENCODE_JUDGE_MODEL when running unauthenticated free OpenCode.
     const outDir2 = makeTempDir('judge-non-zdr-');
     const called: string[] = [];
-    const res2 = runJudge(
+    const res2 = await runJudge(
       { prompt: 'Judge this PR', outDir: outDir2, workdir: outDir2 },
       {
         env: { CI_PROVIDER_ORDER: 'opencode', OPENCODE_JUDGE_MODEL: 'opencode/big-pickle' },
+        log: () => {},
         exec: (inv) => {
           called.push(inv.command);
           return { status: 0, stdout: '', stderr: '' };
@@ -453,5 +471,350 @@ describe('weekly CI provider health check', () => {
     expect(res2.hasVerdict).toBe(false);
     expect(res2.meta.allProvidersFailed).toBe(true);
     expect(called).toEqual([]);
+  });
+});
+
+describe('judge hang and fatal-error watchdogs', () => {
+  it('distinguishes OpenCode startup banners and log lines from real model activity and fatal stream errors', () => {
+    expect(isOpenCodeStartupOrLogLine('\u001b[0m> build · deepseek-v4.1-flash-free\u001b[0m')).toBe(true);
+    expect(isOpenCodeStartupOrLogLine('timestamp=2026-11-22T14:09:58Z level=INFO run=1 message=init')).toBe(true);
+    expect(isOpenCodeStartupOrLogLine('$ npm test')).toBe(false);
+    expect(isOpenCodeStartupOrLogLine('PASS')).toBe(false);
+
+    const fatalLine =
+      'timestamp=2026-11-22T14:09:59.090Z level=ERROR run=554116e2 message="stream error" providerID=opencode modelID=deepseek-v4.1-flash-free error.error="AI_APICallError: Free usage limit reached."';
+    expect(detectFatalProviderErrorLine(fatalLine)).toBe('AI_APICallError: Free usage limit reached.');
+    expect(detectFatalProviderErrorLine('AI_APICallError: Too many requests')).toBe('AI_APICallError: Too many requests');
+    // Bare `Error:` lines and `missing-cli` (ENOENT) from bash tools on stderr must never trigger the abort.
+    expect(detectFatalProviderErrorLine('Error: ENOENT: no such file or directory')).toBeUndefined();
+    expect(detectFatalProviderErrorLine('Error: 429 rate limit exceeded')).toBeUndefined();
+    expect(detectFatalProviderErrorLine('AI_APICallError: ENOENT: no such file or directory')).toBeUndefined();
+    // Normal test/diff output quoting Free usage limit reached must never trigger the abort.
+    expect(detectFatalProviderErrorLine('✓ classifies 401 Unauthorized and 429 rate limit exceeded')).toBeUndefined();
+    expect(detectFatalProviderErrorLine('const msg = "AI_APICallError: Free usage limit reached.";')).toBeUndefined();
+  });
+
+  it('does not abort a healthy opencode judge whose stdout quotes Free usage limit reached', async () => {
+    const outDir = makeTempDir('judge-quoted-error-');
+    const res = await execJudgeProcess(
+      {
+        provider: 'opencode',
+        command: process.execPath,
+        args: [
+          '-e',
+          [
+            'process.stdout.write(\'timestamp=2026-11-22T14:09:59Z level=ERROR run=1 message="stream error" error.error="AI_APICallError: Free usage limit reached."\\n\');',
+            'setTimeout(() => { process.stdout.write("done\\n"); process.exit(0); }, 250);',
+          ].join(' '),
+        ],
+        model: 'opencode/deepseek-v4.1-flash-free',
+        logFile: join(outDir, 'judge-opencode.log'),
+      },
+      outDir,
+      process.env,
+      { firstActivityMs: 2_000, idleMs: 2_000, overallMs: 5_000, fatalErrorGraceMs: 50, killGraceMs: 100 },
+    );
+
+    expect(res.status).toBe(0);
+    expect(res.abortedProviderError).toBeUndefined();
+    expect(res.timedOut).toBeUndefined();
+  });
+
+  it('does not abort a healthy opencode judge when bash tool output prints bare Error: lines to stderr', async () => {
+    const outDir = makeTempDir('judge-stderr-bash-error-');
+    const res = await execJudgeProcess(
+      {
+        provider: 'opencode',
+        command: process.execPath,
+        args: [
+          '-e',
+          [
+            'process.stderr.write("> build · hy4-flash-free\\n");',
+            'process.stderr.write("$ printf \'Error: ENOENT: no such file or directory\\\\n\'; sleep 1\\n");',
+            'process.stderr.write("Error: ENOENT: no such file or directory\\n");',
+            'setTimeout(() => { process.stdout.write("done\\n"); process.exit(0); }, 250);',
+          ].join(' '),
+        ],
+        model: 'opencode/hy4-flash-free',
+        logFile: join(outDir, 'judge-opencode.log'),
+      },
+      outDir,
+      process.env,
+      { firstActivityMs: 2_000, idleMs: 2_000, overallMs: 5_000, fatalErrorGraceMs: 50, killGraceMs: 100 },
+    );
+
+    expect(res.status).toBe(0);
+    expect(res.abortedProviderError).toBeUndefined();
+    expect(res.timedOut).toBeUndefined();
+  });
+
+  it('cancels a pending fatal-error abort when the opencode judge produces subsequent activity', async () => {
+    const outDir = makeTempDir('judge-fatal-canceled-by-activity-');
+    const res = await execJudgeProcess(
+      {
+        provider: 'opencode',
+        command: process.execPath,
+        args: [
+          '-e',
+          [
+            'process.stderr.write("> build · hy4-flash-free\\n");',
+            'process.stderr.write("AI_APICallError: Too many requests\\n");',
+            'setTimeout(() => process.stderr.write("$ echo still working\\n"), 30);',
+            'setTimeout(() => { process.stdout.write("done\\n"); process.exit(0); }, 260);',
+          ].join(' '),
+        ],
+        model: 'opencode/hy4-flash-free',
+        logFile: join(outDir, 'judge-opencode.log'),
+      },
+      outDir,
+      process.env,
+      { firstActivityMs: 2_000, idleMs: 2_000, overallMs: 5_000, fatalErrorGraceMs: 100, killGraceMs: 100 },
+    );
+
+    expect(res.status).toBe(0);
+    expect(res.abortedProviderError).toBeUndefined();
+    expect(res.timedOut).toBeUndefined();
+  });
+
+  it('still aborts promptly when opencode emits repeated fatal stream errors without real activity', async () => {
+    const outDir = makeTempDir('judge-hang-repeated-fatal-');
+    const start = Date.now();
+    const res = await execJudgeProcess(
+      {
+        provider: 'opencode',
+        command: process.execPath,
+        args: [
+          '-e',
+          [
+            'process.stderr.write("> build · deepseek-v4.1-flash-free\\n");',
+            'process.stderr.write(\'timestamp=2026-11-22T14:09:59Z level=ERROR run=1 message="stream error" error.error="AI_APICallError: Free usage limit reached."\\n\');',
+            'setTimeout(() => process.stderr.write("AI_APICallError: Free usage limit reached.\\n"), 30);',
+            'setInterval(() => {}, 60_000);',
+          ].join(' '),
+        ],
+        model: 'opencode/deepseek-v4.1-flash-free',
+        logFile: join(outDir, 'judge-opencode.log'),
+      },
+      outDir,
+      process.env,
+      { firstActivityMs: 5_000, idleMs: 5_000, overallMs: 10_000, fatalErrorGraceMs: 120, killGraceMs: 200 },
+    );
+
+    expect(Date.now() - start).toBeLessThan(3_000);
+    expect(res.abortedProviderError).toContain('Free usage limit reached');
+    expect(res.timedOut).toBeUndefined();
+  });
+
+  it('still aborts when repeated fatal AI_APICallError lines arrive split across stderr chunks', async () => {
+    const outDir = makeTempDir('judge-hang-split-fatal-');
+    const start = Date.now();
+    const res = await execJudgeProcess(
+      {
+        provider: 'opencode',
+        command: process.execPath,
+        args: [
+          '-e',
+          [
+            'process.stderr.write("> build · deepseek-v4.1-flash-free\\n");',
+            'process.stderr.write("AI_APICallError: Too many requests\\n");',
+            'setInterval(() => {',
+            '  process.stderr.write("AI_APICall");',
+            '  setTimeout(() => process.stderr.write("Error: Too many requests\\n"), 15);',
+            '}, 40);',
+          ].join(' '),
+        ],
+        model: 'opencode/deepseek-v4.1-flash-free',
+        logFile: join(outDir, 'judge-opencode.log'),
+      },
+      outDir,
+      process.env,
+      { firstActivityMs: 5_000, idleMs: 5_000, overallMs: 10_000, fatalErrorGraceMs: 120, killGraceMs: 200 },
+    );
+
+    expect(Date.now() - start).toBeLessThan(3_000);
+    expect(res.abortedProviderError).toContain('Too many requests');
+    expect(res.timedOut).toBeUndefined();
+  });
+
+  it('aborts a hung opencode process promptly after Free usage limit reached instead of hanging', async () => {
+    const outDir = makeTempDir('judge-hang-limit-');
+    const start = Date.now();
+    const res = await execJudgeProcess(
+      {
+        provider: 'opencode',
+        command: process.execPath,
+        args: [
+          '-e',
+          [
+            'process.stderr.write("> build · deepseek-v4.1-flash-free\\n");',
+            'process.stderr.write(\'timestamp=2026-11-22T14:09:59Z level=ERROR run=1 message="stream error" error.error="AI_APICallError: Free usage limit reached."\\n\');',
+            'setInterval(() => {}, 60_000);',
+          ].join(' '),
+        ],
+        model: 'opencode/deepseek-v4.1-flash-free',
+        logFile: join(outDir, 'judge-opencode.log'),
+      },
+      outDir,
+      process.env,
+      { firstActivityMs: 5_000, idleMs: 5_000, overallMs: 10_000, fatalErrorGraceMs: 150, killGraceMs: 200 },
+    );
+
+    expect(Date.now() - start).toBeLessThan(3_000);
+    expect(res.abortedProviderError).toContain('Free usage limit reached');
+    expect(res.timedOut).toBeUndefined();
+  });
+
+  it('aborts a silent opencode process that prints only its startup banner and never answers', async () => {
+    const outDir = makeTempDir('judge-hang-silent-');
+    const start = Date.now();
+    const res = await execJudgeProcess(
+      {
+        provider: 'opencode',
+        command: process.execPath,
+        args: ['-e', 'process.stderr.write("> build · deepseek-v4.1-flash-free\\n"); setInterval(() => {}, 60_000);'],
+        model: 'opencode/deepseek-v4.1-flash-free',
+        logFile: join(outDir, 'judge-opencode.log'),
+      },
+      outDir,
+      process.env,
+      { firstActivityMs: 250, idleMs: 5_000, overallMs: 10_000, killGraceMs: 200 },
+    );
+
+    expect(Date.now() - start).toBeLessThan(3_000);
+    expect(res.timedOut).toBe('first-activity');
+  });
+
+  it('aborts a judge process that stalls mid-run after producing initial activity', async () => {
+    const outDir = makeTempDir('judge-hang-idle-');
+    const start = Date.now();
+    const res = await execJudgeProcess(
+      {
+        provider: 'opencode',
+        command: process.execPath,
+        args: ['-e', 'process.stderr.write("$ npm test\\n"); setInterval(() => {}, 60_000);'],
+        model: 'opencode/deepseek-v4.1-flash-free',
+        logFile: join(outDir, 'judge-opencode.log'),
+      },
+      outDir,
+      process.env,
+      { firstActivityMs: 2_000, idleMs: 250, overallMs: 10_000, killGraceMs: 200 },
+    );
+
+    expect(Date.now() - start).toBeLessThan(3_000);
+    expect(res.timedOut).toBe('idle');
+  });
+
+  it('counts non-newline-terminated opencode token streams as activity so active streams do not time out', async () => {
+    const outDir = makeTempDir('judge-stream-tokens-');
+    const res = await execJudgeProcess(
+      {
+        provider: 'opencode',
+        command: process.execPath,
+        args: [
+          '-e',
+          'let n = 0; const t = setInterval(() => { process.stdout.write("tok "); if (++n >= 6) { clearInterval(t); process.exit(0); } }, 80);',
+        ],
+        model: 'opencode/deepseek-v4.1-flash-free',
+        logFile: join(outDir, 'judge-opencode.log'),
+      },
+      outDir,
+      process.env,
+      { firstActivityMs: 200, idleMs: 200, overallMs: 5_000, killGraceMs: 100 },
+    );
+
+    expect(res.status).toBe(0);
+    expect(res.timedOut).toBeUndefined();
+    expect(res.stdout).toContain('tok ');
+  });
+
+  it('kills SIGTERM-resistant descendants in the process group when a timed-out judge exits early', async () => {
+    if (process.platform === 'win32') return;
+    const outDir = makeTempDir('judge-descendant-kill-');
+    const pidFile = join(outDir, 'grandchild.pid');
+    const res = await execJudgeProcess(
+      {
+        provider: 'opencode',
+        command: process.execPath,
+        args: [
+          '-e',
+          [
+            'const { spawn } = require("node:child_process");',
+            'const { writeFileSync } = require("node:fs");',
+            'const gc = spawn(process.execPath, ["-e", "process.on(\'SIGTERM\', () => {}); setInterval(() => {}, 60000);"], { stdio: "ignore" });',
+            `writeFileSync(${JSON.stringify(pidFile)}, String(gc.pid));`,
+            'setInterval(() => {}, 60000);',
+          ].join(' '),
+        ],
+        model: 'opencode/deepseek-v4.1-flash-free',
+        logFile: join(outDir, 'judge-opencode.log'),
+      },
+      outDir,
+      process.env,
+      { firstActivityMs: 250, idleMs: 5_000, overallMs: 5_000, killGraceMs: 2_000 },
+    );
+
+    expect(res.timedOut).toBe('first-activity');
+    const gcPid = Number(readFileSync(pidFile, 'utf8').trim());
+    expect(Number.isInteger(gcPid) && gcPid > 0).toBe(true);
+    // Give the OS a brief moment to reap the SIGKILLed grandchild.
+    await new Promise((r) => setTimeout(r, 100));
+    expect(() => process.kill(gcPid, 0)).toThrow();
+  });
+
+  it('advances to the next ZDR free model when the first hangs on Free usage limit reached or times out', async () => {
+    const outDir = makeTempDir('judge-fallback-hang-');
+    const tried: Array<string | undefined> = [];
+    const { meta, hasVerdict } = await runJudge(
+      { prompt: 'Judge this PR', outDir, workdir: outDir },
+      {
+        env: { CI_PROVIDER_ORDER: 'opencode' },
+        log: () => {},
+        exec: (inv) => {
+          tried.push(inv.model);
+          if (inv.model === ZDR_FREE_OPENCODE_MODELS[0]) {
+            return {
+              status: null,
+              stdout: '',
+              stderr: 'level=ERROR message="stream error" error.error="AI_APICallError: Free usage limit reached."',
+              abortedProviderError: 'level=ERROR message="stream error" error.error="AI_APICallError: Free usage limit reached."',
+            };
+          }
+          if (inv.model === ZDR_FREE_OPENCODE_MODELS[1]) {
+            return { status: null, stdout: '', stderr: '> build · hy4-flash-free\n', timedOut: 'first-activity' };
+          }
+          writeFileSync(join(outDir, 'verdict.json'), JSON.stringify({ verdict: 'PASS', summary: 'Third ZDR model answered.' }));
+          return { status: 0, stdout: 'done', stderr: '' };
+        },
+      },
+    );
+
+    expect(hasVerdict).toBe(true);
+    expect(tried).toEqual([...ZDR_FREE_OPENCODE_MODELS]);
+    expect(meta.model).toBe(ZDR_FREE_OPENCODE_MODELS[2]);
+    expect(meta.attempts).toMatchObject([
+      { provider: 'opencode', model: ZDR_FREE_OPENCODE_MODELS[0], outcome: 'provider-error', failureKind: 'quota' },
+      { provider: 'opencode', model: ZDR_FREE_OPENCODE_MODELS[1], outcome: 'provider-error', failureKind: 'timeout' },
+      { provider: 'opencode', model: ZDR_FREE_OPENCODE_MODELS[2], outcome: 'verdict' },
+    ]);
+  });
+
+  it('exits with allProvidersFailed and writes judge-meta.json when every ZDR free model gets no answer', async () => {
+    const outDir = makeTempDir('judge-all-hang-');
+    const { meta, hasVerdict } = await runJudge(
+      { prompt: 'Judge this PR', outDir, workdir: outDir },
+      {
+        env: { CI_PROVIDER_ORDER: 'opencode' },
+        log: () => {},
+        exec: () => ({ status: null, stdout: '', stderr: '', timedOut: 'first-activity' }),
+      },
+    );
+
+    expect(hasVerdict).toBe(false);
+    expect(meta.allProvidersFailed).toBe(true);
+    expect(meta.attempts).toHaveLength(ZDR_FREE_OPENCODE_MODELS.length);
+    expect(meta.attempts.every((a) => a.failureKind === 'timeout' && a.reason?.includes('No answer'))).toBe(true);
+    const saved = JSON.parse(readFileSync(join(outDir, 'judge-meta.json'), 'utf8')) as typeof meta;
+    expect(saved.allProvidersFailed).toBe(true);
+    expect(saved.attempts).toHaveLength(ZDR_FREE_OPENCODE_MODELS.length);
   });
 });

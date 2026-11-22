@@ -9,7 +9,7 @@ takes after that.
 
 The welcome page walks them through it for Windows, macOS and Linux:
 
-1. A paid Claude plan (Pro or Max), since the Coach runs on their own Claude Code login (ADR 0001).
+1. A logged-in Coach backend: recommended is a paid Claude plan (Pro or Max) via Claude Code (ADR 0001), or Codex, Pi, or OpenCode.
 2. One-line standalone install (`install.ps1` on Windows, `install.sh` on macOS and Linux), which
    downloads a verified archive bundling the official signed Node.js runtime — no Node.js, npm, or
    administrator rights required. Users who already have Node.js 22.18+ can also run
@@ -35,7 +35,7 @@ The welcome page walks them through it for Windows, macOS and Linux:
    npm publish openchesscoach-0.1.0.tgz --access public
    ```
 
-   This makes the built app public on npm under the GPL, while the repository stays private.
+   This publishes the built app to npm under the GPL.
 3. **Trust the release workflow.** On npmjs.com, open the package's **Settings → Trusted
    publishing**, choose **GitHub Actions** and enter owner `inprealpha`, repository `OpenChessCoach` and
    workflow `release.yml`. Releases then publish from GitHub with no npm token stored anywhere.

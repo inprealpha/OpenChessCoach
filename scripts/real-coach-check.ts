@@ -38,7 +38,16 @@ import { COACH_PROVIDERS, type CoachJob, type CoachProvider } from '@chess-coach
 import { CoachClient } from '../packages/backend/src/client.ts';
 import type { CoachCall, CoachEngine, CoachPort } from '../packages/backend/src/coach/port.ts';
 import { avoidedTerms } from './glossary-lint.ts';
-import { hasProviderCredentials, isRetryableProviderFailure, isWeakerJudge, materializeCodexAuth, resolveProviderOrder, withOpenCodeEnv } from './ci-providers.ts';
+import {
+  hasProviderCredentials,
+  isRetryableProviderFailure,
+  isWeakerJudge,
+  isZdrFreeOpenCodeModel,
+  materializeCodexAuth,
+  resolveProviderOrder,
+  resolveZdrFreeOpenCodeModels,
+  withOpenCodeEnv,
+} from './ci-providers.ts';
 
 export const STATUS_CONTEXT = 'real Coach';
 /** The model every call in the check uses: Claude Code resolves the alias to the latest Haiku. */
@@ -420,8 +429,35 @@ async function createProviderCoach(
   return { coach: openCode, close: () => openCode.close() };
 }
 
-const DEFAULT_FREE_OPENCODE_TIMEOUT_MS = 90_000;
+const DEFAULT_FREE_OPENCODE_TIMEOUT_MS = 180_000;
 const DEFAULT_PAID_PROVIDER_TIMEOUT_MS = 300_000;
+
+/**
+ * Resolves the OpenCode model list to try for real-Coach checks. Unauthenticated free OpenCode
+ * runs are strictly limited to Zero-Data-Retention (ZDR) free models so prompts never fall back
+ * to non-ZDR free models such as `opencode/big-pickle`.
+ */
+export function resolveOpenCodeModelsToTry(requestedModel: string, env: NodeJS.ProcessEnv = process.env): string[] {
+  if (!isWeakerJudge('opencode', env)) return [requestedModel];
+  const zdrModels = resolveZdrFreeOpenCodeModels(env);
+  if (requestedModel !== 'default') {
+    if (!isZdrFreeOpenCodeModel(requestedModel, env)) {
+      throw Object.assign(
+        new Error(
+          `Model "${requestedModel}" is not in the Zero-Data-Retention free OpenCode allowlist (${zdrModels.join(', ') || 'none'}).`,
+        ),
+        { code: 'coach-unavailable' },
+      );
+    }
+    return [requestedModel];
+  }
+  if (zdrModels.length === 0) {
+    throw Object.assign(new Error('No Zero-Data-Retention free OpenCode models are configured.'), {
+      code: 'coach-unavailable',
+    });
+  }
+  return zdrModels;
+}
 
 function providerTimeoutMs(provider: CoachProvider, env: NodeJS.ProcessEnv = process.env): number {
   const raw = env.REAL_COACH_PROVIDER_TIMEOUT_MS?.trim();
@@ -564,22 +600,58 @@ export async function runWithFallback(
   throw new Error(`No real-Coach provider succeeded (${errors.join('; ')}).`);
 }
 
+async function runOpenCodeWithZdrModels(args: { model: string; tagProvider?: boolean }): Promise<Verdict> {
+  const models = resolveOpenCodeModelsToTry(args.model, process.env);
+  const errors: string[] = [];
+  for (const model of models) {
+    try {
+      return await runSingleProvider({
+        fake: false,
+        provider: 'opencode',
+        model,
+        ...(args.tagProvider ? { tagProvider: true } : {}),
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      if (
+        models.length > 1 &&
+        (isCoachUnavailableError(err) ||
+          isRetryableProviderFailure(message) ||
+          /is not ready|not logged in|not installed|model.*not found|unknown model|not available/i.test(message))
+      ) {
+        errors.push(`${model}: ${message}`);
+        continue;
+      }
+      throw err;
+    }
+  }
+  throw Object.assign(new Error(`No ZDR free OpenCode model succeeded (${errors.join('; ')}).`), {
+    code: 'coach-unavailable',
+  });
+}
+
 async function run(args: Pick<RealCoachArgs, 'fake' | 'provider' | 'model'>): Promise<Verdict> {
   if (args.fake) {
     return runSingleProvider({ fake: true, provider: 'claude', model: args.model });
   }
   if (args.provider !== 'auto') {
+    if (args.provider === 'opencode') {
+      return runOpenCodeWithZdrModels({ model: args.model });
+    }
     return runSingleProvider({ fake: false, provider: args.provider, model: args.model });
   }
   const order = resolveProviderOrder('coach', process.env);
-  return runWithFallback(order, (provider) =>
-    runSingleProvider({
+  return runWithFallback(order, (provider) => {
+    if (provider === 'opencode') {
+      return runOpenCodeWithZdrModels({ model: 'default', tagProvider: true });
+    }
+    return runSingleProvider({
       fake: false,
       provider,
       model: provider === 'claude' ? CHECK_MODEL : 'default',
       tagProvider: true,
-    }),
-  );
+    });
+  });
 }
 
 function post(verdict: Verdict): void {

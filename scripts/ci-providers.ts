@@ -16,6 +16,45 @@ export const DEFAULT_JUDGE_ORDER: readonly JudgeProvider[] = ['codex', 'claude',
 /** Default real-Coach check order: Codex first, then Claude, then Pi, then free OpenCode last. */
 export const DEFAULT_COACH_CHECK_ORDER: readonly CiProvider[] = ['codex', 'claude', 'pi', 'opencode'];
 
+/**
+ * Zero-Data-Retention (ZDR) free OpenCode Zen models allowed for unauthenticated CI checks.
+ * Non-ZDR free models (such as `opencode/big-pickle`) are intentionally excluded so code and
+ * prompts are never sent to a free model that retains data.
+ */
+export const ZDR_FREE_OPENCODE_MODELS = [
+  'opencode/deepseek-v4.1-flash-free',
+  'opencode/hy4-flash-free',
+  'opencode/longcat-2.5-free',
+] as const;
+
+/**
+ * Resolves the ordered list of allowed Zero-Data-Retention free OpenCode models.
+ * Set `OPENCODE_ZDR_FREE_MODELS` to override the comma-separated allowlist, or `none` to disable
+ * unauthenticated free OpenCode fallback entirely.
+ */
+export function resolveZdrFreeOpenCodeModels(env: NodeJS.ProcessEnv = process.env): string[] {
+  const raw = env.OPENCODE_ZDR_FREE_MODELS;
+  if (raw === undefined) return [...ZDR_FREE_OPENCODE_MODELS];
+  const trimmed = raw.trim();
+  if (!trimmed || trimmed.toLowerCase() === 'none') return [];
+  const out: string[] = [];
+  const seen = new Set<string>();
+  for (const part of trimmed.split(',')) {
+    const model = part.trim();
+    if (!model || seen.has(model)) continue;
+    seen.add(model);
+    out.push(model);
+  }
+  return out;
+}
+
+/** True when `model` is in the active Zero-Data-Retention free OpenCode allowlist. */
+export function isZdrFreeOpenCodeModel(model: string, env: NodeJS.ProcessEnv = process.env): boolean {
+  const normalized = model.trim();
+  if (!normalized) return false;
+  return resolveZdrFreeOpenCodeModels(env).includes(normalized);
+}
+
 /** Every provider secret env var that must be scrubbed from public CI artifacts before upload. */
 export const ALL_PROVIDER_SECRET_ENV_VARS = [
   'OPENAI_API_KEY',

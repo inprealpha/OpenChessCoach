@@ -11,14 +11,17 @@ import {
   hasProviderCredentials,
   isRetryableProviderFailure,
   isWeakerJudge,
+  isZdrFreeOpenCodeModel,
   materializeCodexAuth,
   parseProviderOrder,
   resolveProviderOrder,
+  resolveZdrFreeOpenCodeModels,
   scrubSecretsFromDir,
+  ZDR_FREE_OPENCODE_MODELS,
 } from '../ci-providers.ts';
 import { buildJudgeInvocation, runJudge } from '../run-judge.ts';
 import { checkCiProviders, formatHealthIssueBody, HEALTH_ISSUE_MARKER } from '../check-ci-providers.ts';
-import { parseRealCoachArgs, runWithFallback, summarize } from '../real-coach-check.ts';
+import { parseRealCoachArgs, resolveOpenCodeModelsToTry, runWithFallback, summarize } from '../real-coach-check.ts';
 
 const temps: string[] = [];
 function makeTempDir(prefix: string): string {
@@ -185,7 +188,7 @@ describe('multi-provider judge runner', () => {
     expect(hasVerdict).toBe(false);
     expect(meta.provider).toBeNull();
     expect(meta.allProvidersFailed).toBe(true);
-    expect(meta.attempts).toHaveLength(2);
+    expect(meta.attempts).toHaveLength(1 + ZDR_FREE_OPENCODE_MODELS.length);
   });
 });
 
@@ -329,5 +332,59 @@ describe('weekly CI provider health check', () => {
     ]);
     expect(seen).toContainEqual(['claude', 'oauth-expired', undefined]);
     expect(seen).toContainEqual(['claude', undefined, 'sk-ant-valid']);
+  });
+
+  it('pins free OpenCode Verdict and real Coach strictly to Zero-Data-Retention models and rejects non-ZDR models', () => {
+    expect(resolveZdrFreeOpenCodeModels({})).toEqual([...ZDR_FREE_OPENCODE_MODELS]);
+    expect(isZdrFreeOpenCodeModel('opencode/deepseek-v4.1-flash-free', {})).toBe(true);
+    expect(isZdrFreeOpenCodeModel('opencode/big-pickle', {})).toBe(false);
+    expect(resolveZdrFreeOpenCodeModels({ OPENCODE_ZDR_FREE_MODELS: 'none' })).toEqual([]);
+
+    // real Coach free OpenCode uses ZDR allowlist by default and rejects non-ZDR explicit models.
+    expect(resolveOpenCodeModelsToTry('default', {})).toEqual([...ZDR_FREE_OPENCODE_MODELS]);
+    expect(() => resolveOpenCodeModelsToTry('opencode/big-pickle', {})).toThrow(/Zero-Data-Retention/i);
+    // Paid OpenCode keys bypass the free ZDR allowlist restriction.
+    expect(resolveOpenCodeModelsToTry('opencode/big-pickle', { OPENCODE_API_KEY: 'paid-key' })).toEqual([
+      'opencode/big-pickle',
+    ]);
+
+    // runJudge tries ZDR free models in order and never defaults to big-pickle.
+    const outDir = makeTempDir('judge-zdr-');
+    const triedModels: Array<string | undefined> = [];
+    const { meta, hasVerdict } = runJudge(
+      { prompt: 'Judge this PR', outDir, workdir: outDir },
+      {
+        env: { CI_PROVIDER_ORDER: 'opencode' },
+        exec: (inv) => {
+          triedModels.push(inv.model);
+          if (inv.model === ZDR_FREE_OPENCODE_MODELS[0]) {
+            return { status: 1, stdout: '', stderr: '429 rate limit exceeded' };
+          }
+          writeFileSync(join(outDir, 'verdict.json'), JSON.stringify({ verdict: 'PASS', summary: 'ZDR pass.' }));
+          return { status: 0, stdout: '', stderr: '' };
+        },
+      },
+    );
+    expect(hasVerdict).toBe(true);
+    expect(triedModels).toEqual([ZDR_FREE_OPENCODE_MODELS[0], ZDR_FREE_OPENCODE_MODELS[1]]);
+    expect(meta.model).toBe(ZDR_FREE_OPENCODE_MODELS[1]);
+    expect(meta.weakerJudge).toBe(true);
+
+    // runJudge refuses a non-ZDR OPENCODE_JUDGE_MODEL when running unauthenticated free OpenCode.
+    const outDir2 = makeTempDir('judge-non-zdr-');
+    const called: string[] = [];
+    const res2 = runJudge(
+      { prompt: 'Judge this PR', outDir: outDir2, workdir: outDir2 },
+      {
+        env: { CI_PROVIDER_ORDER: 'opencode', OPENCODE_JUDGE_MODEL: 'opencode/big-pickle' },
+        exec: (inv) => {
+          called.push(inv.command);
+          return { status: 0, stdout: '', stderr: '' };
+        },
+      },
+    );
+    expect(res2.hasVerdict).toBe(false);
+    expect(res2.meta.allProvidersFailed).toBe(true);
+    expect(called).toEqual([]);
   });
 });

@@ -14,10 +14,12 @@ import {
   hasProviderCredentials,
   isRetryableProviderFailure,
   isWeakerJudge,
+  isZdrFreeOpenCodeModel,
   type JudgeProvider,
   materializeCodexAuth,
   type ProviderFailureKind,
   resolveProviderOrder,
+  resolveZdrFreeOpenCodeModels,
   scrubSecretsFromDir,
   withOpenCodeEnv,
 } from './ci-providers.ts';
@@ -73,7 +75,8 @@ export function buildJudgeInvocation(
       logFile: join(outDir, 'claude.json'),
     };
   }
-  const model = env.OPENCODE_JUDGE_MODEL?.trim() || undefined;
+  const explicitModel = env.OPENCODE_JUDGE_MODEL?.trim() || undefined;
+  const model = explicitModel ?? (isWeakerJudge('opencode', env) ? resolveZdrFreeOpenCodeModels(env)[0] : undefined);
   const args = ['run'];
   if (model) args.push('-m', model);
   args.push(prompt);
@@ -149,65 +152,105 @@ export function runJudge(
         ? { ...env, CODEX_HOME: codexAuth.codexHome }
         : env;
     if (provider === 'opencode') runEnv = withOpenCodeEnv(runEnv);
-    const inv = buildJudgeInvocation(provider, opts.prompt, opts.outDir, runEnv, opts.maxBudgetUsd ?? '5');
-    let result: ReturnType<typeof defaultExec>;
+
+    // Free OpenCode is restricted to the Zero-Data-Retention (ZDR) model allowlist so code and
+    // prompts never fall back to non-ZDR free models such as `opencode/big-pickle`.
+    const isFreeOpenCode = provider === 'opencode' && isWeakerJudge('opencode', runEnv);
+    let candidateModels: Array<string | undefined> = [undefined];
+    if (isFreeOpenCode) {
+      const zdrModels = resolveZdrFreeOpenCodeModels(runEnv);
+      const explicitModel = runEnv.OPENCODE_JUDGE_MODEL?.trim();
+      if (explicitModel) {
+        if (!isZdrFreeOpenCodeModel(explicitModel, runEnv)) {
+          attempts.push({
+            provider,
+            outcome: 'provider-error',
+            failureKind: 'auth',
+            reason: `Model "${explicitModel}" is not in the Zero-Data-Retention free OpenCode allowlist.`,
+          });
+          continue;
+        }
+        candidateModels = [explicitModel];
+      } else if (zdrModels.length === 0) {
+        attempts.push({
+          provider,
+          outcome: 'provider-error',
+          failureKind: 'auth',
+          reason: 'No Zero-Data-Retention free OpenCode models are configured.',
+        });
+        continue;
+      } else {
+        candidateModels = zdrModels;
+      }
+    }
+
     try {
-      result = exec(inv, opts.workdir, runEnv);
+      for (const candidateModel of candidateModels) {
+        rmSync(verdictPath, { force: true });
+        rmSync(reportPath, { force: true });
+        const modelEnv =
+          isFreeOpenCode && candidateModel
+            ? { ...runEnv, OPENCODE_JUDGE_MODEL: candidateModel }
+            : runEnv;
+        const inv = buildJudgeInvocation(provider, opts.prompt, opts.outDir, modelEnv, opts.maxBudgetUsd ?? '5');
+        const result = exec(inv, opts.workdir, modelEnv);
+        const combined = [result.error?.message, result.stdout, result.stderr].filter(Boolean).join('\n');
+        try {
+          writeFileSync(inv.logFile, result.stdout || combined);
+          if (result.stderr && result.stdout) {
+            writeFileSync(`${inv.logFile}.stderr`, result.stderr);
+          }
+        } catch {
+          // best effort log write
+        }
+
+        const parsed = existsSync(verdictPath) ? parseVerdict(readFileSync(verdictPath, 'utf8')) : undefined;
+        if (parsed) {
+          attempts.push({ provider, outcome: 'verdict', exitCode: result.status });
+          const meta: JudgeMeta = {
+            provider,
+            weakerJudge: isWeakerJudge(provider, env),
+            source: 'ci',
+            ...(inv.model ? { model: inv.model } : {}),
+            attempts,
+          };
+          writeFileSync(join(opts.outDir, 'judge-meta.json'), `${JSON.stringify(meta, null, 2)}\n`);
+          return { meta, hasVerdict: true };
+        }
+
+        const failureKind = classifyProviderFailure(combined);
+        const modelUnavailable = isFreeOpenCode && /model.*not found|unknown model|not available|not supported/i.test(combined);
+        if (result.error || isRetryableProviderFailure(combined) || modelUnavailable) {
+          attempts.push({
+            provider,
+            outcome: 'provider-error',
+            failureKind,
+            exitCode: result.status,
+            reason: summarizeError(combined),
+          });
+          continue;
+        }
+
+        attempts.push({
+          provider,
+          outcome: 'no-verdict',
+          failureKind: 'other',
+          exitCode: result.status,
+          reason: summarizeError(combined) || `exited with ${String(result.status)} without writing verdict.json`,
+        });
+        const meta: JudgeMeta = {
+          provider,
+          weakerJudge: isWeakerJudge(provider, env),
+          source: 'ci',
+          ...(inv.model ? { model: inv.model } : {}),
+          attempts,
+        };
+        writeFileSync(join(opts.outDir, 'judge-meta.json'), `${JSON.stringify(meta, null, 2)}\n`);
+        return { meta, hasVerdict: false };
+      }
     } finally {
       if (codexAuth && typeof codexAuth === 'object') codexAuth.restore();
     }
-    const combined = [result.error?.message, result.stdout, result.stderr].filter(Boolean).join('\n');
-    try {
-      writeFileSync(inv.logFile, result.stdout || combined);
-      if (result.stderr && result.stdout) {
-        writeFileSync(`${inv.logFile}.stderr`, result.stderr);
-      }
-    } catch {
-      // best effort log write
-    }
-
-    const parsed = existsSync(verdictPath) ? parseVerdict(readFileSync(verdictPath, 'utf8')) : undefined;
-    if (parsed) {
-      attempts.push({ provider, outcome: 'verdict', exitCode: result.status });
-      const meta: JudgeMeta = {
-        provider,
-        weakerJudge: isWeakerJudge(provider, env),
-        source: 'ci',
-        ...(inv.model ? { model: inv.model } : {}),
-        attempts,
-      };
-      writeFileSync(join(opts.outDir, 'judge-meta.json'), `${JSON.stringify(meta, null, 2)}\n`);
-      return { meta, hasVerdict: true };
-    }
-
-    const failureKind = classifyProviderFailure(combined);
-    if (result.error || isRetryableProviderFailure(combined)) {
-      attempts.push({
-        provider,
-        outcome: 'provider-error',
-        failureKind,
-        exitCode: result.status,
-        reason: summarizeError(combined),
-      });
-      continue;
-    }
-
-    attempts.push({
-      provider,
-      outcome: 'no-verdict',
-      failureKind: 'other',
-      exitCode: result.status,
-      reason: summarizeError(combined) || `exited with ${String(result.status)} without writing verdict.json`,
-    });
-    const meta: JudgeMeta = {
-      provider,
-      weakerJudge: isWeakerJudge(provider, env),
-      source: 'ci',
-      ...(inv.model ? { model: inv.model } : {}),
-      attempts,
-    };
-    writeFileSync(join(opts.outDir, 'judge-meta.json'), `${JSON.stringify(meta, null, 2)}\n`);
-    return { meta, hasVerdict: false };
   }
 
   const meta: JudgeMeta = {

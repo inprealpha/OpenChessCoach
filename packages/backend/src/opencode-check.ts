@@ -127,7 +127,7 @@ export function isOpenCodeAuthError(message: string): boolean {
 
 /** True when an OpenCode error message indicates a provider rate or usage limit. */
 export function isOpenCodeLimitError(message: string): boolean {
-  return /\b(429|rate[_\s-]?limit|usage[_\s-]?limit|free[._\s-]?limit|freeusagelimiterror|quota (?:exceeded|exhausted)|too many requests|limit reached|insufficient_quota)\b/i.test(
+  return /\b(429|rate[_\s-]?limit|usage[_\s-]?(?:limit|exceeded)|free[._\s-]?limit|freeusagelimiterror|quota (?:exceeded|exhausted)|too many requests|limit reached|insufficient_quota)\b/i.test(
     message,
   );
 }

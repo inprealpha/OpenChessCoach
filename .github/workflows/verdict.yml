@@ -318,6 +318,7 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
           OPENCODE_ZEN_API_KEY: ${{ secrets.OPENCODE_ZEN_API_KEY }}
+          OPENCODE_ZDR_FREE_MODELS: ${{ vars.OPENCODE_ZDR_FREE_MODELS }}
         run: |
           mkdir -p "$OUT/real-coach"
           for attempt in 1 2; do
@@ -352,6 +353,7 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
           OPENCODE_ZEN_API_KEY: ${{ secrets.OPENCODE_ZEN_API_KEY }}
+          OPENCODE_ZDR_FREE_MODELS: ${{ vars.OPENCODE_ZDR_FREE_MODELS }}
         run: |
           sed -e "s|{{PR}}|$PR|g" -e "s|{{SHA}}|$SHA|g" -e "s|{{BASE}}|$BASE|g" -e "s|{{IN}}|$IN|g" -e "s|{{OUT}}|$OUT|g" \
             -e "s|{{BASE_DIR}}|$GITHUB_WORKSPACE/base|g" ../trusted/.github/verdict-prompt.md > "$IN/verdict-prompt.md"

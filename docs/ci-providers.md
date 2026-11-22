@@ -15,7 +15,12 @@ By default, CI tries providers in this order:
 
 1. **Codex** (`codex`) — first choice.
 2. **Claude** (`claude`) — used automatically whenever you renew Claude and save a key or token.
-3. **OpenCode free models** (`opencode`) — last-resort zero-cost fallback. When free OpenCode runs **Verdict**, both the GitHub status check and the PR comment are clearly labeled **`[weaker judge: opencode]`** so you know it was judged by a weaker free model.
+3. **OpenCode free ZDR models** (`opencode`) — last-resort zero-cost fallback that runs automatically in GitHub Actions with no paid key. To ensure no sensitive information is kept by a free provider, unauthenticated free OpenCode is **strictly pinned to Zero-Data-Retention (ZDR) free models**:
+   - `opencode/deepseek-v4.1-flash-free`
+   - `opencode/hy4-flash-free`
+   - `opencode/longcat-2.5-free`
+
+   Non-ZDR free models (such as `opencode/big-pickle`) are never used. If none of the ZDR free models is available, CI moves on instead of falling back to a model that retains data. When free OpenCode runs **Verdict**, both the GitHub status check and the PR comment are clearly labeled **`[weaker judge: opencode]`** so you know it was judged by a weaker free model.
 
 **Smart fallback rule:** CI only falls back to the next provider when a secret is missing or a provider rejects the login / hits a billing or rate limit (`401`, `403`, `429`). If a provider runs and finds a real bug (`FAIL` or a Coach structural failure), CI **stops immediately and fails the PR** — it never retries a real bug on another model.
 
@@ -23,9 +28,9 @@ By default, CI tries providers in this order:
 
 ## 2. Click-by-click setup in GitHub (what you need to do)
 
-### Step A: Save your AI login in GitHub Secrets
+### Step A (Optional): Save a paid AI login in GitHub Secrets
 
-**GitHub Secrets** are encrypted passwords stored in your repository so GitHub Actions can use them without ever showing them publicly.
+With no secrets saved, GitHub Actions automatically falls back to OpenCode's free ZDR models above. Whenever you want a stronger paid provider to run first, add its secret in **GitHub Secrets** (encrypted passwords stored in your repository so GitHub Actions can use them without ever showing them publicly):
 
 1. Open your repository on GitHub: `https://github.com/inprealpha/OpenChessCoach`
 2. Click **Settings** (top menu bar).
@@ -35,9 +40,9 @@ By default, CI tries providers in this order:
 
 | Secret name | Provider | Notes |
 | --- | --- | --- |
-| `OPENAI_API_KEY` | **Codex** (recommended) | Pay-as-you-go OpenAI API key. Never expires; set a small monthly spend cap (e.g. $10–$15) at [platform.openai.com/settings/organization/limits](https://platform.openai.com/settings/organization/limits). |
 | `CLAUDE_CODE_OAUTH_TOKEN` | **Claude** | Claude subscription OAuth token (add back whenever you renew Claude). |
-| `ANTHROPIC_API_KEY` | **Claude** | Pay-as-you-go Anthropic API key (alternative to a Claude subscription). |
+| `OPENAI_API_KEY` | **Codex** | Optional pay-as-you-go OpenAI API key (set a small monthly spend cap at [platform.openai.com/settings/organization/limits](https://platform.openai.com/settings/organization/limits)). |
+| `ANTHROPIC_API_KEY` | **Claude** | Optional pay-as-you-go Anthropic API key. |
 | `CODEX_AUTH_JSON` | **Codex** (not recommended on public repos) | See section 3 below before using this. |
 
 > **If you pause a subscription later:** You don't need to edit any code. Either delete the old secret in **Secrets**, or leave it alone (CI will skip it after an auth error, and the weekly health check will remind you to clean it up).
@@ -54,7 +59,8 @@ By default, CI tries providers in this order:
 Optional advanced variables (you do not need to set these unless you want different providers for the two checks):
 - `JUDGE_PROVIDER` — overrides the order for **Verdict** only.
 - `COACH_CHECK_PROVIDER` — overrides the order for **real Coach** only (supports `codex,claude,pi,opencode`).
-- `CODEX_JUDGE_MODEL`, `CLAUDE_JUDGE_MODEL`, `OPENCODE_JUDGE_MODEL` — override the model name for a specific judge.
+- `OPENCODE_ZDR_FREE_MODELS` — comma-separated list of Zero-Data-Retention free OpenCode models (defaults to `opencode/deepseek-v4.1-flash-free,opencode/hy4-flash-free,opencode/longcat-2.5-free`; set to `none` to disable free OpenCode fallback).
+- `CODEX_JUDGE_MODEL`, `CLAUDE_JUDGE_MODEL`, `OPENCODE_JUDGE_MODEL` — override the model name for a specific judge (for unauthenticated free OpenCode, `OPENCODE_JUDGE_MODEL` must be in the ZDR allowlist).
 
 ### Step C: Allow local agent fallback results to unblock merges (Branch Protection setting)
 

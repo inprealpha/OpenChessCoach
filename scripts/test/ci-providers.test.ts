@@ -605,6 +605,37 @@ describe('judge hang and fatal-error watchdogs', () => {
     expect(res.timedOut).toBeUndefined();
   });
 
+  it('still aborts when repeated fatal AI_APICallError lines arrive split across stderr chunks', async () => {
+    const outDir = makeTempDir('judge-hang-split-fatal-');
+    const start = Date.now();
+    const res = await execJudgeProcess(
+      {
+        provider: 'opencode',
+        command: process.execPath,
+        args: [
+          '-e',
+          [
+            'process.stderr.write("> build · deepseek-v4.1-flash-free\\n");',
+            'process.stderr.write("AI_APICallError: Too many requests\\n");',
+            'setInterval(() => {',
+            '  process.stderr.write("AI_APICall");',
+            '  setTimeout(() => process.stderr.write("Error: Too many requests\\n"), 15);',
+            '}, 40);',
+          ].join(' '),
+        ],
+        model: 'opencode/deepseek-v4.1-flash-free',
+        logFile: join(outDir, 'judge-opencode.log'),
+      },
+      outDir,
+      process.env,
+      { firstActivityMs: 5_000, idleMs: 5_000, overallMs: 10_000, fatalErrorGraceMs: 120, killGraceMs: 200 },
+    );
+
+    expect(Date.now() - start).toBeLessThan(3_000);
+    expect(res.abortedProviderError).toContain('Too many requests');
+    expect(res.timedOut).toBeUndefined();
+  });
+
   it('aborts a hung opencode process promptly after Free usage limit reached instead of hanging', async () => {
     const outDir = makeTempDir('judge-hang-limit-');
     const start = Date.now();

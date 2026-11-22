@@ -110,12 +110,14 @@ export function isOpenCodeStartupOrLogLine(rawLine: string): boolean {
   return false;
 }
 
+const OPENCODE_NON_ACTIVITY_PREFIXES = ['timestamp=', 'ai_apicallerror:', 'freeusagelimiterror:'] as const;
+
 function couldBeOpenCodeStartupOrLogPrefix(rawLine: string): boolean {
   const clean = stripAnsi(rawLine).trimStart();
   if (!clean) return true;
   if (clean.startsWith('>')) return true;
-  if ('timestamp='.startsWith(clean) || clean.startsWith('timestamp=')) return true;
-  return false;
+  const lower = clean.toLowerCase();
+  return OPENCODE_NON_ACTIVITY_PREFIXES.some((prefix) => prefix.startsWith(lower) || lower.startsWith(prefix));
 }
 
 function isFatalOpenCodeProviderError(text: string): boolean {

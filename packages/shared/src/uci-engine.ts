@@ -6,6 +6,7 @@ import { findThreat, type Threat } from './threat.ts';
 interface Job {
   run: () => void;
   cancel: () => void;
+  fail: (error: Error) => void;
 }
 
 export interface UciTransport {
@@ -32,6 +33,8 @@ export class UciEngine implements Engine {
   private readonly transport: UciTransport;
   private readonly ready: Promise<void>;
   private listener: ((line: string) => void) | undefined;
+  private currentFail: ((error: Error) => void) | undefined;
+  private fatalError: Error | undefined;
   private queue: Job[] = [];
   private busy = false;
   protected readonly options: UciEngineOptions;
@@ -44,7 +47,14 @@ export class UciEngine implements Engine {
       const timer = setTimeout(() => reject(new EngineStartError('The Engine did not start in time.')), options.startTimeoutMs ?? 30_000);
       transport.onError?.((error) => {
         clearTimeout(timer);
+        this.fatalError = error;
         reject(new EngineStartError(error.message));
+        const fail = this.currentFail;
+        this.currentFail = undefined;
+        this.listener = undefined;
+        this.busy = false;
+        fail?.(error);
+        for (const job of this.queue.splice(0)) job.fail(error);
       });
       this.listener = (line) => {
         if (line === 'uciok') {
@@ -74,6 +84,10 @@ export class UciEngine implements Engine {
   }
 
   private enqueue(job: Job): void {
+    if (this.fatalError) {
+      job.fail(this.fatalError);
+      return;
+    }
     this.queue.push(job);
     this.pump();
   }
@@ -83,10 +97,12 @@ export class UciEngine implements Engine {
     const job = this.queue.shift();
     if (!job) return;
     this.busy = true;
+    this.currentFail = job.fail;
     job.run();
   }
 
   private done(): void {
+    this.currentFail = undefined;
     this.busy = false;
     this.pump();
   }
@@ -116,7 +132,14 @@ export class UciEngine implements Engine {
           this.send(`position fen ${fen}`);
           this.send(goCommand(options));
         },
-        cancel: () => resolve(collector.snapshot()),
+        cancel: () => {
+          signal?.removeEventListener('abort', onAbort);
+          resolve(collector.snapshot());
+        },
+        fail: (error) => {
+          signal?.removeEventListener('abort', onAbort);
+          reject(error);
+        },
       };
       // Not started: leave the queue. Running: stop it, and its bestmove rejects it.
       const onAbort = () => {
@@ -155,6 +178,7 @@ export class UciEngine implements Engine {
           this.send(options.depth ? `go depth ${options.depth}` : `go movetime ${options.movetime ?? 300}`);
         },
         cancel: () => reject(new Error('cancelled')),
+        fail: (error) => reject(error),
       });
     });
   }

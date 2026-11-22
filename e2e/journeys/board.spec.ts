@@ -931,6 +931,43 @@ test('the arrow keys do nothing while the promotion dialog is open, and step aga
   await shows(7);
 });
 
+test('a keyboard Player navigates the board with one Tab stop and arrow keys, and Escape cancels selection or promotion', async ({ paired, app }) => {
+  await paired.goto(`${app.url}/#/board`);
+  await expect(board(paired)).toBeVisible();
+  // Only one square on the board is in the Tab order (roving tabindex), so the panel is a few Tabs away, not 64.
+  await expect(board(paired).locator('button.sq[tabindex="0"]')).toHaveCount(1);
+  await square(paired, 'e2').focus();
+  await paired.keyboard.press('Enter');
+  await expect(square(paired, 'e2')).toHaveAttribute('aria-pressed', 'true');
+  await paired.keyboard.press('Escape');
+  await expect(square(paired, 'e2')).toHaveAttribute('aria-pressed', 'false');
+
+  // Play e2-e4 using keyboard only (Enter to pick up, ArrowUp twice, Enter to drop).
+  await paired.keyboard.press('Enter');
+  await paired.keyboard.press('ArrowUp');
+  await paired.keyboard.press('ArrowUp');
+  await expect(square(paired, 'e4')).toBeFocused();
+  await paired.keyboard.press('Enter');
+  await expect(board(paired)).toHaveAttribute('data-fen', playUci(INITIAL_FEN, 'e2e4')!.fenAfter);
+
+  // Promoting by keyboard moves focus into the modal dialog, traps Tab, and Escape closes it and restores focus.
+  await paired.goto(`${app.url}/#/board?fen=4k3/P7/8/8/8/8/8/4K3%20w%20-%20-%200%201`);
+  await square(paired, 'a7').focus();
+  await paired.keyboard.press('Enter');
+  await paired.keyboard.press('ArrowUp');
+  await expect(square(paired, 'a8')).toBeFocused();
+  await paired.keyboard.press('Enter');
+  const dialog = paired.getByRole('dialog', { name: 'Choose a piece to promote to' });
+  await expect(dialog).toBeVisible();
+  await expect(dialog).toHaveAttribute('aria-modal', 'true');
+  await expect(dialog.getByRole('button', { name: 'Promote to queen' })).toBeFocused();
+  await paired.keyboard.press('Shift+Tab');
+  await expect(dialog.getByRole('button', { name: 'Cancel' })).toBeFocused();
+  await paired.keyboard.press('Escape');
+  await expect(dialog).toBeHidden();
+  await expect(square(paired, 'a8')).toBeFocused();
+});
+
 test('on a phone, the move list keeps the move just played in view once its Move Grade arrives', async ({ paired, app }) => {
   await paired.setViewportSize({ width: 390, height: 844 });
   await paired.goto(`${app.url}/#/board`);

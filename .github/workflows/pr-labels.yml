@@ -1,14 +1,15 @@
 # Labels a PR for the reviews it needs (ADR 0006), from lists read off the base branch so
 # a PR can't exempt itself by editing them:
 #   protected-path  touches a path in .github/protected-paths.txt: the owner reviews it before merging
-#   touches-coach   touches a path in .github/coach-paths.txt: the "real Coach" status stays pending until the
-#                   Verdict job (verdict.yml) or a desktop session runs scripts/real-coach-check.ts --post
+#   touches-coach   touches a path in .github/coach-paths.txt: GitHub tries the "real Coach" check
+#                   first in verdict.yml (optional in branch protection); if GitHub can't run it,
+#                   an agent is reminded to run scripts/real-coach-check.ts --provider auto --post locally
 #   no-evidence     the PR description's Evidence section is empty
 #   no-testing-record  the PR description doesn't say how it was made, how it was tested and what wasn't
 #   no-spec         the PR description closes no issue, so there is nothing agreed to prove
 #   unproven        the PR description's "Done means" section has a check that isn't ticked
 #                   (all four from scripts/pr-description.ts; an agent never merges a PR with one, ADR 0014)
-# PRs that don't touch the Coach get a passing "real Coach" status, so it can be a required check.
+# PRs that don't touch the Coach get a passing "real Coach" status immediately.
 # It also keeps the "Verdict" status (ADR 0013): a commit with no verdict yet gets a pending one, so a
 # push always voids the last verdict; PRs that change only docs, tests or process files pass at once.
 # The judge itself runs in verdict.yml.
@@ -68,7 +69,7 @@ jobs:
       - name: Label
         run: |
           gh label create protected-path --repo "$REPO" --color B60205 --description "Touches a protected path: the owner reviews it before merging" 2>/dev/null || true
-          gh label create touches-coach --repo "$REPO" --color 5319E7 --description "Touches the Coach: needs a passing real-Coach check from the desktop" 2>/dev/null || true
+          gh label create touches-coach --repo "$REPO" --color 5319E7 --description "Touches the Coach: GitHub tries real Coach first; otherwise an agent runs and posts it locally" 2>/dev/null || true
           gh label create no-evidence --repo "$REPO" --color FBCA04 --description "The PR description has no evidence from the running app" 2>/dev/null || true
           gh label create no-testing-record --repo "$REPO" --color FBCA04 --description "The PR description doesn't say how it was made and tested" 2>/dev/null || true
           gh label create no-spec --repo "$REPO" --color FBCA04 --description "The PR description closes no issue, so there is nothing agreed to prove" 2>/dev/null || true
@@ -98,7 +99,7 @@ jobs:
             echo "The desktop already posted a verdict for $SHA: $current"
           else
             gh api "repos/$REPO/statuses/$SHA" -f state=pending -f context="real Coach" \
-              -f description="Touches the Coach: the Verdict job runs the real-Coach check, or run it on the desktop"
+              -f description="Touches the Coach: GitHub tries first; if unavailable, run real-coach-check.ts --provider auto --post"
           fi
       - name: Set the Verdict status
         if: ${{ hashFiles('scripts/verdict.ts') != '' }}

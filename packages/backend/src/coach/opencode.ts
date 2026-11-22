@@ -64,7 +64,15 @@ export const OPENCODE_ISOLATED_CONFIG: Config = {
   formatter: false,
 };
 
-const DENY_ALL_PERMISSIONS: PermissionRuleset = [{ permission: '*', pattern: '*', action: 'deny' }];
+/**
+ * Per-session permission rule for v1 sessions: gate every tool call behind `permission.asked`
+ * instead of `action: 'deny'`. OpenCode v1.19.6 Zen free models reject requests whose tool list
+ * is stripped by `permission: 'deny'` or `tools: OPENCODE_DISABLED_TOOLS` with an infinite
+ * `free_tier_limit` retry loop; `action: 'ask'` keeps tool schemas on the wire while our SSE
+ * handler immediately rejects any `permission.asked` event and aborts the session before any
+ * tool can execute.
+ */
+const ASK_ALL_PERMISSIONS: PermissionRuleset = [{ permission: '*', pattern: '*', action: 'ask' }];
 
 /**
  * Server-level config passed via `OPENCODE_CONFIG_CONTENT` when spawning `opencode serve`.
@@ -110,6 +118,14 @@ export interface OpenCodeClientLike {
     ): Promise<{ data?: { info: AssistantMessage; parts: Array<Part> }; error?: unknown }>;
     abort(params: { sessionID: string; directory?: string }): Promise<unknown>;
     delete(params: { sessionID: string; directory?: string }): Promise<unknown>;
+  };
+  permission?: {
+    reply(params: {
+      requestID: string;
+      directory?: string;
+      reply: 'once' | 'always' | 'reject';
+      message?: string;
+    }): Promise<unknown>;
   };
   event: {
     subscribe(
@@ -791,7 +807,7 @@ export class OpenCodeCoach implements CoachPort {
       const created = await client.session.create({
         directory: ctx.workingDirectory,
         title: `OpenChessCoach ${call.job}`,
-        permission: DENY_ALL_PERMISSIONS,
+        permission: ASK_ALL_PERMISSIONS,
       });
       if (created.error || !created.data?.id) {
         const err = formatOpenCodeError(created.error ?? 'Failed to create OpenCode session.');
@@ -800,13 +816,16 @@ export class OpenCodeCoach implements CoachPort {
       sessionID = created.data.id;
 
       const streamAbort = new AbortController();
+      const promptAbort = new AbortController();
       const onRunAbort = () => {
         streamAbort.abort();
+        promptAbort.abort();
         if (sessionID) {
           void client.session.abort({ sessionID, directory: ctx.workingDirectory }).catch(() => {});
         }
       };
-      ctx.signal.addEventListener('abort', onRunAbort, { once: true });
+      if (ctx.signal.aborted) onRunAbort();
+      else ctx.signal.addEventListener('abort', onRunAbort, { once: true });
 
       let rawStreamed = '';
       let emittedText = '';
@@ -851,6 +870,7 @@ export class OpenCodeCoach implements CoachPort {
               if (part.type === 'tool' && part.tool !== 'StructuredOutput') {
                 unexpectedTool = part.tool;
                 streamAbort.abort();
+                promptAbort.abort();
                 void client.session.abort({ sessionID, directory: ctx.workingDirectory }).catch(() => {});
                 break;
               }
@@ -861,6 +881,29 @@ export class OpenCodeCoach implements CoachPort {
                   partTextById.set(part.id, part.text);
                   rawStreamed += delta;
                   emitFromRaw(rawStreamed);
+                }
+              }
+            } else if (event.type === 'permission.asked') {
+              if (event.properties.sessionID !== sessionID) continue;
+              unexpectedTool = event.properties.permission || 'tool';
+              streamAbort.abort();
+              promptAbort.abort();
+              void client.permission
+                ?.reply({ requestID: event.properties.id, directory: ctx.workingDirectory, reply: 'reject' })
+                .catch(() => {});
+              void client.session.abort({ sessionID, directory: ctx.workingDirectory }).catch(() => {});
+              break;
+            } else if (event.type === 'session.status') {
+              if (event.properties.sessionID !== sessionID) continue;
+              const status = event.properties.status;
+              if (status.type === 'retry') {
+                const msg = status.message || 'OpenCode entered retry loop.';
+                if (isOpenCodeLimitError(msg) || isOpenCodeAuthError(msg) || status.attempt >= 2) {
+                  streamError = { message: msg };
+                  streamAbort.abort();
+                  promptAbort.abort();
+                  void client.session.abort({ sessionID, directory: ctx.workingDirectory }).catch(() => {});
+                  break;
                 }
               }
             } else if (event.type === 'session.error') {
@@ -874,22 +917,35 @@ export class OpenCodeCoach implements CoachPort {
       })();
 
       try {
-        const promptResult = await client.session.prompt(
-          {
-            sessionID,
-            directory: ctx.workingDirectory,
-            ...(ctx.modelSpec ? { model: ctx.modelSpec } : {}),
-            tools: OPENCODE_DISABLED_TOOLS,
-            format: {
-              type: 'json_schema',
-              schema: REPLY_SCHEMA as unknown as Record<string, unknown>,
-              retryCount: 2,
+        let promptResult: { data?: { info: AssistantMessage; parts: Array<Part> }; error?: unknown };
+        try {
+          promptResult = await client.session.prompt(
+            {
+              sessionID,
+              directory: ctx.workingDirectory,
+              ...(ctx.modelSpec ? { model: ctx.modelSpec } : {}),
+              format: {
+                type: 'json_schema',
+                schema: REPLY_SCHEMA as unknown as Record<string, unknown>,
+                retryCount: 2,
+              },
+              system: SYSTEM_PROMPT,
+              parts: [{ type: 'text', text: userPrompt(call.brief) }],
             },
-            system: SYSTEM_PROMPT,
-            parts: [{ type: 'text', text: userPrompt(call.brief) }],
-          },
-          { signal: ctx.signal },
-        );
+            { signal: promptAbort.signal },
+          );
+        } catch (err) {
+          streamAbort.abort();
+          await streamTask;
+          if (ctx.isTimedOut() && call.deadlineMs) throw new CoachDeadlineError(call.deadlineMs);
+          if (unexpectedTool) {
+            throw new Error(`OpenCode attempted an unexpected tool call (${unexpectedTool}) during Coach reply.`, {
+              cause: err,
+            });
+          }
+          if (streamError) throw this.mapError(streamError);
+          throw err;
+        }
 
         streamAbort.abort();
         await streamTask;
@@ -897,6 +953,9 @@ export class OpenCodeCoach implements CoachPort {
         if (ctx.isTimedOut() && call.deadlineMs) throw new CoachDeadlineError(call.deadlineMs);
         if (unexpectedTool) {
           throw new Error(`OpenCode attempted an unexpected tool call (${unexpectedTool}) during Coach reply.`);
+        }
+        if (streamError && (!promptResult.data || promptResult.error)) {
+          throw this.mapError(streamError);
         }
         if (promptResult.error) {
           throw this.mapError(formatOpenCodeError(promptResult.error));

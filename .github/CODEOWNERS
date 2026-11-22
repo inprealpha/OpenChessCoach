@@ -26,6 +26,9 @@
 /scripts/glossary-allowlist.json @inprealpha
 /scripts/real-coach-check.ts @inprealpha
 /scripts/verdict.ts @inprealpha
+/scripts/ci-providers.ts @inprealpha
+/scripts/run-judge.ts @inprealpha
+/scripts/check-ci-providers.ts @inprealpha
 /scripts/before-after.ts @inprealpha
 /scripts/pr-description.ts @inprealpha
 /scripts/wait-ci.ts @inprealpha

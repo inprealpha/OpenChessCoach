@@ -3,7 +3,6 @@ import { describe, expect, it, vi } from 'vitest';
 import type { Brief } from '@chess-coach/shared/coach/brief';
 import type { AssistantMessage, Event, Part } from '@opencode-ai/sdk/v2';
 import {
-  OPENCODE_DISABLED_TOOLS,
   OPENCODE_ISOLATED_CONFIG,
   OpenCodeCoach,
   parseOpenCodeModel,
@@ -179,7 +178,7 @@ describe('OpenCodeCoach', () => {
       session: {
         async create(params) {
           createdDir = params.directory;
-          expect(params.permission).toEqual([{ permission: '*', pattern: '*', action: 'deny' }]);
+          expect(params.permission).toEqual([{ permission: '*', pattern: '*', action: 'ask' }]);
           return { data: { id: 'sess-1' } };
         },
         async prompt(params) {
@@ -233,7 +232,7 @@ describe('OpenCodeCoach', () => {
     );
 
     expect(passedConfig).toEqual(OPENCODE_ISOLATED_CONFIG);
-    expect(promptParams?.tools).toEqual(OPENCODE_DISABLED_TOOLS);
+    expect(promptParams?.tools).toBeUndefined();
     expect(promptParams?.model).toEqual({ providerID: 'opencode', modelID: 'big-pickle' });
     expect(deltas.join('')).toBe('Bb5 develops with tempo.');
     expect(reply.text).toBe('Bb5 develops with tempo.');
@@ -254,6 +253,136 @@ describe('OpenCodeCoach', () => {
 
     coach.close();
     expect(closeServer).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects permission.asked and aborts the session before any tool can execute on v1', async () => {
+    const rejected: Array<{ requestID: string; reply: string }> = [];
+    const aborted: string[] = [];
+    let unblockPrompt!: () => void;
+
+    async function* makeStream(): AsyncGenerator<Event, void, unknown> {
+      yield {
+        type: 'permission.asked',
+        properties: {
+          id: 'per-1',
+          sessionID: 'sess-perm',
+          permission: 'bash',
+          patterns: ['echo pwned'],
+          metadata: {},
+          always: [],
+        },
+      } as unknown as Event;
+    }
+
+    const fakeClient: OpenCodeClientLike = {
+      session: {
+        async create() {
+          return { data: { id: 'sess-perm' } };
+        },
+        async prompt(_params, opts) {
+          await new Promise<void>((resolve, reject) => {
+            unblockPrompt = resolve;
+            if (opts?.signal?.aborted) {
+              reject(new DOMException('Aborted', 'AbortError'));
+              return;
+            }
+            opts?.signal?.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')), { once: true });
+          });
+          return { data: { info: makeAssistantInfo(), parts: [] } };
+        },
+        async abort(params) {
+          aborted.push(params.sessionID);
+          return {};
+        },
+        async delete() {
+          return {};
+        },
+      },
+      permission: {
+        async reply(params) {
+          rejected.push({ requestID: params.requestID, reply: params.reply });
+          return {};
+        },
+      },
+      event: {
+        async subscribe() {
+          return { stream: makeStream() };
+        },
+      },
+    };
+
+    const coach = new OpenCodeCoach({
+      createInstance: async () =>
+        ({ client: fakeClient, server: { url: 'http://127.0.0.1:12345', close: vi.fn() } }) as OpenCodeInstanceLike,
+      checkAuth: async () => ({ ok: true, path: '/usr/local/bin/opencode', authSource: 'opencode-cli' }),
+    });
+
+    await expect(coach.ask({ job: 'why', model: 'opencode/deepseek-v4.1-flash-free', brief: BRIEF }, () => {})).rejects.toThrow(
+      /unexpected tool call \(bash\)/i,
+    );
+    unblockPrompt?.();
+    expect(rejected).toEqual([{ requestID: 'per-1', reply: 'reject' }]);
+    expect(aborted).toContain('sess-perm');
+  });
+
+  it('fails fast with CoachLimitError when v1 enters a free_tier_limit retry loop', async () => {
+    const aborted: string[] = [];
+
+    async function* makeStream(): AsyncGenerator<Event, void, unknown> {
+      yield {
+        type: 'session.status',
+        properties: {
+          sessionID: 'sess-retry',
+          status: {
+            type: 'retry',
+            attempt: 1,
+            message: 'Free usage exceeded, subscribe to Go',
+            next: Date.now() + 60_000,
+          },
+        },
+      } as unknown as Event;
+    }
+
+    const fakeClient: OpenCodeClientLike = {
+      session: {
+        async create() {
+          return { data: { id: 'sess-retry' } };
+        },
+        async prompt(_params, opts) {
+          await new Promise<void>((_resolve, reject) => {
+            if (opts?.signal?.aborted) {
+              reject(new DOMException('Aborted', 'AbortError'));
+              return;
+            }
+            opts?.signal?.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')), { once: true });
+          });
+          return { data: { info: makeAssistantInfo(), parts: [] } };
+        },
+        async abort(params) {
+          aborted.push(params.sessionID);
+          return {};
+        },
+        async delete() {
+          return {};
+        },
+      },
+      event: {
+        async subscribe() {
+          return { stream: makeStream() };
+        },
+      },
+    };
+
+    const coach = new OpenCodeCoach({
+      createInstance: async () =>
+        ({ client: fakeClient, server: { url: 'http://127.0.0.1:12345', close: vi.fn() } }) as OpenCodeInstanceLike,
+      checkAuth: async () => ({ ok: true, path: '/usr/local/bin/opencode', authSource: 'opencode-cli' }),
+    });
+
+    await expect(coach.ask({ job: 'why', model: 'opencode/deepseek-v4.1-flash-free', brief: BRIEF }, () => {})).rejects.toBeInstanceOf(
+      CoachLimitError,
+    );
+    expect(aborted).toContain('sess-retry');
   });
 
   it('falls back to parsing JSON text when structured output is absent', async () => {

@@ -38,6 +38,16 @@ import { COACH_PROVIDERS, type CoachJob, type CoachProvider } from '@chess-coach
 import { CoachClient } from '../packages/backend/src/client.ts';
 import type { CoachCall, CoachEngine, CoachPort } from '../packages/backend/src/coach/port.ts';
 import { avoidedTerms } from './glossary-lint.ts';
+import {
+  hasProviderCredentials,
+  isRetryableProviderFailure,
+  isWeakerJudge,
+  isZdrFreeOpenCodeModel,
+  materializeCodexAuth,
+  resolveProviderOrder,
+  resolveZdrFreeOpenCodeModels,
+  withOpenCodeEnv,
+} from './ci-providers.ts';
 
 export const STATUS_CONTEXT = 'real Coach';
 /** The model every call in the check uses: Claude Code resolves the alias to the latest Haiku. */
@@ -327,32 +337,38 @@ async function driveEveryJob(client: CoachClient, root: URL): Promise<Received[]
 export interface Verdict {
   ok: boolean;
   sha: string;
+  provider?: CoachProvider;
+  weakerFallback?: boolean;
   calls: CallVerdict[];
   description: string;
 }
 
 /** The run's verdict: any problem fails it, and the status it posts counts the warnings. */
-export function summarize(calls: readonly CallVerdict[]): { ok: boolean; description: string } {
+export function summarize(calls: readonly CallVerdict[], providerTag?: string): { ok: boolean; description: string } {
+  const prefix = providerTag ? `[${providerTag}] ` : '';
   const failed = calls.filter((c) => c.problems.length);
-  if (failed.length) return { ok: false, description: `${failed.length} of ${calls.length} Coach calls failed: ${failed[0]?.problems[0] ?? ''}`.slice(0, MAX_DESCRIPTION - 1) };
-  const passed = `${calls.length} Coach ${calls.length === 1 ? 'call' : 'calls'} passed the structural checks`;
+  if (failed.length) return { ok: false, description: `${prefix}${failed.length} of ${calls.length} Coach calls failed: ${failed[0]?.problems[0] ?? ''}`.slice(0, MAX_DESCRIPTION - 1) };
+  const passed = `${prefix}${calls.length} Coach ${calls.length === 1 ? 'call' : 'calls'} passed the structural checks`;
   const warnings = calls.flatMap((c) => c.warnings);
   if (!warnings.length) return { ok: true, description: passed };
   return { ok: true, description: `${passed}, ${warnings.length} ${warnings.length === 1 ? 'warning' : 'warnings'}: ${warnings[0]}`.slice(0, MAX_DESCRIPTION - 1) };
 }
 
+export type RealCoachProviderArg = CoachProvider | 'auto';
+
 export interface RealCoachArgs {
   fake: boolean;
   post: boolean;
-  provider: CoachProvider;
+  provider: RealCoachProviderArg;
   model: string;
 }
 
 export function parseRealCoachArgs(argv: readonly string[]): RealCoachArgs {
   let fake = false;
   let postResult = false;
-  let provider: CoachProvider = 'claude';
+  let provider: RealCoachProviderArg = 'claude';
   let model: string | undefined;
+  const validProviders: readonly string[] = [...COACH_PROVIDERS, 'auto'];
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === '--fake') {
@@ -362,13 +378,12 @@ export function parseRealCoachArgs(argv: readonly string[]): RealCoachArgs {
     } else if (arg === '--provider') {
       const next = argv[++i];
       if (!next || next.startsWith('--')) {
-        throw new Error(`Missing value for --provider. Expected one of: ${COACH_PROVIDERS.join(', ')}.`);
+        throw new Error(`Missing value for --provider. Expected one of: ${validProviders.join(', ')}.`);
       }
-      const value = next as CoachProvider;
-      if (!COACH_PROVIDERS.includes(value)) {
-        throw new Error(`Unknown provider "${value}". Expected one of: ${COACH_PROVIDERS.join(', ')}.`);
+      if (!validProviders.includes(next)) {
+        throw new Error(`Unknown provider "${next}". Expected one of: ${validProviders.join(', ')}.`);
       }
-      provider = value;
+      provider = next as RealCoachProviderArg;
     } else if (arg === '--model') {
       const next = argv[++i];
       if (!next || next.startsWith('--')) {
@@ -414,16 +429,100 @@ async function createProviderCoach(
   return { coach: openCode, close: () => openCode.close() };
 }
 
-async function run(args: Pick<RealCoachArgs, 'fake' | 'provider' | 'model'>): Promise<Verdict> {
+const DEFAULT_FREE_OPENCODE_TIMEOUT_MS = 360_000;
+const DEFAULT_PAID_PROVIDER_TIMEOUT_MS = 300_000;
+
+/**
+ * Resolves the OpenCode model list to try for real-Coach checks. Unauthenticated free OpenCode
+ * runs are strictly limited to Zero-Data-Retention (ZDR) free models so prompts never fall back
+ * to non-ZDR free models such as `opencode/big-pickle`.
+ */
+export function resolveOpenCodeModelsToTry(
+  requestedModel: string,
+  env: NodeJS.ProcessEnv = process.env,
+  homeDir?: string,
+  fileExists?: (path: string) => boolean,
+): string[] {
+  if (!isWeakerJudge('opencode', env, homeDir, fileExists)) return [requestedModel];
+  const zdrModels = resolveZdrFreeOpenCodeModels(env);
+  if (requestedModel !== 'default') {
+    if (!isZdrFreeOpenCodeModel(requestedModel, env)) {
+      throw Object.assign(
+        new Error(
+          `Model "${requestedModel}" is not in the Zero-Data-Retention free OpenCode allowlist (${zdrModels.join(', ') || 'none'}).`,
+        ),
+        { code: 'coach-unavailable' },
+      );
+    }
+    return [requestedModel];
+  }
+  if (zdrModels.length === 0) {
+    throw Object.assign(new Error('No Zero-Data-Retention free OpenCode models are configured.'), {
+      code: 'coach-unavailable',
+    });
+  }
+  return zdrModels;
+}
+
+function providerTimeoutMs(provider: CoachProvider, env: NodeJS.ProcessEnv = process.env): number {
+  const raw = env.REAL_COACH_PROVIDER_TIMEOUT_MS?.trim();
+  if (raw) {
+    const parsed = Number(raw);
+    if (Number.isFinite(parsed) && parsed > 0) return parsed;
+  }
+  return provider === 'opencode' && isWeakerJudge('opencode', env)
+    ? DEFAULT_FREE_OPENCODE_TIMEOUT_MS
+    : DEFAULT_PAID_PROVIDER_TIMEOUT_MS;
+}
+
+function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => {
+      reject(Object.assign(new Error(message), { code: 'coach-unavailable' }));
+    }, ms);
+    timer.unref?.();
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (err) => {
+        clearTimeout(timer);
+        reject(err);
+      },
+    );
+  });
+}
+
+async function runSingleProvider(args: {
+  fake: boolean;
+  provider: CoachProvider;
+  model: string;
+  tagProvider?: boolean;
+  timeoutMs?: number;
+}): Promise<Verdict> {
   const root = new URL('../', import.meta.url);
   const { FakeCoach } = await import('../packages/backend/src/coach/fake.ts');
   const { startVerifyInstance } = await import('../packages/backend/src/verify/instance.ts');
   const sha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
-  const created: { coach: CoachPort; close?: () => void | Promise<void> } = args.fake
-    ? { coach: new FakeCoach({ chunkDelayMs: 0 }) }
-    : await createProviderCoach(args.provider);
-  const coach = new RecordingCoach(created.coach, args.model);
+  const codexAuth = !args.fake && args.provider === 'codex' ? materializeCodexAuth() : undefined;
+  const previousCodexHome = process.env.CODEX_HOME;
+  const previousOpenCodeKey = process.env.OPENCODE_API_KEY;
+  if (codexAuth?.codexHome) process.env.CODEX_HOME = codexAuth.codexHome;
+  const mappedOpenCodeKey =
+    !args.fake && args.provider === 'opencode'
+      ? withOpenCodeEnv(process.env).OPENCODE_API_KEY
+      : undefined;
+  if (mappedOpenCodeKey && !previousOpenCodeKey?.trim()) {
+    process.env.OPENCODE_API_KEY = mappedOpenCodeKey;
+  }
+  const timeoutMs = args.timeoutMs ?? (args.fake ? DEFAULT_PAID_PROVIDER_TIMEOUT_MS : providerTimeoutMs(args.provider));
+  let created: { coach: CoachPort; close?: () => void | Promise<void> } | undefined;
   try {
+    created = args.fake
+      ? { coach: new FakeCoach({ chunkDelayMs: 0 }) }
+      : await createProviderCoach(args.provider);
+    const coach = new RecordingCoach(created.coach, args.model);
     const status = await coach.status();
     if (status.state !== 'ready') {
       throw new Error(`The real Coach (${args.provider}) is not ready: ${'reason' in status ? status.reason : status.state}.`);
@@ -434,7 +533,11 @@ async function run(args: Pick<RealCoachArgs, 'fake' | 'provider' | 'model'>): Pr
     try {
       const client = await CoachClient.connect(instance.url, instance.token);
       try {
-        received = await driveEveryJob(client, root);
+        received = await withTimeout(
+          driveEveryJob(client, root),
+          timeoutMs,
+          `real Coach (${args.provider}) timed out after ${Math.round(timeoutMs / 1000)}s`,
+        );
       } finally {
         await client.close();
       }
@@ -455,11 +558,119 @@ async function run(args: Pick<RealCoachArgs, 'fake' | 'provider' | 'model'>): Pr
     const jobs = new Set(calls.map((c) => c.job));
     const missing = (Object.keys(MAX_WORDS) as CoachJob[]).filter((j) => !jobs.has(j));
     if (missing.length) calls.push({ job: missing[0] as CoachJob, words: 0, maxWords: 0, problems: [`no Coach call was made for ${missing.join(', ')}`], warnings: [] });
-    const { ok, description } = summarize(calls);
-    return { ok, sha, calls, description };
+    const weakerFallback = !args.fake && args.provider === 'opencode' && isWeakerJudge('opencode');
+    const providerTag = args.tagProvider && !args.fake ? (weakerFallback ? 'opencode free' : args.provider) : undefined;
+    const { ok, description } = summarize(calls, providerTag);
+    return { ok, sha, ...(args.fake ? {} : { provider: args.provider, weakerFallback }), calls, description };
   } finally {
-    await created.close?.();
+    await created?.close?.();
+    if (codexAuth?.codexHome) {
+      if (previousCodexHome === undefined) delete process.env.CODEX_HOME;
+      else process.env.CODEX_HOME = previousCodexHome;
+    }
+    if (mappedOpenCodeKey && !previousOpenCodeKey?.trim()) {
+      if (previousOpenCodeKey === undefined) delete process.env.OPENCODE_API_KEY;
+      else process.env.OPENCODE_API_KEY = previousOpenCodeKey;
+    }
+    codexAuth?.restore();
   }
+}
+
+function isCoachUnavailableError(err: unknown): boolean {
+  if (!err || typeof err !== 'object') return false;
+  const record = err as { code?: unknown; cause?: unknown };
+  if (record.code === 'coach-unavailable') return true;
+  if (record.cause && typeof record.cause === 'object' && (record.cause as { code?: unknown }).code === 'coach-unavailable') {
+    return true;
+  }
+  return false;
+}
+
+export async function runWithFallback(
+  order: readonly CoachProvider[],
+  tryProvider: (provider: CoachProvider) => Promise<Verdict>,
+  isConfigured: (provider: CoachProvider) => boolean = (p) => hasProviderCredentials(p).configured,
+): Promise<Verdict> {
+  const errors: string[] = [];
+  for (const provider of order) {
+    if (!isConfigured(provider)) {
+      errors.push(`${provider}: skipped (no credentials configured)`);
+      continue;
+    }
+    try {
+      return await tryProvider(provider);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      if (isCoachUnavailableError(err) || isRetryableProviderFailure(message) || /is not ready|not logged in|not installed/i.test(message)) {
+        errors.push(`${provider}: ${message}`);
+        continue;
+      }
+      throw err;
+    }
+  }
+  throw new Error(`No real-Coach provider succeeded (${errors.join('; ')}).`);
+}
+
+async function runOpenCodeWithZdrModels(args: { model: string; tagProvider?: boolean }): Promise<Verdict> {
+  const models = resolveOpenCodeModelsToTry(args.model, process.env);
+  const budgetMs = providerTimeoutMs('opencode');
+  const deadline = Date.now() + budgetMs;
+  const errors: string[] = [];
+  for (const model of models) {
+    const remainingMs = deadline - Date.now();
+    if (remainingMs <= 0) {
+      errors.push(`${model}: skipped (opencode provider timeout budget of ${Math.round(budgetMs / 1000)}s exhausted)`);
+      break;
+    }
+    try {
+      return await runSingleProvider({
+        fake: false,
+        provider: 'opencode',
+        model,
+        timeoutMs: remainingMs,
+        ...(args.tagProvider ? { tagProvider: true } : {}),
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      if (
+        models.length > 1 &&
+        (isCoachUnavailableError(err) ||
+          isRetryableProviderFailure(message) ||
+          /is not ready|not logged in|not installed|model.*not found|unknown model|not available/i.test(message))
+      ) {
+        errors.push(`${model}: ${message}`);
+        continue;
+      }
+      throw err;
+    }
+  }
+  throw Object.assign(new Error(`No ZDR free OpenCode model succeeded (${errors.join('; ')}).`), {
+    code: 'coach-unavailable',
+  });
+}
+
+async function run(args: Pick<RealCoachArgs, 'fake' | 'provider' | 'model'>): Promise<Verdict> {
+  if (args.fake) {
+    return runSingleProvider({ fake: true, provider: 'claude', model: args.model });
+  }
+  if (args.provider !== 'auto') {
+    if (args.provider === 'opencode') {
+      return runOpenCodeWithZdrModels({ model: args.model });
+    }
+    return runSingleProvider({ fake: false, provider: args.provider, model: args.model });
+  }
+  const order = resolveProviderOrder('coach', process.env);
+  return runWithFallback(order, (provider) => {
+    if (provider === 'opencode') {
+      return runOpenCodeWithZdrModels({ model: 'default', tagProvider: true });
+    }
+    return runSingleProvider({
+      fake: false,
+      provider,
+      model: provider === 'claude' ? CHECK_MODEL : 'default',
+      tagProvider: true,
+    });
+  });
 }
 
 function post(verdict: Verdict): void {
@@ -469,20 +680,54 @@ function post(verdict: Verdict): void {
   execFileSync('gh', ['api', `repos/{owner}/{repo}/statuses/${verdict.sha}`, '-f', `state=${verdict.ok ? 'success' : 'failure'}`, '-f', `context=${STATUS_CONTEXT}`, '-f', `description=${verdict.description}`], { stdio: 'inherit' });
 }
 
+function hasPassingRealCoachStatus(sha: string): boolean {
+  try {
+    const state = execFileSync(
+      'gh',
+      ['api', `repos/{owner}/{repo}/commits/${sha}/status`, '--jq', `[.statuses[] | select(.context == "${STATUS_CONTEXT}")][0].state // ""`],
+      { encoding: 'utf8' },
+    ).trim();
+    return state === 'success';
+  } catch {
+    return false;
+  }
+}
+
+function postErrorStatus(description: string): void {
+  if (execFileSync('git', ['status', '--porcelain'], { encoding: 'utf8' }).trim()) return;
+  const sha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+  if (hasPassingRealCoachStatus(sha)) return;
+  const clipped = description.length <= MAX_DESCRIPTION ? description : `${description.slice(0, MAX_DESCRIPTION - 1)}…`;
+  execFileSync(
+    'gh',
+    ['api', `repos/{owner}/{repo}/statuses/${sha}`, '-f', 'state=error', '-f', `context=${STATUS_CONTEXT}`, '-f', `description=${clipped}`],
+    { stdio: 'inherit' },
+  );
+}
+
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const { quietSqliteWarning } = await import('../packages/backend/src/runtime.ts');
   quietSqliteWarning();
+  let parsedArgs: RealCoachArgs | undefined;
   try {
-    const args = parseRealCoachArgs(process.argv.slice(2));
-    const verdict = await run(args);
+    parsedArgs = parseRealCoachArgs(process.argv.slice(2));
+    const verdict = await run(parsedArgs);
     process.stdout.write(`${JSON.stringify(verdict, null, 2)}\n`);
-    if (args.post) {
-      if (args.fake) throw new Error('A run with the fake Coach is never posted as the real-Coach verdict.');
+    if (parsedArgs.post) {
+      if (parsedArgs.fake) throw new Error('A run with the fake Coach is never posted as the real-Coach verdict.');
       post(verdict);
     }
     process.exit(verdict.ok ? 0 : 1);
   } catch (err) {
-    process.stderr.write(`${err instanceof Error ? err.message : String(err)}\n`);
+    const message = err instanceof Error ? err.message : String(err);
+    process.stderr.write(`${message}\n`);
+    if (parsedArgs?.post && !parsedArgs.fake) {
+      try {
+        postErrorStatus(message);
+      } catch {
+        // Best-effort status posting; preserve exit code 2.
+      }
+    }
     process.exit(2);
   }
 }

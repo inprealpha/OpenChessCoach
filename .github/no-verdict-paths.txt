@@ -20,6 +20,9 @@ e2e/
 .github/
 .claude/
 scripts/verdict.ts
+scripts/ci-providers.ts
+scripts/run-judge.ts
+scripts/check-ci-providers.ts
 scripts/protected-paths.ts
 scripts/before-after.ts
 scripts/glossary-lint.ts

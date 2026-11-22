@@ -1,18 +1,21 @@
 ---
 name: real-coach-check
-description: Check a PR that touches the Coach against the real Coach on the owner's desktop and post the "real Coach" status on its head commit. The Verdict job runs the same check when the PR is marked ready; use this when a PR has the touches-coach label and still has no real-Coach status, from a Claude Code session on the owner's desktop where Claude Code is logged in.
+description: Check a PR that touches the Coach against the real Coach and post the "real Coach" status on its head commit. The Verdict job tries it first in GitHub Actions (optional in branch protection); when GitHub couldn't run it, run and post it locally from any machine with OpenCode, Claude Code, Codex, or Pi available.
 ---
 
 # Real-Coach check
 
 CI uses the fake Coach, so a PR that touches the Coach (any path in `.github/coach-paths.txt`) gets
-the `touches-coach` label and a pending `real Coach` status. It can't merge until this check passes
-on its exact head commit. The Verdict job (`.github/workflows/verdict.yml`, ADR 0013) runs it when
-the PR is marked ready for review, with the owner's Claude login as a token. Run it here, on the
-owner's desktop, when that job didn't: the real Coach uses the owner's Claude Code login (ADR 0001).
-Each run makes 15 small Coach calls on the owner's Claude subscription, all on the latest Haiku
-(the `haiku` alias), whatever model each job uses in the app. The owner's rule: tests run on the
-latest Haiku.
+the `touches-coach` label and a `real Coach` status. The Verdict job (`.github/workflows/verdict.yml`,
+ADR 0013) tries the real-Coach check first in GitHub Actions (walking `CI_PROVIDER_ORDER`, including
+free Zero-Data-Retention OpenCode models when no subscription secret is saved). Because GitHub-hosted
+runners share egress IPs, `real Coach` is optional in GitHub branch protection — when GitHub can't
+run it, agents are reminded to run and post it locally from their own machine using whatever provider
+is available (**OpenCode**, **Claude Code**, **Codex**, or **Pi**).
+
+Each run makes 15 small Coach calls; on Claude it uses the latest Haiku (`haiku` alias), and on
+unauthenticated free OpenCode it uses only the ZDR allowlist (`opencode/deepseek-v4.1-flash-free`,
+`opencode/hy4-flash-free`, `opencode/longcat-2.5-free`).
 
 ## Steps
 
@@ -24,13 +27,11 @@ latest Haiku.
    npm ci
    ```
 
-2. Check that Claude Code is logged in: `claude --version` works and the owner has run `claude`
-   at least once. The script refuses to start otherwise.
-
-3. Run the check and read the verdict:
+2. Run the check with `--provider auto` (or pick a specific provider: `opencode`, `claude`, `codex`,
+   or `pi`) and post the verdict on the head commit:
 
    ```bash
-   node scripts/real-coach-check.ts
+   node scripts/real-coach-check.ts --provider auto --post
    ```
 
    It starts a verify-mode instance with the real Coach in place of the fake one, makes one call of
@@ -53,18 +54,11 @@ latest Haiku.
 
    It prints `{ ok, sha, calls: [{ job, words, maxWords, problems, warnings }], description }` and
    exits 0 on pass, 1 on fail, 2 when it couldn't run. On a pass with warnings, `description` (the
-   posted status) counts them and quotes the first.
+   posted status) counts them and quotes the first. `--post` sets the `real Coach` commit status to
+   success or failure through `gh` and refuses when the working tree has changes, so the verdict
+   always matches the commit it is posted on.
 
-4. Post the verdict on the head commit:
-
-   ```bash
-   node scripts/real-coach-check.ts --post
-   ```
-
-   This sets the `real Coach` commit status to success or failure through `gh`. It refuses when the
-   working tree has changes, so the verdict always matches the commit it is posted on.
-
-5. Comment on the PR with the JSON verdict (trimmed to the calls with problems or warnings), so
+3. Comment on the PR with the JSON verdict (trimmed to the calls with problems or warnings), so
    the owner can see what was checked.
 
 ## Notes

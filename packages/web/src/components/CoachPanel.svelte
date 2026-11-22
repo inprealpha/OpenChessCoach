@@ -35,6 +35,9 @@
   let log: HTMLDivElement | undefined = $state();
   let whyInput: HTMLInputElement | undefined = $state();
   const available = $derived(api.coachReady);
+  $effect(() => {
+    if (available) thread.clearOfflineErrors();
+  });
   /** The count shows only near the limit, so a short question isn't cluttered with it. */
   const charsLeft = $derived(MAX_QUESTION_LENGTH - question.length);
   const COUNT_FROM = 50;

@@ -494,7 +494,13 @@ function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promi
   });
 }
 
-async function runSingleProvider(args: { fake: boolean; provider: CoachProvider; model: string; tagProvider?: boolean }): Promise<Verdict> {
+async function runSingleProvider(args: {
+  fake: boolean;
+  provider: CoachProvider;
+  model: string;
+  tagProvider?: boolean;
+  timeoutMs?: number;
+}): Promise<Verdict> {
   const root = new URL('../', import.meta.url);
   const { FakeCoach } = await import('../packages/backend/src/coach/fake.ts');
   const { startVerifyInstance } = await import('../packages/backend/src/verify/instance.ts');
@@ -510,7 +516,7 @@ async function runSingleProvider(args: { fake: boolean; provider: CoachProvider;
   if (mappedOpenCodeKey && !previousOpenCodeKey?.trim()) {
     process.env.OPENCODE_API_KEY = mappedOpenCodeKey;
   }
-  const timeoutMs = args.fake ? DEFAULT_PAID_PROVIDER_TIMEOUT_MS : providerTimeoutMs(args.provider);
+  const timeoutMs = args.timeoutMs ?? (args.fake ? DEFAULT_PAID_PROVIDER_TIMEOUT_MS : providerTimeoutMs(args.provider));
   let created: { coach: CoachPort; close?: () => void | Promise<void> } | undefined;
   try {
     created = args.fake
@@ -607,13 +613,21 @@ export async function runWithFallback(
 
 async function runOpenCodeWithZdrModels(args: { model: string; tagProvider?: boolean }): Promise<Verdict> {
   const models = resolveOpenCodeModelsToTry(args.model, process.env);
+  const budgetMs = providerTimeoutMs('opencode');
+  const deadline = Date.now() + budgetMs;
   const errors: string[] = [];
   for (const model of models) {
+    const remainingMs = deadline - Date.now();
+    if (remainingMs <= 0) {
+      errors.push(`${model}: skipped (opencode provider timeout budget of ${Math.round(budgetMs / 1000)}s exhausted)`);
+      break;
+    }
     try {
       return await runSingleProvider({
         fake: false,
         provider: 'opencode',
         model,
+        timeoutMs: remainingMs,
         ...(args.tagProvider ? { tagProvider: true } : {}),
       });
     } catch (err) {

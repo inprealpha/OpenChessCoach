@@ -1001,8 +1001,43 @@ test.describe('Live Coaching', () => {
     await startGame(paired, app.url);
     await play(paired, 'g2g4', BOARD);
     await expect(paired.getByRole('button', { name: 'Take the move back' })).toBeVisible();
+    await coachIdle(paired);
     const calls = await app.rows<{ job: string; model: string }>('coach_calls');
     expect(calls.map((c) => [c.job, c.model])).toEqual([['live', 'opus']]);
+  });
+
+  test('Take the move back and Carry on work while the Coach is still answering', async ({ paired, app }) => {
+    await startGame(paired, app.url);
+    const desktop = engineGate(app);
+    desktop.hold();
+    await play(paired, 'g2g4', BOARD);
+    const status = paired.getByRole('status', { name: 'Game status' });
+    await expect(status).toContainText('Take the move back, or carry on?');
+    await expect(paired.getByRole('region', { name: 'Coach' }).getByRole('status')).toHaveText('Answering…');
+    await expect(status.getByRole('button', { name: 'Take the move back' })).toBeVisible();
+    await expect(status.getByRole('button', { name: 'Carry on' })).toBeVisible();
+
+    // Taking back while the Coach is still answering restores the board and drops the late reply.
+    await status.getByRole('button', { name: 'Take the move back' }).click();
+    await expect(paired.getByRole('group', { name: BOARD })).toHaveAttribute('data-fen', INITIAL_FEN);
+    await expect(status).toContainText('Your move');
+    await expect(paired.getByRole('button', { name: 'Hint' })).toBeEnabled();
+    await expect(paired.getByLabel('Coach conversation')).toContainText('Move taken back. Have another look.');
+    desktop.release();
+    await expect.poll(async () => (await app.rows('coach_calls')).length).toBe(1);
+    await expect(paired.getByLabel('Coach conversation')).not.toContainText('g4 is graded Mistake');
+
+    // Carrying on while the Coach is still answering lets the Engine reply right away.
+    desktop.hold();
+    await play(paired, 'g2g4', BOARD);
+    await expect(paired.getByRole('region', { name: 'Coach' }).getByRole('status')).toHaveText('Answering…');
+    await expect(status.getByRole('button', { name: 'Carry on' })).toBeVisible();
+    await status.getByRole('button', { name: 'Carry on' }).click();
+    await expect(paired.getByRole('list', { name: 'Moves' }).getByRole('button')).toHaveCount(2);
+    await expect(status).toContainText('Your move');
+    desktop.release();
+    await expect.poll(async () => (await app.rows('coach_calls')).length).toBe(2);
+    await expect(paired.getByLabel('Coach conversation')).not.toContainText('g4 is graded Mistake');
   });
 
   test('two Coach-model changes in the same instant are both saved', async ({ paired, app }) => {

@@ -32,6 +32,8 @@ export class CoachThread {
   threadId = randomId();
   /** The calls still on their way: the thread is busy until the last of them ends. */
   private pending = 0;
+  /** Bumped by cancel/reset so an abandoned in-flight reply writes nothing when it arrives. */
+  private generation = 0;
   /**
    * Counts what the board was annotated for. A new call or a cleared board moves it on, so a reply
    * still on its way, about an earlier move or position, never draws on the board as it is now.
@@ -54,9 +56,21 @@ export class CoachThread {
   }
 
   reset(): void {
+    this.generation++;
+    this.pending = 0;
+    this.busy = false;
     this.entries = [];
     this.clearAnnotations();
     this.threadId = randomId();
+  }
+
+  /** Drops any reply still on its way so the Player is not kept waiting for an abandoned answer. */
+  cancel(): void {
+    this.generation++;
+    this.pending = 0;
+    this.busy = false;
+    this.entries = this.entries.filter((e) => !e.streaming);
+    this.clearAnnotations();
   }
 
   clearAnnotations(): void {
@@ -93,6 +107,7 @@ export class CoachThread {
       const current = this.entries[index];
       if (current) this.entries[index] = change(current);
     };
+    const gen = this.generation;
     const call = ++this.calls;
     const annotating = ++this.annotating;
     this.pending++;
@@ -100,10 +115,12 @@ export class CoachThread {
     this.failed = false;
     try {
       const reply = await api.request('coach.ask', { ...ask, threadId: this.threadId }, (text, _part, status) => {
+        if (gen !== this.generation) return;
         // The answer's text replaces any status; a status shows only while no text has come.
         if (status !== undefined) update((current) => ({ ...current, status }));
         if (text) update((current) => ({ ...current, text: current.text + text, status: '' }));
       });
+      if (gen !== this.generation) return undefined;
       update(() => ({ ...entry, text: reply.text, streaming: false, note: reply.note, engineQuestions: reply.engineQuestions }));
       if (annotating === this.annotating) {
         this.arrows = reply.arrows;
@@ -111,14 +128,17 @@ export class CoachThread {
       }
       return reply;
     } catch (err) {
+      if (gen !== this.generation) return undefined;
       const message = err instanceof ApiError ? err.message : 'The Coach couldn’t answer.';
       update(() => ({ ...entry, text: message, streaming: false, error: true }));
       if (said) this.entries = this.entries.filter((e) => e.id !== said.id);
       if (call === this.calls) this.failed = true;
       return undefined;
     } finally {
-      this.pending--;
-      this.busy = this.pending > 0;
+      if (gen === this.generation) {
+        this.pending--;
+        this.busy = this.pending > 0;
+      }
     }
   }
 }

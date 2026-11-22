@@ -392,9 +392,10 @@
     if (!game) return;
     const offer = (g.grade === 'Mistake' || g.grade === 'Blunder') && game.live && api.coachReady;
     // The takeback offer is saved with the game, so a reload shows it again instead of letting the Engine reply.
-    if (offer) game.offer = { san: m.san, grade: g.grade };
+    const currentOffer: Saved['offer'] = offer ? { san: m.san, grade: g.grade } : undefined;
+    if (currentOffer) game.offer = currentOffer;
     await persist();
-    if (offer) {
+    if (currentOffer) {
       // The choice is about the move just played: a look back taken while it was graded ends, so the
       // board shows that move and the choice is at the top of the panel, in its first screen.
       const wasAway = away;
@@ -409,8 +410,8 @@
         playerSide: game.playerSide,
         moveUci: g.uci,
       });
-      if (reply && game.offer) {
-        game.offer.comment = reply.text;
+      if (reply && game?.offer === currentOffer) {
+        currentOffer.comment = reply.text;
         await persist();
       }
       return;
@@ -427,6 +428,7 @@
     game.grades = game.grades.slice(0, line.moves.length);
     delete game.offer;
     awaitingChoice = false;
+    if (coach.busy) coach.cancel();
     coach.clearAnnotations();
     coach.say('Move taken back. Have another look.');
     await persist();
@@ -436,6 +438,7 @@
     if (!game || !awaitingChoice) return;
     delete game.offer;
     awaitingChoice = false;
+    if (coach.busy) coach.cancel();
     coach.clearAnnotations();
     await persist();
     await engineMove();
@@ -772,13 +775,12 @@
                 <p>The Engine is thinking…</p>
               {:else if awaitingChoice}
                 <p>Take the move back, or carry on?</p>
-                <!-- First in the panel, so on a phone the choice and its reason show right under the board. -->
-                {#if !coach.busy}
-                  <div class="row">
-                    <button type="button" onclick={takeBack}>Take the move back</button>
-                    <button type="button" class="secondary" onclick={carryOn}>Carry on</button>
-                  </div>
-                {/if}
+                <!-- First in the panel, so on a phone the choice and its reason show right under the board.
+                     Shown right away while the Coach is still answering so a slow Coach never locks the game. -->
+                <div class="row">
+                  <button type="button" onclick={takeBack}>Take the move back</button>
+                  <button type="button" class="secondary" onclick={carryOn}>Carry on</button>
+                </div>
               {:else}
                 <p>Your move ({SIDE_NAMES[game.playerSide]}).</p>
               {/if}

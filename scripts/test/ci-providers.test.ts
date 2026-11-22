@@ -484,8 +484,35 @@ describe('judge hang and fatal-error watchdogs', () => {
     const fatalLine =
       'timestamp=2026-11-22T14:09:59.090Z level=ERROR run=554116e2 message="stream error" providerID=opencode modelID=deepseek-v4.1-flash-free error.error="AI_APICallError: Free usage limit reached."';
     expect(detectFatalProviderErrorLine(fatalLine)).toBe('AI_APICallError: Free usage limit reached.');
-    // Normal test output mentioning 401/429 must never trigger the OpenCode stream-error abort.
+    // Normal test/diff output quoting Free usage limit reached must never trigger the abort.
     expect(detectFatalProviderErrorLine('✓ classifies 401 Unauthorized and 429 rate limit exceeded')).toBeUndefined();
+    expect(detectFatalProviderErrorLine('const msg = "AI_APICallError: Free usage limit reached.";')).toBeUndefined();
+  });
+
+  it('does not abort a healthy opencode judge whose stdout quotes Free usage limit reached', async () => {
+    const outDir = makeTempDir('judge-quoted-error-');
+    const res = await execJudgeProcess(
+      {
+        provider: 'opencode',
+        command: process.execPath,
+        args: [
+          '-e',
+          [
+            'process.stdout.write(\'timestamp=2026-11-22T14:09:59Z level=ERROR run=1 message="stream error" error.error="AI_APICallError: Free usage limit reached."\\n\');',
+            'setTimeout(() => { process.stdout.write("done\\n"); process.exit(0); }, 250);',
+          ].join(' '),
+        ],
+        model: 'opencode/deepseek-v4.1-flash-free',
+        logFile: join(outDir, 'judge-opencode.log'),
+      },
+      outDir,
+      process.env,
+      { firstActivityMs: 2_000, idleMs: 2_000, overallMs: 5_000, fatalErrorGraceMs: 50, killGraceMs: 100 },
+    );
+
+    expect(res.status).toBe(0);
+    expect(res.abortedProviderError).toBeUndefined();
+    expect(res.timedOut).toBeUndefined();
   });
 
   it('aborts a hung opencode process promptly after Free usage limit reached instead of hanging', async () => {

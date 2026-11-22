@@ -90,7 +90,8 @@ const ANSI_ESCAPE_RE = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*[A-Za-z]`
 const OPENCODE_BANNER_RE = /^>\s+\S+\s+·\s+\S+/;
 const OPENCODE_LOG_LINE_RE = /^timestamp=\S+\s+level=(?:DEBUG|INFO|WARN|ERROR)\b/;
 const MODEL_UNAVAILABLE_RE = /model.*not found|unknown model|not available|not supported/i;
-const FATAL_STREAM_ERROR_FRAMING_RE = /(?:level=ERROR\b.*message="stream error"|AI_APICallError:|FreeUsageLimitError|Free usage limit reached)/i;
+const FATAL_STREAM_ERROR_FRAMING_RE =
+  /^(?:timestamp=\S+\s+level=ERROR\b.*message="stream error"|(?:AI_APICallError|FreeUsageLimitError|Error):\s*.*(?:Free usage limit reached|429|401|402|403|rate limit|quota|unauthorized|authentication|model.*not found|unknown model|not available|not supported))/i;
 
 /** Strips ANSI color codes from a single line of CLI output. */
 function stripAnsi(text: string): string {
@@ -298,18 +299,20 @@ export function execJudgeProcess(
       resetIdleTimer();
     };
 
-    const inspectLine = (line: string): void => {
+    const inspectLine = (line: string, stream: 'stdout' | 'stderr'): void => {
       if (inv.provider === 'opencode') {
-        const fatal = detectFatalProviderErrorLine(line);
-        if (fatal && !abortedProviderError) {
-          abortedProviderError = fatal;
-          const graceMs = timeouts.fatalErrorGraceMs ?? DEFAULT_FATAL_ERROR_GRACE_MS;
-          fatalErrorTimer = setTimeout(() => {
-            if (settled || aborting) return;
-            abortProcess();
-          }, graceMs);
-          fatalErrorTimer.unref();
-          return;
+        if (stream === 'stderr') {
+          const fatal = detectFatalProviderErrorLine(line);
+          if (fatal && !abortedProviderError) {
+            abortedProviderError = fatal;
+            const graceMs = timeouts.fatalErrorGraceMs ?? DEFAULT_FATAL_ERROR_GRACE_MS;
+            fatalErrorTimer = setTimeout(() => {
+              if (settled || aborting) return;
+              abortProcess();
+            }, graceMs);
+            fatalErrorTimer.unref();
+            return;
+          }
         }
         if (!isOpenCodeStartupOrLogLine(line)) {
           recordActivity();
@@ -330,7 +333,7 @@ export function execJudgeProcess(
         const combined = stdoutPendingLine + text;
         const lines = combined.split(/\r?\n/);
         stdoutPendingLine = lines.pop() ?? '';
-        for (const line of lines) inspectLine(line);
+        for (const line of lines) inspectLine(line, 'stdout');
         // Handle non-newline-terminated model output as activity when it isn't a startup banner.
         if (stdoutPendingLine && inv.provider !== 'opencode' && stripAnsi(stdoutPendingLine).trim()) {
           recordActivity();
@@ -342,7 +345,7 @@ export function execJudgeProcess(
         const combined = stderrPendingLine + text;
         const lines = combined.split(/\r?\n/);
         stderrPendingLine = lines.pop() ?? '';
-        for (const line of lines) inspectLine(line);
+        for (const line of lines) inspectLine(line, 'stderr');
       }
     };
 
@@ -372,8 +375,8 @@ export function execJudgeProcess(
     });
 
     child.on('close', (code) => {
-      if (stdoutPendingLine) inspectLine(stdoutPendingLine);
-      if (stderrPendingLine) inspectLine(stderrPendingLine);
+      if (stdoutPendingLine) inspectLine(stdoutPendingLine, 'stdout');
+      if (stderrPendingLine) inspectLine(stderrPendingLine, 'stderr');
       finish({
         status: code,
         stdout,

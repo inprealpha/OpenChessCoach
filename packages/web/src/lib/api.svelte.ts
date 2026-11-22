@@ -124,7 +124,7 @@ class Api {
       if (this.state !== 'starting') await this.connect();
       return true;
     } catch {
-      this.pairError = 'Your desktop can’t be reached. Check that the coach is running and you are on the same Wi-Fi.';
+      this.pairError = 'Your desktop can’t be reached. Check that OpenChessCoach is running on it and that your connection is working.';
       this.token = await loadToken();
       return false;
     }

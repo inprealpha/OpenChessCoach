@@ -76,7 +76,7 @@ Optional lines: `Preview seed: NAME` when another seed shows the change better, 
   80% full (or with `--deep`), it also clears npm's caches, runs a `git gc` (which keeps the reflog,
   so stashes stay) and deletes `node_modules`. It exits 1 when the disk stays above the limit. It
   deletes evidence, so it refuses to run without `--sandbox`.
-- A machine needs Linux or macOS, Node.js 22.18 or later, about 4 GB of memory, internet access for
+- A machine needs Linux or macOS, Node.js 22.19 or later, about 4 GB of memory, internet access for
   npm, GitHub and the Playwright and Lichess hosts, and, for previews, one port that a link can reach
   (and, for the bubble, Linux with bubblewrap).
 

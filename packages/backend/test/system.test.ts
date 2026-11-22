@@ -68,10 +68,10 @@ describe('the start-up messages', () => {
   });
 
   it('names the Node.js to install when this one is too old', () => {
-    expect(minNode()).toBe('22.18');
-    expect(nodeTooOld('20.11.1')).toMatch(/needs Node\.js 22\.18 or later, and this terminal has Node\.js 20\.11\.1/);
-    expect(nodeTooOld('22.17.0')).toBeDefined();
-    expect(nodeTooOld('22.18.0')).toBeUndefined();
+    expect(minNode()).toBe('22.19');
+    expect(nodeTooOld('20.11.1')).toMatch(/needs Node\.js 22\.19 or later, and this terminal has Node\.js 20\.11\.1/);
+    expect(nodeTooOld('22.18.0')).toBeDefined();
+    expect(nodeTooOld('22.19.0')).toBeUndefined();
     expect(nodeTooOld('24.1.0')).toBeUndefined();
     expect(nodeTooOld('24.0.0', '24.0.1')).toBeDefined();
     expect(nodeTooOld('24.0.1', '24.0.1')).toBeUndefined();

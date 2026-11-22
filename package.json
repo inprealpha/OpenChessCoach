@@ -9,7 +9,7 @@
     "packages/web"
   ],
   "engines": {
-    "node": ">=22.18"
+    "node": ">=22.19"
   },
   "scripts": {
     "start": "node packages/backend/src/cli.ts",

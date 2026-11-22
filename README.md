@@ -21,7 +21,7 @@ curl -fsSL https://github.com/inprealpha/OpenChessCoach/releases/latest/download
 
 Then install [Claude Code](https://claude.com/claude-code), sign in once with `claude`, and start
 OpenChessCoach from your Start Menu (**OpenChessCoach**, on Windows) or by running `openchesscoach`.
-Already have Node.js 22.18+? You can also run `npx openchesscoach@latest` without installing
+Already have Node.js 22.19+? You can also run `npx openchesscoach@latest` without installing
 anything first: see [Install with npm](#already-have-nodejs-npx).
 
 - **Review your own games** from Lichess, chess.com or a PGN: every move gets a Move Grade, a graph
@@ -129,7 +129,7 @@ checksum, extract it anywhere, and run `openchesscoach.cmd` (Windows) or `./open
 
 ### Already have Node.js? (`npx`)
 
-If you already have **Node.js 22.18 or later** (`node --version`), you can run OpenChessCoach
+If you already have **Node.js 22.19 or later** (`node --version`), you can run OpenChessCoach
 directly from npm without installing the standalone bundle:
 
 ```bash

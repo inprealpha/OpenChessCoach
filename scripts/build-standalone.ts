@@ -28,7 +28,7 @@ export const TARGETS: readonly Target[] = [
   { id: 'linux-arm64', platform: 'linux', arch: 'arm64', nodeExt: 'tar.gz', archiveExt: 'tar.gz' },
 ];
 
-export const DEFAULT_NODE_VERSION = '22.18.0';
+export const DEFAULT_NODE_VERSION = '22.19.0';
 
 const REPO = fileURLToPath(new URL('..', import.meta.url));
 const CACHE_DIR = join(REPO, '.cache', 'node-dist');

@@ -23,7 +23,7 @@ fail() {
 cd "$(dirname "${BASH_SOURCE[0]}")/../.." || { echo "prepare: could not find the repository"; exit "$strict"; }
 echo "prepare: OpenChessCoach in $(pwd)"
 
-# The minimum Node.js version is package.json's engines.node (">=22.18").
+# The minimum Node.js version is package.json's engines.node (">=22.19").
 if ! node -e '
   const want = require("./package.json").engines.node.replace(/^>=\s*/, "").split(".").map(Number);
   const have = process.versions.node.split(".").map(Number);

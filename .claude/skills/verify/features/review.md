@@ -51,7 +51,10 @@ call.
 - The panel is one card with three tabs, `Moments` (the key moments, the default), `Moves` (the move
   list; on a phone the graph too) and `Overview` (when the Review has one). Until the Player opens
   it on a first visit to a Review, the tab is `Overview, not read yet`, with a dot; on later visits
-  (remembered per game) just `Overview`.
+  (remembered per game) just `Overview`. The tabs are `PanelTabs.svelte`, shared with the Board's
+  (see `board-and-engine.md`): Tab reaches the picked tab only, and once the keyboard brought the
+  focus there, ← → Home End move between the tabs; after a tab is clicked, ← → still step the
+  board.
 - Opening a key moment's row on a phone pulls the sheet up to read it. Its better move's button,
   "Try axb4 48%" (its name is what it shows), lets the sheet down, plays the move as a variation and keeps the moment open with
   "Trying 11. axb4 … instead of Bxf7+ · 48%"; `Back to the game` returns to the moment and puts the

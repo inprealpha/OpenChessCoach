@@ -91,7 +91,7 @@ const OPENCODE_BANNER_RE = /^>\s+\S+\s+·\s+\S+/;
 const OPENCODE_LOG_LINE_RE = /^timestamp=\S+\s+level=(?:DEBUG|INFO|WARN|ERROR)\b/;
 const MODEL_UNAVAILABLE_RE = /model.*not found|unknown model|not available|not supported/i;
 const FATAL_STREAM_ERROR_FRAMING_RE =
-  /^(?:timestamp=\S+\s+level=ERROR\b.*message="stream error"|(?:AI_APICallError|FreeUsageLimitError|Error):\s*.*(?:Free usage limit reached|429|401|402|403|rate limit|quota|unauthorized|authentication|model.*not found|unknown model|not available|not supported))/i;
+  /^(?:timestamp=\S+\s+level=ERROR\b.*message="stream error"|(?:AI_APICallError|FreeUsageLimitError|Error):)/i;
 
 /** Strips ANSI color codes from a single line of CLI output. */
 function stripAnsi(text: string): string {

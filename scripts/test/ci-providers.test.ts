@@ -484,6 +484,7 @@ describe('judge hang and fatal-error watchdogs', () => {
     const fatalLine =
       'timestamp=2026-11-22T14:09:59.090Z level=ERROR run=554116e2 message="stream error" providerID=opencode modelID=deepseek-v4.1-flash-free error.error="AI_APICallError: Free usage limit reached."';
     expect(detectFatalProviderErrorLine(fatalLine)).toBe('AI_APICallError: Free usage limit reached.');
+    expect(detectFatalProviderErrorLine('AI_APICallError: Too many requests')).toBe('AI_APICallError: Too many requests');
     // Normal test/diff output quoting Free usage limit reached must never trigger the abort.
     expect(detectFatalProviderErrorLine('✓ classifies 401 Unauthorized and 429 rate limit exceeded')).toBeUndefined();
     expect(detectFatalProviderErrorLine('const msg = "AI_APICallError: Free usage limit reached.";')).toBeUndefined();

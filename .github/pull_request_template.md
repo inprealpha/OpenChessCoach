@@ -27,7 +27,7 @@ Made with
 Tested with:
 - [ ] Automated tests: `npm test` and the Player journeys
 - [ ] Verify mode with the fake Coach, driven by the agent (`coachctl`, Playwright)
-- [ ] The real Coach, on a real Claude subscription (the real-Coach check, or used by hand)
+- [ ] The real Coach (via GitHub Actions, or run locally with OpenCode, Claude Code, Codex, or Pi via `node scripts/real-coach-check.ts --provider auto --post`)
 - [ ] Used by hand in the running app (where: desktop browser, phone, InstaBox preview)
 
 Not tested:
@@ -47,9 +47,11 @@ A PR with nothing here gets the no-evidence label.
 
 ## Review notes
 
-<!-- Anything the owner should look at: protected paths touched, Coach changes (they need the
-real-Coach check from the desktop), deviations from the ticket, follow-ups. When the owner corrected
-you, list each lesson and where you encoded it: the code's structure, a lint or test, or prose. -->
+<!-- Anything the owner should look at: protected paths touched, Coach changes (GitHub tries the
+optional real-Coach check first; if it couldn't run, run and post it locally with OpenCode, Claude Code,
+Codex, or Pi via `node scripts/real-coach-check.ts --provider auto --post`), deviations from the ticket,
+follow-ups. When the owner corrected you, list each lesson and where you encoded it: the code's structure,
+a lint or test, or prose. -->
 
 <!-- Preview (.claude/skills/sandbox/SKILL.md): to ask for one, add a line "Preview: on" outside this
 comment, or the "preview" label. Optional lines: "Preview seed: empty" (or many-games, no-phone), and

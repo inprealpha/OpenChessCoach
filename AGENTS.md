@@ -51,7 +51,7 @@ A rule that only lives in a document gets broken. When agents repeat a mistake, 
 | Tempting moves reach the Coach only as Engine-graded output, and only in Why Questions, Review moments and (from Maia-3) Hints (ADR 0011) | `packages/backend/test/tempting-moves.test.ts` |
 | Players on the Wi-Fi and through the tunnel are offered the app's source, as the Maia-3 model's AGPL asks (ADR 0011) | `e2e/journeys/menu.spec.ts` (the Settings source link), `THIRD_PARTY_NOTICES.md` |
 | The owner reviews changes to protected paths | `.github/protected-paths.txt` → `CODEOWNERS` (`npm run check:paths`) and the `protected-path` label |
-| Coach changes are checked against the real Coach before merging | `.github/coach-paths.txt`, the `touches-coach` label and the `real Coach` status (posted by the Verdict job, or from the desktop) |
+| Coach changes are checked against the real Coach before merging | `.github/coach-paths.txt`, the `touches-coach` label and the `real Coach` status (optional in GitHub branch protection: the Verdict job tries it first, and when GitHub can't run it the agent is reminded to run and post it locally via `node scripts/real-coach-check.ts --provider auto --post` using OpenCode, Claude Code, Codex, or Pi) |
 | Tests that call a real model use the latest Haiku (the `haiku` alias), never the app's per-job models | `scripts/test/real-coach-check.test.ts` (`CHECK_MODEL`) |
 | Typecheck, lint, tests, Player journeys and the build pass on every PR | `.github/workflows/ci.yml` |
 | A preview's pairing code never reaches a public log, a PR or a comment (ADR 0001) | `scripts/test/sandbox.test.ts` (`instabox.sh` in GitHub Actions mode, against a fake CLI) |

@@ -28,9 +28,9 @@ By default, CI tries providers in this order:
 
 ## 2. Click-by-click setup in GitHub (what you need to do)
 
-### Step A (Optional): Save a paid AI login in GitHub Secrets
+### Step A (Optional): Save a subscription login in GitHub Secrets
 
-With no secrets saved, GitHub Actions automatically falls back to OpenCode's free ZDR models above. Whenever you want a stronger paid provider to run first, add its secret in **GitHub Secrets** (encrypted passwords stored in your repository so GitHub Actions can use them without ever showing them publicly):
+You do **not** need to create a paid or free API key. With no secrets saved, GitHub Actions automatically tries OpenCode's free ZDR models above whenever the runner's IP still has daily free quota. Whenever you have an active subscription (such as Claude) and want GitHub Actions to use it first, add its secret in **GitHub Secrets** (encrypted passwords stored in your repository so GitHub Actions can use them without ever showing them publicly):
 
 1. Open your repository on GitHub: `https://github.com/inprealpha/OpenChessCoach`
 2. Click **Settings** (top menu bar).
@@ -62,19 +62,26 @@ Optional advanced variables (you do not need to set these unless you want differ
 - `OPENCODE_ZDR_FREE_MODELS` — comma-separated list of Zero-Data-Retention free OpenCode models (defaults to `opencode/deepseek-v4.1-flash-free,opencode/hy4-flash-free,opencode/longcat-2.5-free`; set to `none` to disable free OpenCode fallback).
 - `CODEX_JUDGE_MODEL`, `CLAUDE_JUDGE_MODEL`, `OPENCODE_JUDGE_MODEL` — override the model name for a specific judge (for unauthenticated free OpenCode, `OPENCODE_JUDGE_MODEL` must be in the ZDR allowlist).
 
-### Step C: Allow local agent fallback results to unblock merges (Branch Protection setting)
+### Step C: Update `main` Branch Protection (exact clicks)
 
-When no CI provider works, a **separate agent** (not the one that wrote the PR) can run Verdict and real Coach on its own machine and post the exact same `Verdict` and `real Coach` checks onto the PR.
+GitHub's **Branch protection** (or **Rulesets**) controls which checks must be green before GitHub lets a pull request merge into `main`:
 
-For GitHub to accept those locally posted checks as satisfying your required checks on `main`:
+- **`Verdict` stays required** (and its source is set to **`Any source`** so a separate agent running locally can unblock a merge when no CI provider is available).
+- **`real Coach` becomes optional** (removed from the required list). GitHub Actions still tries `real Coach` first using your provider order (including free ZDR OpenCode when the runner's shared IP still has quota), and if GitHub can't run it, the PR status and agent instructions remind the agent to run `node scripts/real-coach-check.ts --provider auto --post` on its own machine (using OpenCode, Claude Code, Codex, or Pi — whatever is available) and post the result to the PR.
 
-1. Go to **Settings → Branches** (or **Settings → Rules → Rulesets** if using rulesets).
-2. Click **Edit** next to the protection rule for `main`.
-3. Under **Require status checks to pass before merging**, find **`Verdict`** and **`real Coach`**.
-4. Next to each check, look at the **source** dropdown (which may say `GitHub Actions` or `Any source`).
-5. Set the source to **`Any source`** and click **Save changes**.
+**Exact steps in GitHub:**
 
-- **Security tradeoff to know:** Keep **both** `Verdict` and `real Coach` checked as required. Setting the source to **`Any source`** is what lets a separate agent post a passing status from its own machine, **but** it also means any user or token with `statuses: write` permission on this repository (not just GitHub Actions) can post a passing `Verdict` or `real Coach` status. Because only people/agents you grant write access to can do that — and you still review and merge protected PRs by hand — this is the same trust model as ADR 0013. (Note: if your rule is already set to `Any source`, no change is needed.)
+1. Open your repository on GitHub: `https://github.com/inprealpha/OpenChessCoach`
+2. Click **Settings** (top menu bar).
+3. In the left sidebar, click **Branches** (under **Code and automation**).
+   - *(If your rule is under Rulesets instead of Branches, click **Rules → Rulesets** in the left sidebar and click the ruleset for `main`.)*
+4. Next to `main`, click **Edit**.
+5. Scroll to **Require status checks to pass before merging**.
+6. **Make `real Coach` optional:** find **`real Coach`** in the list of required status checks and click the **`×`** (or trash/remove button) next to it to remove it from the required list. *(Do not delete the workflow — removing it here only stops GitHub from blocking merges when a shared GitHub runner IP hits OpenCode's daily free cap.)*
+7. **Keep `Verdict` required and allow local agent fallback:** find **`Verdict`** in the required status checks list, open its **source** dropdown (next to the check name), and select **`Any source`** *(if it already says `Any source`, leave it as is)*.
+8. Scroll to the bottom of the page and click **Save changes**.
+
+- **Security tradeoff to know:** Setting `Verdict`'s source to **`Any source`** is what lets a separate agent post a passing Verdict from its own machine when CI providers are unavailable, **but** it also means any user or token with `statuses: write` permission on this repository (not just GitHub Actions) can post a passing `Verdict` status. Because only people/agents you grant write access to can do that — and you still review and merge protected PRs by hand — this is the same trust model as ADR 0013.
 
 > **How CI protects your API keys on a public repo:** `verdict.yml` runs under `pull_request_target` so a PR cannot modify its own judge workflow, and the gate **rejects all fork PRs** before any secret is ever loaded (only branches pushed by collaborators with write access to `inprealpha/OpenChessCoach` can run). Provider secrets are scoped strictly to the judge/Coach steps — never job-level and never exposed during `npm ci` or build steps — and every configured secret is scrubbed before public artifacts are uploaded. Still, because the judge runs PR code pushed by repo collaborators, set a low monthly spend cap on `OPENAI_API_KEY` (e.g. $10–$15) as recommended by OpenAI's non-interactive Codex docs.
 

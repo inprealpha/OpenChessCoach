@@ -439,7 +439,11 @@ jobs:
               echo "The real-Coach check couldn't run (exit $code), keeping existing passing status on $SHA."
             else
               reason=$(tail -n 1 verdict-out/real-coach/log.txt 2>/dev/null || true)
-              [ -n "$reason" ] || reason="No real-Coach provider succeeded (exit $code). Check provider secrets or run the local independent fallback."
+              if [ -n "$reason" ]; then
+                reason="CI unavailable (run locally via real-coach-check.ts --provider auto --post): $reason"
+              else
+                reason="CI unavailable (exit $code): run locally with OpenCode/Claude/Codex/Pi via real-coach-check.ts --provider auto --post"
+              fi
               node scripts/verdict.ts --status error --context "real Coach" --sha "$SHA" --description "$reason"
             fi
           fi

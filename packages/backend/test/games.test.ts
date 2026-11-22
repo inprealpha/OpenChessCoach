@@ -26,7 +26,7 @@ function clientFrame(opcode: number, payload: Buffer): Buffer {
   return Buffer.concat([Buffer.from([0x80 | opcode, 0x80 | payload.length]), Buffer.alloc(4), payload]);
 }
 
-const PGNS = readFileSync(new URL('../../shared/test/fixtures/lichess-games.pgn', import.meta.url), 'utf8').trim().split(/\n\n(?=\[Event )/);
+const PGNS = readFileSync(new URL('../../shared/test/fixtures/lichess-games.pgn', import.meta.url), 'utf8').replace(/\r\n/g, '\n').trim().split(/\n\n(?=\[Event )/);
 
 describe('importing by username', () => {
   it('imports Lichess games from the recorded API response, never one still being played', async () => {

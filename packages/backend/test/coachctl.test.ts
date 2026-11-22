@@ -25,7 +25,11 @@ describe('coachctl', () => {
     const healthy = await ctl('doctor', ...target);
     expect(healthy.code).toBe(0);
     expect(healthy.json.healthy).toBe(true);
-    expect((healthy.json.checks as { name: string }[]).map((c) => c.name)).toEqual(['backend', 'version', 'mode', 'web-app', 'pairing-guard', 'pairing', 'tempting-moves']);
+    const expectedChecks =
+      process.platform === 'win32'
+        ? ['backend', 'version', 'mode', 'web-app', 'firewall', 'pairing-guard', 'pairing', 'tempting-moves']
+        : ['backend', 'version', 'mode', 'web-app', 'pairing-guard', 'pairing', 'tempting-moves'];
+    expect((healthy.json.checks as { name: string }[]).map((c) => c.name)).toEqual(expectedChecks);
     expect((healthy.json.checks as { name: string; detail: string }[]).at(-1)?.detail).toBe('from fake; Maia-3 model off: verify mode uses fixed moves');
 
     await app.app.close();

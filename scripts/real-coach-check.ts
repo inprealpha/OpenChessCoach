@@ -36,7 +36,7 @@ import type { CoachRequest, CoachRawReply, CoachReply } from '@chess-coach/share
 import type { LessonData, LessonPart } from '@chess-coach/shared/content/lessons';
 import { COACH_PROVIDERS, type CoachJob, type CoachProvider } from '@chess-coach/shared/protocol';
 import { CoachClient } from '../packages/backend/src/client.ts';
-import type { CoachCall, CoachEngine, CoachPort } from '../packages/backend/src/coach/port.ts';
+import { CoachUnavailableError, type CoachCall, type CoachEngine, type CoachPort } from '../packages/backend/src/coach/port.ts';
 import { avoidedTerms } from './glossary-lint.ts';
 import {
   hasProviderCredentials,
@@ -160,12 +160,14 @@ export class RecordingCoach implements CoachPort {
   readonly calls: CoachCallRecord[] = [];
   private readonly inner: CoachPort;
   private readonly model: string;
+  private readonly callTimeoutMs: number | undefined;
 
-  constructor(inner: CoachPort, model = CHECK_MODEL) {
+  constructor(inner: CoachPort, model = CHECK_MODEL, callTimeoutMs?: number) {
     this.inner = inner;
     this.name = inner.name;
     this.supportsEngineTool = inner.supportsEngineTool;
     this.model = model;
+    this.callTimeoutMs = callTimeoutMs;
   }
 
   status() {
@@ -175,9 +177,50 @@ export class RecordingCoach implements CoachPort {
   async ask(call: CoachCall, onText: (delta: string) => void): Promise<CoachRawReply> {
     const answers: EngineAnswer[] = [];
     const engine = call.engine && recordAnswers(call.engine, answers);
-    const raw = await this.inner.ask({ ...call, model: this.model, ...(engine ? { engine } : {}) }, onText);
+    const askInner = (signal?: AbortSignal) =>
+      this.inner.ask({ ...call, model: this.model, ...(engine ? { engine } : {}), ...(signal ? { signal } : {}) }, onText);
+    const raw = this.callTimeoutMs
+      ? await this.askWithCallTimeout(call, askInner, this.callTimeoutMs)
+      : await askInner(call.signal);
     this.calls.push({ job: call.job, brief: call.brief, raw, ...(call.engine ? { answers } : {}) });
     return raw;
+  }
+
+  private async askWithCallTimeout(
+    call: CoachCall,
+    askInner: (signal: AbortSignal) => Promise<CoachRawReply>,
+    timeoutMs: number,
+  ): Promise<CoachRawReply> {
+    const controller = new AbortController();
+    const onExternalAbort = () => controller.abort();
+    if (call.signal) {
+      if (call.signal.aborted) controller.abort();
+      else call.signal.addEventListener('abort', onExternalAbort, { once: true });
+    }
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let timedOut = false;
+    const timeoutError = () =>
+      new CoachUnavailableError(`The Coach call (${call.job}) timed out after ${Math.round(timeoutMs / 1000)}s.`);
+    const innerPromise = askInner(controller.signal);
+    const timeoutPromise = new Promise<never>((_resolve, reject) => {
+      timer = setTimeout(() => {
+        timedOut = true;
+        reject(timeoutError());
+        controller.abort();
+      }, timeoutMs);
+      timer.unref?.();
+    });
+    // Avoid unhandled rejection if the aborted inner call rejects after timeoutPromise already settled.
+    innerPromise.catch(() => {});
+    try {
+      return await Promise.race([innerPromise, timeoutPromise]);
+    } catch (err) {
+      if (timedOut) throw timeoutError();
+      throw err;
+    } finally {
+      if (timer) clearTimeout(timer);
+      if (call.signal) call.signal.removeEventListener('abort', onExternalAbort);
+    }
   }
 }
 
@@ -475,6 +518,20 @@ function providerTimeoutMs(provider: CoachProvider, env: NodeJS.ProcessEnv = pro
     : DEFAULT_PAID_PROVIDER_TIMEOUT_MS;
 }
 
+/** Default per-call timeout for unauthenticated free OpenCode so a hung model fails fast and falls through to the next ZDR model. */
+export const DEFAULT_FREE_OPENCODE_CALL_TIMEOUT_MS = 45_000;
+
+export function providerCallTimeoutMs(provider: CoachProvider, env: NodeJS.ProcessEnv = process.env): number | undefined {
+  const raw = env.REAL_COACH_CALL_TIMEOUT_MS?.trim();
+  if (raw) {
+    const parsed = Number(raw);
+    if (Number.isFinite(parsed) && parsed > 0) return parsed;
+  }
+  return provider === 'opencode' && isWeakerJudge('opencode', env)
+    ? DEFAULT_FREE_OPENCODE_CALL_TIMEOUT_MS
+    : undefined;
+}
+
 function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     const timer = setTimeout(() => {
@@ -517,12 +574,13 @@ async function runSingleProvider(args: {
     process.env.OPENCODE_API_KEY = mappedOpenCodeKey;
   }
   const timeoutMs = args.timeoutMs ?? (args.fake ? DEFAULT_PAID_PROVIDER_TIMEOUT_MS : providerTimeoutMs(args.provider));
+  const callTimeoutMs = args.fake ? undefined : providerCallTimeoutMs(args.provider);
   let created: { coach: CoachPort; close?: () => void | Promise<void> } | undefined;
   try {
     created = args.fake
       ? { coach: new FakeCoach({ chunkDelayMs: 0 }) }
       : await createProviderCoach(args.provider);
-    const coach = new RecordingCoach(created.coach, args.model);
+    const coach = new RecordingCoach(created.coach, args.model, callTimeoutMs);
     const status = await coach.status();
     if (status.state !== 'ready') {
       throw new Error(`The real Coach (${args.provider}) is not ready: ${'reason' in status ? status.reason : status.state}.`);
@@ -576,14 +634,27 @@ async function runSingleProvider(args: {
   }
 }
 
+const TRANSIENT_MODEL_FAILURE_RE =
+  /fetch failed|econnreset|econnrefused|enotfound|etimedout|socket hang up|network error|timed out|timeout|aborted|reply was empty|service unavailable|bad gateway|gateway timeout|internal server error|\b(?:502|503|504)\b|is not ready|not logged in|not installed|model.*not found|unknown model|not available/i;
+
 function isCoachUnavailableError(err: unknown): boolean {
   if (!err || typeof err !== 'object') return false;
   const record = err as { code?: unknown; cause?: unknown };
-  if (record.code === 'coach-unavailable') return true;
-  if (record.cause && typeof record.cause === 'object' && (record.cause as { code?: unknown }).code === 'coach-unavailable') {
-    return true;
+  if (record.code === 'coach-unavailable' || record.code === 'coach-limit') return true;
+  if (record.cause && typeof record.cause === 'object') {
+    const causeCode = (record.cause as { code?: unknown }).code;
+    if (causeCode === 'coach-unavailable' || causeCode === 'coach-limit') return true;
   }
   return false;
+}
+
+export function isRetryableZdrModelFailure(err: unknown): boolean {
+  const message = err instanceof Error ? err.message : String(err);
+  return (
+    isCoachUnavailableError(err) ||
+    isRetryableProviderFailure(message) ||
+    TRANSIENT_MODEL_FAILURE_RE.test(message)
+  );
 }
 
 export async function runWithFallback(
@@ -611,33 +682,25 @@ export async function runWithFallback(
   throw new Error(`No real-Coach provider succeeded (${errors.join('; ')}).`);
 }
 
-async function runOpenCodeWithZdrModels(args: { model: string; tagProvider?: boolean }): Promise<Verdict> {
-  const models = resolveOpenCodeModelsToTry(args.model, process.env);
-  const budgetMs = providerTimeoutMs('opencode');
-  const deadline = Date.now() + budgetMs;
+export async function runOpenCodeZdrModelLoop(
+  models: readonly string[],
+  budgetMs: number,
+  tryModel: (model: string, remainingMs: number) => Promise<Verdict>,
+  now: () => number = Date.now,
+): Promise<Verdict> {
+  const deadline = now() + budgetMs;
   const errors: string[] = [];
   for (const model of models) {
-    const remainingMs = deadline - Date.now();
+    const remainingMs = deadline - now();
     if (remainingMs <= 0) {
       errors.push(`${model}: skipped (opencode provider timeout budget of ${Math.round(budgetMs / 1000)}s exhausted)`);
       break;
     }
     try {
-      return await runSingleProvider({
-        fake: false,
-        provider: 'opencode',
-        model,
-        timeoutMs: remainingMs,
-        ...(args.tagProvider ? { tagProvider: true } : {}),
-      });
+      return await tryModel(model, remainingMs);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      if (
-        models.length > 1 &&
-        (isCoachUnavailableError(err) ||
-          isRetryableProviderFailure(message) ||
-          /is not ready|not logged in|not installed|model.*not found|unknown model|not available/i.test(message))
-      ) {
+      if (models.length > 1 && isRetryableZdrModelFailure(err)) {
         errors.push(`${model}: ${message}`);
         continue;
       }
@@ -647,6 +710,20 @@ async function runOpenCodeWithZdrModels(args: { model: string; tagProvider?: boo
   throw Object.assign(new Error(`No ZDR free OpenCode model succeeded (${errors.join('; ')}).`), {
     code: 'coach-unavailable',
   });
+}
+
+async function runOpenCodeWithZdrModels(args: { model: string; tagProvider?: boolean }): Promise<Verdict> {
+  const models = resolveOpenCodeModelsToTry(args.model, process.env);
+  const budgetMs = providerTimeoutMs('opencode');
+  return runOpenCodeZdrModelLoop(models, budgetMs, (model, remainingMs) =>
+    runSingleProvider({
+      fake: false,
+      provider: 'opencode',
+      model,
+      timeoutMs: remainingMs,
+      ...(args.tagProvider ? { tagProvider: true } : {}),
+    }),
+  );
 }
 
 async function run(args: Pick<RealCoachArgs, 'fake' | 'provider' | 'model'>): Promise<Verdict> {

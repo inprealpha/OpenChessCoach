@@ -5,8 +5,21 @@ import type { Brief } from '@chess-coach/shared/coach/brief';
 import type { CoachRawReply, CoachReply } from '@chess-coach/shared/coach/types';
 import type { EngineAnswer } from '@chess-coach/shared/coach/engine-tool';
 import { avoidedTerms } from '../glossary-lint.ts';
-import { CHECK_MODEL, type CallVerdict, checkCall, parseRealCoachArgs, RecordingCoach, ROLE_BREAK_TERMS, summarize } from '../real-coach-check.ts';
-import type { CoachCall, CoachPort } from '../../packages/backend/src/coach/port.ts';
+import {
+  CHECK_MODEL,
+  type CallVerdict,
+  checkCall,
+  DEFAULT_FREE_OPENCODE_CALL_TIMEOUT_MS,
+  isRetryableZdrModelFailure,
+  parseRealCoachArgs,
+  providerCallTimeoutMs,
+  RecordingCoach,
+  ROLE_BREAK_TERMS,
+  runOpenCodeZdrModelLoop,
+  summarize,
+  type Verdict,
+} from '../real-coach-check.ts';
+import { CoachUnavailableError, type CoachCall, type CoachPort } from '../../packages/backend/src/coach/port.ts';
 
 const AFTER_E4_D5 = 'rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2';
 const brief: Brief = {
@@ -212,5 +225,54 @@ describe('the real-Coach check', () => {
   it('forwards supportsEngineTool from the wrapped Coach', () => {
     const inner: CoachPort = { name: 'codex', supportsEngineTool: false, status: async () => ({ state: 'ready' }), ask: async () => raw };
     expect(new RecordingCoach(inner, 'default').supportsEngineTool).toBe(false);
+  });
+
+  it('aborts a hung call after callTimeoutMs with CoachUnavailableError', async () => {
+    let aborted = false;
+    const inner: CoachPort = {
+      name: 'opencode',
+      status: async () => ({ state: 'ready' }),
+      ask: (call) =>
+        new Promise((_resolve, reject) => {
+          call.signal?.addEventListener('abort', () => {
+            aborted = true;
+            reject(new Error('aborted'));
+          });
+        }),
+    };
+    const coach = new RecordingCoach(inner, 'opencode/longcat-2.5-free', 30);
+    await expect(coach.ask({ job: 'why', model: 'default', brief }, () => {})).rejects.toBeInstanceOf(CoachUnavailableError);
+    expect(aborted).toBe(true);
+  });
+});
+
+describe('OpenCode ZDR model fallback', () => {
+  const passVerdict: Verdict = { ok: true, sha: 'abc123', provider: 'opencode', weakerFallback: true, calls: [], description: '[opencode free] 15 Coach calls passed' };
+
+  it('falls through to the next ZDR model on mid-run fetch failed and per-call timeout', async () => {
+    const tried: string[] = [];
+    const models = ['opencode/deepseek-v4.1-flash-free', 'opencode/hy4-flash-free', 'opencode/longcat-2.5-free'];
+    const result = await runOpenCodeZdrModelLoop(models, 360_000, async (model) => {
+      tried.push(model);
+      if (model === models[0]) throw new Error("The Coach couldn't answer: fetch failed");
+      if (model === models[1]) throw Object.assign(new Error('The Coach call (why) timed out after 45s.'), { code: 'coach-unavailable' });
+      return passVerdict;
+    });
+    expect(result).toEqual(passVerdict);
+    expect(tried).toEqual(models);
+  });
+
+  it('recognizes fetch failed, coach-limit, and timeout as retryable ZDR failures but not unrelated bugs', () => {
+    expect(isRetryableZdrModelFailure(new Error("The Coach couldn't answer: fetch failed"))).toBe(true);
+    expect(isRetryableZdrModelFailure(Object.assign(new Error('limit'), { code: 'coach-limit' }))).toBe(true);
+    expect(isRetryableZdrModelFailure(new Error('The Coach call (why) timed out after 45s.'))).toBe(true);
+    expect(isRetryableZdrModelFailure(new Error('unexpected TypeError in brief builder'))).toBe(false);
+  });
+
+  it('defaults per-call timeout to 45s for unauthenticated free OpenCode and honors env override', () => {
+    expect(providerCallTimeoutMs('opencode', {})).toBe(DEFAULT_FREE_OPENCODE_CALL_TIMEOUT_MS);
+    expect(providerCallTimeoutMs('opencode', { OPENCODE_API_KEY: 'sk-paid' })).toBeUndefined();
+    expect(providerCallTimeoutMs('claude', {})).toBeUndefined();
+    expect(providerCallTimeoutMs('opencode', { REAL_COACH_CALL_TIMEOUT_MS: '60000' })).toBe(60_000);
   });
 });

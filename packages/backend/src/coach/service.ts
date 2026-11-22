@@ -13,7 +13,7 @@ import type { EngineService } from '../engine/service.ts';
 import { getSettings } from '../settings.ts';
 import { EngineTool, type EngineCall } from './engine-tool.ts';
 import { CoachDeadlineError, CoachLimitError, CoachUnavailableError, type CoachPort } from './port.ts';
-import { CoachRouter } from './router.ts';
+import { CoachRouter, PROVIDER_LABELS } from './router.ts';
 
 /** How the Coach panel says the Coach is asking the Engine, numbered so the Player sees it move on. */
 export function checkingText(n: number): string {
@@ -72,7 +72,7 @@ export class CoachService {
 
   async status(): Promise<CoachStatus> {
     if (this.limitUntil && this.limitUntil > this.clock.now()) {
-      return { state: 'limit-reached', reason: limitMessage(this.limitUntil) };
+      return { state: 'limit-reached', reason: limitMessage(this.limitUntil, providerLabel(this.coach)) };
     }
     if (this.unavailableReason) return { state: 'unavailable', reason: this.unavailableReason };
     return this.coach.status();
@@ -234,7 +234,22 @@ export class CoachService {
   }
 }
 
-function limitMessage(until: Date): string {
+function providerLabel(coach: CoachPort): string {
+  if (coach instanceof CoachRouter) return PROVIDER_LABELS[coach.provider];
+  switch (coach.name) {
+    case 'codex':
+      return PROVIDER_LABELS.codex;
+    case 'pi':
+      return PROVIDER_LABELS.pi;
+    case 'opencode':
+      return PROVIDER_LABELS.opencode;
+    case 'real':
+    case 'fake':
+      return PROVIDER_LABELS.claude;
+  }
+}
+
+function limitMessage(until: Date, provider: string): string {
   const time = until.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  return `Your Claude usage limit has been reached. The Coach is back after ${time}.`;
+  return `Your ${provider} usage limit has been reached. The Coach is back after ${time}.`;
 }

@@ -80,11 +80,19 @@ case "$OS" in
 esac
 
 download() {
-  local url="$1" out="$2"
+  local url="$1" out="$2" progress="${3:-0}"
   if command -v curl >/dev/null 2>&1; then
-    curl -fsSL --retry 3 "$url" -o "$out"
+    if [ "$progress" -eq 1 ] && [ -t 2 ]; then
+      curl -fL# --retry 3 "$url" -o "$out"
+    else
+      curl -fsSL --retry 3 "$url" -o "$out"
+    fi
   elif command -v wget >/dev/null 2>&1; then
-    wget -qO "$out" "$url"
+    if [ "$progress" -eq 1 ] && [ -t 2 ]; then
+      wget --show-progress -qO "$out" "$url"
+    else
+      wget -qO "$out" "$url"
+    fi
   else
     echo "Neither curl nor wget is installed. Please install curl and try again." >&2
     exit 1
@@ -119,8 +127,9 @@ else
   TAR_PATH="$TMP_DIR/$ARCHIVE_NAME"
   SUMS_PATH="$TMP_DIR/SHA256SUMS.txt"
 
-  echo "Downloading OpenChessCoach (${TARGET})..."
-  download "${BASE_URL}/${ARCHIVE_NAME}" "$TAR_PATH"
+  echo "Downloading OpenChessCoach (${TARGET}) — this may take a minute..."
+  download "${BASE_URL}/${ARCHIVE_NAME}" "$TAR_PATH" 1
+  echo "Verifying download..."
   download "${BASE_URL}/SHA256SUMS.txt" "$SUMS_PATH"
 
   EXPECTED="$(awk -v f="$ARCHIVE_NAME" '$2 == f || $2 == "*"f {print tolower($1); exit}' "$SUMS_PATH")"
@@ -135,6 +144,7 @@ else
   fi
 fi
 
+echo "Extracting OpenChessCoach..."
 mkdir -p "$TMP_DIR/extract"
 tar -xzf "$TAR_PATH" -C "$TMP_DIR/extract"
 if [ ! -x "$TMP_DIR/extract/openchesscoach/openchesscoach" ]; then
@@ -173,14 +183,26 @@ case ":${PATH}:" in
     ;;
   *)
     SHELL_RC=""
+    IS_FISH=0
     case "${SHELL:-}" in
+      */fish)
+        IS_FISH=1
+        SHELL_RC="${XDG_CONFIG_HOME:-$HOME/.config}/fish/config.fish"
+        ;;
       */zsh)  SHELL_RC="$HOME/.zshrc" ;;
       */bash) SHELL_RC="$HOME/.bashrc" ;;
       *)      SHELL_RC="$HOME/.profile" ;;
     esac
-    EXPORT_LINE="export PATH=\"\$HOME/.local/bin:\$PATH\""
-    if [ "$BIN_DIR" != "$HOME/.local/bin" ]; then
-      EXPORT_LINE="export PATH=\"${BIN_DIR}:\$PATH\""
+    if [ "$IS_FISH" -eq 1 ]; then
+      EXPORT_LINE="fish_add_path -p \"\$HOME/.local/bin\""
+      if [ "$BIN_DIR" != "$HOME/.local/bin" ]; then
+        EXPORT_LINE="fish_add_path -p \"${BIN_DIR}\""
+      fi
+    else
+      EXPORT_LINE="export PATH=\"\$HOME/.local/bin:\$PATH\""
+      if [ "$BIN_DIR" != "$HOME/.local/bin" ]; then
+        EXPORT_LINE="export PATH=\"${BIN_DIR}:\$PATH\""
+      fi
     fi
     ALREADY_IN_RC=0
     if [ -n "$SHELL_RC" ]; then
@@ -191,6 +213,7 @@ case ":${PATH}:" in
       fi
     fi
     if [ -n "$SHELL_RC" ] && [ "$ALREADY_IN_RC" -eq 0 ]; then
+      mkdir -p "$(dirname "$SHELL_RC")"
       printf '\n# OpenChessCoach\n%s\n' "$EXPORT_LINE" >> "$SHELL_RC"
       echo "Added $BIN_DIR to $SHELL_RC."
     fi
@@ -203,9 +226,13 @@ if ! command -v claude >/dev/null 2>&1 \
   && [ ! -x "$HOME/.local/bin/claude" ] \
   && [ ! -x "$HOME/.claude/local/claude" ] \
   && [ ! -x "/opt/homebrew/bin/claude" ] \
-  && [ ! -x "/usr/local/bin/claude" ]; then
+  && [ ! -x "/usr/local/bin/claude" ] \
+  && ! command -v codex >/dev/null 2>&1 \
+  && ! command -v pi >/dev/null 2>&1 \
+  && ! command -v opencode >/dev/null 2>&1; then
   echo ""
-  echo "Next step — install Claude Code and sign in with your Claude Pro/Max account:"
+  echo "Next step — install a Coach backend (Claude Code recommended) and sign in:"
   echo "  curl -fsSL https://claude.ai/install.sh | bash"
   echo "Then open a new terminal, run \"claude\" to sign in, and run \"openchesscoach\"."
+  echo "Or use Codex, Pi, or OpenCode (including free models) — run \"openchesscoach\" for setup commands."
 fi

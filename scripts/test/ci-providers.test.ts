@@ -353,6 +353,13 @@ describe('weekly CI provider health check', () => {
         p.endsWith('/.local/share/opencode/auth.json'),
       ),
     ).toEqual(['anthropic/claude-haiku-4-5']);
+    const emptyAuthHome = makeTempDir('opencode-empty-auth-');
+    mkdirSync(join(emptyAuthHome, '.local', 'share', 'opencode'), { recursive: true });
+    writeFileSync(join(emptyAuthHome, '.local', 'share', 'opencode', 'auth.json'), '{}', 'utf8');
+    expect(isWeakerJudge('opencode', {}, emptyAuthHome)).toBe(true);
+    expect(() =>
+      resolveOpenCodeModelsToTry('opencode/big-pickle', { OPENCODE_ZDR_FREE_MODELS: 'none' }, emptyAuthHome),
+    ).toThrow(/Zero-Data-Retention/i);
     expect(() =>
       resolveOpenCodeModelsToTry(
         'anthropic/claude-haiku-4-5',

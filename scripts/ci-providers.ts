@@ -139,7 +139,20 @@ function hasLocalOpenCodeAuth(
     env.APPDATA?.trim() ? join(env.APPDATA.trim(), 'opencode') : undefined,
     join(homeDir, '.local', 'share', 'opencode'),
   ].filter((d): d is string => Boolean(d));
-  return dirs.some((dir) => fileExists(join(dir, 'auth.json')));
+  for (const dir of dirs) {
+    const authPath = join(dir, 'auth.json');
+    if (!fileExists(authPath)) continue;
+    if (fileExists !== existsSync) return true;
+    try {
+      const parsed = JSON.parse(readFileSync(authPath, 'utf8')) as unknown;
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed) && Object.keys(parsed).length > 0) {
+        return true;
+      }
+    } catch {
+      // Empty or malformed auth.json does not hold a usable saved login.
+    }
+  }
+  return false;
 }
 
 /** Checks whether a provider has credentials configured in env vars (or local auth files). */

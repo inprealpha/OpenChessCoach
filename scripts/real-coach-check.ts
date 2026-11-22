@@ -437,8 +437,13 @@ const DEFAULT_PAID_PROVIDER_TIMEOUT_MS = 300_000;
  * runs are strictly limited to Zero-Data-Retention (ZDR) free models so prompts never fall back
  * to non-ZDR free models such as `opencode/big-pickle`.
  */
-export function resolveOpenCodeModelsToTry(requestedModel: string, env: NodeJS.ProcessEnv = process.env): string[] {
-  if (!isWeakerJudge('opencode', env)) return [requestedModel];
+export function resolveOpenCodeModelsToTry(
+  requestedModel: string,
+  env: NodeJS.ProcessEnv = process.env,
+  homeDir?: string,
+  fileExists?: (path: string) => boolean,
+): string[] {
+  if (!isWeakerJudge('opencode', env, homeDir, fileExists)) return [requestedModel];
   const zdrModels = resolveZdrFreeOpenCodeModels(env);
   if (requestedModel !== 'default') {
     if (!isZdrFreeOpenCodeModel(requestedModel, env)) {

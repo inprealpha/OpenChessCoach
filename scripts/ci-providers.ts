@@ -128,6 +128,20 @@ function codexAuthPath(env: NodeJS.ProcessEnv, homeDir: string): string {
   return join(codexHome, 'auth.json');
 }
 
+function hasLocalOpenCodeAuth(
+  env: NodeJS.ProcessEnv,
+  homeDir: string,
+  fileExists: (path: string) => boolean,
+): boolean {
+  if (env.GITHUB_ACTIONS) return false;
+  const dirs = [
+    env.XDG_DATA_HOME?.trim() ? join(env.XDG_DATA_HOME.trim(), 'opencode') : undefined,
+    env.APPDATA?.trim() ? join(env.APPDATA.trim(), 'opencode') : undefined,
+    join(homeDir, '.local', 'share', 'opencode'),
+  ].filter((d): d is string => Boolean(d));
+  return dirs.some((dir) => fileExists(join(dir, 'auth.json')));
+}
+
 /** Checks whether a provider has credentials configured in env vars (or local auth files). */
 export function hasProviderCredentials(
   provider: CiProvider,
@@ -170,16 +184,25 @@ export function hasProviderCredentials(
   // OpenCode ships with free Zen models out of the box, so it is always available as a last-resort fallback.
   if (env.OPENCODE_API_KEY?.trim()) return { configured: true, source: 'OPENCODE_API_KEY' };
   if (env.OPENCODE_ZEN_API_KEY?.trim()) return { configured: true, source: 'OPENCODE_ZEN_API_KEY' };
+  if (hasLocalOpenCodeAuth(env, homeDir, fileExists)) return { configured: true, source: 'opencode-auth-file' };
   return { configured: true, source: 'opencode-free' };
 }
 
 /**
  * True when the Verdict judge is running on free OpenCode models rather than a paid Codex/Claude
- * provider or paid OpenCode key, so the status and PR comment label it clearly as a weaker judge.
+ * provider, a paid OpenCode key, or a saved local OpenCode login, so the status and PR comment
+ * label it clearly as a weaker judge.
  */
-export function isWeakerJudge(provider: JudgeProvider, env: NodeJS.ProcessEnv = process.env): boolean {
+export function isWeakerJudge(
+  provider: JudgeProvider,
+  env: NodeJS.ProcessEnv = process.env,
+  homeDir: string = homedir(),
+  fileExists: (path: string) => boolean = existsSync,
+): boolean {
   if (provider !== 'opencode') return false;
-  return !env.OPENCODE_API_KEY?.trim() && !env.OPENCODE_ZEN_API_KEY?.trim();
+  if (env.OPENCODE_API_KEY?.trim() || env.OPENCODE_ZEN_API_KEY?.trim()) return false;
+  if (hasLocalOpenCodeAuth(env, homeDir, fileExists)) return false;
+  return true;
 }
 
 /**

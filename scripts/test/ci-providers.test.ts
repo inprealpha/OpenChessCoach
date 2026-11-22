@@ -344,10 +344,23 @@ describe('weekly CI provider health check', () => {
     // real Coach free OpenCode uses ZDR allowlist by default and rejects non-ZDR explicit models.
     expect(resolveOpenCodeModelsToTry('default', {})).toEqual([...ZDR_FREE_OPENCODE_MODELS]);
     expect(() => resolveOpenCodeModelsToTry('opencode/big-pickle', {})).toThrow(/Zero-Data-Retention/i);
-    // Paid OpenCode keys bypass the free ZDR allowlist restriction.
+    // Paid OpenCode keys and saved local OpenCode logins bypass the free ZDR allowlist restriction.
     expect(resolveOpenCodeModelsToTry('opencode/big-pickle', { OPENCODE_API_KEY: 'paid-key' })).toEqual([
       'opencode/big-pickle',
     ]);
+    expect(
+      resolveOpenCodeModelsToTry('anthropic/claude-haiku-4-5', {}, '/home/dev', (p) =>
+        p.endsWith('/.local/share/opencode/auth.json'),
+      ),
+    ).toEqual(['anthropic/claude-haiku-4-5']);
+    expect(() =>
+      resolveOpenCodeModelsToTry(
+        'anthropic/claude-haiku-4-5',
+        { GITHUB_ACTIONS: 'true' },
+        '/home/dev',
+        (p) => p.endsWith('/.local/share/opencode/auth.json'),
+      ),
+    ).toThrow(/Zero-Data-Retention/i);
 
     // runJudge tries ZDR free models in order and never defaults to big-pickle.
     const outDir = makeTempDir('judge-zdr-');

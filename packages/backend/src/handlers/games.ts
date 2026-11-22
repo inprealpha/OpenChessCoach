@@ -161,8 +161,14 @@ function notReviewing(db: Db, gameId: number): void {
   if (reviewInProgress(db, gameId)) throw new AppError('bad-request', 'This game’s Review is being made right now. Try again once it’s done.');
 }
 
+function escapePgnTag(value: string): string {
+  return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+}
+
 function rebuildPgn(headers: Record<string, string>, sans: string[], result: string): string {
-  const head = Object.entries(headers).map(([k, v]) => `[${k} "${v}"]`).join('\n');
+  const head = Object.entries(headers)
+    .map(([k, v]) => `[${k} "${escapePgnTag(v)}"]`)
+    .join('\n');
   const body: string[] = [];
   sans.forEach((s, i) => {
     if (i % 2 === 0) body.push(`${i / 2 + 1}.`);

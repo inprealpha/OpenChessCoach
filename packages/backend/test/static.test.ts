@@ -66,4 +66,17 @@ describe('the web app’s files', () => {
     const res = await fetch(`${url}/..%2f..%2fetc%2fpasswd`);
     expect(res.status).toBe(403);
   });
+
+  it('answers a malformed percent-encoded path with 400 instead of 500', async () => {
+    const res = await fetch(`${url}/%E0%A4%A`);
+    expect(res.status).toBe(400);
+    expect(res.headers.get('cache-control')).toBe('no-store');
+  });
+
+  it('answers HEAD requests with headers only', async () => {
+    const res = await fetch(`${url}/assets/index-NEWHASH.js`, { method: 'HEAD' });
+    expect(res.status).toBe(200);
+    expect(res.headers.get('content-type')).toBe('text/javascript; charset=utf-8');
+    expect(await res.text()).toBe('');
+  });
 });

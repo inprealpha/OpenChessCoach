@@ -8,11 +8,11 @@
  "puzzleThemes": [
   "pawnEndgame"
  ],
- "goal": "You can tell whether king and pawn win against a lone king, using the opposition and the key squares in front of the pawn.",
+ "goal": "You can tell whether king and pawn win against a lone king, using the opposition and the key squares in front of the pawn, and you know why a rook pawn is often only a draw.",
  "priorKnowledge": [
   "active-king"
  ],
- "intro": "With king and pawn against a lone king, the pawn cannot promote on its own: your king has to clear the way. For a pawn still in your half of the board, the key squares are the three squares two ranks (rows) in front of it, and if your king reaches one of them while the pawn is safe, the pawn will promote whoever is to move. Pawns on the a- and h-files are the exception. When the two kings stand face to face with one square between them, the side that does not have to move has the opposition, and the other king must step aside.",
+ "intro": "With king and pawn against a lone king, the pawn cannot promote on its own: your king has to clear the way. For a pawn still in your half of the board, the key squares are the three squares two ranks (rows) in front of it, and if your king reaches one of them while the pawn is safe, the pawn will promote whoever is to move. Pawns on the a- and h-files are the exception: once the defending king gets into the corner in front of such a pawn, it cannot be driven out, and the game is a draw. When the two kings stand face to face with one square between them, the side that does not have to move has the opposition, and the other king must step aside.",
  "playOut": {
   "title": "Win with the extra pawn",
   "fen": "8/8/4k3/8/4K3/4P3/8/8 b - - 0 1",
@@ -110,6 +110,32 @@
      "ply": 6,
      "san": "Kf3",
      "text": "The pawn moved to f5, so its key squares moved too: now they are e3, f3 and g3. Your king sits on f3, in the pawn's path, and Black has no way past. In the game White kept the draw for a few more moves, then lost after 82.Ke1. Staying in front of the pawn with 82.Kf2 would still have drawn."
+    }
+   ]
+  },
+  {
+   "title": "A pawn on the edge",
+   "fen": "8/8/8/8/7p/6k1/4K3/8 w - - 0 61",
+   "side": "white",
+   "keyIdea": "Against a rook pawn, the defending king draws by reaching the corner in front of the pawn: nothing can force it out.",
+   "text": "From a game played on Lichess. You are White, and you defend again. Black's king on g3 is well ahead of its pawn on h4. With a pawn on any other file that would win for Black, but a rook pawn, on the a- or h-file, is different. Look at the corner in front of the pawn.",
+   "url": "https://lichess.org/training/bK77H",
+   "line": "Kf1 h3 Kg1 h2+ Kh1",
+   "notes": [
+    {
+     "ply": 0,
+     "san": "Kf1",
+     "text": "61.Kf1 is the only move that holds. Your king heads for g1 and h1, the squares in front of the pawn. From any other square it would be too late: Black's king would step to g2 and shut yours out of the corner."
+    },
+    {
+     "ply": 2,
+     "san": "Kg1",
+     "text": "Black pushed the pawn to h3, and 62.Kg1 stands in front of it. Again it is the only move: after 62.Ke1 or 62.Ke2, Black's king would reach g2."
+    },
+    {
+     "ply": 4,
+     "san": "Kh1",
+     "text": "62...h2+ checks, and 63.Kh1 walks into the corner. Your king cannot be forced out of it. Black's only try is 63...Kh3, which keeps guarding the pawn, but then you have no legal move and are not in check: stalemate. Any other king move leaves the pawn unguarded, and you take it."
     }
    ]
   }

@@ -278,7 +278,7 @@ export function materializeCodexAuth(
   };
 }
 
-export type ProviderFailureKind = 'auth' | 'quota' | 'missing-cli' | 'other';
+export type ProviderFailureKind = 'auth' | 'quota' | 'missing-cli' | 'timeout' | 'other';
 
 const AUTH_ERROR_RE =
   /\b(401|403|unauthorized|unauthenticated|invalid[_\s-]?api[_\s-]?key|authentication[_\s-]?error|authentication failed|auth(?:entication)? error|not logged in|login required|token expired|expired token|oauth.*(?:expired|invalid|revoked)|refresh[_\s-]?token.*(?:expired|invalid|revoked)|providerautherror|no api key|missing api key|invalid x-api-key|please run.*login)\b/i;

@@ -135,7 +135,9 @@ export function commentFor(
   parts.push(`${judgeLine}For commit ${sha}. A new push needs a new Verdict.`);
 
   if (!verdict && meta?.allProvidersFailed && meta.attempts.length) {
-    const attemptLines = meta.attempts.map((a) => `- **${a.provider}**: ${a.outcome}${a.reason ? ` (${a.reason})` : ''}`).join('\n');
+    const attemptLines = meta.attempts
+      .map((a) => `- **${a.provider}**${a.model ? ` (\`${a.model}\`)` : ''}: ${a.outcome}${a.reason ? ` (${a.reason})` : ''}`)
+      .join('\n');
     parts.push(`### CI providers tried\n\n${attemptLines}\n\nTo unblock this PR while CI providers are unavailable, have a **separate agent** (not the one that wrote the PR) run the Verdict locally and post it with \`node scripts/verdict.ts --post <dir> --pr <n> --sha ${sha} --local --judge-agent <name>\` (see \`docs/ci-providers.md\`).`);
   }
 

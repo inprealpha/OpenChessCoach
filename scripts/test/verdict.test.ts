@@ -94,12 +94,22 @@ describe('multi-provider and local-fallback metadata', () => {
       weakerJudge: false,
       source: 'ci' as const,
       allProvidersFailed: true,
-      attempts: [{ provider: 'codex' as const, outcome: 'provider-error' as const, reason: '401 Unauthorized' }],
+      attempts: [
+        { provider: 'codex' as const, outcome: 'provider-error' as const, reason: '401 Unauthorized' },
+        {
+          provider: 'opencode' as const,
+          model: 'opencode/deepseek-v4.1-flash-free',
+          outcome: 'provider-error' as const,
+          reason: 'No answer from opencode/deepseek-v4.1-flash-free within 2 minutes',
+        },
+      ],
     };
     expect(statusFor(undefined, true, failedMeta).description).toContain('No CI judge available');
     const failedComment = commentFor(undefined, undefined, SHA, RUN, true, failedMeta);
     expect(failedComment).toContain('CI providers tried');
     expect(failedComment).toContain('401 Unauthorized');
+    expect(failedComment).toContain('opencode/deepseek-v4.1-flash-free');
+    expect(failedComment).toContain('No answer from opencode/deepseek-v4.1-flash-free within 2 minutes');
     expect(failedComment).toContain('--local --judge-agent');
   });
 });

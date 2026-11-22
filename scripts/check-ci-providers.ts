@@ -160,6 +160,9 @@ function explainFailure(provider: JudgeProvider, kind: ProviderFailureKind, raw:
   if (kind === 'missing-cli') {
     return `The ${provider} CLI was not found on the runner.${snippet ? ` (${snippet})` : ''}`;
   }
+  if (kind === 'timeout') {
+    return `${provider} timed out without answering.${snippet ? ` (${snippet})` : ''}`;
+  }
   return snippet || `${provider} probe failed without output.`;
 }
 

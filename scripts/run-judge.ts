@@ -91,7 +91,7 @@ const OPENCODE_BANNER_RE = /^>\s+\S+\s+·\s+\S+/;
 const OPENCODE_LOG_LINE_RE = /^timestamp=\S+\s+level=(?:DEBUG|INFO|WARN|ERROR)\b/;
 const MODEL_UNAVAILABLE_RE = /model.*not found|unknown model|not available|not supported/i;
 const FATAL_STREAM_ERROR_FRAMING_RE =
-  /^(?:timestamp=\S+\s+level=ERROR\b.*message="stream error"|(?:AI_APICallError|FreeUsageLimitError|Error):)/i;
+  /^(?:timestamp=\S+\s+level=ERROR\b.*message="stream error"|(?:AI_APICallError|FreeUsageLimitError):)/i;
 
 /** Strips ANSI color codes from a single line of CLI output. */
 function stripAnsi(text: string): string {
@@ -118,6 +118,11 @@ function couldBeOpenCodeStartupOrLogPrefix(rawLine: string): boolean {
   return false;
 }
 
+function isFatalOpenCodeProviderError(text: string): boolean {
+  const kind = classifyProviderFailure(text);
+  return kind === 'auth' || kind === 'quota' || MODEL_UNAVAILABLE_RE.test(text);
+}
+
 /**
  * Returns the cleaned error line when an OpenCode log/output line reports a fatal provider stream
  * error (such as `AI_APICallError: Free usage limit reached`), where `opencode run 1.19.6` is
@@ -127,11 +132,9 @@ export function detectFatalProviderErrorLine(rawLine: string): string | undefine
   const clean = stripAnsi(rawLine).trim();
   if (!clean) return undefined;
   if (!FATAL_STREAM_ERROR_FRAMING_RE.test(clean)) return undefined;
-  if (isRetryableProviderFailure(clean) || MODEL_UNAVAILABLE_RE.test(clean)) {
+  if (isFatalOpenCodeProviderError(clean)) {
     const extracted = /\berror(?:\.error)?="([^"]+)"/.exec(clean)?.[1];
-    return extracted && (isRetryableProviderFailure(extracted) || MODEL_UNAVAILABLE_RE.test(extracted))
-      ? extracted
-      : clean;
+    return extracted && isFatalOpenCodeProviderError(extracted) ? extracted : clean;
   }
   return undefined;
 }
@@ -309,6 +312,11 @@ export function execJudgeProcess(
           firstActivityTimer = undefined;
         }
       }
+      if (fatalErrorTimer && !aborting) {
+        clearTimeout(fatalErrorTimer);
+        fatalErrorTimer = undefined;
+        abortedProviderError = undefined;
+      }
       resetIdleTimer();
     };
 
@@ -316,14 +324,16 @@ export function execJudgeProcess(
       if (inv.provider === 'opencode') {
         if (stream === 'stderr') {
           const fatal = detectFatalProviderErrorLine(line);
-          if (fatal && !abortedProviderError) {
-            abortedProviderError = fatal;
-            const graceMs = timeouts.fatalErrorGraceMs ?? DEFAULT_FATAL_ERROR_GRACE_MS;
-            fatalErrorTimer = setTimeout(() => {
-              if (settled || aborting) return;
-              abortProcess();
-            }, graceMs);
-            fatalErrorTimer.unref();
+          if (fatal) {
+            if (!abortedProviderError) {
+              abortedProviderError = fatal;
+              const graceMs = timeouts.fatalErrorGraceMs ?? DEFAULT_FATAL_ERROR_GRACE_MS;
+              fatalErrorTimer = setTimeout(() => {
+                if (settled || aborting) return;
+                abortProcess();
+              }, graceMs);
+              fatalErrorTimer.unref();
+            }
             return;
           }
         }

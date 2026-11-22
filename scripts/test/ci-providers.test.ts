@@ -485,6 +485,10 @@ describe('judge hang and fatal-error watchdogs', () => {
       'timestamp=2026-11-22T14:09:59.090Z level=ERROR run=554116e2 message="stream error" providerID=opencode modelID=deepseek-v4.1-flash-free error.error="AI_APICallError: Free usage limit reached."';
     expect(detectFatalProviderErrorLine(fatalLine)).toBe('AI_APICallError: Free usage limit reached.');
     expect(detectFatalProviderErrorLine('AI_APICallError: Too many requests')).toBe('AI_APICallError: Too many requests');
+    // Bare `Error:` lines and `missing-cli` (ENOENT) from bash tools on stderr must never trigger the abort.
+    expect(detectFatalProviderErrorLine('Error: ENOENT: no such file or directory')).toBeUndefined();
+    expect(detectFatalProviderErrorLine('Error: 429 rate limit exceeded')).toBeUndefined();
+    expect(detectFatalProviderErrorLine('AI_APICallError: ENOENT: no such file or directory')).toBeUndefined();
     // Normal test/diff output quoting Free usage limit reached must never trigger the abort.
     expect(detectFatalProviderErrorLine('✓ classifies 401 Unauthorized and 429 rate limit exceeded')).toBeUndefined();
     expect(detectFatalProviderErrorLine('const msg = "AI_APICallError: Free usage limit reached.";')).toBeUndefined();
@@ -513,6 +517,91 @@ describe('judge hang and fatal-error watchdogs', () => {
 
     expect(res.status).toBe(0);
     expect(res.abortedProviderError).toBeUndefined();
+    expect(res.timedOut).toBeUndefined();
+  });
+
+  it('does not abort a healthy opencode judge when bash tool output prints bare Error: lines to stderr', async () => {
+    const outDir = makeTempDir('judge-stderr-bash-error-');
+    const res = await execJudgeProcess(
+      {
+        provider: 'opencode',
+        command: process.execPath,
+        args: [
+          '-e',
+          [
+            'process.stderr.write("> build · hy4-flash-free\\n");',
+            'process.stderr.write("$ printf \'Error: ENOENT: no such file or directory\\\\n\'; sleep 1\\n");',
+            'process.stderr.write("Error: ENOENT: no such file or directory\\n");',
+            'setTimeout(() => { process.stdout.write("done\\n"); process.exit(0); }, 250);',
+          ].join(' '),
+        ],
+        model: 'opencode/hy4-flash-free',
+        logFile: join(outDir, 'judge-opencode.log'),
+      },
+      outDir,
+      process.env,
+      { firstActivityMs: 2_000, idleMs: 2_000, overallMs: 5_000, fatalErrorGraceMs: 50, killGraceMs: 100 },
+    );
+
+    expect(res.status).toBe(0);
+    expect(res.abortedProviderError).toBeUndefined();
+    expect(res.timedOut).toBeUndefined();
+  });
+
+  it('cancels a pending fatal-error abort when the opencode judge produces subsequent activity', async () => {
+    const outDir = makeTempDir('judge-fatal-canceled-by-activity-');
+    const res = await execJudgeProcess(
+      {
+        provider: 'opencode',
+        command: process.execPath,
+        args: [
+          '-e',
+          [
+            'process.stderr.write("> build · hy4-flash-free\\n");',
+            'process.stderr.write("AI_APICallError: Too many requests\\n");',
+            'setTimeout(() => process.stderr.write("$ echo still working\\n"), 30);',
+            'setTimeout(() => { process.stdout.write("done\\n"); process.exit(0); }, 260);',
+          ].join(' '),
+        ],
+        model: 'opencode/hy4-flash-free',
+        logFile: join(outDir, 'judge-opencode.log'),
+      },
+      outDir,
+      process.env,
+      { firstActivityMs: 2_000, idleMs: 2_000, overallMs: 5_000, fatalErrorGraceMs: 100, killGraceMs: 100 },
+    );
+
+    expect(res.status).toBe(0);
+    expect(res.abortedProviderError).toBeUndefined();
+    expect(res.timedOut).toBeUndefined();
+  });
+
+  it('still aborts promptly when opencode emits repeated fatal stream errors without real activity', async () => {
+    const outDir = makeTempDir('judge-hang-repeated-fatal-');
+    const start = Date.now();
+    const res = await execJudgeProcess(
+      {
+        provider: 'opencode',
+        command: process.execPath,
+        args: [
+          '-e',
+          [
+            'process.stderr.write("> build · deepseek-v4.1-flash-free\\n");',
+            'process.stderr.write(\'timestamp=2026-11-22T14:09:59Z level=ERROR run=1 message="stream error" error.error="AI_APICallError: Free usage limit reached."\\n\');',
+            'setTimeout(() => process.stderr.write("AI_APICallError: Free usage limit reached.\\n"), 30);',
+            'setInterval(() => {}, 60_000);',
+          ].join(' '),
+        ],
+        model: 'opencode/deepseek-v4.1-flash-free',
+        logFile: join(outDir, 'judge-opencode.log'),
+      },
+      outDir,
+      process.env,
+      { firstActivityMs: 5_000, idleMs: 5_000, overallMs: 10_000, fatalErrorGraceMs: 120, killGraceMs: 200 },
+    );
+
+    expect(Date.now() - start).toBeLessThan(3_000);
+    expect(res.abortedProviderError).toContain('Free usage limit reached');
     expect(res.timedOut).toBeUndefined();
   });
 

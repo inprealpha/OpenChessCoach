@@ -270,6 +270,11 @@ export function execJudgeProcess(
     const finish = (result: JudgeExecResult): void => {
       if (settled) return;
       settled = true;
+      if (aborting) {
+        // Ensure any SIGTERM-resistant descendants in the process group are killed
+        // even if the direct child exited before `killTimer` fired.
+        terminateChildTree(child.pid, 'SIGKILL', () => {});
+      }
       clearAllTimers();
       resolveResult(result);
     };

@@ -606,6 +606,40 @@ describe('judge hang and fatal-error watchdogs', () => {
     expect(res.stdout).toContain('tok ');
   });
 
+  it('kills SIGTERM-resistant descendants in the process group when a timed-out judge exits early', async () => {
+    if (process.platform === 'win32') return;
+    const outDir = makeTempDir('judge-descendant-kill-');
+    const pidFile = join(outDir, 'grandchild.pid');
+    const res = await execJudgeProcess(
+      {
+        provider: 'opencode',
+        command: process.execPath,
+        args: [
+          '-e',
+          [
+            'const { spawn } = require("node:child_process");',
+            'const { writeFileSync } = require("node:fs");',
+            'const gc = spawn(process.execPath, ["-e", "process.on(\'SIGTERM\', () => {}); setInterval(() => {}, 60000);"], { stdio: "ignore" });',
+            `writeFileSync(${JSON.stringify(pidFile)}, String(gc.pid));`,
+            'setInterval(() => {}, 60000);',
+          ].join(' '),
+        ],
+        model: 'opencode/deepseek-v4.1-flash-free',
+        logFile: join(outDir, 'judge-opencode.log'),
+      },
+      outDir,
+      process.env,
+      { firstActivityMs: 250, idleMs: 5_000, overallMs: 5_000, killGraceMs: 2_000 },
+    );
+
+    expect(res.timedOut).toBe('first-activity');
+    const gcPid = Number(readFileSync(pidFile, 'utf8').trim());
+    expect(Number.isInteger(gcPid) && gcPid > 0).toBe(true);
+    // Give the OS a brief moment to reap the SIGKILLed grandchild.
+    await new Promise((r) => setTimeout(r, 100));
+    expect(() => process.kill(gcPid, 0)).toThrow();
+  });
+
   it('advances to the next ZDR free model when the first hangs on Free usage limit reached or times out', async () => {
     const outDir = makeTempDir('judge-fallback-hang-');
     const tried: Array<string | undefined> = [];

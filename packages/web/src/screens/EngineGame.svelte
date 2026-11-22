@@ -609,7 +609,7 @@
       if (hintLevel === 1) {
         if (api.coachReady) {
           await coach.ask({ job: 'hint', fen: line.fen, recentMoves: line.sansUntilCursor(), playerSide: game.playerSide }, 'Hint, please.');
-        } else coach.say('Hints need the Coach, which is unavailable. Press Hint again to see the Engine’s move.');
+        } else coach.say('Hints need the Coach, which is unavailable. Press Show the move to see the Engine’s move.');
         return;
       }
       // From the desktop's Engine, like the facts behind the first Hint (ADR 0007).

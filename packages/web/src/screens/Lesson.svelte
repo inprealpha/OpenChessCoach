@@ -436,7 +436,7 @@
           await tick();
           if (document.activeElement === document.body) hintButton?.focus();
         } else {
-          coach.say('Hints need the Coach, which is unavailable. Press Hint again to see the Lesson’s move.');
+          coach.say('Hints need the Coach, which is unavailable. Press Show the move to see the Lesson’s move.');
         }
         return;
       }

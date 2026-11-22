@@ -1194,3 +1194,36 @@ test('the thumb bar: the board edge to edge on a phone, its tools in the header 
   const previous = await stepsBesideAsk();
   expect((await box('First position')).x + (await box('First position')).width).toBeLessThanOrEqual(previous.x);
 });
+
+test('Won, Lost and Drew results in the game list are visually distinct', async ({ paired, app }) => {
+  await paired.goto(`${app.url}/#/games`);
+  // Import a win and a draw alongside the seeded loss so all three outcomes are in the list.
+  await paired.getByLabel('PGN', { exact: true }).fill('[White "WinA"]\n[Black "WinB"]\n\n1. e4 e5 2. Qh5 Nc6 3. Bc4 Nf6 4. Qxf7# 1-0');
+  await paired.getByRole('button', { name: 'Import PGN' }).click();
+  await paired.getByRole('radio', { name: 'White' }).check();
+  await paired.getByRole('button', { name: 'Import PGN' }).click();
+  await expect(paired.getByRole('status').filter({ hasText: 'Imported: WinA vs WinB' })).toBeVisible();
+
+  await paired.getByLabel('PGN', { exact: true }).fill('[White "DrawA"]\n[Black "DrawB"]\n\n1. d4 d5 2. c4 e6 1/2-1/2');
+  await paired.getByRole('button', { name: 'Import PGN' }).click();
+  await paired.getByRole('radio', { name: 'White' }).check();
+  await paired.getByRole('button', { name: 'Import PGN' }).click();
+  await expect(paired.getByRole('status').filter({ hasText: 'Imported: DrawA vs DrawB' })).toBeVisible();
+
+  const table = paired.getByRole('table', { name: 'Game list' });
+  const styleOf = (text: string) =>
+    table.getByRole('cell', { name: text }).first().evaluate((el) => {
+      const s = getComputedStyle(el);
+      return { color: s.color, weight: Number(s.fontWeight) };
+    });
+
+  const won = await styleOf('Won with White');
+  const lost = await styleOf('Lost with White');
+  const drew = await styleOf('Drew with White');
+
+  expect(won.color).not.toBe(lost.color);
+  expect(won.color).not.toBe(drew.color);
+  expect(lost.color).not.toBe(drew.color);
+  expect(won.weight).toBeGreaterThan(drew.weight);
+  expect(lost.weight).toBeGreaterThan(drew.weight);
+});

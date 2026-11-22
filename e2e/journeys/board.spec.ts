@@ -1491,3 +1491,21 @@ async function recordSearches(page: Page): Promise<void> {
 async function searches(page: Page): Promise<string[]> {
   return page.evaluate(() => [...(window as unknown as { searched: string[] }).searched]);
 }
+
+test('on a phone, every Engine-line move is at least a 44×44 touch target without horizontal page overflow', async ({ paired, app }) => {
+  await paired.setViewportSize({ width: 390, height: 844 });
+  await paired.goto(`${app.url}/#/board`);
+  await paired.getByRole('tab', { name: 'Lines' }).click();
+  const section = paired.getByRole('region', { name: 'Engine lines' });
+  await expect(section.getByText('Depth 10')).toBeVisible();
+  const buttons = section.locator('ol button.move');
+  const count = await buttons.count();
+  expect(count).toBeGreaterThan(0);
+  for (let i = 0; i < count; i++) {
+    const box = await buttons.nth(i).boundingBox();
+    expect(box).not.toBeNull();
+    expect(box!.width).toBeGreaterThanOrEqual(44);
+    expect(box!.height).toBeGreaterThanOrEqual(44);
+  }
+  expect(await paired.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+});

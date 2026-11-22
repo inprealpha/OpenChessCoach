@@ -33,10 +33,9 @@ export const ZDR_FREE_OPENCODE_MODELS = [
  * unauthenticated free OpenCode fallback entirely.
  */
 export function resolveZdrFreeOpenCodeModels(env: NodeJS.ProcessEnv = process.env): string[] {
-  const raw = env.OPENCODE_ZDR_FREE_MODELS;
-  if (raw === undefined) return [...ZDR_FREE_OPENCODE_MODELS];
-  const trimmed = raw.trim();
-  if (!trimmed || trimmed.toLowerCase() === 'none') return [];
+  const trimmed = env.OPENCODE_ZDR_FREE_MODELS?.trim();
+  if (!trimmed) return [...ZDR_FREE_OPENCODE_MODELS];
+  if (trimmed.toLowerCase() === 'none') return [];
   const out: string[] = [];
   const seen = new Set<string>();
   for (const part of trimmed.split(',')) {

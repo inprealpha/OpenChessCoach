@@ -336,6 +336,7 @@ describe('weekly CI provider health check', () => {
 
   it('pins free OpenCode Verdict and real Coach strictly to Zero-Data-Retention models and rejects non-ZDR models', () => {
     expect(resolveZdrFreeOpenCodeModels({})).toEqual([...ZDR_FREE_OPENCODE_MODELS]);
+    expect(resolveZdrFreeOpenCodeModels({ OPENCODE_ZDR_FREE_MODELS: '' })).toEqual([...ZDR_FREE_OPENCODE_MODELS]);
     expect(isZdrFreeOpenCodeModel('opencode/deepseek-v4.1-flash-free', {})).toBe(true);
     expect(isZdrFreeOpenCodeModel('opencode/big-pickle', {})).toBe(false);
     expect(resolveZdrFreeOpenCodeModels({ OPENCODE_ZDR_FREE_MODELS: 'none' })).toEqual([]);

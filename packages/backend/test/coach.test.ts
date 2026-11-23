@@ -14,6 +14,8 @@ import { createNodeEngine } from '../src/engine/node-engine.ts';
 import { NOTE_CAP } from '../src/profile.ts';
 import { REPLY_SCHEMA, SYSTEM_PROMPT } from '../src/coach/prompts.ts';
 import { VERIFY_ENGINE } from '../src/verify/instance.ts';
+import { CoachLimitError, type CoachPort } from '../src/coach/port.ts';
+import { CoachRouter } from '../src/coach/router.ts';
 import { RealCoach, toRawReply } from '../src/coach/real.ts';
 import { client, instance, rows } from './helpers.ts';
 
@@ -703,6 +705,32 @@ describe('the Coach port', () => {
     expect(brief.lesson?.popularity).toMatch(/ 0%$/);
     const [call] = rows<{ brief: string }>(app, 'SELECT brief FROM coach_calls ORDER BY id DESC LIMIT 1');
     expect(call?.brief.length).toBeLessThanOrEqual(BRIEF_BUDGET);
+  });
+
+  it('names the active provider (not Claude) when OpenCode, Codex, or Pi hits a usage limit', async () => {
+    for (const [provider, label] of [
+      ['opencode', 'OpenCode'],
+      ['codex', 'Codex'],
+      ['pi', 'Pi'],
+    ] as const) {
+      const limitedPort: CoachPort = {
+        name: provider,
+        status: async () => ({ state: 'ready', provider }),
+        ask: async () => {
+          throw new CoachLimitError(`${label} usage limit reached.`);
+        },
+      };
+      const router = new CoachRouter({ providers: { [provider]: limitedPort }, initial: provider });
+      const app = await instance({ coachPort: router });
+      const c = await client(app);
+      await expect(c.request('coach.ask', whyAsk())).rejects.toMatchObject({
+        code: 'coach-limit',
+        message: expect.stringContaining(`Your ${label} usage limit has been reached.`),
+      });
+      const statusEvent = c.events.find((e) => e.kind === 'coach-status' && e.status.state === 'limit-reached');
+      expect(statusEvent?.kind === 'coach-status' && 'reason' in statusEvent.status ? statusEvent.status.reason : '').toContain(label);
+      expect(statusEvent?.kind === 'coach-status' && 'reason' in statusEvent.status ? statusEvent.status.reason : '').not.toContain('Claude');
+    }
   });
 
   it('refuses a malformed Lesson focus before calling the Coach', async () => {

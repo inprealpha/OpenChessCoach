@@ -46,7 +46,7 @@ export interface CoachBack {
   limited?: { resetsAt?: Date };
 }
 
-/** The owner's Claude limits are used up. */
+/** The active Coach provider's usage limits are used up. */
 export class CoachLimitError extends Error {
   readonly resetsAt: Date | undefined;
   constructor(message: string, resetsAt?: Date) {

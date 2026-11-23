@@ -3,6 +3,7 @@
 // (`opencode auth login`) or OpenCode's built-in free Zen models.
 import { spawn } from 'node:child_process';
 import { mkdtempSync, rmSync } from 'node:fs';
+import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
@@ -401,12 +402,30 @@ function createOpenCodeV2Client(baseUrl: string, password: string): OpenCodeV2Cl
   };
 }
 
+/** Allocates an ephemeral TCP port because `opencode serve --port=0` falls back to port 4096. */
+export function pickFreePort(hostname = '127.0.0.1'): Promise<number> {
+  return new Promise((resolve, reject) => {
+    const server = createServer();
+    server.unref();
+    server.once('error', reject);
+    server.listen(0, hostname, () => {
+      const addr = server.address();
+      const port = typeof addr === 'object' && addr ? addr.port : 0;
+      server.close((err) => {
+        if (err) reject(err);
+        else if (port > 0) resolve(port);
+        else reject(new Error('Could not allocate an ephemeral port for OpenCode server.'));
+      });
+    });
+  });
+}
+
 async function startOpenCodeServer(
   opencodePath: string | undefined,
   options: ServerOptions = {},
 ): Promise<OpenCodeInstanceLike> {
   const hostname = options.hostname ?? '127.0.0.1';
-  const port = options.port ?? 0;
+  const port = options.port && options.port > 0 ? options.port : await pickFreePort(hostname);
   const timeoutMs = options.timeout ?? 15_000;
   const bin = opencodePath || 'opencode';
 

@@ -7,6 +7,7 @@ import {
   OpenCodeCoach,
   parseOpenCodeModel,
   parseOpenCodeServerBanner,
+  pickFreePort,
   type OpenCodeClientLike,
   type OpenCodeInstanceLike,
   type OpenCodeV2ClientLike,
@@ -833,5 +834,12 @@ describe('OpenCodeCoach', () => {
     await expect(dropCoach.ask({ job: 'why', model: 'default', brief: BRIEF }, () => {})).rejects.toThrow(
       /socket hang up/i,
     );
+  });
+
+  it('allocates a non-zero ephemeral TCP port for opencode serve so back-to-back servers do not collide on 4096', async () => {
+    const port = await pickFreePort('127.0.0.1');
+    expect(Number.isInteger(port)).toBe(true);
+    expect(port).toBeGreaterThan(0);
+    expect(port).toBeLessThanOrEqual(65_535);
   });
 });

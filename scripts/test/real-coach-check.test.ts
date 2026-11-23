@@ -283,6 +283,7 @@ describe('OpenCode ZDR model fallback', () => {
     expect(isRetryableZdrModelFailure(new Error("The Coach couldn't answer: fetch failed"))).toBe(true);
     expect(isRetryableZdrModelFailure(new Error("The Coach couldn't answer: Unexpected server error. Check server logs for details."))).toBe(true);
     expect(isRetryableZdrModelFailure(new Error('ProviderModelNotFoundError: opencode/longcat-2.5-free'))).toBe(true);
+    expect(isRetryableZdrModelFailure(new Error("The Coach couldn't answer: Model opencode/longcat-2.5-free not found"))).toBe(true);
     expect(isRetryableZdrModelFailure(Object.assign(new Error('limit'), { code: 'coach-limit' }))).toBe(true);
     expect(isRetryableZdrModelFailure(new Error('The Coach call (why) timed out after 45s.'))).toBe(true);
     expect(isRetryableZdrModelFailure(new Error('unexpected TypeError in brief builder'))).toBe(false);

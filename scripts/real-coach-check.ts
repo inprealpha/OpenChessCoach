@@ -472,7 +472,7 @@ async function createProviderCoach(
   return { coach: openCode, close: () => openCode.close() };
 }
 
-const DEFAULT_FREE_OPENCODE_TIMEOUT_MS = 360_000;
+const DEFAULT_FREE_OPENCODE_TIMEOUT_MS = 480_000;
 const DEFAULT_PAID_PROVIDER_TIMEOUT_MS = 300_000;
 
 /**
@@ -635,7 +635,7 @@ async function runSingleProvider(args: {
 }
 
 const TRANSIENT_MODEL_FAILURE_RE =
-  /fetch failed|econnreset|econnrefused|enotfound|etimedout|socket hang up|network error|timed out|timeout|aborted|reply was empty|service unavailable|bad gateway|gateway timeout|internal server error|\b(?:502|503|504)\b|is not ready|not logged in|not installed|model.*not found|unknown model|not available/i;
+  /fetch failed|econnreset|econnrefused|enotfound|etimedout|socket hang up|network error|timed out|timeout|aborted|reply was empty|service unavailable|bad gateway|gateway timeout|internal server error|unexpected server error|\b(?:500|502|503|504)\b|is not ready|not logged in|not installed|providermodelnotfounderror|model[\s_-]*not[\s_-]*found|unknown model|not available/i;
 
 function isCoachUnavailableError(err: unknown): boolean {
   if (!err || typeof err !== 'object') return false;

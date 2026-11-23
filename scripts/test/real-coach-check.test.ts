@@ -262,8 +262,27 @@ describe('OpenCode ZDR model fallback', () => {
     expect(tried).toEqual(models);
   });
 
-  it('recognizes fetch failed, coach-limit, and timeout as retryable ZDR failures but not unrelated bugs', () => {
+  it('falls through to the next ZDR model on Unexpected server error and ProviderModelNotFoundError', async () => {
+    const tried: string[] = [];
+    const models = ['opencode/deepseek-v4.1-flash-free', 'opencode/longcat-2.5-free', 'opencode/hy4-flash-free'];
+    const result = await runOpenCodeZdrModelLoop(models, 480_000, async (model) => {
+      tried.push(model);
+      if (model === models[0]) {
+        throw new Error("The Coach couldn't answer: Unexpected server error. Check server logs for details.");
+      }
+      if (model === models[1]) {
+        throw new Error('The Coach couldn\'t answer: {"name":"ProviderModelNotFoundError","data":{"providerID":"opencode","modelID":"longcat-2.5-free"}}');
+      }
+      return passVerdict;
+    });
+    expect(result).toEqual(passVerdict);
+    expect(tried).toEqual(models);
+  });
+
+  it('recognizes fetch failed, coach-limit, timeout, server errors, and ProviderModelNotFoundError as retryable ZDR failures but not unrelated bugs', () => {
     expect(isRetryableZdrModelFailure(new Error("The Coach couldn't answer: fetch failed"))).toBe(true);
+    expect(isRetryableZdrModelFailure(new Error("The Coach couldn't answer: Unexpected server error. Check server logs for details."))).toBe(true);
+    expect(isRetryableZdrModelFailure(new Error('ProviderModelNotFoundError: opencode/longcat-2.5-free'))).toBe(true);
     expect(isRetryableZdrModelFailure(Object.assign(new Error('limit'), { code: 'coach-limit' }))).toBe(true);
     expect(isRetryableZdrModelFailure(new Error('The Coach call (why) timed out after 45s.'))).toBe(true);
     expect(isRetryableZdrModelFailure(new Error('unexpected TypeError in brief builder'))).toBe(false);
